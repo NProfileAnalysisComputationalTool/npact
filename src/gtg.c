@@ -23,11 +23,11 @@ int numbers[]= { 0, 4, 1, 4, 4, 4, 2, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 3, 3, 
 
 main(int argc, char *argv[])   // argv[1] is name of GenBank file
 {
-int	n= 0, cod= 124;  // initializes codon to 'nnn'
+  int	n= 0, cod= 124, MYCOPLASMA;  // initializes codon to 'nnn'
 char	c, longstr[200];
 FILE	*input;
 
-        if(argc == 1) { fprintf(stderr, "\nUsage: gtg input.gbk [ 0 / 1 (default: 0, not a Mycoplasma)]); exit(1); }
+        if(argc == 1) { fprintf(stderr, "\nUsage: gtg input.gbk [ 0 / 1 (default: 0, not a Mycoplasma)]"); exit(1); }
   
         if(argc == 3) MYCOPLASMA= atoi(argv[2]);
 
