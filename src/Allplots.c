@@ -210,7 +210,7 @@ start= tstart + k*line_range;
 end= tstart + (k+1)*line_range;
   if(end > len) end= len;
 
-  if(input=fopen(BLOCK_file,"r")) { 
+  if(input=fopen(BLOCK_file,"r")) {
     while(fgets(longstr,198,input) && !feof(input))
     {
     BLOCK_str= (char *)realloc(BLOCK_str,(nB+1)*sizeof(char));
@@ -231,7 +231,7 @@ end= tstart + (k+1)*line_range;
   }
 else fprintf(stderr,"\nFile of blocks from annotated genes %s NOT read",BLOCK_file);
 
-  if(input=fopen(block_file,"r")) { 
+  if(input=fopen(block_file,"r")) {
     while(fgets(longstr,198,input) && !feof(input))
     {
     block_str= (char *)realloc(block_str,(nb+1)*sizeof(char));
@@ -252,7 +252,7 @@ else fprintf(stderr,"\nFile of blocks from annotated genes %s NOT read",BLOCK_fi
   }
 else fprintf(stderr,"\nFile of new blocks %s NOT read",block_file);
 
-  if(input=fopen(codpot_file,"r")) { ++cpf; 
+  if(input=fopen(codpot_file,"r")) { ++cpf;
     while(fgets(longstr,198,input) && !feof(input))
     {
     codpot_str= (char *)realloc(codpot_str,(ncp+1)*sizeof(char));
@@ -315,7 +315,7 @@ else fprintf(stderr,"\nFile of G+C coding potential %s NOT read",Scodpot_file);
   }
 else fprintf(stderr,"\nFile of Met %s NOT read",met_file);
 
-  if(input=fopen(stop_file,"r")) { 
+  if(input=fopen(stop_file,"r")) {
     while(fgets(longstr,198,input) && !feof(input))
     {
     gs= atoi(longstr+2);
@@ -334,7 +334,7 @@ else fprintf(stderr,"\nFile of Met %s NOT read",met_file);
 else fprintf(stderr,"\nFile of Stop %s NOT read",stop_file);
 
 
-  if(input=fopen(tata_file,"r")) { 
+  if(input=fopen(tata_file,"r")) {
     while(fgets(longstr,198,input) && !feof(input))
     {
     sscanf(longstr,"%f %s %d %s",&tpr,ts,&gs,tatastr);
@@ -352,7 +352,7 @@ else fprintf(stderr,"\nFile of Stop %s NOT read",stop_file);
   }
 else fprintf(stderr,"\nFile of TATA box %s NOT read",tata_file);
 
-  if(input=fopen(cap_file,"r")) { 
+  if(input=fopen(cap_file,"r")) {
     while(fgets(longstr,198,input) && !feof(input))
     {
     sscanf(longstr,"%f %s %d %s",&tpr,ts,&gs,tatastr);
@@ -370,7 +370,7 @@ else fprintf(stderr,"\nFile of TATA box %s NOT read",tata_file);
   }
 else fprintf(stderr,"\nFile of CAP box %s NOT read",cap_file);
 
-  if(input=fopen(ccaa_file,"r")) { 
+  if(input=fopen(ccaa_file,"r")) {
     while(fgets(longstr,198,input) && !feof(input))
     {
     sscanf(longstr,"%f %s %d %s",&tpr,ts,&gs,tatastr);
@@ -388,7 +388,7 @@ else fprintf(stderr,"\nFile of CAP box %s NOT read",cap_file);
   }
 else fprintf(stderr,"\nFile of CCAAT box %s NOT read",ccaa_file);
 
-  if(input=fopen(gcbox_file,"r")) { 
+  if(input=fopen(gcbox_file,"r")) {
     while(fgets(longstr,198,input) && !feof(input))
     {
     sscanf(longstr,"%f %s %d %s",&tpr,ts,&gs,tatastr);
@@ -406,7 +406,7 @@ else fprintf(stderr,"\nFile of CCAAT box %s NOT read",ccaa_file);
   }
 else fprintf(stderr,"\nFile of GC box %s NOT read",gcbox_file);
 
-  if(input=fopen(kozak_file,"r")) { 
+  if(input=fopen(kozak_file,"r")) {
     while(fgets(longstr,198,input) && !feof(input))
     {
     sscanf(longstr,"%f %s %d %s",&tpr,ts,&gs,tatastr);
@@ -425,7 +425,7 @@ else fprintf(stderr,"\nFile of GC box %s NOT read",gcbox_file);
 else fprintf(stderr,"\nFile of Kozak sequences %s NOT read",kozak_file);
 
 
-  if(input=fopen(pali_file,"r")) { 
+  if(input=fopen(pali_file,"r")) {
     while(fgets(longstr,198,input) && !feof(input))
     {
     sscanf(longstr,"%f %d",&pp,&lp);
