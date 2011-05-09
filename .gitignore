@@ -7,3 +7,5 @@ dist
 .git
 _darcs
 input_files/*
+bin
+obj
