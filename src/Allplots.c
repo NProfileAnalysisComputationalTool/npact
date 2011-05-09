@@ -34,6 +34,42 @@ float	TIC_Y= 20.0;
 char NAME[100];
 char NUCLEOTIDES[10];
 
+void printHelp() {
+   fprintf(stderr,"\nUsage:\n\n  Allplots start interval lines [x-tics period_of_frames]\n");
+   fprintf(stderr,"\nstart                 Genome interval first base.");
+   fprintf(stderr,"\ninterval              Number of bases.\n");
+   fprintf(stderr,"\nlines                 Number of lines on page (one page).\n");
+   fprintf(stderr,"\nx-tics                Number of subdivisions.\n");
+   fprintf(stderr,"\nperiod_of_frame       Number of frames.\n");
+
+   fprintf(stderr,"\nNeeds imput file \"Allplots.def\" of the form:\n\n");
+   fprintf(stderr,"Plot_title\n");
+   fprintf(stderr,"Nucleotide(s)_plotted (e.g.: C+G)\n");
+   fprintf(stderr,"First-page title\n");
+   fprintf(stderr,"Title of following pages\n");
+   fprintf(stderr,"File_of_unbiased_CDSs\n");
+   fprintf(stderr,"File_of_conserved_CDSs\n");
+   fprintf(stderr,"File_of_new_CDSs\n");
+   fprintf(stderr,"File_of_potential_new_CDSs\n");
+   fprintf(stderr,"File_of_stretches_where_CG_is_asymmetric\n");
+   fprintf(stderr,"File_of_published_accepted_CDSs\n");
+   fprintf(stderr,"File_of_published_rejected_CDSs\n");
+   fprintf(stderr,"File_of_blocks_from_new_ORFs_as_cds\n");
+   fprintf(stderr,"File_of_blocks_from_annotated_genes_as_cds\n");
+   fprintf(stderr,"File_of_GeneMark_regions\n");
+   fprintf(stderr,"File_of_G+C_coding_potential_regions\n");
+   fprintf(stderr,"File_of_met_positions (e.g.:D 432)\n");
+   fprintf(stderr,"File_of_stop_positions (e.g.:D 432)\n");
+   fprintf(stderr,"File_of_tatabox_positions (e.g.:105.73 D 432 TATAAAAG)\n");
+   fprintf(stderr,"File_of_capbox_positions\n");
+   fprintf(stderr,"File_of_ccaatbox_positions\n");
+   fprintf(stderr,"File_of_gcbox_positions\n");
+   fprintf(stderr,"File_of_kozak_positions\n");
+   fprintf(stderr,"File_of_palindrom_positions_and_size\n");
+   fprintf(stderr,"File_list_of_nucleotides_in_200bp windows.\n");
+   fprintf(stderr,"File_list_of_nucleotides_in_100bp windows.\n");
+}
+
 
 main(argc,argv)
 int	argc;
@@ -53,42 +89,20 @@ char	*argv[];
 
    if(argc==1)
    {
-      fprintf(stderr,"\nUsage:\n\n  Allplots start interval lines [x-tics period_of_frames]\n");
-      fprintf(stderr,"\nstart                 Genome interval first base.");
-      fprintf(stderr,"\ninterval              Number of bases.\n");
-      fprintf(stderr,"\nlines                 Number of lines on page (one page).\n");
-      fprintf(stderr,"\nx-tics                Number of subdivisions.\n");
-      fprintf(stderr,"\nperiod_of_frame       Number of frames.\n");
-      fprintf(stderr,"\nNeeds imput file \"Allplots.def\" of the form:\n\n");
-      fprintf(stderr,"Plot_title\n");
-      fprintf(stderr,"Nucleotide(s)_plotted (e.g.: C+G)\n");
-      fprintf(stderr,"First-page title\n");
-      fprintf(stderr,"Title of following pages\n");
-      fprintf(stderr,"File_of_unbiased_CDSs\n");
-      fprintf(stderr,"File_of_conserved_CDSs\n");
-      fprintf(stderr,"File_of_new_CDSs\n");
-      fprintf(stderr,"File_of_potential_new_CDSs\n");
-      fprintf(stderr,"File_of_stretches_where_CG_is_asymmetric\n");
-      fprintf(stderr,"File_of_published_accepted_CDSs\n");
-      fprintf(stderr,"File_of_published_rejected_CDSs\n");
-      fprintf(stderr,"File_of_blocks_from_new_ORFs_as_cds\n");
-      fprintf(stderr,"File_of_blocks_from_annotated_genes_as_cds\n");
-      fprintf(stderr,"File_of_GeneMark_regions\n");
-      fprintf(stderr,"File_of_G+C_coding_potential_regions\n");
-      fprintf(stderr,"File_of_met_positions (e.g.:D 432)\n");
-      fprintf(stderr,"File_of_stop_positions (e.g.:D 432)\n");
-      fprintf(stderr,"File_of_tatabox_positions (e.g.:105.73 D 432 TATAAAAG)\n");
-      fprintf(stderr,"File_of_capbox_positions\n");
-      fprintf(stderr,"File_of_ccaatbox_positions\n");
-      fprintf(stderr,"File_of_gcbox_positions\n");
-      fprintf(stderr,"File_of_kozak_positions\n");
-      fprintf(stderr,"File_of_palindrom_positions_and_size\n");
-      fprintf(stderr,"File_list_of_nucleotides_in_200bp windows.\n");
-      fprintf(stderr,"File_list_of_nucleotides_in_100bp windows.\n");
-      exit(1); }
+      printHelp();
+      exit(1);
+   }
 
+   fprintf(stderr,"Starting read of Allplots.def\n");
    files= fopen("Allplots.def","r");
+   if(!files) {
+      printHelp();
+      fprintf(stderr,"Couldn't find Allplots.def in current directory.\n");
+      exit(1);
+   }
+
    fgets(longstr,98,files);
+
    sscanf(longstr,"%s %d",NAME,&len);
    fprintf(stderr,"\n%s %d nt",NAME,len);
    fgets(NUCLEOTIDES,8,files);
@@ -118,6 +132,7 @@ char	*argv[];
    fscanf(files,"%s",CG200_file); fprintf(stderr,"\n%s",CG200_file);
    fscanf(files,"%s",CG100_file); fprintf(stderr,"\n%s",CG100_file);
    fclose(files);
+   fprintf(stderr,"Done reading Allplots.def\n");
 
    unb_str= (char *)malloc(sizeof(char));
    unb= (int **)malloc(sizeof(int *));
