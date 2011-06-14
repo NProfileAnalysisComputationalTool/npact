@@ -9,3 +9,4 @@ _darcs
 input_files/*
 bin
 obj
+*.pyc
