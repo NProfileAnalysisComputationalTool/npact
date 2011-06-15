@@ -2,7 +2,7 @@
 <!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
 <html xmlns="http://www.w3.org/1999/xhtml">
 	<head>
-		<title>University of Florida Template</title>
+		<title>{% block title %}University of Florida Genetics Institute{% endblock title %}</title>
 		<link rel="stylesheet" type="text/css" media="screen" href="_style/css/basic.css" />
 		<link rel="stylesheet" type="text/css" media="print" href="_style/css/print.css" />
 		<style type="text/css" media="screen">
@@ -15,42 +15,15 @@
 		{% include "_includes/header.html" %}
 		<div id="mainContainer">
 			<div id="content">
-				<h2 id="secHeader" title="Template Title"><span></span>Template Image</h2>
-				<h3>Header One</h3>
-				<p>Lorem ipsum dolor sit amet, <a href="">consectetuer</a> adipiscing elit. Suspendisse sit amet leo non ligula pulvinar pulvinar. Morbi non tortor. Curabitur varius tincidunt quam. Nam ultrices odio. Curabitur vitae sapien a tortor tincidunt lobortis. Donec posuere elit quis justo.</p>
-				<p>Donec posuere nibh sit amet massa. Integer tincidunt, sem dapibus pellentesque blandit, turpis eros laoreet lectus, sed sagittis velit pede et orci. Nullam in nunc non dui mattis dapibus. Mauris et justo eget ligula aliquam dictum. Integer eu sem. Curabitur vulputate nonummy enim. Fusce luctus tortor porta tortor. Maecenas fringilla commodo nibh.</p>
-				<h4>Header Two</h4>
-				<p>Maecenas in magna eget velit laoreet fringilla. In vitae dolor eget est commodo ornare. Sed felis. Sed blandit ultrices elit. Donec aliquet purus non libero. Integer blandit eros vel arcu. Sed dapibus scelerisque mi. Curabitur nec odio. Aliquam dignissim libero tempus nulla. Aliquam erat volutpat. Aliquam eu elit. Quisque leo.</p>
-				<p>Pellentesque massa libero, lobortis at, pharetra at, commodo sit amet, massa. Nam velit. Ut euismod, nisl in hendrerit suscipit, nulla urna luctus nulla, a bibendum sapien quam ac leo. Donec suscipit, dolor semper molestie laoreet, wisi felis molestie augue, eu ullamcorper eros elit vel urna. Sed luctus nisl non tortor. Vestibulum et leo vel urna vehicula rutrum.</p>
-				<ul>
-					<li>List Item 1</li>
-					<li>List Item 2</li>
-					<li>List Item 3</li>
-					<li>List Item 4</li>
-				</ul>
+                          {%block content %}
+                          {%endblock content %}
 			</div>
 			<div id="related">
 				<h3>Related Sites:</h3>
-				<h4>Page Related Header</h4>
+				<h4>Genetics at UF</h4>
 				<ul>
-					<li><a href="#">Link</a>,</li>
-					<li><a href="#">Link</a>,</li>
-					<li><a href="#">Link</a>,</li>
-					<li><a href="#">Link</a></li>
-				</ul>
-				<h4>Page Related Header</h4>
-				<ul>
-					<li><a href="#">Link</a>,</li>
-					<li><a href="#">Link</a>,</li>
-					<li><a href="#">Link</a>,</li>
-					<li><a href="#">Link</a></li>
-				</ul>
-				<h4>Page Related Header</h4>
-				<ul>
-					<li><a href="#">Link</a>,</li>
-					<li><a href="#">Link</a>,</li>
-					<li><a href="#">Link</a>,</li>
-					<li><a href="#">Link</a></li>
+                                  <li><a href="http://genome.ufl.edu/pages/index.html">genome.ufl.edu</a></li>
+                                  <li><a href="http://www.ufgi.ufl.edu/">Genetics Institute at UF</a></li>
 				</ul>
 				<h4>Page Related Header</h4>
 				<ul>
