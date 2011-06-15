@@ -1,4 +1,5 @@
 from django.conf.urls.defaults import patterns, include, url
+from django.conf.urls.defaults import handler404
 
 # Uncomment the next two lines to enable the admin:
 # from django.contrib import admin
@@ -6,7 +7,7 @@ from django.conf.urls.defaults import patterns, include, url
 
 urlpatterns = patterns('',
     # Examples:
-     url(r'^$', 'spatweb.spat.views.home', name='home'),
+     url(r'^$', 'spat.views.home', name='home'),
     # url(r'^spatweb/', include('spatweb.foo.urls')),
 
     # Uncomment the admin/doc line below to enable admin documentation:

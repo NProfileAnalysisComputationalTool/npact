@@ -3,6 +3,14 @@
 DEBUG = True
 TEMPLATE_DEBUG = DEBUG
 
+import os.path
+
+#physical path we're running this at, the idea is we can update only
+#this variable on deploy and everything else should work out.
+PPATH="/home/ACCELERATION/nathan/projects/spat/spatweb/"
+def ppath(rel) :
+    return os.path.join(PPATH,rel)
+
 ADMINS = (
     # ('Your Name', 'your_email@example.com'),
 )
@@ -60,7 +68,7 @@ STATIC_ROOT = ''
 
 # URL prefix for static files.
 # Example: "http://media.lawrence.com/static/"
-STATIC_URL = '/static/'
+STATIC_URL = '/'
 
 # URL prefix for admin static files -- CSS, JavaScript and images.
 # Make sure to use a trailing slash.
@@ -69,6 +77,7 @@ ADMIN_MEDIA_PREFIX = '/static/admin/'
 
 # Additional locations of static files
 STATICFILES_DIRS = (
+    ppath('www'),
     # Put strings here, like "/home/html/static" or "C:/www/django/static".
     # Always use forward slashes, even on Windows.
     # Don't forget to use absolute paths, not relative paths.
@@ -78,7 +87,7 @@ STATICFILES_DIRS = (
 # various locations.
 STATICFILES_FINDERS = (
     'django.contrib.staticfiles.finders.FileSystemFinder',
-    'django.contrib.staticfiles.finders.AppDirectoriesFinder',
+#    'django.contrib.staticfiles.finders.AppDirectoriesFinder',
 #    'django.contrib.staticfiles.finders.DefaultStorageFinder',
 )
 
@@ -103,7 +112,7 @@ MIDDLEWARE_CLASSES = (
 ROOT_URLCONF = 'spatweb.urls'
 
 TEMPLATE_DIRS = (
-    'spatweb/templates'
+    ppath('templates'),
 
     # Put strings here, like "/home/html/django_templates" or "C:/www/django/templates".
     # Always use forward slashes, even on Windows.

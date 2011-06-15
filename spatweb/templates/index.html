@@ -12,7 +12,7 @@
 
 </head>
 	<body>
-		<!--#include virtual="_includes/header.html"-->
+		{% include "_includes/header.html" %}
 		<div id="mainContainer">
 			<div id="content">
 				<h2 id="secHeader" title="Template Title"><span></span>Template Image</h2>
@@ -59,12 +59,12 @@
 					<li><a href="#">Link</a>,</li>
 					<li><a href="#">Link</a></li>
 				</ul>
-                <!--#include virtual="_includes/search.html"-->
+                                {% include "_includes/search.html" %}
 			</div>
 			<div id="priNav">
-				<!--#include virtual="_includes/priNav.html"-->
+				{% include "_includes/priNav.html" %}
             </div>
-			<!--#include virtual="_includes/footer.html"-->
+			{% include "_includes/footer.html"%}
 			</div>
 	</body>
 </html>
