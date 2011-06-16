@@ -12,7 +12,11 @@
 
 </head>
 	<body>
-		{% include "_includes/header.html" %}
+		<div id="header">
+      <h1 id="dept"><a href="/">S-Profile Analysis Tool</a></h1>
+      <h2 id="uf"><a href="http://www.ufl.edu/">University of Florida<span></span></a></h2>
+    </div>
+
 		<div id="mainContainer">
 			<div id="content">
                           {%block content %}
@@ -36,8 +40,29 @@
 			</div>
 			<div id="priNav">
 				{% include "_includes/priNav.html" %}
-            </div>
-			{% include "_includes/footer.html"%}
-			</div>
+      </div>
+
+      <div id="footer">
+			  <h3>Frequently Used Sites</h3>
+	      <ul>
+	        <li><a href="http://news.ufl.edu/">News</a></li>
+	        <li><a href="http://calendar.ufl.edu/">Calendar</a></li>
+	        <li><a href="http://phonebook.ufl.edu/">Directory</a></li>
+	        <li><a href="https://my.ufl.edu/ps/signon.html">MyUFL</a></li>
+	        <li><a href="http://www.isis.ufl.edu/">ISIS</a></li>
+	        <li><a href="http://www.ufl.edu/websites/">Web Site Listing</a></li>
+	        <li><a href="http://campusmap.ufl.edu/">Campus Map</a></li>
+	        <li><a href="http://webmail.ufl.edu/">WebMail</a></li>
+	        <li><a href="http://www.questions.ufl.edu/">Ask UF</a></li>
+	      </ul>
+	      <p>&copy; <a href="http://www.ufl.edu/" id="footerHome" title="University of Florida">University of Florida<span></span></a>, Gainesville, FL 32611; (352) 392-3261.</p>
+	      <h3>General Site Information</h3>
+	      <ul>
+	        <li><a href="http://www.ufl.edu/disability/">Disability Services</a></li>
+	        <li><a href="http://www.privacy.ufl.edu/privacystatement.html">Privacy Policy</a></li>
+	        <li><a href="http://search.ufl.edu">Search</a></li>
+	      </ul>
+      </div>
+		</div>
 	</body>
 </html>
