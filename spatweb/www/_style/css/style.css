@@ -28,11 +28,18 @@ font-style:normal;
 h1#dept {
 position: relative;
 height: 40px;
-width: 181px;
+
 font-size: 14px;
 /* \*/
 overflow: hidden;
 /* */
+}
+
+h1#dept a {
+   color: white;
+   line-height:160%;
+   font-family: Century Gothic;
+   font-size: larger;
 }
 
 h1#dept a span {
@@ -199,7 +206,7 @@ width:768px;
 background-position: 249px 0;
 }/* */
 
-#priNav {
+#leftCol { 
 background:url(../images/bg_priNav.jpg) repeat-x;
 left:0;
 padding:3px 2px 0;
@@ -219,7 +226,6 @@ letter-spacing:1px;
 }
 
 #priNav li {
-float:left;
 font:125%/18px 'Trebuchet MS', verdana, geneva, Arial, Helvetica, sans-serif;
 }
 
@@ -228,7 +234,6 @@ background:url(../images/pointer.gif) no-repeat 10px 11px;
 border-bottom:1px solid #e6e6e6;
 color:#0021a5;
 display:block;
-float:left;
 letter-spacing:1px;
 padding:7px 0 6px 20px;
 width:230px;
@@ -247,7 +252,7 @@ background-color:#CFD5EE;
 }
 
 #related {
-padding:210px 8px 0;
+padding:32px 8px 0;
 width:230px;
 }
 

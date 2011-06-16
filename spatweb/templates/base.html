@@ -22,26 +22,32 @@
                           {%block content %}
                           {%endblock content %}
 			</div>
-			<div id="related">
-				<h3>Related Sites:</h3>
-				<h4>Genetics at UF</h4>
-				<ul>
-                                  <li><a href="http://genome.ufl.edu/pages/index.html">genome.ufl.edu</a></li>
-                                  <li><a href="http://www.ufgi.ufl.edu/">Genetics Institute at UF</a></li>
-				</ul>
-				<h4>Page Related Header</h4>
-				<ul>
-					<li><a href="#">Link</a>,</li>
-					<li><a href="#">Link</a>,</li>
-					<li><a href="#">Link</a>,</li>
-					<li><a href="#">Link</a></li>
-				</ul>
-                                {% include "_includes/search.html" %}
-			</div>
-			<div id="priNav">
-				{% include "_includes/priNav.html" %}
+      <div id="leftCol">
+			  <div id="priNav">
+          <h2>Primary Navigation</h2>
+          <ul>
+				    <li id="active">Home</li>
+            <li><a href="">Run S-Profile Analysis</a></li>
+				    <li><a href="">S-P.A.T. Library</a></li>
+            <li><a href="">Get the Source</a></li>
+          </ul>
+        </div>
+			  <div id="related">
+				  <h3>Related Sites:</h3>
+				  <h4>Genetics at UF</h4>
+				  <ul>
+            <li><a href="http://genome.ufl.edu/pages/index.html">genome.ufl.edu</a></li>
+            <li><a href="http://www.ufgi.ufl.edu/">Genetics Institute at UF</a></li>
+				  </ul>
+				  <h4>Related Personnel</h4>
+				  <ul>
+					  <li><a href="http://www.mgm.ufl.edu/faculty/lbrocchieri.htm">Luciano Brocchieri</a></li>
+					  <li><a href="#">Link</a>,</li>
+					  <li><a href="#">Link</a>,</li>
+				  </ul>
+          {% include "_includes/search.html" %}
+			  </div>
       </div>
-
       <div id="footer">
 			  <h3>Frequently Used Sites</h3>
 	      <ul>
