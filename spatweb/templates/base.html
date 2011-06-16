@@ -3,11 +3,13 @@
 <html xmlns="http://www.w3.org/1999/xhtml">
 	<head>
 		<title>{% block title %}University of Florida Genetics Institute{% endblock title %}</title>
-		<link rel="stylesheet" type="text/css" media="screen" href="_style/css/basic.css" />
-		<link rel="stylesheet" type="text/css" media="print" href="_style/css/print.css" />
+		<link rel="stylesheet" type="text/css" media="screen" href="/static/_style/css/basic.css" />
+		<link rel="stylesheet" type="text/css" media="print" href="/static/_style/css/print.css" />
 		<style type="text/css" media="screen">
-			@import "_style/css/style.css";
-            #secHeader span{background: url(_style/images/header1.jpg)}
+			{%block secHeaderCss %}
+			@import "/static/_style/css/style.css";
+            #secHeader span{background: url(/static/_style/images/header1.jpg)}
+			{%endblock %}
 		</style>
 
 </head>
@@ -19,15 +21,16 @@
 
 		<div id="mainContainer">
 			<div id="content">
-                          {%block content %}
-                          {%endblock content %}
+
+        {%block content %}
+        {%endblock content %}
 			</div>
       <div id="leftCol">
 			  <div id="priNav">
           <h2>Primary Navigation</h2>
           <ul>
 				    <li id="active">Home</li>
-            <li><a href="">Run S-Profile Analysis</a></li>
+            <li><a href="/run">Run S-Profile Analysis</a></li>
 				    <li><a href="">S-P.A.T. Library</a></li>
             <li><a href="">Get the Source</a></li>
           </ul>

@@ -1,0 +1,39 @@
+{% extends "base.html" %}
+{% block title %}Run S-P.A.T.{% endblock %}
+
+{%block content %}
+				<h2>Run the S-Profile Analysis Tool</h2>
+        From here you can run an S-Profile analysis.
+
+        <h3>extract</h3>
+        pulls out gene names and locations and their addresses from the gbk file.
+        <ul>
+          <li>genebank file</li>
+          <li>first n characters of gene name to skip</li>
+          <li>gene descriptor string</li>
+          <li>first n characters of name 2</li>
+        </ul>
+
+        <h3>CG</h3>
+        calculates ratio of C or G bases in the genebank file.
+        <ul>
+          <li>genebank (above)</li>
+          <li>start = 1</li>
+          <li>end = number of basepairs</li>
+          <li>window size = 201</li>
+          <li>step = 51</li>
+          <li>period of frames = 3
+        </ul>
+
+        <h3>ATG</h3>
+        Searches for stop codons in the genebank file.
+        <ul>
+          <li>genebank</li>
+          <li>MYCOPLASMA</li>
+        </ul>
+
+        <h3>Allplots</h3>
+        Generates plots based on the genes, and the ratios. Can be annotated with a bunch of other stuff.
+
+
+{%endblock content %}

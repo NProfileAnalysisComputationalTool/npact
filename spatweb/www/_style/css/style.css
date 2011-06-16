@@ -90,17 +90,18 @@ list-style:none;
 }
 
 #content {
-background:#FFF;
+background:#FFF url(../images/bg_priNav.jpg) repeat-x;
 float:right;
 position:relative;
 width:516px;
 z-index:5;
+min-height: 376px;
+padding-top: 2px;
 }
 
-#content h3 {
-font-size:125%;
-margin:5px 0 0 12px;
-}
+#content h2 { margin:5px 0 0 8px; }
+#content h3 { font-size:125%;  margin:5px 0 0 12px; }
+#content h2 + h3 { margin-top: 2px; }
 
 #content h4 {
 color:#000;
@@ -194,7 +195,8 @@ width:772px;
 }
 
 #mainContainer {
-background:#fff url(../images/bg_mainContainer.gif) 253px 0 repeat-y;
+background:#fff url(../images/bg_mainContainer.gif) 253px 0 repeat-y; 
+
 margin:0 auto;
 padding:0 2px;
 position:relative;
@@ -206,13 +208,14 @@ width:768px;
 background-position: 249px 0;
 }/* */
 
-#leftCol { 
+#leftCol {
 background:url(../images/bg_priNav.jpg) repeat-x;
 left:0;
 padding:3px 2px 0;
 position:absolute;
 top:0;
 width:250px;
+
 }
 
 #priNav h2,#footer h3 {
@@ -284,6 +287,12 @@ float:left;
 padding:0 0 5px 10px;
 width:228px;
 }
+
+
+/* ### section header image ### */
+
+/* margin accounts for content padding */
+h2#secHeader { margin:-2px 0 0; }
 
 #secHeader {
 height:194px;
