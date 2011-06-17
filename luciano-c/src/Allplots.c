@@ -132,7 +132,7 @@ char	*argv[];
    fscanf(files,"%s",CG200_file); fprintf(stderr,"\n%s",CG200_file);
    fscanf(files,"%s",CG100_file); fprintf(stderr,"\n%s",CG100_file);
    fclose(files);
-   fprintf(stderr,"Done reading Allplots.def\n");
+   fprintf(stderr,"\nDone reading Allplots.def\n");
 
    unb_str= (char *)malloc(sizeof(char));
    unb= (int **)malloc(sizeof(int *));
