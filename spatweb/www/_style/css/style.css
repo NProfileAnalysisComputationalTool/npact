@@ -80,14 +80,19 @@ h3,h4 {
 font-weight:400;
 }
 
-p,li {
+p,li,td {
 color:#444;
 font-size:70%;
 }
 
+th,td { padding: 3px; }
+
 ul {
 list-style:none;
 }
+
+.contentPadding { padding: 5px; }
+
 
 #content {
 background:#FFF url(../images/bg_priNav.jpg) repeat-x;

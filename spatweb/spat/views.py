@@ -7,3 +7,6 @@ def index(request) :
 
 def run(request) :
     return render_to_response('run.html',{})
+
+def library(request) :
+    return render_to_response('library.html', {})

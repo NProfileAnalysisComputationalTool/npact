@@ -1,0 +1,29 @@
+{% extends "base.html" %}
+{% block title %}Run S-P.A.T.{% endblock %}
+
+{%block content %}
+<div class="contentPadding">
+  <h2>Existing S-Profile Analyses</h2>
+  <p>Here you can find already calculated s-profile analyses.</p>
+  <p>
+    <table width="100%" cellpadding="4" cellspacing="0" border="1">
+      <thead>
+      <tr>
+        <th>Organism</th>
+        <th>Locus</th>
+        <th>Published</th>
+        <th>genebank sha1</th>
+      </tr>
+      </thead>
+      <tbody>
+        <tr>
+          <td><a href="#">Mycoplasma genitalium</a></td>
+          <td>NC_000908</td>
+          <td>12-MAR-2001</td>
+          <td>897c28f569d797b09a02bdb7d470817e8942df5c</td>
+        </tr>
+      </tbody>
+    </table>
+  </p>
+</div>
+{%endblock content %}

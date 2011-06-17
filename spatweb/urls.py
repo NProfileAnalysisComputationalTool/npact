@@ -7,7 +7,8 @@ from django.conf.urls.defaults import handler404
 
 urlpatterns = patterns('',
     # Examples:
-     url(r'.', 'spat.views.run'),
+     url(r'^run', 'spat.views.run'),
+     url(r'^library', 'spat.views.library'),
      url(r'^$', 'spat.views.index'),
     # url(r'^spatweb/', include('spatweb.foo.urls')),
 
