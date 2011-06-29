@@ -1,0 +1,3 @@
+[submodule "lib/biopython"]
+	path = lib/biopython
+	url = /home/ACCELERATION/nathan/projects/biopython
