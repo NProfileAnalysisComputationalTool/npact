@@ -49,7 +49,8 @@ $ extract MYCGE.gbk 0 gene 0 locus_tag > MYCGE.genes
 
     def parse(self,gbkfile) :
         self.gbkfile = gbkfile
-            #TODO: gbk can have multiple records in which case this will err (i wasn't able to find one that did though)
+        #TODO: gbk can have multiple records in which case this will
+        #err (i wasn't able to find one that did though)
         self.seqrec = SeqIO.read(gbkfile,"genbank")
 
 
