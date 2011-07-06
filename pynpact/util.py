@@ -79,6 +79,9 @@ def capturedPopen(cmd, stdin=None, stdout=None, stderr=None,
         #http://old.nabble.com/subprocess.Popen-pipeline-bug--td16026600.html
         kwargs['close_fds'] = True
 
+    if not isinstance(cmd,str) :
+        cmd = [str(e) for e in cmd]
+
     if(logger):
         #if we are logging, record the command we're running,
         #trying to strip out passwords.
@@ -91,7 +94,8 @@ def capturedPopen(cmd, stdin=None, stdout=None, stderr=None,
                          **kwargs)
     if logger :
         def monitor(level, src, name) :
-            lname = "%s.%s" % (cmd[0], name)
+            #if the cmd[0] (the binary) contains a full path, just get the name
+            lname = "%s.%s" % (os.path.basename(cmd[0]), name)
             if(hasattr(logger, 'name')) :
                 lname = "%s.%s" % (logger.name, lname)
             sublog = logging.getLogger(lname)

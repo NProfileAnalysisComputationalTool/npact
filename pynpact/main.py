@@ -5,7 +5,7 @@ import util
 
 BINPATH="/home/ACCELERATION/nathan/projects/spat/luciano-c/bin"
 def binfile(name) :
-    os.path.join(BINPATH, name)
+    return os.path.join(BINPATH, name)
 
 class GenBankProcessor(object) :
     #Genbank files are documented at: http://www.ncbi.nlm.nih.gov/Sitemap/samplerecord.html
@@ -25,6 +25,8 @@ class GenBankProcessor(object) :
             #TODO: gbk can have multiple records in which case this
             #will err (i wasn't able to find one that did though)
             self.seqrec = SeqIO.read(gbkfile,"genbank")
+        else :
+            raise Exception("Asked to parse nonexistant genebank file: %r", gbkfile)
 
 
     def derivative_filename(self, part) :
@@ -85,8 +87,7 @@ $ CG MYCGE.gbk 1 580074 201 51 3 > MYCGE.CG200
         outfilename,generate = self.derivative_filename("cg200ratio")
         if generate :
             with open(outfilename,'w') as outfile :
-                #TODO: Need to check this length
-                util.capturedCall([binfile("CG"), self.gbkfile, 1, len(self.seqreq), 201, 51, 3],
+                util.capturedCall([binfile("CG"), self.gbkfile, 1, len(self.seqrec), 201, 51, 3],
                                   stdout=outfile,logger=self.logger)
         return outfilename
 
@@ -101,5 +102,9 @@ $ CG MYCGE.gbk 1 580074 201 51 3 > MYCGE.CG200
 
 
 if __name__ == '__main__' :
+    verbose = True
+    logging.basicConfig(level=(verbose and logging.DEBUG or logging.INFO),
+                        format="%(asctime)s %(name)-10s %(levelname)-8s %(message)s",
+                        datefmt='%H:%M:%S')
     gbkp = GenBankProcessor()
     gbkp.parse("/home/ACCELERATION/nathan/projects/spat/input_files/MYCGE.gbk")
