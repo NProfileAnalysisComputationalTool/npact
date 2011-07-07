@@ -98,8 +98,6 @@ $ CG MYCGE.gbk 1 580074 201 51 3 > MYCGE.CG200
     def run_Alllots(self) :
         #need to generate AllPlots.def
         #/Users/luciano/src/Allplots 0 50000 5 1000 3 > XANCA.S-profiles.001.ps
-
-
    # fprintf(stderr,"\nUsage:\n\n  Allplots start interval lines [x-tics period_of_frames]\n");
    # fprintf(stderr,"\nstart                 Genome interval first base.");
    # fprintf(stderr,"\ninterval              Number of bases.\n");
@@ -107,11 +105,23 @@ $ CG MYCGE.gbk 1 580074 201 51 3 > MYCGE.CG200
    # fprintf(stderr,"\nx-tics                Number of subdivisions.\n");
    # fprintf(stderr,"\nperiod_of_frame       Number of frames.\n");
 
-   # fprintf(stderr,"\nNeeds imput file \"Allplots.def\" of the form:\n\n");
-   # fprintf(stderr,"Plot_title\n");
-   # fprintf(stderr,"Nucleotide(s)_plotted (e.g.: C+G)\n");
-   # fprintf(stderr,"First-page title\n");
-   # fprintf(stderr,"Title of following pages\n");
+        
+        dirname = os.path.dirname(self.gbkfile)
+        #TODO: temporary location for this so that it is thread/process safe
+        allplots_name = os.path.join(dirname,"AllPlots.def")
+        with open(allplots_name, 'w') as allplots :
+            allplots.write("Plot Title\n")
+            allplots.write("Nucleotide(s)_plotted (e.g.: C+G)\n")
+            allplots.write("First-page title\n")
+            allplots.write("Title of following pages\n")
+            def ap_file(name) :
+                if name :
+                    #calculate the abs path.
+                    path = name
+                    allplots.write(path + "\n")
+                else :
+                    allplots.write("\n")
+
    # fprintf(stderr,"File_of_unbiased_CDSs\n");
    # fprintf(stderr,"File_of_conserved_CDSs\n");
    # fprintf(stderr,"File_of_new_CDSs\n");
