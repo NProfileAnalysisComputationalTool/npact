@@ -105,15 +105,11 @@ $ CG MYCGE.gbk 1 580074 201 51 3 > MYCGE.CG200
    # fprintf(stderr,"\nx-tics                Number of subdivisions.\n");
    # fprintf(stderr,"\nperiod_of_frame       Number of frames.\n");
 
-        
         dirname = os.path.dirname(self.gbkfile)
         #TODO: temporary location for this so that it is thread/process safe
-        allplots_name = os.path.join(dirname,"AllPlots.def")
+        allplots_name = os.path.join(dirname,"Allplots.def")
+        self.logger.debug("writing %r", allplots_name)
         with open(allplots_name, 'w') as allplots :
-            allplots.write("Plot Title\n")
-            allplots.write("Nucleotide(s)_plotted (e.g.: C+G)\n")
-            allplots.write("First-page title\n")
-            allplots.write("Title of following pages\n")
             def ap_file(name) :
                 if name :
                     #calculate the abs path.
@@ -122,31 +118,37 @@ $ CG MYCGE.gbk 1 580074 201 51 3 > MYCGE.CG200
                 else :
                     allplots.write("\n")
 
-   # fprintf(stderr,"File_of_unbiased_CDSs\n");
-   # fprintf(stderr,"File_of_conserved_CDSs\n");
-   # fprintf(stderr,"File_of_new_CDSs\n");
-   # fprintf(stderr,"File_of_potential_new_CDSs\n");
-   # fprintf(stderr,"File_of_stretches_where_CG_is_asymmetric\n");
-   # fprintf(stderr,"File_of_published_accepted_CDSs\n");
-   # fprintf(stderr,"File_of_published_rejected_CDSs\n");
-   # fprintf(stderr,"File_of_blocks_from_new_ORFs_as_cds\n");
-   # fprintf(stderr,"File_of_blocks_from_annotated_genes_as_cds\n");
-   # fprintf(stderr,"File_of_GeneMark_regions\n");
-   # fprintf(stderr,"File_of_G+C_coding_potential_regions\n");
-   # fprintf(stderr,"File_of_met_positions (e.g.:D 432)\n");
-   # fprintf(stderr,"File_of_stop_positions (e.g.:D 432)\n");
-   # fprintf(stderr,"File_of_tatabox_positions (e.g.:105.73 D 432 TATAAAAG)\n");
-   # fprintf(stderr,"File_of_capbox_positions\n");
-   # fprintf(stderr,"File_of_ccaatbox_positions\n");
-   # fprintf(stderr,"File_of_gcbox_positions\n");
-   # fprintf(stderr,"File_of_kozak_positions\n");
-   # fprintf(stderr,"File_of_palindrom_positions_and_size\n");
-   # fprintf(stderr,"File_list_of_nucleotides_in_200bp windows.\n");
-   # fprintf(stderr,"File_list_of_nucleotides_in_100bp windows.\n");
+            allplots.write("Plot Title\n")
+            allplots.write("Nucleotide(s)_plotted (e.g.: C+G)\n")
+            allplots.write("First-page title\n")
+            allplots.write("Title of following pages\n")
 
+            ap_file(None) #File_of_unbiased_CDSs
+            ap_file(None) #File_of_conserved_CDSs
+            ap_file(None) #File_of_new_CDSs
+            ap_file(None) #File_of_potential_new_CDSs
+            ap_file(None) #File_of_stretches_where_CG_is_asymmetric
+            ap_file(self.run_extract()) #File_of_published_accepted_CDSs
+            ap_file(None) #File_of_published_rejected_CDSs
+            ap_file(None) #File_of_blocks_from_new_ORFs_as_cds
+            ap_file(None) #File_of_blocks_from_annotated_genes_as_cds
+            ap_file(None) #File_of_GeneMark_regions
+            ap_file(None) #File_of_G+C_coding_potential_regions
+            ap_file(None) #File_of_met_positions (e.g.:D 432)
+            ap_file(None) #File_of_stop_positions (e.g.:D 432)
+            ap_file(None) #File_of_tatabox_positions (e.g.:105.73 D 432 TATAAAAG)
+            ap_file(None) #File_of_capbox_positions
+            ap_file(None) #File_of_ccaatbox_positions
+            ap_file(None) #File_of_gcbox_positions
+            ap_file(None) #File_of_kozak_positions
+            ap_file(None) #File_of_palindrom_positions_and_size
+            ap_file(self.run_CG()) #File_list_of_nucleotides_in_200bp windows.
+            ap_file(None) #File_list_of_nucleotides_in_100bp windows.
 
-        pass
-
+        outfilename,generate = self.derivative_filename(".001.ps")
+        with open(outfilename,'w') as psout :
+            util.capturedCall([binfile("Allplots"), 0, 50000, 5, 1000, 3], stdout=psout,
+                              logger=self.logger,cwd=dirname)
 
 if __name__ == '__main__' :
     verbose = True
