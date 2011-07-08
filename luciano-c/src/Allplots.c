@@ -1,4 +1,3 @@
-/*  -*- c-file-style:"linux" c-basic-offset:3 tab-width:3 -*-  */
 # include <math.h>
 # include <stdio.h>
 # include <stdlib.h>
@@ -133,7 +132,7 @@ char	*argv[];
    fscanf(files,"%s",CG200_file); fprintf(stderr,"\n%s",CG200_file);
    fscanf(files,"%s",CG100_file); fprintf(stderr,"\n%s",CG100_file);
    fclose(files);
-   fprintf(stderr,"\nDone reading Allplots.def\n");
+   fprintf(stderr,"Done reading Allplots.def\n");
 
    unb_str= (char *)malloc(sizeof(char));
    unb= (int **)malloc(sizeof(int *));
@@ -236,26 +235,12 @@ char	*argv[];
             ge= atoi(p+2);
             if(longstr[0]=='c') { gs= atoi(longstr+11); BLOCK_str[nB]='C'; }
             else { gs= atoi(longstr); BLOCK_str[nB]=' '; }
-            if(gs>=start-line_range/50 && gs<end && ge>start && ge<=end+line_range/50)
-            {
-               BLOCK[nB][0]= gs; BLOCK[nB][1]= ge; ++nB;
-            }
-            else if(gs>=start && gs<end && ge>end+line_range/50)
-            {
-               BLOCK[nB][0]= gs; BLOCK[nB][1]= end+line_range/50; ++nB;
-            }
+            if(gs>=start-line_range/50 && gs<end && ge>start && ge<=end+line_range/50) { BLOCK[nB][0]= gs; BLOCK[nB][1]= ge; ++nB; }
+            else if(gs>=start && gs<end && ge>end+line_range/50) { BLOCK[nB][0]= gs; BLOCK[nB][1]= end+line_range/50; ++nB; }
             else if(ge<=end+line_range/50 && ge>start && gs<start-line_range/50)
-            {
-               BLOCK[nB][0]= start-line_range/50;
-               BLOCK[nB][0] += gs%period-BLOCK[nB][0]%period;
-               BLOCK[nB][1]= ge; ++nB;
-            }
+            { BLOCK[nB][0]= start-line_range/50; BLOCK[nB][0] += gs%period-BLOCK[nB][0]%period; BLOCK[nB][1]= ge; ++nB; }
             else if(gs<start-line_range/50 && ge>end+line_range/50)
-            {
-               BLOCK[nB][0]= start-line_range/50;
-               BLOCK[nB][0] += gs%period-BLOCK[nB][0]%period;
-               BLOCK[nB][1]= end+line_range/50; ++nB;
-            }
+            { BLOCK[nB][0]= start-line_range/50; BLOCK[nB][0] += gs%period-BLOCK[nB][0]%period; BLOCK[nB][1]= end+line_range/50; ++nB; }
          }
          fclose(input);
       }
@@ -271,29 +256,12 @@ char	*argv[];
             ge= atoi(p+2);
             if(longstr[0]=='c') { gs= atoi(longstr+11); block_str[nb]='C'; }
             else { gs= atoi(longstr); block_str[nb]=' '; }
-            if(gs>=start-line_range/50 && gs<end && ge>start && ge<=end+line_range/50)
-            {
-               block[nb][0]= gs;
-               block[nb][1]= ge;
-               ++nb;
-            }
-            else if(gs>=start && gs<end && ge>end+line_range/50) {
-               block[nb][0]= gs;
-               block[nb][1]= end+line_range/50;
-               ++nb;
-            }
+            if(gs>=start-line_range/50 && gs<end && ge>start && ge<=end+line_range/50) { block[nb][0]= gs; block[nb][1]= ge; ++nb; }
+            else if(gs>=start && gs<end && ge>end+line_range/50) { block[nb][0]= gs; block[nb][1]= end+line_range/50; ++nb; }
             else if(ge<=end+line_range/50 && ge>start && gs<start-line_range/50)
-            {
-               block[nb][0]= start-line_range/50;
-               block[nb][0] += gs%period-block[nb][0]%period;
-               block[nb][1]= ge; ++nb;
-            }
+            { block[nb][0]= start-line_range/50; block[nb][0] += gs%period-block[nb][0]%period; block[nb][1]= ge; ++nb; }
             else if(gs<start-line_range/50 && ge>end+line_range/50)
-            {
-               block[nb][0]= start-line_range/50;
-               block[nb][0] += gs%period-block[nb][0]%period;
-               block[nb][1]= end+line_range/50; ++nb;
-            }
+            { block[nb][0]= start-line_range/50; block[nb][0] += gs%period-block[nb][0]%period; block[nb][1]= end+line_range/50; ++nb; }
          }
          fclose(input);
       }
@@ -338,11 +306,7 @@ char	*argv[];
             else if(ge<=end && ge>start && gs<start)
             { Scodpot[nScp][0]= start; Scodpot[nScp][0] += gs%period-Scodpot[nScp][0]%period; Scodpot[nScp][1]= ge; ++nScp; }
             else if(gs<start && ge>end)
-            {
-               Scodpot[nScp][0]= start;
-               Scodpot[nScp][0] += gs%period-Scodpot[nScp][0]%period;
-               Scodpot[nScp][1]= end; ++nScp;
-            }
+            { Scodpot[nScp][0]= start; Scodpot[nScp][0] += gs%period-Scodpot[nScp][0]%period; Scodpot[nScp][1]= end; ++nScp; }
          }
          fclose(input);
       }

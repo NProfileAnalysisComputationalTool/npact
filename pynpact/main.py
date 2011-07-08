@@ -118,7 +118,8 @@ $ CG MYCGE.gbk 1 580074 201 51 3 > MYCGE.CG200
                 else :
                     allplots.write("None\n")
 
-            allplots.write("Plot Title\n") 	#Plot Title
+            #NB the "Plot Title" is disregarded, but that line should also contain the total number of bases
+            allplots.write("%s %d\n" % ("FOOBAR",len(self.seqrec))) 	#Plot Title
             allplots.write("C+G\n")		#Nucleotide(s)_plotted (e.g.: C+G)
             allplots.write("Page 1\n")		#First-Page title
             allplots.write("page rest\n")	#Title of following pages
