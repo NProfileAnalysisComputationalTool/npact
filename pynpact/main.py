@@ -95,7 +95,7 @@ $ CG MYCGE.gbk 1 580074 201 51 3 > MYCGE.CG200
         # ../atg MYCGE.gbk > atg.txt
         pass
 
-    def run_Alllots(self) :
+    def run_Allplots(self) :
         #need to generate AllPlots.def
         #/Users/luciano/src/Allplots 0 50000 5 1000 3 > XANCA.S-profiles.001.ps
    # fprintf(stderr,"\nUsage:\n\n  Allplots start interval lines [x-tics period_of_frames]\n");
@@ -112,38 +112,38 @@ $ CG MYCGE.gbk 1 580074 201 51 3 > MYCGE.CG200
         with open(allplots_name, 'w') as allplots :
             def ap_file(name) :
                 if name :
-                    #calculate the abs path.
-                    path = name
+                    #calculate the rel path.
+                    path = os.path.relpath(name,dirname)
                     allplots.write(path + "\n")
                 else :
-                    allplots.write("\n")
+                    allplots.write("None\n")
 
-            allplots.write("Plot Title\n")
-            allplots.write("Nucleotide(s)_plotted (e.g.: C+G)\n")
-            allplots.write("First-page title\n")
-            allplots.write("Title of following pages\n")
+            allplots.write("Plot Title\n") 	#Plot Title
+            allplots.write("C+G\n")		#Nucleotide(s)_plotted (e.g.: C+G)
+            allplots.write("Page 1\n")		#First-Page title
+            allplots.write("page rest\n")	#Title of following pages
 
-            ap_file(None) #File_of_unbiased_CDSs
-            ap_file(None) #File_of_conserved_CDSs
-            ap_file(None) #File_of_new_CDSs
-            ap_file(None) #File_of_potential_new_CDSs
-            ap_file(None) #File_of_stretches_where_CG_is_asymmetric
-            ap_file(self.run_extract()) #File_of_published_accepted_CDSs
-            ap_file(None) #File_of_published_rejected_CDSs
-            ap_file(None) #File_of_blocks_from_new_ORFs_as_cds
-            ap_file(None) #File_of_blocks_from_annotated_genes_as_cds
-            ap_file(None) #File_of_GeneMark_regions
-            ap_file(None) #File_of_G+C_coding_potential_regions
-            ap_file(None) #File_of_met_positions (e.g.:D 432)
-            ap_file(None) #File_of_stop_positions (e.g.:D 432)
-            ap_file(None) #File_of_tatabox_positions (e.g.:105.73 D 432 TATAAAAG)
-            ap_file(None) #File_of_capbox_positions
-            ap_file(None) #File_of_ccaatbox_positions
-            ap_file(None) #File_of_gcbox_positions
-            ap_file(None) #File_of_kozak_positions
-            ap_file(None) #File_of_palindrom_positions_and_size
-            ap_file(self.run_CG()) #File_list_of_nucleotides_in_200bp windows.
-            ap_file(None) #File_list_of_nucleotides_in_100bp windows.
+            ap_file(None)			#File_of_unbiased_CDSs
+            ap_file(None)			#File_of_conserved_CDSs
+            ap_file(None)			#File_of_new_CDSs
+            ap_file(None)			#File_of_potential_new_CDSs
+            ap_file(None)			#File_of_stretches_where_CG_is_asymmetric
+            ap_file(self.run_extract())		#File_of_published_accepted_CDSs
+            ap_file(None)			#File_of_published_rejected_CDSs
+            ap_file(None)			#File_of_blocks_from_new_ORFs_as_cds
+            ap_file(None)			#File_of_blocks_from_annotated_genes_as_cds
+            ap_file(None)			#File_of_GeneMark_regions
+            ap_file(None)			#File_of_G+C_coding_potential_regions
+            ap_file(None)			#File_of_met_positions (e.g.:D 432)
+            ap_file(None)			#File_of_stop_positions (e.g.:D 432)
+            ap_file(None)			#File_of_tatabox_positions (e.g.:105.73 D 432 TATAAAAG)
+            ap_file(None)			#File_of_capbox_positions
+            ap_file(None)			#File_of_ccaatbox_positions
+            ap_file(None)			#File_of_gcbox_positions
+            ap_file(None)			#File_of_kozak_positions
+            ap_file(None)			#File_of_palindrom_positions_and_size
+            ap_file(self.run_CG())		#File_list_of_nucleotides_in_200bp windows.
+            ap_file(None)			#File_list_of_nucleotides_in_100bp windows.
 
         outfilename,generate = self.derivative_filename(".001.ps")
         with open(outfilename,'w') as psout :
