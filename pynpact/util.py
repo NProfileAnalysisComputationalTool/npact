@@ -1,4 +1,5 @@
 import os, os.path, logging, subprocess, threading, time, errno
+import tempfile
 from subprocess import PIPE
 from contextlib import contextmanager
 
@@ -178,5 +179,57 @@ def stream_to_file(stream,path,bufsize=8192) :
 
 
 
-# Copright 2011  Accelerated Data Works
+@contextmanager
+def mkstemp_overwrite(real_filename, conflict_overwrite=True, logger=None, **kwargs) :
+    """For writing to a temporary file and then move it ontop of a
+    (possibly) existing file only when finished.  This enables us to
+    perform long running operations on a file that other people might
+    be using and let everyone else see a consistent version"""
+
+    mtime1 = mtime2 = None
+    if os.path.exists(real_filename) :
+        mtime1 = os.path.getmtime(real_filename)
+
+    (fd,path) = tempfile.mkstemp(**kwargs)
+
+    filelike = os.fdopen(fd,'wb')
+    yield filelike
+    filelike.close()
+
+    if os.path.exists(real_filename) :
+        mtime2 = os.path.getmtime(real_filename)
+
+    if mtime1 != mtime2 and logger:
+        logger.warning("Potential conflict on %r, overwrite: %s",
+                           real_filename, conflict_overwrite)
+
+    if mtime1 == mtime2 or conflict_overwrite :
+        os.rename(path,real_filename)
+
+
+
+# Copright (c) 2011  Accelerated Data Works
 # All rights reserved.
+
+# Redistribution and use in source and binary forms, with or without modification, are permitted provided that the following conditions are met:
+
+#     Redistributions of source code must retain the above copyright
+#     notice, this list of conditions and the following disclaimer.
+
+#     Redistributions in binary form must reproduce the above
+#     copyright notice, this list of conditions and the following
+#     disclaimer in the documentation and/or other materials provided
+#     with the distribution.
+
+# THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS
+# "AS IS" AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT
+# LIMITED TO, THE IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS
+# FOR A PARTICULAR PURPOSE ARE DISCLAIMED. IN NO EVENT SHALL THE
+# COPYRIGHT HOLDER OR CONTRIBUTORS BE LIABLE FOR ANY DIRECT, INDIRECT,
+# INCIDENTAL, SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES (INCLUDING,
+# BUT NOT LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES;
+# LOSS OF USE, DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER
+# CAUSED AND ON ANY THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT
+# LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN
+# ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
+# POSSIBILITY OF SUCH DAMAGE.
