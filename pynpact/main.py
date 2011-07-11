@@ -3,6 +3,11 @@ from Bio import SeqIO
 
 import util
 
+
+#TODO: general next steps:
+#use tempfile for the creation of new files, move them into library when done
+#make paths less dependent on ~nathan
+
 BINPATH="/home/ACCELERATION/nathan/projects/spat/luciano-c/bin"
 def binfile(name) :
     return os.path.join(BINPATH, name)
@@ -157,4 +162,5 @@ if __name__ == '__main__' :
                         format="%(asctime)s %(name)-10s %(levelname)-8s %(message)s",
                         datefmt='%H:%M:%S')
     gbkp = GenBankProcessor()
+    #TODO: read this from the arg
     gbkp.parse("/home/ACCELERATION/nathan/projects/spat/input_files/MYCGE.gbk")
