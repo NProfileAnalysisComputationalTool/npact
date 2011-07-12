@@ -1,4 +1,5 @@
 import logging, os.path
+from optparse import OptionParser
 from Bio import SeqIO
 
 import util
@@ -110,7 +111,7 @@ $ CG MYCGE.gbk 1 580074 201 51 3 > MYCGE.CG200
    # fprintf(stderr,"\nx-tics                Number of subdivisions.\n");
    # fprintf(stderr,"\nperiod_of_frame       Number of frames.\n");
 
-        dirname = os.path.dirname(self.gbkfile)
+        dirname = os.path.dirname(os.path.realpath(self.gbkfile))
         #TODO: temporary location for this so that it is thread/process safe
         allplots_name = os.path.join(dirname,"Allplots.def")
         self.logger.debug("writing %r", allplots_name)
@@ -171,5 +172,5 @@ if __name__ == '__main__' :
                         format="%(asctime)s %(name)-10s %(levelname)-8s %(message)s",
                         datefmt='%H:%M:%S')
 
-    gbkp = GenBankProcessor(args[1])
+    gbkp = GenBankProcessor(args[0])
     gbkp.run_Allplots()
