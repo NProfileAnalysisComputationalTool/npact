@@ -156,11 +156,20 @@ $ CG MYCGE.gbk 1 580074 201 51 3 > MYCGE.CG200
             util.capturedCall([binfile("Allplots"), 0, 50000, 5, 1000, 3], stdout=psout,
                               logger=self.logger,cwd=dirname)
 
+
 if __name__ == '__main__' :
-    verbose = True
-    logging.basicConfig(level=(verbose and logging.DEBUG or logging.INFO),
+    parser = OptionParser("""main.py <genebank file>""")
+    parser.add_option("-v", "--verbose", action="store_true", dest="verbose",
+                      help="Show more verbose log messages.")
+    (options,args) = parser.parse_args()
+
+    if len(args) != 1 :
+        parser.print_help()
+        exit(1)
+
+    logging.basicConfig(level=(options.verbose and logging.DEBUG or logging.INFO),
                         format="%(asctime)s %(name)-10s %(levelname)-8s %(message)s",
                         datefmt='%H:%M:%S')
-    gbkp = GenBankProcessor()
-    #TODO: read this from the arg
-    gbkp.parse("/home/ACCELERATION/nathan/projects/spat/input_files/MYCGE.gbk")
+
+    gbkp = GenBankProcessor(args[1])
+    gbkp.run_Allplots()
