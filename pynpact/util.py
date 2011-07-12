@@ -180,32 +180,55 @@ def stream_to_file(stream,path,bufsize=8192) :
 
 
 @contextmanager
-def mkstemp_overwrite(real_filename, conflict_overwrite=True, logger=None, **kwargs) :
+def mkstemp_overwrite(destination, conflict_overwrite=True, logger=None,
+                      cleanup=True, **kwargs) :
     """For writing to a temporary file and then move it ontop of a
     (possibly) existing file only when finished.  This enables us to
     perform long running operations on a file that other people might
-    be using and let everyone else see a consistent version"""
+    be using and let everyone else see a consistent version
+
+ * conflict_overwrite=True: whether or not to overwrite the file if
+   it's been modified in the intermediate time.
+ * logger=None: if provided log information to it.
+ * cleanup=True: ensure the tempfile is delete when we exit the
+   function (e.g. an error or conflict)
+ * other args are passed to tempfile.mkstemp
+
+Example:
+with mkstemp_overwrite('foobar.txt') as f:
+   #long time intensive processing
+   f.write('stuff\n')
+
+
+    """
 
     mtime1 = mtime2 = None
-    if os.path.exists(real_filename) :
-        mtime1 = os.path.getmtime(real_filename)
+    if os.path.exists(destination) :
+        mtime1 = os.path.getmtime(destination)
+    if logger : logger.debug("Found timestamp(1) %s on %r", mtime1, destination)
 
     (fd,path) = tempfile.mkstemp(**kwargs)
+    try :
+        filelike = os.fdopen(fd,'wb')
+        yield filelike
+        filelike.close()
 
-    filelike = os.fdopen(fd,'wb')
-    yield filelike
-    filelike.close()
+        if os.path.exists(destination) :
+            mtime2 = os.path.getmtime(destination)
+        if logger : logger.debug("Found timestamp(2) %s on %r", mtime1, destination)
 
-    if os.path.exists(real_filename) :
-        mtime2 = os.path.getmtime(real_filename)
+        if mtime1 != mtime2 and logger:
+            logger.warning("Potential conflict on %r, overwrite: %s",
+                               destination, conflict_overwrite)
 
-    if mtime1 != mtime2 and logger:
-        logger.warning("Potential conflict on %r, overwrite: %s",
-                           real_filename, conflict_overwrite)
-
-    if mtime1 == mtime2 or conflict_overwrite :
-        os.rename(path,real_filename)
-
+        if conflict_overwrite or mtime1 == mtime2 :
+            #TODO: permissions?
+            os.rename(path,destination)
+    finally :
+        if cleanup and os.path.exists(path) :
+            if logger :
+                logger.info("Cleaning up leftover tempfile %r", path)
+            os.remove(path)
 
 
 # Copright (c) 2011  Accelerated Data Works
