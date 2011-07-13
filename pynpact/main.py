@@ -18,8 +18,12 @@ class GenBankProcessor(object) :
     gbkfile = None
     force = False
     logger = logging
+    outputdir = None
 
-    def __init__(self, gbkfile = None) :
+    def __init__(self, gbkfile = None,**kwargs) :
+
+        for k in kwargs : setattr(self,k, kwargs[k])
+
         if gbkfile :
             self.parse(gbkfile)
 
@@ -34,26 +38,35 @@ class GenBankProcessor(object) :
         else :
             raise Exception("Asked to parse nonexistant genebank file: %r", gbkfile)
 
+        if not self.outputdir :
+            self.outputdir = os.path.dirname(os.path.realpath(self.gbkfile))
+
 
     def derivative_filename(self, part) :
         """Build the filename of a derivative product of the gbk
-        file. If the derivative file already exists return whether it is out of date"""
+        file. If the derivative file already exists return whether it
+        is out of date"""
+
         if not part[0] == "." :
             part = "." + part
 
-        outfilename = os.path.splitext(self.gbkfile)[0] + part
+        base = os.path.splitext(os.path.basename(self.gbkfile))[0]
+        outfilename = os.path.join(self.outputdir, base + part)
 
         outofdate = self.force or (not os.path.exists(outfilename)) or \
                     os.path.getmtime(outfilename) < os.path.getmtime(self.gbkfile)
 
         return (outfilename, outofdate)
 
+    def mkstemp_overwrite(self, destination, **kwargs) :
+        kwargs.setdefault('dir', self.outputdir)
+        kwargs.setdefault('logger', self.logger)
+        return util.mkstemp_overwrite(destination, **kwargs)
 
     def run_extract(self,gene_descriptor="gene") :
         """Go through the genbank record pulling out gene names and locations
-$ extract MYCGE.gbk 0 gene 0 locus_tag > MYCGE.genes
+        $ extract MYCGE.gbk 0 gene 0 locus_tag > MYCGE.genes
 """
-
 
         outfilename,generate = self.derivative_filename(".extracted")
 
@@ -61,7 +74,7 @@ $ extract MYCGE.gbk 0 gene 0 locus_tag > MYCGE.genes
             self.logger.debug("Skipped extraction")
             return outfilename
 
-        with open(outfilename,'w') as outfile :
+        with self.mkstemp_overwrite(outfilename) as outfile :
             def print_feature(desc, strand, start, end) :
                 location = "%s..%s" % (start +1, end)
                 if f.strand == -1 :
@@ -90,7 +103,7 @@ $ extract MYCGE.gbk 0 gene 0 locus_tag > MYCGE.genes
         """Do the CG ratio calculations.
 $ CG MYCGE.gbk 1 580074 201 51 3 > MYCGE.CG200
 """
-        outfilename,generate = self.derivative_filename("cg200ratio")
+        outfilename,generate = self.derivative_filename("CG200")
         if generate :
             with open(outfilename,'w') as outfile :
                 util.capturedCall([binfile("CG"), self.gbkfile, 1, len(self.seqrec), 201, 51, 3],
