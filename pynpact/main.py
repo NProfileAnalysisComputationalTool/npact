@@ -14,10 +14,27 @@ def binfile(name) :
     return os.path.join(BINPATH, name)
 
 class GenBankProcessor(object) :
-    #Genbank files are documented at: http://www.ncbi.nlm.nih.gov/Sitemap/samplerecord.html
+    """Manipulate Genebank files in the pynpact project.
+
+    Genbank files are documented at: http://www.ncbi.nlm.nih.gov/Sitemap/samplerecord.html
+
+    Takes GenBankProcessor(<gbkfile>, **kwargs)
+
+    Where kwargs:
+
+     * force: (default: False) recreate intermediate files even if
+       they already exist.
+     * logger: (default: None) what logger to use
+     * outputdir: (default: directory of genebank file) What directory
+       to create intermediate and PS files in.
+     * cleanup: (default: True) Should the temporary files (not
+       intermediate products) be deleted in case of errors
+
+"""
+    #
     gbkfile = None
     force = False
-    logger = logging
+    logger = logging.getLogger('pynpact.main')
     outputdir = None
 
     def __init__(self, gbkfile = None,**kwargs) :
