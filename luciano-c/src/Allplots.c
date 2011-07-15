@@ -658,7 +658,10 @@ char	*argv[];
                ++n;
                pos= -1;
             }
-            else fgets(longstr,198,input);
+            else if(pos > end)
+              break;
+            else
+              fgets(longstr,198,input);
          }
          fclose(input);
          fprintf(stderr,"\nLarge window composition file %s read",CG200_file); }
