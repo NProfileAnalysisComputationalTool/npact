@@ -2,5 +2,5 @@ Allplots.def
 *.ps
 *.extracted
 *.cg200ratio
-.CG200
-.CG50
+*.CG200
+*.CG50
