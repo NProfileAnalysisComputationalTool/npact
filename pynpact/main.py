@@ -15,7 +15,9 @@ import util
 
 #make paths less dependent on ~nathan
 
-BINPATH="/home/ACCELERATION/nathan/projects/spat/luciano-c/bin"
+BINPATH=os.path.realpath(os.path.join(os.path.dirname(__file__),"../luciano-c/bin"))
+
+
 def binfile(name) :
     return os.path.join(BINPATH, name)
 
