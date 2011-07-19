@@ -70,6 +70,33 @@ void printHelp() {
    fprintf(stderr,"File_list_of_nucleotides_in_100bp windows.\n");
 }
 
+/*
+ * Read a line of arbitrary length from a file, returning a malloced
+ * null-terminated string with the \n already stripped.
+ */
+char * ap_getl(FILE * f) {
+    size_t size = 0,last= 0, len = 0;
+    char * buf  = NULL;
+    do {
+        size += BUFSIZ; /* BUFSIZ is defined as "the optimal read size for this platform" */
+        buf = realloc(buf,size); /* realloc(NULL,n) is the same as malloc(n) */            
+        /* Actually do the read. Note that fgets puts a terminal '\0' on the
+           end of the string, so we make sure we overwrite this */
+        fgets(buf+len, BUFSIZ, f);
+        len += strlen(buf+len);
+        last = len - 1;
+    } while (!feof(f) && buf[last] != '\n');
+
+    if(buf[last] == '\n') {
+      /* get rid of the newline */
+      buf[last] = '\0';
+      return (char*) realloc(buf,len);
+    }
+    else {
+      return (char*) realloc(buf,len+1);
+    }
+}
+
 
 main(argc,argv)
 int	argc;
@@ -80,9 +107,14 @@ char	*argv[];
       *x,*X,**unb,**con,**pub,**exc,**new,**newP,**cg,**block,**BLOCK,**codpot,**Scodpot,*met,*stop,*tata,**pali,
       *cap,*ccaa,*gcbox,*kozak;
    float	r,tpr,**y,**Y,delta,pp,S[3];
-   char	longstr[200],*p,unb_file[50],con_file[50],new_file[50],newP_file[50],cg_file[50],tatastr[20],pub_file[50],exc_file[50],title1[300],title2[300],
-      block_file[50],BLOCK_file[50],codpot_file[50],Scodpot_file[50],met_file[50],kozak_file[50],tata_file[50],pali_file[50],cap_file[50],ccaa_file[50],
-      gcbox_file[50],ts[2],stop_file[50],CG200_file[50],CG100_file[50],*unb_str,*con_str,*pub_str,*exc_str,
+
+   /* Filename buffers */
+   char *unb_file, *con_file, * new_file, *newP_file, *cg_file, *pub_file, 
+     *exc_file, *block_file,*BLOCK_file,*codpot_file,*Scodpot_file,*met_file,
+     *kozak_file,*tata_file,*pali_file,*cap_file,*ccaa_file,*gcbox_file,
+     *stop_file,*CG200_file,*CG100_file;
+
+   char	longstr[200],*p,tatastr[20],*title1,*title2,ts[2],*unb_str,*con_str,*pub_str,*exc_str,
       *new_str,*newP_str,*cg_str,*block_str,*BLOCK_str,*codpot_str,*Scodpot_str,*codpot_col,*Scodpot_col,*met_str,*stop_str,*tata_str,*kozak_str,*cap_str,*ccaa_str,
       *gcbox_str,**pub_name,**exc_name,**new_name,**newP_name;
    FILE	*input,*files;
@@ -108,29 +140,51 @@ char	*argv[];
    fgets(NUCLEOTIDES,8,files);
    NUCLEOTIDES[strlen(NUCLEOTIDES)-1]='\0';
    fprintf(stderr,"\n%s",NUCLEOTIDES);
-   fgets(title1,298,files); title1[strlen(title1)-1]='\0'; fprintf(stderr,"\n%s",title1);
-   fgets(title2,298,files); title2[strlen(title2)-1]='\0'; fprintf(stderr,"\n%s",title2);
-   fscanf(files,"%s",unb_file); fprintf(stderr,"\n%s",unb_file);
-   fscanf(files,"%s",con_file); fprintf(stderr,"\n%s",con_file);
-   fscanf(files,"%s",new_file); fprintf(stderr,"\n%s",new_file);
-   fscanf(files,"%s",newP_file); fprintf(stderr,"\n%s",newP_file);
-   fscanf(files,"%s",cg_file); fprintf(stderr,"\n%s",cg_file);
-   fscanf(files,"%s",pub_file); fprintf(stderr,"\n%s",pub_file);
-   fscanf(files,"%s",exc_file); fprintf(stderr,"\n%s",exc_file);
-   fscanf(files,"%s",block_file); fprintf(stderr,"\n%s",block_file);
-   fscanf(files,"%s",BLOCK_file); fprintf(stderr,"\n%s",BLOCK_file);
-   fscanf(files,"%s",codpot_file); fprintf(stderr,"\n%s",codpot_file);
-   fscanf(files,"%s",Scodpot_file); fprintf(stderr,"\n%s",Scodpot_file);
-   fscanf(files,"%s",met_file); fprintf(stderr,"\n%s",met_file);
-   fscanf(files,"%s",stop_file); fprintf(stderr,"\n%s",stop_file);
-   fscanf(files,"%s",tata_file); fprintf(stderr,"\n%s",tata_file);
-   fscanf(files,"%s",cap_file); fprintf(stderr,"\n%s",cap_file);
-   fscanf(files,"%s",ccaa_file); fprintf(stderr,"\n%s",ccaa_file);
-   fscanf(files,"%s",gcbox_file); fprintf(stderr,"\n%s",gcbox_file);
-   fscanf(files,"%s",kozak_file); fprintf(stderr,"\n%s",kozak_file);
-   fscanf(files,"%s",pali_file); fprintf(stderr,"\n%s",pali_file);
-   fscanf(files,"%s",CG200_file); fprintf(stderr,"\n%s",CG200_file);
-   fscanf(files,"%s",CG100_file); fprintf(stderr,"\n%s",CG100_file);
+   title1 = ap_getl(files);     fprintf(stderr,"\n%s",title1);
+   title2 = ap_getl(files);     fprintf(stderr,"\n%s",title2);
+   /* File_of_unbiased_CDSs */
+   unb_file = ap_getl(files);   fprintf(stderr,"\n%s",unb_file);
+   /* File_of_conserved_CDSs */
+   con_file = ap_getl(files);   fprintf(stderr,"\n%s",con_file);
+   /* File_of_new_CDSs */
+   new_file = ap_getl(files);   fprintf(stderr,"\n%s",new_file);
+   /* File_of_potential_new_CDSs */
+   newP_file = ap_getl(files);  fprintf(stderr,"\n%s",newP_file);
+   /*File_of_stretches_where_CG_is_asymmetric */
+   cg_file = ap_getl(files);    fprintf(stderr,"\n%s",cg_file);
+   /*File_of_published_accepted_CDSs */
+   pub_file = ap_getl(files);   fprintf(stderr,"\n%s",pub_file);
+   /*File_of_published_rejected_CDSs */
+   exc_file = ap_getl(files);   fprintf(stderr,"\n%s",exc_file);
+   /*File_of_blocks_from_new_ORFs_as_cds */
+   block_file = ap_getl(files); fprintf(stderr,"\n%s",block_file);
+   /*File_of_blocks_from_annotated_genes_as_cds */
+   BLOCK_file = ap_getl(files); fprintf(stderr,"\n%s",BLOCK_file);
+   /*File_of_GeneMark_regions */
+   codpot_file = ap_getl(files); fprintf(stderr,"\n%s",codpot_file);
+   /*File_of_G+C_coding_potential_regions */
+   Scodpot_file = ap_getl(files); fprintf(stderr,"\n%s",Scodpot_file);
+   /*File_of_met_positions (e.g.:D 432) */
+   met_file = ap_getl(files);   fprintf(stderr,"\n%s",met_file);
+   /*File_of_stop_positions (e.g.:D 432) */
+   stop_file = ap_getl(files);  fprintf(stderr,"\n%s",stop_file);
+   /*File_of_tatabox_positions (e.g.:105.73 D 432 TATAAAAG) */
+   tata_file = ap_getl(files);  fprintf(stderr,"\n%s",tata_file);
+   /*File_of_capbox_positions */
+   cap_file = ap_getl(files);   fprintf(stderr,"\n%s",cap_file);
+   /*File_of_ccaatbox_positions */
+   ccaa_file = ap_getl(files);  fprintf(stderr,"\n%s",ccaa_file);
+   /*File_of_gcbox_positions */
+   gcbox_file = ap_getl(files); fprintf(stderr,"\n%s",gcbox_file);
+   /*File_of_kozak_positions */
+   kozak_file = ap_getl(files); fprintf(stderr,"\n%s",kozak_file);
+   /*File_of_palindrom_positions_and_size */
+   pali_file = ap_getl(files);  fprintf(stderr,"\n%s",pali_file);
+   /*File_list_of_nucleotides_in_200bp windows. */
+   CG200_file = ap_getl(files); fprintf(stderr,"\n%s",CG200_file);
+   /*File_list_of_nucleotides_in_100bp windows. */
+   CG100_file = ap_getl(files); fprintf(stderr,"\n%s",CG100_file);
+   
    fclose(files);
    fprintf(stderr,"Done reading Allplots.def\n");
 

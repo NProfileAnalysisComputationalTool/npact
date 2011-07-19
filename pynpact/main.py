@@ -170,14 +170,10 @@ $ CG MYCGE.gbk 1 580074 201 51 3 > MYCGE.CG200
             self.logger.debug("writing %r", allplots_name)
 
             with open(allplots_name, 'w') as allplots :
-                def ap_file(name) :
+                def ap_file(name=None) :
                     if name :
-                        #absolute paths overran buffers in Allplots so
-                        #use relative to keep names short.
-                        path = os.path.relpath(name,dtemp)
-                        allplots.write(path + "\n")
-                    else :
-                        allplots.write("None\n")
+                        allplots.write(name)
+                    allplots.write("\n")
 
                 #NB the "Plot Title" is disregarded, but that line should also contain the total number of bases
                 allplots.write("%s %d\n" % ("FOOBAR", len(self.seqrec))) 	#Plot Title
@@ -185,27 +181,27 @@ $ CG MYCGE.gbk 1 580074 201 51 3 > MYCGE.CG200
                 allplots.write("Page 1\n")		#First-Page title
                 allplots.write("page rest\n")	#Title of following pages
 
-                ap_file(None)			#File_of_unbiased_CDSs
-                ap_file(None)			#File_of_conserved_CDSs
-                ap_file(None)			#File_of_new_CDSs
-                ap_file(None)			#File_of_potential_new_CDSs
-                ap_file(None)			#File_of_stretches_where_CG_is_asymmetric
+                ap_file()			#File_of_unbiased_CDSs
+                ap_file()			#File_of_conserved_CDSs
+                ap_file()			#File_of_new_CDSs
+                ap_file()			#File_of_potential_new_CDSs
+                ap_file()			#File_of_stretches_where_CG_is_asymmetric
                 ap_file(self.run_extract())		#File_of_published_accepted_CDSs
-                ap_file(None)			#File_of_published_rejected_CDSs
-                ap_file(None)			#File_of_blocks_from_new_ORFs_as_cds
-                ap_file(None)			#File_of_blocks_from_annotated_genes_as_cds
-                ap_file(None)			#File_of_GeneMark_regions
-                ap_file(None)			#File_of_G+C_coding_potential_regions
-                ap_file(None)			#File_of_met_positions (e.g.:D 432)
-                ap_file(None)			#File_of_stop_positions (e.g.:D 432)
-                ap_file(None)			#File_of_tatabox_positions (e.g.:105.73 D 432 TATAAAAG)
-                ap_file(None)			#File_of_capbox_positions
-                ap_file(None)			#File_of_ccaatbox_positions
-                ap_file(None)			#File_of_gcbox_positions
-                ap_file(None)			#File_of_kozak_positions
-                ap_file(None)			#File_of_palindrom_positions_and_size
+                ap_file()			#File_of_published_rejected_CDSs
+                ap_file()			#File_of_blocks_from_new_ORFs_as_cds
+                ap_file()			#File_of_blocks_from_annotated_genes_as_cds
+                ap_file()			#File_of_GeneMark_regions
+                ap_file()			#File_of_G+C_coding_potential_regions
+                ap_file()			#File_of_met_positions (e.g.:D 432)
+                ap_file()			#File_of_stop_positions (e.g.:D 432)
+                ap_file()			#File_of_tatabox_positions (e.g.:105.73 D 432 TATAAAAG)
+                ap_file()			#File_of_capbox_positions
+                ap_file()			#File_of_ccaatbox_positions
+                ap_file()			#File_of_gcbox_positions
+                ap_file()			#File_of_kozak_positions
+                ap_file()			#File_of_palindrom_positions_and_size
                 ap_file(self.run_CG())		#File_list_of_nucleotides_in_200bp windows.
-                ap_file(None)			#File_list_of_nucleotides_in_100bp windows.
+                ap_file()			#File_list_of_nucleotides_in_100bp windows.
 
             i = 0
             ppage = 50000
