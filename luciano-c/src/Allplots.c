@@ -103,20 +103,33 @@ int	argc;
 char	*argv[];
 {
    int	i,j,k,n,N,lines,nub,nc,nn,nnP,np,ne,nb,ns,ncg,nB,ncp,nScp,nm,nk,nt,ncap,ncca,ngcb,gs,ge,lp,len,period=3,swflag=1,
-      start,end,pos,tstart,line_range,unbf=0,conf=0,newf=0,newPf=0,cgf=0,cpf= 0,Scpf= 0, npali= 0,
-      *x,*X,**unb,**con,**pub,**exc,**new,**newP,**cg,**block,**BLOCK,**codpot,**Scodpot,*met,*stop,*tata,**pali,
-      *cap,*ccaa,*gcbox,*kozak;
-   float	r,tpr,**y,**Y,delta,pp,S[3];
+     start,end,pos,tstart,line_range,unbf=0,conf=0,newf=0,newPf=0,cgf=0,cpf= 0,Scpf= 0, npali= 0;
+   float	r,tpr,delta,pp,S[3];
 
    /* Filename buffers */
-   char *unb_file, *con_file, * new_file, *newP_file, *cg_file, *pub_file, 
+   char *unb_file, *con_file, * new_file, *newP_file, *cg_file, *pub_file,
      *exc_file, *block_file,*BLOCK_file,*codpot_file,*Scodpot_file,*met_file,
      *kozak_file,*tata_file,*pali_file,*cap_file,*ccaa_file,*gcbox_file,
      *stop_file,*CG200_file,*CG100_file;
 
-   char	longstr[200],*p,tatastr[20],*title1,*title2,ts[2],*unb_str,*con_str,*pub_str,*exc_str,
-      *new_str,*newP_str,*cg_str,*block_str,*BLOCK_str,*codpot_str,*Scodpot_str,*codpot_col,*Scodpot_col,*met_str,*stop_str,*tata_str,*kozak_str,*cap_str,*ccaa_str,
-      *gcbox_str,**pub_name,**exc_name,**new_name,**newP_name;
+
+   /* by declaring them initially to be NULL, when realloc sees it, it
+      will treat it as a malloc */
+   int **unb=NULL, **con=NULL, **new=NULL, **newP=NULL, **cg=NULL, **pub=NULL,
+     **exc=NULL, **block=NULL, **BLOCK=NULL, **codpot=NULL, **Scodpot=NULL,
+     *met=NULL, *tata=NULL, *cap=NULL, *ccaa=NULL, *gcbox=NULL, *stop=NULL,
+     *kozak=NULL, **pali=NULL, *X=NULL, *x=NULL;
+   float **y=NULL,**Y=NULL;
+
+   char *unb_str=NULL, *con_str=NULL, *new_str=NULL, *newP_str=NULL, *cg_str=NULL,
+     *pub_str=NULL, *exc_str=NULL, *block_str=NULL, *BLOCK_str=NULL,
+     *codpot_str=NULL, *codpot_col=NULL, *Scodpot_str=NULL, *Scodpot_col=NULL,
+     *met_str=NULL, *tata_str=NULL, *cap_str=NULL, *ccaa_str=NULL,
+     *gcbox_str=NULL, *stop_str=NULL, *kozak_str=NULL;
+
+   char **pub_name=NULL,**exc_name=NULL,**new_name=NULL,**newP_name=NULL;
+
+   char	longstr[200],*p,tatastr[20],*title1,*title2,ts[2];
    FILE	*input,*files;
 
    if(argc==1)
@@ -187,75 +200,6 @@ char	*argv[];
    
    fclose(files);
    fprintf(stderr,"Done reading Allplots.def\n");
-
-   unb_str= (char *)malloc(sizeof(char));
-   unb= (int **)malloc(sizeof(int *));
-
-   con_str= (char *)malloc(sizeof(char));
-   con= (int **)malloc(sizeof(int *));
-
-   new_str= (char *)malloc(sizeof(char));
-   new= (int **)malloc(sizeof(int *));
-
-   newP_str= (char *)malloc(sizeof(char));
-   newP= (int **)malloc(sizeof(int *));
-
-   cg_str= (char *)malloc(sizeof(char));
-   cg= (int **)malloc(sizeof(int *));
-
-   pub_str= (char *)malloc(sizeof(char));
-   pub= (int **)malloc(sizeof(int *));
-
-   exc_str= (char *)malloc(sizeof(char));
-   exc= (int **)malloc(sizeof(int *));
-
-   block_str= (char *)malloc(sizeof(char));
-   block= (int **)malloc(sizeof(int *));
-
-   BLOCK_str= (char *)malloc(sizeof(char));
-   BLOCK= (int **)malloc(sizeof(int *));
-
-   codpot_str= (char *)malloc(sizeof(char));
-   codpot_col= (char *)malloc(sizeof(char));
-   codpot= (int **)malloc(sizeof(int *));
-
-   Scodpot_str= (char *)malloc(sizeof(char));
-   Scodpot_col= (char *)malloc(sizeof(char));
-   Scodpot= (int **)malloc(sizeof(int *));
-
-   met_str= (char *)malloc(sizeof(char));
-   met= (int *)malloc(sizeof(int));
-
-   tata_str= (char *)malloc(sizeof(char));
-   tata= (int *)malloc(sizeof(int));
-
-   cap_str= (char *)malloc(sizeof(char));
-   cap= (int *)malloc(sizeof(int));
-
-   ccaa_str= (char *)malloc(sizeof(char));
-   ccaa= (int *)malloc(sizeof(int));
-
-   gcbox_str= (char *)malloc(sizeof(char));
-   gcbox= (int *)malloc(sizeof(int));
-
-   stop_str= (char *)malloc(sizeof(char));
-   stop= (int *)malloc(sizeof(int));
-
-   kozak_str= (char *)malloc(sizeof(char));
-   kozak= (int *)malloc(sizeof(int));
-
-   pali= (int **)malloc(sizeof(int *));
-
-   pub_name= (char **)malloc(sizeof(char *));
-   exc_name= (char **)malloc(sizeof(char *));
-   new_name= (char **)malloc(sizeof(char *));
-   newP_name= (char **)malloc(sizeof(char *));
-
-   Y=  (float **)malloc(sizeof(float *));
-   y=  (float **)malloc(sizeof(float *));
-
-   X=  (int *)malloc(sizeof(int));
-   x=  (int *)malloc(sizeof(int));
 
    tstart= atoi(argv[1]);
    line_range= atoi(argv[2]);
