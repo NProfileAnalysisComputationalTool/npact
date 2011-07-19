@@ -101,12 +101,7 @@ class GenBankProcessor(object) :
                 self.logger.debug("Cleaning up mkdtemp %r", path)
                 shutil.rmtree(path,ignore_errors=True)
 
-
-    def run_extract(self,gene_descriptor="gene") :
-        """Go through the genbank record pulling out gene names and locations
-        $ extract MYCGE.gbk 0 gene 0 locus_tag > MYCGE.genes
-"""
-
+    def biopy_extract(self,gene_descriptor="gene") :
         outfilename,generate = self.derivative_filename(".extracted")
 
         if not generate :
@@ -137,6 +132,12 @@ class GenBankProcessor(object) :
                         else :
                             print_feature(desc[0],f.strand,f.location.nofuzzy_start, f.location.nofuzzy_end)
         return outfilename
+
+    def run_extract(self,gene_descriptor="gene") :
+        """Go through the genbank record pulling out gene names and locations
+        $ extract MYCGE.gbk 0 gene 0 locus_tag > MYCGE.genes
+"""
+        return self.biopy_extract(gene_descriptor)
 
     def run_CG(self) :
         """Do the CG ratio calculations.
