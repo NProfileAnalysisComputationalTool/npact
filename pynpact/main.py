@@ -224,6 +224,8 @@ if __name__ == '__main__' :
     parser = OptionParser("""main.py <genebank file>""")
     parser.add_option("-v", "--verbose", action="store_true", dest="verbose",
                       help="Show more verbose log messages.")
+    parser.add_option("-f","--force",action="store_true",dest="force",
+                      help="Force recomputation of intermediate products")
     (options,args) = parser.parse_args()
 
     if len(args) != 1 :
@@ -234,5 +236,5 @@ if __name__ == '__main__' :
                         format="%(asctime)s %(name)-10s %(levelname)-8s %(message)s",
                         datefmt='%H:%M:%S')
 
-    gbkp = GenBankProcessor(args[0])
+    gbkp = GenBankProcessor(args[0],force=options.force)
     gbkp.run_Allplots()
