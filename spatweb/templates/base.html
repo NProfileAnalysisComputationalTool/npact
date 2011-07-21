@@ -21,6 +21,13 @@
 
 		<div id="mainContainer">
 			<div id="content">
+        {% if messages %}
+        <ul class="messages">
+          {% for message in messages %}
+          <li{% if message.tags %} class="{{ message.tags }}"{% endif %}>{{ message }}</li>
+          {% endfor %}
+        </ul>
+        {% endif %}
 
         {%block content %}
         {%endblock content %}
@@ -30,7 +37,7 @@
           <h2>Primary Navigation</h2>
           <ul>
 				    <li id="active">Home</li>
-            <li><a href="/run">Run S-Profile Analysis</a></li>
+            <li><a href="/start">Run S-Profile Analysis</a></li>
 				    <li><a href="/library">S-P.A.T. Library</a></li>
             <li><a href="">Get the Source</a></li>
           </ul>

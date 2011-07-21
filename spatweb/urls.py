@@ -6,11 +6,8 @@ from django.conf.urls.defaults import handler404
 # admin.autodiscover()
 
 urlpatterns = patterns('',
-    # Examples:
-     url(r'^run', 'spat.views.run'),
-     url(r'^library', 'spat.views.library'),
-     url(r'^$', 'spat.views.index'),
-    # url(r'^spatweb/', include('spatweb.foo.urls')),
+                       ('',include('spat.urls')),
+                       
 
     # Uncomment the admin/doc line below to enable admin documentation:
     # url(r'^admin/doc/', include('django.contrib.admindocs.urls')),
