@@ -105,7 +105,7 @@ class GenBankProcessor(object) :
         outfilename,generate = self.derivative_filename(".extracted")
 
         if not generate :
-            self.logger.debug("Skipped extraction")
+            self.logger.debug("Skipping extract")
             return outfilename
 
         with self.mkstemp_overwrite(outfilename) as outfile :
@@ -133,11 +133,22 @@ class GenBankProcessor(object) :
                             print_feature(desc[0],f.strand,f.location.nofuzzy_start, f.location.nofuzzy_end)
         return outfilename
 
-    def run_extract(self,gene_descriptor="gene") :
+    def original_extract(self) :
+        outfilename,generate = self.derivative_filename("genes")
+        if generate :
+            with self.mkstemp_overwrite(outfilename) as outfile :
+                util.capturedCall([binfile("extract"), self.gbkfile, 0, "gene", 0, "locus_tag"],
+                                  stdout=outfile, logger=self.logger)
+        else :
+            self.logger.debug("Skipping extract")
+        return outfilename
+
+
+    def run_extract(self) :
         """Go through the genbank record pulling out gene names and locations
         $ extract MYCGE.gbk 0 gene 0 locus_tag > MYCGE.genes
 """
-        return self.biopy_extract(gene_descriptor)
+        return self.biopy_extract()
 
     def run_CG(self) :
         """Do the CG ratio calculations.
