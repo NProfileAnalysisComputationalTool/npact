@@ -9,7 +9,7 @@ import os.path
 #this variable on deploy and everything else should work out.
 PPATH="/home/ACCELERATION/nathan/projects/spat/spatweb/"
 def ppath(rel) :
-    return os.path.join(PPATH,rel)
+    return os.path.realpath(os.path.join(PPATH,rel))
 
 ADMINS = (
     # ('Your Name', 'your_email@example.com'),
@@ -53,7 +53,7 @@ USE_L10N = True
 
 # Absolute filesystem path to the directory that will hold user-uploaded files.
 # Example: "/home/media/media.lawrence.com/media/"
-MEDIA_ROOT = ''
+MEDIA_ROOT = ppath('media')
 
 # URL that handles the media served from MEDIA_ROOT. Make sure to use a
 # trailing slash.
@@ -151,20 +151,45 @@ INSTALLED_APPS = (
 LOGGING = {
     'version': 1,
     'disable_existing_loggers': False,
+    'formatters': {
+        'verbose': {
+            'format': '%(levelname)s %(asctime)s %(module)s %(process)d %(thread)d %(message)s'
+            },
+        'simple': {
+            'format': '%(levelname)s %(message)s'
+            },
+    },
     'handlers': {
         'mail_admins': {
             'level': 'ERROR',
             'class': 'django.utils.log.AdminEmailHandler'
-        }
+        },
+        'console':{
+            'level':'DEBUG',
+            'class':'logging.StreamHandler',
+        },
     },
     'loggers': {
         'django.request': {
             'handlers': ['mail_admins'],
             'level': 'ERROR',
             'propagate': True,
-        },
+            },
+        'spat': {
+            'handlers': ['console'],
+            'level': 'DEBUG',
+            'propagate': True,
+            'formatter': 'verbose',
+            },
+        'spatweb': {
+            'handlers': ['console'],
+            'level': 'DEBUG',
+            'formatter': 'verbose',
+            'propagate': True,
+            },
+        }
     }
-}
+
 
 
 MESSAGE_STORAGE='django.contrib.messages.storage.cookie.CookieStorage'
