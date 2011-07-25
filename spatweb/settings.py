@@ -155,6 +155,10 @@ LOGGING = {
         'verbose': {
             'format': '%(levelname)s %(asctime)s %(module)s %(process)d %(thread)d %(message)s'
             },
+        'tty': {
+            'format': "%(asctime)s %(module)-10s %(levelname)-8s %(message)s",
+            'datefmt': '%H:%M:%S'
+            },
         'simple': {
             'format': '%(levelname)s %(message)s'
             },
@@ -167,6 +171,7 @@ LOGGING = {
         'console':{
             'level':'DEBUG',
             'class':'logging.StreamHandler',
+            'formatter': 'tty',
         },
     },
     'loggers': {
@@ -178,13 +183,6 @@ LOGGING = {
         'spat': {
             'handlers': ['console'],
             'level': 'DEBUG',
-            'propagate': True,
-            'formatter': 'verbose',
-            },
-        'spatweb': {
-            'handlers': ['console'],
-            'level': 'DEBUG',
-            'formatter': 'verbose',
             'propagate': True,
             },
         }
