@@ -16,11 +16,11 @@ def library(request) :
 
 
 
-def run(request):
-
-    return render_to_response('run.html',{},
-                               context_instance=RequestContext(request))
-
 def results(request) :
     pass
 
+
+
+#the session_key for all of spat's data.
+def session_key(part) :
+    return "spat." + part
