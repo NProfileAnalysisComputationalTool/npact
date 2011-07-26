@@ -6,6 +6,7 @@ from Bio import SeqIO
 
 import util
 
+logger = logging.getLogger(__name__)
 
 #TODO: general next steps:
 
@@ -42,7 +43,7 @@ class GenBankProcessor(object) :
     #
     gbkfile = None
     force = False
-    logger = logging.getLogger('pynpact.main')
+    logger = logger
     outputdir = None
     cleanup = True
 
@@ -90,6 +91,13 @@ class GenBankProcessor(object) :
         kwargs.setdefault('cleanup', self.cleanup)
         return util.mkstemp_overwrite(destination, **kwargs)
 
+    def safe_produce_new(self, ext_part, func, **kwargs) :
+        kwargs.setdefault('dir', self.outputdir)
+        kwargs.setdefault('logger', self.logger)
+        kwargs.setdefault('cleanup', self.cleanup)
+        kwargs.setdefault('force', self.force)
+        return util.safe_produce_new(self.gbkfile, ext_part,func, **kwargs)
+
     @contextmanager
     def mkdtemp(self,**kwargs) :
         kwargs.setdefault('dir', self.outputdir)
@@ -102,13 +110,8 @@ class GenBankProcessor(object) :
                 shutil.rmtree(path,ignore_errors=True)
 
     def biopy_extract(self,gene_descriptor="gene") :
-        outfilename,generate = self.derivative_filename(".extracted")
 
-        if not generate :
-            self.logger.debug("Skipping extract")
-            return outfilename
-
-        with self.mkstemp_overwrite(outfilename) as outfile :
+        def func(outfile):
             def print_feature(desc, strand, start, end) :
                 location = "%s..%s" % (start +1, end)
                 if f.strand == -1 :
@@ -131,18 +134,12 @@ class GenBankProcessor(object) :
                                 ex += 1
                         else :
                             print_feature(desc[0],f.strand,f.location.nofuzzy_start, f.location.nofuzzy_end)
-        return outfilename
+        return self.safe_produce_new(".extracted", func)
 
     def original_extract(self) :
-        outfilename,generate = self.derivative_filename("genes")
-        if generate :
-            with self.mkstemp_overwrite(outfilename) as outfile :
-                util.capturedCall([binfile("extract"), self.gbkfile, 0, "gene", 0, "locus_tag"],
-                                  stdout=outfile, logger=self.logger)
-        else :
-            self.logger.debug("Skipping extract")
-        return outfilename
-
+        func = lambda f: util.capturedCall([binfile("extract"), self.gbkfile, 0, "gene", 0, "locus_tag"],
+                                           stdout=f, logger=self.logger)
+        return self.safe_produce_new("genes", func)
 
     def run_extract(self) :
         """Go through the genbank record pulling out gene names and locations
@@ -154,12 +151,9 @@ class GenBankProcessor(object) :
         """Do the CG ratio calculations.
 $ CG MYCGE.gbk 1 580074 201 51 3 > MYCGE.CG200
 """
-        outfilename,generate = self.derivative_filename("CG200")
-        if generate :
-            with self.mkstemp_overwrite(outfilename) as outfile :
-                util.capturedCall([binfile("CG"), self.gbkfile, 1, len(self.seqrec), 201, 51, 3],
-                                  stdout=outfile, logger=self.logger)
-        return outfilename
+        progargs = [binfile("CG"), self.gbkfile, 1, len(self.seqrec), 201, 51, 3]
+        func = lambda outfile: util.capturedCall(progargs, stdout=outfile, logger=self.logger)
+        return self.safe_produce_new("CG200",func)
 
     def run_atg(self) :
         # ../atg MYCGE.gbk > atg.txt
@@ -188,31 +182,31 @@ $ CG MYCGE.gbk 1 580074 201 51 3 > MYCGE.CG200
 
                 #NB the "Plot Title" is disregarded, but that line should also contain the total number of bases
                 allplots.write("%s %d\n" % ("FOOBAR", len(self.seqrec))) 	#Plot Title
-                allplots.write("C+G\n")		#Nucleotide(s)_plotted (e.g.: C+G)
-                allplots.write("Page 1\n")		#First-Page title
-                allplots.write("page rest\n")	#Title of following pages
+                allplots.write("C+G\n")	      #Nucleotide(s)_plotted (e.g.: C+G)
+                allplots.write("Page 1\n")    #First-Page title
+                allplots.write("page rest\n") #Title of following pages
 
-                ap_file()			#File_of_unbiased_CDSs
-                ap_file()			#File_of_conserved_CDSs
-                ap_file()			#File_of_new_CDSs
-                ap_file()			#File_of_potential_new_CDSs
-                ap_file()			#File_of_stretches_where_CG_is_asymmetric
-                ap_file(self.run_extract())		#File_of_published_accepted_CDSs
-                ap_file()			#File_of_published_rejected_CDSs
-                ap_file()			#File_of_blocks_from_new_ORFs_as_cds
-                ap_file()			#File_of_blocks_from_annotated_genes_as_cds
-                ap_file()			#File_of_GeneMark_regions
-                ap_file()			#File_of_G+C_coding_potential_regions
-                ap_file()			#File_of_met_positions (e.g.:D 432)
-                ap_file()			#File_of_stop_positions (e.g.:D 432)
-                ap_file()			#File_of_tatabox_positions (e.g.:105.73 D 432 TATAAAAG)
-                ap_file()			#File_of_capbox_positions
-                ap_file()			#File_of_ccaatbox_positions
-                ap_file()			#File_of_gcbox_positions
-                ap_file()			#File_of_kozak_positions
-                ap_file()			#File_of_palindrom_positions_and_size
-                ap_file(self.run_CG())		#File_list_of_nucleotides_in_200bp windows.
-                ap_file()			#File_list_of_nucleotides_in_100bp windows.
+                ap_file()		      #File_of_unbiased_CDSs
+                ap_file()		      #File_of_conserved_CDSs
+                ap_file()		      #File_of_new_CDSs
+                ap_file()		      #File_of_potential_new_CDSs
+                ap_file()		      #File_of_stretches_where_CG_is_asymmetric
+                ap_file(self.run_extract())   #File_of_published_accepted_CDSs
+                ap_file()		      #File_of_published_rejected_CDSs
+                ap_file()		      #File_of_blocks_from_new_ORFs_as_cds
+                ap_file()		      #File_of_blocks_from_annotated_genes_as_cds
+                ap_file()		      #File_of_GeneMark_regions
+                ap_file()		      #File_of_G+C_coding_potential_regions
+                ap_file()		      #File_of_met_positions (e.g.:D 432)
+                ap_file()		      #File_of_stop_positions (e.g.:D 432)
+                ap_file()		      #File_of_tatabox_positions (e.g.:105.73 D 432 TATAAAAG)
+                ap_file()		      #File_of_capbox_positions
+                ap_file()		      #File_of_ccaatbox_positions
+                ap_file()		      #File_of_gcbox_positions
+                ap_file()		      #File_of_kozak_positions
+                ap_file()		      #File_of_palindrom_positions_and_size
+                ap_file(self.run_CG())	      #File_list_of_nucleotides_in_200bp windows.
+                ap_file()		      #File_list_of_nucleotides_in_100bp windows.
 
             i = 0
             ppage = 50000

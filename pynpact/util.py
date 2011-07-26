@@ -232,6 +232,39 @@ with mkstemp_overwrite('foobar.txt') as f:
 
 
 
+def derivative_filename(base, part, replace_ext=True, outputdir=None) :
+    """Build the filename of a derivative product of the original
+    file. If the derivative file already exists return whether it
+    is out of date"""
+
+    if not part[0] == "." :
+        part = "." + part
+
+    if outputdir is None :
+        outputdir = os.path.dirname(base)
+    filename = os.path.basename(base)
+
+    if replace_ext :
+        filename = os.path.splitext(filename)[0]
+
+    outfilename = os.path.join(outputdir, filename + part)
+
+    outofdate = (not os.path.exists(outfilename)) or \
+                os.path.getmtime(outfilename) < os.path.getmtime(base)
+
+    return (outfilename, outofdate)
+
+def safe_produce_new(base, ext_part, func,
+                     replace_ext=True, force=False, **kwargs) :
+    outfilename,outofdate = derivative_filename(base, ext_part, replace_ext,
+                                                outputdir=kwargs.get('dir'))
+
+    if outofdate or force:
+        with mkstemp_overwrite(outfilename,**kwargs) as f :
+            func(f)
+    elif kwargs.get('logger',False) :
+        kwargs.get('logger').debug("Skipped producing %r", outfilename)
+    return outfilename
 
 # Copright (c) 2011  Accelerated Data Works
 # All rights reserved.
