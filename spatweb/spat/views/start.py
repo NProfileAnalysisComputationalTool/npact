@@ -42,6 +42,9 @@ def saveToFile(request, text) :
         fh.write(text)
     return savepath
 
+
+
+
 def view(request) :
     form = None
     path = None
@@ -57,7 +60,6 @@ def view(request) :
 
             if path :
                 request.session[session_key("input_path")] = path
-                messages.info(request,"Saved to path: %r" % path)
                 return HttpResponseRedirect(reverse('spat.views.run'))
             else :
                 messages.error(request, "You need to supply a genome source.")
