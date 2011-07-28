@@ -1,7 +1,7 @@
 
 SRCDIR = src
 OBJDIR = obj
-BINDIR = bin
+BINDIR = pynpact/bin
 
 SRC = $(shell find $(SRCDIR) | grep .c)
 OBJ = $(patsubst $(SRCDIR)/%.c, $(OBJDIR)/%.o, $(SRC))

@@ -1,6 +1,9 @@
+#!/usr/bin/env python
 import logging, os.path, tempfile, time, shutil
 from optparse import OptionParser
 from contextlib import contextmanager
+
+from pynpact import binfile
 
 from Bio import SeqIO
 
@@ -16,11 +19,6 @@ logger = logging.getLogger(__name__)
 
 #make paths less dependent on ~nathan
 
-BINPATH=os.path.realpath(os.path.join(os.path.dirname(__file__),"../luciano-c/bin"))
-
-
-def binfile(name) :
-    return os.path.join(BINPATH, name)
 
 class GenBankProcessor(object) :
     """Manipulate Genebank files in the pynpact project.
