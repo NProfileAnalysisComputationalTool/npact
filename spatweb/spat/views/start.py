@@ -60,7 +60,7 @@ def view(request) :
 
             if path :
                 request.session[session_key("input_path")] = path
-                return HttpResponseRedirect(reverse('spat.views.run'))
+                return HttpResponseRedirect(reverse('spat.views.run.view'))
             else :
                 messages.error(request, "You need to supply a genome source.")
 
