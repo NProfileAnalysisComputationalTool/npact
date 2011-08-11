@@ -9,12 +9,12 @@ from django.template import RequestContext
 from django import forms
 from django.contrib import messages
 
-from ordereddict import OrderedDict
 
-from __init__ import session_key
-
+from __init__ import session_key, is_clean_path
+from spat.middleware import RedirectException
 
 from pynpact import prepare
+
 
 # Get an instance of a logger
 logger = logging.getLogger(__name__)
@@ -25,40 +25,33 @@ class RunForm(forms.Form) :
     following_page_title = forms.CharField(required=False)
 
 
-def try_parse(request) :
-    data = OrderedDict()
-    path = request.session[session_key("input_path")]
-    gb_record = None
-
-
-    try :
-        gbrec = prepare.open_parse(path)
-        data['length'] = len(gbrec)
-        data['id'] = gbr.id
-        data['date'] = gbr.annotations.get('date')
-        data['description'] = gbr.description
-        return data
-
-    except :
-        return None
-
-def prefill_form(request) :
+def prefill_form(request, path) :
+    form,data=None,None
+    data = prepare.try_parse(os.path.join(settings.MEDIA_ROOT, path))
+    if not data:
+        messages.error(request,"There was a problem loading file '%s', please try again or try a different record." % path)
+        raise RedirectException(reverse('spat.views.start.view'))
+    
     if request.method == 'POST' :
-        return RunForm(request.POST)
+        form= RunForm(request.POST)
     else :
-        data = try_parse(request)
-        form = RunForm()
-        if data :
-            form.first_page_title.initial = data.get['description']
-            form.following_page_title.initial = data.get['description']
+        title = data.get('description') or data.get('basename')
+        form = RunForm({'first_page_title': title,
+                        'following_page_title': title})
+
+    return form,data
 
 
-def view(request):
-    if not session_key("input_path") in request.session :
-        messages.error(request, "No genome source selected, please upload one, or go to the library and select one.")
+def view(request, path):
+    if not is_clean_path(path) :
+        messages.error(request, "Path contained illegal characters, please upload a file or go to the library and select one.")
         return HttpResponseRedirect(reverse('spat.views.start.view'))
 
-
-    form = prefill_form(request)
-    return render_to_response('run.html',{},
+    form,data = prefill_form(request, path)
+    return render_to_response('run.html',{'form':form, 'data':data},
                                context_instance=RequestContext(request))
+
+
+def view_none(request) :
+    messages.error(request, "No genome source selected, please upload one, or go to the library and select one.")
+    return HttpResponseRedirect(reverse('spat.views.start.view'))

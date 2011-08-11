@@ -56,3 +56,30 @@ def open_parse_seq_rec(gbkfile, reduce_first=False) :
 
 def make_seq_unknown(seq_record) :
     seq_record.seq = Bio.Seq.UnknownSeq(len(seq_record),seq_record.seq.alphabet)
+
+
+parse_cache = {}
+def try_parse(abs_path, force=False) :
+    if not os.path.exists(abs_path) : return None
+
+    mtime = os.path.getmtime(abs_path)
+
+    if not force :
+        #cache_lines are None for miss, or (date, data) otherwise.
+        cache_line = parse_cache.get(abs_path)
+        if cache_line and cache_line[0] >= mtime:
+            return cache_line[1]
+
+    data = {'basename': os.path.basename(abs_path),
+            'mtime': mtime,
+            }
+    try :
+        gbrec = open_parse_seq_rec(abs_path)
+        data['length'] = len(gbrec)
+        data['id'] = gbrec.id
+        data['date'] = gbrec.annotations.get('date')
+        data['description'] = gbrec.description
+    except :
+        pass
+    parse_cache[abs_path] = (mtime,data)
+    return data

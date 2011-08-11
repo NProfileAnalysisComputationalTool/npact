@@ -8,8 +8,9 @@
     <dt>Filename</dt>
     <dd>{{ filename }}</dd>
   </dl>
-  {% if parse_successful %}
+  {% if data.id %}
   
+
   {% else %}
   <p>The file does not appear to be in <a href="http://www.ncbi.nlm.nih.gov/Sitemap/samplerecord.html">GenBank format</a>. You may attempt to procede but results are unpredicatble.</p>
   {% endif %}

@@ -107,6 +107,7 @@ MIDDLEWARE_CLASSES = (
     'django.middleware.csrf.CsrfViewMiddleware',
     'django.contrib.auth.middleware.AuthenticationMiddleware',
     'django.contrib.messages.middleware.MessageMiddleware',
+    'spat.middleware.RedirectExceptionHandler',
 )
 
 #What it is by default.
@@ -117,7 +118,6 @@ MIDDLEWARE_CLASSES = (
 #     "django.core.context_processors.media",
 #     "django.core.context_processors.static",
 #     "django.contrib.messages.context_processors.messages")
-
 ROOT_URLCONF = 'spatweb.urls'
 
 TEMPLATE_DIRS = (
