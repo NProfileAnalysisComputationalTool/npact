@@ -25,21 +25,23 @@ class RunForm(forms.Form) :
     following_page_title = forms.CharField(required=False)
 
 
-def prefill_form(request, path) :
-    form,data=None,None
-    data = prepare.try_parse(os.path.join(settings.MEDIA_ROOT, path))
-    if not data:
-        messages.error(request,"There was a problem loading file '%s', please try again or try a different record." % path)
-        raise RedirectException(reverse('spat.views.start.view'))
-    
-    if request.method == 'POST' :
-        form= RunForm(request.POST)
-    else :
-        title = data.get('description') or data.get('basename')
-        form = RunForm({'first_page_title': title,
-                        'following_page_title': title})
+def prefill_form(request, path, data) :
 
-    return form,data
+    title = data.get('description') or data.get('basename')
+    form = RunForm({'first_page_title': title,
+                    'following_page_title': title})
+
+    return form
+
+def get_display_items(request,data) :
+    yield ('Filename', data['basename'])
+    for key in ['date','length','description'] :
+        if data.get(key) :
+            yield key, data.get(key)
+
+
+def run_it(request,form) :
+    pass
 
 
 def view(request, path):
@@ -47,8 +49,22 @@ def view(request, path):
         messages.error(request, "Path contained illegal characters, please upload a file or go to the library and select one.")
         return HttpResponseRedirect(reverse('spat.views.start.view'))
 
-    form,data = prefill_form(request, path)
-    return render_to_response('run.html',{'form':form, 'data':data},
+    form = None
+    data = prepare.try_parse(os.path.join(settings.MEDIA_ROOT, path))
+    if not data:
+        messages.error(request,"There was a problem loading file '%s', please try again or try a different record." % path)
+        return HttpResponseRedirect(reverse('spat.views.start.view'))
+    
+
+    if request.method == 'POST' :
+        form= RunForm(request.POST)
+        if form.is_valid() :
+            run_it(request, form)
+    else :
+        form = prefill_form(request, path, data)
+
+    return render_to_response('run.html',{'form':form, 'data':data,
+                                          'def_list_items': get_display_items(request,data)},
                                context_instance=RequestContext(request))
 
 

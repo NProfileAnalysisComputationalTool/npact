@@ -5,20 +5,19 @@
 <div class="contentPadding">
   <h2>Selected Genome Info</h2>
   <dl>
-    <dt>Filename</dt>
-    <dd>{{ filename }}</dd>
+{% for key, value in def_list_items %}
+    <dt>{{ key|title }}</dt><dd>{{ value }}</dd>
+{% endfor %}
   </dl>
-  {% if data.id %}
-  
 
-  {% else %}
+  {% if not data.id %}
   <p>The file does not appear to be in <a href="http://www.ncbi.nlm.nih.gov/Sitemap/samplerecord.html">GenBank format</a>. You may attempt to procede but results are unpredicatble.</p>
   {% endif %}
   <h2>S-Profile Analysis Tool Options</h2>
   <p>From here you can customize the options on an S-Profile analysis.</p>
 
 
-  <form action="results" method="POST">
+  <form method="POST">
     {% csrf_token %} 
     {{ form.as_p }}
     <p><button>Get Analysis!</button></p>
