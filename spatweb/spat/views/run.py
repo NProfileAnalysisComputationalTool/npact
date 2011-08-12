@@ -13,7 +13,7 @@ from django.contrib import messages
 from __init__ import session_key, is_clean_path
 from spat.middleware import RedirectException
 
-from pynpact import prepare
+from pynpact import prepare, main
 
 
 # Get an instance of a logger
@@ -40,8 +40,14 @@ def get_display_items(request,data) :
             yield key, data.get(key)
 
 
-def run_it(request,form) :
-    pass
+def run_it(request, path, form) :
+    gbp = main.GenBankProcessor(os.path.join(settings.MEDIA_ROOT, path))
+    psname = gbp.run_Allplots()
+    psname = os.path.relpath(psname, settings.MEDIA_ROOT)
+
+    raise RedirectException(reverse('results', args=[psname]))
+
+
 
 
 def view(request, path):
@@ -59,7 +65,7 @@ def view(request, path):
     if request.method == 'POST' :
         form= RunForm(request.POST)
         if form.is_valid() :
-            run_it(request, form)
+            run_it(request, path, form)
     else :
         form = prefill_form(request, path, data)
 

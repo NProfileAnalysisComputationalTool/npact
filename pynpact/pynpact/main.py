@@ -208,8 +208,10 @@ $ CG MYCGE.gbk 1 580074 201 51 3 > MYCGE.CG200
 
             i = 0
             ppage = 50000
+            filenames = []
             while i*ppage < len(self.seqrec) :
                 outfilename,generate = self.derivative_filename(".%03d.ps" % (i+1,))
+                filenames.append(outfilename)
                 if generate :
                     self.logger.debug("Starting Allplots for %r", os.path.basename(outfilename))
                     with util.mkstemp_overwrite(outfilename) as psout :
@@ -218,6 +220,7 @@ $ CG MYCGE.gbk 1 580074 201 51 3 > MYCGE.CG200
                 else :
                     self.logger.debug("Skipping Allplots for %r", os.path.basename(outfilename))
                 i += 1
+            return filenames[0]
 
 
 if __name__ == '__main__' :
