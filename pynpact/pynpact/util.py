@@ -251,8 +251,16 @@ with mkstemp_overwrite('foobar.txt') as f:
             os.remove(path)
 
 
+def new_enough(filename, *dependencies) :
+    if not os.path.exists(filename) : return True
 
-def derivative_filename(base, part, replace_ext=True, outputdir=None) :
+    mtime = os.path.getmtime(filename)
+    for d in dependencies :
+        if d and os.path.getmtime(d) > mtime :
+            return True
+    return False
+
+def derivative_filename(base, part, replace_ext=True, outputdir=None, dependencies=[]) :
     """Build the filename of a derivative product of the original
     file. If the derivative file already exists return whether it
     is out of date"""
@@ -269,15 +277,15 @@ def derivative_filename(base, part, replace_ext=True, outputdir=None) :
 
     outfilename = os.path.join(outputdir, filename + part)
 
-    outofdate = (not os.path.exists(outfilename)) or \
-                os.path.getmtime(outfilename) < os.path.getmtime(base)
+    outofdate = new_enough(outfilename,base, *dependencies)
 
     return (outfilename, outofdate)
 
 def safe_produce_new(base, ext_part, func,
-                     replace_ext=True, force=False, **kwargs) :
+                     replace_ext=True, force=False,dependencies=[], **kwargs) :
     outfilename,outofdate = derivative_filename(base, ext_part, replace_ext,
-                                                outputdir=kwargs.get('dir'))
+                                                outputdir=kwargs.get('dir'),
+                                                dependencies=dependencies)
 
     if outofdate or force:
         with mkstemp_overwrite(outfilename,**kwargs) as f :

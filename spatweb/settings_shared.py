@@ -185,6 +185,11 @@ LOGGING = {
             'level': 'DEBUG',
             'propagate': True,
             },
+        'pynpact': {
+            'handlers': ['console'],
+            'level': 'DEBUG',
+            'propagate': True,
+            }
         }
     }
 

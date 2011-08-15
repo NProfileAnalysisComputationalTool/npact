@@ -1,3 +1,4 @@
+/*  -*- c-file-style:"linux" c-basic-offset:4 tab-width:4 -*-  */
 # include <math.h>
 # include <stdio.h>
 # include <stdlib.h>
@@ -688,10 +689,9 @@ char	*argv[];
 
       if(!k)
       {
-         fprintf(stdout,"%%!PS-Adobe-2.0\n");
+         fprintf(stdout,"%%!PS-Adobe-2.0\n\n");
          fprintf(stdout,"gsave\n");
          fprintf(stdout,"%d dict begin\n",DICT_SIZE);
-         fprintf(stdout,"/showpage {} def\n");
          fprintf(stdout,"/L2 { 2.0 setlinewidth } def\n");
          fprintf(stdout,"/L15 { 1.5 setlinewidth } def\n");
          fprintf(stdout,"/L1 { 1.0 setlinewidth } def\n");

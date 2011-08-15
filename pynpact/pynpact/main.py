@@ -185,51 +185,78 @@ $ CG MYCGE.gbk 1 580074 201 51 3 > MYCGE.CG200
             ap_wl(self.config.get('first_page_title' or "Page 1"))    #First-Page title
             ap_wl(self.config.get('following_page_title') or ("Page " + str(page_num))) #Title of following pages
 
-            ap_file()                   #File_of_unbiased_CDSs
-            ap_file()                   #File_of_conserved_CDSs
-            ap_file()                   #File_of_new_CDSs
-            ap_file()                   #File_of_potential_new_CDSs
-            ap_file()                   #File_of_stretches_where_CG_is_asymmetric
-            ap_file(self.run_extract()) #File_of_published_accepted_CDSs
-            ap_file()                   #File_of_published_rejected_CDSs
-            ap_file()                   #File_of_blocks_from_new_ORFs_as_cds
-            ap_file()                   #File_of_blocks_from_annotated_genes_as_cds
-            ap_file()                   #File_of_GeneMark_regions
-            ap_file()                   #File_of_G+C_coding_potential_regions
-            ap_file()                   #File_of_met_positions (e.g.:D 432)
-            ap_file()                   #File_of_stop_positions (e.g.:D 432)
-            ap_file()                   #File_of_tatabox_positions (e.g.:105.73 D 432 TATAAAAG)
-            ap_file()                   #File_of_capbox_positions
-            ap_file()                   #File_of_ccaatbox_positions
-            ap_file()                   #File_of_gcbox_positions
-            ap_file()                   #File_of_kozak_positions
-            ap_file()                   #File_of_palindrom_positions_and_size
-            ap_file(self.run_CG())	#File_list_of_nucleotides_in_200bp windows.
-            ap_file()                   #File_list_of_nucleotides_in_100bp windows.
+
+            files = [
+                'File_of_unbiased_CDSs',
+                'File_of_conserved_CDSs',
+                'File_of_new_CDSs',
+                'File_of_potential_new_CDSs',
+                'File_of_stretches_where_CG_is_asymmetric',
+                'File_of_published_accepted_CDSs',
+                'File_of_published_rejected_CDSs',
+                'File_of_blocks_from_new_ORFs_as_cds',
+                'File_of_blocks_from_annotated_genes_as_cds',
+                'File_of_GeneMark_regions',
+                'File_of_G+C_coding_potential_regions',
+                'File_of_met_positions (e.g.:D 432)',
+                'File_of_stop_positions (e.g.:D 432)',
+                'File_of_tatabox_positions (e.g.:105.73 D 432 TATAAAAG)',
+                'File_of_capbox_positions',
+                'File_of_ccaatbox_positions',
+                'File_of_gcbox_positions',
+                'File_of_kozak_positions',
+                'File_of_palindrom_positions_and_size',
+                'File_list_of_nucleotides_in_200bp windows.',
+                'File_list_of_nucleotides_in_100bp windows.']
+            for f in files :
+                ap_file(self.config.get(f))
 
 
     def run_Allplots(self) :
+        #do the dependent work.
+        self.config['File_of_published_accepted_CDSs'] = self.run_extract()
+        self.config['File_list_of_nucleotides_in_200bp windows.'] = self.run_CG()
 
-        config,hash= util.reducehashdict(self.config, ['first_page_title','following_page_title'])
+        #figure out hashed filename of ps output.
+        hashkeys = ['File_of_published_accepted_CDSs',
+                    'File_list_of_nucleotides_in_200bp windows.',
+                    'first_page_title',
+                    'following_page_title']
+        config,hash= util.reducehashdict(self.config, hashkeys)
 
+        #build the individual ps page files.
+        filenames = []
         with self.mkdtemp() as dtemp :
             i = 0
             ppage = 50000
-            filenames = []
             while i*ppage < len(self.seqrec) :
-                outfilename,generate = self.derivative_filename("%s.%03d.ps" % (hash,i+1))
-                filenames.append(outfilename)
-                if generate :
+                def dopage(psout) :
                     self.write_allplots_def(os.path.join(dtemp,"Allplots.def"), i+1)
 
-                    self.logger.debug("Starting Allplots for %r", os.path.basename(outfilename))
-                    with util.mkstemp_overwrite(outfilename) as psout :
-                        util.capturedCall([binfile("Allplots"), i*ppage, ppage, 5, 1000, 3], stdout=psout,
-                                          logger=self.logger,cwd=dtemp)
-                else :
-                    self.logger.debug("Skipping Allplots for %r", os.path.basename(outfilename))
+                    self.logger.debug("Starting Allplots page %d for %r", i+1, os.path.basename(self.gbkfile))
+                    util.capturedCall([binfile("Allplots"), i*ppage, ppage, 5, 1000, 3], stdout=psout,
+                                      logger=self.logger,cwd=dtemp)
+                filenames.append(self.safe_produce_new("%s.%03d.ps" % (hash,i+1), dopage, dir=dtemp))
                 i += 1
-            return filenames[0]
+
+            self.logger.debug("got %d, %r", len(filenames), filenames)
+            def combine_ps_files(psout) :
+                self.logger.info("combining postscript files")
+                first=True
+                psout.write("%!PS-Adobe-2.0\n\n")
+                psout.write("%%Pages: {0}\n\n".format(len(filenames)))
+                idx=1
+                for psf in filenames :
+                    psout.write("%%Page: {0}\n".format(idx))
+                    with open(psf,'r') as infile :
+                        infile.readline()
+                        infile.readline()
+                        psout.write(infile.readline())
+                        for l in infile :
+                            psout.write(l)
+                    idx += 1
+
+            return self.safe_produce_new("%s.ps" %(hash,), combine_ps_files, dependencies=filenames)
 
 
 if __name__ == '__main__' :
