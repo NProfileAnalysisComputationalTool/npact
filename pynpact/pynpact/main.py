@@ -3,10 +3,9 @@ import logging, os.path, tempfile, time, shutil
 from optparse import OptionParser
 from contextlib import contextmanager
 
-from pynpact import binfile
-
 from Bio import SeqIO
 
+from pynpact import binfile
 import util
 
 logger = logging.getLogger(__name__)
@@ -44,6 +43,7 @@ class GenBankProcessor(object) :
     logger = logger
     outputdir = None
     cleanup = True
+    config={}
 
 
     def __init__(self, gbkfile = None,**kwargs) :
@@ -157,62 +157,71 @@ $ CG MYCGE.gbk 1 580074 201 51 3 > MYCGE.CG200
         # ../atg MYCGE.gbk > atg.txt
         pass
 
-    def run_Allplots(self) :
-        #need to generate AllPlots.def
-        #/Users/luciano/src/Allplots 0 50000 5 1000 3 > XANCA.S-profiles.001.ps
-        # fprintf(stderr,"\nUsage:\n\n  Allplots start interval lines [x-tics period_of_frames]\n");
-        # fprintf(stderr,"\nstart                 Genome interval first base.");
-        # fprintf(stderr,"\ninterval              Number of bases.\n");
-        # fprintf(stderr,"\nlines                 Number of lines on page (one page).\n");
-        # fprintf(stderr,"\nx-tics                Number of subdivisions.\n");
-        # fprintf(stderr,"\nperiod_of_frame       Number of frames.\n");
 
+    def write_allplots_def(self,allplots_name,page_num) :
+        self.logger.debug("Writing %r", allplots_name)
+
+        with open(allplots_name, 'w') as allplots :
+            #need to generate AllPlots.def
+            #/Users/luciano/src/Allplots 0 50000 5 1000 3 > XANCA.S-profiles.001.ps
+            # fprintf(stderr,"\nUsage:\n\n  Allplots start interval lines [x-tics period_of_frames]\n");
+            # fprintf(stderr,"\nstart                 Genome interval first base.");
+            # fprintf(stderr,"\ninterval              Number of bases.\n");
+            # fprintf(stderr,"\nlines                 Number of lines on page (one page).\n");
+            # fprintf(stderr,"\nx-tics                Number of subdivisions.\n");
+            # fprintf(stderr,"\nperiod_of_frame       Number of frames.\n");
+
+            def ap_wl(str) :
+                if str : allplots.write(str)
+                allplots.write('\n')
+
+            def ap_file(name=None) :
+                #We may need to do other logic to calculate path, so separate function.
+                ap_wl(name)
+
+            #NB the "Plot Title" is disregarded, but that line should also contain the total number of bases
+            ap_wl("%s %d" % ("FOOBAR", len(self.seqrec))) 	#Plot Title
+            ap_wl("C+G")	      #Nucleotide(s)_plotted (e.g.: C+G)
+            ap_wl(self.config.get('first_page_title' or "Page 1"))    #First-Page title
+            ap_wl(self.config.get('following_page_title') or ("Page " + str(page_num))) #Title of following pages
+
+            ap_file()                   #File_of_unbiased_CDSs
+            ap_file()                   #File_of_conserved_CDSs
+            ap_file()                   #File_of_new_CDSs
+            ap_file()                   #File_of_potential_new_CDSs
+            ap_file()                   #File_of_stretches_where_CG_is_asymmetric
+            ap_file(self.run_extract()) #File_of_published_accepted_CDSs
+            ap_file()                   #File_of_published_rejected_CDSs
+            ap_file()                   #File_of_blocks_from_new_ORFs_as_cds
+            ap_file()                   #File_of_blocks_from_annotated_genes_as_cds
+            ap_file()                   #File_of_GeneMark_regions
+            ap_file()                   #File_of_G+C_coding_potential_regions
+            ap_file()                   #File_of_met_positions (e.g.:D 432)
+            ap_file()                   #File_of_stop_positions (e.g.:D 432)
+            ap_file()                   #File_of_tatabox_positions (e.g.:105.73 D 432 TATAAAAG)
+            ap_file()                   #File_of_capbox_positions
+            ap_file()                   #File_of_ccaatbox_positions
+            ap_file()                   #File_of_gcbox_positions
+            ap_file()                   #File_of_kozak_positions
+            ap_file()                   #File_of_palindrom_positions_and_size
+            ap_file(self.run_CG())	#File_list_of_nucleotides_in_200bp windows.
+            ap_file()                   #File_list_of_nucleotides_in_100bp windows.
+
+
+    def run_Allplots(self) :
+
+        config,hash= util.reducehashdict(self.config, ['first_page_title','following_page_title'])
 
         with self.mkdtemp() as dtemp :
-            allplots_name = os.path.join(dtemp,"Allplots.def")
-            self.logger.debug("writing %r", allplots_name)
-
-            with open(allplots_name, 'w') as allplots :
-                def ap_file(name=None) :
-                    if name :
-                        allplots.write(name)
-                    allplots.write("\n")
-
-                #NB the "Plot Title" is disregarded, but that line should also contain the total number of bases
-                allplots.write("%s %d\n" % ("FOOBAR", len(self.seqrec))) 	#Plot Title
-                allplots.write("C+G\n")	      #Nucleotide(s)_plotted (e.g.: C+G)
-                allplots.write("Page 1\n")    #First-Page title
-                allplots.write("page rest\n") #Title of following pages
-
-                ap_file()		      #File_of_unbiased_CDSs
-                ap_file()		      #File_of_conserved_CDSs
-                ap_file()		      #File_of_new_CDSs
-                ap_file()		      #File_of_potential_new_CDSs
-                ap_file()		      #File_of_stretches_where_CG_is_asymmetric
-                ap_file(self.run_extract())   #File_of_published_accepted_CDSs
-                ap_file()		      #File_of_published_rejected_CDSs
-                ap_file()		      #File_of_blocks_from_new_ORFs_as_cds
-                ap_file()		      #File_of_blocks_from_annotated_genes_as_cds
-                ap_file()		      #File_of_GeneMark_regions
-                ap_file()		      #File_of_G+C_coding_potential_regions
-                ap_file()		      #File_of_met_positions (e.g.:D 432)
-                ap_file()		      #File_of_stop_positions (e.g.:D 432)
-                ap_file()		      #File_of_tatabox_positions (e.g.:105.73 D 432 TATAAAAG)
-                ap_file()		      #File_of_capbox_positions
-                ap_file()		      #File_of_ccaatbox_positions
-                ap_file()		      #File_of_gcbox_positions
-                ap_file()		      #File_of_kozak_positions
-                ap_file()		      #File_of_palindrom_positions_and_size
-                ap_file(self.run_CG())	      #File_list_of_nucleotides_in_200bp windows.
-                ap_file()		      #File_list_of_nucleotides_in_100bp windows.
-
             i = 0
             ppage = 50000
             filenames = []
             while i*ppage < len(self.seqrec) :
-                outfilename,generate = self.derivative_filename(".%03d.ps" % (i+1,))
+                outfilename,generate = self.derivative_filename("%s.%03d.ps" % (hash,i+1))
                 filenames.append(outfilename)
                 if generate :
+                    self.write_allplots_def(os.path.join(dtemp,"Allplots.def"), i+1)
+
                     self.logger.debug("Starting Allplots for %r", os.path.basename(outfilename))
                     with util.mkstemp_overwrite(outfilename) as psout :
                         util.capturedCall([binfile("Allplots"), i*ppage, ppage, 5, 1000, 3], stdout=psout,

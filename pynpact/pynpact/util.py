@@ -1,7 +1,27 @@
-import os, os.path, logging, subprocess, threading, time, errno
+import os, os.path, logging, subprocess, threading, time, errno, hashlib
 import tempfile
 from subprocess import PIPE
 from contextlib import contextmanager
+
+
+
+def reducehashdict(dict,keys) :
+    """pull the given keys out of the dictionary, return the reduced
+    dictionary and the sha1 hash of that set of key values.
+"""
+    outdict= {}
+    h = hashlib.sha1()
+    for k in sorted(keys) :
+        val = dict.get(k)
+        if val is not None:
+            h.update(k)
+            h.update(str(val))
+            outdict[k]=val
+
+    if len(outdict) :
+        return outdict,h.hexdigest()
+    else :
+        return {},None
 
 def ensure_dir(dir, logger=None) :
     if not os.path.exists(dir) :

@@ -41,7 +41,12 @@ def get_display_items(request,data) :
 
 
 def run_it(request, path, form) :
-    gbp = main.GenBankProcessor(os.path.join(settings.MEDIA_ROOT, path))
+    config = {}
+    for k in ['first_page_title', 'following_page_title'] :
+        if form.cleaned_data.get(k) :
+            config[k] = form.cleaned_data[k]
+            
+    gbp = main.GenBankProcessor(os.path.join(settings.MEDIA_ROOT, path), config=config)
     psname = gbp.run_Allplots()
     psname = os.path.relpath(psname, settings.MEDIA_ROOT)
 
