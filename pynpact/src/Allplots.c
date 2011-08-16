@@ -581,12 +581,28 @@ char	*argv[];
                 ge= atoi(p+2);
                 if(longstr[12]=='c') { gs= atoi(longstr+23); pub_str[np]='C'; }
                 else { gs= atoi(longstr+12); pub_str[np]=' '; }
-                if(gs>=start-line_range/50 && gs<end && ge<=end+line_range/50 && ge>start) { pub[np][0]= gs; pub[np][1]= ge; ++np; }
-                else if(gs>=start-line_range/50 && gs<end && ge>end+line_range/50) { pub[np][0]= gs; pub[np][1]= end+line_range/50; ++np; }
-                else if(ge<=end+line_range/50 && ge>start && gs<start-line_range/50)
-                { pub[np][0]= start-line_range/50; pub[np][0] += gs%period-pub[np][0]%period; pub[np][1]= ge; ++np; }
-                else if(gs<start-line_range/50 && ge>end+line_range/50)
-                { pub[np][0]= start-line_range/50; pub[np][0] += gs%period-pub[np][0]%period; pub[np][1]= end+line_range/50; ++np; }
+                if(gs>=start-line_range/50 && gs<end && ge<=end+line_range/50 && ge>start) { 
+                    pub[np][0] = gs;
+                    pub[np][1] = ge;
+                    ++np;
+                }
+                else if(gs>=start-line_range/50 && gs<end && ge>end+line_range/50) {
+                    pub[np][0] = gs;
+                    pub[np][1] = end+line_range/50;
+                    ++np;
+                }
+                else if(ge<=end+line_range/50 && ge>start && gs<start-line_range/50) {
+                    pub[np][0]  = start-line_range/50;
+                    pub[np][0] += gs%period-pub[np][0]%period;
+                    pub[np][1]  = ge;
+                    ++np;
+                }
+                else if(gs<start-line_range/50 && ge>end+line_range/50) {
+                    pub[np][0]  = start-line_range/50;
+                    pub[np][0] += gs%period-pub[np][0]%period;
+                    pub[np][1]  = end+line_range/50;
+                    ++np;
+                }
             }
             fclose(input); }
         else fprintf(stderr,"\nPub file NOT read");
