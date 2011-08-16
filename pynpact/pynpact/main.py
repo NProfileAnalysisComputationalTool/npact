@@ -60,6 +60,7 @@ class GenBankProcessor(object) :
             #TODO: gbk can have multiple records in which case this
             #will err (i wasn't able to find one that did though)
             self.seqrec = SeqIO.read(gbkfile,"genbank")
+            self.config['length'] = len(self.seqrec)
         else :
             raise Exception("Asked to parse nonexistant genebank file: %r", gbkfile)
 
@@ -78,10 +79,7 @@ class GenBankProcessor(object) :
         base = os.path.splitext(os.path.basename(self.gbkfile))[0]
         outfilename = os.path.join(self.outputdir, base + part)
 
-        outofdate = self.force or (not os.path.exists(outfilename)) or \
-                    os.path.getmtime(outfilename) < os.path.getmtime(self.gbkfile)
-
-        return (outfilename, outofdate)
+        return outfilename
 
     def mkstemp_overwrite(self, destination, **kwargs) :
         kwargs.setdefault('dir', self.outputdir)
@@ -89,12 +87,12 @@ class GenBankProcessor(object) :
         kwargs.setdefault('cleanup', self.cleanup)
         return util.mkstemp_overwrite(destination, **kwargs)
 
-    def safe_produce_new(self, ext_part, func, **kwargs) :
+    def safe_produce_new(self, filename, func, **kwargs) :
         kwargs.setdefault('dir', self.outputdir)
         kwargs.setdefault('logger', self.logger)
         kwargs.setdefault('cleanup', self.cleanup)
         kwargs.setdefault('force', self.force)
-        return util.safe_produce_new(self.gbkfile, ext_part,func, **kwargs)
+        return util.safe_produce_new(filename, func, **kwargs)
 
     @contextmanager
     def mkdtemp(self,**kwargs) :
@@ -114,7 +112,7 @@ class GenBankProcessor(object) :
                 location = "%s..%s" % (start +1, end)
                 if f.strand == -1 :
                     location = "complement(" + location + ")"
-                print >>outfile, "%-11s %s" % (desc, location )
+                print >>outfile, "%-11s %s" % (desc[:11], location )
 
             for f in self.seqrec.features :
                 if f.type == 'CDS' :
@@ -132,12 +130,15 @@ class GenBankProcessor(object) :
                                 ex += 1
                         else :
                             print_feature(desc[0],f.strand,f.location.nofuzzy_start, f.location.nofuzzy_end)
-        return self.safe_produce_new(".extracted", func)
-
+        return self.safe_produce_new(self.derivative_filename("extracted"), func,
+                                     dependencies=[self.gbkfile])
     def original_extract(self) :
-        func = lambda f: util.capturedCall([binfile("extract"), self.gbkfile, 0, "gene", 0, "locus_tag"],
-                                           stdout=f, logger=self.logger)
-        return self.safe_produce_new("genes", func)
+        #TODO: put, and pull the parameters from the config dictionary.
+        def func(f) :
+            return util.capturedCall([binfile("extract"), self.gbkfile, 0, "gene", 0, "locus_tag"],
+                                     stdout=f, logger=self.logger)
+        return self.safe_produce_new(self.derivative_filename("genes"), func,
+                                     dependencies=[self.gbkfile])
 
     def run_extract(self) :
         """Go through the genbank record pulling out gene names and locations
@@ -149,45 +150,24 @@ class GenBankProcessor(object) :
         """Do the CG ratio calculations.
 $ CG MYCGE.gbk 1 580074 201 51 3 > MYCGE.CG200
 """
-        progargs = [binfile("CG"), self.gbkfile, 1, len(self.seqrec), 201, 51, 3]
-        func = lambda outfile: util.capturedCall(progargs, stdout=outfile, logger=self.logger)
-        return self.safe_produce_new("CG200",func)
+        #TODO: put, and pull the parameters from the config dictionary.
+        #self.config.setdefault('profile-window-size', 201)
+        config,hash = util.reducehashdict(self.config,['length'])
+
+        outfilename = self.derivative_filename(".%s.CG200" % hash)
+        progargs = [binfile("CG"), self.gbkfile, 1, config['length'], 201, 51, 3]
+        func = lambda out: util.capturedCall(progargs, stdout=out, logger=self.logger)
+        return self.safe_produce_new(outfilename,func, dependencies=[self.gbkfile])
 
     def run_atg(self) :
         # ../atg MYCGE.gbk > atg.txt
         pass
 
 
-    def write_allplots_def(self,allplots_name,page_num) :
-        self.logger.debug("Writing %r", allplots_name)
-
-        with open(allplots_name, 'w') as allplots :
-            #need to generate AllPlots.def
-            #/Users/luciano/src/Allplots 0 50000 5 1000 3 > XANCA.S-profiles.001.ps
-            # fprintf(stderr,"\nUsage:\n\n  Allplots start interval lines [x-tics period_of_frames]\n");
-            # fprintf(stderr,"\nstart                 Genome interval first base.");
-            # fprintf(stderr,"\ninterval              Number of bases.\n");
-            # fprintf(stderr,"\nlines                 Number of lines on page (one page).\n");
-            # fprintf(stderr,"\nx-tics                Number of subdivisions.\n");
-            # fprintf(stderr,"\nperiod_of_frame       Number of frames.\n");
-
-            def ap_wl(str) :
-                if str : allplots.write(str)
-                allplots.write('\n')
-
-            def ap_file(name=None) :
-                #We may need to do other logic to calculate path, so separate function.
-                ap_wl(name)
-
-            #NB the "Plot Title" is disregarded, but that line should also contain the total number of bases
-            ap_wl("%s %d" % ("FOOBAR", len(self.seqrec))) 	#Plot Title
-            ap_wl("C+G")	      #Nucleotide(s)_plotted (e.g.: C+G)
-            ap_wl(self.config.get('first_page_title' or "Page 1"))    #First-Page title
-            ap_wl(self.config.get('following_page_title') or ("Page " + str(page_num))) #Title of following pages
-
-
-            files = [
-                'File_of_unbiased_CDSs',
+    ###############################################
+    ########### Working with Allplots #############
+    
+    AP_file_keys = ['File_of_unbiased_CDSs',
                 'File_of_conserved_CDSs',
                 'File_of_new_CDSs',
                 'File_of_potential_new_CDSs',
@@ -208,38 +188,72 @@ $ CG MYCGE.gbk 1 580074 201 51 3 > MYCGE.CG200
                 'File_of_palindrom_positions_and_size',
                 'File_list_of_nucleotides_in_200bp windows.',
                 'File_list_of_nucleotides_in_100bp windows.']
-            for f in files :
-                ap_file(self.config.get(f))
+
+    def write_allplots_def(self,config,allplots_name,page_num) :
+        self.logger.debug("Writing %r", allplots_name)
+
+        with open(allplots_name, 'w') as allplots :
+
+            #helper function for writing a line to the allplots file.
+            def ap_wl(str) :
+                if str : allplots.write(str)
+                allplots.write('\n')
+
+            #NB the "Plot Title" is disregarded, but that line should also contain the total number of bases
+            ap_wl("%s %d" % ("FOOBAR", len(self.seqrec))) 	#Plot Title
+            ap_wl("C+G")	      #Nucleotide(s)_plotted (e.g.: C+G)
+            ap_wl(config.get('first_page_title' or "Page 1"))    #First-Page title
+            ap_wl(config.get('following_page_title') or ("Page " + str(page_num))) #Title of following pages
+
+
+            for f in self.AP_file_keys :
+                ap_wl(config.get(f,"None"))
 
 
     def run_Allplots(self) :
+        """Actually invoke Allplots, once for each page we're generating.
+
+Example invocation:
+$ /Users/luciano/src/Allplots 0 50000 5 1000 3 > XANCA.S-profiles.001.ps
+
+Documentation from Allplots.c
+Usage:\n\n  Allplots start interval lines [x-tics period_of_frames]
+start                 Genome interval first base.
+interval              Number of bases.
+lines                 Number of lines on page (one page).
+x-tics                Number of subdivisions.
+period_of_frame       Number of frames.
+
+"""
+
         #do the dependent work.
         self.config['File_of_published_accepted_CDSs'] = self.run_extract()
         self.config['File_list_of_nucleotides_in_200bp windows.'] = self.run_CG()
 
         #figure out hashed filename of ps output.
-        hashkeys = ['File_of_published_accepted_CDSs',
-                    'File_list_of_nucleotides_in_200bp windows.',
-                    'first_page_title',
-                    'following_page_title']
+        hashkeys = [ 'first_page_title', 'following_page_title'] + self.AP_file_keys
         config,hash= util.reducehashdict(self.config, hashkeys)
 
         #build the individual ps page files.
         filenames = []
         with self.mkdtemp() as dtemp :
-            i = 0
+            i = 0  #page number offset
             ppage = 50000
             while i*ppage < len(self.seqrec) :
                 def dopage(psout) :
-                    self.write_allplots_def(os.path.join(dtemp,"Allplots.def"), i+1)
+
+                    self.write_allplots_def(config, os.path.join(dtemp,"Allplots.def"), i+1)
 
                     self.logger.debug("Starting Allplots page %d for %r", i+1, os.path.basename(self.gbkfile))
                     util.capturedCall([binfile("Allplots"), i*ppage, ppage, 5, 1000, 3], stdout=psout,
-                                      logger=self.logger,cwd=dtemp)
-                filenames.append(self.safe_produce_new("%s.%03d.ps" % (hash,i+1), dopage, dir=dtemp))
+                                      logger=None,cwd=dtemp)
+                psname = self.derivative_filename("%s.%03d.ps" % (hash,i+1))
+                filenames.append(psname)
+                self.safe_produce_new(psname, dopage,
+                                      dependencies=map(config.get,self.AP_file_keys))
                 i += 1
 
-            self.logger.debug("got %d, %r", len(filenames), filenames)
+
             def combine_ps_files(psout) :
                 self.logger.info("combining postscript files")
                 first=True
@@ -255,8 +269,8 @@ $ CG MYCGE.gbk 1 580074 201 51 3 > MYCGE.CG200
                         for l in infile :
                             psout.write(l)
                     idx += 1
-
-            return self.safe_produce_new("%s.ps" %(hash,), combine_ps_files, dependencies=filenames)
+            combined_ps_name = self.derivative_filename("%s.ps" %(hash,))
+            return self.safe_produce_new(combined_ps_name, combine_ps_files, dependencies=filenames)
 
 
 if __name__ == '__main__' :

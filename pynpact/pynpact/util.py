@@ -225,7 +225,6 @@ with mkstemp_overwrite('foobar.txt') as f:
     mtime1 = mtime2 = None
     if os.path.exists(destination) :
         mtime1 = os.path.getmtime(destination)
-    if logger : logger.debug("Found timestamp(1) %s on %r", mtime1, destination)
 
     (fd,path) = tempfile.mkstemp(**kwargs)
     try :
@@ -235,11 +234,10 @@ with mkstemp_overwrite('foobar.txt') as f:
 
         if os.path.exists(destination) :
             mtime2 = os.path.getmtime(destination)
-        if logger : logger.debug("Found timestamp(2) %s on %r", mtime1, destination)
 
         if mtime1 != mtime2 and logger:
-            logger.warning("Potential conflict on %r, overwrite: %s",
-                               destination, conflict_overwrite)
+            logger.warning("Potential conflict on %r, overwrite: %s; ts1:%s, ts2:%s",
+                               destination, conflict_overwrite, mtime1, mtime2)
 
         if conflict_overwrite or mtime1 == mtime2 :
             #TODO: permissions?
@@ -251,14 +249,11 @@ with mkstemp_overwrite('foobar.txt') as f:
             os.remove(path)
 
 
-def new_enough(filename, *dependencies) :
+def is_outofdate(filename, *dependencies) :
     if not os.path.exists(filename) : return True
 
     mtime = os.path.getmtime(filename)
-    for d in dependencies :
-        if d and os.path.getmtime(d) > mtime :
-            return True
-    return False
+    return any(os.path.getmtime(d) > mtime for d in dependencies if d)
 
 def derivative_filename(base, part, replace_ext=True, outputdir=None, dependencies=[]) :
     """Build the filename of a derivative product of the original
@@ -277,17 +272,16 @@ def derivative_filename(base, part, replace_ext=True, outputdir=None, dependenci
 
     outfilename = os.path.join(outputdir, filename + part)
 
-    outofdate = new_enough(outfilename,base, *dependencies)
+    return outfilename
 
-    return (outfilename, outofdate)
-
-def safe_produce_new(base, ext_part, func,
+def safe_produce_new(outfilename, func,
                      replace_ext=True, force=False,dependencies=[], **kwargs) :
-    outfilename,outofdate = derivative_filename(base, ext_part, replace_ext,
-                                                outputdir=kwargs.get('dir'),
-                                                dependencies=dependencies)
-
+    outofdate = is_outofdate(outfilename, *dependencies)
+    logger=kwargs.get('logger')
     if outofdate or force:
+        if logger:
+            logger.debug("Regenerating, checked:%d force:%r", len(dependencies),force)
+            
         with mkstemp_overwrite(outfilename,**kwargs) as f :
             func(f)
     elif kwargs.get('logger',False) :
