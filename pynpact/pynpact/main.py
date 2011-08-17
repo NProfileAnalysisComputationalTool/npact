@@ -53,6 +53,7 @@ class GenBankProcessor(object) :
             self.parse(gbkfile)
 
     def parse(self,gbkfile) :
+        """Open up a GenBank file, trying to get the sequence record off of it."""
         self.gbkfile = gbkfile
 
         if os.path.exists(gbkfile) :
@@ -88,6 +89,9 @@ class GenBankProcessor(object) :
         return util.mkstemp_overwrite(destination, **kwargs)
 
     def safe_produce_new(self, filename, func, **kwargs) :
+        """A wrapper for util.safe_produce_new (create a new file in a
+multiprocess safe way) setting class defaults
+"""
         kwargs.setdefault('dir', self.outputdir)
         kwargs.setdefault('logger', self.logger)
         kwargs.setdefault('cleanup', self.cleanup)
@@ -96,6 +100,7 @@ class GenBankProcessor(object) :
 
     @contextmanager
     def mkdtemp(self,**kwargs) :
+        """A wrapper for tempfile.mkdtemp, sets defaults based on class variables"""
         kwargs.setdefault('dir', self.outputdir)
         path = tempfile.mkdtemp(**kwargs)
         try :
@@ -106,7 +111,7 @@ class GenBankProcessor(object) :
                 shutil.rmtree(path,ignore_errors=True)
 
     def biopy_extract(self,gene_descriptor="gene") :
-
+        """An implementation using the biopy library of the 'extract' functionality"""
         def func(outfile):
             def print_feature(desc, strand, start, end) :
                 location = "%s..%s" % (start +1, end)
@@ -133,6 +138,9 @@ class GenBankProcessor(object) :
         return self.safe_produce_new(self.derivative_filename("extracted"), func,
                                      dependencies=[self.gbkfile])
     def original_extract(self) :
+        """Go through the genbank record pulling out gene names and locations
+        $ extract MYCGE.gbk 0 gene 0 locus_tag > MYCGE.genes
+"""
         #TODO: put, and pull the parameters from the config dictionary.
         def func(f) :
             return util.capturedCall([binfile("extract"), self.gbkfile, 0, "gene", 0, "locus_tag"],
@@ -142,9 +150,8 @@ class GenBankProcessor(object) :
 
     def run_extract(self) :
         """Go through the genbank record pulling out gene names and locations
-        $ extract MYCGE.gbk 0 gene 0 locus_tag > MYCGE.genes
 """
-        return self.biopy_extract()
+        return self.original_extract()
 
     def run_CG(self) :
         """Do the CG ratio calculations.
@@ -166,30 +173,33 @@ $ CG MYCGE.gbk 1 580074 201 51 3 > MYCGE.CG200
 
     ###############################################
     ########### Working with Allplots #############
-    
+
+    #the files in order that Allplots.def is expected to have.
+    #NB: these are the keys into the config dictionary, the values are the filenames.
     AP_file_keys = ['File_of_unbiased_CDSs',
-                'File_of_conserved_CDSs',
-                'File_of_new_CDSs',
-                'File_of_potential_new_CDSs',
-                'File_of_stretches_where_CG_is_asymmetric',
-                'File_of_published_accepted_CDSs',
-                'File_of_published_rejected_CDSs',
-                'File_of_blocks_from_new_ORFs_as_cds',
-                'File_of_blocks_from_annotated_genes_as_cds',
-                'File_of_GeneMark_regions',
-                'File_of_G+C_coding_potential_regions',
-                'File_of_met_positions (e.g.:D 432)',
-                'File_of_stop_positions (e.g.:D 432)',
-                'File_of_tatabox_positions (e.g.:105.73 D 432 TATAAAAG)',
-                'File_of_capbox_positions',
-                'File_of_ccaatbox_positions',
-                'File_of_gcbox_positions',
-                'File_of_kozak_positions',
-                'File_of_palindrom_positions_and_size',
-                'File_list_of_nucleotides_in_200bp windows.',
-                'File_list_of_nucleotides_in_100bp windows.']
+                    'File_of_conserved_CDSs',
+                    'File_of_new_CDSs',
+                    'File_of_potential_new_CDSs',
+                    'File_of_stretches_where_CG_is_asymmetric',
+                    'File_of_published_accepted_CDSs',
+                    'File_of_published_rejected_CDSs',
+                    'File_of_blocks_from_new_ORFs_as_cds',
+                    'File_of_blocks_from_annotated_genes_as_cds',
+                    'File_of_GeneMark_regions',
+                    'File_of_G+C_coding_potential_regions',
+                    'File_of_met_positions (e.g.:D 432)',
+                    'File_of_stop_positions (e.g.:D 432)',
+                    'File_of_tatabox_positions (e.g.:105.73 D 432 TATAAAAG)',
+                    'File_of_capbox_positions',
+                    'File_of_ccaatbox_positions',
+                    'File_of_gcbox_positions',
+                    'File_of_kozak_positions',
+                    'File_of_palindrom_positions_and_size',
+                    'File_list_of_nucleotides_in_200bp windows.',
+                    'File_list_of_nucleotides_in_100bp windows.']
 
     def write_allplots_def(self,config,allplots_name,page_num) :
+        "Writes out an Allplots.def for a single run through of allplots."
         self.logger.debug("Writing %r", allplots_name)
 
         with open(allplots_name, 'w') as allplots :
@@ -208,6 +218,7 @@ $ CG MYCGE.gbk 1 580074 201 51 3 > MYCGE.CG200
 
             for f in self.AP_file_keys :
                 ap_wl(config.get(f,"None"))
+        return allplots_name
 
 
     def run_Allplots(self) :
@@ -255,6 +266,7 @@ period_of_frame       Number of frames.
 
 
             def combine_ps_files(psout) :
+                #
                 self.logger.info("combining postscript files")
                 first=True
                 psout.write("%!PS-Adobe-2.0\n\n")

@@ -13,6 +13,10 @@ import util
 logger = logging.getLogger(__name__)
 
 def reduce_genbank(gbkfile) :
+    """An attempt to create a version of the gbk file that has all the
+    features but not the sequence in it, didn't end up being a
+    siginificant savings.
+"""
     def filterfun(outfile) :
         with open(gbkfile,'r') as infile:
             for l in infile :
@@ -27,6 +31,12 @@ def reduce_genbank(gbkfile) :
 
 
 def open_parse_gb_rec(gbkfile, reduce_first=False) :
+    """Open the GenBank file using the underlying biopython libraries
+    so we can get at the do_features keyword (False is generally quite
+    a bit faster)
+
+    Returns a the Bio.GenBank specialized record type.
+"""
     if reduce_first :
         raise NotImplementedError("reduce_first option must be False for now")
 
@@ -40,7 +50,13 @@ def open_parse_gb_rec(gbkfile, reduce_first=False) :
         rp._scanner.feed(handle, rp._consumer, do_features=False)
         return rp._consumer.data
     
-def open_parse_seq_rec(gbkfile, reduce_first=False) :
+def open_parse_seq_rec(gbkfile, reduce_first=False, do_features=False) :
+    """Open the GenBank file using the underlying biopython libraries
+    so we can get at the do_features keyword (False is generally quite
+    a bit faster)
+
+    Returns a SeqRecord object--the same as Bio.SeqIO.read(<file>,'genbank')
+"""
     if reduce_first :
         raise NotImplementedError("reduce_first option must be False for now")
 
@@ -51,7 +67,7 @@ def open_parse_seq_rec(gbkfile, reduce_first=False) :
         rp =Bio.GenBank.FeatureParser()
 
         rp._consumer = Bio.GenBank._FeatureConsumer(rp.use_fuzziness,rp._cleaner)
-        rp._scanner.feed(handle, rp._consumer, do_features=False)
+        rp._scanner.feed(handle, rp._consumer, do_features=do_features)
         return rp._consumer.data
 
 def make_seq_unknown(seq_record) :
