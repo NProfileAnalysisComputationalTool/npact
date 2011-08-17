@@ -10,6 +10,8 @@ from django.template import RequestContext
 from django import forms
 from django.contrib import messages
 
+from django.views.static import serve
+
 from pynpact import prepare
 
 logger = logging.getLogger(__name__)
@@ -47,9 +49,6 @@ def library(request) :
     logger.debug("Found %d files in library", len(files))
     return render_to_response('library.html',
                               {'files':files},
-                               context_instance=RequestContext(request))
+                              context_instance=RequestContext(request))
 
 
-
-def results(request) :
-    pass

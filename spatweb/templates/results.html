@@ -1,0 +1,21 @@
+{%extends "base.html" %}
+{%block title %}S-P.A.T. Results{%endblock %}
+
+{%block addScript %}
+<script type="text/javascript" defer="defer">
+    window.onload= function() {
+        window.location= document.getElementById('downloadlink').href;
+    }
+</script>
+{%endblock%}
+
+
+{%block content %}
+<div class="contentPadding">
+  <h2>S-P.A.T. Results</h2>
+  <p>
+  You're download should start shortly.
+  If you're impatient here is <a id="downloadlink" href="{{ download_link}}">the direct link</a>.
+  </p>
+</div>
+{%endblock content %}
