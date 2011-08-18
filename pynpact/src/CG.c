@@ -108,4 +108,5 @@ char	*argv[];
    fclose(input);
 
    fprintf(stderr,"\nbases %d-%d read (%d nt)\n",start,end,n);
+   exit(0);
 }

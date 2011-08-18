@@ -1353,4 +1353,5 @@ char	*argv[];
     fprintf(stdout,"showpage\n");
 
     fclose(stdout);
+    exit(0);
 }

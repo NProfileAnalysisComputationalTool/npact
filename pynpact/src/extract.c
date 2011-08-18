@@ -107,14 +107,14 @@ char	*argv[];
          }
          else strcpy(name,"?");
 
-         if(!ex) fprintf(stdout,"%-11s %s",name,shortstr);
+         if(!ex) fprintf(stdout,"%-11.11s %s",name,shortstr);
          else
             for(i=0;i<ex;++i)
             {
                strcpy(shortstr,name);
                if(str=='C') sprintf(shortstr+strlen(shortstr),"_E%d",ex-i);
                else sprintf(shortstr+strlen(shortstr),"_E%d",i+1);
-               fprintf(stdout,"%-11s ",shortstr);
+               fprintf(stdout,"%-11.11s ",shortstr);
                if(str=='C') fprintf(stdout,"complement(");
                fprintf(stdout,"%s",exon[i]);
                if(str=='C') fprintf(stdout,")\n");
@@ -123,4 +123,5 @@ char	*argv[];
          fflush(stdout);
       }
    }
+   exit(0);
 }
