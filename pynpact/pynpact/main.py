@@ -137,14 +137,15 @@ multiprocess safe way) setting class defaults
                             print_feature(desc[0],f.strand,f.location.nofuzzy_start, f.location.nofuzzy_end)
         return self.safe_produce_new(self.derivative_filename("extracted"), func,
                                      dependencies=[self.gbkfile])
+    
     def original_extract(self) :
         """Go through the genbank record pulling out gene names and locations
         $ extract MYCGE.gbk 0 gene 0 locus_tag > MYCGE.genes
 """
         #TODO: put, and pull the parameters from the config dictionary.
         def func(f) :
-            return util.capturedCall([binfile("extract"), self.gbkfile, 0, "gene", 0, "locus_tag"],
-                                     stdout=f, logger=self.logger)
+            cmd = [binfile("extract"), self.gbkfile, 0, "gene", 0, "locus_tag"]
+            return util.capturedCall(cmd, stdout=f, logger=self.logger, check=True)
         return self.safe_produce_new(self.derivative_filename("genes"), func,
                                      dependencies=[self.gbkfile])
 
@@ -163,7 +164,7 @@ $ CG MYCGE.gbk 1 580074 201 51 3 > MYCGE.CG200
 
         outfilename = self.derivative_filename(".%s.CG200" % hash)
         progargs = [binfile("CG"), self.gbkfile, 1, config['length'], 201, 51, 3]
-        func = lambda out: util.capturedCall(progargs, stdout=out, logger=self.logger)
+        func = lambda out: util.capturedCall(progargs, stdout=out, logger=self.logger, check=True)
         return self.safe_produce_new(outfilename,func, dependencies=[self.gbkfile])
 
     def run_atg(self) :
@@ -210,9 +211,9 @@ $ CG MYCGE.gbk 1 580074 201 51 3 > MYCGE.CG200
                 allplots.write('\n')
 
             #NB the "Plot Title" is disregarded, but that line should also contain the total number of bases
-            ap_wl("%s %d" % ("FOOBAR", len(self.seqrec))) 	#Plot Title
-            ap_wl("C+G")	      #Nucleotide(s)_plotted (e.g.: C+G)
-            ap_wl(config.get('first_page_title' or "Page 1"))    #First-Page title
+            ap_wl("%s %d" % ("FOOBAR", config['length']))     #Plot Title
+            ap_wl("C+G")                                      #Nucleotide(s)_plotted (e.g.: C+G)
+            ap_wl(config.get('first_page_title' or "Page 1")) #First-Page title
             ap_wl(config.get('following_page_title') or ("Page " + str(page_num))) #Title of following pages
 
 
@@ -242,7 +243,7 @@ period_of_frame       Number of frames.
         self.config['File_list_of_nucleotides_in_200bp windows.'] = self.run_CG()
 
         #figure out hashed filename of ps output.
-        hashkeys = [ 'first_page_title', 'following_page_title'] + self.AP_file_keys
+        hashkeys = [ 'first_page_title', 'following_page_title', 'length'] + self.AP_file_keys
         config,hash= util.reducehashdict(self.config, hashkeys)
 
         #build the individual ps page files.
@@ -250,14 +251,15 @@ period_of_frame       Number of frames.
         with self.mkdtemp() as dtemp :
             i = 0  #page number offset
             ppage = 50000
-            while i*ppage < len(self.seqrec) :
+            while i*ppage < config['length'] :
                 def dopage(psout) :
 
                     self.write_allplots_def(config, os.path.join(dtemp,"Allplots.def"), i+1)
 
                     self.logger.debug("Starting Allplots page %d for %r", i+1, os.path.basename(self.gbkfile))
-                    util.capturedCall([binfile("Allplots"), i*ppage, ppage, 5, 1000, 3], stdout=psout,
-                                      logger=None,cwd=dtemp)
+                    cmd = [binfile("Allplots"), i*ppage, ppage, 5, 1000, 3]
+                    util.capturedCall(cmd, stdout=psout, stderr=False,
+                                      logger=self.logger, cwd=dtemp, check=True)
                 psname = self.derivative_filename("%s.%03d.ps" % (hash,i+1))
                 filenames.append(psname)
                 self.safe_produce_new(psname, dopage,
@@ -266,7 +268,8 @@ period_of_frame       Number of frames.
 
 
             def combine_ps_files(psout) :
-                #
+                #While combining, insert the special markers so that
+                #it will appear correctly as many pages.
                 self.logger.info("combining postscript files")
                 first=True
                 psout.write("%!PS-Adobe-2.0\n\n")

@@ -25,8 +25,8 @@ def reduce_genbank(gbkfile) :
                     outfile.write("//\n")
                     return
 
-    return util.safe_produce_new(gbkfile,".noseq", filterfun,
-                                 replace_ext=False, logger=logger)
+    return util.safe_produce_new(util.derivative_filename(gbkfile,".noseq"),
+                                 filterfun, replace_ext=False, logger=logger)
 
 
 
@@ -72,6 +72,7 @@ def open_parse_seq_rec(gbkfile, reduce_first=False, do_features=False) :
 
 def make_seq_unknown(seq_record) :
     seq_record.seq = Bio.Seq.UnknownSeq(len(seq_record),seq_record.seq.alphabet)
+
 
 
 parse_cache = {}

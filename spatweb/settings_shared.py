@@ -7,7 +7,8 @@ import os.path
 
 #physical path we're running this at, the idea is we can update only
 #this variable on deploy and everything else should work out.
-PPATH="/home/ACCELERATION/nathan/projects/spat/spatweb/"
+#PPATH="/home/ACCELERATION/nathan/projects/spat/spatweb/"
+PPATH=os.path.dirname(__file__)
 def ppath(rel) :
     return os.path.realpath(os.path.join(PPATH,rel))
 

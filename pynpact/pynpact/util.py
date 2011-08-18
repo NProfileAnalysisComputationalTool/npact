@@ -75,7 +75,7 @@ def exec_external( proc ):
     return subprocess.call(['python', proc])
 
 
-def capturedCall(cmd, **kwargs) :
+def capturedCall(cmd,check=False, **kwargs) :
     """Do the equivelent of the subprocess.call except
     log the stderr and stdout where appropriate."""
     p= capturedPopen(cmd,**kwargs)
@@ -84,6 +84,9 @@ def capturedCall(cmd, **kwargs) :
     #are scheduled and hopefully finished.
     time.sleep(0.01)
     time.sleep(0.01)
+
+    if check and rc != 0 :
+        raise subprocess.CalledProcessError(rc, cmd[0])
     return rc
 
 
@@ -96,7 +99,7 @@ def capturedPopen(cmd, stdin=None, stdout=None, stderr=None,
     #we use None as sigil values for stdin,stdout,stderr above so we
     # can distinguish from the caller passing in Pipe.
 
-    if not kwargs.has_key("close_fds") and os.name == 'posix' :
+    if os.name == 'posix' and not kwargs.has_key("close_fds") :
         #http://old.nabble.com/subprocess.Popen-pipeline-bug--td16026600.html
         kwargs['close_fds'] = True
 
@@ -105,13 +108,19 @@ def capturedPopen(cmd, stdin=None, stdout=None, stderr=None,
 
     if(logger):
         #if we are logging, record the command we're running,
-        #trying to strip out passwords.
         logger.debug("Running cmd: %s",
                      isinstance(cmd,str) and cmd or subprocess.list2cmdline(cmd))
 
+    def out(arg) :
+        #figure out what to pass to the stdout stream
+        if arg            : return arg #specified: use that
+        elif arg is False : return os.open(os.devnull, os.O_WRONLY)
+        elif logger       : return PIPE
+        else              : return None
+
     p = subprocess.Popen(cmd, stdin=stdin,
-                         stdout=(stdout or (logger and PIPE)),
-                         stderr=(stderr or (logger and PIPE)),
+                         stdout=out(stdout),
+                         stderr=out(stderr),
                          **kwargs)
     if logger :
         def monitor(level, src, name) :
@@ -131,13 +140,24 @@ def capturedPopen(cmd, stdin=None, stdout=None, stderr=None,
             p.__setattr__("std%s_thread" % name, th)
             th.start()
 
-        if stdout == None : monitor(stdout_level, p.stdout,"out")
-        if stderr == None : monitor(stderr_level, p.stderr,"err")
+        if stdout is None : monitor(stdout_level, p.stdout,"out")
+        if stderr is None : monitor(stderr_level, p.stderr,"err")
     return p
 
 
 @contextmanager
 def guardPopen(cmd, timeout=0.1, timeout_count=2, **kwargs) :
+    """ Use this with popening a process that might need to be killed
+    if there is an exception inside the with scope.  e.g.
+
+    with guardPopen(["bzip2"], stdout=PIPE, stdin=PIPE) as bz2 :
+        while(data = <calculate>) :
+           bz2.write(data)
+
+"OH NO! My <calculate> raised an exception."  guardPopen will make
+sure the bz2 process gets killed when the with block is exited.
+
+"""
     popen = None
     logger = kwargs.get('logger')
     try :
@@ -281,7 +301,7 @@ def safe_produce_new(outfilename, func,
     if outofdate or force:
         if logger:
             logger.debug("Regenerating, checked:%d force:%r", len(dependencies),force)
-            
+
         with mkstemp_overwrite(outfilename,**kwargs) as f :
             func(f)
     elif kwargs.get('logger',False) :

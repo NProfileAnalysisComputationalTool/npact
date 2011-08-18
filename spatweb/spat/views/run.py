@@ -48,7 +48,9 @@ def run_it(request, path, form) :
 
     gbp = main.GenBankProcessor(os.path.join(settings.MEDIA_ROOT, path), config=config)
     psname = gbp.run_Allplots()
+    logger.debug("Got back ps file: %r", psname)
     psname = os.path.relpath(psname, settings.MEDIA_ROOT)
+    logger.debug("relpath: %r",psname)
     raise RedirectException(reverse('results', args=[psname]))
 
 
@@ -60,7 +62,9 @@ def view(request, path):
         return HttpResponseRedirect(reverse('spat.views.start.view'))
 
     form = None
-    data = prepare.try_parse(os.path.join(settings.MEDIA_ROOT, path))
+    abs_path = os.path.join(settings.MEDIA_ROOT, path)
+    logger.debug("try_parseing %r", abs_path)
+    data = prepare.try_parse(abs_path)
     if not data:
         messages.error(request,"There was a problem loading file '%s', please try again or try a different record." % path)
         return HttpResponseRedirect(reverse('spat.views.start.view'))
