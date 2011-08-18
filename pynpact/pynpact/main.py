@@ -1,5 +1,5 @@
 #!/usr/bin/env python
-import logging, os.path, tempfile, time, shutil
+import logging, os.path, tempfile, time, shutil, re
 from optparse import OptionParser
 from contextlib import contextmanager
 
@@ -60,8 +60,16 @@ class GenBankProcessor(object) :
             self.logger.info("Parsing genbank file: %r", gbkfile)
             #TODO: gbk can have multiple records in which case this
             #will err (i wasn't able to find one that did though)
-            self.seqrec = SeqIO.read(gbkfile,"genbank")
-            self.config['length'] = len(self.seqrec)
+            try :
+                self.seqrec = SeqIO.read(gbkfile,"genbank")
+                self.config['length'] = len(self.seqrec)
+            except:
+                match = re.search(r'(\d+) ?bp', open(gbkfile).readline())
+                if match :
+                    self.config['length'] = match.group(1)
+                else :
+                    raise Exception("Unable to find sequence length on gbkfile: %r", gbkfile)
+
         else :
             raise Exception("Asked to parse nonexistant genebank file: %r", gbkfile)
 

@@ -10,7 +10,10 @@
   <p>
     <ul>
       {% for f in files %}
-      <li><a href="{{ f.url}}"> {% firstof f.id f.basename %}</a> </li>
+      <li>
+        <a href="{{ f.url}}"> {% firstof f.id f.basename %}</a>:
+        {% if f.length %}{{f.length}}bp{% endif %}, {{ f.filesize}}; {{f.description}}
+      </li>
       {% endfor %}
     <ul>
     <table width="100%" cellpadding="4" cellspacing="0" border="1">

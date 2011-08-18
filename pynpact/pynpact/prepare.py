@@ -89,6 +89,8 @@ def try_parse(abs_path, force=False) :
 
     data = {'basename': os.path.basename(abs_path),
             'mtime': mtime,
+            'filesize': util.pprint_bytes(os.path.getsize(abs_path)),
+
             }
     try :
         gbrec = open_parse_seq_rec(abs_path)
