@@ -77,6 +77,10 @@ class GenBankProcessor(object) :
             self.outputdir = os.path.dirname(os.path.realpath(self.gbkfile))
 
 
+
+    ####################################################################
+    ## Helper Functions
+
     def derivative_filename(self, part) :
         """Build the filename of a derivative product of the gbk
         file. If the derivative file already exists return whether it
@@ -180,8 +184,8 @@ $ CG MYCGE.gbk 1 580074 201 51 3 > MYCGE.CG200
         pass
 
 
-    ###############################################
-    ########### Working with Allplots #############
+    ####################################################################
+    ## Working with Allplots
 
     #the files in order that Allplots.def is expected to have.
     #NB: these are the keys into the config dictionary, the values are the filenames.
