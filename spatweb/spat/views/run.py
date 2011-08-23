@@ -20,16 +20,22 @@ from pynpact import prepare, main
 logger = logging.getLogger(__name__)
 
 
-class RunForm(forms.Form) :
-    first_page_title = forms.CharField()
-    following_page_title = forms.CharField(required=False)
+def get_ti(**kwargs) :
+    return forms.TextInput(attrs=kwargs)
 
+class RunForm(forms.Form) :
+    first_page_title = forms.CharField(widget=get_ti(size=40))
+    following_page_title = forms.CharField(required=False,widget=get_ti(size=40))
+    length=forms.IntegerField(required=True, min_value=0,
+                              widget=get_ti(size=8))
 
 def prefill_form(request, path, data) :
 
     title = data.get('description') or data.get('basename')
     form = RunForm({'first_page_title': title,
-                    'following_page_title': title})
+                    'following_page_title': title,
+                    'length': data.get('length')
+                    })
 
     return form
 

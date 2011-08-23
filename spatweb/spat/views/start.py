@@ -9,8 +9,7 @@ from django.template import RequestContext
 from django import forms
 from django.contrib import messages
 
-from __init__ import session_key
-
+from spat.views import is_clean_path
 # Get an instance of a logger
 logger = logging.getLogger(__name__)
 
@@ -22,6 +21,9 @@ class StartForm(forms.Form):
 
 
 def saveFile(request, fu) :
+    if not is_clean_path(fu.name) :
+        raise Exception("Illegal filename")
+
     savepath = os.path.join(settings.MEDIA_ROOT,fu.name)
     logger.info("Saving uploaded file to %r", savepath)
     #TODO: this should probably be sanitized, and make sure we aren't stepping on someone else.
@@ -29,9 +31,10 @@ def saveFile(request, fu) :
         for chunk in fu.chunks() :
             fh.write(chunk)
 
-    return savepath
+    return os.path.relpath(savepath,settings.MEDIA_ROOT)
 
 def pullFromUrl(request, url) :
+    #TODO: implement pullFromUrl
     raise NotImplemented("Pulling a file from a url is not yet implemented.")
 
 
@@ -40,7 +43,7 @@ def saveToFile(request, text) :
     logger.info("Saving paste to %r, %r", savepath, __name__)
     with os.fdopen(fd,'wb') as fh :
         fh.write(text)
-    return savepath
+    return os.path.relpath(savepath,settings.MEDIA_ROOT)
 
 
 
@@ -59,8 +62,8 @@ def view(request) :
                 path = saveToFile(request, form.cleaned_data.get('pastein'))
 
             if path :
-                request.session[session_key("input_path")] = path
-                return HttpResponseRedirect(reverse('spat.views.run.view'))
+                path
+                return HttpResponseRedirect(reverse('run',args=[path]))
             else :
                 messages.error(request, "You need to supply a genome source.")
 

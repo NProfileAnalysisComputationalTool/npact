@@ -19,7 +19,9 @@
 
   <form method="POST">
     {% csrf_token %} 
-    {{ form.as_p }}
+    <table>
+    {{ form.as_table }}
+    </table>
     <p><button>Get Analysis!</button></p>
   </form>
 </div>
