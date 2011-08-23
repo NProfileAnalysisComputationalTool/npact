@@ -154,12 +154,17 @@ multiprocess safe way) setting class defaults
         """Go through the genbank record pulling out gene names and locations
         $ extract MYCGE.gbk 0 gene 0 locus_tag > MYCGE.genes
 """
-        #TODO: put, and pull the parameters from the config dictionary.
+        config,hash = util.reducehashdict(self.config,
+                                          ['GeneDescriptorKey1', 'GeneDescriptorKey2',
+                                           'GeneDescriptorSkip1', 'GeneDescriptorSkip2',
+                                           ])
         def func(f) :
-            cmd = [binfile("extract"), self.gbkfile, 0, "gene", 0, "locus_tag"]
+            cmd = [binfile("extract"), self.gbkfile,
+                   config['GeneDescriptorSkip1'], config['GeneDescriptorKey1'],
+                   config['GeneDescriptorSkip2'], config['GeneDescriptorKey2']]
             return util.capturedCall(cmd, stdout=f, logger=self.logger, check=True)
-        return self.safe_produce_new(self.derivative_filename("genes"), func,
-                                     dependencies=[self.gbkfile])
+        filename = self.derivative_filename(".%s.genes" % hash)
+        return self.safe_produce_new(filename, func, dependencies=[self.gbkfile])
 
     def run_extract(self) :
         """Go through the genbank record pulling out gene names and locations
@@ -170,18 +175,13 @@ multiprocess safe way) setting class defaults
         """Do the CG ratio calculations.
 $ CG MYCGE.gbk 1 580074 201 51 3 > MYCGE.CG200
 """
-        #TODO: put, and pull the parameters from the config dictionary.
-        #self.config.setdefault('profile-window-size', 201)
-        config,hash = util.reducehashdict(self.config,['length'])
+        config,hash = util.reducehashdict(self.config,['length','window_size','step','period'])
 
-        outfilename = self.derivative_filename(".%s.CG200" % hash)
-        progargs = [binfile("CG"), self.gbkfile, 1, config['length'], 201, 51, 3]
+        outfilename = self.derivative_filename(".%s.CG" % hash)
+        progargs = [binfile("CG"), self.gbkfile, 1, config['length'],
+                    config['window_size'], config['step'], config['period']]
         func = lambda out: util.capturedCall(progargs, stdout=out, logger=self.logger, check=True)
         return self.safe_produce_new(outfilename,func, dependencies=[self.gbkfile])
-
-    def run_atg(self) :
-        # ../atg MYCGE.gbk > atg.txt
-        pass
 
 
     ####################################################################
@@ -225,8 +225,8 @@ $ CG MYCGE.gbk 1 580074 201 51 3 > MYCGE.CG200
             #NB the "Plot Title" is disregarded, but that line should also contain the total number of bases
             ap_wl("%s %d" % ("FOOBAR", config['length']))     #Plot Title
             ap_wl("C+G")                                      #Nucleotide(s)_plotted (e.g.: C+G)
-            ap_wl(config.get('first_page_title' or "Page 1")) #First-Page title
-            ap_wl(config.get('following_page_title') or ("Page " + str(page_num))) #Title of following pages
+            ap_wl(config['first_page_title'].format(page_num)) #First-Page title
+            ap_wl(config['following_page_title'].format(page_num) ) #Title of following pages
 
 
             for f in self.AP_file_keys :
@@ -268,7 +268,9 @@ period_of_frame       Number of frames.
 
                     self.write_allplots_def(config, os.path.join(dtemp,"Allplots.def"), i+1)
 
-                    self.logger.debug("Starting Allplots page %d for %r", i+1, os.path.basename(self.gbkfile))
+                    self.logger.debug("Starting Allplots page %d for %r",
+                                      i+1, os.path.basename(self.gbkfile))
+                    
                     cmd = [binfile("Allplots"), i*ppage, ppage, 5, 1000, 3]
                     util.capturedCall(cmd, stdout=psout, stderr=False,
                                       logger=self.logger, cwd=dtemp, check=True)

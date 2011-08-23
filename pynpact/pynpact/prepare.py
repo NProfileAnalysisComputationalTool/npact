@@ -102,3 +102,30 @@ def try_parse(abs_path, force=False) :
         pass
     parse_cache[abs_path] = (mtime,data)
     return data
+
+
+def default_config(parse_data) :
+    config={
+        'Nuclotides':'CG',
+
+        ##keys for extract.c
+        'GeneDescriptorKey1': 'gene',
+        'GeneDescriptorKey2': 'locus_tag',
+        'GeneDescriptorSkip1': 0,
+        'GeneDescriptorSkip2': 0,
+
+        ##keys for CG:
+        'window_size': 201,
+        'step': 51,
+        'period':3,
+
+        ##allplots
+        #http://docs.python.org/library/string.html#formatspec
+        'first_page_title': 'Page 1',
+        'following_page_title': 'Page {0d}',
+        }
+
+    if parse_data.has_key('length') :
+        config['length'] = parse_data['length']
+
+    return config
