@@ -7,6 +7,8 @@ from distutils.sysconfig import customize_compiler
 import distutils.ccompiler
 
 
+#need to make sure all the C files that are in src get compiled and
+#put into ./pynpact/bin
 src_path= os.path.join(os.path.dirname(__file__),'src')
 c_files=glob.glob(os.path.join(src_path, "*.c"))
 

@@ -36,4 +36,8 @@ if the_eggs:
             '-f', os.path.join(pwd,"requirements/eggs/")] +
            the_eggs)
     ret = subprocess.call(cmd)
-    exit(ret)
+
+if ret: exit(ret)
+
+pynpact_dir = os.path.join(os.path.dirname(__file__), "pynpact/")
+subprocess.call(["make"],cwd=pynpact_dir)
