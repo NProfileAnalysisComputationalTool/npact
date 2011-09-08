@@ -303,7 +303,7 @@ period_of_frame       Number of frames.
 
 
 if __name__ == '__main__' :
-    parser = OptionParser("""main.py <genebank file>""")
+    parser = OptionParser("""%prog <genebank file>""")
     parser.add_option("-v", "--verbose", action="store_true", dest="verbose",
                       help="Show more verbose log messages.")
     parser.add_option("-f","--force",action="store_true",dest="force",
