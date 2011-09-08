@@ -207,8 +207,8 @@ def which(program):
     return None
 
 
-def stream_to_file(stream,path,bufsize=8192) :
-    with open(path, "wb") as f:
+def stream_to_file(stream,path,bufsize=8192):
+    def loop(f):
         bytes=0
         while True :
             buf = stream.read(bufsize)
@@ -216,6 +216,12 @@ def stream_to_file(stream,path,bufsize=8192) :
             bytes += len(buf)
             f.write(buf)
         return bytes
+    if path.hasattr('write'):
+        return loop(f)
+    else:
+        with open(path, "wb") as f:
+            return loop(f)
+
 
 
 
