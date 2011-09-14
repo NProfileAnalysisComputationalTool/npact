@@ -40,8 +40,8 @@ class EntrezSession(object):
         logger.debug("Starting Entrez query for %r", term)
         resp = Bio.Entrez.read(Bio.Entrez.esearch(db=self.db, term=term,
                                                   usehistory=True,
-                                                  QueryKey=self.QueryKey,
-                                                  WebEnv=self.WebEnv))
+                                                  query_key=self.QueryKey,
+                                                  webenv=self.WebEnv))
         self.QueryKey = resp['QueryKey']
         self.WebEnv = resp['WebEnv']
         self.result_count = int(resp['Count'])
@@ -51,8 +51,8 @@ class EntrezSession(object):
     def summarize(self):
         logger.debug("Summarizing from %s, %s", self.WebEnv, self.QueryKey)
         summaries = Bio.Entrez.read(Bio.Entrez.esummary(db=self.db,
-                                                        WebEnv=self.WebEnv,
-                                                        QueryKey=self.QueryKey))
+                                                        webenv=self.WebEnv,
+                                                        query_key=self.QueryKey))
         return summaries
 
     def fetch(self, summary, filename=None):
@@ -71,8 +71,8 @@ class EntrezSession(object):
             #file should be downloaded.
             if self.result_count == 1:
                 net_handle = Bio.Entrez.efetch(db=self.db, rettype='gb',
-                                                        WebEnv=self.WebEnv,
-                                                        QueryKey=self.QueryKey)
+                                               webenv=self.WebEnv,
+                                               query_key=self.QueryKey)
             else:
                 net_handle = Bio.Entrez.efetch(db=self.db, rettype='gb', id=id)
             logger.debug("Streaming handle to file.")
