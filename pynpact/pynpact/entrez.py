@@ -1,3 +1,4 @@
+import os, os.path
 import datetime, time
 import logging
 
@@ -66,7 +67,7 @@ class EntrezSession(object):
 
         update_date = datetime.datetime(*map(int,summary['UpdateDate'].split('/')))
 
-        if not os.path.exists(filename) or \
+        if (not os.path.exists(filename)) or \
                datetime.datetime.fromtimestamp(os.path.getmtime(filename)) < update_date:
             #file should be downloaded.
             if self.result_count == 1:
@@ -77,7 +78,8 @@ class EntrezSession(object):
                 net_handle = Bio.Entrez.efetch(db=self.db, rettype='gb', id=id)
             logger.debug("Streaming handle to file.")
             with util.mkstemp_overwrite(filename,logger=logger) as f:
-                util.stream_to_file(net_handle,f)
+                bytes = util.stream_to_file(net_handle,f)
+                logger.info("Saved %s to %s.", util.pprint_bytes(bytes), filename)
         return filename
 
 
