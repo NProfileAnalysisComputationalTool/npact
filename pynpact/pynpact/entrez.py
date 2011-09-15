@@ -37,6 +37,11 @@ class EntrezSession(object):
         self.lib_path = lib_path
         self.__dict__.update(kwargs)
 
+    def reset(self):
+        self.QueryKey = None
+        self.WebEnv = None
+        self.result_count = None
+
     def search(self, term):
         logger.debug("Starting Entrez query for %r", term)
         resp = Bio.Entrez.read(Bio.Entrez.esearch(db=self.db, term=term,
@@ -82,6 +87,15 @@ class EntrezSession(object):
                 logger.info("Saved %s to %s.", util.pprint_bytes(bytes), filename)
         return filename
 
+    def to_url(self,term):
+        """Convert the query we've done to a url that will load ncbi's site."""
+        fmt = "http://www.ncbi.nlm.nih.gov/sites/entrez?db={0}&term={1}"
+        return fmt.format(self.db,term)
+
+    def to_session_url(self):
+        """Convert the query we've done to a url that will load ncbi's site."""
+        fmt = "http://www.ncbi.nlm.nih.gov/sites/entrez?db={0}&cmd=HistorySearch&querykey={1}&tab=&WebEnv={2}"
+        return fmt.format(self.db,self.QueryKey,self.WebEnv)
 
 # [{'Status': 'Completed',
 #   'Comment': '  ',
