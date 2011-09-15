@@ -1,14 +1,16 @@
 <?xml version="1.0" encoding="iso-8859-1"?>
 <!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+{% load media %}
 <html xmlns="http://www.w3.org/1999/xhtml">
 	<head>
 		<title>{% block title %}University of Florida Genetics Institute{% endblock title %}</title>
-		<link rel="stylesheet" type="text/css" media="screen" href="/static/_style/css/basic.css" />
-		<link rel="stylesheet" type="text/css" media="print" href="/static/_style/css/print.css" />
+    {% include_media 'main.css'  media='screen' %}
+    {% include_media 'print.css' media='print' %}
 		<style type="text/css" media="screen">
 			{%block secHeaderCss %}
-			@import "/static/_style/css/style.css";
-            #secHeader span{background: url(/static/_style/images/header1.jpg)}
+        #secHeader span{
+          background: url({% media_url images/header1.jpg %});
+        }
 			{%endblock %}
 		</style>
     {%block addScript %}{%endblock %}

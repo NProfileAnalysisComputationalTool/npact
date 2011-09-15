@@ -1,4 +1,5 @@
 {% extends "base.html" %}
+{% load media %}
 {% block title %}Run S-P.A.T.{% endblock %}
 
 {%block content %}
@@ -18,45 +19,5 @@
   </form>
 
   <p><a href="/library">Browse the library of existing analyses</a></p>
-
-  <br/>
-  <br/>
-  <br/>
-  <br/>
-  <br/>
-
-  <h2>Rough docs on options on what the programs do</h2>
-  <p>Some of these options are shared (window size) some can be pulled out of the genebank file (length). To start I think we should work with the super-simple above (just enter a genebank file) and then start adding some of these options in.</p>
-  <h3>extract</h3>
-  <p>Pulls out gene names and locations and their addresses from the gbk file.</p>
-  <ul>
-    <li>genebank file</li>
-    <li>first n characters of gene name to skip</li>
-    <li>gene descriptor string</li>
-    <li>first n characters of name 2</li>
-  </ul>
-
-  <h3>CG</h3>
-  <p>Calculates ratio of C or G bases in the genebank file.</p>
-  <ul>
-    <li>genebank (above)</li>
-    <li>start = 1</li>
-    <li>end = number of basepairs</li>
-    <li>window size = 201</li>
-    <li>step = 51</li>
-    <li>period of frames = 3
-  </ul>
-
-  <h3>ATG</h3>
-  <p>Searches for stop codons in the genebank file.</p>
-  <ul>
-    <li>genebank</li>
-    <li>MYCOPLASMA</li>
-  </ul>
-
-  <h3>Allplots</h3>
-  <p>
-    Generates plots based on the genes, and the ratios. Can be annotated with a bunch of other stuff. There's a lot here to tackle later.
-  </p>
 </div>
 {%endblock content %}
