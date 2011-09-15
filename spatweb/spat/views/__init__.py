@@ -26,9 +26,21 @@ def session_key(part) :
 def library_root() :
     return os.path.join(settings.MEDIA_ROOT, 'library')
 
+def getrelpath(abspath):
+    return os.path.relpath(abspath,settings.MEDIA_ROOT)
 
 def is_clean_path(path) :
     return path.find('..') < 0
+
+def getabspath(relpath,raise_on_missing=True):
+    if not is_clean_path(relpath):
+        logger.error("Illegal path submitted", relpath)
+        raise Exception("Illegal path")
+    abspath = os.path.join(settings.MEDIA_ROOT,relpath)
+    if raise_on_missing and not os.path.exists(abspath):
+        raise IOError("Path not found: " + relpath)
+    return abspath
+
 
 
 ##### Views that are small enough to be inline here.

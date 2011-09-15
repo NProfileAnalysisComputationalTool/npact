@@ -32,7 +32,7 @@ class RunForm(forms.Form) :
 def prefill_form(request, path, parse_data) :
 
     title = parse_data.get('description') or parse_data.get('basename')
-    form = RunForm({'first_page_title': title,
+    form = RunForm(initial={'first_page_title': title,
                     'following_page_title': title,
                     'length': parse_data.get('length')
                     })
