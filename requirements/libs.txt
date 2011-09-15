@@ -1,7 +1,0 @@
-requirements/src/ordereddict-1.1.tar.gz
-requirements/src/Django-1.3.tar.gz
-requirements/src/MySQL-python-1.2.3.tar.gz
-requirements/src/numpy-1.6.1.tar.gz
-requirements/src/django-mediagenerator-1.10.4.zip
--e lib/biopython/
--e pynpact/
