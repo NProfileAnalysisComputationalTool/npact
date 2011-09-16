@@ -70,15 +70,22 @@ MEDIA_URL = ''
 MEDIA_DEV_MODE = DEBUG
 DEV_MEDIA_URL = '/devassets/'
 PRODUCTION_MEDIA_URL = '/assets/'
-GLOBAL_MEDIA_DIRS=ppath('www')
+GLOBAL_MEDIA_DIRS=(str(ppath('www')),)
+
 
 MEDIA_BUNDLES= (
     ('main.css',
-     'css/basic.css'
-     'css/style.css'
+     'css/basic.css',
+     'css/style.css',
+     'css/custom-theme/jquery-ui-1.8.16.custom.css',
     ),
+
     ('print.css',
-     'css/print.css')
+     'css/print.css'),
+
+    ('jquery.js',
+     'js/jquery-1.6.4.min.js',
+     'js/jquery-ui-1.8.16.custom.min.js',),
     )
 
 

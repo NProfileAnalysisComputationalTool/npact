@@ -2,6 +2,15 @@
 {% load media %}
 {% block title %}Run S-P.A.T.{% endblock %}
 
+{% block addScript %}
+{% include_media 'jquery.js' %}
+<script type="text/javascript">
+  $(function(){
+    $("#accordion").accordion({ header: "h4" });
+  });
+</script>
+{% endblock %}
+
 {%block content %}
 <div class="contentPadding">
   <h2>Run the S-Profile Analysis Tool</h2>
@@ -14,7 +23,20 @@
   <form action="start" method="POST" enctype="multipart/form-data">
     {% csrf_token %} 
     <h3>GenBank file from:</h3>
-    {{ form.as_p }}
+    <div id="accordion">
+      <div>
+        <h4><a name="#">Upload File</a></h4>
+        <div>
+          {{ form.as_p }}
+        </div>
+      </div>
+      <div>
+        <h4><a name="#">From URL</a></h4>
+        <div>
+          {{ form.as_p }}
+        </div>
+      </div>
+    </div>
     <p><button>Start Analysis!</button></p>
   </form>
 
