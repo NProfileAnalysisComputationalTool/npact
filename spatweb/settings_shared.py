@@ -3,7 +3,7 @@
 DEBUG = True
 TEMPLATE_DEBUG = DEBUG
 
-from settings_logging import *
+from settings_logging import LOGGING
 
 from path import path
 
@@ -12,11 +12,13 @@ from path import path
 #PPATH="/home/ACCELERATION/nathan/projects/spat/spatweb/"
 PPATH=path(__file__).dirname()
 def ppath(rel) :
-    return (PPATH / rel).realpath()
+    abspath = (PPATH / rel).realpath()
+    assert abspath.exists()
+    return abspath
 
 
 ADMINS = (
-    # ('Your Name', 'your_email@example.com'),
+    ('Nathan Bird', 'nathan@acceleration.net'),
 )
 
 MANAGERS = ADMINS

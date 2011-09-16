@@ -9,7 +9,7 @@ LOGGING = {
     'disable_existing_loggers': False,
     'formatters': {
         'verbose': {
-            'format': '%(levelname)s %(asctime)s %(module)s %(process)d %(thread)d %(message)s'
+            'format': '%(asctime)s %(process)d %(thread)d %(module)s %(levelname)s %(message)s'
             },
         'tty': {
             'format': "%(asctime)s %(module)-10s %(levelname)-8s %(message)s",
@@ -35,22 +35,20 @@ LOGGING = {
             'handlers':['console'],
             'level': 'DEBUG',
             },
-        
         'django.request': {
             'handlers': ['mail_admins'],
             'level': 'ERROR',
             'propagate': True,
             },
-        'spat': {
-            'handlers': ['console'],
-            'level': 'DEBUG',
-            'propagate': True,
-            },
-        'pynpact': {
-            'handlers': ['console'],
-            'level': 'DEBUG',
-            'propagate': True,
-            }
+        # 'spat': {
+        #     'handlers': ['console'],
+        #     'level': 'DEBUG',
+        #     'propagate': True,
+        #     },
+        # 'pynpact': {
+        #     'handlers': ['console'],
+        #     'level': 'DEBUG',
+        #     'propagate': True,
+        #     }
         }
     }
-
