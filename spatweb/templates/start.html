@@ -6,7 +6,10 @@
 {% include_media 'jquery.js' %}
 <script type="text/javascript">
   $(function(){
-    $("#accordion").accordion({ header: "h4" });
+    $("#accordion").accordion({ header: "h4", clearStyle: false,
+//        change: function(event,ui) { $('#selected')[0].value = ui.newHeader.text(); }
+    });
+    $('button').button()
   });
 </script>
 {% endblock %}
@@ -20,26 +23,32 @@
     genbank data pasted directly in. Only one of the  following is neccessary</p>
 
 
-  <form action="start" method="POST" enctype="multipart/form-data">
-    {% csrf_token %} 
+    <input type="hidden" name="selected" value="" id="selected"/>
     <h3>GenBank file from:</h3>
     <div id="accordion">
+      {% for form in forms %}
       <div>
-        <h4><a name="#">Upload File</a></h4>
-        <div>
-          {{ form.as_p }}
-        </div>
+        <h4><a name="#">{{ form.title|title }}</a></h4>
+        {% if form.is_multipart %}
+        <form enctype="multipart/form-data" method="post" action="start">
+        {% else %}
+        <form method="post" action="start">
+        {% endif %}
+          {% csrf_token %} 
+          <input type="hidden" name="type" value="{{ form.type }}">
+          <div>
+            {{ form.as_p }}
+          </div>
+          <br>
+          <button>Start Analysis!</button>
+        </form>
       </div>
-      <div>
-        <h4><a name="#">From URL</a></h4>
-        <div>
-          {{ form.as_p }}
-        </div>
-      </div>
+      {% endfor %}
     </div>
-    <p><button>Start Analysis!</button></p>
+    <br/>
   </form>
-
+<!--
   <p><a href="/library">Browse the library of existing analyses</a></p>
+-->
 </div>
 {%endblock content %}

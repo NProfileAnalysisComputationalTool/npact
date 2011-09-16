@@ -314,3 +314,13 @@ width:100%;
 
 dt { font-weight: bold; margin-top:4px;}
 dd { margin-left: 8px; }
+
+textarea { width: 100%; }
+#content .ui-accordion-content p { margin: 0; }
+
+.helptext {font-size: 0.8em; float:right; }
+
+#content label { width: 15ex; float:left; text-align: right; clear:left; }
+#content input { margin-left: 6px; float:left; }
+
+ul.errorlist li { color:red; }

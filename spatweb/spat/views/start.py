@@ -21,22 +21,8 @@ from spat.views import is_clean_path, getabspath, getrelpath
 # Get an instance of a logger
 logger = logging.getLogger(__name__)
 
-class UploadForm(forms.Form):
-    file_upload = forms.FileField(required=False)
 
-class UrlForm(forms.Form):
-    url = forms.URLField(label="From URL", required=False)
-
-class PasteForm(forms.Form):
-    pastein = forms.CharField(label="Paste it in",widget=forms.Textarea,required=False)
-
-class EntrezSearchForm(forms.Form):
-    term = forms.CharField(label="Search Term")
-    refine = forms.BooleanField("Refine previous search",
-                                initial=True,
-                                help_text="Leave checked to search inside the previous results.")
-
-def mksavefile(req, prefix):
+def mksavefile(prefix):
     """Wrapper around creating the file to save uploaded files in.
 
   Returns the (fd,path) tuple (similar to tempfile.mkstemp)
@@ -47,69 +33,110 @@ def mksavefile(req, prefix):
     relpath = getrelpath(abspath)
     return (fd,abspath,relpath)
 
-def saveUploadFile(req, fu) :
-    if not is_clean_path(fu.name) :
-        messages.error(req,"Illegal filename")
-        raise IOError("Illegal filename")
-
-    fd,savepath,relpath = mksavefile(req, "up-" + fu.name)
-    logger.info("Saving uploaded file to %r", relpath)
-    with os.fdopen(fd, 'wb') as fh :
-        for chunk in fu.chunks() :
-            fh.write(chunk)
-
-    return relpath
-
-def pullFromUrl(req, url) :
-    logger.debug("Going to pull from %r", url)
-    pull_req = urllib2.Request(url)
-    if pull_req.get_type == "file":
-        messages.error(req,"Illegal URL.")
-        raise IOError("Illegal URL")
-    try:
-        with urllib2.urlopen(pull_req) as fh:
-            fd,savepath,relpath = mksavefile(req,"url")
-            pynpact.util.stream_to_file(fh,savepath)
-    except:
-        messages.error(req,"Error opening url.")
-        raise
-
-def saveToFile(req, text) :
-    (fd,savepath,relpath) = mksavefile(req,"txt")
-    logger.info("Saving paste to %r", relpath)
-    with os.fdopen(fd,'wb') as fh :
-        fh.write(text)
-    return relpath
 
 
-def view_POST(req):
-    path=None
-    form=StartForm(req.POST, req.FILES)
-    entrez_search = EntrezSearchForm(req.POST)
-    if form.is_valid() :
+            # elif form.cleaned_data.get('url') :
+            #     path = pullFromUrl(req, form.cleaned_data.get('url'))
+            # elif form.cleaned_data.get('pastein') :
+            #     path = saveToFile(req, form.cleaned_data.get('pastein'))
+
+
+class UploadForm(forms.Form):
+    type="UploadForm"
+    title="Upload a File"
+    file_upload = forms.FileField(required=True)
+
+    def clean(self):
+        cleaned_data = self.cleaned_data
+        fu = cleaned_data['file_upload']
+        logger.info("Checking Uploaded file %s", fu)
+        if not is_clean_path(fu.name):
+            raise forms.ValidationError("Illegal filename")
+
+        fd,savepath,relpath = mksavefile( "up-%s-" % fu.name)
+        logger.info("Saving uploaded file to %r", relpath)
+        with os.fdopen(fd, 'wb') as fh :
+            for chunk in fu.chunks() :
+                fh.write(chunk)
+
+        cleaned_data['path']=relpath
+        return cleaned_data
+
+class UrlForm(forms.Form):
+    type="UrlForm"
+    title="From URL"
+    url = forms.URLField(label="From URL", required=True)
+
+    def clean(self):
+        cleaned_data = self.cleaned_data
+        url = cleaned_data['url']
+        logger.debug("Going to pull from %r", url)
+        pull_req = urllib2.Request(url)
+        if pull_req.get_type == "file":
+            raise forms.ValidationError("Illegal URL")
         try:
-            if req.FILES.get('file_upload') :
-                path = saveUploadFile(req, req.FILES.get('file_upload'))
-            elif form.cleaned_data.get('url') :
-                path = pullFromUrl(req, form.cleaned_data.get('url'))
-            elif form.cleaned_data.get('pastein') :
-            path = saveToFile(req, form.cleaned_data.get('pastein'))
+            fh = urllib2.urlopen(pull_req)
+            fd,savepath,relpath = mksavefile("url")
+            pynpact.util.stream_to_file(fh,savepath)
+            cleaned_data['path'] = relpath
+        except:
+            logger.exception("Error fetching url %s", url)
+            raise forms.ValidationError("Error fetching url")
 
-            if path :
-                return RedirectException(reverse('run',args=[path]))
-            else :
-                messages.error(req, "You need to supply a genome source.")
-        except Exception,e:
-            logger.exception(e)
-    elif entrez_search.is_valid() :
-        
-    
+        return cleaned_data
+
+class PasteForm(forms.Form):
+    type="PasteForm"
+    title="Paste as Text"
+    pastein = forms.CharField(label="Paste in as text",
+                              widget=forms.Textarea(attrs={'rows':3, 'cols':""}),
+                              required=True)
+    def clean(self):
+        cleaned_data = self.cleaned_data
+        text = cleaned_data['pastein']
+        (fd,savepath,relpath) = mksavefile("txt")
+        logger.info("Saving paste to %r", relpath)
+        cleaned_data['path'] = relpath
+        with os.fdopen(fd,'wb') as fh :
+            fh.write(text)
+        return cleaned_data
+
+class EntrezSearchForm(forms.Form):
+    type="EntrezSearchForm"
+    title="Search Entrez"
+    term = forms.CharField(label="Search Term")
+    refine = forms.BooleanField("Refine previous search",
+                                initial=True,
+                                help_text="Leave checked to search inside the previous results.")
+    def clean(self):
+        pass
+
+def build_forms(req):
+    types = [UploadForm,UrlForm,PasteForm,EntrezSearchForm]
+    if req.method == 'POST':
+        forms = []
+        for type in types:
+            if type.__name__ == req.POST['type']:
+                forms.insert(0, type(req.POST,req.FILES))
+            else:
+                forms.append(type())
+        return forms
+    else:
+        return [type() for type in types]
 
 
 def view(req) :
     form = None
     if req.method == 'POST' :
-        form = view_POST(req)
+        path=None
+        forms=build_forms(req)
+        submitted = forms[0]
+        if submitted.is_valid():
+            logger.info("Form is valid")
+            path = submitted.cleaned_data['path']
+            raise RedirectException(reverse('run',args=[path]))
+    else:
+        forms = build_forms(req)
 
-    return render_to_response('start.html',{'form':form or StartForm()},
+    return render_to_response('start.html',{'forms':forms},
                                   context_instance=RequestContext(req))
