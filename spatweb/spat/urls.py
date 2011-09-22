@@ -5,8 +5,8 @@ from django.conf import settings
 urlpatterns = \
             patterns('spat.views',
                      url(r'^$', 'index'),
-                     url(r'^start', 'start.view', name="start"),
-                     url(r'^entrez', 'start.entrez_results', name='entrez_results')
+                     url(r'^start$', 'start.view', name="start"),
+                     url(r'^start/efetch/(\d+)', 'start.efetch', name="efetch"),
                      url(r'^library', 'library'),
                      url(r'^run/(.+\.gbk?)', 'run.view', name="run"),
                      url(r'^run^', 'run.view_none'),

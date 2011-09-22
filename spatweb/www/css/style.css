@@ -85,6 +85,8 @@ color:#444;
 font-size:70%;
 }
 
+th { color:#222; font-size: .75em; }
+
 th,td { padding: 3px; }
 
 ul {
@@ -105,7 +107,7 @@ padding-top: 2px;
 }
 
 #content h2 { margin:5px 0 0 8px; }
-#content h3 { font-size:125%;  margin:5px 0 0 12px; }
+#content h3 { /*font-size:125%;  margin:5px 0 0 12px; */}
 #content h2 + h3 { margin-top: 2px; }
 
 #content h4 {
@@ -320,7 +322,9 @@ textarea { width: 100%; }
 
 .helptext {font-size: 0.8em; float:right; }
 
-#content label { width: 15ex; float:left; text-align: right; clear:left; }
+ #content label { width: 15ex; float:left; text-align: right; clear:left; }
 #content input { margin-left: 6px; float:left; }
 
 ul.errorlist li { color:red; }
+
+button.Start { clear:both; margin: 8px;}

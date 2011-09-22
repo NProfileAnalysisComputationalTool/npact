@@ -31,7 +31,7 @@ class EntrezSession(object):
     WebEnv = None
     QueryKey = None
     lib_path = None
-
+    summaries = None
 
     def __init__(self, lib_path, **kwargs):
         self.lib_path = lib_path
@@ -47,7 +47,7 @@ class EntrezSession(object):
                self.WebEnv and len(self.WebEnv)
 
     def search(self, term):
-        logger.debug("Starting Entrez query for %r, session=%s", term, self.has_session())
+        logger.info("Starting Entrez query for %r, session=%s", term, self.has_session())
         resp = Bio.Entrez.read(Bio.Entrez.esearch(db=self.db, term=term,
                                                   usehistory=True,
                                                   query_key=self.QueryKey,
@@ -59,18 +59,19 @@ class EntrezSession(object):
         return resp
 
     def summarize(self):
-        logger.debug("Summarizing from %s, %s", self.WebEnv, self.QueryKey)
-        summaries = Bio.Entrez.read(Bio.Entrez.esummary(db=self.db,
-                                                        webenv=self.WebEnv,
-                                                        query_key=self.QueryKey))
-        return summaries
+        if not self.summaries:
+            logger.info("Summarizing from %s, %s", self.WebEnv, self.QueryKey)
+            self.summaries = Bio.Entrez.read(Bio.Entrez.esummary(db=self.db,
+                                                                 webenv=self.WebEnv,
+                                                                 query_key=self.QueryKey))
+        return self.summaries
 
     def fetch(self, summary=None, filename=None):
         if not summary:
             if self.result_count == 1:
                 summary = self.summarize()[0]
             else :
-                raise T
+                raise TooManyResponsesException()
         id = summary['Id']
         #this appears to be the RefSeq Id.
         caption = summary['Caption']
@@ -84,17 +85,17 @@ class EntrezSession(object):
         if (not os.path.exists(filename)) or \
                datetime.datetime.fromtimestamp(os.path.getmtime(filename)) < update_date:
             #file should be downloaded.
-            if self.result_count == 1:
-                net_handle = Bio.Entrez.efetch(db=self.db, rettype='gb',
-                                               webenv=self.WebEnv,
-                                               query_key=self.QueryKey)
-            else:
-                net_handle = Bio.Entrez.efetch(db=self.db, rettype='gb', id=id)
+            net_handle = Bio.Entrez.efetch(db=self.db, rettype='gb', id=id)
             logger.debug("Streaming handle to file.")
             with util.mkstemp_overwrite(filename,logger=logger) as f:
                 bytes = util.stream_to_file(net_handle,f)
                 logger.info("Saved %s to %s.", util.pprint_bytes(bytes), filename)
         return filename
+
+    def fetch_id(self,id):
+        logger.info("Starting fetch of Id: %s", id)
+        summaries = Bio.Entrez.read(Bio.Entrez.esummary(db=self.db,id=id))
+        return self.fetch(summary=summaries[0])
 
     def to_url(self,term):
         """Convert the query we've done to a url that will load ncbi's site."""

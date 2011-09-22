@@ -18,6 +18,8 @@ from django.template import RequestContext
 from spat.middleware import RedirectException
 from spat.views import is_clean_path, getabspath, getrelpath, library_root
 
+#used to dynamically load functions.
+import start
 
 # Get an instance of a logger
 logger = logging.getLogger(__name__)
@@ -42,6 +44,7 @@ def mksavefile(prefix):
             #     path = saveToFile(req, form.cleaned_data.get('pastein'))
 
 class UploadForm(forms.Form):
+    type="UploadForm"
     title="Upload a File"
     file_upload = forms.FileField(required=True)
 
@@ -62,6 +65,7 @@ class UploadForm(forms.Form):
         return cleaned_data
 
 class UrlForm(forms.Form):
+    type="UrlForm"
     title="From URL"
     url = forms.URLField(label="From URL", required=True)
 
@@ -84,6 +88,7 @@ class UrlForm(forms.Form):
         return cleaned_data
 
 class PasteForm(forms.Form):
+    type="PasteForm"
     title="Paste as Text"
     pastein = forms.CharField(label="Paste in as text",
                               widget=forms.Textarea(attrs={'rows':3, 'cols':""}),
@@ -99,46 +104,43 @@ class PasteForm(forms.Form):
         return cleaned_data
 
 class EntrezSearchForm(forms.Form):
+    type="EntrezSearchForm"
     title="Search Entrez"
+    template="start/EntrezSearchForm.html"
     term = forms.CharField(label="Search Term",required=True)
 
-class EntrezSearchFormPOST(EntrezSearchForm):
-    WebEnv = forms.CharField(widget=forms.HiddenInput(), required=False)
-    QueryKey = forms.CharField(widget=forms.HiddenInput(), required=False)
     def clean(self):
         logger.debug("Starting handling Entrez search.")
         cleaned_data = self.cleaned_data
-        sess = pynpact.entrez.EntrezSession(library_root(),
-                                            QueryKey=cleaned_data['QueryKey'],
-                                            WebEnv=cleaned_data['WebEnv'])
-        if not cleaned_data.get('refine',False):
-            logger.debug("resetting session")
-            sess.reset()
-        sess.search(cleaned_data['term'])
-        self.cleaned_data['WebEnv'] = sess.WebEnv
-        self.cleaned_data['QueryKey'] = sess.QueryKey
-        logger.debug("Search finished, found %d matches", sess.result_count)
-        if sess.result_count == 1:
-            path = getrelpath(sess.fetch())
-        elif sess.result_count > 1:
-            raise forms.ValidationError("Too many results (%d) found, need 1. Try refining the search or searching for a RefSeq id." % (sess.result_count))
-        else:
-            raise forms.ValidationError("No results found.")
+        if cleaned_data.get('term'): 
+            self.session = pynpact.entrez.EntrezSession(library_root())
+
+            self.session.search(cleaned_data['term'])
+            logger.debug("Search finished, found %d matches", self.session.result_count)
+            if self.session.result_count == 1:
+                cleaned_data['path'] = getrelpath(self.session.fetch())
+            elif self.session.result_count > 1:
+                raise forms.ValidationError("Too many results (%d) found, need 1. Try refining the search or searching for a RefSeq id." % (self.session.result_count))
+            else:
+                raise forms.ValidationError("No results found.")
         return cleaned_data
 
 
 def build_forms(req):
     if req.method == 'POST':
         types = [UploadForm,UrlForm,PasteForm,EntrezSearchFormPOST]
-        active = int(req.POST['active'])
-        forms = []
-        for i,type in zip(range(len(types)),types):
-            if i == active:
-                forms.append(type(req.POST,req.FILES))
-            else:
-                forms.append(type())
+        active = req.POST['active']
+        cls = getattr(start,active,None)
+        return [ cls() ]
 
-        return forms
+        #forms = []
+        # for i,type in zip(range(len(types)),types):
+        #     if i == active:
+        #         forms.append(type(req.POST,req.FILES))
+        #     else:
+        #         forms.append(type())
+
+        # return forms
     else:
         types = [UploadForm,UrlForm,PasteForm,EntrezSearchForm]
         return [type() for type in types]
@@ -148,17 +150,26 @@ def view(req) :
     form = None
     if req.method == 'POST' :
         path=None
-        forms=build_forms(req)
-        submitted = forms[0]
+        active = req.POST['active']
+        cls = getattr(start,active)
+        submitted = cls(req.POST,req.FILES)
         if submitted.is_valid():
             logger.info("Form is valid")
             path = submitted.cleaned_data['path']
             raise RedirectException(reverse('run',args=[path]))
-
-        active = req.POST['active']
+        else :
+            forms = [submitted]
     else:
-        forms = build_forms(req)
-        active = "0"
+        types = [UploadForm,UrlForm,PasteForm,EntrezSearchForm]
+        forms = [type() for type in types]
+        active = ''
 
     return render_to_response('start.html',{'forms':forms, 'active':active},
                                   context_instance=RequestContext(req))
+
+
+def efetch(req, id):
+    logger.info("Asked to fetch Id: %s", id)
+    session = pynpact.entrez.EntrezSession(library_root())
+    path = getrelpath(session.fetch_id(id))
+    return HttpResponseRedirect(reverse('run',args=[path]))

@@ -6,10 +6,12 @@
 {% include_media 'jquery.js' %}
 <script type="text/javascript">
   $(function(){
-    $("#accordion").accordion({ header: "h4", clearStyle: false,
-                                active: {{ active }}
-//        change: function(event,ui) { $('#selected')[0].value = ui.newHeader.text(); }
-    });
+    if( $("#accordion > *").length > 1) {
+      $("#accordion").accordion({ header: "h3", clearStyle: false,
+  //    autoHeight:false,
+  //        change: function(event,ui) { $('#selected')[0].value = ui.newHeader.text(); }
+      });
+    }
     $('button').button()
   });
 </script>
@@ -25,25 +27,9 @@
 
 
     <input type="hidden" name="selected" value="" id="selected"/>
-    <h3>GenBank file from:</h3>
     <div id="accordion">
       {% for form in forms %}
-      <div>
-        <h4><a name="#">{{ form.title|title }}</a></h4>
-        {% if form.is_multipart %}
-        <form enctype="multipart/form-data" method="post" action="start">
-        {% else %}
-        <form method="post" action="start">
-        {% endif %}
-          {% csrf_token %} 
-          <input type="hidden" name="active" value="{{ forloop.counter0}}">
-          <div>
-            {{ form.as_p }}
-          </div>
-          <br>
-          <button>Start Analysis!</button>
-        </form>
-      </div>
+      {% include form.template|default:"start/form.html" %}
       {% endfor %}
     </div>
     <br/>
