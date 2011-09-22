@@ -42,8 +42,12 @@ class EntrezSession(object):
         self.WebEnv = None
         self.result_count = None
 
+    def has_session(self):
+        return self.QueryKey and len(self.QueryKey) and \
+               self.WebEnv and len(self.WebEnv)
+
     def search(self, term):
-        logger.debug("Starting Entrez query for %r", term)
+        logger.debug("Starting Entrez query for %r, session=%s", term, self.has_session())
         resp = Bio.Entrez.read(Bio.Entrez.esearch(db=self.db, term=term,
                                                   usehistory=True,
                                                   query_key=self.QueryKey,
@@ -61,7 +65,12 @@ class EntrezSession(object):
                                                         query_key=self.QueryKey))
         return summaries
 
-    def fetch(self, summary, filename=None):
+    def fetch(self, summary=None, filename=None):
+        if not summary:
+            if self.result_count == 1:
+                summary = self.summarize()[0]
+            else :
+                raise T
         id = summary['Id']
         #this appears to be the RefSeq Id.
         caption = summary['Caption']

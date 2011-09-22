@@ -7,6 +7,7 @@
 <script type="text/javascript">
   $(function(){
     $("#accordion").accordion({ header: "h4", clearStyle: false,
+                                active: {{ active }}
 //        change: function(event,ui) { $('#selected')[0].value = ui.newHeader.text(); }
     });
     $('button').button()
@@ -35,7 +36,7 @@
         <form method="post" action="start">
         {% endif %}
           {% csrf_token %} 
-          <input type="hidden" name="type" value="{{ form.type }}">
+          <input type="hidden" name="active" value="{{ forloop.counter0}}">
           <div>
             {{ form.as_p }}
           </div>

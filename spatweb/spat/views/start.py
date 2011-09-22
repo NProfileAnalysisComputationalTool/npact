@@ -5,6 +5,7 @@ import tempfile
 import urllib2
 
 import pynpact.util
+import pynpact.entrez
 
 from django import forms
 from django.conf import settings
@@ -15,7 +16,7 @@ from django.shortcuts import render_to_response
 from django.template import RequestContext
 
 from spat.middleware import RedirectException
-from spat.views import is_clean_path, getabspath, getrelpath
+from spat.views import is_clean_path, getabspath, getrelpath, library_root
 
 
 # Get an instance of a logger
@@ -40,9 +41,7 @@ def mksavefile(prefix):
             # elif form.cleaned_data.get('pastein') :
             #     path = saveToFile(req, form.cleaned_data.get('pastein'))
 
-
 class UploadForm(forms.Form):
-    type="UploadForm"
     title="Upload a File"
     file_upload = forms.FileField(required=True)
 
@@ -63,7 +62,6 @@ class UploadForm(forms.Form):
         return cleaned_data
 
 class UrlForm(forms.Form):
-    type="UrlForm"
     title="From URL"
     url = forms.URLField(label="From URL", required=True)
 
@@ -86,7 +84,6 @@ class UrlForm(forms.Form):
         return cleaned_data
 
 class PasteForm(forms.Form):
-    type="PasteForm"
     title="Paste as Text"
     pastein = forms.CharField(label="Paste in as text",
                               widget=forms.Textarea(attrs={'rows':3, 'cols':""}),
@@ -102,26 +99,48 @@ class PasteForm(forms.Form):
         return cleaned_data
 
 class EntrezSearchForm(forms.Form):
-    type="EntrezSearchForm"
     title="Search Entrez"
-    term = forms.CharField(label="Search Term")
-    refine = forms.BooleanField("Refine previous search",
-                                initial=True,
-                                help_text="Leave checked to search inside the previous results.")
+    term = forms.CharField(label="Search Term",required=True)
+
+class EntrezSearchFormPOST(EntrezSearchForm):
+    WebEnv = forms.CharField(widget=forms.HiddenInput(), required=False)
+    QueryKey = forms.CharField(widget=forms.HiddenInput(), required=False)
     def clean(self):
-        pass
+        logger.debug("Starting handling Entrez search.")
+        cleaned_data = self.cleaned_data
+        sess = pynpact.entrez.EntrezSession(library_root(),
+                                            QueryKey=cleaned_data['QueryKey'],
+                                            WebEnv=cleaned_data['WebEnv'])
+        if not cleaned_data.get('refine',False):
+            logger.debug("resetting session")
+            sess.reset()
+        sess.search(cleaned_data['term'])
+        self.cleaned_data['WebEnv'] = sess.WebEnv
+        self.cleaned_data['QueryKey'] = sess.QueryKey
+        logger.debug("Search finished, found %d matches", sess.result_count)
+        if sess.result_count == 1:
+            path = getrelpath(sess.fetch())
+        elif sess.result_count > 1:
+            raise forms.ValidationError("Too many results (%d) found, need 1. Try refining the search or searching for a RefSeq id." % (sess.result_count))
+        else:
+            raise forms.ValidationError("No results found.")
+        return cleaned_data
+
 
 def build_forms(req):
-    types = [UploadForm,UrlForm,PasteForm,EntrezSearchForm]
     if req.method == 'POST':
+        types = [UploadForm,UrlForm,PasteForm,EntrezSearchFormPOST]
+        active = int(req.POST['active'])
         forms = []
-        for type in types:
-            if type.__name__ == req.POST['type']:
-                forms.insert(0, type(req.POST,req.FILES))
+        for i,type in zip(range(len(types)),types):
+            if i == active:
+                forms.append(type(req.POST,req.FILES))
             else:
                 forms.append(type())
+
         return forms
     else:
+        types = [UploadForm,UrlForm,PasteForm,EntrezSearchForm]
         return [type() for type in types]
 
 
@@ -135,8 +154,11 @@ def view(req) :
             logger.info("Form is valid")
             path = submitted.cleaned_data['path']
             raise RedirectException(reverse('run',args=[path]))
+
+        active = req.POST['active']
     else:
         forms = build_forms(req)
+        active = "0"
 
-    return render_to_response('start.html',{'forms':forms},
+    return render_to_response('start.html',{'forms':forms, 'active':active},
                                   context_instance=RequestContext(req))
