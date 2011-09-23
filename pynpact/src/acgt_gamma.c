@@ -16,8 +16,8 @@ int	RANDOMIZE= 0;
 
 #define WRITE_SEQUENCES 0
 
-#define BASE_DIR "/Volumes/2TB_DIsk/"
-#define BASE_DIR_THRESHOLD_TABLES "/Users/luciano/ACGT_ORFS/data/"
+#define BASE_DIR NULL
+#define BASE_DIR_THRESHOLD_TABLES NULL
 
 # define ATG_POS5 45
 # define ATG_POS3 12
@@ -219,7 +219,7 @@ int check;
 
 int main (int argc, char *argv[])
 {
-    char	organism_file[256], *p;
+    char	*organism_file, *p;
     int	i, j, k, h, genome_size, tot_hss= 0, *o, tot_Ghits= 0, ncds, nexons= 0, on= 1;
     long	*ffrom, bytes_from_origin;
     int     minutes, secs;
@@ -232,8 +232,16 @@ int main (int argc, char *argv[])
     srand48(time(NULL));
     t0= time(NULL);
 
-    strcpy(organism_file,BASE_DIR);
-    strcat(organism_file,argv[1]);
+
+    if(BASE_DIR) {
+        organism_file = (char*)malloc(sizeof(char) * (strlen(BASE_DIR) + strlen(argv[1]) + 1));
+        strcpy(organism_file,BASE_DIR);
+        strcat(organism_file,argv[1]);
+    }
+    else{
+        organism_file=(char*)malloc(sizeof(char) * (strlen(argv[1]) + 1));
+        strcat(organism_file,argv[1]);
+    }
 
     if(strstr(organism_file, "Mycoplasma") || 
        strstr(organism_file, "Mesoplasma") || 
@@ -262,8 +270,7 @@ int main (int argc, char *argv[])
     strcpy(Output_name +  8 * 100 + strlen(Output_name + 8 * 100) - 4, ".faa");
 
 	if(argc == 3) SIGNIFICANCE= atof(argv[2]);
-	if(argc == 4)
-	{
+	if(argc == 4) {
         NAME_OFFSET= strlen(argv[3]);
         strcpy(common_name, argv[3]);
 	}
@@ -273,9 +280,12 @@ int main (int argc, char *argv[])
 
     sprintf(organism_file, "%s", organism_file);
 
-	if((fp = fopen(organism_file, "r")) == NULL) { fprintf(stderr, "fp file %s returns NULL\n", organism_file); exit(1); }
+	if((fp = fopen(organism_file, "r")) == NULL) { 
+        fprintf(stderr, "fp file %s returns NULL\n", organism_file); exit(1);
+    }
 
-    bytes_from_origin= annotation(&ncds, &nexons);		// Reads annotated CDSs and records start-of-sequence position in the file
+    // Reads annotated CDSs and records start-of-sequence position in the file
+    bytes_from_origin= annotation(&ncds, &nexons);		
 
     fprintf(stderr, "\nNum CDS: %d\nNum exons: %d\n", ncds, nexons);
 
@@ -3249,62 +3259,50 @@ int position(int a, int c, int g, int t)
 /*** Function read_tables()  ***/
 /*******************************/
 
-void read_tables()
-{
+void read_table(char* filename, int array_pos) {
     int	i, j;
-    char	input_file[200], longstr[1000];
+    char	*base_dir, *input_file, longstr[1000];
     FILE	*input;
+    
+    
+    base_dir = BASE_DIR_THRESHOLD_TABLES ? BASE_DIR_THRESHOLD_TABLES : getenv("BASE_DIR_THRESHOLD_TABLES");
 
-// Reads threshold values at p= 0.01
+    if(base_dir) {
+        input_file = (char*)malloc(sizeof(char) * (strlen(base_dir) + strlen(filename) + 1));
+        strcpy(input_file, base_dir);
+        strcat(input_file, filename);
+    }
+    else {
+        fprintf(stderr,"\nNo BASE_DIR_THRESHOLD_TABLES given in environment.\n");
+        exit(1);
+    }
 
-    strcpy(input_file, BASE_DIR_THRESHOLD_TABLES);
-    strcat(input_file, "scores100.table");
-
-	if((input= fopen(input_file,"r"))==NULL) { fprintf(stderr,"\n\nInput table %s not found.\n",input_file); exit(1); }
-
-    fgets(longstr, 998, input);
-
-	for(i= 0; i < 23426; ++i)
-	{
-        fgets(longstr, 998, input);
-        sscanf(longstr + 39 * LEN_TRANSFORM,"%f %f", threshold[0][i], threshold[0][i] + 1);
-	}
-
-    fclose(input);
-
-// Reads threshold values at p= 0.001
-
-    strcpy(input_file, BASE_DIR_THRESHOLD_TABLES);
-    strcat(input_file, "scores1000.table");
-
-	if((input= fopen(input_file,"r"))==NULL) { fprintf(stderr,"\n\nInput table %s not found.\n",input_file); exit(1); }
+	if((input= fopen(input_file,"r"))==NULL) { 
+        fprintf(stderr,"\n\nInput table %s not found.\n",input_file); 
+        exit(1);
+    }
 
     fgets(longstr, 998, input);
 
-	for(i= 0; i < 23426; ++i)
-	{
+	for(i= 0; i < 23426; ++i) {
         fgets(longstr, 998, input);
-        sscanf(longstr + 39 * LEN_TRANSFORM,"%f %f", threshold[1][i], threshold[1][i] + 1);
+        sscanf(longstr + 39 * LEN_TRANSFORM,"%f %f", threshold[array_pos][i], threshold[array_pos][i] + 1);
 	}
 
     fclose(input);
+    free(input_file);
+}
 
-// Reads threshold values at p= 0.0001
+void read_tables() {
 
-    strcpy(input_file, BASE_DIR_THRESHOLD_TABLES);
-    strcat(input_file, "scores10000.table");
+    // Reads threshold values at p= 0.01
+    read_table("scores100.table",0);
 
-	if((input= fopen(input_file,"r"))==NULL) { fprintf(stderr,"\n\nInput table %s not found.\n",input_file); exit(1); }
+    // Reads threshold values at p= 0.001
+    read_table("scores1000.table",1);
 
-    fgets(longstr, 998, input);
-
-	for(i= 0; i < 23426; ++i)
-	{
-        fgets(longstr, 998, input);
-        sscanf(longstr + 39 * LEN_TRANSFORM,"%f %f", threshold[2][i], threshold[2][i] + 1);
-	}
-
-    fclose(input);
+    // Reads threshold values at p= 0.0001
+    read_table("scores10000.table",2);
 }
 
 /*** End of function read_tables() ***/
