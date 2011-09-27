@@ -28,6 +28,7 @@ class build_pynpact(build) :
         for o in objects :
             basename = os.path.splitext(os.path.basename(o))[0]
             self.compiler.link_executable([o],self.compiler.executable_filename(basename,strip_dir=True),
+                                          libraries=['m'],
                                           output_dir=output_dir,debug=self.debug)
 
 

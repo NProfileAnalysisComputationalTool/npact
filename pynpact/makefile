@@ -1,7 +1,8 @@
-FLAGS = -ggdb
+FLAGS = -ggdb -lm
 SRCDIR = src
 OBJDIR = obj
 BINDIR = pynpact/bin
+CC = gcc
 
 SRC = $(shell find $(SRCDIR) | grep .c)
 OBJ = $(patsubst $(SRCDIR)/%.c, $(OBJDIR)/%.o, $(SRC))
@@ -18,10 +19,10 @@ init:
 	$(foreach DIR, $(patsubst $(SRCDIR)/%, $(OBJDIR)/%, $(shell find $(SRCDIR)/* -type d)), mkdir $(DIR))
 
 $(APPNAME): init $(OBJ)
-	gcc $(FLAGS) -o $(BINDIR)/$(APPNAME) $(OBJ)
+	$(CC) $(FLAGS) -o $(BINDIR)/$(APPNAME) $(OBJ)
 
 $(OBJDIR)/%.o: $(SRCDIR)/%.c
-	gcc $(FLAGS) -c $< -o $@
+	$(CC) $(FLAGS) -c $< -o $@
 
 $(BINDIR)/%: $(OBJDIR)/%.o
-	gcc $(FLAGS) -o $@ $<
+	$(CC) $(FLAGS) -o $@ $<

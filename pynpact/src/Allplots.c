@@ -80,7 +80,7 @@ char * ap_getl(FILE * f) {
     char * buf  = NULL;
     do {
         size += BUFSIZ; /* BUFSIZ is defined as "the optimal read size for this platform" */
-        buf = realloc(buf,size); /* realloc(NULL,n) is the same as malloc(n) */
+        buf = (char*) realloc(buf,size); /* realloc(NULL,n) is the same as malloc(n) */
         /* Actually do the read. Note that fgets puts a terminal '\0' on the
            end of the string, so we make sure we overwrite this */
         fgets(buf+len, BUFSIZ, f);
@@ -99,10 +99,7 @@ char * ap_getl(FILE * f) {
 }
 
 
-main(argc,argv)
-int	argc;
-char	*argv[];
-{
+main(int argc, char *argv[]) {
     int	i,j,k,n,N,lines,nub,nc,nn,nnP,np,ne,nb,ns,ncg,nB,ncp,nScp,nm,nk,nt,ncap,ncca,ngcb,gs,ge,lp,len,period=3,swflag=1,
         start,end,pos,tstart,line_range,unbf=0,conf=0,newf=0,newPf=0,cgf=0,cpf= 0,Scpf= 0, npali= 0;
     float	r,tpr,delta,pp,S[3];
