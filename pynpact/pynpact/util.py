@@ -44,10 +44,10 @@ def ensure_dir(dir, logger=None) :
 
 def withDir(dir, fn, *args,**kwargs) :
     olddir = os.getcwd()
-    try :
+    try:
         os.chdir(dir)
         return fn(*args,**kwargs)
-    finally :
+    finally:
         os.chdir(olddir)
 
 
@@ -160,10 +160,10 @@ sure the bz2 process gets killed when the with block is exited.
 """
     popen = None
     logger = kwargs.get('logger')
-    try :
+    try:
         popen = capturedPopen(cmd,**kwargs)
         yield popen
-    finally :
+    finally:
         if popen:
             while popen.poll() == None and timeout and timeout_count > 0 :
                 if logger:
@@ -253,7 +253,7 @@ with mkstemp_overwrite('foobar.txt') as f:
         mtime1 = os.path.getmtime(destination)
 
     (fd,path) = tempfile.mkstemp(**kwargs)
-    try :
+    try:
         filelike = os.fdopen(fd,'wb')
         yield filelike
         filelike.close()
@@ -268,7 +268,7 @@ with mkstemp_overwrite('foobar.txt') as f:
         if conflict_overwrite or mtime1 == mtime2 :
             #TODO: permissions?
             os.rename(path,destination)
-    finally :
+    finally:
         if cleanup and os.path.exists(path) :
             if logger :
                 logger.info("Cleaning up leftover tempfile %r", path)

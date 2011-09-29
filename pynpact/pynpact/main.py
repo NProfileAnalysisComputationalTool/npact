@@ -60,7 +60,7 @@ class GenBankProcessor(object) :
             self.logger.info("Parsing genbank file: %r", gbkfile)
             #TODO: gbk can have multiple records in which case this
             #will err (i wasn't able to find one that did though)
-            try :
+            try:
                 self.seqrec = SeqIO.read(gbkfile,"genbank")
                 self.config['length'] = len(self.seqrec)
             except:
@@ -115,9 +115,9 @@ multiprocess safe way) setting class defaults
         """A wrapper for tempfile.mkdtemp, sets defaults based on class variables"""
         kwargs.setdefault('dir', self.outputdir)
         path = tempfile.mkdtemp(**kwargs)
-        try :
+        try:
             yield path
-        finally :
+        finally:
             if self.cleanup :
                 self.logger.debug("Cleaning up mkdtemp %r", path)
                 shutil.rmtree(path,ignore_errors=True)
@@ -149,7 +149,7 @@ multiprocess safe way) setting class defaults
                             print_feature(desc[0],f.strand,f.location.nofuzzy_start, f.location.nofuzzy_end)
         return self.safe_produce_new(self.derivative_filename("extracted"), func,
                                      dependencies=[self.gbkfile])
-    
+
     def original_extract(self) :
         """Go through the genbank record pulling out gene names and locations
         $ extract MYCGE.gbk 0 gene 0 locus_tag > MYCGE.genes
@@ -195,8 +195,8 @@ $ CG MYCGE.gbk 1 580074 201 51 3 > MYCGE.CG200
             cmd = [binfile("acgt_gamma"), self.gbkfile]
             if config.has_key('Significance'):
                 cmd.append(config['Significance'])
-                
-            
+
+
             with self.mkdtemp() as dtemp:
                 self.logger.info("Starting prediction program in %s", dtemp)
                 util.capturedCall(cmd, cwd=dtemp, check=True,
@@ -216,9 +216,9 @@ $ CG MYCGE.gbk 1 580074 201 51 3 > MYCGE.CG200
         self.config['File_of_new_CDSs'] = j(".newcds")
         self.config['File_of_published_rejected_CDSs'] = j(".modified")
         self.config['File_of_G+C_coding_potential_regions'] = j('.profiles')
-        
-        
-            
+
+
+
 
     ####################################################################
     ## Working with Allplots
@@ -306,7 +306,7 @@ period_of_frame       Number of frames.
 
                     self.logger.debug("Starting Allplots page %d for %r",
                                       i+1, os.path.basename(self.gbkfile))
-                    
+
                     cmd = [binfile("Allplots"), i*ppage, ppage, 5, 1000, 3]
                     util.capturedCall(cmd, stdout=psout, stderr=False,
                                       logger=self.logger, cwd=dtemp, check=True)
