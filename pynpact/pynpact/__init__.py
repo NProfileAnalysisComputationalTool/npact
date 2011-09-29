@@ -15,3 +15,5 @@ def binfile(name) :
     assert os.path.exists(path), "Missing pynpact/bin/" + name + ", perhaps you need to run make?"
     return  path
 
+
+DATAPATH=os.path.realpath(os.path.join(os.path.dirname(__file__), "data"))

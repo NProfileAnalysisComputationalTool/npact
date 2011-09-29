@@ -5,7 +5,7 @@ from contextlib import contextmanager
 
 from Bio import SeqIO
 
-from pynpact import binfile
+from __init__ import binfile,DATAPATH
 import util
 
 logger = logging.getLogger(__name__)
@@ -159,6 +159,7 @@ multiprocess safe way) setting class defaults
                                            'GeneDescriptorSkip1', 'GeneDescriptorSkip2',
                                            ])
         def func(f) :
+            logger.info("starting extract for %s", self.gbkfile)
             cmd = [binfile("extract"), self.gbkfile,
                    config['GeneDescriptorSkip1'], config['GeneDescriptorKey1'],
                    config['GeneDescriptorSkip2'], config['GeneDescriptorKey2']]
@@ -181,8 +182,43 @@ $ CG MYCGE.gbk 1 580074 201 51 3 > MYCGE.CG200
         progargs = [binfile("CG"), self.gbkfile, 1, config['length'],
                     config['window_size'], config['step'], config['period']]
         func = lambda out: util.capturedCall(progargs, stdout=out, logger=self.logger, check=True)
-        return self.safe_produce_new(outfilename,func, dependencies=[self.gbkfile])
+        return self.safe_produce_new(outfilename, func, dependencies=[self.gbkfile])
 
+
+    def acgt_gamma(self):
+        "Run the acgt_gamma gene prediction program."
+        config,hash = util.reducehashdict(self.config,
+                                          ['Significance', 'GeneDescriptorSkip1'])
+        #TODO: acgt actually takes the string of characters to skip, not the length.
+        outdir = self.derivative_filename('.{0}.predict'.format(hash))
+        if util.is_outofdate(outdir, self.gbkfile):
+            cmd = [binfile("acgt_gamma"), self.gbkfile]
+            if config.has_key('Significance'):
+                cmd.append(config['Significance'])
+                
+            
+            with self.mkdtemp() as dtemp:
+                self.logger.info("Starting prediction program in %s", dtemp)
+                util.capturedCall(cmd, cwd=dtemp, check=True,
+                                  env={'BASE_DIR_THRESHOLD_TABLES':DATAPATH},
+                                  logger=self.logger)
+                if os.path.exists(outdir):
+                    self.loger.debug("Removing existing prediction output at %s", outdir)
+                    shutil.rmtree(outdir)
+                self.logger.debug("Renaming from %s to %s", dtemp, outdir)
+                os.rename(dtemp,outdir)
+
+        self.logger.debug("Adding prediction filenames to config dict.")
+        #strip 4 characters off here b/c that's how acgt_gamma does it
+        #at about lines 262-270
+        gbkbase = os.path.filename(self.gbkfile)[:-4]
+        j = lambda ext: os.path.join(outdir,gbkbase + ext)
+        self.config['File_of_new_CDSs'] = j(".newcds")
+        self.config['File_of_published_rejected_CDSs'] = j(".modified")
+        self.config['File_of_G+C_coding_potential_regions'] = j('.profiles')
+        
+        
+            
 
     ####################################################################
     ## Working with Allplots

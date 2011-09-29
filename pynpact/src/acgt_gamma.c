@@ -240,7 +240,7 @@ int main (int argc, char *argv[])
     }
     else{
         organism_file=(char*)malloc(sizeof(char) * (strlen(argv[1]) + 1));
-        strcat(organism_file,argv[1]);
+        strcpy(organism_file,argv[1]);
     }
 
     if(strstr(organism_file, "Mycoplasma") || 
@@ -269,7 +269,8 @@ int main (int argc, char *argv[])
     strcpy(Output_name +  7 * 100 + strlen(Output_name + 7 * 100) - 4, ".ffn");
     strcpy(Output_name +  8 * 100 + strlen(Output_name + 8 * 100) - 4, ".faa");
 
-	if(argc == 3) SIGNIFICANCE= atof(argv[2]);
+	if(argc >= 3) 
+        SIGNIFICANCE= atof(argv[2]);
 	if(argc == 4) {
         NAME_OFFSET= strlen(argv[3]);
         strcpy(common_name, argv[3]);
@@ -278,7 +279,7 @@ int main (int argc, char *argv[])
     hss= (struct HSSs *)malloc(sizeof(struct HSSs));
     gene= (struct exons *)malloc(sizeof(struct exons));
 
-    sprintf(organism_file, "%s", organism_file);
+    //sprintf(organism_file, "%s", organism_file);
 
 	if((fp = fopen(organism_file, "r")) == NULL) { 
         fprintf(stderr, "fp file %s returns NULL\n", organism_file); exit(1);
@@ -1138,7 +1139,7 @@ double score(char *seq,int n,double *sc,int *from,int *to, int flag)
 long annotation(int *ncds, int *nexons)
 {
     int     n= 0, i, j, k, len= 0, lcds, flag= 0;
-    char    longstr[500], *cds, *p, *p1, *p2;
+    char    longstr[512], *cds, *p, *p1, *p2;
 
     cds= (char *)malloc(sizeof(char));
 
@@ -1256,7 +1257,10 @@ long annotation(int *ncds, int *nexons)
                 gene[n].span= gene[n].to - gene[n].from + 1;
 			}
 
-			if(gene[n].span <= 0) fprintf(stderr, "\nGene %c %d..%d across origin of replication\n", gene[n].strand, gene[n].from, gene[n].to);
+			if(gene[n].span <= 0) 
+                fprintf(stderr, 
+                        "\nGene %c %d..%d across origin of replication\n", 
+                        gene[n].strand, gene[n].from, gene[n].to);
 		
             ++n;
 		}
@@ -1265,8 +1269,10 @@ long annotation(int *ncds, int *nexons)
             if(p= strstr(longstr, "/gene="))
             {
 				p[strlen(p) - 2]= '\0';
-                if(NAME_OFFSET && strstr(p + 7, common_name)) strcpy(gene[n - 1].name, p + 7 + NAME_OFFSET);
-                else                                          strcpy(gene[n - 1].name, p + 7);
+                if(NAME_OFFSET && strstr(p + 7, common_name))
+                    strcpy(gene[n - 1].name, p + 7 + NAME_OFFSET);
+                else
+                    strcpy(gene[n - 1].name, p + 7);
 				flag= 0;
             }
             if((p= strstr(longstr, "/locus_tag=")) && !strlen(gene[n - 1].name))
@@ -3268,8 +3274,11 @@ void read_table(char* filename, int array_pos) {
     base_dir = BASE_DIR_THRESHOLD_TABLES ? BASE_DIR_THRESHOLD_TABLES : getenv("BASE_DIR_THRESHOLD_TABLES");
 
     if(base_dir) {
-        input_file = (char*)malloc(sizeof(char) * (strlen(base_dir) + strlen(filename) + 1));
+        input_file = (char*)malloc(sizeof(char) * (strlen(base_dir) + strlen(filename) + 2));
         strcpy(input_file, base_dir);
+        if (input_file[strlen(input_file)] != '/') {
+            strcat(input_file,'/');
+        }
         strcat(input_file, filename);
     }
     else {
