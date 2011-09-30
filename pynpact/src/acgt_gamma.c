@@ -3297,28 +3297,30 @@ int position(int a, int c, int g, int t)
 /*******************************/
 
 void read_table(char* filename, int array_pos) {
+    int len;
     int	i, j;
-    char	*base_dir, *input_file, longstr[1000];
+    char	*base_dir, *absfilename, longstr[1000];
     FILE	*input;
     
     
     base_dir = BASE_DIR_THRESHOLD_TABLES ? BASE_DIR_THRESHOLD_TABLES : getenv("BASE_DIR_THRESHOLD_TABLES");
 
     if(base_dir) {
-        input_file = (char*)malloc(sizeof(char) * (strlen(base_dir) + strlen(filename) + 2));
-        strcpy(input_file, base_dir);
-        if (input_file[strlen(input_file)] != '/') {
-            strcat(input_file,'/');
+        len = strlen(base_dir) + strlen(filename) + 2;
+        absfilename = (char*) malloc(sizeof(char) * len);
+        strcpy(absfilename, base_dir);
+        if (absfilename[strlen(absfilename)] != '/') {
+            strcat(absfilename,"/");
         }
-        strcat(input_file, filename);
+        strcat(absfilename, filename);
     }
     else {
         fprintf(stderr,"\nNo BASE_DIR_THRESHOLD_TABLES given in environment.\n");
         exit(1);
     }
 
-	if((input= fopen(input_file,"r"))==NULL) { 
-        fprintf(stderr,"\n\nInput table %s not found.\n",input_file); 
+	if((input= fopen(absfilename,"r"))==NULL) { 
+        fprintf(stderr,"\n\nInput table %s not found.\n",absfilename); 
         exit(1);
     }
 
@@ -3330,7 +3332,7 @@ void read_table(char* filename, int array_pos) {
 	}
 
     fclose(input);
-    free(input_file);
+    free(absfilename);
 }
 
 void read_tables() {
