@@ -217,14 +217,19 @@ void	print_amino_acids(char *seq, int len, FILE *output);
 
 int check;
 
+int quiet = 0;
+#define logmsg(level,...) if(level >= quiet) { fprintf(stderr,__VA_ARGS__); }
+
 int main (int argc, char *argv[])
 {
-    char	*organism_file, *p;
+    char	*organism_file, *p, *opt;
     int	i, j, k, h, genome_size, tot_hss= 0, *o, tot_Ghits= 0, ncds, nexons= 0, on= 1;
     long	*ffrom, bytes_from_origin;
     int     minutes, secs;
     time_t	t0, t1, t2;
     double	nuc[24], tnuc[5]= {0.0};
+
+    int argi = 1;
 		
     define_characterizations();
 	if(!REPETITIONS) read_tables();
@@ -232,24 +237,41 @@ int main (int argc, char *argv[])
     srand48(time(NULL));
     t0= time(NULL);
 
+    /**** Parse command line options ****/
+    while (argi < argc && argv[argi][0] == '-') {
+        opt = argv[argi];
+        if(strcmp(opt, "-q") == 0) {
+            quiet += 10;
+            argi++;
+        }
+        /* else if (strcmp(opt, "") == 0) {} */
+    }
 
+
+    /* Consume the GBK filename the 1st argument */
     if(BASE_DIR) {
-        organism_file = (char*)malloc(sizeof(char) * (strlen(BASE_DIR) + strlen(argv[1]) + 1));
-        strcpy(organism_file,BASE_DIR);
-        strcat(organism_file,argv[1]);
+        organism_file = (char*) malloc(sizeof(char) * (strlen(BASE_DIR) + strlen(argv[argi]) + 1));
+        strcpy(organism_file, BASE_DIR);
+        strcat(organism_file, argv[argi]);
     }
     else{
-        organism_file=(char*)malloc(sizeof(char) * (strlen(argv[1]) + 1));
-        strcpy(organism_file,argv[1]);
+        organism_file=(char*)malloc(sizeof(char) * (strlen(argv[argi]) + 1));
+        strcpy(organism_file,argv[argi]);
     }
+    argi++;
 
     if(strstr(organism_file, "Mycoplasma") || 
        strstr(organism_file, "Mesoplasma") || 
        strstr(organism_file, "Ureaplasma") || 
        strstr(organism_file, "Candidatus_Hodgkinia")) 
         MYCOPLASMA= 1;
+    p = strrchr(organism_file,'/');
+    if(p)
+        p++;
+    else
+        p = organism_file;
 
-    p= strrchr(organism_file,'/'); ++p;
+    /* Calculate the outputfilenames, pack them into big array output_name */
     strcpy(Output_name, p);
     strcpy(Output_name + 100, p);
     strcpy(Output_name + 2 * 100, p);
@@ -269,12 +291,17 @@ int main (int argc, char *argv[])
     strcpy(Output_name +  7 * 100 + strlen(Output_name + 7 * 100) - 4, ".ffn");
     strcpy(Output_name +  8 * 100 + strlen(Output_name + 8 * 100) - 4, ".faa");
 
-	if(argc >= 3) 
-        SIGNIFICANCE= atof(argv[2]);
-	if(argc == 4) {
-        NAME_OFFSET= strlen(argv[3]);
-        strcpy(common_name, argv[3]);
+    /* consume the significance, the 2nd argument. */
+	if(argc > argi) 
+        SIGNIFICANCE= atof(argv[argi]);
+    argi++;
+
+    /* consume the offset name, 3rd argument */
+	if(argc > argi) {
+        NAME_OFFSET= strlen(argv[argi]);
+        strcpy(common_name, argv[argi]);
 	}
+    argi++;
 
     hss= (struct HSSs *)malloc(sizeof(struct HSSs));
     gene= (struct exons *)malloc(sizeof(struct exons));
@@ -287,8 +314,8 @@ int main (int argc, char *argv[])
 
     // Reads annotated CDSs and records start-of-sequence position in the file
     bytes_from_origin= annotation(&ncds, &nexons);		
-
-    fprintf(stderr, "\nNum CDS: %d\nNum exons: %d\n", ncds, nexons);
+    
+    logmsg(10,"\nNum CDS: %d\nNum exons: %d\n", ncds, nexons);
 
     ffrom= (long *)malloc(nexons * sizeof(long));
     o= (int *)malloc(nexons * sizeof(int));
@@ -300,14 +327,16 @@ int main (int argc, char *argv[])
     fseek(fp, bytes_from_origin, SEEK_SET);				// Resets file pointer to start of sequence
 
 
-    fprintf(stdout,"Genome: ~/%s\nGenome size: %d\nUnknown bases: %d\nNumber of CDS annotated in file: %d (%d exons).",argv[1],genome_size, ttinvalid_base, ncds, nexons);
-	if(p= strrchr(argv[1], '/')) ++p;
-	else p= argv[1];
+    fprintf(stdout, "Genome: \"%s\"  size: %d  Unknown bases: %d\n",
+            p, genome_size, ttinvalid_base);
+    fprintf(stdout, "Number of CDS annotated in file: %d (%d exons).\n", ncds, nexons);
 
-    fprintf(stderr,"\n%s", p);
-    fprintf(stdout,"\nComposition: A: %.2f%%, C: %.2f%%, G: %.2f%%, T: %.2f%%.\n",tnuc[0]*100.0/tnuc[4],tnuc[1]*100.0/tnuc[4],tnuc[2]*100.0/tnuc[4],tnuc[3]*100.0/tnuc[4]);
-    fprintf(stdout,"\nSignificance level: %.4f\n",SIGNIFICANCE);
-    fprintf(stderr,"\nAnalyzing genome reading frames:     ");
+
+    fprintf(stdout,"Composition: A: %.2f%%, C: %.2f%%, G: %.2f%%, T: %.2f%%.\n",
+            tnuc[0]*100.0/tnuc[4],tnuc[1]*100.0/tnuc[4],tnuc[2]*100.0/tnuc[4],tnuc[3]*100.0/tnuc[4]);
+    fprintf(stdout,"Significance level: %.4f\n", SIGNIFICANCE);
+
+    logmsg(10,"\nAnalyzing genome reading frames:     ");
 
 /* Finds and tests orfs in all 6 frames */
 
@@ -323,8 +352,8 @@ int main (int argc, char *argv[])
 
 /************/
 		
-    fprintf(stdout,"\nTotal HSS: %d\n",tot_hss);
-// for(i= 0; i < tot_hss; ++i) fprintf(stderr,"%5d.\t%d\t%d\t%c%d\n",i+1,hss[i].fromp,hss[i].top,hss[i].strand,hss[i].frame);
+    fprintf(stdout,"Total HSS: %d\n",tot_hss);
+    //for(i= 0; i < tot_hss; ++i) logmsg(10,"%5d.\t%d\t%d\t%c%d\n",i+1,hss[i].fromp,hss[i].top,hss[i].strand,hss[i].frame);
 
     rescue_hss(tot_hss);                                    // Rescues excluded HSSs 
 
@@ -334,8 +363,8 @@ int main (int argc, char *argv[])
     minutes= (int)(t1 - t0) / 60;
     secs= ((int)(t1 - t0)) % 60;
 
-    fprintf(stdout, "\nScoring time: %d\' %d\"\n", minutes, secs);
-    fprintf(stderr,"\nChecking for other compositional asymmetries (G-tests):     ");
+    fprintf(stdout, "Scoring time: %d\' %d\"\n", minutes, secs);
+    logmsg(10, "\nChecking for other compositional asymmetries (G-tests):     ");
 
     tot_Ghits= find_Ghits(genome_size, tot_hss, bytes_from_origin, &on);     // G-tests
     fseek(fp, bytes_from_origin, SEEK_SET);
@@ -345,7 +374,7 @@ int main (int argc, char *argv[])
     secs= ((int)(t2 - t1)) % 60;
     fprintf(stdout, "\n\nG-test time: %d\' %d\"\n", minutes, secs);
 
-    fprintf(stderr,"\nCharacterizing %d published genes:     ",ncds);
+    logmsg(10, "\nCharacterizing %d published genes:     ",ncds);
     characterize_published_genes(ncds, tot_Ghits, nuc, bytes_from_origin, ffrom);   // List published genes characterized by content annotation
 
     process_hss(tot_hss, tot_Ghits, ncds);     // Characterizes genes predicted by G-test
@@ -503,7 +532,7 @@ int analyze_genome(int genome_size, int tot_hss, int *on)
 		if (c >= 'a' && c <= 'z')
 		{
             ++pos;
-            fprintf(stderr,"\b\b\b\b%3d%%",(int)((double)pos / ((double)genome_size) * 100.0 + 0.5));
+            logmsg(0,"\b\b\b\b%3d%%",(int)((double)pos / ((double)genome_size) * 100.0 + 0.5));
 
 			for(k= 0; k < 3; ++k)
 			{
@@ -660,8 +689,8 @@ int analyze_genome(int genome_size, int tot_hss, int *on)
 		}
 	}
 
-    fprintf(stderr,"\b\b\b\b100%%\n");
-    fprintf(stdout,"\nTotal # orfs (len >= %d): %d\n", mHL, tot_orfs[0] + tot_orfs[1] + tot_orfs[2] + tot_orfs[3] + tot_orfs[4] + tot_orfs[5]);
+    logmsg(0,"\b\b\b\b100%%\n");
+    fprintf(stdout,"Total # orfs (len >= %d): %d\n", mHL, tot_orfs[0] + tot_orfs[1] + tot_orfs[2] + tot_orfs[3] + tot_orfs[4] + tot_orfs[5]);
 
     return(tot_hss);
 }	
@@ -895,7 +924,7 @@ int score_orf_table(char *orf, int n, int tot_hss)
                 else if(k == 2) hss[tot_hss + h].prob= 0.0001;
                 hss[tot_hss+h].type= 5;
 
-// fprintf(stderr,"\nSEGMENT FOUND (len: %d; Score: %.3f). ", to_pos - from_pos + 1, maxscore);
+                //logmsg(10,"\nSEGMENT FOUND (len: %d; Score: %.3f). ", to_pos - from_pos + 1, maxscore);
 
 // Checks HSS against alternative reading frames:
 
@@ -2291,7 +2320,7 @@ void rescue_hss(int to_hss)
 		}
 	}
 
-    fprintf(stderr,"\n\nTotal rescued hss: %d\n\n",tot);
+    logmsg(10,"\n\nTotal rescued hss: %d\n\n",tot);
 }
 
 /***** End of function rescue_hss()  *****/
@@ -2313,7 +2342,7 @@ void process_hss(int from_hss, int to_hss, int ncds)
 
 //Hits sorted by maximum length of global significance (the longer the length the higher the significance)
 
-    fprintf(stderr, "\n\nEvaluating global significance.."); 
+    logmsg(10, "\n\nEvaluating global significance.."); 
 
 	for(i= 0; i < to_hss - 1; ++i)
 		for(j= i + 1; j < to_hss; ++j)
@@ -2357,7 +2386,7 @@ void process_hss(int from_hss, int to_hss, int ncds)
 
 // This sorts hits by the score per unit length of hit (i.e., differential of cumulative score)
  
-    fprintf(stderr, "\n\nSorting hits by score slope.."); 
+    logmsg(10, "\n\nSorting hits by score slope.."); 
  
 	for(i= 0; i < to_hss; ++i) o[i]= i;
 
@@ -2399,13 +2428,13 @@ void process_hss(int from_hss, int to_hss, int ncds)
 //         }
 
 
-    fprintf(stderr, "\n\nProcessing HSSs:     "); 
+    logmsg(10, "\n\nProcessing HSSs:     "); 
 
 // Checks overlap with annotated genes and with higher-scoring HSSs
 
 	for(i= 0; i < to_hss; ++i)
 	{
-        fprintf(stderr,"\b\b\b\b%3.0f%%",(float)(i+1)/(float)(to_hss+1)*100.0);
+        logmsg(0,"\b\b\b\b%3.0f%%",(float)(i+1)/(float)(to_hss+1)*100.0);
 		if(hss[o[i]].type != 5)
 		{
             k= 0;
@@ -2517,7 +2546,7 @@ void process_hss(int from_hss, int to_hss, int ncds)
 		}
 	}
 
-    fprintf(stderr,"\b\b\b\b100%%");
+    logmsg(0,"\b\b\b\b100%%");
 
 // Renumbers hits within each orf including only those of type 5:
 
@@ -2906,7 +2935,7 @@ int find_Ghits(int genome_size, int tot_hss, long bytes_from_origin, int *on)
 		
 		if(g1 - g0 + 1  >= mHL)
 		{
-            fprintf(stderr,"\b\b\b\b%3d%%",(int)((double)g0 / ((double)genome_size) * 100.0) );
+            logmsg(0,"\b\b\b\b%3d%%",(int)((double)g0 / ((double)genome_size) * 100.0) );
 
             get_sequence(g0 - g3 + 1, g1 - g0 + 1, 'D', ORF);
 
@@ -2986,7 +3015,7 @@ int find_Ghits(int genome_size, int tot_hss, long bytes_from_origin, int *on)
 	
     free(o);
 	
-    fprintf(stderr,"\b\b\b\b100%%\n");
+    logmsg(0,"\b\b\b\b100%%\n");
     fprintf(stdout,"\nTotal G-hits: %d", tot_Ghits - tot_hss);
 	
     return(tot_Ghits);
@@ -3027,7 +3056,7 @@ void characterize_published_genes(int ncds, int tot_Ghits, double nuc[], long by
 
 	for(j= 0; j < ncds; ++j)
 	{
-        fprintf(stderr,"\b\b\b\b%3.0f%%",(float)(j+1)/((float)ncds)*100.0);
+        logmsg(0,"\b\b\b\b%3.0f%%",(float)(j+1)/((float)ncds)*100.0);
         l= 0;
 
 // Assembles exons
