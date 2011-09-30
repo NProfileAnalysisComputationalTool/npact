@@ -870,24 +870,37 @@ int score_orf_table(char *orf, int n, int tot_hss)
 	a[2]= threshold[2][i][0];
 	b[2]= threshold[2][i][1];
 
-    if(LEN_TRANSFORM == 0) X= (double)n; 
-    else if(LEN_TRANSFORM == 1) X= log((double)n); 
-    else if(LEN_TRANSFORM == 2) X= log(log((double)n)); 
-    else if(LEN_TRANSFORM == 3) X= log(log(log((double)n))); 
-    else { fprintf(stderr,"\n\nLEN_TRANSFORM can only be defined as 0= len, 1= ln(len), 2= ln(ln(len)), or 3= ln(ln(ln(len)))\n"); exit(1); }
+    if(LEN_TRANSFORM == 0) 
+        X= (double)n; 
+    else if(LEN_TRANSFORM == 1) 
+        X= log((double)n); 
+    else if(LEN_TRANSFORM == 2) 
+        X= log(log((double)n)); 
+    else if(LEN_TRANSFORM == 3) 
+        X= log(log(log((double)n))); 
+    else { 
+        fprintf(stderr,"\n\nLEN_TRANSFORM can only be defined as 0= len, 1= ln(len), 2= ln(ln(len)), or 3= ln(ln(ln(len)))\n"); 
+        exit(1);
+    }
 
 	thr[0]= a[0] * X + b[0];
 	thr[1]= a[1] * X + b[1];
 	thr[2]= a[2] * X + b[2];
 
-// fprintf(stderr,"\n%d %d %d %d %d   %.3f %.3f %.3f\n",n,nuc[0], nuc[1], nuc[2], nuc[3], thr[0],thr[1],thr[2]);
+    //logmsg(10,"\n%d %d %d %d %d   %.3f %.3f %.3f\n",n,nuc[0], nuc[1], nuc[2], nuc[3], thr[0],thr[1],thr[2]);
 
 	down_thr= thr[0];
 
-    if(SIGNIFICANCE == 0.01) t= 0;
-    else if(SIGNIFICANCE == 0.001) t= 1;
-    else if(SIGNIFICANCE == 0.0001) t= 2;
-    else { fprintf(stderr,"\n\nWhen using tables significance values can only be 0.01, 0.001, or 0.0001.\n"); exit(1); }
+    if(SIGNIFICANCE == 0.01) 
+        t= 0;
+    else if(SIGNIFICANCE == 0.001) 
+        t= 1;
+    else if(SIGNIFICANCE == 0.0001) 
+        t= 2;
+    else { 
+        fprintf(stderr,"\n\nWhen using tables significance values can only be 0.01, 0.001, or 0.0001.\n"); 
+        exit(1);
+    }
 	
 // Finds HSSs in ORF:
 
@@ -1317,7 +1330,10 @@ long annotation(int *ncds, int *nexons)
         }
 	}
 
-	if(strncmp(longstr,"ORIGIN",6)) { fprintf(stderr,"\nLine ORIGIN not found in file. Exiting.\n"); exit(1); }
+	if(strncmp(longstr,"ORIGIN",6)) { 
+        fprintf(stderr,"\nLine ORIGIN not found in file. Exiting.\n"); 
+        exit(1);
+    }
 
     ncds[0]= n;
 
