@@ -393,6 +393,8 @@ int main (int argc, char *argv[])
     minutes= (int)(t2 - t0) / 60;
     secs= ((int)(t2 - t0)) % 60;
     fprintf(stdout, "Total run time: %d\' %d\"\n\n", minutes, secs);
+
+    return 0;
 }
 
 /************ END OF MAIN ************/
