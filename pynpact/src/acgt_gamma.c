@@ -309,7 +309,8 @@ int main (int argc, char *argv[])
     //sprintf(organism_file, "%s", organism_file);
 
 	if((fp = fopen(organism_file, "r")) == NULL) { 
-        fprintf(stderr, "fp file %s returns NULL\n", organism_file); exit(1);
+        fprintf(stderr, "Organism file %s not found.\n", organism_file); 
+        exit(1);
     }
 
     // Reads annotated CDSs and records start-of-sequence position in the file
@@ -372,7 +373,7 @@ int main (int argc, char *argv[])
     t2= time(NULL);
     minutes= (int)(t2 - t1) / 60;
     secs= ((int)(t2 - t1)) % 60;
-    fprintf(stdout, "\n\nG-test time: %d\' %d\"\n", minutes, secs);
+    fprintf(stdout, "G-test time: %d\' %d\"\n", minutes, secs);
 
     logmsg(10, "\nCharacterizing %d published genes:     ",ncds);
     characterize_published_genes(ncds, tot_Ghits, nuc, bytes_from_origin, ffrom);   // List published genes characterized by content annotation
@@ -388,11 +389,11 @@ int main (int argc, char *argv[])
     free(gene);
 
 
-    fprintf(stdout, "\nTotal hss scored: %d\n\n", tot_Ghits);
+    fprintf(stdout, "\nTotal hss scored: %d\n", tot_Ghits);
     t2= time(NULL);
     minutes= (int)(t2 - t0) / 60;
     secs= ((int)(t2 - t0)) % 60;
-    fprintf(stdout, "Total run time: %d\' %d\"\n\n", minutes, secs);
+    fprintf(stdout, "Total run time: %d\' %d\"\n", minutes, secs);
 
     return 0;
 }

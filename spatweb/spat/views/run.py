@@ -10,7 +10,7 @@ from django import forms
 from django.contrib import messages
 
 
-from __init__ import session_key, is_clean_path
+from __init__ import session_key, is_clean_path, getabspath, getrelpath
 from spat.middleware import RedirectException
 
 from pynpact import prepare, main
@@ -29,7 +29,7 @@ class RunForm(forms.Form) :
     length=forms.IntegerField(required=True, min_value=0,
                               widget=get_ti(size=8))
 
-def prefill_form(request, path, parse_data) :
+def prefill_form(request, path, parse_data):
 
     title = parse_data.get('description') or parse_data.get('basename')
     form = RunForm(initial={'first_page_title': title,
@@ -39,23 +39,25 @@ def prefill_form(request, path, parse_data) :
 
     return form
 
-def get_display_items(request,parse_data) :
+def get_display_items(request, parse_data):
     yield ('Filename', parse_data['basename'])
     for key in ['date','length','description'] :
         if parse_data.get(key) :
             yield key, parse_data.get(key)
 
 
-def run_it(request, path, form,parse_data) :
-    config = prepare.default_config(parse_data)
+def run_it(request, path, form, parse_data):
+    config = prepare.default_config(getabspath(path))
+
     for k in ['first_page_title', 'following_page_title'] :
         if form.cleaned_data.get(k) :
             config[k] = form.cleaned_data[k]
 
-    gbp = main.GenBankProcessor(os.path.join(settings.MEDIA_ROOT, path), config=config)
+    gbp = main.GenBankProcessor(getabspath(path), config=config)
     psname = gbp.run_Allplots()
     logger.debug("Got back ps file: %r", psname)
-    psname = os.path.relpath(psname, settings.MEDIA_ROOT)
+    
+    psname = getrelpath(psname)
     logger.debug("relpath: %r",psname)
     raise RedirectException(reverse('results', args=[psname]))
 
@@ -68,9 +70,7 @@ def view(request, path):
         return HttpResponseRedirect(reverse('spat.views.start.view'))
 
     form = None
-    abs_path = os.path.join(settings.MEDIA_ROOT, path)
-    logger.debug("try_parseing %r", abs_path)
-    parse_data = prepare.try_parse(abs_path)
+    parse_data = prepare.try_parse(getabspath(path))
     if not parse_data:
         messages.error(request,"There was a problem loading file '%s', please try again or try a different record." % path)
         return HttpResponseRedirect(reverse('spat.views.start.view'))

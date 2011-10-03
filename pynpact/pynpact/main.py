@@ -6,6 +6,7 @@ from contextlib import contextmanager
 from Bio import SeqIO
 
 from __init__ import binfile,DATAPATH
+import prepare
 import util
 
 logger = logging.getLogger(__name__)
@@ -42,36 +43,24 @@ class GenBankProcessor(object) :
     force = False
     logger = logger
     outputdir = None
-    cleanup = True
-    config={}
+    cleanup = False
+    config=None
 
 
     def __init__(self, gbkfile = None,**kwargs) :
         for k in kwargs : setattr(self,k, kwargs[k])
 
-        if gbkfile :
-            self.parse(gbkfile)
+        self.parse(gbkfile)
 
-    def parse(self,gbkfile) :
+    def parse(self, gbkfile):
         """Open up a GenBank file, trying to get the sequence record off of it."""
+        logger.info
         self.gbkfile = gbkfile
-
-        if os.path.exists(gbkfile) :
-            self.logger.info("Parsing genbank file: %r", gbkfile)
-            #TODO: gbk can have multiple records in which case this
-            #will err (i wasn't able to find one that did though)
-            try:
-                self.seqrec = SeqIO.read(gbkfile,"genbank")
-                self.config['length'] = len(self.seqrec)
-            except:
-                match = re.search(r'(\d+) ?bp', open(gbkfile).readline())
-                if match :
-                    self.config['length'] = match.group(1)
-                else :
-                    raise Exception("Unable to find sequence length on gbkfile: %r", gbkfile)
-
-        else :
+        if not os.path.exists(gbkfile):
             raise Exception("Asked to parse nonexistant genebank file: %r", gbkfile)
+        
+        if self.config is None:
+            self.config = prepare.default_config(self.gbkfile)
 
         if not self.outputdir :
             self.outputdir = os.path.dirname(os.path.realpath(self.gbkfile))
@@ -122,6 +111,11 @@ multiprocess safe way) setting class defaults
                 self.logger.debug("Cleaning up mkdtemp %r", path)
                 shutil.rmtree(path,ignore_errors=True)
 
+    def seqrec(self):
+        if self._seqrec is None:
+            self._seqrec = prepare.open_parse_seq_rec(self.gbkfile, do_features=True)
+        return self._seqrec
+
     def biopy_extract(self,gene_descriptor="gene") :
         """An implementation using the biopy library of the 'extract' functionality"""
         def func(outfile):
@@ -131,7 +125,7 @@ multiprocess safe way) setting class defaults
                     location = "complement(" + location + ")"
                 print >>outfile, "%-11s %s" % (desc[:11], location )
 
-            for f in self.seqrec.features :
+            for f in self.seqrec().features :
                 if f.type == 'CDS' :
                     desc = f.qualifiers.get(gene_descriptor)
                     #TODO: original stopped at the first space in the descripton
@@ -187,12 +181,15 @@ $ CG MYCGE.gbk 1 580074 201 51 3 > MYCGE.CG200
 
     def acgt_gamma(self):
         "Run the acgt_gamma gene prediction program."
+        assert os.path.exists(DATAPATH), \
+               "Missing pynpact/data for acgt_gamma prediction. Expected at " + DATAPATH
+        
         config,hash = util.reducehashdict(self.config,
                                           ['Significance', 'GeneDescriptorSkip1'])
         #TODO: acgt actually takes the string of characters to skip, not the length.
         outdir = self.derivative_filename('.{0}.predict'.format(hash))
-        if util.is_outofdate(outdir, self.gbkfile):
-            cmd = [binfile("acgt_gamma"), self.gbkfile]
+        if util.is_outofdate(outdir, self.gbkfile, DATAPATH):
+            cmd = [binfile("acgt_gamma"), "-q", "-q", self.gbkfile]
             if config.has_key('Significance'):
                 cmd.append(config['Significance'])
 
@@ -211,8 +208,8 @@ $ CG MYCGE.gbk 1 580074 201 51 3 > MYCGE.CG200
         self.logger.debug("Adding prediction filenames to config dict.")
         #strip 4 characters off here b/c that's how acgt_gamma does it
         #at about lines 262-270
-        gbkbase = os.path.filename(self.gbkfile)[:-4]
-        j = lambda ext: os.path.join(outdir,gbkbase + ext)
+        gbkbase = os.path.basename(self.gbkfile)[:-4]
+        j = lambda ext: os.path.join(outdir, gbkbase + ext)
         self.config['File_of_new_CDSs'] = j(".newcds")
         self.config['File_of_published_rejected_CDSs'] = j(".modified")
         self.config['File_of_G+C_coding_potential_regions'] = j('.profiles')
@@ -249,7 +246,7 @@ $ CG MYCGE.gbk 1 580074 201 51 3 > MYCGE.CG200
 
     def write_allplots_def(self,config,allplots_name,page_num) :
         "Writes out an Allplots.def for a single run through of allplots."
-        self.logger.debug("Writing %r", allplots_name)
+        self.logger.debug("Writing Allplots for %d %r", page_num, allplots_name)
 
         with open(allplots_name, 'w') as allplots :
 
@@ -289,6 +286,7 @@ period_of_frame       Number of frames.
         #do the dependent work.
         self.config['File_of_published_accepted_CDSs'] = self.run_extract()
         self.config['File_list_of_nucleotides_in_200bp windows.'] = self.run_CG()
+        self.acgt_gamma()  #sticks several keys into dictionary.
 
         #figure out hashed filename of ps output.
         hashkeys = [ 'first_page_title', 'following_page_title', 'length'] + self.AP_file_keys

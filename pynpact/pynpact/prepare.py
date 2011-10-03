@@ -1,4 +1,5 @@
 import logging, os.path, tempfile, time, shutil
+import re
 from optparse import OptionParser
 from contextlib import contextmanager
 
@@ -12,16 +13,16 @@ import util
 
 logger = logging.getLogger(__name__)
 
-def reduce_genbank(gbkfile) :
+def reduce_genbank(gbkfile):
     """An attempt to create a version of the gbk file that has all the
     features but not the sequence in it, didn't end up being a
     siginificant savings.
 """
-    def filterfun(outfile) :
+    def filterfun(outfile):
         with open(gbkfile,'r') as infile:
-            for l in infile :
+            for l in infile:
                 outfile.write(l)
-                if l.startswith("ORIGIN") :
+                if l.startswith("ORIGIN"):
                     outfile.write("//\n")
                     return
 
@@ -30,14 +31,14 @@ def reduce_genbank(gbkfile) :
 
 
 
-def open_parse_gb_rec(gbkfile, reduce_first=False) :
+def open_parse_gb_rec(gbkfile, reduce_first=False):
     """Open the GenBank file using the underlying biopython libraries
     so we can get at the do_features keyword (False is generally quite
     a bit faster)
 
     Returns a the Bio.GenBank specialized record type.
 """
-    if reduce_first :
+    if reduce_first:
         raise NotImplementedError("reduce_first option must be False for now")
 
     #rec = GenBankScanner().parse(open('NC_007912.gbk','r'), do_features=False) 
@@ -50,38 +51,41 @@ def open_parse_gb_rec(gbkfile, reduce_first=False) :
         rp._scanner.feed(handle, rp._consumer, do_features=False)
         return rp._consumer.data
     
-def open_parse_seq_rec(gbkfile, reduce_first=False, do_features=False) :
+def open_parse_seq_rec(gbkfile, reduce_first=False, do_features=False):
     """Open the GenBank file using the underlying biopython libraries
     so we can get at the do_features keyword (False is generally quite
     a bit faster)
 
     Returns a SeqRecord object--the same as Bio.SeqIO.read(<file>,'genbank')
 """
-    if reduce_first :
+    if reduce_first:
         raise NotImplementedError("reduce_first option must be False for now")
+
+    logger.info("Parsing genbank file (features:%s): %r",
+                do_features, gbkfile)
 
     #rec = GenBankScanner().parse(open('NC_007912.gbk','r'), do_features=False) 
     #SeqIO.read(gbkfile,"genbank")
-
+    
     with open(gbkfile,'r') as handle: 
         rp =Bio.GenBank.FeatureParser()
-
         rp._consumer = Bio.GenBank._FeatureConsumer(rp.use_fuzziness,rp._cleaner)
         rp._scanner.feed(handle, rp._consumer, do_features=do_features)
         return rp._consumer.data
 
-def make_seq_unknown(seq_record) :
+def make_seq_unknown(seq_record):
     seq_record.seq = Bio.Seq.UnknownSeq(len(seq_record),seq_record.seq.alphabet)
 
 
 
 parse_cache = {}
-def try_parse(abs_path, force=False) :
-    if not os.path.exists(abs_path) : return None
+def try_parse(abs_path, force=False):
+    if not os.path.exists(abs_path):
+        return None
 
     mtime = os.path.getmtime(abs_path)
 
-    if not force :
+    if not force:
         #cache_lines are None for miss, or (date, data) otherwise.
         cache_line = parse_cache.get(abs_path)
         if cache_line and cache_line[0] >= mtime:
@@ -90,21 +94,27 @@ def try_parse(abs_path, force=False) :
     data = {'basename': os.path.basename(abs_path),
             'mtime': mtime,
             'filesize': util.pprint_bytes(os.path.getsize(abs_path)),
-
             }
-    try :
+    try:
         gbrec = open_parse_seq_rec(abs_path)
         data['length'] = len(gbrec)
         data['id'] = gbrec.id
         data['date'] = gbrec.annotations.get('date')
         data['description'] = gbrec.description
-    except :
-        pass
+    except:
+        logger.debug("Failed parsing %s, trying regex search.")
+        
+        match = re.search(r'(\d+) ?bp', open(abs_path).readline())
+        if match :
+            self.config['length'] = match.group(1)
+        else :
+            raise Exception("Unable to find sequence length on gbkfile: %r", abs_path)
+
     parse_cache[abs_path] = (mtime,data)
     return data
 
 
-def default_config(parse_data) :
+def default_config(abs_path):
     config={
         'Nuclotides':'CG',
 
@@ -119,13 +129,16 @@ def default_config(parse_data) :
         'step': 51,
         'period':3,
 
+        #acgt_gamma:
+        'Significance': "0.001",
+
         ##allplots
         #http://docs.python.org/library/string.html#formatspec
         'first_page_title': 'Page 1',
-        'following_page_title': 'Page {0d}',
+        'following_page_title': 'Page {0}',
         }
-
-    if parse_data.has_key('length') :
-        config['length'] = parse_data['length']
+    data = try_parse(abs_path)
+    if data:
+        config.update(data)
 
     return config
