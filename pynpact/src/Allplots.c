@@ -71,6 +71,9 @@ void printHelp() {
     fprintf(stderr,"File_list_of_nucleotides_in_100bp windows.\n");
 }
 
+int quiet = 0;
+#define logmsg(level,...) if(level >= quiet) { fprintf(stderr,__VA_ARGS__); }
+
 /*
  * Read a line of arbitrary length from a file, returning a malloced
  * null-terminated string with the \n already stripped.
@@ -565,6 +568,7 @@ main(int argc, char *argv[]) {
         /* READS FILE OF ACCEPTED PUBLIC GENES */
 
         if(input= fopen(pub_file,"r")) {
+            logmsg(10, "Reading Pub file.\n");
             while(fgets(longstr,198,input) && !feof(input)) {
                 pub_name= (char **)realloc(pub_name,(np+1)*sizeof(char *));
                 pub_name[np]= (char *)malloc(20*sizeof(char *));
@@ -601,13 +605,15 @@ main(int argc, char *argv[]) {
                     ++np;
                 }
             }
-            fclose(input); }
+            fclose(input);
+        }
         else fprintf(stderr,"\nPub file NOT read");
 
 
         /* READS FILE OF REJECTED PUBLIC GENES */
 
         if(input= fopen(exc_file,"r")) {
+            logmsg(10, "Reading excluded file %s\n", exc_file);
             while(fgets(longstr,198,input) && !feof(input)) {
                 exc_name= (char **)realloc(exc_name,(ne+1)*sizeof(char *));
                 exc_name[ne]= (char *)malloc(20*sizeof(char *));
@@ -629,7 +635,8 @@ main(int argc, char *argv[]) {
                 { exc[ne][0]= start-line_range/50; exc[ne][0] += gs%period-exc[ne][0]%period; exc[ne][1]= end+line_range/50; ++ne; }
             }
             fclose(input);
-            fprintf(stderr,"\nExcluded file %s read",exc_file); }
+            fprintf(stderr,"\nExcluded file %s read",exc_file);
+        }
         else fprintf(stderr,"\nExcluded file NOT read");
 
         if(input= fopen(CG200_file,"r")) {
