@@ -6,13 +6,11 @@
 {% include_media 'jquery.js' %}
 <script type="text/javascript">
   $(function(){
-    if( $("#accordion > *").length > 1) {
-      $("#accordion").accordion({ header: "h3", clearStyle: false,
-  //    autoHeight:false,
-  //        change: function(event,ui) { $('#selected')[0].value = ui.newHeader.text(); }
-      });
-    }
     $('button').button()
+    if( $("#accordion > *").length > 1) {
+      $("#accordion").accordion({ header: "h3", clearStyle: false });
+    }
+    
   });
 </script>
 {% endblock %}

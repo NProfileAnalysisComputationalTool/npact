@@ -80,6 +80,7 @@ MEDIA_BUNDLES= (
      'css/basic.css',
      'css/style.css',
      'css/custom-theme/jquery-ui-1.8.16.custom.css',
+     'qtip2/jquery.qtip.css',
     ),
 
     ('print.css',
@@ -87,7 +88,8 @@ MEDIA_BUNDLES= (
 
     ('jquery.js',
      'js/jquery-1.6.4.min.js',
-     'js/jquery-ui-1.8.16.custom.min.js',),
+     'js/jquery-ui-1.8.16.custom.min.js',
+     'qtip2/jquery.qtip.js',),
     )
 
 

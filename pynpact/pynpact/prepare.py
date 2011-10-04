@@ -116,7 +116,7 @@ def try_parse(abs_path, force=False):
 
 def default_config(abs_path):
     config={
-        'Nuclotides':'CG',
+        'Nucleotides':'CG',
 
         ##keys for extract.c
         'GeneDescriptorKey1': 'gene',
@@ -134,11 +134,28 @@ def default_config(abs_path):
 
         ##allplots
         #http://docs.python.org/library/string.html#formatspec
-        'first_page_title': 'Page 1',
+        'first_page_title': None,
         'following_page_title': 'Page {0}',
+
+        'start_page': 1,
+        'end_page':None,
+        
+        
         }
-    data = try_parse(abs_path)
-    if data:
-        config.update(data)
+    
+    if(abs_path):
+        data = try_parse(abs_path)
+        if data:
+            config.update(data)
+            config['first_page_title'] = config.get('description') or config.get('basename') or 'Page 1'
 
     return config
+
+CONFIG_HELP_TEXT={
+    'start_page': "By page number, the first page to generate.",
+    'length': "The length, in base pairs, of the genome being analyzed.",
+    'first_page_title': "The title of the page containing the beginning of the genome.",
+    'following_page_title': "The title of the pages after the first. Use {0} to get the page number.",
+    
+    
+    }

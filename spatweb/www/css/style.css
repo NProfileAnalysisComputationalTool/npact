@@ -328,3 +328,5 @@ textarea { width: 100%; }
 ul.errorlist li { color:red; }
 
 button.Start { clear:both; margin: 8px;}
+
+.helptext {display:none;}

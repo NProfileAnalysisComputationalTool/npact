@@ -12,6 +12,8 @@ from django.contrib import messages
 
 from __init__ import session_key, is_clean_path, getabspath, getrelpath
 from spat.middleware import RedirectException
+from spat import helpers
+#from spat.helpers import add_help_text
 
 from pynpact import prepare, main
 
@@ -29,29 +31,17 @@ class RunForm(forms.Form) :
     length=forms.IntegerField(required=True, min_value=0,
                               widget=get_ti(size=8))
 
-def prefill_form(request, path, parse_data):
-
-    title = parse_data.get('description') or parse_data.get('basename')
-    form = RunForm(initial={'first_page_title': title,
-                    'following_page_title': title,
-                    'length': parse_data.get('length')
-                    })
-
-    return form
-
-def get_display_items(request, parse_data):
-    yield ('Filename', parse_data['basename'])
+def get_display_items(request, config):
+    yield ('Filename', config['basename'])
     for key in ['date','length','description'] :
-        if parse_data.get(key) :
-            yield key, parse_data.get(key)
+        if config.get(key) :
+            yield key, config.get(key)
 
 
-def run_it(request, path, form, parse_data):
-    config = prepare.default_config(getabspath(path))
-
-    for k in ['first_page_title', 'following_page_title'] :
-        if form.cleaned_data.get(k) :
-            config[k] = form.cleaned_data[k]
+def run_it(request, path, form, config):
+    logger.info("Got clean post, running.")
+  
+    config.update(cleaned_data)
 
     gbp = main.GenBankProcessor(getabspath(path), config=config)
     psname = gbp.run_Allplots()
@@ -70,20 +60,23 @@ def view(request, path):
         return HttpResponseRedirect(reverse('spat.views.start.view'))
 
     form = None
-    parse_data = prepare.try_parse(getabspath(path))
-    if not parse_data:
+    config = None
+    try:
+        config = prepare.default_config(getabspath(path))
+    except:
         messages.error(request,"There was a problem loading file '%s', please try again or try a different record." % path)
         return HttpResponseRedirect(reverse('spat.views.start.view'))
 
     if request.method == 'POST' :
         form= RunForm(request.POST)
         if form.is_valid() :
-            run_it(request, path, form, parse_data)
+            run_it(request, path, form, config)
     else :
-        form = prefill_form(request, path, parse_data)
+        form = RunForm(initial=config)
+    helpers.add_help_text(form,prepare.CONFIG_HELP_TEXT)
 
-    return render_to_response('run.html',{'form':form, 'parse_data':parse_data,
-                                          'def_list_items': get_display_items(request,parse_data)},
+    return render_to_response('run.html',{'form':form, 'parse_data':config,
+                                          'def_list_items': get_display_items(request,config)},
                                context_instance=RequestContext(request))
 
 

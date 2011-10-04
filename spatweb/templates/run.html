@@ -1,5 +1,25 @@
 {% extends "base.html" %}
+{% load media %}
 {% block title %}Run S-P.A.T.{% endblock %}
+
+{% block addScript %}
+{% include_media 'jquery.js' %}
+<script type="text/javascript">
+
+  $(function(){
+    $("tbody input + br").remove();
+    $("tbody tr").each(function() {
+       $("input", this).qtip({
+          content: $(".helptext", this),
+          show: { event: "focus mouseenter",
+                  solo: true},
+
+       });
+
+    });
+  });
+</script>
+{% endblock %}
 
 {%block content %}
 <div class="contentPadding">
