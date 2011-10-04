@@ -116,35 +116,8 @@ multiprocess safe way) setting class defaults
             self._seqrec = prepare.open_parse_seq_rec(self.gbkfile, do_features=True)
         return self._seqrec
 
-    def biopy_extract(self,gene_descriptor="gene") :
-        """An implementation using the biopy library of the 'extract' functionality"""
-        def func(outfile):
-            def print_feature(desc, strand, start, end) :
-                location = "%s..%s" % (start +1, end)
-                if f.strand == -1 :
-                    location = "complement(" + location + ")"
-                print >>outfile, "%-11s %s" % (desc[:11], location )
 
-            for f in self.seqrec().features :
-                if f.type == 'CDS' :
-                    desc = f.qualifiers.get(gene_descriptor)
-                    #TODO: original stopped at the first space in the descripton
-                    if desc :
-                        if f.location_operator=="join" :
-                            ex=1
-                            for sf in f.sub_features :
-                                #TODO: original one reversed the order
-                                #here if it was on the complement
-                                #strand
-                                print_feature(desc[0] + "_E" + str(ex), sf.strand,
-                                              sf.location.nofuzzy_start, sf.location.nofuzzy_end)
-                                ex += 1
-                        else :
-                            print_feature(desc[0],f.strand,f.location.nofuzzy_start, f.location.nofuzzy_end)
-        return self.safe_produce_new(self.derivative_filename("extracted"), func,
-                                     dependencies=[self.gbkfile])
-
-    def original_extract(self) :
+    def run_extract(self) :
         """Go through the genbank record pulling out gene names and locations
         $ extract MYCGE.gbk 0 gene 0 locus_tag > MYCGE.genes
 """
@@ -153,18 +126,15 @@ multiprocess safe way) setting class defaults
                                            'GeneDescriptorSkip1', 'GeneDescriptorSkip2',
                                            ])
         def func(f) :
-            logger.info("starting extract for %s", self.gbkfile)
+            self.logger.info("starting extract for %s", self.gbkfile)
             cmd = [binfile("extract"), self.gbkfile,
                    config['GeneDescriptorSkip1'], config['GeneDescriptorKey1'],
                    config['GeneDescriptorSkip2'], config['GeneDescriptorKey2']]
             return util.capturedCall(cmd, stdout=f, logger=self.logger, check=True)
         filename = self.derivative_filename(".%s.genes" % hash)
-        return self.safe_produce_new(filename, func, dependencies=[self.gbkfile])
-
-    def run_extract(self) :
-        """Go through the genbank record pulling out gene names and locations
-"""
-        return self.original_extract()
+        self.safe_produce_new(filename, func, dependencies=[self.gbkfile])
+        self.config['File_of_published_accepted_CDSs'] = filename
+        return filename
 
     def run_CG(self) :
         """Do the CG ratio calculations.
@@ -176,16 +146,23 @@ $ CG MYCGE.gbk 1 580074 201 51 3 > MYCGE.CG200
         progargs = [binfile("CG"), self.gbkfile, 1, config['length'],
                     config['window_size'], config['step'], config['period']]
         func = lambda out: util.capturedCall(progargs, stdout=out, logger=self.logger, check=True)
-        return self.safe_produce_new(outfilename, func, dependencies=[self.gbkfile])
-
+        self.safe_produce_new(outfilename, func, dependencies=[self.gbkfile])
+        self.config['File_list_of_nucleotides_in_200bp windows.'] = outfilename
+        return outfilename
+    
 
     def acgt_gamma(self):
         "Run the acgt_gamma gene prediction program."
+        if self.config.get('significance',True) in ["False",False]:
+            self.logger.debug("Skipping prediction.")
+            return
+        self.logger.debug("Starting prediction: %s",self.config.get('significance'))
+        
         assert os.path.exists(DATAPATH), \
                "Missing pynpact/data for acgt_gamma prediction. Expected at " + DATAPATH
         
         config,hash = util.reducehashdict(self.config,
-                                          ['Significance', 'GeneDescriptorSkip1'])
+                                          ['significance', 'GeneDescriptorSkip1'])
 
         gbkbase = os.path.basename(self.gbkfile)[:-4]
 
@@ -193,8 +170,8 @@ $ CG MYCGE.gbk 1 580074 201 51 3 > MYCGE.CG200
         outdir = self.derivative_filename('.{0}.predict'.format(hash))
         if util.is_outofdate(outdir, self.gbkfile, DATAPATH):
             cmd = [binfile("acgt_gamma"), "-q", "-q", self.gbkfile]
-            if config.has_key('Significance'):
-                cmd.append(config['Significance'])
+            if config.has_key('significance'):
+                cmd.append(config['significance'])
 
 
             with self.mkdtemp() as dtemp:
@@ -288,31 +265,40 @@ period_of_frame       Number of frames.
 """
 
         #do the dependent work.
-        self.config['File_of_published_accepted_CDSs'] = self.run_extract()
-        self.config['File_list_of_nucleotides_in_200bp windows.'] = self.run_CG()
+        self.run_extract()
+        self.run_CG()
         self.acgt_gamma()  #sticks several keys into dictionary.
 
         #figure out hashed filename of ps output.
-        hashkeys = [ 'first_page_title', 'following_page_title', 'length'] + self.AP_file_keys
+        hashkeys = [ 'first_page_title', 'following_page_title', 'length', 'start_page',
+                     'end_page', 'period', 'bp_per_page']
+        hashkeys += self.AP_file_keys
         config,hash= util.reducehashdict(self.config, hashkeys)
 
         #build the individual ps page files.
         filenames = []
         with self.mkdtemp() as dtemp :
-            i = 0  #page number offset
-            ppage = 50000
-            while i*ppage < config['length'] :
-                def dopage(psout) :
+            #page number offset
+            i = config.get('start_page',1) - 1
+            ppage = config['bp_per_page']
 
-                    self.write_allplots_def(config, os.path.join(dtemp,"Allplots.def"), i+1)
+            #the hash of individual pages shouldn't depend on the
+            #'start_page' and 'end_page' configuration, so we leave
+            #that out.
+            pconfkeys = set(hashkeys).difference(set(["start_page","end_page"]))
+            pconfig,phash=util.reducehashdict(config,pconfkeys)
+            
+            while i*ppage < config['length'] and i < config.get('end_page',1000):
+                def dopage(psout) :
+                    self.write_allplots_def(pconfig, os.path.join(dtemp,"Allplots.def"), i+1)
 
                     self.logger.debug("Starting Allplots page %d for %r",
                                       i+1, os.path.basename(self.gbkfile))
 
-                    cmd = [binfile("Allplots"), i*ppage, ppage, 5, 1000, 3]
+                    cmd = [binfile("Allplots"), i*ppage, ppage, 5, 1000, config['period']]
                     util.capturedCall(cmd, stdout=psout, stderr=False,
                                       logger=self.logger, cwd=dtemp, check=True)
-                psname = self.derivative_filename("%s.%03d.ps" % (hash,i+1))
+                psname = self.derivative_filename("%s.%03d.ps" % (phash,i+1))
                 filenames.append(psname)
                 self.safe_produce_new(psname, dopage,
                                       dependencies=map(config.get,self.AP_file_keys))

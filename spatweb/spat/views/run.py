@@ -30,6 +30,9 @@ class RunForm(forms.Form) :
     following_page_title = forms.CharField(required=False,widget=get_ti(size=40))
     length=forms.IntegerField(required=True, min_value=0,
                               widget=get_ti(size=8))
+    significance=forms.ChoiceField(choices=prepare.significance_levels)
+    start_page=forms.IntegerField(required=False)
+    end_page=forms.IntegerField(required=False)
 
 def get_display_items(request, config):
     yield ('Filename', config['basename'])
@@ -41,7 +44,7 @@ def get_display_items(request, config):
 def run_it(request, path, form, config):
     logger.info("Got clean post, running.")
   
-    config.update(cleaned_data)
+    config.update(form.cleaned_data)
 
     gbp = main.GenBankProcessor(getabspath(path), config=config)
     psname = gbp.run_Allplots()

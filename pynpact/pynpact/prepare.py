@@ -130,7 +130,7 @@ def default_config(abs_path):
         'period':3,
 
         #acgt_gamma:
-        'Significance': "0.001",
+        'significance': "0.001",
 
         ##allplots
         #http://docs.python.org/library/string.html#formatspec
@@ -139,6 +139,7 @@ def default_config(abs_path):
 
         'start_page': 1,
         'end_page':None,
+        'bp_per_page': 50000,
         
         
         }
@@ -153,9 +154,13 @@ def default_config(abs_path):
 
 CONFIG_HELP_TEXT={
     'start_page': "By page number, the first page to generate.",
+    'end_page': "By page number, the last page to generate.",
     'length': "The length, in base pairs, of the genome being analyzed.",
     'first_page_title': "The title of the page containing the beginning of the genome.",
     'following_page_title': "The title of the pages after the first. Use {0} to get the page number.",
-    
+    'significance': "Significance level for acgt_gamma prediction; \"Don't Run\" to skip this."
     
     }
+
+significance_levels=("0.01","0.001","0.0001")
+significance_levels=[(False,"Don't Run")] + zip(significance_levels,significance_levels)

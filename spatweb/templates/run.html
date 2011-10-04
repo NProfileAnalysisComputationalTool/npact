@@ -7,6 +7,7 @@
 <script type="text/javascript">
 
   $(function(){
+    $('button').button()
     $("tbody input + br").remove();
     $("tbody tr").each(function() {
        $("input", this).qtip({
