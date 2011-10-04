@@ -81,6 +81,8 @@ int quiet = 0;
 char * ap_getl(FILE * f) {
     size_t size = 0,last= 0, len = 0;
     char * buf  = NULL;
+    if(feof(f)) 
+        return NULL;
     do {
         size += BUFSIZ; /* BUFSIZ is defined as "the optimal read size for this platform" */
         buf = (char*) realloc(buf,size); /* realloc(NULL,n) is the same as malloc(n) */
