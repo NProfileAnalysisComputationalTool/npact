@@ -1361,3 +1361,85 @@ main(int argc, char *argv[]) {
     fclose(stdout);
     exit(0);
 }
+
+typedef struct _line_info {
+  int start;
+  int end;
+  int line_range;
+  int period;
+} line_info;
+
+
+
+void read_gene_table(char* filename, line_info *li, 
+                     char** names, char* compliment, int** values ) {
+    char *line;
+    FILE *input;
+
+    char **pub_name=NULL;
+    char *pub_str=NULL;
+    int **pub;
+    char *p;
+    int np;
+    int gs,ge;
+
+    int start = li->start;
+    int end = li->end;
+    int line_range = li->line_range;
+    int period = li->period;
+
+    if(input= fopen(filename,"r")) {
+        logmsg(10, "Reading file %s.\n", filename);
+        while(line = ap_getl(input)) {
+            pub_name     = (char **) realloc(pub_name,(np+1) * sizeof(char *));
+            pub_str      = (char *) realloc(pub_str,(np+1)*sizeof(char));
+            pub          = (int **) realloc(pub,(np+1)*sizeof(int *));
+            pub[np]      = (int *) malloc(2*sizeof(int));
+
+
+            p = strrchr(line, ' ') + 1;
+            /* Starting right after the last space is the location */
+            if (p[0] == 'c') {
+                pub_str[np] = 'C';
+                p += 11; /* move past 'complement(' */
+            }
+            else {
+                pub_str[np] = ' ';
+            }
+            gs = atoi(p);
+            p = strchr(p,'.') + 2; /* find .., move past it */
+            ge = atoi(p);
+
+
+            /* keep the name up to the first space, free the rest of the memory. */
+            p = strchr(line, ' ');
+            p[0] = '\0';
+            pub_name[np] = realloc(line, strlen(line) + 1 );
+
+            if(gs >= start - line_range/50 && gs <  end && 
+               ge <= end + line_range/50   && ge > start) { 
+                pub[np][0] = gs;
+                pub[np][1] = ge;
+                ++np;
+            }
+            else if(gs >= start-line_range/50 && gs<end && ge>end+line_range/50) {
+                pub[np][0] = gs;
+                pub[np][1] = end+line_range/50;
+                ++np;
+            }
+            else if(ge<=end+line_range/50 && ge>start && gs<start-line_range/50) {
+                pub[np][0]  = start-line_range/50;
+                pub[np][0] += gs%period-pub[np][0]%period;
+                pub[np][1]  = ge;
+                ++np;
+            }
+            else if(gs<start-line_range/50 && ge>end+line_range/50) {
+                pub[np][0]  = start-line_range/50;
+                pub[np][0] += gs%period-pub[np][0]%period;
+                pub[np][1]  = end+line_range/50;
+                ++np;
+            }
+        }
+        fclose(input);
+    }
+}
