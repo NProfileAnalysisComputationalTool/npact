@@ -1,0 +1,48 @@
+{% load media %}
+      <div>
+        <h3><a name="#">{{ form.title|title }}</a></h3>
+        
+        <div>
+        <form method="post" action="start"
+              {% if form.is_multipart %}
+                enctype="multipart/form-data"
+              {% endif %}
+              >
+          {% csrf_token %} 
+          <input type="hidden" name="active" value="{{ form.type }}">
+          <div>
+            {{ form.as_p }}
+          </div>
+          <div style="clear:both;">
+            <button class="Start">Start Analysis!</button>
+          </div>
+
+        {% if form.session and form.session.result_count > 0 %}
+        <table>
+          <thead>
+            <tr>
+              <th>Title</th>
+              <th>Length</th>
+              <th>Date Created/ Updated</th>
+              <th>RefSeqId</th>
+          </thead>
+          <tbody>
+            {% for summary in form.session.summarize %}
+            <tr>
+              <td><a href="{% url efetch summary.Id %}"> {{summary.Title}}</a>
+                <!-- <a title="See this record @ NCBI"><img src="{% media_url "images/ncbi.gif" %}"></a>
+                     -->
+              </td>
+              <td>{{summary.Length}}</td>
+              <td>{{summary.CreateDate}}<br/>
+                  {{summary.UpdateDate}}</td>
+              <td><a href="http://www.ncbi.nlm.nih.gov/nuccore/{{summary.Caption}}">{{summary.Caption}}</a></td>
+            </tr>
+            {% endfor %}
+          </tbody>
+        </table>
+        {% endif %}
+
+        </form>
+        </div>
+      </div>
