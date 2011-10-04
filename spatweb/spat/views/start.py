@@ -50,18 +50,19 @@ class UploadForm(forms.Form):
 
     def clean(self):
         cleaned_data = self.cleaned_data
-        fu = cleaned_data['file_upload']
-        logger.info("Checking Uploaded file %s", fu)
-        if not is_clean_path(fu.name):
-            raise forms.ValidationError("Illegal filename")
+        fu = cleaned_data.get('file_upload')
+        if fu:
+            logger.info("Checking Uploaded file %s", fu)
+            if not is_clean_path(fu.name):
+                raise forms.ValidationError("Illegal filename")
 
-        fd,savepath,relpath = mksavefile( "up-%s-" % fu.name)
-        logger.info("Saving uploaded file to %r", relpath)
-        with os.fdopen(fd, 'wb') as fh :
-            for chunk in fu.chunks() :
-                fh.write(chunk)
+            fd,savepath,relpath = mksavefile( "up-%s-" % fu.name)
+            logger.info("Saving uploaded file to %r", relpath)
+            with os.fdopen(fd, 'wb') as fh :
+                for chunk in fu.chunks() :
+                    fh.write(chunk)
 
-        cleaned_data['path']=relpath
+            cleaned_data['path']=relpath
         return cleaned_data
 
 class UrlForm(forms.Form):
@@ -71,19 +72,20 @@ class UrlForm(forms.Form):
 
     def clean(self):
         cleaned_data = self.cleaned_data
-        url = cleaned_data['url']
-        logger.debug("Going to pull from %r", url)
-        pull_req = urllib2.Request(url)
-        if pull_req.get_type == "file":
-            raise forms.ValidationError("Illegal URL")
-        try:
-            fh = urllib2.urlopen(pull_req)
-            fd,savepath,relpath = mksavefile("url")
-            pynpact.util.stream_to_file(fh,savepath)
-            cleaned_data['path'] = relpath
-        except:
-            logger.exception("Error fetching url %s", url)
-            raise forms.ValidationError("Error fetching url")
+        url = cleaned_data.get('url')
+        if url:
+            logger.debug("Going to pull from %r", url)
+            pull_req = urllib2.Request(url)
+            if pull_req.get_type == "file":
+                raise forms.ValidationError("Illegal URL")
+            try:
+                fh = urllib2.urlopen(pull_req)
+                fd,savepath,relpath = mksavefile("url")
+                pynpact.util.stream_to_file(fh,savepath)
+                cleaned_data['path'] = relpath
+            except:
+                logger.exception("Error fetching url %s", url)
+                raise forms.ValidationError("Error fetching url")
 
         return cleaned_data
 
@@ -95,13 +97,14 @@ class PasteForm(forms.Form):
                               required=True)
     def clean(self):
         cleaned_data = self.cleaned_data
-        text = cleaned_data['pastein']
-        (fd,savepath,relpath) = mksavefile("txt")
-        logger.info("Saving paste to %r", relpath)
-        cleaned_data['path'] = relpath
-        with os.fdopen(fd,'wb') as fh :
-            fh.write(text)
-        return cleaned_data
+        text = cleaned_data.get('pastein')
+        if text:
+            (fd,savepath,relpath) = mksavefile("txt")
+            logger.info("Saving paste to %r", relpath)
+            cleaned_data['path'] = relpath
+            with os.fdopen(fd,'wb') as fh :
+                fh.write(text)
+            return cleaned_data
 
 class EntrezSearchForm(forms.Form):
     type="EntrezSearchForm"
