@@ -186,6 +186,9 @@ $ CG MYCGE.gbk 1 580074 201 51 3 > MYCGE.CG200
         
         config,hash = util.reducehashdict(self.config,
                                           ['Significance', 'GeneDescriptorSkip1'])
+
+        gbkbase = os.path.basename(self.gbkfile)[:-4]
+
         #TODO: acgt actually takes the string of characters to skip, not the length.
         outdir = self.derivative_filename('.{0}.predict'.format(hash))
         if util.is_outofdate(outdir, self.gbkfile, DATAPATH):
@@ -199,6 +202,8 @@ $ CG MYCGE.gbk 1 580074 201 51 3 > MYCGE.CG200
                 util.capturedCall(cmd, cwd=dtemp, check=True,
                                   env={'BASE_DIR_THRESHOLD_TABLES':DATAPATH},
                                   logger=self.logger)
+                #the "exc_file", (.modified) contains an extra header line we need to strip.
+                util.file_delete_first_line(os.path.join(dtemp, gbkbase + ".modified"))
                 if os.path.exists(outdir):
                     self.loger.debug("Removing existing prediction output at %s", outdir)
                     shutil.rmtree(outdir)
@@ -208,7 +213,6 @@ $ CG MYCGE.gbk 1 580074 201 51 3 > MYCGE.CG200
         self.logger.debug("Adding prediction filenames to config dict.")
         #strip 4 characters off here b/c that's how acgt_gamma does it
         #at about lines 262-270
-        gbkbase = os.path.basename(self.gbkfile)[:-4]
         j = lambda ext: os.path.join(outdir, gbkbase + ext)
         self.config['File_of_new_CDSs'] = j(".newcds")
         self.config['File_of_published_rejected_CDSs'] = j(".modified")

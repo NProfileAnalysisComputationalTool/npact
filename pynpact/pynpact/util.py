@@ -314,6 +314,10 @@ def safe_produce_new(outfilename, func,
         kwargs.get('logger').debug("Skipped producing %r", outfilename)
     return outfilename
 
+
+def file_delete_first_line(filename):
+    capturedCall(["sed", "-i", "1d", filename], logger=False, check=True)
+
 # Copright (c) 2011  Accelerated Data Works
 # All rights reserved.
 
