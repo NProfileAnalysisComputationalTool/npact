@@ -267,7 +267,7 @@ period_of_frame       Number of frames.
         #do the dependent work.
         self.run_extract()
         self.run_CG()
-        self.acgt_gamma()  #sticks several keys into dictionary.
+        self.acgt_gamma()
 
         #figure out hashed filename of ps output.
         hashkeys = [ 'first_page_title', 'following_page_title', 'length', 'start_page',

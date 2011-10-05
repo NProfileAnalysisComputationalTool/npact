@@ -22,4 +22,6 @@ if settings.DEBUG :
 else :
     #TODO: "Need to configure a fallback url for apache to punt to."
     raise Exception("Need to configure a fallback url for apache to punt to.")
-    raw_url=  None
+
+
+

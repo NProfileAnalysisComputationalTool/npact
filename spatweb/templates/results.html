@@ -2,20 +2,33 @@
 {%block title %}S-P.A.T. Results{%endblock %}
 
 {%block addScript %}
+{% if download_link %}
 <script type="text/javascript" defer="defer">
     window.onload= function() {
         window.location= document.getElementById('downloadlink').href;
     }
 </script>
-{%endblock%}
+{% endif %}
+{% endblock %}
 
 
 {%block content %}
 <div class="contentPadding">
   <h2>S-P.A.T. Results</h2>
+  {% if download_link %}
+  <h3>Download</h3>
   <p>
   You're download should start shortly.
   If you're impatient here is <a id="downloadlink" href="{{ download_link}}">the direct link</a>.
   </p>
+  {% endif %}
+
+  <h3>Not what you expected?</h3>
+  <ul>
+    {% if return_url %}
+    <li><a href="{{ return_url }}">Return to the previous page</a> and adjust the options</li>
+    {% endif %}
+    <li><a href="{% url start %}">Start Over</a></li>
+  </ul>
 </div>
 {%endblock content %}

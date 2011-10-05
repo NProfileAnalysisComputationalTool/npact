@@ -325,7 +325,10 @@ textarea { width: 100%; }
 #content label { float:left; text-align: right; clear:left; }
 #content input, #content select { margin-left: 6px; float:left; }
 
-ul.errorlist li { color:red; }
+li.error, ul.errorlist li { color:red; }
+
+ul.messages { border: 1px dotted #444; } 
+
 
 button.Start { clear:both; margin: 8px;}
 

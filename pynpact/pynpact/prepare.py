@@ -137,8 +137,6 @@ def default_config(abs_path):
         'first_page_title': None,
         'following_page_title': 'Page {0}',
 
-        'start_page': 1,
-        'end_page':None,
         'bp_per_page': 50000,
         
         
@@ -153,8 +151,8 @@ def default_config(abs_path):
     return config
 
 CONFIG_HELP_TEXT={
-    'start_page': "By page number, the first page to generate.",
-    'end_page': "By page number, the last page to generate.",
+    'start_page': "By page number, the first page to generate. Leave blank to start at the beginning.",
+    'end_page': "By page number, the last page to generate. Leave blank to generate through to the end.",
     'length': "The length, in base pairs, of the genome being analyzed.",
     'first_page_title': "The title of the page containing the beginning of the genome.",
     'following_page_title': "The title of the pages after the first. Use {0} to get the page number.",

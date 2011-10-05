@@ -21,7 +21,15 @@ def reducehashdict(dict,keys) :
     if len(outdict) :
         return outdict,h.hexdigest()
     else :
-        return {},None
+        return outdict,None
+
+def reducedict(dict,keys):
+    out = {}
+    for k in keys:
+        if dict.has_key(k):
+            out[k] = dict[k]
+    return out
+
 
 def ensure_dir(dir, logger=None) :
     if not os.path.exists(dir) :

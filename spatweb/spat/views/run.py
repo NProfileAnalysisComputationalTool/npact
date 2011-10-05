@@ -1,21 +1,21 @@
 # Create your views here.
-import os.path, logging, tempfile
+import logging
+import os.path
 
-from django.conf import settings
-from django.http import HttpResponse,HttpResponseRedirect
-from django.core.urlresolvers import reverse
-from django.shortcuts import render_to_response
-from django.template import RequestContext
 from django import forms
 from django.contrib import messages
-
-
-from __init__ import session_key, is_clean_path, getabspath, getrelpath
-from spat.middleware import RedirectException
+from django.core.urlresolvers import reverse
+from django.http import HttpResponseRedirect
+from django.shortcuts import render_to_response
+from django.utils.http import urlencode
+from django.template import RequestContext
+from pynpact import prepare, main, util
 from spat import helpers
+from spat.middleware import RedirectException
+from __init__ import is_clean_path, getabspath, getrelpath
+
 #from spat.helpers import add_help_text
 
-from pynpact import prepare, main
 
 
 # Get an instance of a logger
@@ -34,6 +34,14 @@ class RunForm(forms.Form) :
     start_page=forms.IntegerField(required=False)
     end_page=forms.IntegerField(required=False)
 
+    def clean(self):
+        cleaned_data = self.cleaned_data
+        start = cleaned_data.get('start_page')
+        end = cleaned_data.get('end_page')
+        if start and end and start > end:
+            raise forms.ValidationError("End page must be greater than or equal to start page.")
+        return cleaned_data
+
 def get_display_items(request, config):
     yield ('Filename', config['basename'])
     for key in ['date','length','description'] :
@@ -49,10 +57,13 @@ def run_it(request, path, form, config):
     gbp = main.GenBankProcessor(getabspath(path), config=config)
     psname = gbp.run_Allplots()
     logger.debug("Got back ps file: %r", psname)
-    
     psname = getrelpath(psname)
-    logger.debug("relpath: %r",psname)
-    raise RedirectException(reverse('results', args=[psname]))
+    url = reverse('results', args=[psname])
+    urlconf = util.reducedict(config, form.fields.keys())
+    urlconf['path'] = path
+    
+    url += "?" + urlencode(urlconf)
+    raise RedirectException(url)
 
 
 
@@ -70,12 +81,12 @@ def view(request, path):
         messages.error(request,"There was a problem loading file '%s', please try again or try a different record." % path)
         return HttpResponseRedirect(reverse('spat.views.start.view'))
 
+    form = RunForm(request.REQUEST, initial=config)
+    
     if request.method == 'POST' :
-        form= RunForm(request.POST)
-        if form.is_valid() :
+        if form.is_valid():
             run_it(request, path, form, config)
-    else :
-        form = RunForm(initial=config)
+
     helpers.add_help_text(form,prepare.CONFIG_HELP_TEXT)
 
     return render_to_response('run.html',{'form':form, 'parse_data':config,
@@ -91,14 +102,26 @@ def view_none(request) :
 
 
 
-def results(request,path) :
-    """Serve either a results page, or if the 'raw' querystring parameter is set to anything then return the ps file directly."""
+def results(request, path):
+    """Serve either a results page, or if the 'raw' querystring
+    parameter is set to anything then return the ps file directly."""
 
     if not is_clean_path(path) :
         messages.error(request, "Path contained illegal characters, please upload a file or go to the library and select one.")
         return HttpResponseRedirect(reverse('start'))
 
-    download_link=request.build_absolute_uri(reverse('raw', kwargs={'path':path}))
+    download_link = None
+    try:
+        getabspath(path)
+        download_link=request.build_absolute_uri(reverse('raw', kwargs={'path':path}))
+    except IOError:
+        messages.error(request, "We're sorry but that file no longer exists. We expire old results periodically to save space on the server. Please try running the analysis again.")
+
+    return_url = None
+    if request.GET.get('path'):
+        return_url = reverse('run',args=[request.GET.get('path')]) + "?" + urlencode(request.GET)
+
     return render_to_response('results.html',
-                              {'download_link': download_link},
+                              {'download_link': download_link,
+                               'return_url': return_url},
                               context_instance=RequestContext(request))
