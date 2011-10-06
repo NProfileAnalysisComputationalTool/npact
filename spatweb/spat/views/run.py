@@ -81,11 +81,17 @@ def view(request, path):
         messages.error(request,"There was a problem loading file '%s', please try again or try a different record." % path)
         return HttpResponseRedirect(reverse('spat.views.start.view'))
 
-    form = RunForm(request.REQUEST, initial=config)
-    
     if request.method == 'POST' :
+        form = RunForm(request.POST)
         if form.is_valid():
             run_it(request, path, form, config)
+    else:
+        #can't use dict.update here as the multi-value dict gives back
+        #an array in that case
+        for k in request.GET:
+            logger.info('k:%s, v:%s', k, request.GET[k])
+            config[k]= request.GET[k]
+        form  = RunForm(initial=config)
 
     helpers.add_help_text(form,prepare.CONFIG_HELP_TEXT)
 
