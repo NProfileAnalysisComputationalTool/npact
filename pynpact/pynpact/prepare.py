@@ -95,12 +95,9 @@ def try_parse(abs_path, force=False):
             'mtime': mtime,
             'filesize': util.pprint_bytes(os.path.getsize(abs_path)),
             }
+    gbrec= None
     try:
         gbrec = open_parse_seq_rec(abs_path)
-        data['length'] = len(gbrec)
-        data['id'] = gbrec.id
-        data['date'] = gbrec.annotations.get('date')
-        data['description'] = gbrec.description
     except:
         logger.debug("Failed parsing %s, trying regex search.")
         
@@ -109,6 +106,16 @@ def try_parse(abs_path, force=False):
             self.config['length'] = match.group(1)
         else :
             raise Exception("Unable to find sequence length on gbkfile: %r", abs_path)
+    if gbrec:
+        if isinstance(gbrec.seq,Bio.Seq.UnknownSeq):
+            raise Exception("File contains no sequence data.")
+        
+        data['length'] = len(gbrec)
+        data['id'] = gbrec.id
+        data['date'] = gbrec.annotations.get('date')
+        data['description'] = gbrec.description
+
+
 
     parse_cache[abs_path] = (mtime,data)
     return data
