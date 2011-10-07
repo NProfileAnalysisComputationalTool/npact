@@ -71,7 +71,7 @@ char	RGB[]= "RGB";
 char	strnd[]= "DC";
 char	ORF[6*MAX_ORF_SIZE];
 char	buff[MAX_LINE];
-char	Output_name[9 * 100];
+char	*organism_name;
 
 int	length[1000]= { 0 };
 
@@ -175,6 +175,7 @@ struct Gstruct
 } *Ghit;
 
 
+FILE*   get_out_file(const char*, const char*);
 void	define_characterizations();
 void	read_tables();
 int	analyze_genome(int n, int tot_hss, int *on);
@@ -224,6 +225,7 @@ int main (int argc, char *argv[])
 {
     char	*organism_file, *p, *opt;
     int	i, j, k, h, genome_size, tot_hss= 0, *o, tot_Ghits= 0, ncds, nexons= 0, on= 1;
+    size_t len;
     long	*ffrom, bytes_from_origin;
     int     minutes, secs;
     time_t	t0, t1, t2;
@@ -265,31 +267,16 @@ int main (int argc, char *argv[])
        strstr(organism_file, "Ureaplasma") || 
        strstr(organism_file, "Candidatus_Hodgkinia")) 
         MYCOPLASMA= 1;
+
     p = strrchr(organism_file,'/');
     if(p)
         p++;
     else
         p = organism_file;
-
-    /* Calculate the outputfilenames, pack them into big array output_name */
-    strcpy(Output_name, p);
-    strcpy(Output_name + 100, p);
-    strcpy(Output_name + 2 * 100, p);
-    strcpy(Output_name + 3 * 100, p);
-    strcpy(Output_name + 4 * 100, p);
-    strcpy(Output_name + 5 * 100, p);
-    strcpy(Output_name + 6 * 100, p);
-    strcpy(Output_name + 7 * 100, p);
-    strcpy(Output_name + 8 * 100, p);
-    strcpy(Output_name + strlen(Output_name) - 4, ".modified");
-    strcpy(Output_name + 100 + strlen(Output_name + 100) - 4, ".newcds");
-    strcpy(Output_name +  2 * 100 + strlen(Output_name + 2 * 100) - 4, ".profiles");
-    strcpy(Output_name +  3 * 100 + strlen(Output_name + 3 * 100) - 4, ".verbose");
-    strcpy(Output_name +  4 * 100 + strlen(Output_name + 4 * 100) - 4, ".altcds");
-    strcpy(Output_name +  5 * 100 + strlen(Output_name + 5 * 100) - 4, ".repetitive");
-    strcpy(Output_name +  6 * 100 + strlen(Output_name + 6 * 100) - 4, ".confirmed");
-    strcpy(Output_name +  7 * 100 + strlen(Output_name + 7 * 100) - 4, ".ffn");
-    strcpy(Output_name +  8 * 100 + strlen(Output_name + 8 * 100) - 4, ".faa");
+    len = strlen(p) - 4; /* strip off .gbk */
+    organism_name = (char*) malloc( (len + 1) * sizeof(char));
+    memcpy(organism_name, p, len);
+    organism_name[len]='\0';
 
     /* consume the significance, the 2nd argument. */
 	if(argc > argi) 
@@ -2587,16 +2574,16 @@ void write_results(int from_hss, int to_hss, int ncds, int genome_size)
     double	G, print_len, po;
     FILE	*output1, *output2, *output3, *output4, *output5, *output7, *output8;
 
-    output1= fopen(Output_name + 100, "w");
-    output2= fopen(Output_name + 2 * 100, "w");
-    output3= fopen(Output_name + 3 * 100, "a");
-    output4= fopen(Output_name + 4 * 100, "w");
-    output5= fopen(Output_name + 5 * 100, "w");
+    output1 = get_out_file(".newcds","w");
+    output2= get_out_file(".profiles", "w");
+    output3= get_out_file(".verbose", "a");
+    output4= get_out_file(".altcds", "w");
+    output5= get_out_file(".repetitive", "w");
 
 	if(WRITE_SEQUENCES)
 	{
-        output7= fopen(Output_name + 7 * 100, "w");
-        output8= fopen(Output_name + 8 * 100, "w");
+        output7= get_out_file(".ffn", "w");
+        output8= get_out_file(".faa", "w");
 	}
 
 // Sort hits by position:
@@ -3055,9 +3042,9 @@ void characterize_published_genes(int ncds, int tot_Ghits, double nuc[], long by
     double	G;
     FILE	*output1, *output2, *output3;
 
-    output1= fopen(Output_name, "w");
-    output2= fopen(Output_name + 6 * 100, "w");
-    output3= fopen(Output_name + 3 * 100, "w");
+    output1= get_out_file(".modified", "w");
+    output2= get_out_file(".confirmed", "w");
+    output3= get_out_file(".verbose", "w");
 
 // output1 = *.modified ( published CDSs modified)
 // output2 = *.confirmed ( published CDSs confirmed)
@@ -3365,6 +3352,21 @@ void read_tables() {
 }
 
 /*** End of function read_tables() ***/
+
+/*******************************************/
+/*** Function get_out_file() ******/
+/*******************************************/
+
+FILE*   get_out_file(const char* extension, const char* mode) {
+    char* name = malloc(strlen(organism_name) + strlen(extension) + 1);
+    strcpy(name, organism_name);
+    strcat(name, extension);
+    FILE* out = fopen(name, mode);
+    free(name);
+    return out;
+}
+
+/*** End of function get_out_file() ***/
 
 /*******************************************/
 /*** Function assign_gene_positions() ******/
