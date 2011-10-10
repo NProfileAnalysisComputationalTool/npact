@@ -13,6 +13,12 @@ import util
 
 logger = logging.getLogger(__name__)
 
+
+class InvalidGBKException(Exception):
+    """This class should only ever contain messages that are safe to present to the user."""
+    pass
+
+
 def reduce_genbank(gbkfile):
     """An attempt to create a version of the gbk file that has all the
     features but not the sequence in it, didn't end up being a
@@ -98,6 +104,15 @@ def try_parse(abs_path, force=False):
     gbrec= None
     try:
         gbrec = open_parse_seq_rec(abs_path)
+        if isinstance(gbrec.seq,Bio.Seq.UnknownSeq):
+            raise InvalidGBKException("File contains no sequence data.")
+        
+        data['length'] = len(gbrec)
+        data['id'] = gbrec.id
+        data['date'] = gbrec.annotations.get('date')
+        data['description'] = gbrec.description
+    except InvalidGBKException:
+        raise
     except:
         logger.debug("Failed parsing %s, trying regex search.")
         
@@ -105,17 +120,7 @@ def try_parse(abs_path, force=False):
         if match :
             self.config['length'] = match.group(1)
         else :
-            raise Exception("Unable to find sequence length on gbkfile: %r", abs_path)
-    if gbrec:
-        if isinstance(gbrec.seq,Bio.Seq.UnknownSeq):
-            raise Exception("File contains no sequence data.")
-        
-        data['length'] = len(gbrec)
-        data['id'] = gbrec.id
-        data['date'] = gbrec.annotations.get('date')
-        data['description'] = gbrec.description
-
-
+            raise InvalidGBKException("Unable to find sequence length.")
 
     parse_cache[abs_path] = (mtime,data)
     return data

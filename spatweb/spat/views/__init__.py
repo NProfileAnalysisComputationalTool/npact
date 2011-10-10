@@ -42,6 +42,14 @@ def getabspath(relpath,raise_on_missing=True):
     return abspath
 
 
+def get_return_url(request):
+    if request.GET.get('path'):
+        return reverse('run',args=[request.GET.get('path')]) + "?" + urlencode(request.GET)
+    else:
+        return None
+        
+
+
 
 ##### Views that are small enough to be inline here.
 

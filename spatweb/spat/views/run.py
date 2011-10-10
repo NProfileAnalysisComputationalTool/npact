@@ -12,7 +12,7 @@ from django.template import RequestContext
 from pynpact import prepare, main, util
 from spat import helpers
 from spat.middleware import RedirectException
-from __init__ import is_clean_path, getabspath, getrelpath
+from __init__ import is_clean_path, getabspath, getrelpath, get_return_url
 
 #from spat.helpers import add_help_text
 
@@ -77,6 +77,9 @@ def view(request, path):
     config = None
     try:
         config = prepare.default_config(getabspath(path))
+    except prepare.InvalidGBKException, e:
+        messages.error(request,str(e))
+        return HttpResponseRedirect(reverse('spat.views.start.view'))
     except:
         messages.error(request,"There was a problem loading file '%s', please try again or try a different record." % path)
         return HttpResponseRedirect(reverse('spat.views.start.view'))
@@ -123,9 +126,7 @@ def results(request, path):
     except IOError:
         messages.error(request, "We're sorry but that file no longer exists. We expire old results periodically to save space on the server. Please try running the analysis again.")
 
-    return_url = None
-    if request.GET.get('path'):
-        return_url = reverse('run',args=[request.GET.get('path')]) + "?" + urlencode(request.GET)
+    return_url = get_return_url(request)
 
     return render_to_response('results.html',
                               {'download_link': download_link,
