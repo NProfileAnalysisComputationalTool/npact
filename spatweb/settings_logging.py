@@ -52,3 +52,5 @@ LOGGING = {
         #     }
         }
     }
+
+EXC_TRACE_FNAME="%s"

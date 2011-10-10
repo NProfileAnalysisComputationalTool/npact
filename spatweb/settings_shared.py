@@ -1,9 +1,8 @@
 # Django settings for spatweb project.
+import os
 
 DEBUG = True
 TEMPLATE_DEBUG = DEBUG
-
-from settings_logging import LOGGING
 
 from path import path
 
@@ -11,11 +10,17 @@ from path import path
 #this variable on deploy and everything else should work out.
 #PPATH="/home/ACCELERATION/nathan/projects/spat/spatweb/"
 PPATH=path(__file__).dirname()
-def ppath(rel) :
+def ppath(rel, create=False) :
     abspath = (PPATH / rel).realpath()
-    assert abspath.exists()
-    return abspath
+    if abspath.exists():
+        return abspath
+    elif create:
+        os.makedirs(abspath)
+        return abspath
+    else:
+        raise Exception("Path '%s' doesn't exist." % abaspath)
 
+from settings_logging import *
 
 ADMINS = (
     ('Nathan Bird', 'nathan@acceleration.net'),
@@ -59,7 +64,7 @@ USE_L10N = False
 
 # Absolute filesystem path to the directory that will hold user-uploaded files.
 # Example: "/home/media/media.lawrence.com/media/"
-MEDIA_ROOT = ppath('uploads')
+MEDIA_ROOT = ppath('uploads',True)
 
 # URL that handles the media served from MEDIA_ROOT. Make sure to use a
 # trailing slash.
@@ -155,3 +160,5 @@ INSTALLED_APPS = (
 
 
 MESSAGE_STORAGE='django.contrib.messages.storage.cookie.CookieStorage'
+
+EXC_TRACE_PATH=ppath("logs/exceptions", True)
