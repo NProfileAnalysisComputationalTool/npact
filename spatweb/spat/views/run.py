@@ -10,12 +10,12 @@ from django.shortcuts import render_to_response
 from django.utils.http import urlencode
 from django.template import RequestContext
 from pynpact import prepare, main, util
+from spat import is_clean_path, getabspath, getrelpath
 from spat import helpers
 from spat.middleware import RedirectException
-from __init__ import is_clean_path, getabspath, getrelpath, get_return_url
+from spat.views import get_return_url
 
 #from spat.helpers import add_help_text
-
 
 
 # Get an instance of a logger

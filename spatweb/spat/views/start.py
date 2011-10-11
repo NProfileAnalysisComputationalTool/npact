@@ -15,8 +15,9 @@ from django.http import HttpResponseRedirect
 from django.shortcuts import render_to_response
 from django.template import RequestContext
 
+
+from spat import is_clean_path, getabspath, getrelpath, library_root
 from spat.middleware import RedirectException
-from spat.views import is_clean_path, getabspath, getrelpath, library_root
 
 #used to dynamically load functions.
 import start
@@ -133,7 +134,7 @@ def build_forms(req):
     if req.method == 'POST':
         types = [UploadForm,UrlForm,PasteForm,EntrezSearchFormPOST]
         active = req.POST['active']
-        cls = getattr(start,active,None)
+        cls = getattr(start, active, None)
         return [ cls() ]
 
         #forms = []
@@ -154,8 +155,8 @@ def view(req) :
     if req.method == 'POST' :
         path=None
         active = req.POST['active']
-        cls = getattr(start,active)
-        submitted = cls(req.POST,req.FILES)
+        cls = getattr(start, active)
+        submitted = cls(req.POST, req.FILES)
         if submitted.is_valid():
             logger.info("Form is valid")
             path = submitted.cleaned_data['path']
