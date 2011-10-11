@@ -10,7 +10,8 @@ logger.info("Starting the main spat site.")
 
 
 def library_root() :
-    return os.path.join(settings.MEDIA_ROOT, 'library')
+    return getabspath("library")
+
 
 def getrelpath(abspath):
     return os.path.relpath(abspath, settings.MEDIA_ROOT)
