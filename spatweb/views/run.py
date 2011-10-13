@@ -10,12 +10,12 @@ from django.shortcuts import render_to_response
 from django.utils.http import urlencode
 from django.template import RequestContext
 from pynpact import prepare, main, util
-from spat import is_clean_path, getabspath, getrelpath
-from spat import helpers
-from spat.middleware import RedirectException
-from spat.views import get_return_url
+from spatweb import is_clean_path, getabspath, getrelpath
+from spatweb import helpers
+from spatweb.middleware import RedirectException
+from spatweb.views import get_return_url
 
-#from spat.helpers import add_help_text
+#from spatweb.helpers import add_help_text
 
 
 # Get an instance of a logger
@@ -71,7 +71,7 @@ def run_it(request, path, form, config):
 def view(request, path):
     if not is_clean_path(path) :
         messages.error(request, "Path contained illegal characters, please upload a file or go to the library and select one.")
-        return HttpResponseRedirect(reverse('spat.views.start.view'))
+        return HttpResponseRedirect(reverse('spatweb.views.start.view'))
 
     form = None
     config = None
@@ -79,10 +79,10 @@ def view(request, path):
         config = prepare.default_config(getabspath(path))
     except prepare.InvalidGBKException, e:
         messages.error(request,str(e))
-        return HttpResponseRedirect(reverse('spat.views.start.view'))
+        return HttpResponseRedirect(reverse('spatweb.views.start.view'))
     except:
         messages.error(request,"There was a problem loading file '%s', please try again or try a different record." % path)
-        return HttpResponseRedirect(reverse('spat.views.start.view'))
+        return HttpResponseRedirect(reverse('spatweb.views.start.view'))
 
     if request.method == 'POST' :
         form = RunForm(request.POST)
@@ -105,7 +105,7 @@ def view(request, path):
 
 def view_none(request) :
     messages.error(request, "No genome source selected, please upload one, or go to the library and select one.")
-    return HttpResponseRedirect(reverse('spat.views.start.view'))
+    return HttpResponseRedirect(reverse('spatweb.views.start.view'))
 
 
 

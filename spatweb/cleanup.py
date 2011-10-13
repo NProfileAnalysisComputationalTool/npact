@@ -7,7 +7,7 @@ from optparse import OptionParser
 
 from django.conf import settings
 
-from spat import library_root
+from spatweb import library_root
 
 
 logger = logging.getLogger(__name__)

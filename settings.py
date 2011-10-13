@@ -127,7 +127,7 @@ MIDDLEWARE_CLASSES = (
     'django.middleware.csrf.CsrfViewMiddleware',
     'django.contrib.auth.middleware.AuthenticationMiddleware',
     'django.contrib.messages.middleware.MessageMiddleware',
-    'spat.middleware.RedirectExceptionHandler',
+    'spatweb.middleware.RedirectExceptionHandler',
 )
 
 #What it is by default.
@@ -138,7 +138,7 @@ MIDDLEWARE_CLASSES = (
 #     "django.core.context_processors.media",
 #     "django.core.context_processors.static",
 #     "django.contrib.messages.context_processors.messages")
-ROOT_URLCONF = 'spat.urls'
+ROOT_URLCONF = 'spatweb.urls'
 
 TEMPLATE_DIRS = (
     #ppath('templates'),
@@ -158,7 +158,7 @@ INSTALLED_APPS = (
     'django.contrib.messages',
     
     'mediagenerator',
-    'spat'
+    'spatweb'
     #'django.contrib.staticfiles',
     # Uncomment the next line to enable the admin:
     # 'django.contrib.admin',

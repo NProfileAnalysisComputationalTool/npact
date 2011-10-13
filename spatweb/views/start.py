@@ -16,8 +16,8 @@ from django.shortcuts import render_to_response
 from django.template import RequestContext
 
 
-from spat import is_clean_path, getabspath, getrelpath, library_root
-from spat.middleware import RedirectException
+from spatweb import is_clean_path, getabspath, getrelpath, library_root
+from spatweb.middleware import RedirectException
 
 #used to dynamically load functions.
 import start

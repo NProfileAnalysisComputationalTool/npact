@@ -3,7 +3,7 @@ from django.conf import settings
 
 
 urlpatterns = \
-            patterns('spat.views',
+            patterns('spatweb.views',
                      url(r'^$', 'index', name='index'),
                      url(r'^start$', 'start.view', name="start"),
                      url(r'^start/efetch/(\d+)', 'start.efetch', name="efetch"),

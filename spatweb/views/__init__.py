@@ -5,7 +5,7 @@ from django.shortcuts import render_to_response
 from django.template import RequestContext
 from django.utils.http import urlencode
 from pynpact import prepare
-from spat import library_root
+from spatweb import library_root
 
 
 logger = logging.getLogger(__name__)
