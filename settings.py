@@ -6,7 +6,6 @@ TEMPLATE_DEBUG = DEBUG
 from path import path
 
 webroot=path(__file__).dirname() / "webroot"
-
 if not webroot.exists():
     raise Exception("Couldn't find webroot at %s" % webroot)
 
@@ -22,32 +21,13 @@ def ppath(rel, create=False):
 
 
 
-#from settings_logging import *
-
 ADMINS = (
     ('Nathan Bird', 'nathan@acceleration.net'),
 )
 
 MANAGERS = ADMINS
 
-DATABASES = {
-    # 'default': {
-    #     'ENGINE': 'django.db.backends.', # Add 'postgresql_psycopg2', 'postgresql', 'mysql', 'sqlite3' or 'oracle'.
-    #     'NAME': 'spat',                      # Or path to database file if using sqlite3.
-    #     'USER': 'spat',                      # Not used with sqlite3.
-    #     'PASSWORD': 'Sp4t4g0r14l',                  # Not used with sqlite3.
-    #     'HOST': '',                      # Set to empty string for localhost. Not used with sqlite3.
-    #     'PORT': '',                      # Set to empty string for default. Not used with sqlite3.
-    # }
-}
 
-# Local time zone for this installation. Choices can be found here:
-# http://en.wikipedia.org/wiki/List_of_tz_zones_by_name
-# although not all choices may be available on all operating systems.
-# On Unix systems, a value of None will cause Django to use the same
-# timezone as the operating system.
-# If running in a Windows environment this must be set to the same as your
-# system time zone.
 TIME_ZONE = 'America/New_York'
 
 # Language code for this installation. All choices can be found here:
@@ -72,17 +52,11 @@ MEDIA_ROOT = ppath('uploads',True)
 # haven't been accessed before we delete them.
 MEDIA_RETAIN_FOR=7
 
-# URL that handles the media served from MEDIA_ROOT. Make sure to use a
-# trailing slash.
-# Examples: "http://media.lawrence.com/media/", "http://example.com/media/"
-MEDIA_URL = ''
-
-
-#### django-mediagenerator settings
+######## django-mediagenerator settings
 
 MEDIA_DEV_MODE = DEBUG
-DEV_MEDIA_URL = '/devassets/'
-PRODUCTION_MEDIA_URL = '/assets/'
+DEV_MEDIA_URL = '/spat/devassets/'
+PRODUCTION_MEDIA_URL = '/spat/assets/'
 #GLOBAL_MEDIA_DIRS=(str(ppath('www')),)
 
 
@@ -107,7 +81,6 @@ MEDIA_BUNDLES= (
 
 
 
-
 # Make this unique, and don't share it with anybody.
 SECRET_KEY = ')=m+&gn97_#2s!gi=ivgp%9j92cmj76+ecy&*kin#p&f%2p$78'
 
@@ -121,7 +94,7 @@ TEMPLATE_LOADERS = (
 MIDDLEWARE_CLASSES = (
      # Media middleware has to come first
     'mediagenerator.middleware.MediaMiddleware',
-    
+   
     'django.middleware.common.CommonMiddleware',
     'django.contrib.sessions.middleware.SessionMiddleware',
     'django.middleware.csrf.CsrfViewMiddleware',
@@ -138,15 +111,11 @@ MIDDLEWARE_CLASSES = (
 #     "django.core.context_processors.media",
 #     "django.core.context_processors.static",
 #     "django.contrib.messages.context_processors.messages")
+
 ROOT_URLCONF = 'spatweb.urls'
 
-TEMPLATE_DIRS = (
-    #ppath('templates'),
-
-    # Put strings here, like "/home/html/django_templates" or "C:/www/django/templates".
-    # Always use forward slashes, even on Windows.
-    # Don't forget to use absolute paths, not relative paths.
-)
+#since we use the django.template.loaders.app_directories.Loader it automatically looks for apps' templates directory.
+TEMPLATE_DIRS = ()
 
 SESSION_ENGINE="django.contrib.sessions.backends.file"
 
@@ -169,5 +138,62 @@ INSTALLED_APPS = (
 
 MESSAGE_STORAGE='django.contrib.messages.storage.cookie.CookieStorage'
 
-EXC_TRACE_PATH=ppath("logs/exceptions", True)
+#this will be passed to logging.dictConfig (or something equivalent)
+LOGGING = {
+    'version': 1,
+    'disable_existing_loggers': False,
+    'formatters': {
+        'verbose': {
+            'format': '%(asctime)s %(process)d %(thread)d %(name)s %(levelname)s %(message)s'
+            },
+        'tty': {
+            'format': "%(asctime)s %(module)-10s %(levelname)-8s %(message)s",
+            'datefmt': '%H:%M:%S'
+            },
+        'simple': {
+            'format': '%(levelname)s %(message)s'
+            },
+    },
+    'handlers': {
+        'mail_admins': {
+            'level': 'ERROR',
+            'class': 'django.utils.log.AdminEmailHandler'
+        },
+        'console': {
+            'level':'DEBUG',
+            'class':'logging.StreamHandler',
+            'formatter': 'tty',
+        },
+        'mainlogfile': {
+            'class':'logging.handlers.WatchedFileHandler',
+            'filename': ppath("logs",True) / "main.log",
+            'formatter': 'verbose'
 
+            }
+    },
+    'loggers': {
+        '': {
+            'level': 'DEBUG',
+            'handlers': ['mainlogfile'],
+            },
+        'django.request': {
+            'handlers': ['mail_admins'],
+            'level': 'ERROR',
+            'propagate': True,
+            },
+        # 'spat': {
+        #     'handlers': ['console'],
+        #     'level': 'DEBUG',
+        #     'propagate': True,
+        #     },
+        # 'pynpact': {
+        #     'handlers': ['console'],
+        #     'level': 'DEBUG',
+        #     'propagate': True,
+        #     }
+        }
+    }
+
+if DEBUG:
+    LOGGING['loggers']['']['handlers'].append('console')
+    

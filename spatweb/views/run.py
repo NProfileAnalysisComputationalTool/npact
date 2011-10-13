@@ -92,7 +92,6 @@ def view(request, path):
         #can't use dict.update here as the multi-value dict gives back
         #an array in that case
         for k in request.GET:
-            logger.info('k:%s, v:%s', k, request.GET[k])
             config[k]= request.GET[k]
         form  = RunForm(initial=config)
 

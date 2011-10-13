@@ -2,7 +2,7 @@ from django.conf.urls.defaults import patterns, include, url
 from django.conf import settings
 
 
-urlpatterns = \
+spatpatterns = \
             patterns('spatweb.views',
                      url(r'^$', 'index', name='index'),
                      url(r'^start$', 'start.view', name="start"),
@@ -12,6 +12,9 @@ urlpatterns = \
                      url(r'^run^', 'run.view_none'),
                      url(r'^results/(.+)', 'run.results', name='results'),
                      )
+
+urlpatterns = patterns('',
+                       ('^spat/',include(spatpatterns)))
 
 
 
