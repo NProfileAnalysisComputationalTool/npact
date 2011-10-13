@@ -1,6 +1,6 @@
 import os
 
-DEBUG = True
+DEBUG = False
 TEMPLATE_DEBUG = DEBUG
 
 from path import path
@@ -76,7 +76,7 @@ MEDIA_BUNDLES= (
      'js/jquery-ui-1.8.16.custom.min.js',
      'qtip2/jquery.qtip.js',),
     )
-#STATICFILES_ROOT='/tmp/'
+GENERATED_MEDIA_DIR = ppath('_generated_media',create=True)
 
 
 

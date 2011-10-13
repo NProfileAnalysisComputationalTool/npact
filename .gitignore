@@ -14,3 +14,4 @@ ve
 *.egg-info
 .ropeproject
 a.out
+_generated_media_names.py
