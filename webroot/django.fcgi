@@ -1,4 +1,4 @@
-#!ve/bin/python
+#!../ve/bin/python
 
 #this is supposed to work, if it doesn't remember this address:
 # http://stackoverflow.com/questions/527237/unhandled-exception-in-flup
