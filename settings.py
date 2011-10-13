@@ -1,4 +1,3 @@
-# Django settings for spatweb project.
 import os
 
 DEBUG = True
@@ -6,21 +5,24 @@ TEMPLATE_DEBUG = DEBUG
 
 from path import path
 
-#physical path we're running this at, the idea is we can update only
-#this variable on deploy and everything else should work out.
-#PPATH="/home/ACCELERATION/nathan/projects/spat/spatweb/"
-PPATH=path(__file__).dirname()
-def ppath(rel, create=False) :
-    abspath = (PPATH / rel).realpath()
+webroot=path(__file__).dirname() / "webroot"
+
+if not webroot.exists():
+    raise Exception("Couldn't find webroot at %s" % webroot)
+
+def ppath(rel, create=False):
+    abspath = (webroot / rel).realpath()
     if abspath.exists():
         return abspath
     elif create:
         os.makedirs(abspath)
         return abspath
     else:
-        raise Exception("Path '%s' doesn't exist." % abaspath)
+        raise Exception("Path '%s' doesn't exist." % abspath)
 
-from settings_logging import *
+
+
+#from settings_logging import *
 
 ADMINS = (
     ('Nathan Bird', 'nathan@acceleration.net'),
@@ -81,7 +83,7 @@ MEDIA_URL = ''
 MEDIA_DEV_MODE = DEBUG
 DEV_MEDIA_URL = '/devassets/'
 PRODUCTION_MEDIA_URL = '/assets/'
-GLOBAL_MEDIA_DIRS=(str(ppath('www')),)
+#GLOBAL_MEDIA_DIRS=(str(ppath('www')),)
 
 
 MEDIA_BUNDLES= (
@@ -100,6 +102,8 @@ MEDIA_BUNDLES= (
      'js/jquery-ui-1.8.16.custom.min.js',
      'qtip2/jquery.qtip.js',),
     )
+#STATICFILES_ROOT='/tmp/'
+
 
 
 
@@ -109,7 +113,7 @@ SECRET_KEY = ')=m+&gn97_#2s!gi=ivgp%9j92cmj76+ecy&*kin#p&f%2p$78'
 
 # List of callables that know how to import templates from various sources.
 TEMPLATE_LOADERS = (
-    'django.template.loaders.filesystem.Loader',
+#    'django.template.loaders.filesystem.Loader',
     'django.template.loaders.app_directories.Loader',
 #     'django.template.loaders.eggs.Loader',
 )
@@ -134,10 +138,10 @@ MIDDLEWARE_CLASSES = (
 #     "django.core.context_processors.media",
 #     "django.core.context_processors.static",
 #     "django.contrib.messages.context_processors.messages")
-ROOT_URLCONF = 'spatweb.urls'
+ROOT_URLCONF = 'spat.urls'
 
 TEMPLATE_DIRS = (
-    ppath('templates'),
+    #ppath('templates'),
 
     # Put strings here, like "/home/html/django_templates" or "C:/www/django/templates".
     # Always use forward slashes, even on Windows.
@@ -166,3 +170,4 @@ INSTALLED_APPS = (
 MESSAGE_STORAGE='django.contrib.messages.storage.cookie.CookieStorage'
 
 EXC_TRACE_PATH=ppath("logs/exceptions", True)
+

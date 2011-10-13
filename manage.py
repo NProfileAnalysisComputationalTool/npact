@@ -1,6 +1,10 @@
-#!../ve/bin/python
+#!ve/bin/python
 from django.core.management import execute_manager
-import imp
+import imp,sys,os
+
+from path import path
+sys.path.append(path(__file__).dirname())
+
 try:
     imp.find_module('settings') # Assumed to be in the same directory.
 except ImportError:
@@ -9,6 +13,6 @@ except ImportError:
     sys.exit(1)
 
 import settings
-
+sys.stderr.write("Imported settings.\n")
 if __name__ == "__main__":
     execute_manager(settings)
