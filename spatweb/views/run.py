@@ -13,7 +13,7 @@ from pynpact import prepare, main, util
 from spatweb import is_clean_path, getabspath, getrelpath
 from spatweb import helpers
 from spatweb.middleware import RedirectException
-from spatweb.views import get_return_url
+from spatweb.views import get_return_url, get_raw_url
 
 #from spatweb.helpers import add_help_text
 
