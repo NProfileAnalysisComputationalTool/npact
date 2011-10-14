@@ -27,9 +27,10 @@
               <th>RefSeqId</th>
           </thead>
           <tbody>
+            {% with form.data.term|urlencode as term %}
             {% for summary in form.session.summarize %}
             <tr>
-              <td><a href="{% url efetch summary.Id %}"> {{summary.Title}}</a>
+              <td><a href="{% url efetch summary.Id %}?term={{term}}"> {{summary.Title}}</a>
                 <!-- <a title="See this record @ NCBI"><img src="{% media_url "images/ncbi.gif" %}"></a>
                      -->
               </td>
@@ -39,6 +40,7 @@
               <td><a href="http://www.ncbi.nlm.nih.gov/nuccore/{{summary.Caption}}">{{summary.Caption}}</a></td>
             </tr>
             {% endfor %}
+            {% endwith %}
           </tbody>
         </table>
         {% endif %}

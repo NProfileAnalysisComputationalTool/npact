@@ -107,6 +107,26 @@ class EntrezSession(object):
         fmt = "http://www.ncbi.nlm.nih.gov/sites/entrez?db={0}&cmd=HistorySearch&querykey={1}&tab=&WebEnv={2}"
         return fmt.format(self.db,self.QueryKey,self.WebEnv)
 
+
+ENTREZ_CACHE={}
+class CachedEntrezSession(EntrezSession):
+    def search(self, term):
+        self.term = term
+        self.summaries = ENTREZ_CACHE.get(term)
+        if self.summaries:
+            logger.debug('CachedEntrezSession hit for %s', term)
+            self.result_count = len(self.summaries)
+        else:
+            result = super(CachedEntrezSession, self).search(term)
+
+    def summarize(self):
+        if not self.summaries:
+            ENTREZ_CACHE[self.term] = super(CachedEntrezSession, self).summarize()
+        return self.summaries
+        
+        
+    
+
 # [{'Status': 'Completed',
 #   'Comment': '  ',
 #   'Caption': 'NC_014248',

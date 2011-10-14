@@ -4,8 +4,7 @@ import os.path
 import tempfile
 import urllib2
 
-import pynpact.util
-import pynpact.entrez
+from pynpact import util, entrez, prepare
 
 from django import forms
 from django.conf import settings
@@ -82,7 +81,7 @@ class UrlForm(forms.Form):
             try:
                 fh = urllib2.urlopen(pull_req)
                 fd,savepath,relpath = mksavefile("url")
-                pynpact.util.stream_to_file(fh,savepath)
+                util.stream_to_file(fh,savepath)
                 cleaned_data['path'] = relpath
             except:
                 logger.exception("Error fetching url %s", url)
@@ -117,7 +116,7 @@ class EntrezSearchForm(forms.Form):
         logger.debug("Starting handling Entrez search.")
         cleaned_data = self.cleaned_data
         if cleaned_data.get('term'): 
-            self.session = pynpact.entrez.EntrezSession(library_root())
+            self.session = entrez.CachedEntrezSession(library_root())
 
             self.session.search(cleaned_data['term'])
             logger.debug("Search finished, found %d matches", self.session.result_count)
@@ -172,8 +171,25 @@ def view(req) :
                                   context_instance=RequestContext(req))
 
 
+def re_search(req):
+    if req.REQUEST.get('term'):
+        esf = EntrezSearchForm(req.REQUEST)
+    return render_to_response('start.html',{'forms':[esf], 'active':'EntrezSearchForm'},
+                                  context_instance=RequestContext(req))
+
+
 def efetch(req, id):
     logger.info("Asked to fetch Id: %s", id)
-    session = pynpact.entrez.EntrezSession(library_root())
-    path = getrelpath(session.fetch_id(id))
-    return HttpResponseRedirect(reverse('run',args=[path]))
+    session = entrez.EntrezSession(library_root())
+    abspath = session.fetch_id(id)
+
+    try:
+        prepare.try_parse(abspath)
+    except prepare.InvalidGBKException, e:
+        messages.error(req, str(e))
+        return re_search(req)
+    except:
+        messages.error(request,"There was a problem loading file '%s', please try again or try a different record." % path)
+        return re_search(req)
+    
+    return HttpResponseRedirect(reverse('run',args=[getrelpath(abspath)]))
