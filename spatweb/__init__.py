@@ -10,7 +10,11 @@ logger.info("Starting the main spat site.")
 
 
 def library_root() :
-    return getabspath("library")
+    abspath = getabspath("library",False)
+    if not os.path.exists(abspath):
+        logger.info("Creating library root at %s", abspath)
+        os.makedirs(abspath)
+    return abspath
 
 
 def getrelpath(abspath):
