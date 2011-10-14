@@ -17,6 +17,10 @@ def get_return_url(request):
         return reverse('run',args=[request.GET.get('path')]) + "?" + urlencode(request.GET)
     else:
         return None
+
+def get_raw_url(request, path):
+    return request.build_absolute_uri(reverse('index') + path)
+    
         
 
 

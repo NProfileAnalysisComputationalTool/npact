@@ -121,7 +121,7 @@ def results(request, path):
     download_link = None
     try:
         getabspath(path)
-        download_link=request.build_absolute_uri(reverse('raw', kwargs={'path':path}))
+        download_link=get_raw_url(request, path)
     except IOError:
         messages.error(request, "We're sorry but that file no longer exists. We expire old results periodically to save space on the server. Please try running the analysis again.")
 
