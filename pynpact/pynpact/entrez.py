@@ -46,6 +46,7 @@ class EntrezSession(object):
         return self.QueryKey and len(self.QueryKey) and \
                self.WebEnv and len(self.WebEnv)
 
+    @util.log_time(logger)
     def search(self, term):
         logger.info("Starting Entrez query for %r, session=%s", term, self.has_session())
         resp = Bio.Entrez.read(Bio.Entrez.esearch(db=self.db, term=term,
@@ -58,14 +59,19 @@ class EntrezSession(object):
         logger.debug("Got back %s results.", self.result_count)
         return resp
 
+    @util.log_time(logger)
+    def _summarize(self):
+        logger.info("Summarizing from %s, %s", self.WebEnv, self.QueryKey)
+        self.summaries = Bio.Entrez.read(Bio.Entrez.esummary(db=self.db,
+                                                             webenv=self.WebEnv,
+                                                             query_key=self.QueryKey))
+ 
     def summarize(self):
         if not self.summaries:
-            logger.info("Summarizing from %s, %s", self.WebEnv, self.QueryKey)
-            self.summaries = Bio.Entrez.read(Bio.Entrez.esummary(db=self.db,
-                                                                 webenv=self.WebEnv,
-                                                                 query_key=self.QueryKey))
+            self._summarize()
         return self.summaries
 
+    @util.log_time(logger)
     def fetch(self, summary=None, filename=None):
         if not summary:
             if self.result_count == 1:

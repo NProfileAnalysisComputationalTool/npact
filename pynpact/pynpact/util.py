@@ -2,7 +2,7 @@ import os, os.path, logging, subprocess, threading, time, errno, hashlib
 import tempfile
 from subprocess import PIPE
 from contextlib import contextmanager
-
+from functools import wraps
 
 
 def reducehashdict(dict,keys) :
@@ -325,6 +325,19 @@ def safe_produce_new(outfilename, func,
 
 def file_delete_first_line(filename):
     capturedCall(["sed", "-i", "1d", filename], logger=False, check=True)
+
+
+def log_time(logger=logging, level=logging.INFO):
+    def decorator(func):
+        def wrapper(*args, **kwargs):
+            t1 = time.time()
+            result = func(*args, **kwargs)
+            t2 = time.time()
+            logger.log(level, "%s done, took %fs" % (func.func_name, (t2-t1)))
+            return result
+        return wraps(func)(wrapper)
+    return decorator
+
 
 # Copright (c) 2011  Accelerated Data Works
 # All rights reserved.
