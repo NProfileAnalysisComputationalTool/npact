@@ -182,7 +182,7 @@ $ CG MYCGE.gbk 1 580074 201 51 3 > MYCGE.CG200
                 #the "exc_file", (.modified) contains an extra header line we need to strip.
                 util.file_delete_first_line(os.path.join(dtemp, gbkbase + ".modified"))
                 if os.path.exists(outdir):
-                    self.loger.debug("Removing existing prediction output at %s", outdir)
+                    self.logger.debug("Removing existing prediction output at %s", outdir)
                     shutil.rmtree(outdir)
                 self.logger.debug("Renaming from %s to %s", dtemp, outdir)
                 os.rename(dtemp,outdir)

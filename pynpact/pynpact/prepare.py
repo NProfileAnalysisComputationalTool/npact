@@ -95,7 +95,7 @@ def try_parse(abs_path, force=False):
         #cache_lines are None for miss, or (date, data) otherwise.
         cache_line = parse_cache.get(abs_path)
         if cache_line and cache_line[0] >= mtime:
-            logger.debug("Cache hit for {0}", abs_path)
+            logger.debug("Cache hit for %s", abs_path)
             return cache_line[1]
 
     data = {'basename': os.path.basename(abs_path),
