@@ -59,8 +59,10 @@ def run_it(request, path, form, config):
     logger.debug("Got back ps file: %r", psname)
     psname = getrelpath(psname)
     url = reverse('results', args=[psname])
-    urlconf = util.reducedict(config, form.fields.keys())
-    urlconf['path'] = path
+    urlconf = {'path': path}
+    for k in form.fields.keys():
+        v = config.get(k,None)
+        if v: urlconf[k] = v
     
     url += "?" + urlencode(urlconf)
     raise RedirectException(url)

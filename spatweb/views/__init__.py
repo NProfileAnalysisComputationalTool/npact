@@ -19,7 +19,7 @@ def get_return_url(request):
         return None
 
 def get_raw_url(request, path):
-    return request.build_absolute_uri(reverse('index') + path)
+    return request.build_absolute_uri(reverse('index') + "raw/" + path)
     
         
 
