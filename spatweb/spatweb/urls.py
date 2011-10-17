@@ -13,13 +13,11 @@ spatpatterns = \
                      url(r'^results/(.+)', 'run.results', name='results'),
                      )
 
-urlpatterns = patterns('',
-                       ('^spat/',include(spatpatterns)))
-
-
-
 
 if settings.DEBUG :
-    urlpatterns += patterns('', url(r'^raw/(?P<path>.*)$', 'django.views.static.serve', {
+    spatpatterns += patterns('', url(r'^raw/(?P<path>.*)$', 'django.views.static.serve', {
         'document_root': settings.MEDIA_ROOT,
         }, name="raw"))
+
+
+urlpatterns = patterns('', ('^spat/',include(spatpatterns)))

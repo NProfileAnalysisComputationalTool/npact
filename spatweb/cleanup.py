@@ -1,24 +1,28 @@
 #!/usr/bin/env python
 
+ATIME_DEFAULT=14
+
+import os
 import logging
 import subprocess
+
 from optparse import OptionParser
+from path import path
 
-
-from django.conf import settings
-
+from pynpact import util
 from spatweb import library_root
 
 
-logger = logging.getLogger(__name__)
+logger = logging.getLogger('cleanup')
 
 
 
 def clean(path, days):
-    logger.info("Cleaning up; days:%d, path:%r", days, path)
+    logger.info("Cleaning up; days:%d, %r", days, path)
     
-    cmd=["find", path, "-atime", "+" + days,
-         "-exec", "rm", "{}", "+"]
+    cmd=["find", path, "-atime", "+" + str(days),
+         "-exec", "rm", "-v", "{}", "+"]
+    util.capturedCall(cmd,logger=logger,)
 
 
 def setup_logger(verbose):
@@ -28,19 +32,18 @@ def setup_logger(verbose):
     if verbose:
         logging.getLogger('').setLevel(logging.DEBUG)
 
-
 if __name__ == '__main__' :
+
     parser = OptionParser("""usage: %prog [options] [path]
         src <- The file to decrypt. If a directory, decrypt the most recent in there.""")
     parser.add_option("-v", "--verbose", action="store_true", dest="verbose",
                       help="Show more verbose log messages.")
 
     parser.add_option("-a", "--atime", action="store", dest="atime",
-                      default=settings.settings.MEDIA_RETAIN_FOR,
-                      help="""argument to find's atime predicate for how many days since it has been accessed before we decide to delete it.""")
+                      default=ATIME_DEFAULT,
+                      help="""argument to find's atime predicate for how many days since it has been accessed before we decide to delete it. Defaults to %s""" % ATIME_DEFAULT)
 
     (options,args) = parser.parse_args()
     setup_logger(options.verbose)
-
     
-    #parser.add_option("-n", "--dry-run", action)
+    clean(path(__file__).dirname().joinpath('../webroot/uploads').realpath(), options.atime)

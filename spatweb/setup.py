@@ -10,15 +10,15 @@ def recursive_files(*roots):
                 yield os.path.join(root,i)
 
 setup(name='spatweb',
-      version='0.1',
+      version='0.2',
       description='Website for PYNPACT, the Python N-Profile Analysis Computation Tool',
       author='Nathan Bird',
       author_email='nathan@acceleration.net',
       url='http://genome.ufl.edu/spat',
-      package_dir={'spatweb': '.'},
       packages=['spatweb'],
       package_data={'spatweb': list(recursive_files('static','templates'))},
       requires=["biopython(>=1.57)",
                 "pynpact",
                 "django(==1.3)"],
+      scripts=['cleanup.py']
      )
