@@ -15,10 +15,11 @@ setup(name='spatweb',
       author='Nathan Bird',
       author_email='nathan@acceleration.net',
       url='http://genome.ufl.edu/spat',
+      py_modules=['settings'],
       packages=['spatweb'],
       package_data={'spatweb': list(recursive_files('static','templates'))},
       requires=["biopython(>=1.57)",
                 "pynpact",
                 "django(==1.3)"],
-      scripts=['cleanup.py']
+      scripts=['cleanup.py','django.fcgi']
      )

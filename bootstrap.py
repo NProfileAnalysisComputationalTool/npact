@@ -18,13 +18,15 @@ ret = subprocess.call(["python", "virtualenv.py",
                        "--no-site-packages",
                        "-p", "python2.6",
                        "--never-download",
-                       vedir])
+                       vedir],
+                      cwd=pwd)
 if ret: exit(ret)
 
 ret = subprocess.call([os.path.join(vedir, 'bin', 'pip'), "install",
                        "-E", vedir,
                        "--index-url=''",
-                       "--requirement",os.path.join(pwd,"requirements.txt")])
+                       "--requirement",os.path.join(pwd,"requirements.txt")],
+                      cwd=pwd)
 if ret: exit(ret)
 
 

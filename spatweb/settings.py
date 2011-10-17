@@ -5,7 +5,7 @@ TEMPLATE_DEBUG = DEBUG
 
 from path import path
 
-webroot=path(__file__).dirname() / "webroot"
+webroot=(path(__file__).dirname() / "../webroot").realpath()
 if not webroot.exists():
     raise Exception("Couldn't find webroot at %s" % webroot)
 
@@ -77,7 +77,7 @@ MEDIA_BUNDLES= (
      'qtip2/jquery.qtip.js',),
     )
 GENERATED_MEDIA_DIR = ppath('_generated_media',create=True)
-
+GENERATED_MEDIA_NAMES_FILE = path(__file__).dirname() / '_generated_media_names.py'
 
 
 

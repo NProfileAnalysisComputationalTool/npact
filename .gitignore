@@ -1,11 +1,9 @@
-.svn
 build
 dist
 *~
 *#
 *.fasl
 .git
-_darcs
 bin
 obj
 *.pyc
@@ -15,3 +13,7 @@ ve
 .ropeproject
 a.out
 _generated_media_names.py
+_generated_media
+logs
+uploads
+development-bundle
