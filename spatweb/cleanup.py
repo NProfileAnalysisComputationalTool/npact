@@ -17,16 +17,20 @@ logger = logging.getLogger('cleanup')
 
 
 
-def clean(path, days):
+def clean(path, days, verbose=False):
     logger.info("Cleaning up; days:%d, %r", days, path)
-    
-    cmd=["find", path, "-atime", "+" + str(days),
-         "-exec", "rm", "-v", "{}", "+"]
-    util.capturedCall(cmd,logger=logger,)
+
+    if verbose:
+        cmd=["find", path, "-atime", "+" + str(days),
+             "-exec", "rm","-v", "{}", "+"]
+    else:
+        cmd=["find", path, "-atime", "+" + str(days),
+             "-exec", "rm", "{}", "+"]
+    util.capturedCall(cmd,logger=logger,stderr_level=logging.WARNING)
 
 
 def setup_logger(verbose):
-    logging.basicConfig(level=(verbose and logging.DEBUG or logging.INFO),
+    logging.basicConfig(level=(verbose and logging.DEBUG or logging.WARNING),
                         format="%(asctime)s %(name)-10s %(levelname)-8s %(message)s",
                         datefmt='%H:%M:%S')
     if verbose:
@@ -46,4 +50,6 @@ if __name__ == '__main__' :
     (options,args) = parser.parse_args()
     setup_logger(options.verbose)
     
-    clean(path(__file__).dirname().joinpath('../webroot/uploads').realpath(), options.atime)
+    clean(path(__file__).dirname().joinpath('../webroot/uploads').realpath(),
+          options.atime,
+          options.verbose)
