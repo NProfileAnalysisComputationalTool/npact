@@ -2,10 +2,9 @@
 
 HOST="genome"
 #make sure root doesn't have spaces in it or we'll have problems.
-ROOT="/home/accel/spat"
+ROOT="/var/www/html/genome.ufl.edu/spat"
 
 #HOST="progden"
-#$git stROOT="/home/ACCELERATION/nathan/spat2"
 
 rsync -vrp --exclude-from=.gitignore . $HOST:"${ROOT}"
 ssh $HOST "[ -e ${ROOT}/webroot/uploads ] ||  mkdir -m 777 ${ROOT}/webroot/uploads"
