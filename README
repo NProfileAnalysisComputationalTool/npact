@@ -1,0 +1,63 @@
+# About
+NPACT is the N-Profile Analysis and Computation Tool. It is a way to analyze the ratios of different base pairs across a genome sections.  The primary output is a PostScript file that graphs the ratios across the genome.
+
+This project was developed in 2011 by acceleration.net under contract from Luciano Brocchieri.
+
+# Using 
+
+This project is primarily meant to be used as a website (See the spatweb component). The pynpact component can be used directly on the command line though this has not been tested recently.
+
+## Requirements
+As much as possible the required libraries are packaged with this project to make it easier to get started and more resistant to external changes.
+
+### External requirements
+These you will need to setup on your system ahead of doing.
+
+* [Git](http://git-scm.com/): The version control system this project is maintained in.
+* [Python](http://python.org/): The bulk of the glue code is written in Python. It is targeting python 2.6 though 2.7 should work just as well. Python 3 compatibility has not been tested--and probably won't work due to biopython.
+* A [posix](http://en.wikipedia.org/wiki/POSIX) environemnt for python. It works on CentOS and Ubuntu; it should work on any posix environment build of python.
+* [sed](http://www.gnu.org/s/sed/): used to assemble the output. This will most likely already be present in a posix environment.
+* A C compiler: the actual analysis code is written in C. Tested with gcc 4.6.1. Others should work, I don't think there is anything too crazy being used.
+* Some sort of PostScript viewer to view the output files.
+* An fcgi server to run the website. The included apache.conf works with apache 2.2 running mod_fcgid but other fcgi servers should work as well.
+
+
+### Packaged requirements
+The system uses (already included) several python packages for deployment: [virtualenv](http://pypi.python.org/pypi/virtualenv), [setuptools](http://pypi.python.org/pypi/setuptools), and [pip](http://www.pip-installer.org/en/latest/index.html).
+
+The requirements.txt contains the exact libraries beyond that. It is in a [format](http://www.pip-installer.org/en/latest/requirements.html) that pip understands.
+
+Notes:
+
+* Biopython (1.58) Used to query entrez and read information out of GenBank files. This could probably be upgraded without any hassle.
+* Django (1.3) Used to build the website interface. Upgrading this will be much more involved.
+
+## Building
+1. After cloning the repository from git, submodules will also need to be initialized (necessary for at least biopython).
+        git submodule update --init
+2. run bootstrap.py to get everything going.
+        python bootstrap.py
+   N.B. If you only have python 2.7 available you will need to edit bootstrap.py to change the targeted version.
+
+## Running
+Primarily this should be run underneath a fcgi webserver. Look at apache.conf for an example of how to do that.
+
+### Development mode
+Django does have a builtin webserver that will work for local installations, to use it.
+
+1. edit spatweb/settings.py to change DEBUG from False to True at the top of the file.
+2. python manage.py runserver
+3. open http://127.0.0.1:8000/spat/
+
+### command line interface
+The project was developed with this in mind but has been extended beyond it so there is no good way to provide detailed configuration via the command line-- it's only available via the website.
+
+1. In a shell from the project root activate the virtualenv.
+        . ve/bin/activate
+2. python -mpynpact.main <gbkfile>
+3. There should now be a ps file in the same directory as the gbk file that is the results.
+
+# Project Components
+
+
+# Contributing
