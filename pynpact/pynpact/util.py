@@ -284,15 +284,15 @@ with mkstemp_overwrite('foobar.txt') as f:
 
 
 def is_outofdate(filename, *dependencies):
+    """Return true if the file is missing or not newer than all of its dependencies."""
     if not os.path.exists(filename): return True
 
     mtime = os.path.getmtime(filename)
     return any(os.path.getmtime(d) > mtime for d in dependencies if d)
 
-def derivative_filename(base, part, replace_ext=True, outputdir=None, dependencies=[]):
+def derivative_filename(base, part, replace_ext=True, outputdir=None):
     """Build the filename of a derivative product of the original
-    file. If the derivative file already exists return whether it
-    is out of date"""
+    file."""
 
     if not part[0] == ".":
         part = "." + part

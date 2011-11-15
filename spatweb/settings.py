@@ -1,8 +1,7 @@
-import os
-
-DEBUG = False
+DEBUG = True
 TEMPLATE_DEBUG = DEBUG
 
+import os
 from path import path
 
 webroot=(path(__file__).dirname() / "../webroot").realpath()
