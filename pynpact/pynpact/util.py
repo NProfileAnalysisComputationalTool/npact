@@ -5,22 +5,22 @@ from contextlib import contextmanager
 from functools import wraps
 
 
-def reducehashdict(dict,keys) :
+def reducehashdict(dict,keys):
     """pull the given keys out of the dictionary, return the reduced
     dictionary and the sha1 hash of that set of key values.
 """
     outdict= {}
     h = hashlib.sha1()
-    for k in sorted(keys) :
+    for k in sorted(keys):
         val = dict.get(k)
         if val is not None:
             h.update(k)
             h.update(str(val))
             outdict[k]=val
 
-    if len(outdict) :
+    if len(outdict):
         return outdict,h.hexdigest()
-    else :
+    else:
         return outdict,None
 
 def reducedict(dict,keys):
@@ -31,26 +31,26 @@ def reducedict(dict,keys):
     return out
 
 
-def ensure_dir(dir, logger=None) :
-    if not os.path.exists(dir) :
+def ensure_dir(dir, logger=None):
+    if not os.path.exists(dir):
         try:
             if logger: logger.debug("Making dir: %s", dir)
             os.makedirs(dir)
             if logger: logger.info("Created dir: %s", dir)
-        except OSError, e :
+        except OSError, e:
             #not entirely sure why we are getting errors,
             #http://docs.python.org/library/os.path.html#os.path.exists
             #says this could be related to not being able to call
             #os.stat, but I can do so from the command line python
             #just fine.
-            if os.path.exists(dir) :
+            if os.path.exists(dir):
                 if logger: logger.debug("Erred, already exists: e.errno: %s",e.errno)
                 return
             else:
                 raise
 
 
-def withDir(dir, fn, *args,**kwargs) :
+def withDir(dir, fn, *args,**kwargs):
     olddir = os.getcwd()
     try:
         os.chdir(dir)
@@ -59,19 +59,19 @@ def withDir(dir, fn, *args,**kwargs) :
         os.chdir(olddir)
 
 
-def pprint_bytes(bytes) :
+def pprint_bytes(bytes):
     suffix = 'B'
     bytes= float(bytes)
-    if bytes >= 1024 :
+    if bytes >= 1024:
         bytes = bytes / 1024
         suffix = 'KB'
-    if bytes >= 1024 :
+    if bytes >= 1024:
         bytes = bytes / 1024
         suffix = 'MB'
-    if bytes >= 1024 :
+    if bytes >= 1024:
         bytes = bytes / 1024
         suffix = 'GB'
-    if bytes >= 1024 :
+    if bytes >= 1024:
         bytes = bytes / 1024
         suffix = 'TB'
     return '%.2f%s' % (bytes,suffix)
@@ -83,7 +83,7 @@ def exec_external( proc ):
     return subprocess.call(['python', proc])
 
 
-def capturedCall(cmd,check=False, **kwargs) :
+def capturedCall(cmd,check=False, **kwargs):
     """Do the equivelent of the subprocess.call except
     log the stderr and stdout where appropriate."""
     p= capturedPopen(cmd,**kwargs)
@@ -93,7 +93,7 @@ def capturedCall(cmd,check=False, **kwargs) :
     time.sleep(0.01)
     time.sleep(0.01)
 
-    if check and rc != 0 :
+    if check and rc != 0:
         raise subprocess.CalledProcessError(rc, cmd[0])
     return rc
 
@@ -101,17 +101,17 @@ def capturedCall(cmd,check=False, **kwargs) :
 def capturedPopen(cmd, stdin=None, stdout=None, stderr=None,
                   logger=logging,
                   stdout_level=logging.INFO,
-                  stderr_level=logging.WARNING, **kwargs) :
+                  stderr_level=logging.WARNING, **kwargs):
     """Equivalent to subprocess.Popen except log stdout and stderr
     where appropriate. Also log the command being called."""
     #we use None as sigil values for stdin,stdout,stderr above so we
     # can distinguish from the caller passing in Pipe.
 
-    if os.name == 'posix' and not kwargs.has_key("close_fds") :
+    if os.name == 'posix' and not kwargs.has_key("close_fds"):
         #http://old.nabble.com/subprocess.Popen-pipeline-bug--td16026600.html
         kwargs['close_fds'] = True
 
-    if not isinstance(cmd,str) :
+    if not isinstance(cmd,str):
         cmd = [str(e) for e in cmd]
 
     if(logger):
@@ -119,7 +119,7 @@ def capturedPopen(cmd, stdin=None, stdout=None, stderr=None,
         logger.debug("Running cmd: %s",
                      isinstance(cmd,str) and cmd or subprocess.list2cmdline(cmd))
 
-    def out(arg) :
+    def out(arg):
         #figure out what to pass to the stdout stream
         if arg            : return arg #specified: use that
         elif arg is False : return os.open(os.devnull, os.O_WRONLY)
@@ -130,15 +130,15 @@ def capturedPopen(cmd, stdin=None, stdout=None, stderr=None,
                          stdout=out(stdout),
                          stderr=out(stderr),
                          **kwargs)
-    if logger :
-        def monitor(level, src, name) :
+    if logger:
+        def monitor(level, src, name):
             #if the cmd[0] (the binary) contains a full path, just get the name
             lname = "%s.%s" % (os.path.basename(cmd[0]), name)
-            if(hasattr(logger, 'name')) :
+            if(hasattr(logger, 'name')):
                 lname = "%s.%s" % (logger.name, lname)
             sublog = logging.getLogger(lname)
 
-            def tfn() :
+            def tfn():
                 l = src.readline()
                 while l != "":
                     sublog.log(level,l.strip())
@@ -148,18 +148,18 @@ def capturedPopen(cmd, stdin=None, stdout=None, stderr=None,
             p.__setattr__("std%s_thread" % name, th)
             th.start()
 
-        if stdout is None : monitor(stdout_level, p.stdout,"out")
-        if stderr is None : monitor(stderr_level, p.stderr,"err")
+        if stdout is None: monitor(stdout_level, p.stdout,"out")
+        if stderr is None: monitor(stderr_level, p.stderr,"err")
     return p
 
 
 @contextmanager
-def guardPopen(cmd, timeout=0.1, timeout_count=2, **kwargs) :
+def guardPopen(cmd, timeout=0.1, timeout_count=2, **kwargs):
     """ Use this with popening a process that might need to be killed
     if there is an exception inside the with scope.  e.g.
 
-    with guardPopen(["bzip2"], stdout=PIPE, stdin=PIPE) as bz2 :
-        while(data = <calculate>) :
+    with guardPopen(["bzip2"], stdout=PIPE, stdin=PIPE) as bz2:
+        while(data = <calculate>):
            bz2.write(data)
 
 "OH NO! My <calculate> raised an exception."  guardPopen will make
@@ -173,7 +173,7 @@ sure the bz2 process gets killed when the with block is exited.
         yield popen
     finally:
         if popen:
-            while popen.poll() == None and timeout and timeout_count > 0 :
+            while popen.poll() == None and timeout and timeout_count > 0:
                 if logger:
                     logger.debug("Things don't look right yet waiting for %ss (%s tries left)", 
                                  timeout, timeout_count)
@@ -184,12 +184,12 @@ sure the bz2 process gets killed when the with block is exited.
                     logger.exception("Terminating %s", cmd[0])
                 popen.terminate()
 
-def selfCaptured(klass) :
-    def mungekw(self,kwargs) :
+def selfCaptured(klass):
+    def mungekw(self,kwargs):
         if(not kwargs.has_key("logger")): kwargs["logger"] = self.logger
         return kwargs
-    def add(func) :
-        def newfunc(self,cmd,**kwargs) :
+    def add(func):
+        def newfunc(self,cmd,**kwargs):
             return func(cmd, **mungekw(self,kwargs))
         setattr(klass,func.__name__,newfunc)
 
@@ -218,9 +218,9 @@ def which(program):
 def stream_to_file(stream,path,bufsize=8192):
     def loop(f):
         bytes=0
-        while True :
+        while True:
             buf = stream.read(bufsize)
-            if buf == "" :  break #EOF
+            if buf == "":  break #EOF
             bytes += len(buf)
             f.write(buf)
         return bytes
@@ -235,7 +235,7 @@ def stream_to_file(stream,path,bufsize=8192):
 
 @contextmanager
 def mkstemp_overwrite(destination, conflict_overwrite=True, logger=None,
-                      cleanup=True, **kwargs) :
+                      cleanup=True, **kwargs):
     """For writing to a temporary file and then move it ontop of a
     (possibly) existing file only when finished.  This enables us to
     perform long running operations on a file that other people might
@@ -257,7 +257,7 @@ with mkstemp_overwrite('foobar.txt') as f:
     """
 
     mtime1 = mtime2 = None
-    if os.path.exists(destination) :
+    if os.path.exists(destination):
         mtime1 = os.path.getmtime(destination)
 
     (fd,path) = tempfile.mkstemp(**kwargs)
@@ -266,42 +266,42 @@ with mkstemp_overwrite('foobar.txt') as f:
         yield filelike
         filelike.close()
 
-        if os.path.exists(destination) :
+        if os.path.exists(destination):
             mtime2 = os.path.getmtime(destination)
 
         if mtime1 != mtime2 and logger:
             logger.warning("Potential conflict on %r, overwrite: %s; ts1:%s, ts2:%s",
                                destination, conflict_overwrite, mtime1, mtime2)
 
-        if conflict_overwrite or mtime1 == mtime2 :
+        if conflict_overwrite or mtime1 == mtime2:
             #TODO: permissions?
-            os.rename(path,destination)
+            os.rename(path, destination)
     finally:
-        if cleanup and os.path.exists(path) :
-            if logger :
+        if cleanup and os.path.exists(path):
+            if logger:
                 logger.info("Cleaning up leftover tempfile %r", path)
             os.remove(path)
 
 
-def is_outofdate(filename, *dependencies) :
-    if not os.path.exists(filename) : return True
+def is_outofdate(filename, *dependencies):
+    if not os.path.exists(filename): return True
 
     mtime = os.path.getmtime(filename)
     return any(os.path.getmtime(d) > mtime for d in dependencies if d)
 
-def derivative_filename(base, part, replace_ext=True, outputdir=None, dependencies=[]) :
+def derivative_filename(base, part, replace_ext=True, outputdir=None, dependencies=[]):
     """Build the filename of a derivative product of the original
     file. If the derivative file already exists return whether it
     is out of date"""
 
-    if not part[0] == "." :
+    if not part[0] == ".":
         part = "." + part
 
-    if outputdir is None :
+    if outputdir is None:
         outputdir = os.path.dirname(base)
     filename = os.path.basename(base)
 
-    if replace_ext :
+    if replace_ext:
         filename = os.path.splitext(filename)[0]
 
     outfilename = os.path.join(outputdir, filename + part)
@@ -309,16 +309,16 @@ def derivative_filename(base, part, replace_ext=True, outputdir=None, dependenci
     return outfilename
 
 def safe_produce_new(outfilename, func,
-                     replace_ext=True, force=False,dependencies=[], **kwargs) :
+                     replace_ext=True, force=False,dependencies=[], **kwargs):
     outofdate = is_outofdate(outfilename, *dependencies)
     logger=kwargs.get('logger')
     if outofdate or force:
         if logger:
             logger.debug("Regenerating, checked:%d force:%r", len(dependencies),force)
 
-        with mkstemp_overwrite(outfilename,**kwargs) as f :
+        with mkstemp_overwrite(outfilename,**kwargs) as f:
             func(f)
-    elif kwargs.get('logger',False) :
+    elif kwargs.get('logger',False):
         kwargs.get('logger').debug("Skipped producing %r", outfilename)
     return outfilename
 
