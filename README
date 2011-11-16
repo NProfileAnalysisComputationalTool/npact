@@ -110,7 +110,7 @@ This is the code for the website. It is built ontop of [Django](http://djangopro
 
 # Contributing
 
-This project uses Git for source control. Git is an excellent system with lots of good documentation. One of its advantages is that it can be run disconnected from others and then used to bring disparate parties back into sync at some later point. There are many very good tutorials out there; [Pro Git](http://progit.org/book/) is fantastic and all on [this list](http://sixrevisions.com/resources/git-tutorials-beginners/)  look good. See the section "Recording changes" below for the super quick version.
+This project uses Git for source control. Git is an excellent system with lots of good documentation. One of its advantages is that it can be run disconnected from others and then used to bring disparate parties back into sync at some later point. See the section "Recording changes" below for a super quick introduction and links to tutorials.
 
 ## Virtualenv
 In order for any editing to work well you should activate the python virtual environment. This will alter the paths that the system looks for the python and executable code in. From a command line shell in the root of the project simply type.
@@ -157,8 +157,12 @@ Later on you can see the entire history of a file:
 
     git log README
 
-If you are in the middle of editing a file and just want to start over from the last good one.
+If you are in the middle of editing a file and want to see what all you've changed?
+
+    git diff <file>
+    
+Want to get rid of those changes and go back to the recorded version that you know worked?
 
     git checkout <file>
 
-Will restore the version saved the last time you committed.
+There are many very good tutorials out there; [Pro Git](http://progit.org/book/) is fantastic and all on [this list](http://sixrevisions.com/resources/git-tutorials-beginners/)  look good.
