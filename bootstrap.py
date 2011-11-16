@@ -44,3 +44,5 @@ if ret: exit(ret)
 
 pynpact_dir = os.path.join(os.path.dirname(__file__), "pynpact/")
 subprocess.call(["make"],cwd=pynpact_dir)
+if ret:
+    print "Make failed C programs may not be available."
