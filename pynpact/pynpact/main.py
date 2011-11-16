@@ -11,13 +11,6 @@ import util
 
 logger = logging.getLogger(__name__)
 
-#TODO: general next steps:
-
-#start figuring out how to supply arguments to the various programs,
-#and hash output filenames based on those args so that datestamp cache
-#handles different invocations of a program.
-
-#make paths less dependent on ~nathan
 
 
 class GenBankProcessor(object) :
