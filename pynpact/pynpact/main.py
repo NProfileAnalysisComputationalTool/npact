@@ -13,6 +13,15 @@ logger = logging.getLogger(__name__)
 
 
 
+#### One of the main ideas in here is that we name output products
+#### with a hash of the configuration that went into them. That
+#### filename then goes back in the master configuration, and might be
+#### the input to a future computation (i.e. Allplots). The purpose of
+#### this is to reuse the products when we can, but guarantee that
+#### changes in the configuration cause the apropriate programs to
+#### create new output.
+
+
 class GenBankProcessor(object) :
     """Manipulate Genebank files in the pynpact project.
 

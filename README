@@ -78,14 +78,14 @@ The project was developed with this in mind but has been extended beyond it so t
 
 In the root of the project are several configuration and build files. 
 
-* `requirements.txt` is a list of python packages that are used. Most of the referenced packages exist in the `lib` folder; the rest are described below.
-* `apache.conf` sample apache configuration (and what's actually used on genome.ufl.edu
-* `bootstrap.py` is the script that helps get a new checkout of the project running. Run this after a fresh checkout to get the virtual environment and dependencies setup.
-* `publish.sh` used for publishing to genome.ufl.edu (or potentially another host)
-* `manage.py` a Django script for managing the website portion. Run with 
-* `lib/` contains the libraries this project depends on.
-* `ve/` holds the python virtual environment-- won't exist until after `bootstrap.py` has been called. Can be deleted and recreated with `boostrap.py` at any point.
-* `webroot/` a container for the dynamic portion that will change while running as a website. Uploaded files are written to here, logs are written to here.
+* `requirements.txt` - the list of python packages that are used. Most of the referenced packages exist in the `lib` folder; the rest are described below.
+* `apache.conf` - sample apache configuration (and what's actually used on genome.ufl.edu
+* `bootstrap.py` - the script that helps get a new checkout of the project running. Run this after a fresh checkout to get the virtual environment and dependencies setup.
+* `publish.sh` - used for publishing to genome.ufl.edu (or potentially another host)
+* `manage.py` - the Django script for managing the website portion. Run with 
+* `lib/` -  contains the libraries this project depends on.
+* `ve/` - holds the python virtual environment-- won't exist until after `bootstrap.py` has been called. Can be deleted and recreated with `boostrap.py` at any point.
+* `webroot/` - a container for the dynamic portion that will change while running as a website. Uploaded files are written to here, logs are written to here.
 
 ## pynpact/
 For Python N-Profile Analysis and Computation Tool.  This is the main module that interacts with [Genbank](http://www.ncbi.nlm.nih.gov/genbank/) files to compute the graphs of N-Profile ratios. (NB: It's currently limitted to S-Profiles but this is high on the TODO list.)
