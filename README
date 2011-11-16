@@ -16,13 +16,11 @@ This project is primarily meant to be used as a website (See the spatweb compone
 As much as possible the required libraries are packaged with this project to make it easier to get started and more resistant to external changes.
 
 ### External requirements
-These you will need to setup on your system ahead of doing.
-
-* [Git](http://git-scm.com/): The version control system this project is maintained in. 
+These you will need to setup on your system ahead of getting started.
 
 * [Python](http://python.org/): The bulk of the glue code is written in Python. It is targeting python 2.6 though 2.7 should work just as well. Python 3 compatibility has not been tested--and probably won't work due to biopython.
 
-* A [posix](http://en.wikipedia.org/wiki/POSIX) environment for python. It works on CentOS and Ubuntu; it should work on any posix environment build of python.
+* A [posix](http://en.wikipedia.org/wiki/POSIX) environment for python. It works on CentOS and Ubuntu; it should work on any posix environment build of python. Mac OS X is expected to work.
 
 * [sed](http://www.gnu.org/s/sed/): used to assemble the output. This will most likely already be present in a posix environment.
 
@@ -32,6 +30,7 @@ These you will need to setup on your system ahead of doing.
 
 * An fcgi server to run the website. The included apache.conf works with apache 2.2 running mod_fcgid but other fcgi servers should work as well. If you intend to only run it locally there is a builtin webserver that will dowell enough.
 
+* [Git](http://git-scm.com/)  (OPTIONAL): The version control system this project is maintained in. Will be necessary to record changes but not for running the project.
 
 ### Packaged requirements
 The system uses (already included) several python packages for deployment: [virtualenv](http://pypi.python.org/pypi/virtualenv), [setuptools](http://pypi.python.org/pypi/setuptools), and [pip](http://www.pip-installer.org/en/latest/index.html).
@@ -42,6 +41,8 @@ Notes:
 
 * Biopython (1.58) Used to query entrez and read information out of GenBank files. This could probably be upgraded without any hassle.
 * Django (1.3) Used to build the website interface. Upgrading this will be much more involved.
+* flup is used by django to convert fcgi requests to wsgi.
+
 
 ## Building
 1. After cloning the repository from git, submodules will also need to be initialized (necessary for at least biopython).
