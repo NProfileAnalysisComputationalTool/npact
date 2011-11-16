@@ -1,7 +1,12 @@
 # About
 NPACT is the N-Profile Analysis and Computation Tool. It is a way to analyze the ratios of different base pairs across a genome sections.  The primary output is a PostScript file that graphs the ratios across the genome.
 
-This project was developed in 2011 by acceleration.net under contract from Luciano Brocchieri.
+This project was developed in 2011 by acceleration.net under contract from Luciano Brocchieri at the [University of Florida Genetics Institute](http://www.ufgi.ufl.edu/).
+
+## About this file
+This file is written using [Markdown](http://daringfireball.net/projects/markdown/). It should be fairly legible as plain text but there are tools that will produce a bit nicer output, e.g. http://daringfireball.net/projects/markdown/dingus.
+
+
 
 # Using 
 
@@ -13,19 +18,25 @@ As much as possible the required libraries are packaged with this project to mak
 ### External requirements
 These you will need to setup on your system ahead of doing.
 
-* [Git](http://git-scm.com/): The version control system this project is maintained in.
+* [Git](http://git-scm.com/): The version control system this project is maintained in. 
+
 * [Python](http://python.org/): The bulk of the glue code is written in Python. It is targeting python 2.6 though 2.7 should work just as well. Python 3 compatibility has not been tested--and probably won't work due to biopython.
-* A [posix](http://en.wikipedia.org/wiki/POSIX) environemnt for python. It works on CentOS and Ubuntu; it should work on any posix environment build of python.
+
+* A [posix](http://en.wikipedia.org/wiki/POSIX) environment for python. It works on CentOS and Ubuntu; it should work on any posix environment build of python.
+
 * [sed](http://www.gnu.org/s/sed/): used to assemble the output. This will most likely already be present in a posix environment.
-* A C compiler: the actual analysis code is written in C. Tested with gcc 4.6.1. Others should work, I don't think there is anything too crazy being used.
+
+* A C compiler: the actual analysis code is written in C. Tested with gcc 4.6.1. Others should work, I don't think there is anything too crazy being used. There is a makefile that can be used to build all the C if you have [make](http://www.gnu.org/s/make/) installed.
+
 * Some sort of PostScript viewer to view the output files.
-* An fcgi server to run the website. The included apache.conf works with apache 2.2 running mod_fcgid but other fcgi servers should work as well.
+
+* An fcgi server to run the website. The included apache.conf works with apache 2.2 running mod_fcgid but other fcgi servers should work as well. If you intend to only run it locally there is a builtin webserver that will dowell enough.
 
 
 ### Packaged requirements
 The system uses (already included) several python packages for deployment: [virtualenv](http://pypi.python.org/pypi/virtualenv), [setuptools](http://pypi.python.org/pypi/setuptools), and [pip](http://www.pip-installer.org/en/latest/index.html).
 
-The requirements.txt contains the exact libraries beyond that. It is in a [format](http://www.pip-installer.org/en/latest/requirements.html) that pip understands.
+The `requirements.txt` contains the exact libraries beyond that. It is in a [format](http://www.pip-installer.org/en/latest/requirements.html) that pip understands.
 
 Notes:
 
@@ -34,30 +45,120 @@ Notes:
 
 ## Building
 1. After cloning the repository from git, submodules will also need to be initialized (necessary for at least biopython).
+
         git submodule update --init
+        
 2. run bootstrap.py to get everything going.
+
         python bootstrap.py
+        
    N.B. If you only have python 2.7 available you will need to edit bootstrap.py to change the targeted version.
 
 ## Running
-Primarily this should be run underneath a fcgi webserver. Look at apache.conf for an example of how to do that.
+Primarily this should be run underneath a fcgi webserver. Look at `apache.conf` for an example of how to do that.
 
 ### Development mode
 Django does have a builtin webserver that will work for local installations, to use it.
 
-1. edit spatweb/settings.py to change DEBUG from False to True at the top of the file.
-2. python manage.py runserver
-3. open http://127.0.0.1:8000/spat/
+1. edit `spatweb/settings.py` to change DEBUG from False to True at the top of the file.
+2. `python manage.py runserver`
+3. open [http://127.0.0.1:8000/spat/]()
 
 ### command line interface
 The project was developed with this in mind but has been extended beyond it so there is no good way to provide detailed configuration via the command line-- it's only available via the website.
 
-1. In a shell from the project root activate the virtualenv.
-        . ve/bin/activate
-2. python -mpynpact.main <gbkfile>
+1. In a shell from the project root activate the virtualenv: `. ve/bin/activate`
+2. `python -mpynpact.main <gbkfile>`
 3. There should now be a ps file in the same directory as the gbk file that is the results.
+
+
 
 # Project Components
 
+In the root of the project are several configuration and build files. 
+
+* `requirements.txt` is a list of python packages that are used. Most of the referenced packages exist in the `lib` folder; the rest are described below.
+* `apache.conf` sample apache configuration (and what's actually used on genome.ufl.edu
+* `bootstrap.py` is the script that helps get a new checkout of the project running. Run this after a fresh checkout to get the virtual environment and dependencies setup.
+* `publish.sh` used for publishing to genome.ufl.edu (or potentially another host)
+* `manage.py` a Django script for managing the website portion. Run with 
+* `lib/` contains the libraries this project depends on.
+* `ve/` holds the python virtual environment-- won't exist until after `bootstrap.py` has been called. Can be deleted and recreated with `boostrap.py` at any point.
+* `webroot/` a container for the dynamic portion that will change while running as a website. Uploaded files are written to here, logs are written to here.
+
+## pynpact/
+For Python N-Profile Analysis and Computation Tool.  This is the main module that interacts with [Genbank](http://www.ncbi.nlm.nih.gov/genbank/) files to compute the graphs of N-Profile ratios. (NB: It's currently limitted to S-Profiles but this is high on the TODO list.)
+
+The C code at `pynpact/src` does most of the analysis and the python code in `pynpact/pynpact` helps glue it together into an easy-to-run process.
+
+* `pynpact/pynpact/prepare.py` this is used to investigate a GBK file and come up with the default options that will be used on a run. To change a default on the websites run page, go here. To change the help text about one of the options, go here.
+* `pynpact/pynpact/entrez.py` is used for querying entrez to find gbk files.
+* `pynpact/pynpact/main.py` actually coordinates the running of the C programs and produces the PS output.
+
+
+## spatweb
+This is the code for the website. It is built ontop of [Django](http://djangoproject.com/). 
+* `spatweb/settings.py` is the configuration for this django website. Tells what modules and applications to load; configures where paths for different content are.
+* `spatweb/spatweb/static/` holds the static images, CSS, and javascript used on the website.
+* `spatweb/spatweb/templates/` holds the templates that generate html on the website. Go here to change text on the site, rearrange blocks, or add new content.
+* `spatweb/spatweb/urls.py` controls the web sites url space; django uses this to dispatch incoming requests to views.
+* `spatweb/spatweb/views/` holds the code that gets run on an incoming request.
+* `spatweb/cleanup.py` used to clean out old uploaded files so they don't take too much space on the server.
+* `spatweb/django.fcgi` is the entry point for fcgi webservers.
+
+
 
 # Contributing
+
+This project uses Git for source control. Git is an excellent system with lots of good documentation. One of its advantages is that it can be run disconnected from others and then used to bring disparate parties back into sync at some later point. There are many very good tutorials out there; [Pro Git](http://progit.org/book/) is fantastic and all on [this list](http://sixrevisions.com/resources/git-tutorials-beginners/)  look good. See the section "Recording changes" below for the super quick version.
+
+## Virtualenv
+In order for any editing to work well you should activate the python virtual environment. This will alter the paths that the system looks for the python and executable code in. From a command line shell in the root of the project simply type.
+
+    source ve/bin/activate
+
+## Editing the website
+Website content is mostly in the templates at `spatweb/spatweb/templates`. This uses the [Django template language](https://docs.djangoproject.com/en/1.3/topics/templates/). To alter the default values or help text given on the run page go look in `pynpact/pynpact/prepare.py`. 
+
+This can be tested out by running the development server. See Using > Running > Development mode section above.
+
+## Editing the C code
+All of the C lives in `pynpact/src`. 
+
+### Building with make (recommended)
+There are two methods for building the code. This first is to use the makefile at `pynpact/makefile`. e.g.
+
+    cd pynpact
+    make
+
+### building with setup.py
+The second (which should work if make is unavailable, but is a bit more involved) is to use `pynpact/setup.py` to build it. This requires the virtualenv being activated (see Virtualenv section above).
+
+Before this can work however you will need to edit `requirements.txt`. In that file you should see a line for pynpact. Ensure that it does not begin with `-e`. The `-e` puts it in a development mode that makes it easier to see changes in the python take effect immediately but causes this system to put the bin files in the wrong place. Once the `-e` is removed you should rerun `bootstrap.py` once. After that subsequent rebuilds can be done with:
+
+    cd pynpact
+    python setup.py install
+
+This will build the C code and copy both the python code and C binaries into the correct location of the virtual environment for everything to be seen correctly. Note: The C binaries aren't added to the system path; if you wish to call one directly either use the make approach above, or look in `ve/lib/python2.6/site-packages/pynpact/bin/`.
+
+
+## Recording changes
+Frequently recording your changes makes it easier to merge with other developers later or to track down when a bug or confusing line of code was introduced.
+
+The simplest form is:
+
+    git commit -m "<A brief descriptive message>"  <the file or files to commit>
+
+How frequently should you do this? Any time you are at a good little stopping point: e.g.
+
+    git commit -m "Got most of the way through first draft of the README file." README
+
+Later on you can see the entire history of a file:
+
+    git log README
+
+If you are in the middle of editing a file and just want to start over from the last good one.
+
+    git checkout <file>
+
+Will restore the version saved the last time you committed.
