@@ -1,4 +1,5 @@
-FLAGS = -ggdb -lm
+FLAGS = -ggdb
+ENDFLAGS= -lm   #it doesn't work unless this is a the end of the command line.
 SRCDIR = src
 OBJDIR = obj
 BINDIR = pynpact/bin
@@ -25,4 +26,4 @@ $(OBJDIR)/%.o: $(SRCDIR)/%.c
 	$(CC) $(FLAGS) -c $< -o $@
 
 $(BINDIR)/%: $(OBJDIR)/%.o
-	$(CC) $(FLAGS) -o $@ $<
+	$(CC) $(FLAGS) -o $@ $<  $(ENDFLAGS)
