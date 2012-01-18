@@ -28,7 +28,7 @@ These you will need to setup on your system ahead of getting started.
 
 * Some sort of PostScript viewer to view the output files.
 
-* An fcgi server to run the website. The included apache.conf works with apache 2.2 running mod_fcgid but other fcgi servers should work as well. If you intend to only run it locally there is a builtin webserver that will dowell enough.
+* An fcgi server to run the website. The included apache.conf works with apache 2.2 running mod_fcgid but other fcgi servers should work as well. If you intend to only run it locally there is a builtin webserver that will do well enough.
 
 * [Git](http://git-scm.com/)  (OPTIONAL): The version control system this project is maintained in. Will be necessary to record changes but not for running the project.
 
@@ -79,10 +79,10 @@ The project was developed with this in mind but has been extended beyond it so t
 In the root of the project are several configuration and build files. 
 
 * `requirements.txt` - the list of python packages that are used. Most of the referenced packages exist in the `lib` folder; the rest are described below.
-* `apache.conf` - sample apache configuration (and what's actually used on genome.ufl.edu
+* `apache.conf` - sample apache configuration (and what's actually used on genome.ufl.edu)
 * `bootstrap.py` - the script that helps get a new checkout of the project running. Run this after a fresh checkout to get the virtual environment and dependencies setup.
 * `publish.sh` - used for publishing to genome.ufl.edu (or potentially another host)
-* `manage.py` - the Django script for managing the website portion. Run with 
+* `manage.py` - the Django script for managing the website portion.
 * `lib/` -  contains the libraries this project depends on.
 * `ve/` - holds the python virtual environment-- won't exist until after `bootstrap.py` has been called. Can be deleted and recreated with `boostrap.py` at any point.
 * `webroot/` - a container for the dynamic portion that will change while running as a website. Uploaded files are written to here, logs are written to here.
@@ -98,7 +98,7 @@ The C code at `pynpact/src` does most of the analysis and the python code in `py
 
 
 ## spatweb
-This is the code for the website. It is built ontop of [Django](http://djangoproject.com/). 
+This is the code for the website. It is built on top of [Django](http://djangoproject.com/).
 * `spatweb/settings.py` is the configuration for this django website. Tells what modules and applications to load; configures where paths for different content are.
 * `spatweb/spatweb/static/` holds the static images, CSS, and javascript used on the website.
 * `spatweb/spatweb/templates/` holds the templates that generate html on the website. Go here to change text on the site, rearrange blocks, or add new content.
@@ -166,4 +166,4 @@ Want to get rid of those changes and go back to the recorded version that you kn
 
     git checkout <file>
 
-There are many very good tutorials out there; [Pro Git](http://progit.org/book/) is fantastic and all on [this list](http://sixrevisions.com/resources/git-tutorials-beginners/)  look good.
+There are many very good tutorials out there; [Pro Git](http://progit.org/book/) is fantastic and all on [this list](http://sixrevisions.com/resources/git-tutorials-beginners/) look good.
