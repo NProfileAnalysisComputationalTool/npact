@@ -33,8 +33,11 @@ class build_pynpact(build) :
                                           libraries=['m'],
                                           output_dir=output_dir,debug=self.debug)
 
-
         build.run(self)
+        #TODO: perhaps we could include these into the script files so
+        #they are automatically copied into the virtuealenv's bin
+        #folder
+    
     
     # def install(self):
     #     if os.path.isdir(self.build_dir):
