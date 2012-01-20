@@ -13,7 +13,7 @@ if os.path.exists(vedir):
 
 virtualenv_support_dir = os.path.abspath(os.path.join(pwd, "lib", "virtualenv_support"))
 
-ret = subprocess.call(["python", "virtualenv.py", 
+ret = subprocess.call(["python", "virtualenv.py",
                        "--extra-search-dir=%s" % virtualenv_support_dir,
                        "--no-site-packages",
                        "-p", "python2.6",
@@ -30,7 +30,7 @@ ret = subprocess.call([os.path.join(vedir, 'bin', 'pip'), "install",
 if ret: exit(ret)
 
 
-## no eggs 
+## no eggs
 # the_eggs = [os.path.basename(path) for path in
 #             glob.glob(os.path.join(pwd, "requirements", "eggs", "*.egg"))]
 # if the_eggs:
