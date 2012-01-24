@@ -53,7 +53,7 @@ Notes:
 
         python bootstrap.py
         
-   N.B. If you only have python 2.7 available you will need to edit bootstrap.py to change the targeted version.
+N.B. To target a different version of python, simply invoke with that version of python. E.g. `python2.6 bootrap.py`
 
 ## Running
 Primarily this should be run underneath a fcgi webserver. Look at `apache.conf` for an example of how to do that.
