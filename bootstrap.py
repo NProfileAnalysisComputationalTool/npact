@@ -16,8 +16,9 @@ virtualenv_support_dir = os.path.abspath(os.path.join(pwd, "lib", "virtualenv_su
 ret = subprocess.call(["python", "virtualenv.py",
                        "--extra-search-dir=%s" % virtualenv_support_dir,
                        "--no-site-packages",
-                       "-p", "python2.6",
-                       "--never-download",
+#                      "-p", "python2.6",
+#                      "--never-download",
+        
                        vedir],
                       cwd=pwd)
 if ret: exit(ret)
@@ -29,6 +30,8 @@ ret = subprocess.call([os.path.join(vedir, 'bin', 'pip'), "install",
                       cwd=pwd)
 if ret: exit(ret)
 
+if not os.path.exists('webroot'):
+    os.makedirs('webroot')
 
 ## no eggs
 # the_eggs = [os.path.basename(path) for path in
@@ -43,6 +46,8 @@ if ret: exit(ret)
 # if ret: exit(ret)
 
 pynpact_dir = os.path.join(os.path.dirname(__file__), "pynpact/")
-subprocess.call(["make"],cwd=pynpact_dir)
+ret = subprocess.call(["make"],cwd=pynpact_dir)
 if ret:
     print "Make failed C programs may not be available."
+else:
+    print "Successfully finished bootstrap.py"

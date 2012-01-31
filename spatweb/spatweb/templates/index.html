@@ -1,16 +1,16 @@
 {% extends "base.html" %}
-{% block title %}S-Profile Analysis Tool{% endblock %}
+{% block title %}N-PACT - N-Profile Analysis Computational Tool{% endblock %}
 
 {%block content %}
-				<h2 id="secHeader" title="S-Profile Analysis Tool Home"><span></span>S-Profile Analysis Tool Home</h2>
-				<h3>About the S-Profile Analysis Tool</h3>
+				<h2 id="secHeader" title="N-PACT - N-Profile Analysis COmputational Tool Home"><span></span>N-Profile Analysis Computational Tool Home</h2>
+				<h3>About the N-Profile Analysis Computational Tool</h3>
 
 <div class="contentPadding">
-				<p>Lorem ipsum dolor sit amet, <a href="">consectetuer</a> adipiscing elit. Suspendisse sit amet leo non ligula pulvinar pulvinar. Morbi non tortor. Curabitur varius tincidunt quam. Nam ultrices odio. Curabitur vitae sapien a tortor tincidunt lobortis. Donec posuere elit quis justo.</p>
-				<p>Donec posuere nibh sit amet massa. Integer tincidunt, sem dapibus pellentesque blandit, turpis eros laoreet lectus, sed sagittis velit pede et orci. Nullam in nunc non dui mattis dapibus. Mauris et justo eget ligula aliquam dictum. Integer eu sem. Curabitur vulputate nonummy enim. Fusce luctus tortor porta tortor. Maecenas fringilla commodo nibh.</p>
+				<p>You reached a version under development of N-PACT. N-PACT provides: (1) a genome-scale visual representation of sequence compositional properties for the identification of protein-coding sequences in relation to published annotation and, by default, position of high-scoring-segments (HSSs) of significant compositional contrast and corresponding gene predictions using the method of Oden and Brocchieri (<a href="">in preparation</a>). </p>
+				<p>The N-PACT server produces a (multi-page) PostScript file for frame analysis (<a href="http://www.sciencedirect.com/science/article/pii/0378111984901161">Bibb et al. 1984</a>) representing profiles of GC content in three frames (<a href="http://www.bioinformatika.pbf.hr/Articles/FramePlot.pdf">Ishikawa and Hotta 1999</a>; <a href="http://www.ncbi.nlm.nih.gov/pubmed/15919911">Brocchieri et al. 2005</a>), published gene annotation when available, high-scoring segments and new gene predictions.</p>
 				<h4>Getting Started</h4>
-				<p>Maecenas in magna eget velit laoreet fringilla. In vitae dolor eget est commodo ornare. Sed felis. Sed blandit ultrices elit. Donec aliquet purus non libero. Integer blandit eros vel arcu. Sed dapibus scelerisque mi. Curabitur nec odio. Aliquam dignissim libero tempus nulla. Aliquam erat volutpat. Aliquam eu elit. Quisque leo.</p>
-				<p>Pellentesque massa libero, lobortis at, pharetra at, commodo sit amet, massa. Nam velit. Ut euismod, nisl in hendrerit suscipit, nulla urna luctus nulla, a bibendum sapien quam ac leo. Donec suscipit, dolor semper molestie laoreet, wisi felis molestie augue, eu ullamcorper eros elit vel urna. Sed luctus nisl non tortor. Vestibulum et leo vel urna vehicula rutrum.</p>
+				<p>To start the analysis click "Run N-Profile Analysis" at the upper-right corner, input sequence file, click "Start Analysis!", choose parameters, and finally click "Get Analysis!". The program accepts as input a GenBank-formatted sequence text file, which has to minimally include one line starting with the word ORIGIN, followed by lines including the nucleotide sequence in lower or upper case. All alphabetic characters are interpreted as sequence, and all non-alphabetic characters are ignored. All annotated coding sequences are read from the file up to the line ORIGIN according to the GenBank format, from " CDS " lines. Gene names are assigned reading them from the variables "gene" (first choice) or "locus_tag" (second choice).</p>
+				<p> </p>
 				<ul>
 					<li>List Item 1</li>
 					<li>List Item 2</li>

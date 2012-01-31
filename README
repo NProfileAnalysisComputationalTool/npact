@@ -52,8 +52,10 @@ Notes:
 2. run bootstrap.py to get everything going.
 
         python bootstrap.py
+
+If that completes successfuly then you should see "Successfully finished bootstrap.py". If it doesn't the rest won't work.
         
-   N.B. If you only have python 2.7 available you will need to edit bootstrap.py to change the targeted version.
+N.B. To target a different version of python, simply invoke with that version of python. E.g. `python2.6 bootrap.py`
 
 ## Running
 Primarily this should be run underneath a fcgi webserver. Look at `apache.conf` for an example of how to do that.
@@ -62,8 +64,9 @@ Primarily this should be run underneath a fcgi webserver. Look at `apache.conf` 
 Django does have a builtin webserver that will work for local installations, to use it.
 
 1. edit `spatweb/settings.py` to change DEBUG from False to True at the top of the file.
-2. `python manage.py runserver`
-3. open [http://127.0.0.1:8000/spat/]()
+2. `source ve/bin/activate`
+3. `python manage.py runserver`
+4. open [http://127.0.0.1:8000/spat/]()
 
 ### command line interface
 The project was developed with this in mind but has been extended beyond it so there is no good way to provide detailed configuration via the command line-- it's only available via the website.
