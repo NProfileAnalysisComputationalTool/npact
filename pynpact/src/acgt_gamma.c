@@ -2623,8 +2623,8 @@ void write_results(int from_hss, int to_hss, int ncds, int genome_size)
 
 		if(k == 0 || k == 7)
 		{
-            if(hss[o[i]].global_sig == 1) sprintf(name, "%cn%d*", hss[o[i]].hit_type, o[i]);
-            else                          sprintf(name, "%cn%d", hss[o[i]].hit_type, o[i]);
+            if(hss[o[i]].global_sig == 1) sprintf(name, "%c-%d*", hss[o[i]].hit_type, o[i]);
+            else                          sprintf(name, "%c-%d", hss[o[i]].hit_type, o[i]);
 		}
 		else sprintf(name, "-");
 
