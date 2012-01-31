@@ -1,6 +1,6 @@
 {% extends "base.html" %}
 {% load media %}
-{% block title %}Run S-P.A.T.{% endblock %}
+{% block title %}Run N-P.A.C.T.{% endblock %}
 
 {% block addScript %}
 {% include_media 'jquery.js' %}
@@ -34,8 +34,8 @@
   {% if not parse_data.id %}
   <p>The file does not appear to be in <a href="http://www.ncbi.nlm.nih.gov/Sitemap/samplerecord.html">GenBank format</a>. You may attempt to procede but results are unpredicatble.</p>
   {% endif %}
-  <h2>S-Profile Analysis Tool Options</h2>
-  <p>From here you can customize the options on an S-Profile analysis.</p>
+  <h2>N-Profile Analysis Options</h2>
+  <p>From here you can customize the options on an N-Profile analysis.</p>
 
 
   <form method="POST">
