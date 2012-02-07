@@ -27,7 +27,9 @@ class TooManyResponsesException(Exception):
         QueryKey=self.QueryKey
 
 class EntrezSession(object):
-    db = 'genome'
+    #db = 'genome'
+    #http://www.ncbi.nlm.nih.gov/About/news/17Nov2011.html
+    db = 'nucleotide'
     WebEnv = None
     QueryKey = None
     lib_path = None
