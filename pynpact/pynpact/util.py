@@ -259,6 +259,7 @@ with mkstemp_overwrite('foobar.txt') as f:
     mtime1 = mtime2 = None
     if os.path.exists(destination):
         mtime1 = os.path.getmtime(destination)
+    kwargs.setdefault('dir', os.path.dirname(destination))
 
     (fd,path) = tempfile.mkstemp(**kwargs)
     try:
