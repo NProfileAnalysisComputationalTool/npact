@@ -1,4 +1,6 @@
 import os, os.path
+import random
+import string
 import datetime, time
 import logging
 
@@ -81,29 +83,43 @@ class EntrezSession(object):
             else :
                 raise TooManyResponsesException()
         id = summary['Id']
-        #this appears to be the RefSeq Id.
-        caption = summary['Caption']
-        logger.info("Starting fetch of Id: %s, RefSeq ID: %s", id, caption)
+        logger.info("Starting fetch of Id: %s", id)
 
         if filename is None:
-            filename =  os.path.join(self.lib_path, caption + ".gbk")
+            base = (
+                summary.get('Assembly_Accession') or
+                summary.get('Caption'))
+            if not base:
+                logger.warning("Couldn't find a filename in the summary. Id: %s", id)
+                base = ''.join(random.choice(string.ascii_uppercase + string.digits) for x in range(16))
 
-        update_date = datetime.datetime(*map(int,summary['UpdateDate'].split('/')))
+            filename =  os.path.join(self.lib_path, base + ".gbk")
 
-        if (not os.path.exists(filename)) or \
-               datetime.datetime.fromtimestamp(os.path.getmtime(filename)) < update_date:
+        
+        # if os.path.exists(filename):
+        #     date = (summary.get('UpdateDate') or
+        #             summary.get('Update_Date') or
+        #             summary.get('CreateDate') or
+        #             summary.get('Create_Date'))
+
+
+        if (not os.path.exists(filename)):
+            #or datetime.datetime.fromtimestamp(os.path.getmtime(filename)) < update_date:
             #file should be downloaded.
             net_handle = Bio.Entrez.efetch(db=self.db, rettype='gb', id=id)
-            logger.debug("Streaming handle to file.")
-            with util.mkstemp_overwrite(filename,logger=logger) as f:
-                bytes = util.stream_to_file(net_handle,f)
+            logger.debug("Streaming handle to %r.", filename)
+            with util.mkstemp_overwrite(filename, logger=logger) as f:
+                bytes = util.stream_to_file(net_handle, f)
                 logger.info("Saved %s to %s.", util.pprint_bytes(bytes), filename)
         return filename
 
-    def fetch_id(self,id):
+    def fetch_id(self, id):
         logger.info("Starting fetch of Id: %s", id)
-        summaries = Bio.Entrez.read(Bio.Entrez.esummary(db=self.db,id=id))
-        return self.fetch(summary=summaries[0])
+        summaries = Bio.Entrez.read(Bio.Entrez.esummary(db=self.db, id=id))
+        if len(summaries):
+            return self.fetch(summary=summaries[0])
+        else:
+            return None
 
     def to_url(self,term):
         """Convert the query we've done to a url that will load ncbi's site."""
