@@ -102,14 +102,19 @@ MIDDLEWARE_CLASSES = (
     'spatweb.middleware.RedirectExceptionHandler',
 )
 
-#What it is by default.
-# TEMPLATE_CONTEXT_PROCESSORS = (
-#     "django.contrib.auth.context_processors.auth",
-#     "django.core.context_processors.debug",
-#     "django.core.context_processors.i18n",
-#     "django.core.context_processors.media",
-#     "django.core.context_processors.static",
-#     "django.contrib.messages.context_processors.messages")
+
+TEMPLATE_CONTEXT_PROCESSORS = (
+    #The defaults
+    "django.contrib.auth.context_processors.auth",
+    "django.core.context_processors.debug",
+    "django.core.context_processors.i18n",
+    "django.core.context_processors.media",
+    "django.core.context_processors.static",
+    "django.contrib.messages.context_processors.messages",
+    #addons
+    "spatweb.context_processors.resolvermatch",
+
+     )
 
 ROOT_URLCONF = 'spatweb.urls'
 

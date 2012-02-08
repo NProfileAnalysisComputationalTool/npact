@@ -38,8 +38,12 @@
         <div id="priNav">
           <h2>Primary Navigation</h2>
           <ul>
-            <li id="active">Home</li>
-            <li><a href="{% url start %}">Run N-Profile Analysis</a></li>
+            <li {%if resolved.view_name == 'start' %}id="active"{%endif%} >
+              <a href="{% url start %}">Home</a>
+            </li>
+            <li {%if resolved.view_name == 'about' %}id="active"{%endif%} >
+              <a href="{% url about %}">About</a>
+            </li>
             <li><a href="">Get the Source</a></li>
           </ul>
         </div>
