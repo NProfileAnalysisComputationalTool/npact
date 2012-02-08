@@ -1,28 +1,28 @@
-<?xml version="1.0" encoding="iso-8859-1"?>
+<?xml version="1.0" encoding="utf-8"?>
 <!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
 {% load media %}
 <html xmlns="http://www.w3.org/1999/xhtml">
-	<head>
-		<title>{% block title %}University of Florida Genetics Institute{% endblock title %}</title>
+  <head>
+    <title>{% block title %}University of Florida Genetics Institute{% endblock title %}</title>
     {% include_media 'main.css'  media='screen' %}
     {% include_media 'print.css' media='print' %}
-		<style type="text/css" media="screen">
-			{%block secHeaderCss %}
-        #secHeader span{
-          background: url({% media_url "images/header1.jpg" %});
-        }
-			{%endblock %}
-		</style>
+    <style type="text/css" media="screen">
+      {%block secHeaderCss %}
+      #secHeader span{
+      background: url({% media_url "images/header1.jpg" %});
+      }
+      {%endblock %}
+    </style>
     {%block addScript %}{%endblock %}
-</head>
-	<body>
-		<div id="header">
+  </head>
+  <body>
+    <div id="header">
       <h1 id="dept"><a href="/">N-Profile Analysis Computational Tool</a></h1>
       <h2 id="uf"><a href="http://www.ufl.edu/">University of Florida<span></span></a></h2>
     </div>
 
-		<div id="mainContainer">
-			<div id="content">
+    <div id="mainContainer">
+      <div id="content">
         {% if messages %}
         <ul class="messages">
           {% for message in messages %}
@@ -33,53 +33,53 @@
 
         {%block content %}
         {%endblock content %}
-			</div>
+      </div>
       <div id="leftCol">
-			  <div id="priNav">
+        <div id="priNav">
           <h2>Primary Navigation</h2>
           <ul>
-				    <li id="active">Home</li>
+            <li id="active">Home</li>
             <li><a href="{% url start %}">Run N-Profile Analysis</a></li>
             <li><a href="">Get the Source</a></li>
           </ul>
         </div>
-			  <div id="related">
-				  <h3>Related Sites:</h3>
-				  <h4>Genetics at UF</h4>
-				  <ul>
+        <div id="related">
+          <h3>Related Sites:</h3>
+          <h4>Genetics at UF</h4>
+          <ul>
             <li><a href="http://genome.ufl.edu/pages/index.html">genome.ufl.edu</a></li>
             <li><a href="http://www.ufgi.ufl.edu/">Genetics Institute at UF</a></li>
-				  </ul>
-				  <h4>People</h4>
-				  <ul>
-					  <li><a href="http://www.mgm.ufl.edu/brocchieri/index.html">Luciano Brocchieri (PI)</a></li>
-					  <li><a href="#">Steve M. Oden (Graduate student)</a></li>
-					  <li><a href="#">Eric Hernandez (Programmer)</a></li>
-				  </ul>
+          </ul>
+          <h4>People</h4>
+          <ul>
+            <li><a href="http://www.mgm.ufl.edu/brocchieri/index.html">Luciano Brocchieri (PI)</a></li>
+            <li><a href="#">Steve M. Oden (Graduate student)</a></li>
+            <li><a href="#">Eric Hernandez (Programmer)</a></li>
+          </ul>
           {% include "_includes/search.html" %}
-			  </div>
+        </div>
       </div>
       <div id="footer">
-			  <h3>Frequently Used Sites</h3>
-	      <ul>
-	        <li><a href="http://news.ufl.edu/">News</a></li>
-	        <li><a href="http://calendar.ufl.edu/">Calendar</a></li>
-	        <li><a href="http://phonebook.ufl.edu/">Directory</a></li>
-	        <li><a href="https://my.ufl.edu/ps/signon.html">MyUFL</a></li>
-	        <li><a href="http://www.isis.ufl.edu/">ISIS</a></li>
-	        <li><a href="http://www.ufl.edu/websites/">Web Site Listing</a></li>
-	        <li><a href="http://campusmap.ufl.edu/">Campus Map</a></li>
-	        <li><a href="http://webmail.ufl.edu/">WebMail</a></li>
-	        <li><a href="http://www.questions.ufl.edu/">Ask UF</a></li>
-	      </ul>
-	      <p>&copy; <a href="http://www.ufl.edu/" id="footerHome" title="University of Florida">University of Florida<span></span></a>, Gainesville, FL 32611; (352) 392-3261.</p>
-	      <h3>General Site Information</h3>
-	      <ul>
-	        <li><a href="http://www.ufl.edu/disability/">Disability Services</a></li>
-	        <li><a href="http://www.privacy.ufl.edu/privacystatement.html">Privacy Policy</a></li>
-	        <li><a href="http://search.ufl.edu">Search</a></li>
-	      </ul>
+        <h3>Frequently Used Sites</h3>
+        <ul>
+          <li><a href="http://news.ufl.edu/">News</a></li>
+          <li><a href="http://calendar.ufl.edu/">Calendar</a></li>
+          <li><a href="http://phonebook.ufl.edu/">Directory</a></li>
+          <li><a href="https://my.ufl.edu/ps/signon.html">MyUFL</a></li>
+          <li><a href="http://www.isis.ufl.edu/">ISIS</a></li>
+          <li><a href="http://www.ufl.edu/websites/">Web Site Listing</a></li>
+          <li><a href="http://campusmap.ufl.edu/">Campus Map</a></li>
+          <li><a href="http://webmail.ufl.edu/">WebMail</a></li>
+          <li><a href="http://www.questions.ufl.edu/">Ask UF</a></li>
+        </ul>
+        <p>&copy; <a href="http://www.ufl.edu/" id="footerHome" title="University of Florida">University of Florida<span></span></a>, Gainesville, FL 32611; (352) 392-3261.</p>
+        <h3>General Site Information</h3>
+        <ul>
+          <li><a href="http://www.ufl.edu/disability/">Disability Services</a></li>
+          <li><a href="http://www.privacy.ufl.edu/privacystatement.html">Privacy Policy</a></li>
+          <li><a href="http://search.ufl.edu">Search</a></li>
+        </ul>
       </div>
-		</div>
-	</body>
+    </div>
+  </body>
 </html>
