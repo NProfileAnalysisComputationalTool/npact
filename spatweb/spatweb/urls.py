@@ -7,7 +7,7 @@ spatpatterns = \
             patterns('spatweb.views',
                      url(r'^$' , 'start.view', name='start'),
                      url(r'^about$' , direct_to_template, {'template': 'about.html'}, name='about'),
-                     url(r'^start/efetch/(\d+)' , 'start.efetch', name="efetch"),
+                     url(r'^efetch/(\d+)' , 'start.efetch', name="efetch"),
                      url(r'^library' , 'library'),
                      url(r'^run/(.+\.gbk?)' , 'run.view', name="run"),
                      url(r'^run^' , 'run.view_none'),

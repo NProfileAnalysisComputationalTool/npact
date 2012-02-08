@@ -18,8 +18,6 @@ from django.template import RequestContext
 from spatweb import is_clean_path, getabspath, getrelpath, library_root
 from spatweb.middleware import RedirectException
 
-#used to dynamically load functions.
-import start
 
 # Get an instance of a logger
 logger = logging.getLogger(__name__)
@@ -38,20 +36,25 @@ def mksavefile(prefix):
 
 
 
-            # elif form.cleaned_data.get('url') :
-            #     path = pullFromUrl(req, form.cleaned_data.get('url'))
-            # elif form.cleaned_data.get('pastein') :
-            #     path = saveToFile(req, form.cleaned_data.get('pastein'))
+class StartForm(forms.Form):
+    active = None
+    file_upload = forms.FileField(required=False)
+    url = forms.URLField(label="From URL",required=False)
+    pastein = forms.CharField(label="Paste in as text",
+                              widget=forms.Textarea(attrs={'rows':3, 'cols':""}),
+                              required=False)
+    entrez_search_term = forms.CharField(label="Search Entrez for Term", required=False)
 
-class UploadForm(forms.Form):
-    type="UploadForm"
-    title="Upload a File"
-    file_upload = forms.FileField(required=True)
+    def __init__(self,*args,**kwargs):
+        super(StartForm,self).__init__(*args,**kwargs)
 
-    def clean(self):
+
+    def clean_file_upload(self):
         cleaned_data = self.cleaned_data
-        fu = cleaned_data.get('file_upload')
-        if fu:
+
+        if cleaned_data.get('file_upload'):
+            self.active = 'file_upload'
+            fu = cleaned_data.get('file_upload')
             logger.info("Checking Uploaded file %s", fu)
             if not is_clean_path(fu.name):
                 raise forms.ValidationError("Illegal filename")
@@ -63,17 +66,12 @@ class UploadForm(forms.Form):
                     fh.write(chunk)
 
             cleaned_data['path']=relpath
-        return cleaned_data
 
-class UrlForm(forms.Form):
-    type="UrlForm"
-    title="From URL"
-    url = forms.URLField(label="From URL", required=True)
-
-    def clean(self):
+    def clean_url(self):
         cleaned_data = self.cleaned_data
-        url = cleaned_data.get('url')
-        if url:
+        if cleaned_data.get('url'):
+            self.active='url'
+            url = cleaned_data.get('url')
             logger.debug("Going to pull from %r", url)
             pull_req = urllib2.Request(url)
             if pull_req.get_type == "file":
@@ -87,95 +85,67 @@ class UrlForm(forms.Form):
                 logger.exception("Error fetching url %s", url)
                 raise forms.ValidationError("Error fetching url")
 
-        return cleaned_data
 
-class PasteForm(forms.Form):
-    type="PasteForm"
-    title="Paste as Text"
-    pastein = forms.CharField(label="Paste in as text",
-                              widget=forms.Textarea(attrs={'rows':3, 'cols':""}),
-                              required=True)
-    def clean(self):
+    def clean_pastein(self):
         cleaned_data = self.cleaned_data
-        text = cleaned_data.get('pastein')
-        if text:
+        if cleaned_data.get('pastein'):
+            self.active = 'pastein'
+            text = cleaned_data.get('pastein')
             (fd,savepath,relpath) = mksavefile("txt")
             logger.info("Saving paste to %r", relpath)
             cleaned_data['path'] = relpath
             with os.fdopen(fd,'wb') as fh :
                 fh.write(text)
-            return cleaned_data
 
-class EntrezSearchForm(forms.Form):
-    type="EntrezSearchForm"
-    title="Search Entrez"
-    template="start/EntrezSearchForm.html"
-    term = forms.CharField(label="Search Term",required=True)
-
-    def clean(self):
-        logger.debug("Starting handling Entrez search.")
+    def clean_entrez_search_term(self):
         cleaned_data = self.cleaned_data
-        if cleaned_data.get('term'): 
+        if cleaned_data.get('entrez_search_term'):
+            self.active='entrez_search_term'
             self.session = entrez.CachedEntrezSession(library_root())
 
-            self.session.search(cleaned_data['term'])
+            self.session.search(cleaned_data['entrez_search_term'])
             logger.debug("Search finished, found %d matches", self.session.result_count)
             if self.session.result_count == 1:
                 cleaned_data['path'] = getrelpath(self.session.fetch())
             elif self.session.result_count > 1:
-                raise forms.ValidationError("Too many results (%d) found, need 1. Try refining the search or searching for a RefSeq id." % (self.session.result_count))
+                raise forms.ValidationError("Too many results (%d) found, need 1."
+                                            " Try refining the search or searching for a RefSeq id."
+                                            % (self.session.result_count))
             else:
                 raise forms.ValidationError("No results found.")
+
+    def clean(self):
+        cleaned_data = self.cleaned_data
+
+        if not cleaned_data.get('path'):
+            raise forms.ValidationError("No valid GenBank file submitted.")
         return cleaned_data
-
-
-def build_forms(req):
-    if req.method == 'POST':
-        types = [UploadForm,UrlForm,PasteForm,EntrezSearchFormPOST]
-        active = req.POST['active']
-        cls = getattr(start, active, None)
-        return [ cls() ]
-
-        #forms = []
-        # for i,type in zip(range(len(types)),types):
-        #     if i == active:
-        #         forms.append(type(req.POST,req.FILES))
-        #     else:
-        #         forms.append(type())
-
-        # return forms
-    else:
-        types = [UploadForm,UrlForm,PasteForm,EntrezSearchForm]
-        return [type() for type in types]
 
 
 def view(req) :
     form = None
     if req.method == 'POST' :
         path=None
-        active = req.POST['active']
-        cls = getattr(start, active)
-        submitted = cls(req.POST, req.FILES)
-        if submitted.is_valid():
-            logger.info("Form is valid")
-            path = submitted.cleaned_data['path']
-            raise RedirectException(reverse('run',args=[path]))
-        else :
-            forms = [submitted]
-    else:
-        types = [UploadForm,UrlForm,PasteForm,EntrezSearchForm]
-        forms = [type() for type in types]
-        active = ''
+        startform = StartForm(req.POST, req.FILES)
 
-    return render_to_response('start.html',{'forms':forms, 'active':active},
-                                  context_instance=RequestContext(req))
+        if startform.is_valid():
+            logger.info("Form is valid; action is %r", req.POST.get('action'))
+            path = startform.cleaned_data['path']
+            return HttpResponseRedirect(reverse('run',args=[path]))
+    else:
+        startform = StartForm()
+
+    return render_to_response('start.html', {'form': startform},
+                              context_instance=RequestContext(req))
 
 
 def re_search(req):
-    if req.REQUEST.get('term'):
-        esf = EntrezSearchForm(req.REQUEST)
-    return render_to_response('start.html',{'forms':[esf], 'active':'EntrezSearchForm'},
+    if req.REQUEST.get('entrez_search_term'):
+        return render_to_response('start.html', {'form': StartForm(req.REQUEST)},
                                   context_instance=RequestContext(req))
+    else:
+        return view(req)
+
 
 
 def efetch(req, id):
@@ -189,7 +159,10 @@ def efetch(req, id):
         messages.error(req, str(e))
         return re_search(req)
     except:
-        messages.error(request,"There was a problem loading file '%s', please try again or try a different record." % path)
+        messages.error(request,
+                       "There was a problem loading file '%s', "
+                       "please try again or try a different record."
+                       % path)
         return re_search(req)
-    
+
     return HttpResponseRedirect(reverse('run',args=[getrelpath(abspath)]))
