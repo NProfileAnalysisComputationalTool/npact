@@ -124,18 +124,25 @@ class StartForm(forms.Form):
 
 def view(req) :
     form = None
+    action = None
     if req.method == 'POST' :
         path=None
         startform = StartForm(req.POST, req.FILES)
 
+        action = req.POST.get('action')
         if startform.is_valid():
-            logger.info("Form is valid; action is %r", req.POST.get('action'))
+
+            logger.info("Form is valid; action is %r", action)
             path = startform.cleaned_data['path']
-            return HttpResponseRedirect(reverse('run',args=[path]))
+            if action in ['run', 'config']:
+                return HttpResponseRedirect(reverse(action, args=[path]))
+            else:
+                logger.error("Unknown action %r", action)
+                messages.error(request, "Unknown action.")
     else:
         startform = StartForm()
 
-    return render_to_response('start.html', {'form': startform},
+    return render_to_response('start.html', {'form': startform, 'action': action},
                               context_instance=RequestContext(req))
 
 
@@ -145,7 +152,6 @@ def re_search(req):
                                   context_instance=RequestContext(req))
     else:
         return view(req)
-
 
 
 def efetch(req, id):
@@ -165,4 +171,11 @@ def efetch(req, id):
                        % path)
         return re_search(req)
 
-    return HttpResponseRedirect(reverse('run',args=[getrelpath(abspath)]))
+    path = getrelpath(abspath)
+    action=req.GET.get('action','run')
+    if action in ['run', 'config']:
+        return HttpResponseRedirect(reverse(action, args=[path]))
+    else:
+        logger.error("Unknown action %r", action)
+        messages.error(request, "Unknown action.")
+        return re_search(req)
