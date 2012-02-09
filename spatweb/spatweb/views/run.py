@@ -27,7 +27,7 @@ def get_ti(**kwargs) :
 
 class RunForm(forms.Form) :
     first_page_title = forms.CharField(widget=get_ti(size=40))
-    following_page_title = forms.CharField(required=False,widget=get_ti(size=40))
+    following_page_title = forms.CharField(required=False, widget=get_ti(size=40))
     length=forms.IntegerField(required=True, min_value=0,
                               widget=get_ti(size=8))
     significance=forms.ChoiceField(choices=prepare.significance_levels)
@@ -51,7 +51,7 @@ def get_display_items(request, config):
 
 def run_it(request, path, form, config):
     logger.info("Got clean post, running.")
-  
+
     config.update(form.cleaned_data)
 
     gbp = main.GenBankProcessor(getabspath(path), config=config)
@@ -61,9 +61,10 @@ def run_it(request, path, form, config):
     url = reverse('results', args=[psname])
     urlconf = {'path': path}
     for k in form.fields.keys():
-        v = config.get(k,None)
-        if v: urlconf[k] = v
-    
+        v = config.get(k, None)
+        if v:
+            urlconf[k] = v
+
     url += "?" + urlencode(urlconf)
     raise RedirectException(url)
 
@@ -72,7 +73,9 @@ def run_it(request, path, form, config):
 
 def view(request, path):
     if not is_clean_path(path) :
-        messages.error(request, "Path contained illegal characters, please upload a file or go to the library and select one.")
+        messages.error(request,
+                       "Path contained illegal characters, please upload "
+                       "a file or go to the library and select one.")
         return HttpResponseRedirect(reverse('spatweb.views.start.view'))
 
     form = None
@@ -83,7 +86,9 @@ def view(request, path):
         messages.error(request,str(e))
         return HttpResponseRedirect(reverse('spatweb.views.start.view'))
     except:
-        messages.error(request,"There was a problem loading file '%s', please try again or try a different record." % path)
+        messages.error(request,
+                       "There was a problem loading file '%s', "
+                       "please try again or try a different record." % path)
         return HttpResponseRedirect(reverse('spatweb.views.start.view'))
 
     if request.method == 'POST' :
@@ -99,13 +104,16 @@ def view(request, path):
 
     helpers.add_help_text(form,prepare.CONFIG_HELP_TEXT)
 
-    return render_to_response('run.html',{'form':form, 'parse_data':config,
-                                          'def_list_items': get_display_items(request,config)},
+    return render_to_response('run.html',
+                              {'form':form, 'parse_data':config,
+                               'def_list_items': get_display_items(request,config)},
                                context_instance=RequestContext(request))
 
 
 def view_none(request) :
-    messages.error(request, "No genome source selected, please upload one, or go to the library and select one.")
+    messages.error(request,
+                   "No genome source selected, please upload one, "
+                   "or go to the library and select one.")
     return HttpResponseRedirect(reverse('spatweb.views.start.view'))
 
 
@@ -117,7 +125,9 @@ def results(request, path):
     parameter is set to anything then return the ps file directly."""
 
     if not is_clean_path(path) :
-        messages.error(request, "Path contained illegal characters, please upload a file or go to the library and select one.")
+        messages.error(request,
+                       "Path contained illegal characters, please upload "
+                       "a file or go to the library and select one.")
         return HttpResponseRedirect(reverse('start'))
 
     download_link = None
@@ -125,7 +135,10 @@ def results(request, path):
         getabspath(path)
         download_link=get_raw_url(request, path)
     except IOError:
-        messages.error(request, "We're sorry but that file no longer exists. We expire old results periodically to save space on the server. Please try running the analysis again.")
+        messages.error(request,
+                       "We're sorry but that file no longer exists. We "
+                       "expire old results periodically to save space on"
+                       " the server. Please try running the analysis again.")
 
     return_url = get_return_url(request)
 
