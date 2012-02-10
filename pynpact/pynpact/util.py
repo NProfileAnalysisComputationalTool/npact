@@ -325,7 +325,8 @@ def safe_produce_new(outfilename, func,
 
 
 def file_delete_first_line(filename, logger=False):
-    capturedCall(["sed", "-i", "1d", filename], logger=logger, check=True)
+    return capturedCall(["sed", "-e", "1d", "-i", filename], 
+                        logger=logger, check=True)
 
 
 def log_time(logger=logging, level=logging.INFO):
