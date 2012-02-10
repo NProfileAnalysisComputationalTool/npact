@@ -2393,46 +2393,55 @@ void process_hss(int from_hss, int to_hss, int ncds)
 
 // This sorts hits by the score per unit length of hit (i.e., differential of cumulative score)
  
-    logmsg(10, "\n\nSorting hits by score slope.."); 
+//    logmsg(10, "\n\nSorting hits by score slope.."); 
  
-	for(i= 0; i < to_hss; ++i) o[i]= i;
+//	for(i= 0; i < to_hss; ++i) o[i]= i;
 
-	for(i= 0; i < to_hss - 1; ++i)
-	{
-        li= hss[o[i]].top - hss[o[i]].fromp + 1;
-		for(j= i + 1; j < to_hss; ++j)
-		{
-            lj= hss[o[j]].top - hss[o[j]].fromp + 1;
-			if(hss[o[j]].score/lj > hss[o[i]].score/li) { k= o[i]; o[i]= o[j]; o[j]= k; }
-		}
-	}
+//	for(i= 0; i < to_hss - 1; ++i)
+//	{
+//        li= hss[o[i]].top - hss[o[i]].fromp + 1;
+//		for(j= i + 1; j < to_hss; ++j)
+//		{
+ //           lj= hss[o[j]].top - hss[o[j]].fromp + 1;
+//			if(hss[o[j]].score/lj > hss[o[i]].score/li) { k= o[i]; o[i]= o[j]; o[j]= k; }
+//		}
+//	}
 
+ 
+    logmsg(10, "\n\nSorting hits by score per ORF position"); 
 
-/**** TO BE CHECKED !!! ***/
+// This sorts hits by the score per unit length of ORF, from start-codon or RF start, to stop codon (i.e., differential of cumulative score)
 
-// This sorts hits by the score per unit length of ORF, from start of hit to stop codon (i.e., differential of cumulative score)
+         for(i= 0; i < to_hss; ++i)
+         {
+         o[i]= i;
+         scoi= hss[i].score;
+                   if(hss[i].strand == 'D')
+                   {
+                        if(!hss[i].start)                               li= hss[i].stop2 - hss[i].stop1 + 1;
+                        else if(hss[i].start == 1 || hss[i].start == 3) li= hss[i].stop2 - hss[i].atg + 1;                        else if(hss[i].start == 2 || hss[i].start == 4) li= hss[i].stop2 - hss[i].gtg + 1;
+                        else if(hss[i].start == 5 || hss[i].start == 6) li= hss[i].stop2 - hss[i].ttg + 1;
+                   }
+                   else
+                   {
+                        if(!hss[i].start)                               li= hss[i].stop2 - hss[i].stop1 + 1;
+                        else if(hss[i].start == 1 || hss[i].start == 3) li= hss[i].atg - hss[i].stop1 + 1;
+                        else if(hss[i].start == 2 || hss[i].start == 4) li= hss[i].gtg - hss[i].stop1 + 1;
+                        else if(hss[i].start == 5 || hss[i].start == 6) li= hss[i].ttg - hss[i].stop1 + 1;
+                   }
+
+         k= i;
+                   while(hss[k].next_hit != -1) { k= hss[k].next_hit; scoi += hss[k].score; }
+
+         hss[i].scpp= scoi / li;
+         }
+
+        for(i= 0; i < to_hss - 1; ++i)
+                for(j= i + 1; j < to_hss; ++j)
+                        if(hss[o[j]].scpp > hss[o[i]].scpp) { k= o[i]; o[i]= o[j]; o[j]= k; }
+
 // 
 // fprintf(stderr, "\n\nSorting hits by score slope.."); 
-// 
-//         for(i= 0; i < to_hss; ++i) o[i]= i;
-// 
-//         for(i= 0; i < to_hss - 1; ++i)
-//         {
-//         scoi= 0.0;
-//         k= o[i];
-//                 while((k= hss[k].next_hit) != -1) scoi += hss[k].score;
-//                 if(hss[o[i]].strand == 'D') li= hss[o[i]].stop2 - hss[o[i]].fromp + 1;
-//                 else                        li= hss[o[i]].top - hss[o[i]].stop1 + 1;
-//                 for(j= i + 1; j < to_hss; ++j)
-//                 {
-//                 scoj= 0.0;
-//                 k= o[j];
-//                         while((k= hss[k].next_hit) != -1) scoj += hss[k].score;
-//                         if(hss[o[j]].strand == 'D') lj= hss[o[j]].stop2 - hss[o[j]].fromp + 1;
-//                         else                        lj= hss[o[j]].top - hss[o[j]].stop1 + 1;
-//                         if(scoj/lj > scoi/li) { k= o[i]; o[i]= o[j]; o[j]= k; }
-//                 }
-//         }
 
 
     logmsg(10, "\n\nProcessing HSSs:     "); 
