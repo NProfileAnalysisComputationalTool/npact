@@ -160,6 +160,7 @@ struct HSSs {
     float  prob;
     double nuc[24];
     double score;
+    double scpp;              // score per position of ORF
     double entropy;
     double sig_len;
     char	  global_sig;
