@@ -2419,7 +2419,8 @@ void process_hss(int from_hss, int to_hss, int ncds)
                    if(hss[i].strand == 'D')
                    {
                         if(!hss[i].start)                               li= hss[i].stop2 - hss[i].stop1 + 1;
-                        else if(hss[i].start == 1 || hss[i].start == 3) li= hss[i].stop2 - hss[i].atg + 1;                        else if(hss[i].start == 2 || hss[i].start == 4) li= hss[i].stop2 - hss[i].gtg + 1;
+                        else if(hss[i].start == 1 || hss[i].start == 3) li= hss[i].stop2 - hss[i].atg + 1;
+			else if(hss[i].start == 2 || hss[i].start == 4) li= hss[i].stop2 - hss[i].gtg + 1;
                         else if(hss[i].start == 5 || hss[i].start == 6) li= hss[i].stop2 - hss[i].ttg + 1;
                    }
                    else
@@ -2455,15 +2456,30 @@ void process_hss(int from_hss, int to_hss, int ncds)
 		{
             k= 0;
             l=  hss[o[i]].top-hss[o[i]].fromp+1;
-			if(hss[o[i]].strand == 'D') { gfrom= hss[o[i]].fromp; gto= hss[o[i]].stop2; }
-			else                        { gto= hss[o[i]].top; gfrom= hss[o[i]].stop1; }
+
+                        if(hss[o[i]].strand == 'D')                     // ORF from start codon (gfrom) to stop (gto)
+                        {
+                                if(!hss[o[i]].start) gfrom= hss[o[i]].stop1;
+                                else if(hss[o[i]].start == 1 || hss[o[i]].start == 3) gfrom= hss[o[i]].atg;
+                                else if(hss[o[i]].start == 2 || hss[o[i]].start == 4) gfrom= hss[o[i]].gtg;
+                                else if(hss[o[i]].start == 5 || hss[o[i]].start == 6) gfrom= hss[o[i]].ttg;
+                        gto= hss[o[i]].stop2;
+                        }
+                        else                                           // ORF from stop (gfrom) to start codon (gto)
+                        {
+                                if(!hss[o[i]].start) gto= hss[o[i]].stop2;
+                                else if(hss[o[i]].start == 1 || hss[o[i]].start == 3) gto= hss[o[i]].atg;
+                                else if(hss[o[i]].start == 2 || hss[o[i]].start == 4) gto= hss[o[i]].gtg;
+                                else if(hss[o[i]].start == 5 || hss[o[i]].start == 6) gto= hss[o[i]].ttg;
+                        gfrom= hss[o[i]].stop1;
+                        }
 
             G= hss[o[i]].G;
             strcpy(Pg,hss[o[i]].pstring);
 
 // Checks overlap with annotated genes
 
-			for(j=0;j<ncds;++j)
+			for(j= 0; j < ncds; ++j)
 			{
                 nex= gene[j].num_exons;
 				for(h= 0; h < nex; ++h)
@@ -2535,8 +2551,22 @@ void process_hss(int from_hss, int to_hss, int ncds)
                 out= 0;
 				if(hss[o[j]].type <= 3)
 				{
-					if(hss[o[j]].strand == 'D') { from= hss[o[j]].fromp; to= hss[o[j]].stop2; }
-					else                        { from= hss[o[j]].stop1; to= hss[o[j]].top; }
+                                        if(hss[o[j]].strand == 'D')      // ORF from start codon (from) to stop (to)
+                                        {
+                                        to= hss[o[j]].stop2;
+                                                if(!hss[o[j]].start) from= hss[o[j]].stop1;
+                                                else if(hss[o[j]].start == 1 || hss[o[j]].start == 3) from= hss[o[j]].atg;
+                                                else if(hss[o[j]].start == 2 || hss[o[j]].start == 4) from= hss[o[j]].gtg;
+                                                else if(hss[o[j]].start == 5 || hss[o[j]].start == 6) from= hss[o[j]].ttg;
+                                        }
+                                        else                              // ORF from stop (from) to start codon (to)
+                                        {
+                                        from= hss[o[j]].stop1;
+                                                if(!hss[o[j]].start) to= hss[o[j]].stop2;
+                                                else if(hss[o[j]].start == 1 || hss[o[j]].start == 3) to= hss[o[j]].atg;
+                                                else if(hss[o[j]].start == 2 || hss[o[j]].start == 4) to= hss[o[j]].gtg;
+                                                else if(hss[o[j]].start == 5 || hss[o[j]].start == 6) to= hss[o[j]].ttg;
+                                        }
 	
 					if(!(to < gfrom + mHL/2 - 1 || from > gto - mHL/2 + 1))  // Two newly predicted genes are overlapping
 					{
