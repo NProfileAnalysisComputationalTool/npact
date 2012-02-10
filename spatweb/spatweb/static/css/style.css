@@ -13,7 +13,7 @@ text-decoration:none;
 }
 
 a:link,a:visited {
-color:#0021a5;
+   color:#0021a5 !important;
 }
 
 a:hover,a:active {
@@ -322,7 +322,7 @@ textarea { width: 100%; }
 
 .helptext {font-size: 0.8em; float:right; }
 
-#content label { float:left; text-align: right; clear:left; }
+
 #content input, #content select { margin-left: 6px; float:left; }
 
 li.error, ul.errorlist li { color:red; }

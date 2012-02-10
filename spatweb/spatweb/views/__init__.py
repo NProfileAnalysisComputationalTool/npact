@@ -1,30 +1,25 @@
 import os.path, glob, logging
 
+from django.conf import settings
 from django.core.urlresolvers import reverse
 from django.shortcuts import render_to_response
 from django.template import RequestContext
 from django.utils.http import urlencode
+from django.views import static
+
 from pynpact import prepare
 from spatweb import library_root
 
 
 logger = logging.getLogger(__name__)
 
-#### Helper functions used by all the views
-
-def get_return_url(request):
-    if request.GET.get('path'):
-        return reverse('run',args=[request.GET.get('path')]) + "?" + urlencode(request.GET)
-    else:
-        return None
-
-def get_raw_url(request, path):
-    return request.build_absolute_uri(reverse('index') + "raw/" + path)
-    
-        
-
 
 ##### Views that are small enough to be inline here.
+
+def static_serve_wrapper(request, path):
+    if settings.DEBUG:
+        return static.serve(request, path=path, document_root=settings.MEDIA_ROOT)
+        
 
 def index(request) :
     return render_to_response('index.html',{},
@@ -45,3 +40,9 @@ def library(request) :
                               {'files':files},
                               context_instance=RequestContext(request))
 
+
+def view_none(request) :
+    messages.error(request,
+                   "No genome source selected, please upload one, "
+                   "or go to the library and select one.")
+    return HttpResponseRedirect(reverse('spatweb.views.start.view'))

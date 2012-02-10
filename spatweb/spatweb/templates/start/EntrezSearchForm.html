@@ -1,50 +1,32 @@
 {% load media %}
-      <div>
-        <h3><a name="#">{{ form.title|title }}</a></h3>
-        
-        <div>
-        <form method="post" action="{% url start %}"
-              {% if form.is_multipart %}
-                enctype="multipart/form-data"
-              {% endif %}
-              >
-          {% csrf_token %} 
-          <input type="hidden" name="active" value="{{ form.type }}">
-          <div>
-            {{ form.as_p }}
-          </div>
-          <div style="clear:both;">
-            <button class="Start" >Start Analysis!</button>
-          </div>
-
-        {% if form.session and form.session.result_count > 0 %}
-        <table>
-          <thead>
-            <tr>
-              <th>Title</th>
-              <th>Length</th>
-              <th>Date Created/ Updated</th>
-              <th>RefSeqId</th>
-          </thead>
-          <tbody>
-            {% with form.data.term|urlencode as term %}
-            {% for summary in form.session.summarize %}
-            <tr>
-              <td><a href="{% url efetch summary.Id %}?term={{term}}"> {{summary.Title}}</a>
-                <!-- <a title="See this record @ NCBI"><img src="{% media_url "images/ncbi.gif" %}"></a>
-                     -->
-              </td>
-              <td>{{summary.Length}}</td>
-              <td>{{summary.CreateDate}}<br/>
-                  {{summary.UpdateDate}}</td>
-              <td><a href="http://www.ncbi.nlm.nih.gov/nuccore/{{summary.Caption}}">{{summary.Caption}}</a></td>
-            </tr>
-            {% endfor %}
-            {% endwith %}
-          </tbody>
-        </table>
-        {% endif %}
-
-        </form>
-        </div>
-      </div>
+{% if form.session and form.session.result_count > 0 %}
+<table>
+  <thead>
+    <tr>
+      <th>Title</th>
+      <th>Length</th>
+      <th>Date Created/ Updated</th>
+      <th>RefSeqId</th>
+  </thead>
+  <tbody>
+    {% with form.data.entrez_search_term|urlencode as entrez_search_term %}
+    {% for summary in form.session.summarize %}
+    <tr>
+      <td>
+        <a href="{% url efetch summary.Id %}?entrez_search_term={{entrez_search_term}}&action={{action}}">
+          {{summary.Title}}
+        </a>
+      </td>
+      <td>{{summary.Length}}</td>
+      <td>{{summary.CreateDate}}<br/>
+          {{summary.UpdateDate}}</td>
+      <td>
+        <a href="http://www.ncbi.nlm.nih.gov/nuccore/{{summary.Caption}}">{{summary.Caption}}
+          <!-- <img src="{% media_url "images/ncbi.gif" %}" height="12" width="25"></a> -->
+      </td>
+    </tr>
+    {% endfor %}
+    {% endwith %}
+  </tbody>
+</table>
+{% endif %}

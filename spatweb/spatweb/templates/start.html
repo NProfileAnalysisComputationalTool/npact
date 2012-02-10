@@ -1,6 +1,6 @@
 {% extends "base.html" %}
 {% load media %}
-{% block title %}Run N-P.A.C.T.{% endblock %}
+{% block title %}N-PACT - N-Profile Analysis Computational Tool{% endblock %}
 
 {% block addScript %}
 {% include_media 'jquery.js' %}
@@ -8,9 +8,11 @@
   $(function(){
     $('button').button()
     if( $("#accordion > *").length > 1) {
-      $("#accordion").accordion({ header: "h3", clearStyle: false });
+      $("#accordion").accordion({ header: "h3", clearStyle: false,
+                                  autoHeight:false,
+                                  active: "h3.active"});
     }
-    
+
   });
 </script>
 {% endblock %}
@@ -24,18 +26,37 @@
     genbank data pasted directly in. Only one of the  following is neccessary</p>
 
 
-    <input type="hidden" name="selected" value="" id="selected"/>
+  <input type="hidden" name="selected" value="" id="selected"/>
+  <form method="post" action="{% url start %}" enctype="multipart/form-data">
+    {% csrf_token %}
+    {{ form.non_field_errors }}
     <div id="accordion">
-      {% for form in forms %}
-      {% include form.template|default:"start/form.html" %}
+      {% for field in form %}
+      <div
+           >
+        <h3 {% if field.html_name == form.active %}class="active"{% endif %}><a name="#"> {{ field.label_tag }} </a></h3>
+        <div>
+          {{ field.errors }}
+          {{ field }}
+          {% if field.html_name == 'entrez_search_term' %}
+          {% include "start/EntrezSearchForm.html" %}
+          {% endif %}
+        </div>
+      </div>
       {% endfor %}
     </div>
-    <br/>
-    <p>
-      <a href="">Start Over</a>
-    </p>
-<!--
-  <p><a href="/library">Browse the library of existing analyses</a></p>
--->
+    <button class="Start" type="submit" name="action" value="run" 
+            title="Get the analysis results based on default configuration.">
+      Get Analysis!
+    </button>
+    <button class="Start" type="submit" name="action" value="config" 
+            title="Configure the analysis before running.">
+      Configure Analysis!
+    </button>
+  </form>
+  <br/>
+  <p>
+    <a href="">Start Over</a>
+  </p>
 </div>
 {%endblock content %}

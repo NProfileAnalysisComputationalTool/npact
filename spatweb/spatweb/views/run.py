@@ -13,23 +13,33 @@ from pynpact import prepare, main, util
 from spatweb import is_clean_path, getabspath, getrelpath
 from spatweb import helpers
 from spatweb.middleware import RedirectException
-from spatweb.views import get_return_url, get_raw_url
 
 #from spatweb.helpers import add_help_text
-
 
 # Get an instance of a logger
 logger = logging.getLogger(__name__)
 
 
-def get_ti(**kwargs) :
-    return forms.TextInput(attrs=kwargs)
 
-class RunForm(forms.Form) :
-    first_page_title = forms.CharField(widget=get_ti(size=40))
-    following_page_title = forms.CharField(required=False,widget=get_ti(size=40))
+def get_return_url(request):
+    if request.GET.get('path'):
+        return reverse('config', args=[request.GET.get('path')]) + "?" + urlencode(request.GET)
+    else:
+        return None
+
+def get_raw_url(request, path):
+    #return request.build_absolute_uri(reverse('raw', path))
+    return reverse('raw', args=[path])
+
+
+def get_ti(size):
+    return forms.TextInput(attrs={'size':size})
+
+class ConfigForm(forms.Form) :
+    first_page_title = forms.CharField(widget=get_ti(40))
+    following_page_title = forms.CharField(required=False, widget=get_ti(40))
     length=forms.IntegerField(required=True, min_value=0,
-                              widget=get_ti(size=8))
+                              widget=get_ti(8))
     significance=forms.ChoiceField(choices=prepare.significance_levels)
     start_page=forms.IntegerField(required=False)
     end_page=forms.IntegerField(required=False)
@@ -49,75 +59,84 @@ def get_display_items(request, config):
             yield key, config.get(key)
 
 
-def run_it(request, path, form, config):
-    logger.info("Got clean post, running.")
-  
-    config.update(form.cleaned_data)
 
-    gbp = main.GenBankProcessor(getabspath(path), config=config)
-    psname = gbp.run_Allplots()
-    logger.debug("Got back ps file: %r", psname)
-    psname = getrelpath(psname)
-    url = reverse('results', args=[psname])
-    urlconf = {'path': path}
-    for k in form.fields.keys():
-        v = config.get(k,None)
-        if v: urlconf[k] = v
-    
-    url += "?" + urlencode(urlconf)
-    raise RedirectException(url)
-
-
-
-
-def view(request, path):
+def config(request, path):
     if not is_clean_path(path) :
-        messages.error(request, "Path contained illegal characters, please upload a file or go to the library and select one.")
+        messages.error(request,
+                       "Path contained illegal characters, please upload "
+                       "a file or go to the library and select one.")
         return HttpResponseRedirect(reverse('spatweb.views.start.view'))
 
     form = None
+    config = build_config(path, request, False)
+    if request.method == 'POST' :
+        form = ConfigForm(request.POST)
+        if form.is_valid():
+            logger.info("Got clean post, running.")
+            config.update(form.cleaned_data)
+            url = reverse('run', args=[path]) + encode_config(config)
+            return HttpResponseRedirect(url)
+            
+    else:
+        form = ConfigForm(initial=config)
+
+    helpers.add_help_text(form, prepare.CONFIG_HELP_TEXT)
+
+    return render_to_response('config.html',
+                              {'form':form, 'parse_data':config,
+                               'def_list_items': get_display_items(request,config)},
+                               context_instance=RequestContext(request))
+
+def build_config(path, request, read_request=True):
+    if not is_clean_path(path) :
+        messages.error(request,
+                       "Path contained illegal characters. "
+                       "Please select a new GBK file.")
+        return HttpResponseRedirect(reverse('start'))
+
     config = None
     try:
         config = prepare.default_config(getabspath(path))
     except prepare.InvalidGBKException, e:
-        messages.error(request,str(e))
-        return HttpResponseRedirect(reverse('spatweb.views.start.view'))
+        messages.error(request, str(e))
+        raise RedirectException(reverse('start'))
     except:
-        messages.error(request,"There was a problem loading file '%s', please try again or try a different record." % path)
-        return HttpResponseRedirect(reverse('spatweb.views.start.view'))
+        messages.error(request,
+                       "There was a problem loading file '%s', "
+                       "please try again or try a different record." % path)
+        return HttpResponseRedirect(reverse('start'))
 
-    if request.method == 'POST' :
-        form = RunForm(request.POST)
-        if form.is_valid():
-            run_it(request, path, form, config)
-    else:
-        #can't use dict.update here as the multi-value dict gives back
-        #an array in that case
-        for k in request.GET:
-            config[k]= request.GET[k]
-        form  = RunForm(initial=config)
+    if read_request:
+        cf = ConfigForm(request.REQUEST)
+        if cf.is_valid():
+            config.update(cf.cleaned_data)
 
-    helpers.add_help_text(form,prepare.CONFIG_HELP_TEXT)
+    return config
+    
+def encode_config(config, **urlconf):
+    for k in ConfigForm().fields.keys():
+        v = config.get(k, None)
+        if v:
+            urlconf[k] = v
+    return "?" + urlencode(urlconf)
 
-    return render_to_response('run.html',{'form':form, 'parse_data':config,
-                                          'def_list_items': get_display_items(request,config)},
-                               context_instance=RequestContext(request))
-
-
-def view_none(request) :
-    messages.error(request, "No genome source selected, please upload one, or go to the library and select one.")
-    return HttpResponseRedirect(reverse('spatweb.views.start.view'))
-
-
-
+def run(request, path):
+    config = build_config(path, request, True)
+    gbp = main.GenBankProcessor(getabspath(path), config=config)
+    psname = gbp.run_Allplots()
+    logger.debug("Got back ps file: %r", psname)
+    psname = getrelpath(psname)
+    url = reverse('results', args=[psname]) + encode_config(config, path=path)
+    raise RedirectException(url)
 
 
 def results(request, path):
-    """Serve either a results page, or if the 'raw' querystring
-    parameter is set to anything then return the ps file directly."""
+    """Serve a results page."""
 
     if not is_clean_path(path) :
-        messages.error(request, "Path contained illegal characters, please upload a file or go to the library and select one.")
+        messages.error(request,
+                       "Path contained illegal characters, please upload "
+                       "a file or go to the library and select one.")
         return HttpResponseRedirect(reverse('start'))
 
     download_link = None
@@ -125,7 +144,10 @@ def results(request, path):
         getabspath(path)
         download_link=get_raw_url(request, path)
     except IOError:
-        messages.error(request, "We're sorry but that file no longer exists. We expire old results periodically to save space on the server. Please try running the analysis again.")
+        messages.error(request,
+                       "We're sorry but that file no longer exists. We "
+                       "expire old results periodically to save space on"
+                       " the server. Please try running the analysis again.")
 
     return_url = get_return_url(request)
 
