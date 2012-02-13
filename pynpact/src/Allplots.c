@@ -450,10 +450,23 @@ main(int argc, char *argv[]) {
                 unb_str= (char *)realloc(unb_str,(nub+1)*sizeof(char));
                 unb= (int **)realloc(unb,(nub+1)*sizeof(int *));
                 unb[nub]= (int *)malloc(2*sizeof(int));
-                p= strchr(longstr,'.');
-                ge= atoi(p+2);
-                if(longstr[0]=='c') { gs= atoi(longstr+11); unb_str[nub]='C'; }
-                else { gs= atoi(longstr); unb_str[nub]=' '; }
+                p= strchr(longstr,'.'); p += 2;
+			if(p[0] == '>' || p[0] == '<') ++p;
+                ge= atoi(p);
+                if(longstr[0]=='c')
+		{
+		p= longstr + 11;
+			if(p[0] == '>' || p[0] == '<') ++p;
+		gs= atoi(p);
+		unb_str[nub]='C';
+		}
+                else
+		{
+		p= longstr;
+			if(p[0] == '>' || p[0] == '<') ++p;
+		gs= atoi(p);
+		unb_str[nub]=' ';
+		}
                 if(gs>=start-line_range/50 && gs<end && ge>start && ge<=end+line_range/50) { unb[nub][0]= gs; unb[nub][1]= ge; ++nub; }
                 else if(gs>=start && gs<end && ge>end+line_range/50) { unb[nub][0]= gs; unb[nub][1]= end+line_range/50; ++nub; }
                 else if(ge<=end+line_range/50 && ge>start && gs<start-line_range/50)
@@ -474,10 +487,23 @@ main(int argc, char *argv[]) {
                 con_str= (char *)realloc(con_str,(nc+1)*sizeof(char));
                 con= (int **)realloc(con,(nc+1)*sizeof(int *));
                 con[nc]= (int *)malloc(2*sizeof(int));
-                p= strchr(longstr,'.');
-                ge= atoi(p+2);
-                if(longstr[0]=='c') { gs= atoi(longstr+11); con_str[nc]='C'; }
-                else { gs= atoi(longstr); con_str[nc]=' '; }
+                p= strchr(longstr,'.'); p += 2;
+			if(p[0] == '>' || p[0] == '<') ++p;
+                ge= atoi(p);
+                if(longstr[0]=='c')
+		{
+		p= longstr + 11;
+			if(p[0] == '>' || p[0] == '<') ++p;
+		gs= atoi(p);
+		con_str[nc]='C';
+		}
+                else
+		{
+		p= longstr;
+			if(p[0] == '>' || p[0] == '<') ++p;
+		gs= atoi(p);
+		con_str[nc]=' ';
+		}
                 if(gs>=start-line_range/50 && gs<end && ge<=end+line_range/50) { con[nc][0]= gs; con[nc][1]= ge; ++nc; }
                 else if(gs>=start-line_range/50 && gs<end && ge>end+line_range/50) { con[nc][0]= gs; con[nc][1]= end+line_range/50; ++nc; }
                 else if(ge<=end+line_range/50 && ge>start && gs<start-line_range/50)
@@ -494,24 +520,37 @@ main(int argc, char *argv[]) {
         if(input= fopen(new_file,"r")) {
             newf= 1;
             while(fgets(longstr,198,input) && !feof(input)) {
-                new_name= (char **)realloc(new_name,(nn+1)*sizeof(char *));
-                new_name[nn]= (char *)malloc(20*sizeof(char *));
-                new_str= (char *)realloc(new_str,(nn+1)*sizeof(char));
-                new= (int **)realloc(new,(nn+1)*sizeof(int *));
-                new[nn]= (int *)malloc(2*sizeof(int));
-                strncpy(new_name[nn],longstr,12);
-                p= strchr(new_name[nn],' ');
+                new_name= (char **)realloc(new_name, (nn + 1) * sizeof(char *));
+                new_name[nn]= (char *)malloc(20 * sizeof(char *));
+                new_str= (char *)realloc(new_str, (nn + 1) * sizeof(char));
+                new= (int **)realloc(new, (nn + 1)*sizeof(int *));
+                new[nn]= (int *)malloc(2 * sizeof(int));
+                strncpy(new_name[nn], longstr, 12);
+                p= strchr(new_name[nn], ' ');
                 p[0]= '\0';
-                p= strchr(longstr+12,'.');
-                ge= atoi(p+2);
-                if(longstr[12]=='c') { gs= atoi(longstr+23); new_str[nn]='C'; }
-                else { gs= atoi(longstr+12); new_str[nn]=' '; }
-                if(gs>=start-line_range/50 && gs<end && ge<=end+line_range/50) { new[nn][0]= gs; new[nn][1]= ge; ++nn; }
-                else if(gs>=start-line_range/50 && gs<end && ge>end+line_range/50) { new[nn][0]= gs; new[nn][1]= end+line_range/50; ++nn; }
-                else if(ge<=end+line_range/50 && ge>start && gs<start-line_range/50)
-                { new[nn][0]= start-line_range/50; new[nn][0] += gs%period-new[nn][0]%period; new[nn][1]= ge; ++nn; }
-                else if(gs<start-line_range/50 && ge>end+line_range/50)
-                { new[nn][0]= start-line_range/50; new[nn][0] += gs%period-new[nn][0]%period; new[nn][1]= end+line_range/50; ++nn; }
+                p= strchr(longstr + 12, '.'); p += 2;
+			if(p[0] == '>' || p[0] == '<') ++p;
+                ge= atoi(p);
+                if(longstr[12] == 'c')
+		{
+		p= longstr + 23;
+			if(p[0] == '>' || p[0] == '<') ++p;
+		gs= atoi(p);
+		new_str[nn]='C';
+		}
+                else
+		{
+		p= longstr + 12;
+			if(p[0] == '>' || p[0] == '<') ++p;
+		gs= atoi(p);
+		new_str[nn]=' ';
+		}
+                if(gs >= start - line_range / 50 && gs < end && ge <= end + line_range / 50) { new[nn][0]= gs; new[nn][1]= ge; ++nn; }
+                else if(gs >= start - line_range / 50 && gs < end && ge > end + line_range / 50) { new[nn][0]= gs; new[nn][1]= end + line_range / 50; ++nn; }
+                else if(ge <= end + line_range / 50 && ge > start && gs < start - line_range / 50)
+                { new[nn][0]= start - line_range / 50; new[nn][0] += gs % period - new[nn][0] % period; new[nn][1]= ge; ++nn; }
+                else if(gs < start - line_range / 50 && ge > end + line_range / 50)
+                { new[nn][0]= start - line_range / 50; new[nn][0] += gs % period - new[nn][0] % period; new[nn][1]= end + line_range / 50; ++nn; }
             }
             fclose(input);
         }
@@ -521,24 +560,24 @@ main(int argc, char *argv[]) {
 
         if(input= fopen(newP_file,"r")) { newPf= 1;
             while(fgets(longstr,198,input) && !feof(input)) {
-                newP_name= (char **)realloc(newP_name,(nnP+1)*sizeof(char *));
-                newP_name[nnP]= (char *)malloc(20*sizeof(char *));
-                newP_str= (char *)realloc(newP_str,(nnP+1)*sizeof(char));
-                newP= (int **)realloc(newP,(nnP+1)*sizeof(int *));
-                newP[nnP]= (int *)malloc(2*sizeof(int));
-                strncpy(newP_name[nnP],longstr,12);
-                p= strchr(newP_name[nnP],' ');
+                newP_name= (char **)realloc(newP_name, (nnP + 1) * sizeof(char *));
+                newP_name[nnP]= (char *)malloc(20 * sizeof(char *));
+                newP_str= (char *)realloc(newP_str, (nnP + 1) * sizeof(char));
+                newP= (int **)realloc(newP, (nnP + 1) * sizeof(int *));
+                newP[nnP]= (int *)malloc(2 * sizeof(int));
+                strncpy(newP_name[nnP], longstr, 12);
+                p= strchr(newP_name[nnP], ' ');
                 p[0]= '\0';
-                p= strchr(longstr+12,'.');
-                ge= atoi(p+2);
-                if(longstr[12]=='c') { gs= atoi(longstr+23); newP_str[nnP]='C'; }
-                else { gs= atoi(longstr+12); newP_str[nnP]=' '; }
-                if(gs>=start-line_range/50 && gs<end && ge<=end+line_range/50) { newP[nnP][0]= gs; newP[nnP][1]= ge; ++nnP; }
-                else if(gs>=start-line_range/50 && gs<end && ge>end+line_range/50) { newP[nnP][0]= gs; newP[nnP][1]= end+line_range/50; ++nnP; }
-                else if(ge<=end+line_range/50 && ge>start && gs<start-line_range/50)
-                { newP[nnP][0]= start-line_range/50; newP[nnP][0] += gs%period-newP[nnP][0]%period; newP[nnP][1]= ge; ++nnP; }
-                else if(gs<start-line_range/50 && ge>end+line_range/50)
-                { newP[nnP][0]= start-line_range/50; newP[nnP][0] += gs%period-newP[nnP][0]%period; newP[nnP][1]= end+line_range/50; ++nnP; }
+                p= strchr(longstr + 12, '.');
+                ge= atoi(p + 2);
+                if(longstr[12] == 'c') { gs= atoi(longstr + 23); newP_str[nnP]= 'C'; }
+                else { gs= atoi(longstr + 12); newP_str[nnP]= ' '; }
+                if(gs >= start - line_range / 50 && gs < end && ge <= end + line_range / 50) { newP[nnP][0]= gs; newP[nnP][1]= ge; ++nnP; }
+                else if(gs >= start - line_range / 50 && gs < end && ge > end + line_range / 50) { newP[nnP][0]= gs; newP[nnP][1]= end + line_range / 50; ++nnP; }
+                else if(ge <= end + line_range / 50 && ge > start && gs < start - line_range / 50)
+                { newP[nnP][0]= start - line_range / 50; newP[nnP][0] += gs % period - newP[nnP][0] % period; newP[nnP][1]= ge; ++nnP; }
+                else if(gs < start - line_range / 50 && ge > end + line_range / 50)
+                { newP[nnP][0]= start - line_range / 50; newP[nnP][0] += gs % period - newP[nnP][0] % period; newP[nnP][1]= end + line_range / 50; ++nnP; }
             }
             fclose(input);
         }
@@ -571,39 +610,52 @@ main(int argc, char *argv[]) {
 
         if(input= fopen(pub_file,"r")) {
             logmsg(10, "Reading Pub file.\n");
-            while(fgets(longstr,198,input) && !feof(input)) {
-                pub_name= (char **)realloc(pub_name,(np+1)*sizeof(char *));
-                pub_name[np]= (char *)malloc(20*sizeof(char *));
-                pub_str= (char *)realloc(pub_str,(np+1)*sizeof(char));
-                pub= (int **)realloc(pub,(np+1)*sizeof(int *));
-                pub[np]= (int *)malloc(2*sizeof(int));
-                strncpy(pub_name[np],longstr,12);
+            while(fgets(longstr, 198, input) && !feof(input)) {
+                pub_name= (char **)realloc(pub_name, (np + 1) * sizeof(char *));
+                pub_name[np]= (char *)malloc(20 * sizeof(char *));
+                pub_str= (char *)realloc(pub_str, (np + 1) * sizeof(char));
+                pub= (int **)realloc(pub, (np + 1) * sizeof(int *));
+                pub[np]= (int *)malloc(2 * sizeof(int));
+                strncpy(pub_name[np], longstr, 12);
                 p= strchr(pub_name[np],' ');
                 p[0]= '\0';
-                p= strchr(longstr+12,'.');
-                ge= atoi(p+2);
-                if(longstr[12]=='c') { gs= atoi(longstr+23); pub_str[np]='C'; }
-                else { gs= atoi(longstr+12); pub_str[np]=' '; }
-                if(gs>=start-line_range/50 && gs<end && ge<=end+line_range/50 && ge>start) { 
+                p= strchr(longstr + 12, '.'); p += 2;
+			if(p[0] == '>' || p[0] == '<') ++p;
+                ge= atoi(p);
+                if(longstr[12]=='c')
+		{
+		p= longstr + 23;
+			if(p[0] == '>' || p[0] == '<') ++p;
+		gs= atoi(p);
+		pub_str[np]='C';
+		}
+                else
+		{
+		p= longstr + 12;
+			if(p[0] == '>' || p[0] == '<') ++p;
+		gs= atoi(p);
+		pub_str[np]=' ';
+		}
+                if(gs >= start - line_range / 50 && gs < end && ge <= end + line_range / 50 && ge > start) { 
                     pub[np][0] = gs;
                     pub[np][1] = ge;
                     ++np;
                 }
                 else if(gs>=start-line_range/50 && gs<end && ge>end+line_range/50) {
                     pub[np][0] = gs;
-                    pub[np][1] = end+line_range/50;
+                    pub[np][1] = end + line_range / 50;
                     ++np;
                 }
-                else if(ge<=end+line_range/50 && ge>start && gs<start-line_range/50) {
-                    pub[np][0]  = start-line_range/50;
-                    pub[np][0] += gs%period-pub[np][0]%period;
+                else if(ge <= end + line_range / 50 && ge > start && gs < start - line_range / 50) {
+                    pub[np][0]  = start - line_range / 50;
+                    pub[np][0] += gs % period - pub[np][0] % period;
                     pub[np][1]  = ge;
                     ++np;
                 }
-                else if(gs<start-line_range/50 && ge>end+line_range/50) {
-                    pub[np][0]  = start-line_range/50;
-                    pub[np][0] += gs%period-pub[np][0]%period;
-                    pub[np][1]  = end+line_range/50;
+                else if(gs < start - line_range / 50 && ge > end + line_range / 50) {
+                    pub[np][0]  = start - line_range / 50;
+                    pub[np][0] += gs % period - pub[np][0] % period;
+                    pub[np][1]  = end + line_range / 50;
                     ++np;
                 }
             }
@@ -625,10 +677,23 @@ main(int argc, char *argv[]) {
                 strncpy(exc_name[ne],longstr,12);
                 p= strchr(exc_name[ne],' ');
                 p[0]= '\0';
-                p= strchr(longstr+12,'.');
-                ge= atoi(p+2);
-                if(longstr[12]=='c') { gs= atoi(longstr+23); exc_str[ne]='C'; }
-                else { gs= atoi(longstr+12); exc_str[ne]=' '; }
+                p= strchr(longstr+12,'.'); p += 2;
+			if(p[0] ='<' || p[0] == '>') ++p;
+                ge= atoi(p);
+                if(longstr[12]=='c')
+		{
+		p= longstr+23;
+			if(p[0] == '>' || p[0] == '<') ++p;
+		gs= atoi(p);
+		exc_str[ne]='C';
+		}
+                else
+		{
+		p= longstr+12;
+			if(p[0] == '>' || p[0] == '<') ++p;
+		gs= atoi(p);
+		exc_str[ne]=' ';
+		}
                 if(gs>=start-line_range/50 && gs<end && ge<=end+line_range/50 && ge>start) { exc[ne][0]= gs; exc[ne][1]= ge; ++ne; }
                 else if(gs>=start-line_range/50 && gs<end && ge>end+line_range/50) { exc[ne][0]= gs; exc[ne][1]= end+line_range/50; ++ne; }
                 else if(ge<=end+line_range/50 && ge>start && gs<start-line_range/50)
