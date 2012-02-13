@@ -182,7 +182,7 @@ $ CG MYCGE.gbk 1 580074 201 51 3 > MYCGE.CG200
                                   env={'BASE_DIR_THRESHOLD_TABLES':DATAPATH},
                                   logger=self.logger)
                 #the "exc_file", (.modified) contains an extra header line we need to strip.
-                util.file_delete_first_line(os.path.join(dtemp, gbkbase + ".modified"))
+                util.file_delete_first_line(os.path.join(dtemp, gbkbase + ".modified"), logger=logger)
                 if os.path.exists(outdir):
                     self.logger.debug("Removing existing prediction output at %s", outdir)
                     shutil.rmtree(outdir)
