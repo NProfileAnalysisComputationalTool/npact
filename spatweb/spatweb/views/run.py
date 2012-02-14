@@ -146,7 +146,7 @@ def results(request, path):
     except IOError:
         messages.error(request,
                        "We're sorry but that file no longer exists. We "
-                       "expire old results periodically to save space on"
+                       "delete old results periodically to save space on"
                        " the server. Please try running the analysis again.")
 
     return_url = get_return_url(request)
