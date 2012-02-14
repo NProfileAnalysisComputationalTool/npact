@@ -1,6 +1,8 @@
 import logging
 import os.path
 
+from pkg_resources import resource_filename
+
 class NullHandler(logging.Handler):
     def emit(self, record):
         pass
@@ -16,5 +18,6 @@ def binfile(name) :
     return  path
 
 
-DATAPATH=os.path.realpath(os.path.join(os.path.dirname(__file__), "data"))
+DATAPATH=resource_filename(__name__, 'data')
+
 
