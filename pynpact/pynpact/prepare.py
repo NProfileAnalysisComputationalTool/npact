@@ -127,7 +127,6 @@ def try_parse(abs_path, force=False):
     parse_cache[abs_path] = (mtime,data)
     return data
 
-
 def default_config(abs_path):
     config={
         'Nucleotides':'CG',
@@ -152,17 +151,16 @@ def default_config(abs_path):
         'following_page_title': 'Page {0}',
 
         'bp_per_page': 50000,
-        
-        
         }
-    
+
+
     if(abs_path):
         data = try_parse(abs_path)
         if data:
             config.update(data)
             config['first_page_title'] = config.get('description') or config.get('basename') or 'Page 1'
-
     return config
+
 
 CONFIG_HELP_TEXT={
     'start_page': "By page number, the first page to generate. Leave blank to start at the beginning.",

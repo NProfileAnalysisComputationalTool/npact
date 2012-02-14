@@ -290,7 +290,7 @@ period_of_frame       Number of frames.
             pconfkeys = set(hashkeys).difference(set(["start_page","end_page"]))
             pconfig,phash=util.reducehashdict(config,pconfkeys)
             
-            while i*ppage < config['length'] and i < config.get('end_page',1000):
+            while i*ppage < config['length'] and i < config.get('end_page', 1000):
                 def dopage(psout) :
                     self.write_allplots_def(pconfig, os.path.join(dtemp,"Allplots.def"), i+1)
 
