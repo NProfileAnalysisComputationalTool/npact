@@ -1,15 +1,17 @@
 # Create your views here.
 import logging
 import os.path
+import json
 
 from django import forms
 from django.contrib import messages
 from django.core.urlresolvers import reverse
-from django.http import HttpResponseRedirect
+from django.http import HttpResponseRedirect, HttpResponse
 from django.shortcuts import render_to_response
 from django.utils.http import urlencode
 from django.template import RequestContext
 from pynpact import prepare, main, util
+
 from spatweb import is_clean_path, getabspath, getrelpath
 from spatweb import helpers
 from spatweb.middleware import RedirectException
@@ -120,14 +122,31 @@ def encode_config(config, **urlconf):
             urlconf[k] = v
     return "?" + urlencode(urlconf)
 
-def run(request, path):
-    config = build_config(path, request, True)
+
+def run_frame(request, path):
+    full_path = request.get_full_path().replace('/run/', '/process/')
+    return render_to_response('processing.html', 
+                              {'path': full_path},
+                              context_instance=RequestContext(request))
+
+def run_step(request, path):
+    config =  request.session.get('config',
+                                  build_config(path, request, read_request=True))
     gbp = main.GenBankProcessor(getabspath(path), config=config)
-    psname = gbp.run_Allplots()
-    logger.debug("Got back ps file: %r", psname)
-    psname = getrelpath(psname)
-    url = reverse('results', args=[psname]) + encode_config(config, path=path)
-    raise RedirectException(url)
+    nextstep = None
+    try:
+        psname = gbp.process(8)
+        logger.debug("Finished processing.")
+        psname = getrelpath(psname)
+        url = reverse('results', args=[psname]) + encode_config(config, path=path)
+        request.session.modified = True
+        nextstep = {'next':'results', 'url': url}
+    
+    except main.ProcessTimeout, pt:
+        request.session.modified = True
+        nextstep = {'next':'process', 'pt': vars(pt)}
+    return HttpResponse(json.dumps(nextstep))
+        
 
 
 def results(request, path):

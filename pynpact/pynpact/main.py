@@ -149,7 +149,7 @@ $ CG MYCGE.gbk 1 580074 201 51 3 > MYCGE.CG200
                     config['window_size'], config['step'], config['period']]
         func = lambda out: util.capturedCall(progargs, stdout=out, logger=self.logger, check=True)
         self.safe_produce_new(outfilename, func, dependencies=[self.gbkfile])
-        self.config['File_list_of_nucleotides_in_200bp windows.'] = outfilename
+        self.config['File_list_of_nucleotides_in_200bp windows'] = outfilename
         return outfilename
     
 
@@ -224,8 +224,8 @@ $ CG MYCGE.gbk 1 580074 201 51 3 > MYCGE.CG200
                     'File_of_gcbox_positions',
                     'File_of_kozak_positions',
                     'File_of_palindrom_positions_and_size',
-                    'File_list_of_nucleotides_in_200bp windows.',
-                    'File_list_of_nucleotides_in_100bp windows.']
+                    'File_list_of_nucleotides_in_200bp windows',
+                    'File_list_of_nucleotides_in_100bp windows']
 
     def write_allplots_def(self,config,allplots_name,page_num) :
         "Writes out an Allplots.def for a single run through of allplots."
@@ -265,11 +265,6 @@ x-tics                Number of subdivisions.
 period_of_frame       Number of frames.
 
 """
-
-        #do the dependent work.
-        self.run_extract()
-        self.run_CG()
-        self.acgt_gamma()
 
         #figure out hashed filename of ps output.
         hashkeys = [ 'first_page_title', 'following_page_title', 'length', 'start_page',
@@ -326,6 +321,35 @@ period_of_frame       Number of frames.
                     idx += 1
             combined_ps_name = self.derivative_filename("%s.ps" %(hash,))
             return self.safe_produce_new(combined_ps_name, combine_ps_files, dependencies=filenames)
+
+    RUN_FNS=['run_extract','run_CG','acgt_gamma','run_Allplots']
+    RUN_FNS_DESC={
+        'run_extract': 'Extracting gene names',
+        'run_CG': 'Calculating profile',
+        'acgt_gamma': 'Predicting new gene locations',
+        'run_Allplots': 'Generating graphs.'
+    }
+    def process(self, softtimeout=None):
+        val = None
+        i = 0
+        t1 = time.time()
+        for fn in self.RUN_FNS:
+            i += 1
+            tdiff = time.time() - t1
+            if softtimeout and tdiff > softtimeout:
+                raise ProcessTimeout(step_num=i, 
+                                     step_desc=self.RUN_FNS_DESC[fn],
+                                     tdiff=tdiff)
+            val = getattr(self, fn)()
+        return val
+
+
+class ProcessTimeout(Exception):
+    def __init__(self, **args):
+        self.__dict__.update(args)
+    
+
+        
 
 
 if __name__ == '__main__' :

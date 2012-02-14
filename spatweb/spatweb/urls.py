@@ -10,7 +10,10 @@ spatpatterns = \
                      url(r'^efetch/(\d+)' , 'start.efetch', name="efetch"),
                      url(r'^library' , 'library'),
                      url(r'^config/(.+\.gbk?)', 'run.config', name="config"),
-                     url(r'^run/(.+\.gbk?)' , 'run.run', name="run"),
+                     url(r'^run/(.+\.gbk?)' , 'run.run_frame', name="run"),
+
+                     url(r'^process/(.+\.gbk?)' , 'run.run_step', name="process"),
+                     
                      url(r'^(run|config)^' , 'view_none'),
                      url(r'^results/(.+)' , 'run.results', name='results'),
                      url(r'^raw/(?P<path>.*)$', 'static_serve_wrapper', name='raw'),

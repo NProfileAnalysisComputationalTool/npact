@@ -6,6 +6,22 @@
 				<h3>About the N-Profile Analysis Computational Tool</h3>
 
 <div class="contentPadding">
+The computation is currently running.
+<script type="text/javascript">
+  var kickoffurl = "{{ path }}";
+
+  function onsuccess(data){
+     if(data.next=='results'){
+       window.location(data.url)
+     }
+     else {
+       //data.pt looks like '{"step_num": 1, "tdiff": 10.32341, "step_desc": "a step description."}'
+
+       updateDisplay()
+       startNextAjax()
+     }
+  }
+</script>
 
 </div>
 {%endblock content %}
