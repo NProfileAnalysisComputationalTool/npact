@@ -11,7 +11,7 @@
 # define TRANSLATE -130
 # define HIGHT 50.0
 # define HIGHT_PUB 22.0  // Published annotation ORFs
-# define HIGHT_TGR 22.0  // Excluded ORFs
+# define HIGHT_MOD 40.0  // Modified ORFs
 # define HIGHT_NEW 40.0  // New ORFs (bold-face) and Potential new ORFs (roman)
 # define HIGHT_BIA 22.0
 # define HIGHT_CP 8.0
@@ -111,7 +111,7 @@ main(int argc, char *argv[]) {
 
     /* Filename buffers */
     char *unb_file, *con_file, * new_file, *newP_file, *cg_file, *pub_file,
-        *exc_file, *block_file,*BLOCK_file,*codpot_file,*Scodpot_file,*met_file,
+        *mod_file, *block_file,*BLOCK_file,*codpot_file,*Scodpot_file,*met_file,
         *kozak_file,*tata_file,*pali_file,*cap_file,*ccaa_file,*gcbox_file,
         *stop_file,*CG200_file,*CG100_file;
 
@@ -119,18 +119,18 @@ main(int argc, char *argv[]) {
     /* by declaring them initially to be NULL, when realloc sees it, it
        will treat it as a malloc */
     int **unb=NULL, **con=NULL, **new=NULL, **newP=NULL, **cg=NULL, **pub=NULL,
-        **exc=NULL, **block=NULL, **BLOCK=NULL, **codpot=NULL, **Scodpot=NULL,
+        **modified=NULL, **block=NULL, **BLOCK=NULL, **codpot=NULL, **Scodpot=NULL,
         *met=NULL, *tata=NULL, *cap=NULL, *ccaa=NULL, *gcbox=NULL, *stop=NULL,
         *kozak=NULL, **pali=NULL, *X=NULL, *x=NULL;
     float **y=NULL,**Y=NULL;
 
     char *unb_str=NULL, *con_str=NULL, *new_str=NULL, *newP_str=NULL, *cg_str=NULL,
-        *pub_str=NULL, *exc_str=NULL, *block_str=NULL, *BLOCK_str=NULL,
+        *pub_str=NULL, *mod_str=NULL, *block_str=NULL, *BLOCK_str=NULL,
         *codpot_str=NULL, *codpot_col=NULL, *Scodpot_str=NULL, *Scodpot_col=NULL,
         *met_str=NULL, *tata_str=NULL, *cap_str=NULL, *ccaa_str=NULL,
         *gcbox_str=NULL, *stop_str=NULL, *kozak_str=NULL;
 
-    char **pub_name=NULL,**exc_name=NULL,**new_name=NULL,**newP_name=NULL;
+    char **pub_name=NULL,**mod_name=NULL,**new_name=NULL,**newP_name=NULL;
 
     char	longstr[200],*p,tatastr[20],*title1,*title2,ts[2];
     FILE	*input,*files;
@@ -171,7 +171,7 @@ main(int argc, char *argv[]) {
     /*File_of_published_accepted_CDSs */
     pub_file = ap_getl(files);   fprintf(stderr,"\n%s",pub_file);
     /*File_of_published_rejected_CDSs */
-    exc_file = ap_getl(files);   fprintf(stderr,"\n%s",exc_file);
+    mod_file = ap_getl(files);   fprintf(stderr,"\n%s",mod_file);
     /*File_of_blocks_from_new_ORFs_as_cds */
     block_file = ap_getl(files); fprintf(stderr,"\n%s",block_file);
     /*File_of_blocks_from_annotated_genes_as_cds */
@@ -664,18 +664,18 @@ main(int argc, char *argv[]) {
         else fprintf(stderr,"\nPub file NOT read");
 
 
-        /* READS FILE OF REJECTED PUBLIC GENES */
+        /* READS FILE OF MODIFIED PUBLIC GENES */
 
-        if(input= fopen(exc_file,"r")) {
-            logmsg(10, "Reading excluded file %s\n", exc_file);
-            while(fgets(longstr,198,input) && !feof(input)) {
-                exc_name= (char **)realloc(exc_name,(ne+1)*sizeof(char *));
-                exc_name[ne]= (char *)malloc(20*sizeof(char *));
-                exc_str= (char *)realloc(exc_str,(ne+1)*sizeof(char));
-                exc= (int **)realloc(exc,(ne+1)*sizeof(int *));
-                exc[ne]= (int *)malloc(2*sizeof(int));
-                strncpy(exc_name[ne],longstr,12);
-                p= strchr(exc_name[ne],' ');
+        if(input= fopen(mod_file,"r")) {
+            logmsg(10, "Reading excluded file %s\n", mod_file);
+            while(fgets(longstr, 198, input) && !feof(input)) {
+                mod_name= (char **)realloc(mod_name, (ne + 1) * sizeof(char *));
+                mod_name[ne]= (char *)malloc(20 * sizeof(char *));
+                mod_str= (char *)realloc(mod_str, (ne + 1)*sizeof(char));
+                modified= (int **)realloc(modified,(ne + 1)*sizeof(int *));
+                modified[ne]= (int *)malloc(2 * sizeof(int));
+                strncpy(mod_name[ne], longstr, 12);
+                p= strchr(mod_name[ne],'_');
                 p[0]= '\0';
                 p= strchr(longstr+12,'.'); p += 2;
 			if(p[0] ='<' || p[0] == '>') ++p;
@@ -685,24 +685,24 @@ main(int argc, char *argv[]) {
 		p= longstr+23;
 			if(p[0] == '>' || p[0] == '<') ++p;
 		gs= atoi(p);
-		exc_str[ne]='C';
+		mod_str[ne]='C';
 		}
                 else
 		{
 		p= longstr+12;
 			if(p[0] == '>' || p[0] == '<') ++p;
 		gs= atoi(p);
-		exc_str[ne]=' ';
+		mod_str[ne]=' ';
 		}
-                if(gs>=start-line_range/50 && gs<end && ge<=end+line_range/50 && ge>start) { exc[ne][0]= gs; exc[ne][1]= ge; ++ne; }
-                else if(gs>=start-line_range/50 && gs<end && ge>end+line_range/50) { exc[ne][0]= gs; exc[ne][1]= end+line_range/50; ++ne; }
+                if(gs>=start-line_range/50 && gs<end && ge<=end+line_range/50 && ge>start) { modified[ne][0]= gs; modified[ne][1]= ge; ++ne; }
+                else if(gs>=start-line_range/50 && gs<end && ge>end+line_range/50) { modified[ne][0]= gs; modified[ne][1]= end+line_range/50; ++ne; }
                 else if(ge<=end+line_range/50 && ge>start && gs<start-line_range/50)
-                { exc[ne][0]= start-line_range/50; exc[ne][0] += gs%period-exc[ne][0]%period; exc[ne][1]= ge; ++ne; }
+                { modified[ne][0]= start-line_range/50; modified[ne][0] += gs%period-modified[ne][0]%period; modified[ne][1]= ge; ++ne; }
                 else if(gs<start-line_range/50 && ge>end+line_range/50)
-                { exc[ne][0]= start-line_range/50; exc[ne][0] += gs%period-exc[ne][0]%period; exc[ne][1]= end+line_range/50; ++ne; }
+                { modified[ne][0]= start-line_range/50; modified[ne][0] += gs%period-modified[ne][0]%period; modified[ne][1]= end+line_range/50; ++ne; }
             }
             fclose(input);
-            fprintf(stderr,"\nExcluded file %s read",exc_file);
+            fprintf(stderr,"\nExcluded file %s read",mod_file);
         }
         else fprintf(stderr,"\nExcluded file NOT read");
 
@@ -842,7 +842,7 @@ main(int argc, char *argv[]) {
 
         fprintf(stdout,"stroke %.3f %.3f M (Annotation) Lshow\n",-15.0,HIGHT+HIGHT_PUB-2);
         /*
-          fprintf(stdout,"stroke %.3f %.3f M (Annotation) Lshow\n",-15.0,HIGHT+HIGHT_TGR-2);
+          fprintf(stdout,"stroke %.3f %.3f M (Annotation) Lshow\n",-15.0,HIGHT+HIGHT_MOD-2);
         */
 
         /* Prints S-profile and Genemark coding potentials (DISABLED)
@@ -1316,25 +1316,25 @@ main(int argc, char *argv[]) {
 
 
         /***********************************/
-        /* Prints excluded annotated genes */
+        /* Prints modified annotated genes */
         /***********************************/
 
         for(i=0;i<ne;++i) {
-            if(exc_str[i]==' ') {
+            if(mod_str[i]==' ') {
                 if(period%3) fprintf(stdout,"Black");
-                else if(exc[i][0]%period==1) fprintf(stdout,"B");
-                else if(exc[i][0]%period==2) fprintf(stdout,"R");
-                else if(exc[i][0]%period==0) fprintf(stdout,"G");
-                fprintf(stdout," %.1f %.2f M %.2f Rarrow\n",(exc[i][0]-(float)start)/delta*WIDTH,HIGHT+HIGHT_TGR+2.0,(exc[i][1]-exc[i][0])/delta*WIDTH);
-                fprintf(stdout,"Black %.1f %.2f M (%s) Cshow\n",((exc[i][1]+exc[i][0])/2-(float)start)/delta*WIDTH,HIGHT+HIGHT_TGR+5.0,exc_name[i]);
+                else if(modified[i][0]%period==1) fprintf(stdout,"B");
+                else if(modified[i][0]%period==2) fprintf(stdout,"R");
+                else if(modified[i][0]%period==0) fprintf(stdout,"G");
+                fprintf(stdout," %.1f %.2f M %.2f Rarrow\n",(modified[i][0]-(float)start)/delta*WIDTH,HIGHT+HIGHT_MOD+2.0,(modified[i][1]-modified[i][0])/delta*WIDTH);
+                fprintf(stdout,"Black %.1f %.2f M (%s) Cshow\n",((modified[i][1]+modified[i][0])/2-(float)start)/delta*WIDTH,HIGHT+HIGHT_MOD+5.0,mod_name[i]);
             }
             else {
                 if(period%3) fprintf(stdout,"Black");
-                else if(exc[i][0]%period==1) fprintf(stdout,"R");
-                else if(exc[i][0]%period==2) fprintf(stdout,"G");
-                else if(exc[i][0]%period==0) fprintf(stdout,"B");
-                fprintf(stdout," %.1f %.2f M %.2f Larrow\n",(exc[i][0]-(float)start)/delta*WIDTH,HIGHT+HIGHT_TGR-2.0,(exc[i][1]-exc[i][0])/delta*WIDTH);
-                fprintf(stdout,"Black %.1f %.2f M (%s) Cshow\n",((exc[i][1]+exc[i][0])/2-(float)start)/delta*WIDTH,HIGHT+HIGHT_TGR-10.0,exc_name[i]);
+                else if(modified[i][0]%period==1) fprintf(stdout,"R");
+                else if(modified[i][0]%period==2) fprintf(stdout,"G");
+                else if(modified[i][0]%period==0) fprintf(stdout,"B");
+                fprintf(stdout," %.1f %.2f M %.2f Larrow\n",(modified[i][0]-(float)start)/delta*WIDTH,HIGHT+HIGHT_MOD-2.0,(modified[i][1]-modified[i][0])/delta*WIDTH);
+//              fprintf(stdout,"Black %.1f %.2f M (%s) Cshow\n",((modified[i][1]+modified[i][0])/2-(float)start)/delta*WIDTH,HIGHT+HIGHT_MOD-10.0,mod_name[i]);
             }
         }
 
