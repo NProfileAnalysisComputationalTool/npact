@@ -2698,7 +2698,8 @@ void write_results(int from_hss, int to_hss, int ncds, int genome_size)
 						{
 							if(hss[o[i]].start == 1)
 							{
-                                strcat(name, "++");
+                                if(name[strlen(name) - 1]== '*') strcat(name, "A");
+                                else                             strcat(name, "-A");
                                 fprintf(output1,"%-11.11s %d..%d\n", name, hss[o[i]].atg + s1, hss[o[i]].stop2 + s2);
 								if(WRITE_SEQUENCES)
 								{
@@ -2710,7 +2711,8 @@ void write_results(int from_hss, int to_hss, int ncds, int genome_size)
 							}
 							else if(hss[o[i]].start == 3)
 							{
-                                strcat(name, "+");
+                                if(name[strlen(name) - 1]== '*') strcat(name, "a");
+                                else                             strcat(name, "-a");
                                 fprintf(output1,"%-11.11s %d..%d\n", name, hss[o[i]].atg + s1, hss[o[i]].stop2 + s2);
 								if(WRITE_SEQUENCES)
 								{
@@ -2722,7 +2724,8 @@ void write_results(int from_hss, int to_hss, int ncds, int genome_size)
 							}
 							else if(hss[o[i]].start == 2)
 							{
-                                strcat(name, "--");
+                                if(name[strlen(name) - 1]== '*') strcat(name, "G");
+                                else                             strcat(name, "-G");
                                 fprintf(output1,"%-11.11s %d..%d\n", name, hss[o[i]].gtg + s1, hss[o[i]].stop2 + s2);
 								if(WRITE_SEQUENCES)
 								{
@@ -2734,7 +2737,8 @@ void write_results(int from_hss, int to_hss, int ncds, int genome_size)
 							}
 							else if(hss[o[i]].start == 4)
 							{
-                                strcat(name, "-");
+                                if(name[strlen(name) - 1]== '*') strcat(name, "g");
+                                else                             strcat(name, "-g");
                                 fprintf(output1,"%-11.11s %d..%d\n", name, hss[o[i]].gtg + s1, hss[o[i]].stop2 + s2);
 								if(WRITE_SEQUENCES)
 								{
@@ -2746,7 +2750,8 @@ void write_results(int from_hss, int to_hss, int ncds, int genome_size)
 							}
 							else if(hss[o[i]].start == 5)
 							{
-                                strcat(name, "==");
+                                if(name[strlen(name) - 1]== '*') strcat(name, "T");
+                                else                             strcat(name, "-T");
                                 fprintf(output1,"%-11.11s %d..%d\n", name, hss[o[i]].ttg + s1, hss[o[i]].stop2 + s2);
 								if(WRITE_SEQUENCES)
 								{
@@ -2758,7 +2763,8 @@ void write_results(int from_hss, int to_hss, int ncds, int genome_size)
 							}
 							else if(hss[o[i]].start == 6)
 							{
-                                strcat(name, "=");
+                                if(name[strlen(name) - 1]== '*') strcat(name, "t");
+                                else                             strcat(name, "-t");
                                 fprintf(output1,"%-11.11s %d..%d\n", name, hss[o[i]].ttg + s1, hss[o[i]].stop2 + s2);
 								if(WRITE_SEQUENCES)
 								{
@@ -2790,7 +2796,8 @@ void write_results(int from_hss, int to_hss, int ncds, int genome_size)
 						{
 							if(hss[o[i]].start == 1)
 							{
-                                strcat(name, "++");
+                                if(name[strlen(name) - 1]== '*') strcat(name, "A");
+                                else                             strcat(name, "-A");
                                 fprintf(output1,"%-11.11s complement(%d..%d)\n", name, hss[o[i]].stop1 + s1, hss[o[i]].atg + s2);
 								if(WRITE_SEQUENCES)
 								{
@@ -2802,7 +2809,8 @@ void write_results(int from_hss, int to_hss, int ncds, int genome_size)
 							}
 							else if(hss[o[i]].start == 3)
 							{
-                                strcat(name, "+");
+                                if(name[strlen(name) - 1]== '*') strcat(name, "a");
+                                else                             strcat(name, "-a");
                                 fprintf(output1,"%-11.11s complement(%d..%d)\n", name, hss[o[i]].stop1 + s1, hss[o[i]].atg + s2);
 								if(WRITE_SEQUENCES)
 								{
@@ -2814,7 +2822,8 @@ void write_results(int from_hss, int to_hss, int ncds, int genome_size)
 							}
 							else if(hss[o[i]].start == 2)
 							{
-                                strcat(name, "--");
+                                if(name[strlen(name) - 1]== '*') strcat(name, "G");
+                                else                             strcat(name, "-G");
                                 fprintf(output1,"%-11.11s complement(%d..%d)\n", name, hss[o[i]].stop1 + s1, hss[o[i]].gtg + s2);
 								if(WRITE_SEQUENCES)
 								{
@@ -2826,7 +2835,8 @@ void write_results(int from_hss, int to_hss, int ncds, int genome_size)
 							}
 							else if(hss[o[i]].start == 4)
 							{
-                                strcat(name, "-");
+                                if(name[strlen(name) - 1]== '*') strcat(name, "g");
+                                else                             strcat(name, "-g");
                                 fprintf(output1,"%-11.11s complement(%d..%d)\n", name, hss[o[i]].stop1 + s1, hss[o[i]].gtg + s2);
 								if(WRITE_SEQUENCES)
 								{
@@ -2838,7 +2848,8 @@ void write_results(int from_hss, int to_hss, int ncds, int genome_size)
 							}
 							else if(hss[o[i]].start == 5)
 							{
-                                strcat(name, "==");
+                                if(name[strlen(name) - 1]== '*') strcat(name, "T");
+                                else                             strcat(name, "-T");
                                 fprintf(output1,"%-11.11s complement(%d..%d)\n", name, hss[o[i]].stop1 + s1, hss[o[i]].ttg + s2);
 								if(WRITE_SEQUENCES)
 								{
@@ -2850,7 +2861,8 @@ void write_results(int from_hss, int to_hss, int ncds, int genome_size)
 							}
 							else if(hss[o[i]].start == 6)
 							{
-                                strcat(name, "=");
+                                if(name[strlen(name) - 1]== '*') strcat(name, "t");
+                                else                             strcat(name, "-t");
                                 fprintf(output1,"%-11.11s complement(%d..%d)\n", name, hss[o[i]].stop1 + s1, hss[o[i]].ttg + s2);
 								if(WRITE_SEQUENCES)
 								{
