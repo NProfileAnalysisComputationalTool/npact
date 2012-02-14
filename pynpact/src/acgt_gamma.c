@@ -2696,7 +2696,7 @@ void write_results(int from_hss, int to_hss, int ncds, int genome_size)
 							if(hss[o[i]].start == 1)
 							{
                                 strcat(name, "++");
-                                fprintf(output1,"%-11s %d..%d\n", name, hss[o[i]].atg + s1, hss[o[i]].stop2 + s2);
+                                fprintf(output1,"%-11.11s %d..%d\n", name, hss[o[i]].atg + s1, hss[o[i]].stop2 + s2);
 								if(WRITE_SEQUENCES)
 								{
                                     fprintf(output7,">%s %d..%d\n", name, hss[o[i]].atg + s1, hss[o[i]].stop2 + s2);
@@ -2708,7 +2708,7 @@ void write_results(int from_hss, int to_hss, int ncds, int genome_size)
 							else if(hss[o[i]].start == 3)
 							{
                                 strcat(name, "+");
-                                fprintf(output1,"%-11s %d..%d\n", name, hss[o[i]].atg + s1, hss[o[i]].stop2 + s2);
+                                fprintf(output1,"%-11.11s %d..%d\n", name, hss[o[i]].atg + s1, hss[o[i]].stop2 + s2);
 								if(WRITE_SEQUENCES)
 								{
                                     fprintf(output7,">%s %d..%d\n", name, hss[o[i]].atg + s1, hss[o[i]].stop2 + s2);
@@ -2720,7 +2720,7 @@ void write_results(int from_hss, int to_hss, int ncds, int genome_size)
 							else if(hss[o[i]].start == 2)
 							{
                                 strcat(name, "--");
-                                fprintf(output1,"%-11s %d..%d\n", name, hss[o[i]].gtg + s1, hss[o[i]].stop2 + s2);
+                                fprintf(output1,"%-11.11s %d..%d\n", name, hss[o[i]].gtg + s1, hss[o[i]].stop2 + s2);
 								if(WRITE_SEQUENCES)
 								{
                                     fprintf(output1,">%s %d..%d\n", name, hss[o[i]].gtg + s1, hss[o[i]].stop2 + s2);
@@ -2732,7 +2732,7 @@ void write_results(int from_hss, int to_hss, int ncds, int genome_size)
 							else if(hss[o[i]].start == 4)
 							{
                                 strcat(name, "-");
-                                fprintf(output1,"%-11s %d..%d\n", name, hss[o[i]].gtg + s1, hss[o[i]].stop2 + s2);
+                                fprintf(output1,"%-11.11s %d..%d\n", name, hss[o[i]].gtg + s1, hss[o[i]].stop2 + s2);
 								if(WRITE_SEQUENCES)
 								{
                                     fprintf(output1,">%s %d..%d\n", name, hss[o[i]].gtg + s1, hss[o[i]].stop2 + s2);
@@ -2744,7 +2744,7 @@ void write_results(int from_hss, int to_hss, int ncds, int genome_size)
 							else if(hss[o[i]].start == 5)
 							{
                                 strcat(name, "==");
-                                fprintf(output1,"%-11s %d..%d\n", name, hss[o[i]].ttg + s1, hss[o[i]].stop2 + s2);
+                                fprintf(output1,"%-11.11s %d..%d\n", name, hss[o[i]].ttg + s1, hss[o[i]].stop2 + s2);
 								if(WRITE_SEQUENCES)
 								{
                                     fprintf(output1,">%s %d..%d\n", name, hss[o[i]].ttg + s1, hss[o[i]].stop2 + s2);
@@ -2756,7 +2756,7 @@ void write_results(int from_hss, int to_hss, int ncds, int genome_size)
 							else if(hss[o[i]].start == 6)
 							{
                                 strcat(name, "=");
-                                fprintf(output1,"%-11s %d..%d\n", name, hss[o[i]].ttg + s1, hss[o[i]].stop2 + s2);
+                                fprintf(output1,"%-11.11s %d..%d\n", name, hss[o[i]].ttg + s1, hss[o[i]].stop2 + s2);
 								if(WRITE_SEQUENCES)
 								{
                                     fprintf(output1,">%s %d..%d\n", name, hss[o[i]].ttg + s1, hss[o[i]].stop2 + s2);
@@ -2767,7 +2767,7 @@ void write_results(int from_hss, int to_hss, int ncds, int genome_size)
 							}
 							else
 							{
-                                fprintf(output1,"%-11s %d..%d\n", name, hss[o[i]].fromp + s1, hss[o[i]].stop2 + s2);
+                                fprintf(output1,"%-11.11s %d..%d\n", name, hss[o[i]].fromp + s1, hss[o[i]].stop2 + s2);
 								if(WRITE_SEQUENCES)
 								{
                                     fprintf(output7,">%s %d..%d\n", name, hss[o[i]].fromp + s1, hss[o[i]].stop2 + s2);
@@ -2777,7 +2777,7 @@ void write_results(int from_hss, int to_hss, int ncds, int genome_size)
 								}
 							}
 						}
-						else fprintf(output5,"%-11s %d..%d %d %.4f\n", name, hss[o[i]].fromp + s1, hss[o[i]].stop2 + s2, hss[o[i]].len, hss[o[i]].entropy);
+						else fprintf(output5,"%-11.11s %d..%d %d %.4f\n", name, hss[o[i]].fromp + s1, hss[o[i]].stop2 + s2, hss[o[i]].len, hss[o[i]].entropy);
 // Length and Entropy to stdout:	fprintf(stdout,"%d\t%.5f\n", hss[o[i]].stop2 -  hss[o[i]].fromp + s2, hss[o[i]].entropy);
                         ++length[(hss[o[i]].stop2 + s2 - hss[o[i]].fromp - s1 + 1)/50];
 					}
@@ -2788,7 +2788,7 @@ void write_results(int from_hss, int to_hss, int ncds, int genome_size)
 							if(hss[o[i]].start == 1)
 							{
                                 strcat(name, "++");
-                                fprintf(output1,"%-11s complement(%d..%d)\n", name, hss[o[i]].stop1 + s1, hss[o[i]].atg + s2);
+                                fprintf(output1,"%-11.11s complement(%d..%d)\n", name, hss[o[i]].stop1 + s1, hss[o[i]].atg + s2);
 								if(WRITE_SEQUENCES)
 								{
                                     fprintf(output7,">%s++ %d..%d\n", name, hss[o[i]].stop1 + s1, hss[o[i]].atg + s2);
@@ -2800,7 +2800,7 @@ void write_results(int from_hss, int to_hss, int ncds, int genome_size)
 							else if(hss[o[i]].start == 3)
 							{
                                 strcat(name, "+");
-                                fprintf(output1,"%-11s complement(%d..%d)\n", name, hss[o[i]].stop1 + s1, hss[o[i]].atg + s2);
+                                fprintf(output1,"%-11.11s complement(%d..%d)\n", name, hss[o[i]].stop1 + s1, hss[o[i]].atg + s2);
 								if(WRITE_SEQUENCES)
 								{
                                     fprintf(output7,">%s+ %d..%d\n", name, hss[o[i]].stop1 + s1, hss[o[i]].atg + s2);
@@ -2812,7 +2812,7 @@ void write_results(int from_hss, int to_hss, int ncds, int genome_size)
 							else if(hss[o[i]].start == 2)
 							{
                                 strcat(name, "--");
-                                fprintf(output1,"%-11s complement(%d..%d)\n", name, hss[o[i]].stop1 + s1, hss[o[i]].gtg + s2);
+                                fprintf(output1,"%-11.11s complement(%d..%d)\n", name, hss[o[i]].stop1 + s1, hss[o[i]].gtg + s2);
 								if(WRITE_SEQUENCES)
 								{
                                     fprintf(output7,">%s-- %d..%d\n", name, hss[o[i]].stop1 + s1, hss[o[i]].gtg + s2);
@@ -2824,7 +2824,7 @@ void write_results(int from_hss, int to_hss, int ncds, int genome_size)
 							else if(hss[o[i]].start == 4)
 							{
                                 strcat(name, "-");
-                                fprintf(output1,"%-11s complement(%d..%d)\n", name, hss[o[i]].stop1 + s1, hss[o[i]].gtg + s2);
+                                fprintf(output1,"%-11.11s complement(%d..%d)\n", name, hss[o[i]].stop1 + s1, hss[o[i]].gtg + s2);
 								if(WRITE_SEQUENCES)
 								{
                                     fprintf(output7,">%s- %d..%d\n", name, hss[o[i]].stop1 + s1, hss[o[i]].gtg + s2);
@@ -2836,7 +2836,7 @@ void write_results(int from_hss, int to_hss, int ncds, int genome_size)
 							else if(hss[o[i]].start == 5)
 							{
                                 strcat(name, "==");
-                                fprintf(output1,"%-11s complement(%d..%d)\n", name, hss[o[i]].stop1 + s1, hss[o[i]].ttg + s2);
+                                fprintf(output1,"%-11.11s complement(%d..%d)\n", name, hss[o[i]].stop1 + s1, hss[o[i]].ttg + s2);
 								if(WRITE_SEQUENCES)
 								{
                                     fprintf(output7,">%s- %d..%d\n", name, hss[o[i]].stop1 + s1, hss[o[i]].ttg + s2);
@@ -2848,7 +2848,7 @@ void write_results(int from_hss, int to_hss, int ncds, int genome_size)
 							else if(hss[o[i]].start == 6)
 							{
                                 strcat(name, "=");
-                                fprintf(output1,"%-11s complement(%d..%d)\n", name, hss[o[i]].stop1 + s1, hss[o[i]].ttg + s2);
+                                fprintf(output1,"%-11.11s complement(%d..%d)\n", name, hss[o[i]].stop1 + s1, hss[o[i]].ttg + s2);
 								if(WRITE_SEQUENCES)
 								{
                                     fprintf(output7,">%s- %d..%d\n", name, hss[o[i]].stop1 + s1, hss[o[i]].ttg + s2);
@@ -2859,7 +2859,7 @@ void write_results(int from_hss, int to_hss, int ncds, int genome_size)
 							}
 							else
 							{
-                                fprintf(output1,"%-11s complement(%d..%d)\n", name, hss[o[i]].stop1 + s1, hss[o[i]].top + s2);
+                                fprintf(output1,"%-11.11s complement(%d..%d)\n", name, hss[o[i]].stop1 + s1, hss[o[i]].top + s2);
 								if(WRITE_SEQUENCES)
 								{
                                     fprintf(output7,">%s complement(%d..%d)\n", name, hss[o[i]].stop1 + s1, hss[o[i]].top + s2);
@@ -2869,7 +2869,7 @@ void write_results(int from_hss, int to_hss, int ncds, int genome_size)
 								}
 							}
 						}
-						else fprintf(output5,"%-11s complement(%d..%d) %d %.4f\n", name, hss[o[i]].stop1 + s1, hss[o[i]].top + s2, hss[o[i]].len, hss[o[i]].entropy);
+						else fprintf(output5,"%-11.11s complement(%d..%d) %d %.4f\n", name, hss[o[i]].stop1 + s1, hss[o[i]].top + s2, hss[o[i]].len, hss[o[i]].entropy);
 // Length and Entropy to stdout:	fprintf(stdout,"%d\t%.5f\n", hss[o[i]].top - hss[o[i]].stop1 + 4, hss[o[i]].entropy);
                         ++length[(hss[o[i]].top + s2 - hss[o[i]].stop1 - s1 + 1)/50];
 					}
@@ -2882,8 +2882,8 @@ void write_results(int from_hss, int to_hss, int ncds, int genome_size)
 					if(hss[o[i]].global_sig == 1) sprintf(name, "%c-%d*", hss[o[i]].hit_type, o[i]);
 					else                          sprintf(name, "%c-%d", hss[o[i]].hit_type, o[i]);
 
-					if(hss[o[i]].strand == 'D') fprintf(output4,"%-11s %d..%d\n", name, hss[o[i]].fromp + s1, hss[o[i]].stop2 + s2);
-					else                        fprintf(output4,"%-11s complement(%d..%d)\n", name, hss[o[i]].stop1 + s1, hss[o[i]].top + s2);
+					if(hss[o[i]].strand == 'D') fprintf(output4,"%-11.11s %d..%d\n", name, hss[o[i]].fromp + s1, hss[o[i]].stop2 + s2);
+					else                        fprintf(output4,"%-11.11s complement(%d..%d)\n", name, hss[o[i]].stop1 + s1, hss[o[i]].top + s2);
 				}
 			}
 
@@ -3244,13 +3244,13 @@ void write_published_exon(int j, int h, int k, int from, int to, int s1, int s2,
 			else if(k == 3) sprintf(name, "CO%d", j+1);
 		}
 			
-		if(gene[j].strand == 'D') fprintf(output1,"%-11s %d..%d\n", name, from + s1, to + s2);
-		else                      fprintf(output1,"%-11s complement(%d..%d)\n", name, from + s1, to + s2);
+		if(gene[j].strand == 'D') fprintf(output1,"%-11.11s %d..%d\n", name, from + s1, to + s2);
+		else                      fprintf(output1,"%-11.11s complement(%d..%d)\n", name, from + s1, to + s2);
 	}
 	else
 	{
-		if(gene[j].strand == 'D') fprintf(output2,"%-11s %d..%d\n", gene[j].name, from + s1, to + s2);
-		else                      fprintf(output2,"%-11s complement(%d..%d)\n", gene[j].name, from + s1, to + s2);
+		if(gene[j].strand == 'D') fprintf(output2,"%-11.11s %d..%d\n", gene[j].name, from + s1, to + s2);
+		else                      fprintf(output2,"%-11.11s complement(%d..%d)\n", gene[j].name, from + s1, to + s2);
 	}
 }
 
