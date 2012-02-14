@@ -678,9 +678,9 @@ main(int argc, char *argv[]) {
                 p= strchr(mod_name[ne],'_');
                 p[0]= '\0';
                 p= strchr(longstr + 12,'.'); p += 2;
-			if(p[0] ='<' || p[0] == '>') ++p;
+			if(p[0] == '<' || p[0] == '>') ++p;
                 ge= atoi(p);
-                if(longstr[12]=='c')
+                if(longstr[12] =='c')
 		{
 		p= longstr + 23;
 			if(p[0] == '>' || p[0] == '<') ++p;
