@@ -123,9 +123,10 @@ struct exons
     int     *start;		// 5' position of each exon, numbered 5' to 3'.
     int     *newstart;	// Modified 5' position of each exon, numbered 5' to 3'.
     int     *newend;	// Modified 3' position of each exon, numbered 5' to 3'.
+    int     *sup;	// Superimposed contradicting hit.
     int     *end;		// 3' position of each exon (excluding stop codon), numbered 5' to 3'.
-	int	*fpos;		// Position in ffrom array where file-address of start of exon sequence is recorded.
-	int	*type;		// Type of exon as defined in Annotation[][] from function define_characterizations().
+    int     *fpos;		// Position in ffrom array where file-address of start of exon sequence is recorded.
+    int     *type;		// Type of exon as defined in Annotation[][] from function define_characterizations().
     char    *color;		// color of exon.
     int     *frame;		// frame of exon.
     int     span;		// Length of gene from first coding position to last coding position (excluding stop codon) = to - from + 1.
@@ -1215,6 +1216,7 @@ long annotation(int *ncds, int *nexons)
             gene[n].newstart= (int *)malloc(gene[n].num_exons*sizeof(int));
             gene[n].end= (int *)malloc(gene[n].num_exons*sizeof(int));
             gene[n].newend= (int *)malloc(gene[n].num_exons*sizeof(int));
+            gene[n].sup= (int *)malloc(gene[n].num_exons*sizeof(int));
             gene[n].fpos= (int *)malloc(gene[n].num_exons*sizeof(int));
             gene[n].type= (int *)malloc(gene[n].num_exons*sizeof(int));
             gene[n].color= (char *)malloc(gene[n].num_exons*sizeof(char));
@@ -2682,7 +2684,8 @@ void write_results(int from_hss, int to_hss, int ncds, int genome_size)
 
 		if(k != 5)
 		{
-			if(k == 0)
+//			if(k == 0) 
+			if(k == 0 || k == 7)           // TESTING ALT GENES
 			{
 				if(hss[o[i]].hit_num == 1)
 				{
@@ -3185,6 +3188,7 @@ void characterize_published_genes(int ncds, int tot_Ghits, double nuc[], long by
 						else if(gene[j].type[h] == 0 || gene[j].type[h] == 4)  // superimposed in different frame and not previously classified
 						{
                             gene[j].type[h]= k= 3;
+                            gene[j].sup[h]= i;
                             out= 0;
 							if(hss[i].fromp < from) out += from - hss[i].fromp;
 							if(hss[i].top > to) out += hss[i].top - to;
@@ -3216,6 +3220,7 @@ void characterize_published_genes(int ncds, int tot_Ghits, double nuc[], long by
 
 void write_published_exon(int j, int h, int k, int from, int to, int s1, int s2, double G, char Pg[], double nuc[], FILE *output1, FILE *output2, FILE *output3)
 {
+    int         hi;
     char	name[50];
 
 // output1 = *.modified ( published CDSs modified)
@@ -3228,13 +3233,14 @@ void write_published_exon(int j, int h, int k, int from, int to, int s1, int s2,
 	if(gene[j].entropy <= MAX_ENTROPY) fprintf(output3, " repetitive");
     fprintf(output3, "\n\tA= %5.2f  C= %5.2f  G= %5.2f  T= %5.2f  S= %5.2f  S1= %5.2f  S2= %5.2f  S3= %5.2f  R= %5.2f  R1= %5.2f  R2= %5.2f  R3= %5.2f\n", nuc[3*6+0], nuc[3*6+1], nuc[3*6+2], nuc[3*6+3], nuc[3*6+4], nuc[0*6+4], nuc[1*6+4], nuc[2*6+4], nuc[3*6+5], nuc[0*6+5], nuc[1*6+5], nuc[2*6+5]);
 
-	if(k == 0 || k == 2 || k == 3)
+//	if(k == 0 || k == 2 || k == 3)     TESTING ALT GENES
+	if(0)
 	{
 		if(strlen(gene[j].name))
 		{
 			if(k == 0) sprintf(name, "NS_");
 			else if(k == 2) sprintf(name, "MO_");
-			else if(k == 3) sprintf(name, "CO_");
+			else if(k == 3) { sprintf(name, "CO_"); hi= gene[j].sup[h]; }
             strcat(name, gene[j].name);
 		}
 		else
