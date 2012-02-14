@@ -641,7 +641,7 @@ main(int argc, char *argv[]) {
                     pub[np][1] = ge;
                     ++np;
                 }
-                else if(gs>=start-line_range/50 && gs<end && ge>end+line_range/50) {
+                else if(gs >= start - line_range / 50 && gs < end && ge > end + line_range / 50) {
                     pub[np][0] = gs;
                     pub[np][1] = end + line_range / 50;
                     ++np;
@@ -667,7 +667,7 @@ main(int argc, char *argv[]) {
         /* READS FILE OF MODIFIED PUBLIC GENES */
 
         if(input= fopen(mod_file,"r")) {
-            logmsg(10, "Reading excluded file %s\n", mod_file);
+            logmsg(10, "Reading modified-predictions file %s\n", mod_file);
             while(fgets(longstr, 198, input) && !feof(input)) {
                 mod_name= (char **)realloc(mod_name, (ne + 1) * sizeof(char *));
                 mod_name[ne]= (char *)malloc(20 * sizeof(char *));
@@ -677,12 +677,12 @@ main(int argc, char *argv[]) {
                 strncpy(mod_name[ne], longstr, 12);
                 p= strchr(mod_name[ne],'_');
                 p[0]= '\0';
-                p= strchr(longstr+12,'.'); p += 2;
+                p= strchr(longstr + 12,'.'); p += 2;
 			if(p[0] ='<' || p[0] == '>') ++p;
                 ge= atoi(p);
                 if(longstr[12]=='c')
 		{
-		p= longstr+23;
+		p= longstr + 23;
 			if(p[0] == '>' || p[0] == '<') ++p;
 		gs= atoi(p);
 		mod_str[ne]='C';
@@ -694,17 +694,34 @@ main(int argc, char *argv[]) {
 		gs= atoi(p);
 		mod_str[ne]=' ';
 		}
-                if(gs>=start-line_range/50 && gs<end && ge<=end+line_range/50 && ge>start) { modified[ne][0]= gs; modified[ne][1]= ge; ++ne; }
-                else if(gs>=start-line_range/50 && gs<end && ge>end+line_range/50) { modified[ne][0]= gs; modified[ne][1]= end+line_range/50; ++ne; }
-                else if(ge<=end+line_range/50 && ge>start && gs<start-line_range/50)
-                { modified[ne][0]= start-line_range/50; modified[ne][0] += gs%period-modified[ne][0]%period; modified[ne][1]= ge; ++ne; }
-                else if(gs<start-line_range/50 && ge>end+line_range/50)
-                { modified[ne][0]= start-line_range/50; modified[ne][0] += gs%period-modified[ne][0]%period; modified[ne][1]= end+line_range/50; ++ne; }
+
+                if(gs >= start - line_range / 50 && gs < end && ge <= end + line_range / 50 && ge > start) { 
+                    modified[ne][0] = gs;
+                    modified[ne][1] = ge;
+                    ++ne;
+                }
+                else if(gs >= start - line_range / 50 && gs < end && ge > end + line_range / 50) {
+                    modified[ne][0] = gs;
+                    modified[ne][1] = end + line_range / 50;
+                    ++ne;
+                }
+                else if(ge <= end + line_range / 50 && ge > start && gs < start - line_range / 50) {
+                    modified[ne][0]  = start - line_range / 50;
+                    modified[ne][0] += gs % period - modified[ne][0] % period;
+                    modified[ne][1]  = ge;
+                    ++ne;
+                }
+                else if(gs < start - line_range / 50 && ge > end + line_range / 50) {
+                    modified[ne][0]  = start - line_range / 50;
+                    modified[ne][0] += gs % period - modified[ne][0] % period;
+                    modified[ne][1]  = end + line_range / 50;
+                    ++ne;
+                }
             }
             fclose(input);
-            fprintf(stderr,"\nExcluded file %s read",mod_file);
+            fprintf(stderr,"\nModified file %s read",mod_file);
         }
-        else fprintf(stderr,"\nExcluded file NOT read");
+        else fprintf(stderr,"\nModified file NOT read");
 
         if(input= fopen(CG200_file,"r")) {
             while(!feof(input)) {
@@ -1319,22 +1336,22 @@ main(int argc, char *argv[]) {
         /* Prints modified annotated genes */
         /***********************************/
 
-        for(i=0;i<ne;++i) {
-            if(mod_str[i]==' ') {
-                if(period%3) fprintf(stdout,"Black");
-                else if(modified[i][0]%period==1) fprintf(stdout,"B");
-                else if(modified[i][0]%period==2) fprintf(stdout,"R");
-                else if(modified[i][0]%period==0) fprintf(stdout,"G");
-                fprintf(stdout," %.1f %.2f M %.2f Rarrow\n",(modified[i][0]-(float)start)/delta*WIDTH,HIGHT+HIGHT_MOD+2.0,(modified[i][1]-modified[i][0])/delta*WIDTH);
-                fprintf(stdout,"Black %.1f %.2f M (%s) Cshow\n",((modified[i][1]+modified[i][0])/2-(float)start)/delta*WIDTH,HIGHT+HIGHT_MOD+5.0,mod_name[i]);
+        for(i= 0; i < ne; ++i) {
+            if(mod_str[i] == ' ') {
+                if(period % 3) fprintf(stdout, "Black");
+                else if(modified[i][0] % period == 1) fprintf(stdout, "B");
+                else if(modified[i][0] % period == 2) fprintf(stdout, "R");
+                else if(modified[i][0] % period==0) fprintf(stdout, "G");
+                fprintf(stdout," %.1f %.2f M %.2f Rarrow\n", (modified[i][0] - (float)start) / delta * WIDTH, HIGHT + HIGHT_MOD + 2.0, (modified[i][1] - modified[i][0]) / delta * WIDTH);
+//              fprintf(stdout,"Black %.1f %.2f M (%s) Cshow\n", ((modified[i][1] + modified[i][0]) / 2 - (float)start) / delta * WIDTH, HIGHT + HIGHT_MOD + 5.0, mod_name[i]);
             }
             else {
-                if(period%3) fprintf(stdout,"Black");
-                else if(modified[i][0]%period==1) fprintf(stdout,"R");
-                else if(modified[i][0]%period==2) fprintf(stdout,"G");
-                else if(modified[i][0]%period==0) fprintf(stdout,"B");
-                fprintf(stdout," %.1f %.2f M %.2f Larrow\n",(modified[i][0]-(float)start)/delta*WIDTH,HIGHT+HIGHT_MOD-2.0,(modified[i][1]-modified[i][0])/delta*WIDTH);
-//              fprintf(stdout,"Black %.1f %.2f M (%s) Cshow\n",((modified[i][1]+modified[i][0])/2-(float)start)/delta*WIDTH,HIGHT+HIGHT_MOD-10.0,mod_name[i]);
+                if(period % 3) fprintf(stdout, "Black");
+                else if(modified[i][0] % period == 1) fprintf(stdout, "R");
+                else if(modified[i][0] % period == 2) fprintf(stdout, "G");
+                else if(modified[i][0] % period == 0) fprintf(stdout, "B");
+                fprintf(stdout," %.1f %.2f M %.2f Larrow\n", (modified[i][0] - (float)start) / delta * WIDTH, HIGHT + HIGHT_MOD - 2.0, (modified[i][1] - modified[i][0]) / delta * WIDTH);
+//              fprintf(stdout,"Black %.1f %.2f M (%s) Cshow\n", ((modified[i][1] + modified[i][0]) / 2 - (float)start) / delta * WIDTH, HIGHT + HIGHT_MOD - 10.0, mod_name[i]);
             }
         }
 
