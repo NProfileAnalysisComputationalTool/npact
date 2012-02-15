@@ -22,7 +22,7 @@ logger = logging.getLogger(__name__)
 #### create new output.
 
 
-class GenBankProcessor(object) :
+class GenBankProcessor(object):
     """Manipulate Genebank files in the pynpact project.
 
     Genbank files are documented at: http://www.ncbi.nlm.nih.gov/Sitemap/samplerecord.html
@@ -49,8 +49,8 @@ class GenBankProcessor(object) :
     config=None
 
 
-    def __init__(self, gbkfile = None,**kwargs) :
-        for k in kwargs : setattr(self,k, kwargs[k])
+    def __init__(self, gbkfile = None,**kwargs):
+        for k in kwargs: setattr(self,k, kwargs[k])
 
         self.parse(gbkfile)
 
@@ -64,7 +64,7 @@ class GenBankProcessor(object) :
         if self.config is None:
             self.config = prepare.default_config(self.gbkfile)
 
-        if not self.outputdir :
+        if not self.outputdir:
             self.outputdir = os.path.dirname(os.path.realpath(self.gbkfile))
 
 
@@ -72,12 +72,12 @@ class GenBankProcessor(object) :
     ####################################################################
     ## Helper Functions
 
-    def derivative_filename(self, part) :
+    def derivative_filename(self, part):
         """Build the filename of a derivative product of the gbk
         file. If the derivative file already exists return whether it
         is out of date"""
 
-        if not part[0] == "." :
+        if not part[0] == ".":
             part = "." + part
 
         base = os.path.splitext(os.path.basename(self.gbkfile))[0]
@@ -85,13 +85,13 @@ class GenBankProcessor(object) :
 
         return outfilename
 
-    def mkstemp_overwrite(self, destination, **kwargs) :
+    def mkstemp_overwrite(self, destination, **kwargs):
         kwargs.setdefault('dir', self.outputdir)
         kwargs.setdefault('logger', self.logger)
         kwargs.setdefault('cleanup', self.cleanup)
         return util.mkstemp_overwrite(destination, **kwargs)
 
-    def safe_produce_new(self, filename, func, **kwargs) :
+    def safe_produce_new(self, filename, func, **kwargs):
         """A wrapper for util.safe_produce_new (create a new file in a
 multiprocess safe way) setting class defaults
 """
@@ -102,24 +102,26 @@ multiprocess safe way) setting class defaults
         return util.safe_produce_new(filename, func, **kwargs)
 
     @contextmanager
-    def mkdtemp(self,**kwargs) :
+    def mkdtemp(self,**kwargs):
         """A wrapper for tempfile.mkdtemp, sets defaults based on class variables"""
         kwargs.setdefault('dir', self.outputdir)
         path = tempfile.mkdtemp(**kwargs)
         try:
             yield path
         finally:
-            if self.cleanup :
+            if self.cleanup:
                 self.logger.debug("Cleaning up mkdtemp %r", path)
                 shutil.rmtree(path,ignore_errors=True)
 
+    #####
+                
     def seqrec(self):
         if self._seqrec is None:
             self._seqrec = prepare.open_parse_seq_rec(self.gbkfile, do_features=True)
         return self._seqrec
 
 
-    def run_extract(self) :
+    def run_extract(self):
         """Go through the genbank record pulling out gene names and locations
         $ extract MYCGE.gbk 0 gene 0 locus_tag > MYCGE.genes
 """
@@ -127,7 +129,7 @@ multiprocess safe way) setting class defaults
                                           ['GeneDescriptorKey1', 'GeneDescriptorKey2',
                                            'GeneDescriptorSkip1', 'GeneDescriptorSkip2',
                                            ])
-        def func(f) :
+        def func(f):
             self.logger.info("starting extract for %s", self.gbkfile)
             cmd = [binfile("extract"), self.gbkfile,
                    config['GeneDescriptorSkip1'], config['GeneDescriptorKey1'],
@@ -138,7 +140,7 @@ multiprocess safe way) setting class defaults
         self.config['File_of_published_accepted_CDSs'] = filename
         return filename
 
-    def run_CG(self) :
+    def run_CG(self):
         """Do the CG ratio calculations.
 $ CG MYCGE.gbk 1 580074 201 51 3 > MYCGE.CG200
 """
@@ -227,15 +229,15 @@ $ CG MYCGE.gbk 1 580074 201 51 3 > MYCGE.CG200
                     'File_list_of_nucleotides_in_200bp windows',
                     'File_list_of_nucleotides_in_100bp windows']
 
-    def write_allplots_def(self,config,allplots_name,page_num) :
+    def write_allplots_def(self,config,allplots_name,page_num):
         "Writes out an Allplots.def for a single run through of allplots."
         self.logger.debug("Writing Allplots for %d %r", page_num, allplots_name)
 
-        with open(allplots_name, 'w') as allplots :
+        with open(allplots_name, 'w') as allplots:
 
             #helper function for writing a line to the allplots file.
-            def ap_wl(str) :
-                if str : allplots.write(str)
+            def ap_wl(str):
+                if str: allplots.write(str)
                 allplots.write('\n')
 
             #NB the "Plot Title" is disregarded, but that line should also contain the total number of bases
@@ -245,12 +247,12 @@ $ CG MYCGE.gbk 1 580074 201 51 3 > MYCGE.CG200
             ap_wl(config['following_page_title'].format(page_num) ) #Title of following pages
 
 
-            for f in self.AP_file_keys :
+            for f in self.AP_file_keys:
                 ap_wl(config.get(f,"None"))
         return allplots_name
 
 
-    def run_Allplots(self) :
+    def run_Allplots(self):
         """Actually invoke Allplots, once for each page we're generating.
 
 Example invocation:
@@ -267,14 +269,16 @@ period_of_frame       Number of frames.
 """
 
         #figure out hashed filename of ps output.
-        hashkeys = [ 'first_page_title', 'following_page_title', 'length', 'start_page',
-                     'end_page', 'period', 'bp_per_page']
-        hashkeys += self.AP_file_keys
+        hashkeys = self.AP_file_keys + \
+          ['first_page_title', 
+           'following_page_title', 
+           'length', 'start_page',
+           'end_page', 'period', 'bp_per_page']
         config,hash= util.reducehashdict(self.config, hashkeys)
 
         #build the individual ps page files.
         filenames = []
-        with self.mkdtemp() as dtemp :
+        with self.mkdtemp() as dtemp:
             #page number offset
             i = config.get('start_page',1) - 1
             ppage = config['bp_per_page']
@@ -282,11 +286,11 @@ period_of_frame       Number of frames.
             #the hash of individual pages shouldn't depend on the
             #'start_page' and 'end_page' configuration, so we leave
             #that out.
-            pconfkeys = set(hashkeys).difference(set(["start_page","end_page"]))
-            pconfig,phash=util.reducehashdict(config,pconfkeys)
+            pconfkeys = set(hashkeys).difference(set(["start_page", "end_page"]))
+            pconfig,phash = util.reducehashdict(config, pconfkeys)
             
             while i*ppage < config['length'] and i < config.get('end_page', 1000):
-                def dopage(psout) :
+                def dopage(psout):
                     self.write_allplots_def(pconfig, os.path.join(dtemp,"Allplots.def"), i+1)
 
                     self.logger.debug("Starting Allplots page %d for %r",
@@ -302,7 +306,7 @@ period_of_frame       Number of frames.
                 i += 1
 
 
-            def combine_ps_files(psout) :
+            def combine_ps_files(psout):
                 #While combining, insert the special markers so that
                 #it will appear correctly as many pages.
                 self.logger.info("combining postscript files")
@@ -310,13 +314,13 @@ period_of_frame       Number of frames.
                 psout.write("%!PS-Adobe-2.0\n\n")
                 psout.write("%%Pages: {0}\n\n".format(len(filenames)))
                 idx=1
-                for psf in filenames :
+                for psf in filenames:
                     psout.write("%%Page: {0}\n".format(idx))
-                    with open(psf,'r') as infile :
+                    with open(psf,'r') as infile:
                         infile.readline()
                         infile.readline()
                         psout.write(infile.readline())
-                        for l in infile :
+                        for l in infile:
                             psout.write(l)
                     idx += 1
             combined_ps_name = self.derivative_filename("%s.ps" %(hash,))
@@ -347,12 +351,10 @@ period_of_frame       Number of frames.
 class ProcessTimeout(Exception):
     def __init__(self, **args):
         self.__dict__.update(args)
-    
-
-        
 
 
-if __name__ == '__main__' :
+
+if __name__ == '__main__':
     parser = OptionParser("""%prog <genebank file>""")
     parser.add_option("-v", "--verbose", action="store_true", dest="verbose",
                       help="Show more verbose log messages.")
@@ -360,7 +362,7 @@ if __name__ == '__main__' :
                       help="Force recomputation of intermediate products")
     (options,args) = parser.parse_args()
 
-    if len(args) != 1 :
+    if len(args) != 1:
         parser.print_help()
         exit(1)
 
