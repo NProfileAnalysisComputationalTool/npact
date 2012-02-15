@@ -130,22 +130,26 @@ def run_frame(request, path):
                               context_instance=RequestContext(request))
 
 def run_step(request, path):
-    config =  request.session.get('config',
-                                  build_config(path, request, read_request=True))
-    gbp = main.GenBankProcessor(getabspath(path), config=config)
-    nextstep = None
     try:
-        psname = gbp.process(8)
-        logger.debug("Finished processing.")
-        psname = getrelpath(psname)
-        url = reverse('results', args=[psname]) + encode_config(config, path=path)
-        request.session.modified = True
-        nextstep = {'next':'results', 'url': url}
-    
-    except main.ProcessTimeout, pt:
-        request.session.modified = True
-        nextstep = {'next':'process', 'pt': vars(pt)}
-    return HttpResponse(json.dumps(nextstep))
+        config =  request.session.get('config',
+                                  build_config(path, request, read_request=True))
+        gbp = main.GenBankProcessor(getabspath(path), config=config)
+        nextstep = None
+        try:
+            psname = gbp.process(0.1)
+            logger.debug("Finished processing.")
+            psname = getrelpath(psname)
+            url = reverse('results', args=[psname]) + encode_config(config, path=path)
+            request.session.modified = True
+            nextstep = {'next':'results', 'url': url}
+            
+        except main.ProcessTimeout, pt:
+            request.session.modified = True
+            nextstep = {'next':'process', 'pt': vars(pt)}
+        return HttpResponse(json.dumps(nextstep))
+    except :
+        messages.error(request, "Error Processing Data File" )
+        return HttpResponse('ERROR', status=500)
         
 
 

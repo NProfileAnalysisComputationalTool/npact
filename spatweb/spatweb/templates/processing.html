@@ -1,26 +1,73 @@
 {% extends "base.html" %}
+{% load media %}
 {% block title %}N-PACT - N-Profile Analysis Computational Tool{% endblock %}
 
-{%block content %}
+{% block addScript %}
+  {% include_media 'jquery.js' %}
+{% endblock addScript %}
+
+{% block content %}
 <h2 id="secHeader" title="N-PACT - N-Profile Analysis Computational Tool Home"><span></span>N-Profile Analysis Computational Tool Home</h2>
 				<h3>About the N-Profile Analysis Computational Tool</h3>
 
 <div class="contentPadding">
 The computation is currently running.
+<div class="progress">
+  <div class="timer"></div>
+  <div class="text"> - Current Progress -</div>
+</div>
 <script type="text/javascript">
-  var kickoffurl = "{{ path }}";
+  var progress ={
+     url:"{{ path }}",
+     dom: jQuery('.progress'),
+     timerDom: jQuery('.progress .timer'),
+     textDom: jQuery('.progress .text'),
+     start: null,
+     updateTimer :function (){
+       if(progress.start){
+          progress.elapsed = new Date() - progress.start;
+          progress.timerDom.html(Math.floor(progress.elapsed/1000) + ' sec.');
+       }
+     }
+  };
 
+  function updateDisplay( data ){
+     //{"step_num": 1, "tdiff": 10.32341, "step_desc": "a step description."}
+     console.log('Update Progress Display', data);
+     if(!data) return;
+     var newhtml = '<br />'+'Working on step '+data.step_num+' : '+ data.step_desc;
+     progress.textDom.html(progress.textDom.html()+newhtml);
+  }
   function onsuccess(data){
+     console.log('Progress', data);
      if(data.next=='results'){
-       window.location(data.url)
+       if(progress.interval)window.clearInterval(progress.interval);
+       progress.textDom.html(progress.textDom.html()+'<br /> Finished! Sending file.');
+       window.location = data.url;
      }
      else {
-       //data.pt looks like '{"step_num": 1, "tdiff": 10.32341, "step_desc": "a step description."}'
-
-       updateDisplay()
-       startNextAjax()
+       //data.pt looks has progress data
+       updateDisplay(data.pt);
+       runRequest();
      }
   }
+  function onerror(data){
+     window.location = "{% url start %}";
+  }
+  function runRequest(){
+     console.log('Starting Progress Request Chain');
+     if(!progress.start) progress.start = new Date();
+     jQuery.ajax({
+       url: progress.url,
+       dataType:'json',
+       success:onsuccess,
+       error: onerror
+     })
+  }
+  jQuery(document).ready(function(){
+    runRequest();
+    progress.interval = window.setInterval(progress.updateTimer, 500);
+  });
 </script>
 
 </div>
