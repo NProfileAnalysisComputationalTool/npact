@@ -116,7 +116,7 @@ def try_parse(abs_path, force=False):
     except InvalidGBKException:
         raise
     except:
-        logger.debug("Failed parsing %s, trying regex search.")
+        logger.debug("Failed parsing %r, trying regex search.", abs_path)
         
         match = re.search(r'(\d+) ?bp', open(abs_path).readline())
         if match :

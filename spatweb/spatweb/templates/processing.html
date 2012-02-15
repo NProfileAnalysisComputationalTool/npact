@@ -14,14 +14,17 @@
 The computation is currently running.
 <div class="progress">
   <div class="timer"></div>
-  <div class="text"> - Current Progress -</div>
+  <div class="text"> - Current Progress - 
+    <ul id="steps">
+    </ul>
+  </div>
 </div>
 <script type="text/javascript">
   var progress ={
      url:"{{ path }}",
      dom: jQuery('.progress'),
      timerDom: jQuery('.progress .timer'),
-     textDom: jQuery('.progress .text'),
+     steps: jQuery('#steps'),
      start: null,
      updateTimer :function (){
        if(progress.start){
@@ -32,17 +35,18 @@ The computation is currently running.
   };
 
   function updateDisplay( data ){
-     //{"step_num": 1, "tdiff": 10.32341, "step_desc": "a step description."}
+     //{"steps": ['a','b'], "tdiff": 10.32341, "step_desc": "a step description."}
      console.log('Update Progress Display', data);
      if(!data) return;
-     var newhtml = '<br />'+'Working on step '+data.step_num+' : '+ data.step_desc;
-     progress.textDom.html(progress.textDom.html()+newhtml);
+     for(var i=0; i< data.steps.length; i++) {
+        progress.steps.append('<li>' + data.steps[i] + '</li>')
+     }
   }
   function onsuccess(data){
      console.log('Progress', data);
      if(data.next=='results'){
        if(progress.interval)window.clearInterval(progress.interval);
-       progress.textDom.html(progress.textDom.html()+'<br /> Finished! Sending file.');
+       progress.steps.append('<li>Finished! Sending file.</li>');
        window.location = data.url;
      }
      else {

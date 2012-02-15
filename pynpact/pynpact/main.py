@@ -8,6 +8,7 @@ from Bio import SeqIO
 from __init__ import binfile,DATAPATH
 import prepare
 import util
+from softtimeout import SoftTimer, Timeout
 
 logger = logging.getLogger(__name__)
 
@@ -22,7 +23,7 @@ logger = logging.getLogger(__name__)
 #### create new output.
 
 
-class GenBankProcessor(object):
+class GenBankProcessor(object ):
     """Manipulate Genebank files in the pynpact project.
 
     Genbank files are documented at: http://www.ncbi.nlm.nih.gov/Sitemap/samplerecord.html
@@ -36,7 +37,7 @@ class GenBankProcessor(object):
      * logger: (default: None) what logger to use
      * outputdir: (default: directory of genebank file) What directory
        to create intermediate and PS files in.
-     * cleanup: (default: True) Should the temporary files (not
+     * cleanup: (default: False) Should the temporary files (not
        intermediate products) be deleted in case of errors
 
 """
@@ -46,11 +47,14 @@ class GenBankProcessor(object):
     logger = logger
     outputdir = None
     cleanup = False
-    config=None
+    config = None
+    timer = None
 
-
-    def __init__(self, gbkfile = None,**kwargs):
-        for k in kwargs: setattr(self,k, kwargs[k])
+    def __init__(self, gbkfile = None, timeout=None, **kwargs):
+        self.__dict__.update(kwargs)
+        #for k in kwargs: setattr(self,k, kwargs[k])
+        if not self.timer:
+            self.timer = SoftTimer(timeout=timeout)
 
         self.parse(gbkfile)
 
@@ -124,33 +128,37 @@ multiprocess safe way) setting class defaults
     def run_extract(self):
         """Go through the genbank record pulling out gene names and locations
         $ extract MYCGE.gbk 0 gene 0 locus_tag > MYCGE.genes
-"""
+        """
         config,hash = util.reducehashdict(self.config,
                                           ['GeneDescriptorKey1', 'GeneDescriptorKey2',
                                            'GeneDescriptorSkip1', 'GeneDescriptorSkip2',
                                            ])
-        def func(f):
+        def thunk(out):
+            self.timer.check("Extracting genes in %s." % os.path.basename(self.gbkfile))
             self.logger.info("starting extract for %s", self.gbkfile)
             cmd = [binfile("extract"), self.gbkfile,
                    config['GeneDescriptorSkip1'], config['GeneDescriptorKey1'],
                    config['GeneDescriptorSkip2'], config['GeneDescriptorKey2']]
-            return util.capturedCall(cmd, stdout=f, logger=self.logger, check=True)
+            return util.capturedCall(cmd, stdout=out, logger=self.logger, check=True)
         filename = self.derivative_filename(".%s.genes" % hash)
-        self.safe_produce_new(filename, func, dependencies=[self.gbkfile])
+        self.safe_produce_new(filename, thunk, dependencies=[self.gbkfile])
         self.config['File_of_published_accepted_CDSs'] = filename
         return filename
 
     def run_CG(self):
         """Do the CG ratio calculations.
-$ CG MYCGE.gbk 1 580074 201 51 3 > MYCGE.CG200
-"""
-        config,hash = util.reducehashdict(self.config,['length','window_size','step','period'])
 
+        $ CG MYCGE.gbk 1 580074 201 51 3 > MYCGE.CG200
+        """
+        config,hash = util.reducehashdict(self.config,['length','window_size','step','period'])
         outfilename = self.derivative_filename(".%s.CG" % hash)
-        progargs = [binfile("CG"), self.gbkfile, 1, config['length'],
-                    config['window_size'], config['step'], config['period']]
-        func = lambda out: util.capturedCall(progargs, stdout=out, logger=self.logger, check=True)
-        self.safe_produce_new(outfilename, func, dependencies=[self.gbkfile])
+        def thunk(out):
+            self.timer.check("Calculating CG ratio.")
+            progargs = [binfile("CG"), self.gbkfile, 1, config['length'],
+                        config['window_size'], config['step'], config['period']]
+            return util.capturedCall(progargs, stdout=out, logger=self.logger, check=True)
+        
+        self.safe_produce_new(outfilename, thunk, dependencies=[self.gbkfile])
         self.config['File_list_of_nucleotides_in_200bp windows'] = outfilename
         return outfilename
     
@@ -160,7 +168,8 @@ $ CG MYCGE.gbk 1 580074 201 51 3 > MYCGE.CG200
         if self.config.get('significance',True) in ["False",False]:
             self.logger.debug("Skipping prediction.")
             return
-        self.logger.debug("Starting prediction: %s",self.config.get('significance'))
+        self.logger.debug("Starting prediction: %s", 
+                          self.config.get('significance'))
         
         assert os.path.exists(DATAPATH), \
                "Missing pynpact/data for acgt_gamma prediction. Expected at " + DATAPATH
@@ -179,17 +188,20 @@ $ CG MYCGE.gbk 1 580074 201 51 3 > MYCGE.CG200
 
 
             with self.mkdtemp() as dtemp:
+                self.timer.check("Predicting new gene locations.")
                 self.logger.info("Starting prediction program in %s", dtemp)
                 util.capturedCall(cmd, cwd=dtemp, check=True,
                                   env={'BASE_DIR_THRESHOLD_TABLES':DATAPATH},
                                   logger=self.logger)
                 #the "exc_file", (.modified) contains an extra header line we need to strip.
-                util.file_delete_first_line(os.path.join(dtemp, gbkbase + ".modified"), logger=logger)
+                util.file_delete_first_line(os.path.join(dtemp, gbkbase + ".modified"), 
+                                            logger=logger)
+                #TODO, while deleting this is inconsistent...
                 if os.path.exists(outdir):
                     self.logger.debug("Removing existing prediction output at %s", outdir)
                     shutil.rmtree(outdir)
                 self.logger.debug("Renaming from %s to %s", dtemp, outdir)
-                os.rename(dtemp,outdir)
+                os.rename(dtemp, outdir)
 
         self.logger.debug("Adding prediction filenames to config dict.")
         #strip 4 characters off here b/c that's how acgt_gamma does it
@@ -290,7 +302,8 @@ period_of_frame       Number of frames.
             pconfig,phash = util.reducehashdict(config, pconfkeys)
             
             while i*ppage < config['length'] and i < config.get('end_page', 1000):
-                def dopage(psout):
+                def thunk(psout):
+                    self.timer.check("Generating page %d" % i+1)
                     self.write_allplots_def(pconfig, os.path.join(dtemp,"Allplots.def"), i+1)
 
                     self.logger.debug("Starting Allplots page %d for %r",
@@ -301,7 +314,7 @@ period_of_frame       Number of frames.
                                       logger=self.logger, cwd=dtemp, check=True)
                 psname = self.derivative_filename("%s.%03d.ps" % (phash,i+1))
                 filenames.append(psname)
-                self.safe_produce_new(psname, dopage,
+                self.safe_produce_new(psname, thunk,
                                       dependencies=map(config.get,self.AP_file_keys))
                 i += 1
 
@@ -309,6 +322,7 @@ period_of_frame       Number of frames.
             def combine_ps_files(psout):
                 #While combining, insert the special markers so that
                 #it will appear correctly as many pages.
+                self.timer.check("Combining pages into output.")
                 self.logger.info("combining postscript files")
                 first=True
                 psout.write("%!PS-Adobe-2.0\n\n")
@@ -333,24 +347,13 @@ period_of_frame       Number of frames.
         'acgt_gamma': 'Predicting new gene locations',
         'run_Allplots': 'Generating graphs.'
     }
-    def process(self, softtimeout=None):
+    def process(self):
         val = None
-        i = 0
-        t1 = time.time()
         for fn in self.RUN_FNS:
-            i += 1
-            tdiff = time.time() - t1
-            if softtimeout and tdiff > softtimeout:
-                raise ProcessTimeout(step_num=i, 
-                                     step_desc=self.RUN_FNS_DESC[fn],
-                                     tdiff=tdiff)
             val = getattr(self, fn)()
         return val
 
 
-class ProcessTimeout(Exception):
-    def __init__(self, **args):
-        self.__dict__.update(args)
 
 
 

@@ -172,10 +172,10 @@ def efetch(req, id):
         return re_search(req)
 
     path = getrelpath(abspath)
-    action=req.GET.get('action','run')
+    action=req.GET.get('action') or 'run'
     if action in ['run', 'config']:
         return HttpResponseRedirect(reverse(action, args=[path]))
     else:
         logger.error("Unknown action %r", action)
-        messages.error(request, "Unknown action.")
+        messages.error(req, "Unknown action.")
         return re_search(req)

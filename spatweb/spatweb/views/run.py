@@ -11,6 +11,7 @@ from django.shortcuts import render_to_response
 from django.utils.http import urlencode
 from django.template import RequestContext
 from pynpact import prepare, main, util
+from pynpact.softtimeout import Timeout
 
 from spatweb import is_clean_path, getabspath, getrelpath
 from spatweb import helpers
@@ -103,6 +104,7 @@ def build_config(path, request, read_request=True):
         messages.error(request, str(e))
         raise RedirectException(reverse('start'))
     except:
+        logger.exception("Error parsing gbk: %r", getabspath(path))
         messages.error(request,
                        "There was a problem loading file '%s', "
                        "please try again or try a different record." % path)
@@ -133,21 +135,22 @@ def run_step(request, path):
     try:
         config =  request.session.get('config',
                                   build_config(path, request, read_request=True))
-        gbp = main.GenBankProcessor(getabspath(path), config=config)
+        gbp = main.GenBankProcessor(getabspath(path), config=config, timeout=2)
         nextstep = None
         try:
-            psname = gbp.process(0.1)
+            psname = gbp.process()
             logger.debug("Finished processing.")
             psname = getrelpath(psname)
             url = reverse('results', args=[psname]) + encode_config(config, path=path)
             request.session.modified = True
             nextstep = {'next':'results', 'url': url}
             
-        except main.ProcessTimeout, pt:
+        except Timeout, pt:
             request.session.modified = True
             nextstep = {'next':'process', 'pt': vars(pt)}
         return HttpResponse(json.dumps(nextstep))
-    except :
+    except:
+        logger.exception("Error in run_step")
         messages.error(request, "Error Processing Data File" )
         return HttpResponse('ERROR', status=500)
         
