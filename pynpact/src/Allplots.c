@@ -521,26 +521,27 @@ main(int argc, char *argv[]) {
             newf= 1;
             while(fgets(longstr,198,input) && !feof(input)) {
                 new_name= (char **)realloc(new_name, (nn + 1) * sizeof(char *));
-                new_name[nn]= (char *)malloc(20 * sizeof(char *));
+                new_name[nn]= (char *)malloc(50 * sizeof(char *));
                 new_str= (char *)realloc(new_str, (nn + 1) * sizeof(char));
                 new= (int **)realloc(new, (nn + 1)*sizeof(int *));
                 new[nn]= (int *)malloc(2 * sizeof(int));
-                strncpy(new_name[nn], longstr, 12);
+                strncpy(new_name[nn], longstr, 48);
                 p= strchr(new_name[nn], ' ');
                 p[0]= '\0';
-                p= strchr(longstr + 12, '.'); p += 2;
+		p= strnchr(longstr, ' '); ++p;
+                p= strchr(p, '.'); p += 2;
 			if(p[0] == '>' || p[0] == '<') ++p;
                 ge= atoi(p);
-                if(longstr[12] == 'c')
+		p= strnchr(longstr, ' '); ++p;
+                if(p[0] == 'c')
 		{
-		p= longstr + 23;
+		p += 11;
 			if(p[0] == '>' || p[0] == '<') ++p;
 		gs= atoi(p);
 		new_str[nn]='C';
 		}
                 else
 		{
-		p= longstr + 12;
 			if(p[0] == '>' || p[0] == '<') ++p;
 		gs= atoi(p);
 		new_str[nn]=' ';
@@ -561,17 +562,28 @@ main(int argc, char *argv[]) {
         if(input= fopen(newP_file,"r")) { newPf= 1;
             while(fgets(longstr,198,input) && !feof(input)) {
                 newP_name= (char **)realloc(newP_name, (nnP + 1) * sizeof(char *));
-                newP_name[nnP]= (char *)malloc(20 * sizeof(char *));
+                newP_name[nnP]= (char *)malloc(50 * sizeof(char *));
                 newP_str= (char *)realloc(newP_str, (nnP + 1) * sizeof(char));
                 newP= (int **)realloc(newP, (nnP + 1) * sizeof(int *));
                 newP[nnP]= (int *)malloc(2 * sizeof(int));
-                strncpy(newP_name[nnP], longstr, 12);
+                strncpy(newP_name[nnP], longstr, 48);
                 p= strchr(newP_name[nnP], ' ');
                 p[0]= '\0';
-                p= strchr(longstr + 12, '.');
+		p= strnchr(longstr, ' '); ++p;
+                p= strchr(p, '.');
                 ge= atoi(p + 2);
-                if(longstr[12] == 'c') { gs= atoi(longstr + 23); newP_str[nnP]= 'C'; }
-                else { gs= atoi(longstr + 12); newP_str[nnP]= ' '; }
+		p= strnchr(longstr, ' '); ++p;
+                if(p[0] == 'c')
+		{
+		p += 11;
+		gs= atoi(p);
+		newP_str[nnP]= 'C';
+		}
+                else
+		{
+		gs= atoi(p);
+		newP_str[nnP]= ' ';
+		}
                 if(gs >= start - line_range / 50 && gs < end && ge <= end + line_range / 50) { newP[nnP][0]= gs; newP[nnP][1]= ge; ++nnP; }
                 else if(gs >= start - line_range / 50 && gs < end && ge > end + line_range / 50) { newP[nnP][0]= gs; newP[nnP][1]= end + line_range / 50; ++nnP; }
                 else if(ge <= end + line_range / 50 && ge > start && gs < start - line_range / 50)
@@ -612,26 +624,27 @@ main(int argc, char *argv[]) {
             logmsg(10, "Reading Pub file.\n");
             while(fgets(longstr, 198, input) && !feof(input)) {
                 pub_name= (char **)realloc(pub_name, (np + 1) * sizeof(char *));
-                pub_name[np]= (char *)malloc(20 * sizeof(char *));
+                pub_name[np]= (char *)malloc(50 * sizeof(char *));
                 pub_str= (char *)realloc(pub_str, (np + 1) * sizeof(char));
                 pub= (int **)realloc(pub, (np + 1) * sizeof(int *));
                 pub[np]= (int *)malloc(2 * sizeof(int));
-                strncpy(pub_name[np], longstr, 12);
+                strncpy(pub_name[np], longstr, 48);
                 p= strchr(pub_name[np],' ');
                 p[0]= '\0';
-                p= strchr(longstr + 12, '.'); p += 2;
+		p= strnchr(longstr, ' '); ++p;
+                p= strchr(p, '.'); p += 2;
 			if(p[0] == '>' || p[0] == '<') ++p;
                 ge= atoi(p);
-                if(longstr[12]=='c')
+		p= strnchr(longstr, ' '); ++p;
+                if(p[0]=='c')
 		{
-		p= longstr + 23;
+		p += 11;
 			if(p[0] == '>' || p[0] == '<') ++p;
 		gs= atoi(p);
 		pub_str[np]='C';
 		}
                 else
 		{
-		p= longstr + 12;
 			if(p[0] == '>' || p[0] == '<') ++p;
 		gs= atoi(p);
 		pub_str[np]=' ';
@@ -670,26 +683,27 @@ main(int argc, char *argv[]) {
             logmsg(10, "Reading modified-predictions file %s\n", mod_file);
             while(fgets(longstr, 198, input) && !feof(input)) {
                 mod_name= (char **)realloc(mod_name, (ne + 1) * sizeof(char *));
-                mod_name[ne]= (char *)malloc(20 * sizeof(char *));
+                mod_name[ne]= (char *)malloc(50 * sizeof(char *));
                 mod_str= (char *)realloc(mod_str, (ne + 1)*sizeof(char));
                 modified= (int **)realloc(modified,(ne + 1)*sizeof(int *));
                 modified[ne]= (int *)malloc(2 * sizeof(int));
-                strncpy(mod_name[ne], longstr, 12);
-                p= strchr(mod_name[ne],'_');
+                strncpy(mod_name[ne], longstr, 48);
+                p= strchr(mod_name[ne],' ');
                 p[0]= '\0';
-                p= strchr(longstr + 12,'.'); p += 2;
+                p= strnchr(longstr,' '); ++p;
+                p= strnchr(p, '.'); p += 2;
 			if(p[0] == '<' || p[0] == '>') ++p;
                 ge= atoi(p);
-                if(longstr[12] =='c')
+                p= strnchr(longstr,' '); ++p;
+                if(p[0] =='c')
 		{
-		p= longstr + 23;
+		p += 11;
 			if(p[0] == '>' || p[0] == '<') ++p;
 		gs= atoi(p);
 		mod_str[ne]='C';
 		}
                 else
 		{
-		p= longstr+12;
 			if(p[0] == '>' || p[0] == '<') ++p;
 		gs= atoi(p);
 		mod_str[ne]=' ';
