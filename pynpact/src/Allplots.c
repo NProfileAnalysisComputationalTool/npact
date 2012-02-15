@@ -528,11 +528,11 @@ main(int argc, char *argv[]) {
                 strncpy(new_name[nn], longstr, 48);
                 p= strchr(new_name[nn], ' ');
                 p[0]= '\0';
-		p= strnchr(longstr, ' '); ++p;
+		p= strrchr(longstr, ' '); ++p;
                 p= strchr(p, '.'); p += 2;
 			if(p[0] == '>' || p[0] == '<') ++p;
                 ge= atoi(p);
-		p= strnchr(longstr, ' '); ++p;
+		p= strrchr(longstr, ' '); ++p;
                 if(p[0] == 'c')
 		{
 		p += 11;
@@ -569,10 +569,10 @@ main(int argc, char *argv[]) {
                 strncpy(newP_name[nnP], longstr, 48);
                 p= strchr(newP_name[nnP], ' ');
                 p[0]= '\0';
-		p= strnchr(longstr, ' '); ++p;
+		p= strrchr(longstr, ' '); ++p;
                 p= strchr(p, '.');
                 ge= atoi(p + 2);
-		p= strnchr(longstr, ' '); ++p;
+		p= strrchr(longstr, ' '); ++p;
                 if(p[0] == 'c')
 		{
 		p += 11;
@@ -631,11 +631,11 @@ main(int argc, char *argv[]) {
                 strncpy(pub_name[np], longstr, 48);
                 p= strchr(pub_name[np],' ');
                 p[0]= '\0';
-		p= strnchr(longstr, ' '); ++p;
+		p= strrchr(longstr, ' '); ++p;
                 p= strchr(p, '.'); p += 2;
 			if(p[0] == '>' || p[0] == '<') ++p;
                 ge= atoi(p);
-		p= strnchr(longstr, ' '); ++p;
+		p= strrchr(longstr, ' '); ++p;
                 if(p[0]=='c')
 		{
 		p += 11;
@@ -690,11 +690,11 @@ main(int argc, char *argv[]) {
                 strncpy(mod_name[ne], longstr, 48);
                 p= strchr(mod_name[ne],' ');
                 p[0]= '\0';
-                p= strnchr(longstr,' '); ++p;
-                p= strnchr(p, '.'); p += 2;
+                p= strrchr(longstr,' '); ++p;
+                p= strrchr(p, '.'); p += 2;
 			if(p[0] == '<' || p[0] == '>') ++p;
                 ge= atoi(p);
-                p= strnchr(longstr,' '); ++p;
+                p= strrchr(longstr,' '); ++p;
                 if(p[0] =='c')
 		{
 		p += 11;
