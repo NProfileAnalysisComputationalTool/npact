@@ -14,6 +14,13 @@ double	SIGNIFICANCE= 0.001;
 int	RANDOMIZE= 0;
 #define MAX_ENTROPY 0.40
 
+// Hits are sorted by length of global significance (the sequence length at which
+// the hit has significance p < 0.01 ) if none of these conditions below apply:
+
+#define SORT_BY_SCORE 1
+#define SORT_BY_HIT_SLOPE 0
+#define SORT_BY_ORF_SLOPE 0
+
 #define WRITE_SEQUENCES 0
 
 #define BASE_DIR NULL
@@ -2402,11 +2409,6 @@ void process_hss(int from_hss, int to_hss, int ncds)
 
 	for(i= 0; i < to_hss; ++i)
 	{
-//		if(hss[o[i]].hit_type == 'H' && hss[o[i]].len >= mHL)
-//		{
-//			if(hss[o[i]].type != 5) fprintf(stdout,"%.3f\t%.3f\t\t%d\n",hss[o[i]].score, hss[o[i]].score/(float)hss[o[i]].len, hss[o[i]].len);
-//			else if(hss[o[i]].type == 5) fprintf(stdout,"%.3f\t\t%.3f\t%d\n",hss[o[i]].score, hss[o[i]].score/(float)hss[o[i]].len, hss[o[i]].len);
-//		}
 		if(hss[o[i]].sig_len >= (double)search_size)
 		{
             hss[o[i]].global_sig= 1;
@@ -2416,46 +2418,48 @@ void process_hss(int from_hss, int to_hss, int ncds)
 	}
 
 
-// Hits are sorted by score.
+// Hits are sorted by length of global significance (the sequence length at which the hit has significance p < 0.01 ) if none of the conditions below applies
 
-// fprintf(stderr, "\n\nSorting hits by score.."); 
-// 
-// 	for(i= 0; i < to_hss; ++i) o[i]= i;
-// 
-// 	for(i= 0; i < to_hss - 1; ++i)
-// 		for(j= i + 1; j < to_hss; ++j)
-// 			if(hss[o[j]].score > hss[o[i]].score) { k= o[i]; o[i]= o[j]; o[j]= k; }
-
-
-// Hits are sorted by length of global significance (the maximum sequence length at which the hit has significance p < 0.01 ).
-//
-//      for(i= 0; i < to_hss; ++i) o[i]= i;
-//
-//      for(i= 0; i < to_hss - 1; ++i)
-//              for(j= i + 1; j < to_hss; ++j)
-//                      if(hss[o[j]].sig_len > hss[o[i]].sig_len) { k= o[i]; o[i]= o[j]; o[j]= k; }
-
-
-// This sorts hits by the score per unit length of hit (i.e., differential of cumulative score)
+// Hits sorted by score:
  
-//    logmsg(10, "\n\nSorting hits by score slope.."); 
+	if(SORT_BY_SCORE)
+	{
+     logmsg(10, "\n\nSorting hits by score..."); 
  
-//	for(i= 0; i < to_hss; ++i) o[i]= i;
-
-//	for(i= 0; i < to_hss - 1; ++i)
-//	{
-//        li= hss[o[i]].top - hss[o[i]].fromp + 1;
-//		for(j= i + 1; j < to_hss; ++j)
-//		{
- //           lj= hss[o[j]].top - hss[o[j]].fromp + 1;
-//			if(hss[o[j]].score/lj > hss[o[i]].score/li) { k= o[i]; o[i]= o[j]; o[j]= k; }
-//		}
-//	}
-
+ 	for(i= 0; i < to_hss; ++i) o[i]= i;
  
+ 	for(i= 0; i < to_hss - 1; ++i)
+ 		for(j= i + 1; j < to_hss; ++j)
+ 			if(hss[o[j]].score > hss[o[i]].score) { k= o[i]; o[i]= o[j]; o[j]= k; }
+	}
+
+
+
+// This sorts hits by the score per unit length of hit (i.e., differential of cumulative score):
+ 
+	if(SORT_BY_HIT_SLOPE)
+	{
+      logmsg(10, "\n\nSorting hits by hit-score slope.."); 
+ 
+	for(i= 0; i < to_hss; ++i) o[i]= i;
+
+		for(i= 0; i < to_hss - 1; ++i)
+		{
+        	li= hss[o[i]].top - hss[o[i]].fromp + 1;
+			for(j= i + 1; j < to_hss; ++j)
+			{
+            	lj= hss[o[j]].top - hss[o[j]].fromp + 1;
+				if(hss[o[j]].score / lj > hss[o[i]].score / li) { k= o[i]; o[i]= o[j]; o[j]= k; }
+			}
+		}
+	}
+
+
+// This sorts hits by the score per unit length of ORF, from start-codon or RF start, to stop codon (i.e., differential of cumulative score):
+ 
+	if(SORT_BY_ORF_SLOPE)
+	{
     logmsg(10, "\n\nSorting hits by score per ORF position"); 
-
-// This sorts hits by the score per unit length of ORF, from start-codon or RF start, to stop codon (i.e., differential of cumulative score)
 
          for(i= 0; i < to_hss; ++i)
          {
@@ -2481,10 +2485,9 @@ void process_hss(int from_hss, int to_hss, int ncds)
         for(i= 0; i < to_hss - 1; ++i)
                 for(j= i + 1; j < to_hss; ++j)
                         if(hss[o[j]].scpp > hss[o[i]].scpp) { k= o[i]; o[i]= o[j]; o[j]= k; }
+	}
 
-// 
-// fprintf(stderr, "\n\nSorting hits by score slope.."); 
-
+// End of sorting.
 
     logmsg(10, "\n\nProcessing HSSs:     "); 
 
