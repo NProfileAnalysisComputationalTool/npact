@@ -2586,10 +2586,10 @@ void process_hss(int from_hss, int to_hss, int ncds)
 
 // Checks overlap with higher-scoring HSSs
 
-			for(j= 0; j < i && hss[o[i]].type == 0; ++j)
+			for(j= 0; j < i && (hss[o[i]].type == 0 || hss[o[i]].type == 7); ++j)
 			{
                 out= 0;
-				if(hss[o[j]].type <= 3)
+				if(hss[o[j]].type <= 3 || hss[o[j]].type == 7)
 				{
                                         if(hss[o[j]].strand == 'D')      // ORF from start codon (from) to stop (to)
                                         {
