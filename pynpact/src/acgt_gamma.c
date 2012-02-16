@@ -65,6 +65,7 @@ int	aa_numbers[]= AA_NUMBERS;
 char	aa_letters[]= AA_LETTERS;
 char	RGB[]= "RGB";
 char	strnd[]= "DC";
+char	start_char[]= " AaGgTtCcWw";
 char	ORF[6*MAX_ORF_SIZE];
 char	buff[MAX_LINE];
 char	*organism_name;
@@ -144,11 +145,7 @@ struct HSSs {
     int	  top;
     int	  len;
     int	  type;
-    int	  atg;
-    int	  gtg;
-    int	  ttg;
-    int	  ctg;
-    int	  att;
+    int	  start_pos;
     int	  start;
     int	  seqlen;
     char	  *seq;
@@ -582,11 +579,7 @@ int analyze_genome(int genome_size, int tot_hss, int *on)
                         hss[tot_hss + h].G= G_test(ORF + frame * MAX_ORF_SIZE + hss[tot_hss + h].fromp, hss[tot_hss + h].top - hss[tot_hss + h].fromp + 1, hss[tot_hss + h].pstring, &i);
 
                         hss[tot_hss + h].fromp += hss[tot_hss + h].stop1;
-						if(hss[tot_hss + h].start == 1 || hss[tot_hss + h].start == 3) hss[tot_hss + h].atg += hss[tot_hss + h].stop1;
-						else if(hss[tot_hss + h].start == 2 || hss[tot_hss + h].start == 4) hss[tot_hss + h].gtg += hss[tot_hss + h].stop1;
-						else if(hss[tot_hss + h].start == 5 || hss[tot_hss + h].start == 6) hss[tot_hss + h].ttg += hss[tot_hss + h].stop1;
-						else if(hss[tot_hss + h].start == 7 || hss[tot_hss + h].start == 8) hss[tot_hss + h].ctg += hss[tot_hss + h].stop1;
-						else if(hss[tot_hss + h].start == 9 || hss[tot_hss + h].start == 10) hss[tot_hss + h].att += hss[tot_hss + h].stop1;
+						if(hss[tot_hss + h].start) hss[tot_hss + h].start_pos += hss[tot_hss + h].stop1;
                         hss[tot_hss + h].top +=   hss[tot_hss + h].stop1;
                         hss[tot_hss + h].len= hss[tot_hss + h].top - hss[tot_hss + h].fromp + 1;
 					}
@@ -653,30 +646,10 @@ int analyze_genome(int genome_size, int tot_hss, int *on)
                         hss[tot_hss + h].fromp = len[frame] - 1 - hss[tot_hss + h].top + hss[tot_hss + h].stop1;
                         hss[tot_hss + h].top = len[frame] - 1 - f + hss[tot_hss + h].stop1;
                         hss[tot_hss + h].len= hss[tot_hss + h].top - hss[tot_hss + h].fromp + 1;
-						if(hss[tot_hss + h].start == 1 || hss[tot_hss + h].start == 3)
+						if(hss[tot_hss + h].start)
 						{
-                            f= hss[tot_hss + h].atg;
-                            hss[tot_hss + h].atg = len[frame] - 1 - f + hss[tot_hss + h].stop1;
-						}
-						else if(hss[tot_hss + h].start == 2 || hss[tot_hss + h].start == 4)
-						{
-                            f= hss[tot_hss + h].gtg;
-                            hss[tot_hss + h].gtg = len[frame] - 1 - f + hss[tot_hss + h].stop1;
-						}
-						else if(hss[tot_hss + h].start == 5 || hss[tot_hss + h].start == 6)
-						{
-                            f= hss[tot_hss + h].ttg;
-                            hss[tot_hss + h].ttg = len[frame] - 1 - f + hss[tot_hss + h].stop1;
-						}
-						else if(hss[tot_hss + h].start == 7 || hss[tot_hss + h].start == 8)
-						{
-                            f= hss[tot_hss + h].ctg;
-                            hss[tot_hss + h].ctg = len[frame] - 1 - f + hss[tot_hss + h].stop1;
-						}
-						else if(hss[tot_hss + h].start == 9 || hss[tot_hss + h].start == 10)
-						{
-                            f= hss[tot_hss + h].att;
-                            hss[tot_hss + h].att = len[frame] - 1 - f + hss[tot_hss + h].stop1;
+                            f= hss[tot_hss + h].start_pos;
+                            hss[tot_hss + h].start_pos = len[frame] - 1 - f + hss[tot_hss + h].stop1;
 						}
 					}
 
@@ -971,99 +944,99 @@ int score_orf_table(char *orf, int n, int tot_hss)
                 for(k= hss[tot_hss + h].fromp; k >= 0 && k >=hss[tot_hss + h].fromp - START_POS5; k -= 3)
                 {
 					nt= 16 * orf[k] + 4 * orf[k + 1] + orf[k + 2];
-                    if(nt == 14) { hss[tot_hss + h].atg= k; k= 0; flag= 1; }
+                    if(nt == 14) { hss[tot_hss + h].start_pos= k; k= 0; flag= 1; }
                 }
 
                 if(!flag)
                     for(k= hss[tot_hss + h].fromp; k < hss[tot_hss + h].top && k <= hss[tot_hss + h].fromp + START_POS3; k += 3)
                     {
 						nt= 16 * orf[k] + 4 * orf[k + 1] + orf[k + 2];
-                        if(nt == 14) { hss[tot_hss + h].atg= k; k= hss[tot_hss + h].top; flag= 1; }
+                        if(nt == 14) { hss[tot_hss + h].start_pos= k; k= hss[tot_hss + h].top; flag= 1; }
                     }
 
                 if(!flag)
                     for(k= hss[tot_hss + h].fromp; k >= 0 && k >= hss[tot_hss + h].fromp - START_POS5; k -= 3)
                     {
 						nt= 16 * orf[k] + 4 * orf[k + 1] + orf[k + 2];
-                        if(nt == 46) { hss[tot_hss + h].gtg= k; k= 0; flag= 2; }
+                        if(nt == 46) { hss[tot_hss + h].start_pos= k; k= 0; flag= 3; }
                     }
 
                 if(!flag)
                     for(k= hss[tot_hss + h].fromp; k < hss[tot_hss + h].top && k <= hss[tot_hss + h].fromp + START_POS3; k += 3)
                     {
 						nt= 16 * orf[k] + 4 * orf[k + 1] + orf[k + 2];
-                        if(nt == 46) { hss[tot_hss + h].gtg= k; k= hss[tot_hss + h].top; flag= 2; }
+                        if(nt == 46) { hss[tot_hss + h].start_pos= k; k= hss[tot_hss + h].top; flag= 3; }
                     }
 
                 if(!flag)
                     for(k= hss[tot_hss + h].fromp - START_POS5 - 3; k >= 0; k -= 3)
                     {
 						nt= 16 * orf[k] + 4 * orf[k + 1] + orf[k + 2];
-                        if(nt == 14) { hss[tot_hss + h].atg= k; k= 0; flag= 3; }
-                        else if(nt == 46) { hss[tot_hss + h].gtg= k; k= 0; flag= 4; }
+                        if(nt == 14) { hss[tot_hss + h].start_pos= k; k= 0; flag= 2; }
+                        else if(nt == 46) { hss[tot_hss + h].start_pos= k; k= 0; flag= 4; }
                     }
 
                 if(!flag)
                     for(k= hss[tot_hss + h].fromp; k >= 0 && k >= hss[tot_hss + h].fromp - START_POS5; k -= 3)
                     {
 						nt= 16 * orf[k] + 4 * orf[k + 1] + orf[k + 2];
-                        if(nt == 62) { hss[tot_hss + h].ttg= k; k= 0; flag= 5; }
+                        if(nt == 62) { hss[tot_hss + h].start_pos= k; k= 0; flag= 5; }
                     }
 
                 if(!flag)
                     for(k= hss[tot_hss + h].fromp; k < hss[tot_hss + h].top && k <= hss[tot_hss + h].fromp + START_POS3; k += 3)
                     {
 						nt= 16 * orf[k] + 4 * orf[k + 1] + orf[k + 2];
-                        if(nt == 62) { hss[tot_hss + h].ttg= k; k= hss[tot_hss + h].top; flag= 5; }
+                        if(nt == 62) { hss[tot_hss + h].start_pos= k; k= hss[tot_hss + h].top; flag= 5; }
                     }
 
                 if(!flag)
                     for(k= hss[tot_hss + h].fromp - START_POS5 - 3; k >= 0; k -= 3)
                     {
 						nt= 16 * orf[k] + 4 * orf[k + 1] + orf[k + 2];
-                        if(nt == 62) { hss[tot_hss + h].ttg= k; k= 0; flag= 6; }
+                        if(nt == 62) { hss[tot_hss + h].start_pos= k; k= 0; flag= 6; }
                     }
 
                 if(!flag)
                     for(k= hss[tot_hss + h].fromp; k >= 0 && k >= hss[tot_hss + h].fromp - START_POS5; k -= 3)
                     {
 						nt= 16 * orf[k] + 4 * orf[k + 1] + orf[k + 2];
-                        if(nt == 30) { hss[tot_hss + h].ctg= k; k= 0; flag= 7; }
+                        if(nt == 30) { hss[tot_hss + h].start_pos= k; k= 0; flag= 7; }
                     }
 
                 if(!flag)
                     for(k= hss[tot_hss + h].fromp; k < hss[tot_hss + h].top && k <= hss[tot_hss + h].fromp + START_POS3; k += 3)
                     {
 						nt= 16 * orf[k] + 4 * orf[k + 1] + orf[k + 2];
-                        if(nt == 30) { hss[tot_hss + h].ctg= k; k= hss[tot_hss + h].top; flag= 7; }
+                        if(nt == 30) { hss[tot_hss + h].start_pos= k; k= hss[tot_hss + h].top; flag= 7; }
                     }
 
                 if(!flag)
                     for(k= hss[tot_hss + h].fromp - START_POS5 - 3; k >= 0; k -= 3)
                     {
 						nt= 16 * orf[k] + 4 * orf[k + 1] + orf[k + 2];
-                        if(nt == 30) { hss[tot_hss + h].ctg= k; k= 0; flag= 8; }
+                        if(nt == 30) { hss[tot_hss + h].start_pos= k; k= 0; flag= 8; }
                     }
 
                 if(!flag)
                     for(k= hss[tot_hss + h].fromp; k >= 0 && k >= hss[tot_hss + h].fromp - START_POS5; k -= 3)
                     {
 						nt= 16 * orf[k] + 4 * orf[k + 1] + orf[k + 2];
-                        if(nt == 15) { hss[tot_hss + h].ctg= k; k= 0; flag= 9; }
+                        if(nt == 15) { hss[tot_hss + h].start_pos= k; k= 0; flag= 9; }
                     }
 
                 if(!flag)
                     for(k= hss[tot_hss + h].fromp; k < hss[tot_hss + h].top && k <= hss[tot_hss + h].fromp + START_POS3; k += 3)
                     {
 						nt= 16 * orf[k] + 4 * orf[k + 1] + orf[k + 2];
-                        if(nt == 15) { hss[tot_hss + h].ctg= k; k= hss[tot_hss + h].top; flag= 9; }
+                        if(nt == 15) { hss[tot_hss + h].start_pos= k; k= hss[tot_hss + h].top; flag= 9; }
                     }
 
                 if(!flag)
                     for(k= hss[tot_hss + h].fromp - START_POS5 - 3; k >= 0; k -= 3)
                     {
 						nt= 16 * orf[k] + 4 * orf[k + 1] + orf[k + 2];
-                        if(nt == 15) { hss[tot_hss + h].ctg= k; k= 0; flag= 10; }
+                        if(nt == 15) { hss[tot_hss + h].start_pos= k; k= 0; flag= 10; }
                     }
 
 				hss[tot_hss + h].start= flag;
@@ -1071,19 +1044,19 @@ int score_orf_table(char *orf, int n, int tot_hss)
 
                 if(WRITE_SEQUENCES)
                 {
-                    if(flag == 1 || flag == 3)
+                    if(flag = 1 || flag == 2)
                     {
-						nt= n - hss[tot_hss + h].atg + 2;
+						nt= n - hss[tot_hss + h].start_pos + 2;
 						hss[tot_hss + h].seqlen= nt - 1;
 						hss[tot_hss + h].seq= (char *)malloc(nt * sizeof(char));
-                        for(j= 0; j < nt - 1; ++j) hss[tot_hss + h].seq[j]= orf[hss[tot_hss + h].atg + j];
+                        for(j= 0; j < nt - 1; ++j) hss[tot_hss + h].seq[j]= orf[hss[tot_hss + h].start_pos + j];
                     }
-                    else if(flag == 2 || flag == 4)
+                    else if(flag == 3 || flag == 4)
                     {
-						nt= n - hss[tot_hss + h].gtg + 2;
+						nt= n - hss[tot_hss + h].start_pos + 2;
 						hss[tot_hss + h].seqlen= nt - 1;
 						hss[tot_hss + h].seq= (char *)malloc(nt * sizeof(char));
-						strncpy(hss[tot_hss + h].seq, orf + hss[tot_hss + h].gtg, nt - 1);
+						strncpy(hss[tot_hss + h].seq, orf + hss[tot_hss + h].start_pos, nt - 1);
                     }
                     else
                     {
@@ -1495,7 +1468,7 @@ void invert_sequence(char *seq, int len)
     int     i;
     char    s;
 
-    for(i=0;i<len/2;++i) { s= seq[i]; seq[i]= seq[len - 1 - i]; seq[len - 1 - i]= s; }
+    for(i= 0; i < len / 2; ++i) { s= seq[i]; seq[i]= seq[len - 1 - i]; seq[len - 1 - i]= s; }
 }
 
 /* end of function invert_sequence() */
@@ -1723,125 +1696,111 @@ int maxG_test(char *seq, int len, int ori, char strand, int frame, int orfn, int
 					for(k= hss[hit].fromp; k >= 0 && k >= hss[hit].fromp - START_POS5; k -= 3)
 					{
                         nt= 16 * seq[k] + 4 * seq[k + 1] + seq[k + 2];
-						if(nt == 14) { hss[hit].atg= k; k= 0; flags= 1; }
+						if(nt == 14) { hss[hit].start_pos= k; k= 0; flags= 1; }
 					}
 
 					if(!flags)
 						for(k= hss[hit].fromp; k < hss[hit].top && k <= hss[hit].fromp + START_POS3; k += 3)
 						{
                             nt= 16 * seq[k] + 4 * seq[k + 1] + seq[k + 2];
-							if(nt == 14) { hss[hit].atg= k; k= hss[hit].top; flags= 1; }
+							if(nt == 14) { hss[hit].start_pos= k; k= hss[hit].top; flags= 1; }
 						}
 
 					if(!flags)
 						for(k= hss[hit].fromp; k >= 0 && k >= hss[hit].fromp - START_POS5; k -= 3)
 						{
                             nt= 16 * seq[k] + 4 * seq[k + 1] + seq[k + 2];
-							if(nt == 46) { hss[hit].gtg= k; k= 0; flags= 2; }
+							if(nt == 46) { hss[hit].start_pos= k; k= 0; flags= 3; }
 						}
 
 					if(!flags)
 						for(k= hss[hit].fromp; k < hss[hit].top && k <= hss[hit].fromp + START_POS3; k += 3)
 						{
                             nt= 16 * seq[k] + 4 * seq[k + 1] + seq[k + 2];
-							if(nt == 46) { hss[hit].gtg= k; k= hss[hit].top; flags= 2; }
+							if(nt == 46) { hss[hit].start_pos= k; k= hss[hit].top; flags= 3; }
 						}
 
 					if(!flags)
 						for(k= hss[hit].fromp - START_POS5 - 3; k >= 0; k -= 3)
 						{
                             nt= 16 * seq[k] + 4 * seq[k + 1] + seq[k + 2];
-							if(nt == 14) { hss[hit].atg= k; k= 0; flags= 3; }
-							else if(nt == 46) { hss[hit].gtg= k; k= 0; flags= 4; }
+							if(nt == 14) { hss[hit].start_pos= k; k= 0; flags= 2; }
+							else if(nt == 46) { hss[hit].start_pos= k; k= 0; flags= 4; }
 						}
 
 					if(!flags)
 						for(k= hss[hit].fromp; k >= 0 && k >= hss[hit].fromp - START_POS5; k -= 3)
 						{
                             nt= 16 * seq[k] + 4 * seq[k + 1] + seq[k + 2];
-							if(nt == 62) { hss[hit].ttg= k; k= 0; flags= 5; }
+							if(nt == 62) { hss[hit].start_pos= k; k= 0; flags= 5; }
 						}
 
 					if(!flags)
 						for(k= hss[hit].fromp; k < hss[hit].top && k <= hss[hit].fromp + START_POS3; k += 3)
 						{
                             nt= 16 * seq[k] + 4 * seq[k + 1] + seq[k + 2];
-							if(nt == 62) { hss[hit].ttg= k; k= hss[hit].top; flags= 5; }
+							if(nt == 62) { hss[hit].start_pos= k; k= hss[hit].top; flags= 5; }
 						}
 
 					if(!flags)
 						for(k= hss[hit].fromp - START_POS5 - 3; k >= 0; k -= 3)
 						{
                             nt= 16 * seq[k] + 4 * seq[k + 1] + seq[k + 2];
-							if(nt == 62) { hss[hit].ttg= k; k= 0; flags= 6; }
+							if(nt == 62) { hss[hit].start_pos= k; k= 0; flags= 6; }
 						}
 
 					if(!flags)
 						for(k= hss[hit].fromp; k >= 0 && k >= hss[hit].fromp - START_POS5; k -= 3)
 						{
                             nt= 16 * seq[k] + 4 * seq[k + 1] + seq[k + 2];
-							if(nt == 30) { hss[hit].ctg= k; k= 0; flags= 7; }
+							if(nt == 30) { hss[hit].start_pos= k; k= 0; flags= 7; }
 						}
 
 					if(!flags)
 						for(k= hss[hit].fromp; k < hss[hit].top && k <= hss[hit].fromp + START_POS3; k += 3)
 						{
                             nt= 16 * seq[k] + 4 * seq[k + 1] + seq[k + 2];
-							if(nt == 30) { hss[hit].ctg= k; k= hss[hit].top; flags= 7; }
+							if(nt == 30) { hss[hit].start_pos= k; k= hss[hit].top; flags= 7; }
 						}
 
 					if(!flags)
 						for(k= hss[hit].fromp - START_POS5 - 3; k >= 0; k -= 3)
 						{
                             nt= 16 * seq[k] + 4 * seq[k + 1] + seq[k + 2];
-							if(nt == 30) { hss[hit].ctg= k; k= 0; flags= 8; }
+							if(nt == 30) { hss[hit].start_pos= k; k= 0; flags= 8; }
 						}
 
 					if(!flags)
 						for(k= hss[hit].fromp; k >= 0 && k >= hss[hit].fromp - START_POS5; k -= 3)
 						{
                             nt= 16 * seq[k] + 4 * seq[k + 1] + seq[k + 2];
-							if(nt == 15) { hss[hit].att= k; k= 0; flags= 9; }
+							if(nt == 15) { hss[hit].start_pos= k; k= 0; flags= 9; }
 						}
 
 					if(!flags)
 						for(k= hss[hit].fromp; k < hss[hit].top && k <= hss[hit].fromp + START_POS3; k += 3)
 						{
                             nt= 16 * seq[k] + 4 * seq[k + 1] + seq[k + 2];
-							if(nt == 15) { hss[hit].att= k; k= hss[hit].top; flags= 9; }
+							if(nt == 15) { hss[hit].start_pos= k; k= hss[hit].top; flags= 9; }
 						}
 
 					if(!flags)
 						for(k= hss[hit].fromp - START_POS5 - 3; k >= 0; k -= 3)
 						{
                             nt= 16 * seq[k] + 4 * seq[k + 1] + seq[k + 2];
-							if(nt == 15) { hss[hit].att= k; k= 0; flags= 10; }
+							if(nt == 15) { hss[hit].start_pos= k; k= 0; flags= 10; }
 						}
 
                     hss[hit].start= flags;
 
 					if(WRITE_SEQUENCES)
 					{
-						if(flags == 1 || flags == 3)
+						if(flags)
 						{
-                            nt= len - hss[hit].atg + 2;
+                            nt= len - hss[hit].start_pos + 2;
                             hss[hit].seqlen= nt - 1;
                             hss[hit].seq= (char *)malloc(nt * sizeof(char));
-                            strncpy(hss[hit].seq, seq + hss[hit].atg, nt - 1);
-						}
-						else if(flags == 2 || flags == 4)
-						{
-                            nt= len - hss[hit].gtg + 2;
-                            hss[hit].seqlen= nt - 1;
-                            hss[hit].seq= (char *)malloc(nt * sizeof(char));
-                            strncpy(hss[hit].seq, seq + hss[hit].gtg, nt - 1);
-						}
-						else if(flags == 5 || flags == 6)
-						{
-                            nt= len - hss[hit].ttg + 2;
-                            hss[hit].seqlen= nt - 1;
-                            hss[hit].seq= (char *)malloc(nt * sizeof(char));
-                            strncpy(hss[hit].seq, seq + hss[hit].ttg, nt - 1);
+                            strncpy(hss[hit].seq, seq + hss[hit].start_pos, nt - 1);
 						}
 						else
 						{
@@ -1852,20 +1811,10 @@ int maxG_test(char *seq, int len, int ori, char strand, int frame, int orfn, int
 						}
 					}
 
-					if(hss[hit].start == 1 || hss[hit].start == 3)
+					if(hss[hit].start)
 					{
-						if(strand == 'D') hss[hit].atg += ori;
-						else  hss[hit].atg= ori - hss[hit].atg;
-					}
-					else if(hss[hit].start == 2 || hss[hit].start == 4)
-					{
-						if(strand == 'D') hss[hit].gtg += ori;
-						else  hss[hit].gtg= ori - hss[hit].gtg;
-					}
-					else if(hss[hit].start == 5 || hss[hit].start == 6)
-					{
-						if(strand == 'D') hss[hit].ttg += ori;
-						else  hss[hit].ttg= ori - hss[hit].ttg;
+						if(strand == 'D') hss[hit].start_pos += ori;
+						else  hss[hit].start_pos= ori - hss[hit].start_pos;
 					}
 
 					if(strand == 'D')
@@ -2514,21 +2463,13 @@ void process_hss(int from_hss, int to_hss, int ncds)
          scoi= hss[i].score;
                    if(hss[i].strand == 'D')
                    {
-                        if(!hss[i].start)                               li= hss[i].stop2 - hss[i].stop1 + 1;
-                        else if(hss[i].start == 1 || hss[i].start == 3) li= hss[i].stop2 - hss[i].atg + 1;
-			else if(hss[i].start == 2 || hss[i].start == 4) li= hss[i].stop2 - hss[i].gtg + 1;
-                        else if(hss[i].start == 5 || hss[i].start == 6) li= hss[i].stop2 - hss[i].ttg + 1;
-                        else if(hss[i].start == 7 || hss[i].start == 8) li= hss[i].stop2 - hss[i].ctg + 1;
-                        else if(hss[i].start == 9 || hss[i].start == 10) li= hss[i].stop2 - hss[i].att + 1;
+                        if(!hss[i].start) li= hss[i].stop2 - hss[i].stop1 + 1;
+                        else              li= hss[i].stop2 - hss[i].start_pos + 1;
                    }
                    else
                    {
-                        if(!hss[i].start)                               li= hss[i].stop2 - hss[i].stop1 + 1;
-                        else if(hss[i].start == 1 || hss[i].start == 3) li= hss[i].atg - hss[i].stop1 + 1;
-                        else if(hss[i].start == 2 || hss[i].start == 4) li= hss[i].gtg - hss[i].stop1 + 1;
-                        else if(hss[i].start == 5 || hss[i].start == 6) li= hss[i].ttg - hss[i].stop1 + 1;
-                        else if(hss[i].start == 7 || hss[i].start == 8) li= hss[i].ctg - hss[i].stop1 + 1;
-                        else if(hss[i].start == 9 || hss[i].start == 10) li= hss[i].att - hss[i].stop1 + 1;
+                        if(!hss[i].start) li= hss[i].stop2 - hss[i].stop1 + 1;
+                        else              li= hss[i].start_pos - hss[i].stop1 + 1;
                    }
 
          k= i;
@@ -2560,21 +2501,13 @@ void process_hss(int from_hss, int to_hss, int ncds)
                         if(hss[o[i]].strand == 'D')                     // ORF from start codon (gfrom) to stop (gto)
                         {
                                 if(!hss[o[i]].start) gfrom= hss[o[i]].stop1;
-                                else if(hss[o[i]].start == 1 || hss[o[i]].start == 3) gfrom= hss[o[i]].atg;
-                                else if(hss[o[i]].start == 2 || hss[o[i]].start == 4) gfrom= hss[o[i]].gtg;
-                                else if(hss[o[i]].start == 5 || hss[o[i]].start == 6) gfrom= hss[o[i]].ttg;
-                                else if(hss[o[i]].start == 7 || hss[o[i]].start == 8) gfrom= hss[o[i]].ctg;
-                                else if(hss[o[i]].start == 9 || hss[o[i]].start == 10) gfrom= hss[o[i]].att;
+                                else                 gfrom= hss[o[i]].start_pos;
                         gto= hss[o[i]].stop2;
                         }
                         else                                           // ORF from stop (gfrom) to start codon (gto)
                         {
                                 if(!hss[o[i]].start) gto= hss[o[i]].stop2;
-                                else if(hss[o[i]].start == 1 || hss[o[i]].start == 3) gto= hss[o[i]].atg;
-                                else if(hss[o[i]].start == 2 || hss[o[i]].start == 4) gto= hss[o[i]].gtg;
-                                else if(hss[o[i]].start == 5 || hss[o[i]].start == 6) gto= hss[o[i]].ttg;
-                                else if(hss[o[i]].start == 7 || hss[o[i]].start == 8) gto= hss[o[i]].ctg;
-                                else if(hss[o[i]].start == 9 || hss[o[i]].start == 10) gto= hss[o[i]].att;
+                                else                 gto= hss[o[i]].start_pos;
                         gfrom= hss[o[i]].stop1;
                         }
 
@@ -2659,21 +2592,13 @@ void process_hss(int from_hss, int to_hss, int ncds)
                                         {
                                         to= hss[o[j]].stop2;
                                                 if(!hss[o[j]].start) from= hss[o[j]].stop1;
-                                                else if(hss[o[j]].start == 1 || hss[o[j]].start == 3) from= hss[o[j]].atg;
-                                                else if(hss[o[j]].start == 2 || hss[o[j]].start == 4) from= hss[o[j]].gtg;
-                                                else if(hss[o[j]].start == 5 || hss[o[j]].start == 6) from= hss[o[j]].ttg;
-                                                else if(hss[o[j]].start == 7 || hss[o[j]].start == 8) from= hss[o[j]].ctg;
-                                                else if(hss[o[j]].start == 9 || hss[o[j]].start == 10) from= hss[o[j]].att;
+                                                else                 from= hss[o[j]].start_pos;
                                         }
                                         else                              // ORF from stop (from) to start codon (to)
                                         {
                                         from= hss[o[j]].stop1;
                                                 if(!hss[o[j]].start) to= hss[o[j]].stop2;
-                                                else if(hss[o[j]].start == 1 || hss[o[j]].start == 3) to= hss[o[j]].atg;
-                                                else if(hss[o[j]].start == 2 || hss[o[j]].start == 4) to= hss[o[j]].gtg;
-                                                else if(hss[o[j]].start == 5 || hss[o[j]].start == 6) to= hss[o[j]].ttg;
-                                                else if(hss[o[j]].start == 7 || hss[o[j]].start == 8) to= hss[o[j]].ctg;
-                                                else if(hss[o[j]].start == 9 || hss[o[j]].start == 10) to= hss[o[j]].att;
+                                                else                 to= hss[o[j]].start_pos;
                                         }
 	
 					if(!(to < gfrom + mHL/2 - 1 || from > gto - mHL/2 + 1))  // Two newly predicted genes are overlapping
@@ -2802,132 +2727,18 @@ void write_results(int from_hss, int to_hss, int ncds, int genome_size)
 					{
 						if(hss[o[i]].entropy > MAX_ENTROPY)
 						{
-							if(hss[o[i]].start == 1)
+							if(hss[o[i]].start)
 							{
-                                if(name[strlen(name) - 1]== '*') strcat(name, "A");
-                                else                             strcat(name, "-A");
-                                fprintf(output1,"%s %d..%d\n", name, hss[o[i]].atg + s1, hss[o[i]].stop2 + s2);
+				j= strlen(name);
+                                if(name[j - 1] != '*') { strcat(name, "-"); ++j; }
+				name[j]= start_char[hss[o[i]].start];
+				name[j + 1]= '\0';
+                                fprintf(output1,"%s %d..%d\n", name, hss[o[i]].start_pos + s1, hss[o[i]].stop2 + s2);
+                                if(k == 7) fprintf(output4,"%s %d..%d\n", name, hss[o[i]].start_pos + s1, hss[o[i]].stop2 + s2);
 								if(WRITE_SEQUENCES)
 								{
-                                    fprintf(output7,">%s %d..%d\n", name, hss[o[i]].atg + s1, hss[o[i]].stop2 + s2);
-                                    fprintf(output8,">%s %d..%d\n", name, hss[o[i]].atg + s1, hss[o[i]].stop2 + s2);
-                                    print_nucleotides(hss[o[i]].seq, hss[o[i]].seqlen, output7);
-                                    print_amino_acids(hss[o[i]].seq, hss[o[i]].seqlen, output8);
-								}
-							}
-							else if(hss[o[i]].start == 3)
-							{
-                                if(name[strlen(name) - 1]== '*') strcat(name, "a");
-                                else                             strcat(name, "-a");
-                                fprintf(output1,"%s %d..%d\n", name, hss[o[i]].atg + s1, hss[o[i]].stop2 + s2);
-								if(WRITE_SEQUENCES)
-								{
-                                    fprintf(output7,">%s %d..%d\n", name, hss[o[i]].atg + s1, hss[o[i]].stop2 + s2);
-                                    fprintf(output8,">%s %d..%d\n", name, hss[o[i]].atg + s1, hss[o[i]].stop2 + s2);
-                                    print_nucleotides(hss[o[i]].seq, hss[o[i]].seqlen, output7);
-                                    print_amino_acids(hss[o[i]].seq, hss[o[i]].seqlen, output8);
-								}
-							}
-							else if(hss[o[i]].start == 2)
-							{
-                                if(name[strlen(name) - 1]== '*') strcat(name, "G");
-                                else                             strcat(name, "-G");
-                                fprintf(output1,"%s %d..%d\n", name, hss[o[i]].gtg + s1, hss[o[i]].stop2 + s2);
-								if(WRITE_SEQUENCES)
-								{
-                                    fprintf(output1,">%s %d..%d\n", name, hss[o[i]].gtg + s1, hss[o[i]].stop2 + s2);
-                                    fprintf(output1,">%s %d..%d\n", name, hss[o[i]].gtg + s1, hss[o[i]].stop2 + s2);
-                                    print_nucleotides(hss[o[i]].seq, hss[o[i]].seqlen, output7);
-                                    print_amino_acids(hss[o[i]].seq, hss[o[i]].seqlen, output8);
-								}
-							}
-							else if(hss[o[i]].start == 4)
-							{
-                                if(name[strlen(name) - 1]== '*') strcat(name, "g");
-                                else                             strcat(name, "-g");
-                                fprintf(output1,"%s %d..%d\n", name, hss[o[i]].gtg + s1, hss[o[i]].stop2 + s2);
-								if(WRITE_SEQUENCES)
-								{
-                                    fprintf(output1,">%s %d..%d\n", name, hss[o[i]].gtg + s1, hss[o[i]].stop2 + s2);
-                                    fprintf(output1,">%s %d..%d\n", name, hss[o[i]].gtg + s1, hss[o[i]].stop2 + s2);
-                                    print_nucleotides(hss[o[i]].seq, hss[o[i]].seqlen, output7);
-                                    print_amino_acids(hss[o[i]].seq, hss[o[i]].seqlen, output8);
-								}
-							}
-							else if(hss[o[i]].start == 5)
-							{
-                                if(name[strlen(name) - 1]== '*') strcat(name, "T");
-                                else                             strcat(name, "-T");
-                                fprintf(output1,"%s %d..%d\n", name, hss[o[i]].ttg + s1, hss[o[i]].stop2 + s2);
-								if(WRITE_SEQUENCES)
-								{
-                                    fprintf(output1,">%s %d..%d\n", name, hss[o[i]].ttg + s1, hss[o[i]].stop2 + s2);
-                                    fprintf(output1,">%s %d..%d\n", name, hss[o[i]].ttg + s1, hss[o[i]].stop2 + s2);
-                                    print_nucleotides(hss[o[i]].seq, hss[o[i]].seqlen, output7);
-                                    print_amino_acids(hss[o[i]].seq, hss[o[i]].seqlen, output8);
-								}
-							}
-							else if(hss[o[i]].start == 6)
-							{
-                                if(name[strlen(name) - 1]== '*') strcat(name, "t");
-                                else                             strcat(name, "-t");
-                                fprintf(output1,"%s %d..%d\n", name, hss[o[i]].ttg + s1, hss[o[i]].stop2 + s2);
-								if(WRITE_SEQUENCES)
-								{
-                                    fprintf(output1,">%s %d..%d\n", name, hss[o[i]].ttg + s1, hss[o[i]].stop2 + s2);
-                                    fprintf(output1,">%s %d..%d\n", name, hss[o[i]].ttg + s1, hss[o[i]].stop2 + s2);
-                                    print_nucleotides(hss[o[i]].seq, hss[o[i]].seqlen, output7);
-                                    print_amino_acids(hss[o[i]].seq, hss[o[i]].seqlen, output8);
-								}
-							}
-							else if(hss[o[i]].start == 7)
-							{
-                                if(name[strlen(name) - 1]== '*') strcat(name, "C");
-                                else                             strcat(name, "-C");
-                                fprintf(output1,"%s %d..%d\n", name, hss[o[i]].ctg + s1, hss[o[i]].stop2 + s2);
-								if(WRITE_SEQUENCES)
-								{
-                                    fprintf(output1,">%s %d..%d\n", name, hss[o[i]].ctg + s1, hss[o[i]].stop2 + s2);
-                                    fprintf(output1,">%s %d..%d\n", name, hss[o[i]].ctg + s1, hss[o[i]].stop2 + s2);
-                                    print_nucleotides(hss[o[i]].seq, hss[o[i]].seqlen, output7);
-                                    print_amino_acids(hss[o[i]].seq, hss[o[i]].seqlen, output8);
-								}
-							}
-							else if(hss[o[i]].start == 8)
-							{
-                                if(name[strlen(name) - 1]== '*') strcat(name, "c");
-                                else                             strcat(name, "-c");
-                                fprintf(output1,"%s %d..%d\n", name, hss[o[i]].ctg + s1, hss[o[i]].stop2 + s2);
-								if(WRITE_SEQUENCES)
-								{
-                                    fprintf(output1,">%s %d..%d\n", name, hss[o[i]].ctg + s1, hss[o[i]].stop2 + s2);
-                                    fprintf(output1,">%s %d..%d\n", name, hss[o[i]].ctg + s1, hss[o[i]].stop2 + s2);
-                                    print_nucleotides(hss[o[i]].seq, hss[o[i]].seqlen, output7);
-                                    print_amino_acids(hss[o[i]].seq, hss[o[i]].seqlen, output8);
-								}
-							}
-							else if(hss[o[i]].start == 9)
-							{
-                                if(name[strlen(name) - 1]== '*') strcat(name, "W");
-                                else                             strcat(name, "-W");
-                                fprintf(output1,"%s %d..%d\n", name, hss[o[i]].att + s1, hss[o[i]].stop2 + s2);
-								if(WRITE_SEQUENCES)
-								{
-                                    fprintf(output1,">%s %d..%d\n", name, hss[o[i]].att + s1, hss[o[i]].stop2 + s2);
-                                    fprintf(output1,">%s %d..%d\n", name, hss[o[i]].att + s1, hss[o[i]].stop2 + s2);
-                                    print_nucleotides(hss[o[i]].seq, hss[o[i]].seqlen, output7);
-                                    print_amino_acids(hss[o[i]].seq, hss[o[i]].seqlen, output8);
-								}
-							}
-							else if(hss[o[i]].start == 10)
-							{
-                                if(name[strlen(name) - 1]== '*') strcat(name, "w");
-                                else                             strcat(name, "-w");
-                                fprintf(output1,"%s %d..%d\n", name, hss[o[i]].att + s1, hss[o[i]].stop2 + s2);
-								if(WRITE_SEQUENCES)
-								{
-                                    fprintf(output1,">%s %d..%d\n", name, hss[o[i]].att + s1, hss[o[i]].stop2 + s2);
-                                    fprintf(output1,">%s %d..%d\n", name, hss[o[i]].att + s1, hss[o[i]].stop2 + s2);
+                                    fprintf(output7,">%s %d..%d\n", name, hss[o[i]].start_pos + s1, hss[o[i]].stop2 + s2);
+                                    fprintf(output8,">%s %d..%d\n", name, hss[o[i]].start_pos + s1, hss[o[i]].stop2 + s2);
                                     print_nucleotides(hss[o[i]].seq, hss[o[i]].seqlen, output7);
                                     print_amino_acids(hss[o[i]].seq, hss[o[i]].seqlen, output8);
 								}
@@ -2935,6 +2746,7 @@ void write_results(int from_hss, int to_hss, int ncds, int genome_size)
 							else
 							{
                                 fprintf(output1,"%s %d..%d\n", name, hss[o[i]].fromp + s1, hss[o[i]].stop2 + s2);
+                                if(k == 7) fprintf(output4,"%s %d..%d\n", name, hss[o[i]].fromp + s1, hss[o[i]].stop2 + s2);
 								if(WRITE_SEQUENCES)
 								{
                                     fprintf(output7,">%s %d..%d\n", name, hss[o[i]].fromp + s1, hss[o[i]].stop2 + s2);
@@ -2952,132 +2764,18 @@ void write_results(int from_hss, int to_hss, int ncds, int genome_size)
 					{
 						if(hss[o[i]].entropy > MAX_ENTROPY)
 						{
-							if(hss[o[i]].start == 1)
+							if(hss[o[i]].start)
 							{
-                                if(name[strlen(name) - 1]== '*') strcat(name, "A");
-                                else                             strcat(name, "-A");
-                                fprintf(output1,"%s complement(%d..%d)\n", name, hss[o[i]].stop1 + s1, hss[o[i]].atg + s2);
+				j= strlen(name);
+                                if(name[j - 1] != '*') { strcat(name, "-"); ++j; }
+				name[j]= start_char[hss[o[i]].start];
+				name[j + 1]= '\0';
+                                fprintf(output1,"%s complement(%d..%d)\n", name, hss[o[i]].stop1 + s1, hss[o[i]].start_pos + s2);
+                                if(k == 7) fprintf(output4,"%s complement(%d..%d)\n", name, hss[o[i]].stop1 + s1, hss[o[i]].start_pos + s2);
 								if(WRITE_SEQUENCES)
 								{
-                                    fprintf(output7,">%s++ %d..%d\n", name, hss[o[i]].stop1 + s1, hss[o[i]].atg + s2);
-                                    fprintf(output8,">%s++ %d..%d\n", name, hss[o[i]].stop1 + s1, hss[o[i]].atg + s2);
-                                    print_nucleotides(hss[o[i]].seq, hss[o[i]].seqlen, output7);
-                                    print_amino_acids(hss[o[i]].seq, hss[o[i]].seqlen, output8);
-								}
-							}
-							else if(hss[o[i]].start == 3)
-							{
-                                if(name[strlen(name) - 1]== '*') strcat(name, "a");
-                                else                             strcat(name, "-a");
-                                fprintf(output1,"%s complement(%d..%d)\n", name, hss[o[i]].stop1 + s1, hss[o[i]].atg + s2);
-								if(WRITE_SEQUENCES)
-								{
-                                    fprintf(output7,">%s+ %d..%d\n", name, hss[o[i]].stop1 + s1, hss[o[i]].atg + s2);
-                                    fprintf(output8,">%s+ %d..%d\n", name, hss[o[i]].stop1 + s1, hss[o[i]].atg + s2);
-                                    print_nucleotides(hss[o[i]].seq, hss[o[i]].seqlen, output7);
-                                    print_amino_acids(hss[o[i]].seq, hss[o[i]].seqlen, output8);
-								}
-							}
-							else if(hss[o[i]].start == 2)
-							{
-                                if(name[strlen(name) - 1]== '*') strcat(name, "G");
-                                else                             strcat(name, "-G");
-                                fprintf(output1,"%s complement(%d..%d)\n", name, hss[o[i]].stop1 + s1, hss[o[i]].gtg + s2);
-								if(WRITE_SEQUENCES)
-								{
-                                    fprintf(output7,">%s-- %d..%d\n", name, hss[o[i]].stop1 + s1, hss[o[i]].gtg + s2);
-                                    fprintf(output8,">%s-- %d..%d\n", name, hss[o[i]].stop1 + s1, hss[o[i]].gtg + s2);
-                                    print_nucleotides(hss[o[i]].seq, hss[o[i]].seqlen, output7);
-                                    print_amino_acids(hss[o[i]].seq, hss[o[i]].seqlen, output8);
-								}
-							}
-							else if(hss[o[i]].start == 4)
-							{
-                                if(name[strlen(name) - 1]== '*') strcat(name, "g");
-                                else                             strcat(name, "-g");
-                                fprintf(output1,"%s complement(%d..%d)\n", name, hss[o[i]].stop1 + s1, hss[o[i]].gtg + s2);
-								if(WRITE_SEQUENCES)
-								{
-                                    fprintf(output7,">%s- %d..%d\n", name, hss[o[i]].stop1 + s1, hss[o[i]].gtg + s2);
-                                    fprintf(output8,">%s- %d..%d\n", name, hss[o[i]].stop1 + s1, hss[o[i]].gtg + s2);
-                                    print_nucleotides(hss[o[i]].seq, hss[o[i]].seqlen, output7);
-                                    print_amino_acids(hss[o[i]].seq, hss[o[i]].seqlen, output8);
-								}
-							}
-							else if(hss[o[i]].start == 5)
-							{
-                                if(name[strlen(name) - 1]== '*') strcat(name, "T");
-                                else                             strcat(name, "-T");
-                                fprintf(output1,"%s complement(%d..%d)\n", name, hss[o[i]].stop1 + s1, hss[o[i]].ttg + s2);
-								if(WRITE_SEQUENCES)
-								{
-                                    fprintf(output7,">%s- %d..%d\n", name, hss[o[i]].stop1 + s1, hss[o[i]].ttg + s2);
-                                    fprintf(output8,">%s- %d..%d\n", name, hss[o[i]].stop1 + s1, hss[o[i]].ttg + s2);
-                                    print_nucleotides(hss[o[i]].seq, hss[o[i]].seqlen, output7);
-                                    print_amino_acids(hss[o[i]].seq, hss[o[i]].seqlen, output8);
-								}
-							}
-							else if(hss[o[i]].start == 6)
-							{
-                                if(name[strlen(name) - 1]== '*') strcat(name, "t");
-                                else                             strcat(name, "-t");
-                                fprintf(output1,"%s complement(%d..%d)\n", name, hss[o[i]].stop1 + s1, hss[o[i]].ttg + s2);
-								if(WRITE_SEQUENCES)
-								{
-                                    fprintf(output7,">%s- %d..%d\n", name, hss[o[i]].stop1 + s1, hss[o[i]].ttg + s2);
-                                    fprintf(output8,">%s- %d..%d\n", name, hss[o[i]].stop1 + s1, hss[o[i]].ttg + s2);
-                                    print_nucleotides(hss[o[i]].seq, hss[o[i]].seqlen, output7);
-                                    print_amino_acids(hss[o[i]].seq, hss[o[i]].seqlen, output8);
-								}
-							}
-							else if(hss[o[i]].start == 7)
-							{
-                                if(name[strlen(name) - 1]== '*') strcat(name, "C");
-                                else                             strcat(name, "-C");
-                                fprintf(output1,"%s complement(%d..%d)\n", name, hss[o[i]].stop1 + s1, hss[o[i]].ctg + s2);
-								if(WRITE_SEQUENCES)
-								{
-                                    fprintf(output7,">%s- %d..%d\n", name, hss[o[i]].stop1 + s1, hss[o[i]].ctg + s2);
-                                    fprintf(output8,">%s- %d..%d\n", name, hss[o[i]].stop1 + s1, hss[o[i]].ctg + s2);
-                                    print_nucleotides(hss[o[i]].seq, hss[o[i]].seqlen, output7);
-                                    print_amino_acids(hss[o[i]].seq, hss[o[i]].seqlen, output8);
-								}
-							}
-							else if(hss[o[i]].start == 8)
-							{
-                                if(name[strlen(name) - 1]== '*') strcat(name, "c");
-                                else                             strcat(name, "-c");
-                                fprintf(output1,"%s complement(%d..%d)\n", name, hss[o[i]].stop1 + s1, hss[o[i]].ctg + s2);
-								if(WRITE_SEQUENCES)
-								{
-                                    fprintf(output7,">%s- %d..%d\n", name, hss[o[i]].stop1 + s1, hss[o[i]].ctg + s2);
-                                    fprintf(output8,">%s- %d..%d\n", name, hss[o[i]].stop1 + s1, hss[o[i]].ctg + s2);
-                                    print_nucleotides(hss[o[i]].seq, hss[o[i]].seqlen, output7);
-                                    print_amino_acids(hss[o[i]].seq, hss[o[i]].seqlen, output8);
-								}
-							}
-							else if(hss[o[i]].start == 9)
-							{
-                                if(name[strlen(name) - 1]== '*') strcat(name, "W");
-                                else                             strcat(name, "-W");
-                                fprintf(output1,"%s complement(%d..%d)\n", name, hss[o[i]].stop1 + s1, hss[o[i]].att + s2);
-								if(WRITE_SEQUENCES)
-								{
-                                    fprintf(output7,">%s- %d..%d\n", name, hss[o[i]].stop1 + s1, hss[o[i]].att + s2);
-                                    fprintf(output8,">%s- %d..%d\n", name, hss[o[i]].stop1 + s1, hss[o[i]].att + s2);
-                                    print_nucleotides(hss[o[i]].seq, hss[o[i]].seqlen, output7);
-                                    print_amino_acids(hss[o[i]].seq, hss[o[i]].seqlen, output8);
-								}
-							}
-							else if(hss[o[i]].start == 10)
-							{
-                                if(name[strlen(name) - 1]== '*') strcat(name, "w");
-                                else                             strcat(name, "-w");
-                                fprintf(output1,"%s complement(%d..%d)\n", name, hss[o[i]].stop1 + s1, hss[o[i]].att + s2);
-								if(WRITE_SEQUENCES)
-								{
-                                    fprintf(output7,">%s- %d..%d\n", name, hss[o[i]].stop1 + s1, hss[o[i]].att + s2);
-                                    fprintf(output8,">%s- %d..%d\n", name, hss[o[i]].stop1 + s1, hss[o[i]].att + s2);
+                                    fprintf(output7,">%s++ %d..%d\n", name, hss[o[i]].stop1 + s1, hss[o[i]].start_pos + s2);
+                                    fprintf(output8,">%s++ %d..%d\n", name, hss[o[i]].stop1 + s1, hss[o[i]].start_pos + s2);
                                     print_nucleotides(hss[o[i]].seq, hss[o[i]].seqlen, output7);
                                     print_amino_acids(hss[o[i]].seq, hss[o[i]].seqlen, output8);
 								}
@@ -3085,6 +2783,7 @@ void write_results(int from_hss, int to_hss, int ncds, int genome_size)
 							else
 							{
                                 fprintf(output1,"%s complement(%d..%d)\n", name, hss[o[i]].stop1 + s1, hss[o[i]].top + s2);
+                                if(k == 7) fprintf(output4,"%s complement(%d..%d)\n", name, hss[o[i]].stop1 + s1, hss[o[i]].top + s2);
 								if(WRITE_SEQUENCES)
 								{
                                     fprintf(output7,">%s complement(%d..%d)\n", name, hss[o[i]].stop1 + s1, hss[o[i]].top + s2);
@@ -3098,17 +2797,6 @@ void write_results(int from_hss, int to_hss, int ncds, int genome_size)
 // Length and Entropy to stdout:	fprintf(stdout,"%d\t%.5f\n", hss[o[i]].top - hss[o[i]].stop1 + 4, hss[o[i]].entropy);
                         ++length[(hss[o[i]].top + s2 - hss[o[i]].stop1 - s1 + 1)/50];
 					}
-				}
-			}
-			else if(k == 7)
-			{
-				if(hss[o[i]].hit_num == 1)
-				{
-					if(hss[o[i]].global_sig == 1) sprintf(name, "%c-%d*", hss[o[i]].hit_type, o[i]);
-					else                          sprintf(name, "%c-%d", hss[o[i]].hit_type, o[i]);
-
-					if(hss[o[i]].strand == 'D') fprintf(output4,"%s %d..%d\n", name, hss[o[i]].fromp + s1, hss[o[i]].stop2 + s2);
-					else                        fprintf(output4,"%s complement(%d..%d)\n", name, hss[o[i]].stop1 + s1, hss[o[i]].top + s2);
 				}
 			}
 
