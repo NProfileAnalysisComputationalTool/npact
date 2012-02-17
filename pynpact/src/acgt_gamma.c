@@ -192,7 +192,7 @@ int	score_orf_random(char *seg, int n, int tot_hss);
 int	score_orf_table(char *seg, int n, int tot_hss);
 double	score(char *seq,int n,double *sc,int *from,int *to, int flag);
 double entropy(char *seq, int n);
-int	get_codon(char *seq);
+int	get_codon(char *seq, int strand);
 int	maxG_test(char *seq, int len, int ori, char strand, int frame, int orfn, int tot_Ghits, int *on);
 double	G_test(char *seq, int n, char Pg[], int *k);
 void	complement(char *seq,int len);
@@ -774,15 +774,15 @@ int score_orf_random(char *orf, int n, int tot_hss)
 				from= from_pos;
 				to= to_pos;
 
-                for(k=1;k<=5;++k)
+                for(k= 1; k <= 5; ++k)
                 {
-                    r= score(orf+from, to-from+1, sc + k*64, &from, &to, 1);    //  r= score(orf+from,to-from+1,sc[k],&from,&to);
+                    r= score(orf + from, to - from + 1, sc + k * 64, &from, &to, 1);    //  r= score(orf+from,to-from+1,sc[k],&from,&to);
 					from += from_pos;
 					to += from_pos;
 					from_pos= from;
 				}
 
-                maxscore= score(orf+from, to-from+1, sc, &from, &to, 1);    //  maxscore_array[j]= score(orf+from,to-from+1,sc[0],&from,&to);
+                maxscore= score(orf + from, to - from + 1, sc, &from, &to, 1);    //  maxscore_array[j]= score(orf+from,to-from+1,sc[0],&from,&to);
 				from += from_pos;
 				to += from_pos;
 				from_pos= from;
@@ -791,13 +791,13 @@ int score_orf_random(char *orf, int n, int tot_hss)
 
 				if (maxscore >= maxrscore[sig_pos])
 				{
-                    hss[tot_hss+j].fromp= from_pos;
-                    hss[tot_hss+j].top= to_pos;
-                    hss[tot_hss+j].score= maxscore;
-                    hss[tot_hss+j].type= 0;
+                    hss[tot_hss + j].fromp= from_pos;
+                    hss[tot_hss + j].top= to_pos;
+                    hss[tot_hss + j].score= maxscore;
+                    hss[tot_hss + j].type= 0;
                     k= 0;
-                    do ++k; while((sig_pos+k) < rep && maxscore >= maxrscore[sig_pos+k]);
-                    hss[tot_hss+j].prob= 1.0 - (float)(sig_pos+k-1)/((float)rep);
+                    do ++k; while((sig_pos + k) < rep && maxscore >= maxrscore[sig_pos + k]);
+                    hss[tot_hss + j].prob= 1.0 - (float)(sig_pos + k - 1)/((float)rep);
 				}
                 ++j;
 			}
@@ -928,7 +928,7 @@ int score_orf_table(char *orf, int n, int tot_hss)
 
                 for(k= 1; k <= 5; ++k)
                 {
-                    r= score(orf + from, to - from + 1, sc + k*64, &from, &to, 1);    //  r= score(orf+from,to-from+1,sc[k],&from,&to);
+                    r= score(orf + from, to - from + 1, sc + k * 64, &from, &to, 1);    //  r= score(orf+from,to-from+1,sc[k],&from,&to);
 					from += from_pos;
 					to += from_pos;
 					from_pos= from;
@@ -1117,7 +1117,7 @@ double entropy(char *seq, int n)
 		
 	for(i= 0; i < n - n % 3; i += 3)
 	{
-		if((codon= get_codon(seq + i)) < 64 && codon != 48 && codon != 50 && (codon != 56 || MYCOPLASMA))
+		if((codon= get_codon(seq + i, 1)) < 64 && codon != 48 && codon != 50 && (codon != 56 || MYCOPLASMA))
 		{
             ++codon_arr[codon];
             ++total_codon;
@@ -1145,17 +1145,18 @@ double entropy(char *seq, int n)
 /**** Function get_codon() /
 /**************************/
 
-int get_codon(char buff[])
+int get_codon(char buff[], int strand)
 {
-	
-    int	codon= 0, i, power[] = { 16, 4, 1 };
-	
-	for(i = 0; i < 3; ++i)
-	{
-		if(buff[i] < 0 || buff[i] > 3) return(64);
-		else codon += power[i] * buff[i];
-	}
-    return(codon);
+
+        int     codon= 0, i, power[] = { 16, 4, 1 };
+
+        for(i = 0; i < 3; ++i)
+        {
+                if(buff[i] < 0 || buff[i] > 3) return(64);
+                else if(strand) codon += power[i] * buff[i];
+                else            codon += power[2 - i] * buff[i];
+        }
+        return(codon);
 }
 
 // End of function get_codon()
@@ -1692,7 +1693,7 @@ int maxG_test(char *seq, int len, int ori, char strand, int frame, int orfn, int
 
 					for(j= 0; j < 6; ++j)
 					{
-                        hss_score= score(seq + hss[hit].fromp, hss[hit].top - hss[hit].fromp + 1, sc + 64*j, &f, &t, 0);
+                        hss_score= score(seq + hss[hit].fromp, hss[hit].top - hss[hit].fromp + 1, sc + 64 * j, &f, &t, 0);
 						if(hss_score < 0.0) { flag= 0; j= 6; }
 					}
 
@@ -1978,7 +1979,7 @@ void difference_vector(double *vector, double *minus_vector, double *result_vect
 
 void build_scores(char *seg, int n, double *sc)      // sc[6 * 64]
 {
-    int i, j = 0, k, l;
+    int i, j = 0, k, l, codon[3], cod;
     double r, x1, y1, a, b;
     double N[16] = {0.0}, stop0, stop1;     // N[4][4], sc[6* 64]
 
@@ -1994,7 +1995,7 @@ void build_scores(char *seg, int n, double *sc)      // sc[6 * 64]
 // SCORES WITH BOUNDARIES:
 
 // A
-    if(N[0]<(x1=0.1251+EPSILON))      // N[0][0]
+    if(N[0] < (x1= 0.1251 + EPSILON))      // N[0][0]
     {
         y1= 0.8288 * x1 + 0.0527;
         a= y1 / x1;
@@ -2006,19 +2007,19 @@ void build_scores(char *seg, int n, double *sc)      // sc[6 * 64]
         a= y1 / x1;
         N[12] =  a * N[0];              // N[3][0], N[0][0]
     }
-    else if(N[0]>(x1=0.7568-EPSILON))
+    else if(N[0] > (x1= 0.7568 - EPSILON))
     {
         y1= 0.8288 * x1 + 0.0527;
         a= (y1 - 1.0)/(x1 - 1.0);
-        b= y1 - a*x1;
+        b= y1 - a * x1;
         N[4] =  a * N[0] + b;    // N[1][0], N[0][0]
         y1= 0.5883 * x1 + 0.1454;
         a= (y1 - 1.0)/(x1 - 1.0);
-        b= y1 - a*x1;
+        b= y1 - a * x1;
         y1= 1.5829 * x1 - 0.1980;
         N[8] =  a * N[0] + b;      // N[2][0], N[0][0]
         a= (y1 - 1.0)/(x1 - 1.0);
-        b= y1 - a*x1;
+        b= y1 - a * x1;
         N[12] =  a * N[0] + b;    // N[3][0], N[0][0]
     }
     else
@@ -2029,7 +2030,7 @@ void build_scores(char *seg, int n, double *sc)      // sc[6 * 64]
     }
 
 // C
-    if(N[1]<(x1=0.0865+EPSILON))        // if(N[0][1]<(x1=0.0865+EPSILON))
+    if(N[1]<(x1= 0.0865 + EPSILON))        // if(N[0][1]<(x1=0.0865+EPSILON))
     {
         y1= 0.7388 * x1 + 0.0359;
         a= y1 / x1;
@@ -2041,7 +2042,7 @@ void build_scores(char *seg, int n, double *sc)      // sc[6 * 64]
         a= y1 / x1;
         N[13] =  a * N[1];       // N[3][1] =  a * N[0][1];
     }
-    else if(N[1]>(x1=0.6364-EPSILON))     // else if(N[0][1]>(x1=0.6364-EPSILON))
+    else if(N[1] > (x1= 0.6364 - EPSILON))     // else if(N[0][1]>(x1=0.6364-EPSILON))
     {
         y1= 0.7388 * x1 + 0.0359;
         a= (y1 - 1.0)/(x1 - 1.0);
@@ -2137,11 +2138,14 @@ void build_scores(char *seg, int n, double *sc)      // sc[6 * 64]
 
 	stop1 = N[7] * N[8] * N[12] + N[7] * N[8] * N[14] + ( N[7] * N[10] * N[12] ) * (1 - MYCOPLASMA);
 
-	for(i = 0; i < 4; i++)
-		for(j = 0; j < 4; j++)
-			for(k = 0; k < 4; k++)
+	for(codon[0] = 0; codon[0] < 4; ++codon[0])
+		for(codon[1] = 0; codon[1] < 4; ++codon[1])
+			for(codon[2] = 0; codon[2] < 4; ++codon[2])
+			{
+			cod= get_codon(codon, 1);
 			    for(l = 0; l < 6; l++)
-                    sc[l*64 + 16*i+4*j+k] = log(N[4 + i] * N[8 + j] * N[12 + k] / (1.0 - stop1)); 
+                    sc[l * 64 + cod] = log(N[4 + codon[0]] * N[8 + codon[1]] * N[12 + codon[2]] / (1.0 - stop1)); 
+			}
 
 // Old N[][]:				sc[l][16*i+4*j+k] = log(N[1][i] * N[2][j] * N[3][k] / (1.0 - stop1)); 
 
@@ -2156,6 +2160,14 @@ void build_scores(char *seg, int n, double *sc)      // sc[6 * 64]
 			for(k = 0; k < 4; k++)
 				sc[16*i+4*j+k] -= log(N[i] * N[j] * N[k] / (1.0 - stop0));
 
+	for(codon[0] = 0; codon[0] < 4; ++codon[0])
+		for(codon[1] = 0; codon[1] < 4; ++codon[1])
+			for(codon[2] = 0; codon[2] < 4; ++codon[2])
+			{
+			cod= get_codon(codon, 1);
+			sc[cod] -= log(N[codon[0]] * N[codon[1]] * N[codon[2]] / (1.0 - stop0));
+			}
+
 // Old N[][]:				sc[0][16*i+4*j+k] -= log(N[0][i] * N[0][j] * N[0][k] / (1.0 - stop0));
 
 // Expected frequency of stop codons in direct frame:
@@ -2164,24 +2176,40 @@ void build_scores(char *seg, int n, double *sc)      // sc[6 * 64]
 
 // Scores against jki:
 
-	for(i = 0; i < 4; i++)
-		for(j = 0; j < 4; j++)
-			for(k = 0; k < 4; k++)
-				sc[64 + 16*i+4*j+k] -= log(N[4 + j] * N[8 + k] * N[12 + i] / (1.0 - stop0));
+//	for(i = 0; i < 4; i++)
+//		for(j = 0; j < 4; j++)
+//			for(k = 0; k < 4; k++)
+//				sc[64 + 16*i+4*j+k] -= log(N[4 + j] * N[8 + k] * N[12 + i] / (1.0 - stop0));
+
+	for(codon[0] = 0; codon[0] < 4; ++codon[0])
+		for(codon[1] = 0; codon[1] < 4; ++codon[1])
+			for(codon[2] = 0; codon[2] < 4; ++codon[2])
+			{
+			cod= get_codon(codon, 1);
+			sc[64 + cod] -= log(N[4 + codon[1]] * N[8 + codon[2]] * N[12 + codon[0]] / (1.0 - stop0));
+			}
 
 // Old N[][]:				sc[1][16*i+4*j+k] -= log(N[1][j] * N[2][k] * N[3][i] / (1.0 - stop0));
 
 // Scores against kij:
 
-	for(i = 0; i < 4; i++)
-		for(j = 0; j < 4; j++)
-			for(k = 0; k < 4; k++)
-				sc[128 + 16*i+4*j+k] -= log(N[4 + k] * N[8 + i] * N[12 + j] / (1.0 - stop0));
+//	for(i = 0; i < 4; i++)
+//		for(j = 0; j < 4; j++)
+//			for(k = 0; k < 4; k++)
+//				sc[128 + 16*i+4*j+k] -= log(N[4 + k] * N[8 + i] * N[12 + j] / (1.0 - stop0));
+
+	for(codon[0] = 0; codon[0] < 4; ++codon[0])
+		for(codon[1] = 0; codon[1] < 4; ++codon[1])
+			for(codon[2] = 0; codon[2] < 4; ++codon[2])
+			{
+			cod= get_codon(codon, 1);
+			sc[128 + cod] -= log(N[4 + codon[2]] * N[8 + codon[0]] * N[12 + codon[1]] / (1.0 - stop0));
+			}
 
 // Old N[][]:				sc[2][16*i+4*j+k] -= log(N[1][k] * N[2][i] * N[3][j] / (1.0 - stop0));
 
 // A
-    if(N[3]<(x1=0.1251+EPSILON))    // if(N[0][3]<(x1=0.1251+EPSILON))
+    if(N[3] < (x1= 0.1251 + EPSILON))    // if(N[0][3]<(x1=0.1251+EPSILON))
     {
         y1= 0.8288 * x1 + 0.0527;
         a= y1 / x1;
@@ -2193,19 +2221,19 @@ void build_scores(char *seg, int n, double *sc)      // sc[6 * 64]
         a= y1 / x1;
         N[12] =  a * N[3];    //  N[3][0] =  a * N[0][3];
     }
-    else if(N[3]>(x1=0.7568-EPSILON))    //  else if(N[0][3]>(x1=0.7568-EPSILON))
+    else if(N[3] > (x1= 0.7568 - EPSILON))    //  else if(N[0][3]>(x1=0.7568-EPSILON))
     {
         y1= 0.8288 * x1 + 0.0527;
         a= (y1 - 1.0)/(x1 - 1.0);
-        b= y1 - a*x1;
+        b= y1 - a * x1;
         N[4] =  a * N[3] + b;     //  N[1][0] =  a * N[0][3] + b;
         y1= 0.5883 * x1 + 0.1454;
         a= (y1 - 1.0)/(x1 - 1.0);
-        b= y1 - a*x1;
+        b= y1 - a * x1;
         y1= 1.5829 * x1 - 0.1980;
         N[8] =  a * N[3] + b;     //  N[2][0] =  a * N[0][3] + b;
         a= (y1 - 1.0)/(x1 - 1.0);
-        b= y1 - a*x1;
+        b= y1 - a * x1;
         N[12] =  a * N[3] + b;    //  N[3][0] =  a * N[0][3] + b;
     }
     else
@@ -2216,7 +2244,7 @@ void build_scores(char *seg, int n, double *sc)      // sc[6 * 64]
     }
 
 // C
-    if(N[2]<(x1=0.0865+EPSILON))     // if(N[0][2]<(x1=0.0865+EPSILON))
+    if(N[2] < (x1= 0.0865 + EPSILON))     // if(N[0][2]<(x1=0.0865+EPSILON))
     {
         y1= 0.7388 * x1 + 0.0359;
         a= y1 / x1;
@@ -2228,19 +2256,19 @@ void build_scores(char *seg, int n, double *sc)      // sc[6 * 64]
         a= y1 / x1;
         N[13] =  a * N[2];    //  N[3][1] =  a * N[0][2];
     }
-    else if(N[2]>(x1=0.6364-EPSILON))    //  else if(N[0][2]>(x1=0.6364-EPSILON))
+    else if(N[2] > (x1= 0.6364 - EPSILON))    //  else if(N[0][2]>(x1=0.6364-EPSILON))
     {
         y1= 0.7388 * x1 + 0.0359;
-        a= (y1 - 1.0)/(x1 - 1.0);
-        b= y1 - a*x1;
+        a= (y1 - 1.0) / (x1 - 1.0);
+        b= y1 - a * x1;
         N[5] =  a * N[2] + b;    // N[1][1] =  a * N[0][2] + b;
         y1= 0.4424 * x1 + 0.1215;
-        a= (y1 - 1.0)/(x1 - 1.0);
-        b= y1 - a*x1;
+        a= (y1 - 1.0) / (x1 - 1.0);
+        b= y1 - a * x1;
         N[9] =  a * N[2] + b;    // N[2][1] =  a * N[0][2] + b;
         y1= 1.8188 * x1 - 0.1574;
-        a= (y1 - 1.0)/(x1 - 1.0);
-        b= y1 - a*x1;
+        a= (y1 - 1.0) / (x1 - 1.0);
+        b= y1 - a * x1;
         N[13] =  a * N[2] + b;    //  N[3][1] =  a * N[0][2] + b;
     }
     else
@@ -2251,7 +2279,7 @@ void build_scores(char *seg, int n, double *sc)      // sc[6 * 64]
     }
 
 // G
-    if(N[1]<(x1=0.1168+EPSILON))    //  if(N[0][1]<(x1=0.1168+EPSILON))
+    if(N[1]<(x1= 0.1168 + EPSILON))    //  if(N[0][1]<(x1=0.1168+EPSILON))
     {
         y1= 0.7257 * x1 + 0.1620;
         a= y1 / x1;
@@ -2263,26 +2291,26 @@ void build_scores(char *seg, int n, double *sc)      // sc[6 * 64]
         a= y1 / x1;
         N[14] =  a * N[1];    //  N[3][2] =  a * N[0][1];
     }
-    else if(N[1]>(x1=0.6741-EPSILON))    //  else if(N[0][1]>(x1=0.6741-EPSILON))
+    else if(N[1] > (x1= 0.6741 - EPSILON))    //  else if(N[0][1]>(x1=0.6741-EPSILON))
     {
         y1= 0.7257 * x1 + 0.1620;
         a= (y1 - 1.0)/(x1 - 1.0);
-        b= y1 - a*x1;
+        b= y1 - a * x1;
         N[6] =  a * N[1] + b;    //  N[1][2] =  a * N[0][1] + b;
         y1= 0.4800 * x1 + 0.0476;
-        a= (y1 - 1.0)/(x1 - 1.0);
-        b= y1 - a*x1;
+        a= (y1 - 1.0) / (x1 - 1.0);
+        b= y1 - a * x1;
         N[10] =  a * N[1] + b;    //  N[2][2] =  a * N[0][1] + b;
         y1= 1.7943 * x1 - 0.2096;
-        a= (y1 - 1.0)/(x1 - 1.0);
-        b= y1 - a*x1;
+        a= (y1 - 1.0) / (x1 - 1.0);
+        b= y1 - a * x1;
         N[14] =  a * N[1] + b;    //  N[3][2] =  a * N[0][1] + b;
     }
     else
     {
-        N[6] =  0.7257 * N[1] + 0.1620;    //  N[1][2] =  0.7257 * N[0][1] + 0.1620;
-        N[10] =  0.4800 * N[1] + 0.0476;    //  N[2][2] =  0.4800 * N[0][1] + 0.0476;
-        N[14] =  1.7943 * N[1] - 0.2096;    //  N[3][2] =  1.7943 * N[0][1] - 0.2096;
+        N[6]=  0.7257 * N[1] + 0.1620;    //  N[1][2] =  0.7257 * N[0][1] + 0.1620;
+        N[10]=  0.4800 * N[1] + 0.0476;    //  N[2][2] =  0.4800 * N[0][1] + 0.0476;
+        N[14]=  1.7943 * N[1] - 0.2096;    //  N[3][2] =  1.7943 * N[0][1] - 0.2096;
     }
 
 //T
@@ -2298,19 +2326,19 @@ void build_scores(char *seg, int n, double *sc)      // sc[6 * 64]
         a= y1 / x1;
         N[15] =  a * N[0];    //  N[3][3] =  a * N[0][0];
     }
-    else if(N[0]>(x1=0.5929-EPSILON))    //  else if(N[0][0]>(x1=0.5929-EPSILON))
+    else if(N[0] > (x1= 0.5929 - EPSILON))    //  else if(N[0][0]>(x1=0.5929-EPSILON))
     {
         y1= 0.6013 * x1 + 0.0237;
-        a= (y1 - 1.0)/(x1 - 1.0);
-        b= y1 - a*x1;
+        a= (y1 - 1.0) / (x1 - 1.0);
+        b= y1 - a * x1;
         N[7] =  a * N[0] + b;    //  N[1][3] =  a * N[0][0] + b;
         y1= 0.2738 * x1 + 0.2361;
-        a= (y1 - 1.0)/(x1 - 1.0);
-        b= y1 - a*x1;
+        a= (y1 - 1.0) / (x1 - 1.0);
+        b= y1 - a * x1;
         N[11] =  a * N[0] + b;    //  N[2][3] =  a * N[0][0] + b;
         y1= 2.1249 * x1 - 0.2599;
-        a= (y1 - 1.0)/(x1 - 1.0);
-        b= y1 - a*x1;
+        a= (y1 - 1.0) / (x1 - 1.0);
+        b= y1 - a * x1;
         N[15] =  a * N[0] + b;    //  N[3][3] =  a * N[0][0] + b;
     }
     else
@@ -2329,28 +2357,52 @@ void build_scores(char *seg, int n, double *sc)      // sc[6 * 64]
 
 // Scores against comp ijk:
 
-	for(i = 0; i < 4; i++)
-		for(j = 0; j < 4; j++)
-			for(k = 0; k < 4; k++)
-				sc[192 + 16*i+4*j+k] -= log(N[15-i] * N[11-j] * N[7-k] / (1.0 - stop0));
+//	for(i = 0; i < 4; i++)
+//		for(j = 0; j < 4; j++)
+//			for(k = 0; k < 4; k++)
+//				sc[192 + 16*i+4*j+k] -= log(N[15-i] * N[11-j] * N[7-k] / (1.0 - stop0));
+
+	for(codon[0] = 0; codon[0] < 4; ++codon[0])
+		for(codon[1] = 0; codon[1] < 4; ++codon[1])
+			for(codon[2] = 0; codon[2] < 4; ++codon[2])
+			{
+			cod= get_codon(codon, 1);
+			sc[192 + cod] -= log(N[15 - codon[0]] * N[11 - codon[1]] * N[7 - codon[2]] / (1.0 - stop0));
+			}
 
 // Old N[][]:				sc[3][16*i+4*j+k] -= log(N[3][3-i] * N[2][3-j] * N[1][3-k] / (1.0 - stop0));
 
 // Scores against comp jki:
 
-	for(i = 0; i < 4; i++)
-		for(j = 0; j < 4; j++)
-			for(k = 0; k < 4; k++)
-				sc[256 + 16*i+4*j+k] -= log(N[15-j] * N[11-k] * N[7-i] / (1.0 - stop0));
+//	for(i = 0; i < 4; i++)
+//		for(j = 0; j < 4; j++)
+//			for(k = 0; k < 4; k++)
+//				sc[256 + 16*i+4*j+k] -= log(N[15-j] * N[11-k] * N[7-i] / (1.0 - stop0));
+
+	for(codon[0] = 0; codon[0] < 4; ++codon[0])
+		for(codon[1] = 0; codon[1] < 4; ++codon[1])
+			for(codon[2] = 0; codon[2] < 4; ++codon[2])
+			{
+			cod= get_codon(codon, 1);
+			sc[256 + cod] -= log(N[15 - codon[1]] * N[11 - codon[2]] * N[7 - codon[0]] / (1.0 - stop0));
+			}
 
 // Old N[][]:				sc[4][16*i+4*j+k] -= log(N[3][3-j] * N[2][3-k] * N[1][3-i] / (1.0 - stop0));
 
 // Scores against comp kij:
 
-	for(i = 0; i < 4; i++)
-		for(j = 0; j < 4; j++)
-			for(k = 0; k < 4; k++)
-				sc[320 + 16*i+4*j+k] -= log(N[15-k] * N[11-i] * N[7-j] / (1.0 - stop0));
+//	for(i = 0; i < 4; i++)
+//		for(j = 0; j < 4; j++)
+//			for(k = 0; k < 4; k++)
+//				sc[320 + 16*i+4*j+k] -= log(N[15-k] * N[11-i] * N[7-j] / (1.0 - stop0));
+
+	for(codon[0] = 0; codon[0] < 4; ++codon[0])
+		for(codon[1] = 0; codon[1] < 4; ++codon[1])
+			for(codon[2] = 0; codon[2] < 4; ++codon[2])
+			{
+			cod= get_codon(codon, 1);
+			sc[320 + cod] -= log(N[15 - codon[2]] * N[11 - codon[0]] * N[7 - codon[1]] / (1.0 - stop0));
+			}
 
 // Old N[][]:				sc[5][16*i+4*j+k] -= log(N[3][3-k] * N[2][3-i] * N[1][3-j] / (1.0 - stop0));
 }
