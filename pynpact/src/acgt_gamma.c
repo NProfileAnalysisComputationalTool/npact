@@ -400,6 +400,7 @@ int main (int argc, char *argv[])
     free(o);
     free(hss);
     free(gene);
+    free(ffrom);
 
 
     fprintf(stdout, "\nTotal hss scored: %d\n", tot_Ghits);
