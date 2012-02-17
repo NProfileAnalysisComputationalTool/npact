@@ -566,7 +566,7 @@ int analyze_genome(int genome_size, int tot_hss, int *on)
 
             frame= (pos - 1) % 3;
 
-            codon= ORF[frame * MAX_ORF_SIZE + len[frame]-3] * 16 + ORF[frame * MAX_ORF_SIZE + len[frame] - 2] * 4 + ORF[frame * MAX_ORF_SIZE + len[frame] - 1];
+            codon= get_codon(ORF + frame * MAX_ORF_SIZE + len[frame] - 3, 1);
 
 			if(codon == 48 || codon == 50 || (codon == 56 && !MYCOPLASMA) || pos >= genome_size - 2)
 			{
@@ -628,7 +628,7 @@ int analyze_genome(int genome_size, int tot_hss, int *on)
 
             frame= pos % 3 + 3;
 
-            codon= ORF[frame*MAX_ORF_SIZE + len[frame]-3] + ORF[frame*MAX_ORF_SIZE + len[frame]-2]*4 + ORF[frame*MAX_ORF_SIZE + len[frame]-1]*16;
+            codon= get_codon(ORF + frame * MAX_ORF_SIZE + len[frame] - 3, 0);
 
 			if(codon == 48 || codon == 50 || (codon == 56 && !MYCOPLASMA) || pos >= genome_size - 2)
 			{
@@ -843,7 +843,7 @@ int score_orf_random(char *orf, int n, int tot_hss)
 
 int score_orf_table(char *orf, int n, int tot_hss)
 {
-    int i, j, h, k, l, t, nuc[4]= {0}, from, to, last_zero= n, from_pos, to_pos= n - 1, nt, flag;
+    int i, j, h, k, l, t, nuc[4]= {0}, from, to, last_zero= n, from_pos, to_pos= n - 1, cod, nt, flag;
     float	a[3], b[3], f;
     char *seq;
     double r, Score = 0.0, maxscore= 0.0, max_len;
@@ -907,13 +907,14 @@ int score_orf_table(char *orf, int n, int tot_hss)
 	
 // Finds HSSs in ORF:
 
-	last_zero = n;
-	Score = 0.0;
-	h = 0;
+	last_zero= n;
+	Score= 0.0;
+	h= 0;
 
-	for(i = n - 3; i >= 0; i -= 3)
+	for(i= n - 3; i >= 0; i -= 3)
 	{
-        Score += sc[16*orf[i] + 4*orf[i+1] + orf[i+2]];    //  Score += sc[0][16*orf[i] + 4*orf[i+1] + orf[i+2]];
+	cod= get_codon(orf + i, 1);
+        Score += sc[cod];    //  Score += sc[0][16*orf[i] + 4*orf[i+1] + orf[i+2]];
 
 		if(Score < 0.0 || maxscore - Score >= down_thr)
 			Score = 0.0;
@@ -1132,7 +1133,7 @@ int score_orf_table(char *orf, int n, int tot_hss)
 
 double entropy(char *seq, int n)
 {
-	int i, j, k, l, codon, total_codon= 0;
+	int i, j, k, l, codon, flag= 0, total_codon= 0;
 	double codon_arr[64]= {0.0}, entropy= 0.0, D;
 
 	if(MYCOPLASMA) D= 62.0;
@@ -1140,11 +1141,13 @@ double entropy(char *seq, int n)
 		
 	for(i= 0; i < n - n % 3; i += 3)
 	{
-		if((codon= get_codon(seq + i, 1)) < 64 && codon != 48 && codon != 50 && (codon != 56 || MYCOPLASMA))
+	codon= get_codon(seq + i, 1);
+		if(codon != 48 && codon != 50 && (codon != 56 || MYCOPLASMA))
 		{
             ++codon_arr[codon];
             ++total_codon;
 		}
+		if(codon == 64) flag= 1;
 	}
 
 	if(total_codon)
@@ -1154,8 +1157,10 @@ double entropy(char *seq, int n)
 	else return(-1.0);
 
 	for(k= 0; k < 64; k++)
-		if(codon_arr[k] > 0.0 && codon_arr[k] < 1.0)
+		if(codon_arr[k] > 0.0)
 			entropy -= codon_arr[k] * log(codon_arr[k]);
+
+	if(flag) ++D;
 
     entropy /= log(D);
 	
@@ -1621,7 +1626,8 @@ int maxG_test(char *seq, int len, int ori, char strand, int frame, int orfn, int
 
     for(k= from; k >= 0; k -= 3)
     {
-        cod= 16*seq[k] + 4*seq[k+1] + seq[k+2];
+//        cod= 16*seq[k] + 4*seq[k+1] + seq[k+2];
+	cod= get_codon(seq + k, 1);
 
         for(j = 0; j < 3; ++j)
         {
@@ -2979,7 +2985,7 @@ fprintf(output6, "List of predicted ORFs modifying previous annotation.\n");
 
 int find_Ghits(int genome_size, int tot_hss, long bytes_from_origin, int *on)
 {
-    int tot_Ghits= tot_hss, cod, i0= 0, i, j, n[6]= {0}, k, *o, g0= 0, g1= 0, g2, g3= 0, h0, h1, flag, frame, stop, len;
+    int tot_Ghits= tot_hss, cod, i0= 0, i, j, n[6]= {0}, k, *o, g0= 0, g1= 0, g2, g3= 0, h0, h1, flag, frame, stop, len, nlen;
 
     o= (int *)malloc(tot_hss * sizeof(int));
     hss= (struct HSSs *)realloc(hss,(tot_hss+1)*sizeof(struct HSSs));
@@ -3041,16 +3047,19 @@ int find_Ghits(int genome_size, int tot_hss, long bytes_from_origin, int *on)
                 h0= k;
                 frame= (g0 + h0 + 2) % 3;
                 len= g1 - g0 + 1 - k;
+		nlen= 0;
 
 				for(i= k; i < len - 2; i += 3)
 				{
-                    cod= 16 * ORF[i] + 4 * ORF[i+1] + ORF[i+2];
+//                  cod= 16 * ORF[i] + 4 * ORF[i+1] + ORF[i+2];
+		    cod= get_codon(ORF + i, 1);
+		    if(cod == 64) nlen += 3;
                     if(cod == 48 || cod == 50 || ( cod == 56 && !MYCOPLASMA) || i >= len - 5)
 					{
                         h1= i - 1;
                         if(cod == 48 || cod == 50 || ( cod == 56 && !MYCOPLASMA)) stop= 1;
                         else { stop= 0; h1 += 3; }
-						if(h1 - h0 + 1 >= mHL)
+						if(h1 - h0 + 1 - nlen >= mHL)
 						{
 							while(orf_num[frame][n[frame]][1] < g0 + h0) ++n[frame];
 
@@ -3076,17 +3085,20 @@ int find_Ghits(int genome_size, int tot_hss, long bytes_from_origin, int *on)
                 h0= k;
                 frame= (g1 - h0 - 2) % 3 + 3;
                 len= g1 - g0 + 1 - k;
+		nlen= 0;
 				while(n[frame] < tot_orfs[frame] - 1 && orf_num[frame][n[frame]][1] < g1 - h0) ++n[frame];
 
 				for(i= k; i < len - 2; i += 3)
 				{
-                    cod= 16 * ORF[i] + 4 * ORF[i+1] + ORF[i+2];
+//                  cod= 16 * ORF[i] + 4 * ORF[i+1] + ORF[i+2];
+		    cod= get_codon(ORF + i, 1);
+		    if(cod == 64) nlen += 3;
                     if(cod == 48 || cod == 50 || ( cod == 56 && !MYCOPLASMA) || i >= len - 5)
 					{
                         h1= i - 1;
                         if(cod == 48 || cod == 50 || ( cod == 56 && !MYCOPLASMA)) stop= 1;
                         else { stop= 0; h1 += 3; }
-						if(h1 - h0 + 1 >= mHL)
+						if(h1 - h0 + 1 - nlen >= mHL)
 						{
 							while(n[frame]>0 && orf_num[frame][n[frame]][0] > g1 - h0) --n[frame];
 
@@ -3364,7 +3376,8 @@ void shuffle(char *seq, int n, int remove_stops)
 	if(remove_stops)
 		for(i = n - 3; i >= 0; i -= 3)
 		{
-            cod= 16 * seq[i] + 4 * seq[i + 1] + seq[i + 2];
+//          cod= 16 * seq[i] + 4 * seq[i + 1] + seq[i + 2];
+	    cod= get_codon(seq + i, 1);
 			if(cod == 48 || cod == 50 || (cod == 56 && !MYCOPLASMA)) shuffle(seq + i, 3, 1);
 		}
 }
