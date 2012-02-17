@@ -2001,7 +2001,8 @@ void difference_vector(double *vector, double *minus_vector, double *result_vect
 
 void build_scores(char *seg, int n, double *sc)      // sc[6 * 64]
 {
-    int i, j = 0, k, l, codon[3], cod;
+    int i, j = 0, k, l, cod;
+    char codon[3];
     double r, x1, y1, a, b;
     double N[16] = {0.0}, stop0, stop1;     // N[4][4], sc[6* 64]
 
