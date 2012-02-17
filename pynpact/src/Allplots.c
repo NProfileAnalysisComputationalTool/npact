@@ -681,6 +681,7 @@ main(int argc, char *argv[]) {
 
         if(input= fopen(mod_file,"r")) {
             logmsg(10, "Reading modified-predictions file %s\n", mod_file);
+            fgets(longstr, 198, input);
             while(fgets(longstr, 198, input) && !feof(input)) {
                 mod_name= (char **)realloc(mod_name, (ne + 1) * sizeof(char *));
                 mod_name[ne]= (char *)malloc(50 * sizeof(char *));
