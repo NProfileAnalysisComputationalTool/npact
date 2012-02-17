@@ -2956,6 +2956,7 @@ fprintf(output6, "List of predicted ORFs modifying previous annotation.\n");
     fclose(output3);
     fclose(output4);
     fclose(output5);
+    fclose(output6);
 
 	if(WRITE_SEQUENCES)
 	{
