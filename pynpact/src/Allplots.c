@@ -692,7 +692,7 @@ main(int argc, char *argv[]) {
                 p= strchr(mod_name[ne],' ');
                 p[0]= '\0';
                 p= strrchr(longstr,' '); ++p;
-                p= strrchr(p, '.'); p += 2;
+                p= strchr(p, '.'); p += 2;
 			if(p[0] == '<' || p[0] == '>') ++p;
                 ge= atoi(p);
                 p= strrchr(longstr,' '); ++p;
@@ -1354,17 +1354,17 @@ main(int argc, char *argv[]) {
         for(i= 0; i < ne; ++i) {
             if(mod_str[i] == ' ') {
                 if(period % 3) fprintf(stdout, "Black");
-                else if(modified[i][0] % period == 1) fprintf(stdout, "B");
-                else if(modified[i][0] % period == 2) fprintf(stdout, "R");
-                else if(modified[i][0] % period==0) fprintf(stdout, "G");
+                else if(modified[i][0] % period == 1) fprintf(stdout, "LB");
+                else if(modified[i][0] % period == 2) fprintf(stdout, "LR");
+                else if(modified[i][0] % period==0) fprintf(stdout, "LG");
                 fprintf(stdout," %.1f %.2f M %.2f Rarrow\n", (modified[i][0] - (float)start) / delta * WIDTH, HIGHT + HIGHT_MOD + 2.0, (modified[i][1] - modified[i][0]) / delta * WIDTH);
 //              fprintf(stdout,"Black %.1f %.2f M (%s) Cshow\n", ((modified[i][1] + modified[i][0]) / 2 - (float)start) / delta * WIDTH, HIGHT + HIGHT_MOD + 5.0, mod_name[i]);
             }
             else {
                 if(period % 3) fprintf(stdout, "Black");
-                else if(modified[i][0] % period == 1) fprintf(stdout, "R");
-                else if(modified[i][0] % period == 2) fprintf(stdout, "G");
-                else if(modified[i][0] % period == 0) fprintf(stdout, "B");
+                else if(modified[i][0] % period == 1) fprintf(stdout, "LR");
+                else if(modified[i][0] % period == 2) fprintf(stdout, "LG");
+                else if(modified[i][0] % period == 0) fprintf(stdout, "LB");
                 fprintf(stdout," %.1f %.2f M %.2f Larrow\n", (modified[i][0] - (float)start) / delta * WIDTH, HIGHT + HIGHT_MOD - 2.0, (modified[i][1] - modified[i][0]) / delta * WIDTH);
 //              fprintf(stdout,"Black %.1f %.2f M (%s) Cshow\n", ((modified[i][1] + modified[i][0]) / 2 - (float)start) / delta * WIDTH, HIGHT + HIGHT_MOD - 10.0, mod_name[i]);
             }
