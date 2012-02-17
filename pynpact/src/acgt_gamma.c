@@ -23,8 +23,30 @@ int	RANDOMIZE= 0;
 
 #define WRITE_SEQUENCES 0
 
+# define WEB_SERVER 1
+# define STEVE 0
+# define LUCIANO 0
+# define LUCIANO_HOME 0
+
+#if WEB_SERVER
 #define BASE_DIR NULL
 #define BASE_DIR_THRESHOLD_TABLES NULL
+#endif
+
+#if STEVE
+#define BASE_DIR "/Users/steve/source/"
+#define BASE_DIR_THRESHOLD_TABLES "./"
+#endif
+
+#if LUCIANO
+#define BASE_DIR "/Volumes/2TB_Disk/GENOMES/1000PROKARYOTES/all.gbk/"
+#define BASE_DIR_THRESHOLD_TABLES "/Users/luciano/ACGT_ORFS/data/"
+#endif
+
+#if LUCIANO_HOME
+#define BASE_DIR "/Users/luciano/GENOMES/"
+#define BASE_DIR_THRESHOLD_TABLES "/Users/luciano/ACGT_ORFS/data/"
+#endif
 
 # define START_POS5 45
 # define START_POS3 12
