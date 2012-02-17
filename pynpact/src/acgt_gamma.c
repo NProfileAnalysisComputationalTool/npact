@@ -1196,7 +1196,8 @@ double score(char *seq,int n,double *sc,int *from,int *to, int flag)
 
     for(i = n - 3; i >= 0; i -= 3)
     {
-        cod= 16*seq[i] + 4*seq[i+1] + seq[i+2];
+//        cod= 16*seq[i] + 4*seq[i+1] + seq[i+2];
+        cod= get_codon(seq + i, 1);
 
         Score += sc[cod];
 
@@ -1913,7 +1914,7 @@ int maxG_test(char *seq, int len, int ori, char strand, int frame, int orfn, int
                     ++nhit;
                     hss[hit].orf_num= orfn;
                     ++hit;
-                    hss= (struct HSSs *)realloc(hss,(hit+1)*sizeof(struct HSSs));
+                    hss= (struct HSSs *)realloc(hss, (hit + 1) * sizeof(struct HSSs));
                 }
 
                 if(bfrom - last_stop < mHL || bfrom >= to) { k= last_stop; from= last_stop - 3; last_stop= 0; }
@@ -2068,16 +2069,16 @@ void build_scores(char *seg, int n, double *sc)      // sc[6 * 64]
     else if(N[1] > (x1= 0.6364 - EPSILON))     // else if(N[0][1]>(x1=0.6364-EPSILON))
     {
         y1= 0.7388 * x1 + 0.0359;
-        a= (y1 - 1.0)/(x1 - 1.0);
-        b= y1 - a*x1;
+        a= (y1 - 1.0) / (x1 - 1.0);
+        b= y1 - a * x1;
         N[5] =  a * N[1] + b;         // N[1][1] =  a * N[0][1] + b;
         y1= 0.4424 * x1 + 0.1215;
-        a= (y1 - 1.0)/(x1 - 1.0);
-        b= y1 - a*x1;
+        a= (y1 - 1.0) / (x1 - 1.0);
+        b= y1 - a * x1;
         N[9] =  a * N[1] + b;        // N[2][1] =  a * N[0][1] + b;
         y1= 1.8188 * x1 - 0.1574;
-        a= (y1 - 1.0)/(x1 - 1.0);
-        b= y1 - a*x1;
+        a= (y1 - 1.0) / (x1 - 1.0);
+        b= y1 - a * x1;
         N[13] =  a * N[1] + b;     // N[3][1] =  a * N[0][1] + b;
     }
     else
@@ -2088,7 +2089,7 @@ void build_scores(char *seg, int n, double *sc)      // sc[6 * 64]
     }
 
 // G
-    if(N[2]<(x1=0.1168+EPSILON))       // if(N[0][2]<(x1=0.1168+EPSILON)) 
+    if(N[2] < (x1= 0.1168 + EPSILON))       // if(N[0][2]<(x1=0.1168+EPSILON)) 
     {
         y1= 0.7257 * x1 + 0.1620;
         a= y1 / x1;
@@ -2100,19 +2101,19 @@ void build_scores(char *seg, int n, double *sc)      // sc[6 * 64]
         a= y1 / x1;
         N[14] =  a * N[2];      // N[3][2] =  a * N[0][2];
     }
-    else if(N[2]>(x1=0.6741-EPSILON))     //  else if(N[0][2]>(x1=0.6741-EPSILON))
+    else if(N[2] > (x1= 0.6741 - EPSILON))     //  else if(N[0][2]>(x1=0.6741-EPSILON))
     {
         y1= 0.7257 * x1 + 0.1620;
-        a= (y1 - 1.0)/(x1 - 1.0);
-        b= y1 - a*x1;
+        a= (y1 - 1.0) / (x1 - 1.0);
+        b= y1 - a * x1;
         N[6] =  a * N[2] + b;        // N[1][2] =  a * N[0][2] + b;
         y1= 0.4800 * x1 + 0.0476;
-        a= (y1 - 1.0)/(x1 - 1.0);
-        b= y1 - a*x1;
+        a= (y1 - 1.0) / (x1 - 1.0);
+        b= y1 - a * x1;
         N[10] =  a * N[2] + b;   // N[2][2] =  a * N[0][2] + b;
         y1= 1.7943 * x1 - 0.2096;
-        a= (y1 - 1.0)/(x1 - 1.0);
-        b= y1 - a*x1;
+        a= (y1 - 1.0) / (x1 - 1.0);
+        b= y1 - a * x1;
         N[14] =  a * N[2] + b;    // N[3][2] =  a * N[0][2] + b;
     }
     else
@@ -2123,7 +2124,7 @@ void build_scores(char *seg, int n, double *sc)      // sc[6 * 64]
     }
 
 //T
-    if(N[3]<(x1=0.1223+EPSILON))     // if(N[0][3]<(x1=0.1223+EPSILON))
+    if(N[3] < (x1= 0.1223 + EPSILON))     // if(N[0][3]<(x1=0.1223+EPSILON))
     {
         y1= 0.6013 * x1 + 0.0237;
         a= y1 / x1;
@@ -2135,19 +2136,19 @@ void build_scores(char *seg, int n, double *sc)      // sc[6 * 64]
         a= y1 / x1;
         N[15] =  a * N[3];     //  N[3][3] =  a * N[0][3];
     }
-    else if(N[3]>(x1=0.5929-EPSILON))    //  else if(N[0][3]>(x1=0.5929-EPSILON))
+    else if(N[3] > (x1= 0.5929 - EPSILON))    //  else if(N[0][3]>(x1=0.5929-EPSILON))
     {
         y1= 0.6013 * x1 + 0.0237;
-        a= (y1 - 1.0)/(x1 - 1.0);
+        a= (y1 - 1.0) / (x1 - 1.0);
         b= y1 - a*x1;
         N[7] =  a * N[3] + b;     //  N[1][3] =  a * N[0][3] + b;
         y1= 0.2738 * x1 + 0.2361;
-        a= (y1 - 1.0)/(x1 - 1.0);
-        b= y1 - a*x1;
+        a= (y1 - 1.0) / (x1 - 1.0);
+        b= y1 - a * x1;
         N[11] =  a * N[3] + b;    //  N[2][3] =  a * N[0][3] + b;
         y1= 2.1249 * x1 - 0.2599;
-        a= (y1 - 1.0)/(x1 - 1.0);
-        b= y1 - a*x1;
+        a= (y1 - 1.0) / (x1 - 1.0);
+        b= y1 - a * x1;
         N[15] =  a * N[3] + b;     //  N[3][3] =  a * N[0][3] + b;
     }
     else
@@ -2385,9 +2386,9 @@ void build_scores(char *seg, int n, double *sc)      // sc[6 * 64]
 //			for(k = 0; k < 4; k++)
 //				sc[192 + 16*i+4*j+k] -= log(N[15-i] * N[11-j] * N[7-k] / (1.0 - stop0));
 
-	for(codon[0] = 0; codon[0] < 4; ++codon[0])
-		for(codon[1] = 0; codon[1] < 4; ++codon[1])
-			for(codon[2] = 0; codon[2] < 4; ++codon[2])
+	for(codon[0]= 0; codon[0] < 4; ++codon[0])
+		for(codon[1]= 0; codon[1] < 4; ++codon[1])
+			for(codon[2]= 0; codon[2] < 4; ++codon[2])
 			{
 			cod= get_codon(codon, 1);
 			sc[192 + cod] -= log(N[15 - codon[0]] * N[11 - codon[1]] * N[7 - codon[2]] / (1.0 - stop0));
@@ -2402,9 +2403,9 @@ void build_scores(char *seg, int n, double *sc)      // sc[6 * 64]
 //			for(k = 0; k < 4; k++)
 //				sc[256 + 16*i+4*j+k] -= log(N[15-j] * N[11-k] * N[7-i] / (1.0 - stop0));
 
-	for(codon[0] = 0; codon[0] < 4; ++codon[0])
-		for(codon[1] = 0; codon[1] < 4; ++codon[1])
-			for(codon[2] = 0; codon[2] < 4; ++codon[2])
+	for(codon[0]= 0; codon[0] < 4; ++codon[0])
+		for(codon[1]= 0; codon[1] < 4; ++codon[1])
+			for(codon[2]= 0; codon[2] < 4; ++codon[2])
 			{
 			cod= get_codon(codon, 1);
 			sc[256 + cod] -= log(N[15 - codon[1]] * N[11 - codon[2]] * N[7 - codon[0]] / (1.0 - stop0));
@@ -2419,9 +2420,9 @@ void build_scores(char *seg, int n, double *sc)      // sc[6 * 64]
 //			for(k = 0; k < 4; k++)
 //				sc[320 + 16*i+4*j+k] -= log(N[15-k] * N[11-i] * N[7-j] / (1.0 - stop0));
 
-	for(codon[0] = 0; codon[0] < 4; ++codon[0])
-		for(codon[1] = 0; codon[1] < 4; ++codon[1])
-			for(codon[2] = 0; codon[2] < 4; ++codon[2])
+	for(codon[0]= 0; codon[0] < 4; ++codon[0])
+		for(codon[1]= 0; codon[1] < 4; ++codon[1])
+			for(codon[2]= 0; codon[2] < 4; ++codon[2])
 			{
 			cod= get_codon(codon, 1);
 			sc[320 + cod] -= log(N[15 - codon[2]] * N[11 - codon[0]] * N[7 - codon[1]] / (1.0 - stop0));
@@ -2530,7 +2531,7 @@ void process_hss(int from_hss, int to_hss, int ncds)
 	}
 
 
-// This sorts hits by the score per unit length of ORF, from start-codon or RF start, to stop codon (i.e., differential of cumulative score):
+// This sorts hits by the score per unit length of ORF, from start-codon or RF start, to stop codon (i.e., differential of ORF cumulative score):
  
 	if(SORT_BY_ORF_SLOPE)
 	{
@@ -2570,21 +2571,23 @@ void process_hss(int from_hss, int to_hss, int ncds)
 
 	for(i= 0; i < to_hss; ++i)
 	{
-        logmsg(0,"\b\b\b\b%3.0f%%",(float)(i+1)/(float)(to_hss+1)*100.0);
+        logmsg(0,"\b\b\b\b%3.0f%%", (float)(i + 1) / (float)(to_hss + 1) * 100.0);
 		if(hss[o[i]].type != 5)
 		{
             k= 0;
-            l=  hss[o[i]].top-hss[o[i]].fromp+1;
+            l=  hss[o[i]].top - hss[o[i]].fromp + 1;
 
                         if(hss[o[i]].strand == 'D')                     // ORF from start codon (gfrom) to stop (gto)
                         {
-                                if(!hss[o[i]].start) gfrom= hss[o[i]].stop1;
+//                              if(!hss[o[i]].start) gfrom= hss[o[i]].stop1;
+                                if(!hss[o[i]].start) gfrom= hss[o[i]].fromp;
                                 else                 gfrom= hss[o[i]].start_pos;
                         gto= hss[o[i]].stop2;
                         }
                         else                                           // ORF from stop (gfrom) to start codon (gto)
                         {
-                                if(!hss[o[i]].start) gto= hss[o[i]].stop2;
+//                              if(!hss[o[i]].start) gto= hss[o[i]].stop2;
+                                if(!hss[o[i]].start) gto= hss[o[i]].top;
                                 else                 gto= hss[o[i]].start_pos;
                         gfrom= hss[o[i]].stop1;
                         }
@@ -2592,7 +2595,7 @@ void process_hss(int from_hss, int to_hss, int ncds)
             G= hss[o[i]].G;
             strcpy(Pg,hss[o[i]].pstring);
 
-// Checks overlap with annotated genes
+// Checks overlap with annotated genes:
 
 			for(j= 0; j < ncds; ++j)
 			{
@@ -2669,13 +2672,15 @@ void process_hss(int from_hss, int to_hss, int ncds)
                                         if(hss[o[j]].strand == 'D')      // ORF from start codon (from) to stop (to)
                                         {
                                         to= hss[o[j]].stop2;
-                                                if(!hss[o[j]].start) from= hss[o[j]].stop1;
+//                                              if(!hss[o[j]].start) from= hss[o[j]].stop1;
+                                		if(!hss[o[j]].start) from= hss[o[j]].fromp;
                                                 else                 from= hss[o[j]].start_pos;
                                         }
                                         else                              // ORF from stop (from) to start codon (to)
                                         {
                                         from= hss[o[j]].stop1;
-                                                if(!hss[o[j]].start) to= hss[o[j]].stop2;
+//                                              if(!hss[o[j]].start) to= hss[o[j]].stop2;
+                                		if(!hss[o[j]].start) to= hss[o[j]].top;
                                                 else                 to= hss[o[j]].start_pos;
                                         }
 	
@@ -2723,13 +2728,16 @@ void write_results(int from_hss, int to_hss, int ncds, int genome_size)
     int	i, j, k, h, l, *o, s1, s2, types[13]= { 0 }, from, to, out;
     char	Pg[15], name[50];
     double	G, print_len, po;
-    FILE	*output1, *output2, *output3, *output4, *output5, *output7, *output8;
+    FILE	*output1, *output2, *output3, *output4, *output5, *output6, *output7, *output8;
 
     output1 = get_out_file(".newcds","w");
     output2= get_out_file(".profiles", "w");
     output3= get_out_file(".verbose", "a");
     output4= get_out_file(".altcds", "w");
     output5= get_out_file(".repetitive", "w");
+    output6= get_out_file(".modified", "w");
+
+fprintf(output6, "List of predicted ORFs modifying previous annotation.\n");
 
 	if(WRITE_SEQUENCES)
 	{
@@ -2793,8 +2801,7 @@ void write_results(int from_hss, int to_hss, int ncds, int genome_size)
 
 		if(k != 5)
 		{
-//			if(k == 0) 
-			if(k == 0 || k == 7)           // TESTING ALT GENES
+			if(k == 0 || k == 7)
 			{
 				if(hss[o[i]].hit_num == 1)
 				{
@@ -2870,6 +2877,57 @@ void write_results(int from_hss, int to_hss, int ncds, int genome_size)
                                     print_amino_acids(hss[o[i]].seq, hss[o[i]].seqlen, output8);
 								}
 							}
+						}
+						else fprintf(output5,"%s complement(%d..%d) %d %.4f\n", name, hss[o[i]].stop1 + s1, hss[o[i]].top + s2, hss[o[i]].len, hss[o[i]].entropy);
+// Length and Entropy to stdout:	fprintf(stdout,"%d\t%.5f\n", hss[o[i]].top - hss[o[i]].stop1 + 4, hss[o[i]].entropy);
+                        ++length[(hss[o[i]].top + s2 - hss[o[i]].stop1 - s1 + 1)/50];
+					}
+				}
+			}
+			else if((k == 2 || k == 3) && hss[o[i]].start)
+			{
+				if(hss[o[i]].hit_num == 1)
+				{
+					if(hss[o[i]].global_sig == 1) sprintf(name, "%c-%d*", hss[o[i]].hit_type, o[i]);
+					else                          sprintf(name, "%c-%d", hss[o[i]].hit_type, o[i]);
+
+					if(hss[o[i]].strand == 'D')
+					{
+						if(hss[o[i]].entropy > MAX_ENTROPY)
+						{
+				j= strlen(name);
+                                if(name[j - 1] != '*') { strcat(name, "-"); ++j; }
+				name[j]= start_char[hss[o[i]].start];
+				name[j + 1]= '\0';
+                                fprintf(output6,"%s %d..%d\n", name, hss[o[i]].start_pos + s1, hss[o[i]].stop2 + s2);
+								if(WRITE_SEQUENCES)
+								{
+                                    fprintf(output7,">%s %d..%d\n", name, hss[o[i]].start_pos + s1, hss[o[i]].stop2 + s2);
+                                    fprintf(output8,">%s %d..%d\n", name, hss[o[i]].start_pos + s1, hss[o[i]].stop2 + s2);
+                                    print_nucleotides(hss[o[i]].seq, hss[o[i]].seqlen, output7);
+                                    print_amino_acids(hss[o[i]].seq, hss[o[i]].seqlen, output8);
+								}
+						}
+						else fprintf(output5,"%s %d..%d %d %.4f\n", name, hss[o[i]].fromp + s1, hss[o[i]].stop2 + s2, hss[o[i]].len, hss[o[i]].entropy);
+// Length and Entropy to stdout:	fprintf(stdout,"%d\t%.5f\n", hss[o[i]].stop2 -  hss[o[i]].fromp + s2, hss[o[i]].entropy);
+                        ++length[(hss[o[i]].stop2 + s2 - hss[o[i]].fromp - s1 + 1)/50];
+					}
+					else
+					{
+						if(hss[o[i]].entropy > MAX_ENTROPY)
+						{
+				j= strlen(name);
+                                if(name[j - 1] != '*') { strcat(name, "-"); ++j; }
+				name[j]= start_char[hss[o[i]].start];
+				name[j + 1]= '\0';
+                                fprintf(output6,"%s complement(%d..%d)\n", name, hss[o[i]].stop1 + s1, hss[o[i]].start_pos + s2);
+								if(WRITE_SEQUENCES)
+								{
+                                    fprintf(output7,">%s++ %d..%d\n", name, hss[o[i]].stop1 + s1, hss[o[i]].start_pos + s2);
+                                    fprintf(output8,">%s++ %d..%d\n", name, hss[o[i]].stop1 + s1, hss[o[i]].start_pos + s2);
+                                    print_nucleotides(hss[o[i]].seq, hss[o[i]].seqlen, output7);
+                                    print_amino_acids(hss[o[i]].seq, hss[o[i]].seqlen, output8);
+								}
 						}
 						else fprintf(output5,"%s complement(%d..%d) %d %.4f\n", name, hss[o[i]].stop1 + s1, hss[o[i]].top + s2, hss[o[i]].len, hss[o[i]].entropy);
 // Length and Entropy to stdout:	fprintf(stdout,"%d\t%.5f\n", hss[o[i]].top - hss[o[i]].stop1 + 4, hss[o[i]].entropy);
@@ -3073,15 +3131,15 @@ void characterize_published_genes(int ncds, int tot_Ghits, double nuc[], long by
     double	G;
     FILE	*output1, *output2, *output3;
 
-    output1= get_out_file(".modified", "w");
+    output1= get_out_file(".excluded", "w");
     output2= get_out_file(".confirmed", "w");
     output3= get_out_file(".verbose", "w");
 
-// output1 = *.modified ( published CDSs modified)
+// output1 = *.excluded ( published CDSs contradicted or not supported)
 // output2 = *.confirmed ( published CDSs confirmed)
 // output3 = *.verbose   ( detailed features of all annotations and hits )
 
-    fprintf(output1,"List of published CDSs with modified annotation: NS= Not supported; MO= Modified; CO= Contradicted.\n");
+    fprintf(output1,"List of published CDSs with NS= Not supported or CO= Contradicted annotation.\n");
     fprintf(output2,"List of published CDSs confirmed by this analysis (p <= %.5f) (coordinates from start of first hit to stop codon)\n", SIGNIFICANCE);
     fprintf(output3,"PUBLISHED ANNOTATION\n\nNo\tGene\tCDS-fm\tCDS-to\tCDS-len\tStrand\tColor\tEntropy\tG-test (significance)\tCharacterization\n");
 
@@ -3211,7 +3269,7 @@ void write_published_exon(int j, int h, int k, int from, int to, int s1, int s2,
     int         hi;
     char	name[50];
 
-// output1 = *.modified ( published CDSs modified)
+// output1 = *.excluded ( published CDSs modified, not supported or contradicted)
 // output2 = *.confirmed   ( pulished CDSs confirmed )
 // output3 = *.verbose   ( detailed features of all annotations and hits )
 
@@ -3221,8 +3279,7 @@ void write_published_exon(int j, int h, int k, int from, int to, int s1, int s2,
 	if(gene[j].entropy <= MAX_ENTROPY) fprintf(output3, " repetitive");
     fprintf(output3, "\n\tA= %5.2f  C= %5.2f  G= %5.2f  T= %5.2f  S= %5.2f  S1= %5.2f  S2= %5.2f  S3= %5.2f  R= %5.2f  R1= %5.2f  R2= %5.2f  R3= %5.2f\n", nuc[3*6+0], nuc[3*6+1], nuc[3*6+2], nuc[3*6+3], nuc[3*6+4], nuc[0*6+4], nuc[1*6+4], nuc[2*6+4], nuc[3*6+5], nuc[0*6+5], nuc[1*6+5], nuc[2*6+5]);
 
-//	if(k == 0 || k == 2 || k == 3)     TESTING ALT GENES
-	if(0)
+	if(k == 0 || k == 2 || k == 3) 
 	{
 		if(strlen(gene[j].name))
 		{
