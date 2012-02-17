@@ -1725,35 +1725,35 @@ int maxG_test(char *seq, int len, int ori, char strand, int frame, int orfn, int
 
 					for(k= hss[hit].fromp; k >= 0 && k >= hss[hit].fromp - START_POS5; k -= 3)
 					{
-                        nt= 16 * seq[k] + 4 * seq[k + 1] + seq[k + 2];
+			    nt= get_codon(seq + k, 1);
 						if(nt == 14) { hss[hit].start_pos= k; k= 0; flags= 1; }
 					}
 
 					if(!flags)
 						for(k= hss[hit].fromp; k < hss[hit].top && k <= hss[hit].fromp + START_POS3; k += 3)
 						{
-                            nt= 16 * seq[k] + 4 * seq[k + 1] + seq[k + 2];
+			    nt= get_codon(seq + k, 1);
 							if(nt == 14) { hss[hit].start_pos= k; k= hss[hit].top; flags= 1; }
 						}
 
 					if(!flags)
 						for(k= hss[hit].fromp; k >= 0 && k >= hss[hit].fromp - START_POS5; k -= 3)
 						{
-                            nt= 16 * seq[k] + 4 * seq[k + 1] + seq[k + 2];
+			    nt= get_codon(seq + k, 1);
 							if(nt == 46) { hss[hit].start_pos= k; k= 0; flags= 3; }
 						}
 
 					if(!flags)
 						for(k= hss[hit].fromp; k < hss[hit].top && k <= hss[hit].fromp + START_POS3; k += 3)
 						{
-                            nt= 16 * seq[k] + 4 * seq[k + 1] + seq[k + 2];
+			    nt= get_codon(seq + k, 1);
 							if(nt == 46) { hss[hit].start_pos= k; k= hss[hit].top; flags= 3; }
 						}
 
 					if(!flags)
 						for(k= hss[hit].fromp - START_POS5 - 3; k >= 0; k -= 3)
 						{
-                            nt= 16 * seq[k] + 4 * seq[k + 1] + seq[k + 2];
+			    nt= get_codon(seq + k, 1);
 							if(nt == 14) { hss[hit].start_pos= k; k= 0; flags= 2; }
 							else if(nt == 46) { hss[hit].start_pos= k; k= 0; flags= 4; }
 						}
@@ -1761,63 +1761,63 @@ int maxG_test(char *seq, int len, int ori, char strand, int frame, int orfn, int
 					if(!flags)
 						for(k= hss[hit].fromp; k >= 0 && k >= hss[hit].fromp - START_POS5; k -= 3)
 						{
-                            nt= 16 * seq[k] + 4 * seq[k + 1] + seq[k + 2];
+			    nt= get_codon(seq + k, 1);
 							if(nt == 62) { hss[hit].start_pos= k; k= 0; flags= 5; }
 						}
 
 					if(!flags)
 						for(k= hss[hit].fromp; k < hss[hit].top && k <= hss[hit].fromp + START_POS3; k += 3)
 						{
-                            nt= 16 * seq[k] + 4 * seq[k + 1] + seq[k + 2];
+			    nt= get_codon(seq + k, 1);
 							if(nt == 62) { hss[hit].start_pos= k; k= hss[hit].top; flags= 5; }
 						}
 
 					if(!flags)
 						for(k= hss[hit].fromp - START_POS5 - 3; k >= 0; k -= 3)
 						{
-                            nt= 16 * seq[k] + 4 * seq[k + 1] + seq[k + 2];
+			    nt= get_codon(seq + k, 1);
 							if(nt == 62) { hss[hit].start_pos= k; k= 0; flags= 6; }
 						}
 
 					if(!flags)
 						for(k= hss[hit].fromp; k >= 0 && k >= hss[hit].fromp - START_POS5; k -= 3)
 						{
-                            nt= 16 * seq[k] + 4 * seq[k + 1] + seq[k + 2];
+			    nt= get_codon(seq + k, 1);
 							if(nt == 30) { hss[hit].start_pos= k; k= 0; flags= 7; }
 						}
 
 					if(!flags)
 						for(k= hss[hit].fromp; k < hss[hit].top && k <= hss[hit].fromp + START_POS3; k += 3)
 						{
-                            nt= 16 * seq[k] + 4 * seq[k + 1] + seq[k + 2];
+			    nt= get_codon(seq + k, 1);
 							if(nt == 30) { hss[hit].start_pos= k; k= hss[hit].top; flags= 7; }
 						}
 
 					if(!flags)
 						for(k= hss[hit].fromp - START_POS5 - 3; k >= 0; k -= 3)
 						{
-                            nt= 16 * seq[k] + 4 * seq[k + 1] + seq[k + 2];
+			    nt= get_codon(seq + k, 1);
 							if(nt == 30) { hss[hit].start_pos= k; k= 0; flags= 8; }
 						}
 
 					if(!flags)
 						for(k= hss[hit].fromp; k >= 0 && k >= hss[hit].fromp - START_POS5; k -= 3)
 						{
-                            nt= 16 * seq[k] + 4 * seq[k + 1] + seq[k + 2];
+			    nt= get_codon(seq + k, 1);
 							if(nt == 15) { hss[hit].start_pos= k; k= 0; flags= 9; }
 						}
 
 					if(!flags)
 						for(k= hss[hit].fromp; k < hss[hit].top && k <= hss[hit].fromp + START_POS3; k += 3)
 						{
-                            nt= 16 * seq[k] + 4 * seq[k + 1] + seq[k + 2];
+			    nt= get_codon(seq + k, 1);
 							if(nt == 15) { hss[hit].start_pos= k; k= hss[hit].top; flags= 9; }
 						}
 
 					if(!flags)
 						for(k= hss[hit].fromp - START_POS5 - 3; k >= 0; k -= 3)
 						{
-                            nt= 16 * seq[k] + 4 * seq[k + 1] + seq[k + 2];
+			    nt= get_codon(seq + k, 1);
 							if(nt == 15) { hss[hit].start_pos= k; k= 0; flags= 10; }
 						}
 
@@ -2177,10 +2177,10 @@ void build_scores(char *seg, int n, double *sc)      // sc[6 * 64]
 
 	stop0 = N[3] * N[0] * N[0] + N[3] * N[0] * N[2] + ( N[3] * N[2] * N[0]) * (1 - MYCOPLASMA);
 
-	for(i = 0; i < 4; i++)
-		for(j = 0; j < 4; j++)
-			for(k = 0; k < 4; k++)
-				sc[16*i+4*j+k] -= log(N[i] * N[j] * N[k] / (1.0 - stop0));
+//	for(i = 0; i < 4; i++)
+//		for(j = 0; j < 4; j++)
+//			for(k = 0; k < 4; k++)
+//				sc[16*i+4*j+k] -= log(N[i] * N[j] * N[k] / (1.0 - stop0));
 
 	for(codon[0] = 0; codon[0] < 4; ++codon[0])
 		for(codon[1] = 0; codon[1] < 4; ++codon[1])
