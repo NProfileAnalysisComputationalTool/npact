@@ -21,6 +21,8 @@
 # define HAIRPIN_RADIUS 2.0
 # define STEM_SEPARATION 1.0
 
+# define ANOPIAS 0
+
 # define VIEWER "showps"
 # define TIC_W 5.0
 # define NFS 7.0
@@ -800,12 +802,26 @@ main(int argc, char *argv[]) {
             fprintf(stdout,"/TitleFontSize {%.1f} def\n",TFS);
             fprintf(stdout,"/Title2FontSize {%.1f} def\n",TFS);
             fprintf(stdout,"/LegendFontSize {%.1f} def\n",LFS);
+
+            if(ANOPIAS)
+	    {
+            fprintf(stdout,"/R {0.835 0.369 0.000 setrgbcolor} def\n");  // Vermillion
+            fprintf(stdout,"/G {0.800 0.475 0.655 setrgbcolor} def\n");  // Reddish purple
+            fprintf(stdout,"/B {0.000 0.447 0.698 setrgbcolor} def\n");  // Blue
+            fprintf(stdout,"/LR {0.918 0.685 0.300 setrgbcolor} def\n");  // Light Vermillion
+            fprintf(stdout,"/LG {0.900 0.738 0.300 setrgbcolor} def\n");  // Light Reddish purple
+            fprintf(stdout,"/LB {0.300 0.724 0.849 setrgbcolor} def\n");  // Light Blue
+	    }
+            else
+	    {
             fprintf(stdout,"/R {1.0 0.0 0.0 setrgbcolor} def\n");
             fprintf(stdout,"/G {0.0 1.0 0.0 setrgbcolor} def\n");
             fprintf(stdout,"/B {0.0 0.0 1.0 setrgbcolor} def\n");
-            fprintf(stdout,"/LR {1.0 0.6 0.6 setrgbcolor} def\n");
-            fprintf(stdout,"/LG {0.6 1.0 0.6 setrgbcolor} def\n");
-            fprintf(stdout,"/LB {0.6 0.6 1.0 setrgbcolor} def\n");
+            fprintf(stdout,"/LR {1.0 0.5 0.5 setrgbcolor} def\n");
+            fprintf(stdout,"/LG {0.5 1.0 0.5 setrgbcolor} def\n");
+            fprintf(stdout,"/LB {0.5 0.5 1.0 setrgbcolor} def\n");
+	    }
+
             fprintf(stdout,"/DarkGray {0.25 0.25 0.25 setrgbcolor} def\n");
             fprintf(stdout,"/Gray {0.5 0.5 0.5 setrgbcolor} def\n");
             fprintf(stdout,"/LightGray {0.75 0.75 0.75 setrgbcolor} def\n");
