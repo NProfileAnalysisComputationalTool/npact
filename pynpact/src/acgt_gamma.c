@@ -17,9 +17,9 @@ int	RANDOMIZE= 0;
 // Hits are sorted by length of global significance (the sequence length at which
 // the hit has significance p < 0.01 ) if none of these conditions below apply:
 
-#define SORT_BY_SCORE 1
+#define SORT_BY_SCORE 0
 #define SORT_BY_HIT_SLOPE 0
-#define SORT_BY_ORF_SLOPE 0
+#define SORT_BY_ORF_SLOPE 1
 
 #define WRITE_SEQUENCES 0
 
