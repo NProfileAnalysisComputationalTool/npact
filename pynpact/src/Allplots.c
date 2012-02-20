@@ -21,7 +21,7 @@
 # define HAIRPIN_RADIUS 2.0
 # define STEM_SEPARATION 1.0
 
-# define ANOPIAS 0
+# define ANOPIAS 1
 
 # define VIEWER "showps"
 # define TIC_W 5.0
@@ -1374,7 +1374,7 @@ main(int argc, char *argv[]) {
                 else if(modified[i][0] % period == 2) fprintf(stdout, "LR");
                 else if(modified[i][0] % period==0) fprintf(stdout, "LG");
                 fprintf(stdout," %.1f %.2f M %.2f Rarrow\n", (modified[i][0] - (float)start) / delta * WIDTH, HIGHT + HIGHT_MOD + 2.0, (modified[i][1] - modified[i][0]) / delta * WIDTH);
-//              fprintf(stdout,"Black %.1f %.2f M (%s) Cshow\n", ((modified[i][1] + modified[i][0]) / 2 - (float)start) / delta * WIDTH, HIGHT + HIGHT_MOD + 5.0, mod_name[i]);
+                fprintf(stdout,"Gray %.1f %.2f M (%s) Cshow\n", ((modified[i][1] + modified[i][0]) / 2 - (float)start) / delta * WIDTH, HIGHT + HIGHT_MOD + 5.0, mod_name[i]);
             }
             else {
                 if(period % 3) fprintf(stdout, "Black");
@@ -1382,7 +1382,7 @@ main(int argc, char *argv[]) {
                 else if(modified[i][0] % period == 2) fprintf(stdout, "LG");
                 else if(modified[i][0] % period == 0) fprintf(stdout, "LB");
                 fprintf(stdout," %.1f %.2f M %.2f Larrow\n", (modified[i][0] - (float)start) / delta * WIDTH, HIGHT + HIGHT_MOD - 2.0, (modified[i][1] - modified[i][0]) / delta * WIDTH);
-//              fprintf(stdout,"Black %.1f %.2f M (%s) Cshow\n", ((modified[i][1] + modified[i][0]) / 2 - (float)start) / delta * WIDTH, HIGHT + HIGHT_MOD - 10.0, mod_name[i]);
+                fprintf(stdout,"Gray %.1f %.2f M (%s) Cshow\n", ((modified[i][1] + modified[i][0]) / 2 - (float)start) / delta * WIDTH, HIGHT + HIGHT_MOD - 10.0, mod_name[i]);
             }
         }
 
