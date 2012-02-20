@@ -13,7 +13,7 @@ main(argc,argv)
 int	argc;
 char	*argv[];
 {
-   char	longstr[400],shortstr[200],extrastr[200],*p,*q,exon[20][30],name[20],str;
+   char	longstr[400],shortstr[200],extrastr[200],*p,*q,exon[20][30],name[50],str;
    int	i,ex,stop=0;
    FILE	*input;
 
@@ -107,14 +107,14 @@ char	*argv[];
          }
          else strcpy(name,"?");
 
-         if(!ex) fprintf(stdout,"%-11.11s %s",name,shortstr);
+         if(!ex) fprintf(stdout,"%s %s",name,shortstr);
          else
             for(i=0;i<ex;++i)
             {
                strcpy(shortstr,name);
                if(str=='C') sprintf(shortstr+strlen(shortstr),"_E%d",ex-i);
                else sprintf(shortstr+strlen(shortstr),"_E%d",i+1);
-               fprintf(stdout,"%-11.11s ",shortstr);
+               fprintf(stdout,"%s ",shortstr);
                if(str=='C') fprintf(stdout,"complement(");
                fprintf(stdout,"%s",exon[i]);
                if(str=='C') fprintf(stdout,")\n");
