@@ -17,9 +17,9 @@ int	RANDOMIZE= 0;
 // Hits are sorted by length of global significance (the sequence length at which
 // the hit has significance p < 0.01 ) if none of these conditions below apply:
 
-#define SORT_BY_SCORE 0
+#define SORT_BY_SCORE 1
 #define SORT_BY_HIT_SLOPE 0
-#define SORT_BY_ORF_SLOPE 1
+#define SORT_BY_ORF_SLOPE 0
 
 #define WRITE_SEQUENCES 0
 
@@ -51,6 +51,8 @@ int	RANDOMIZE= 0;
 # define START_POS5 45
 # define START_POS3 12
 
+# define CODONS 65
+
 int	MYCOPLASMA= 0;
 
 /* Boolean RANDOMIZE forces if true a randomization (shuffling) of the
@@ -58,7 +60,7 @@ int	MYCOPLASMA= 0;
 
 // #define DOWN_G 16.919  // Value at which G-hss is terminated, corresponding to G-Prob = 0.05; d.f. = 9
 #define DOWN_G 21.67  // Value at which G-hss is terminated, corresponding to G-Prob = 0.01; d.f. = 9
-#define mHL 36         // Minimum hit-length
+#define mHL 36         // Minimum hit-length in nucleotides
 
 /* If REPETITIONS = 0, it reads threshold values from table and allowed values are: 0.01, 0.001, 0.0001.                 */
 /* If REPETITIONS > 0 distribution is sampled and SIGNIFICANCE is meaninigful only if REPETITIONS >= (1 / SIGNIFICANCE). */
@@ -80,7 +82,7 @@ float	threshold[1][1][1];
 #define MAX_LINE 400
 #define SHUFFLE 1
 #define EPSILON 0.01
-#define NUMBERS { 0,-1,1,-1,-1,-1,2,-1,-1,-1,-1,-1,-1,1,-1,-1,-1,-1,-1,3,3,-1,-1,-1,-1,-1 }  /* n is coded as c to avoid insertion of stop codons */
+#define NUMBERS { 0,-1,1,-1,-1,-1,2,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,3,3,-1,-1,-1,-1,-1 }  /* n is coded as c to avoid insertion of stop codons */
 #define LETTERS "acgtn"
 # define AA_LETTERS "KNKNTTTTRSRSIIMIQHQHPPPPRRRRLLLLEDEDAAAAGGGGVVVV*Y*YSSSSWCWCLFLF"
 # define AA_NUMBERS { 0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10,11,12,13,14,15,16,17,18,19,20,21,22,23,24,25,26,27,28,29,30,31,32,33,34,35,36,37,38,39,40,41,42,43,44,45,46,47,48,49,50,51,52,53,54,55,56,57,58,59,60,61,62,63 }
@@ -113,7 +115,11 @@ int	**orf_num[6];
 
 int	search_size;
 
-double	sc[384];        // Old: sc[6][64]
+// New:
+double sc[6 * CODONS];
+// Old:
+// double sc[6][64]
+// double  sc[384];       
 
 FILE *output, *fp;
 
@@ -441,11 +447,11 @@ void get_sequence(int from, int len, char strand, char *ORF)
 		if(c >= 'A' && c <= 'Z') c += 'a' - 'A';
 		if (c >= 'a' && c <= 'z')
 		{
-            if(numbers[c - 'a'] == -1)    // TEMPORARY FIX FOR NON-STANDARD BASE
-            {
-                if(strand == 'D') c= 'c';
-                else              c= 'g';
-            }
+//            if(numbers[c - 'a'] == -1)    TEMPORARY FIX FOR NON-STANDARD BASE NOT USED
+//            {
+//                if(strand == 'D') c= 'c';
+//                else              c= 'g';
+//            }
 
             ORF[i++] = numbers[c - 'a'];
 		}
@@ -469,22 +475,19 @@ void get_sequence(int from, int len, char strand, char *ORF)
 int genome_composition(double *tnuc, long *ffrom, int *o, int k)
 {
     char	c;
-    int	i= 0, j, n;
+    int	i= 0, j, n, nuc;
 
 	while((c= fgetc(fp)) && !feof(fp))
 	{
 		if(c >= 'A' && c <= 'Z') c += 'a' - 'A';
 		if (c >= 'a' && c <= 'z')
 		{
-			if(c != 'a' && c != 'c' && c != 'g' && c != 't')
-			{
-                c= 'c'; //  TEMPORARY FIX FOR INVALID BASE
-                ++ttinvalid_base;
-			}
+		nuc= numbers[c - 'a'];
 
 			while(i < k && (int)ffrom[o[i]] == tnuc[4]) { ffrom[o[i]]= ftell(fp); ++i; }
 
-            ++tnuc[numbers[c-'a']];
+			if(nuc < 0) ++ttinvalid_base;
+            		else ++tnuc[nuc];
             ++tnuc[4];
 		}
 	}
@@ -504,7 +507,7 @@ int genome_composition(double *tnuc, long *ffrom, int *o, int k)
 
 int analyze_genome(int genome_size, int tot_hss, int *on) 
 {
-    int	pos= 0, j, k, t, f, codon, h, th, i, len[6]= {0}, first_stop[6], second_stop[6],frame;
+    int	pos= 0, j, k, t, f, codon, h, th, i, len[6]= {0}, first_stop[6], second_stop[6], frame, ncod[6]= { 0 };
     char	*p, c, s;
 
 	while(pos < 1)
@@ -513,7 +516,7 @@ int analyze_genome(int genome_size, int tot_hss, int *on)
 		if(c >= 'A' && c <= 'Z') c += 'a' - 'A';
 		if(c >= 'a' && c <= 'z') ++pos;
 	}
-	if(c != 'a' && c != 'c' && c != 'g' && c != 't') c= 'c'; //  TEMPORARY FIX FOR INVALID BASE
+//	if(c != 'a' && c != 'c' && c != 'g' && c != 't') c= 'c'; TEMPORARY FIX FOR INVALID BASE NOT USED
 
     ORF[2*MAX_ORF_SIZE]= numbers[c - 'a']; 
     ORF[3*MAX_ORF_SIZE]= 3 - numbers[c - 'a'];
@@ -524,7 +527,7 @@ int analyze_genome(int genome_size, int tot_hss, int *on)
 		if(c >= 'A' && c <= 'Z') c += 'a' - 'A';
 		if(c >= 'a' && c <= 'z') ++pos;
 	}
-	if(c != 'a' && c != 'c' && c != 'g' && c != 't') c= 'c'; //  TEMPORARY FIX FOR INVALID BASE
+//	if(c != 'a' && c != 'c' && c != 'g' && c != 't') c= 'c'; TEMPORARY FIX FOR INVALID BASE NOT USED
 
     ORF[2*MAX_ORF_SIZE + 1]= numbers[c - 'a'];
     ORF[3*MAX_ORF_SIZE + 1]= 3 - numbers[c - 'a'];
@@ -553,13 +556,13 @@ int analyze_genome(int genome_size, int tot_hss, int *on)
 
 			for(k= 0; k < 3; ++k)
 			{
-				if(c != 'a' && c != 'c' && c != 'g' && c != 't') c= 'c'; //  TEMPORARY FIX FOR INVALID BASE
+//				if(c != 'a' && c != 'c' && c != 'g' && c != 't') c= 'c'; TEMPORARY FIX FOR INVALID BASE NOT USED
                 ORF[k * MAX_ORF_SIZE + len[k]++] = numbers[c - 'a'];
 			}
 			for(k= 3; k < 6; ++k)
 			{
-				if(c != 'a' && c != 'c' && c != 'g' && c != 't') c= 'g'; //  TEMPORARY FIX FOR INVALID BASE
-                ORF[k*MAX_ORF_SIZE + len[k]++] = 3 - numbers[c - 'a'];
+//				if(c != 'a' && c != 'c' && c != 'g' && c != 't') c= 'g'; TEMPORARY FIX FOR INVALID BASE NOT USED
+                ORF[k * MAX_ORF_SIZE + len[k]++] = 3 - numbers[c - 'a'];
 			}
 
 // DIRECT STRAND:
@@ -567,6 +570,7 @@ int analyze_genome(int genome_size, int tot_hss, int *on)
             frame= (pos - 1) % 3;
 
             codon= get_codon(ORF + frame * MAX_ORF_SIZE + len[frame] - 3, 1);
+		if(codon == CODONS - 1) ++ncod[frame];
 
 			if(codon == 48 || codon == 50 || (codon == 56 && !MYCOPLASMA) || pos >= genome_size - 2)
 			{
@@ -578,7 +582,7 @@ int analyze_genome(int genome_size, int tot_hss, int *on)
 				}
 				else second_stop[frame]= pos - 1;
 
-				if(len[frame] >= mHL)
+				if(len[frame] - 3 * ncod[frame] >= mHL)
 				{
                     orf_num[frame]= (int **)realloc(orf_num[frame],(tot_orfs[frame] + 1) * sizeof(int *));
                     orf_num[frame][tot_orfs[frame]]= (int *)malloc(3 * sizeof(int));
@@ -621,6 +625,7 @@ int analyze_genome(int genome_size, int tot_hss, int *on)
                     tot_hss += th;
 				}
                 len[frame]= 0;
+		ncod[frame]= 0;
                 first_stop[frame]= second_stop[frame] + 4;
 			}
 
@@ -629,6 +634,7 @@ int analyze_genome(int genome_size, int tot_hss, int *on)
             frame= pos % 3 + 3;
 
             codon= get_codon(ORF + frame * MAX_ORF_SIZE + len[frame] - 3, 0);
+		if(codon == CODONS - 1) ++ncod[frame];
 
 			if(codon == 48 || codon == 50 || (codon == 56 && !MYCOPLASMA) || pos >= genome_size - 2)
 			{
@@ -640,7 +646,7 @@ int analyze_genome(int genome_size, int tot_hss, int *on)
 				else second_stop[frame]= pos - 1;
 
 
-				if(len[frame] >= mHL)
+				if(len[frame] - 3 * ncod[frame] >= mHL)
 				{
                     orf_num[frame]= (int **)realloc(orf_num[frame],(tot_orfs[frame] + 1) * sizeof(int *));
                     orf_num[frame][tot_orfs[frame]]= (int *)malloc(3 * sizeof(int *));
@@ -689,6 +695,7 @@ int analyze_genome(int genome_size, int tot_hss, int *on)
                     tot_hss += th;
 				}
                 len[frame]= 0;
+		ncod[frame]= 0;
                 first_stop[frame]= second_stop[frame] + 4;
 			}
 		}
@@ -727,11 +734,11 @@ void sort(double * array, int size)
 /*** Function score_orf_random() ***/
 /***************************************/
 
-// Requires global double sc[6 * 64]
+// Requires global double sc[6 * CODONS] where i*(CODONS-1) is the average of row i
 
 int score_orf_random(char *orf, int n, int tot_hss)
 {
-    int i, j = 0, k, nuc[4]= {0}, downthr_pos, rep, sig_pos, from, to, last_zero= n, from_pos, to_pos= n - 1;
+    int i, j = 0, k, nuc[4]= {0}, downthr_pos, rep, sig_pos, from, to, last_zero= n, from_pos, to_pos= n - 1, cod, ncod;
     char *seq;
     double r, Score = 0.0, maxscore= 0.0;
     double maxrscore[REPETITIONS + 1] = {0.0};
@@ -763,9 +770,13 @@ int score_orf_random(char *orf, int n, int tot_hss)
 	
 // Finds HSSs in ORF:
 
+ncod= 0;
+
 	for(i = n - 3; i >= 0; i -= 3)
 	{
-		Score += sc[16*orf[i] + 4*orf[i+1] + orf[i+2]];    //  Score += sc[0][16*orf[i] + 4*orf[i+1] + orf[i+2]];
+	cod= get_codon(orf + i, 1);
+	if(cod == CODONS - 1) ++ncod;
+		Score += sc[cod];    //  Score += sc[0][16*orf[i] + 4*orf[i+1] + orf[i+2]];
 
 		if(Score < 0.0 || maxscore - Score >= maxrscore[downthr_pos])
 			Score = 0.0;
@@ -780,36 +791,37 @@ int score_orf_random(char *orf, int n, int tot_hss)
 		
 		if (Score == 0.0)
 		{
-			if (maxscore >= maxrscore[sig_pos] && to_pos - from_pos + 1 >= mHL)
+			if (maxscore >= maxrscore[sig_pos] && to_pos - from_pos + 1 - 3 * ncod >= mHL)
 			{
 				to_pos= last_zero - 1;
-                hss= (struct HSSs *)realloc(hss,(tot_hss+j+1)*sizeof(struct HSSs));
-                hss[tot_hss+j].fromp= from_pos;
-                hss[tot_hss+j].top= to_pos;
-                hss[tot_hss+j].score= maxscore;
+                hss= (struct HSSs *)realloc(hss, (tot_hss + j + 1) * sizeof(struct HSSs));
+                hss[tot_hss + j].fromp= from_pos;
+                hss[tot_hss + j].top= to_pos;
+                hss[tot_hss + j].score= maxscore;
                 k= 0;
-                do ++k; while((sig_pos+k) < rep && maxscore >= maxrscore[sig_pos+k]);
-                hss[tot_hss+j].prob= 1.0 - (float)(sig_pos+k-1)/((float)rep);
-                hss[tot_hss+j].type= 5;
+                do ++k; while((sig_pos + k) < rep && maxscore >= maxrscore[sig_pos + k]);
+                hss[tot_hss + j].prob= 1.0 - (float)(sig_pos + k - 1) / ((float)rep);
+                hss[tot_hss + j].type= 5;
 
 // Checks HSS against alternative reading frames:
 
-				from= from_pos;
-				to= to_pos;
+			from= from_pos;
+			to= to_pos;
 
                 for(k= 1; k <= 5; ++k)
                 {
-                    r= score(orf + from, to - from + 1, sc + k * 64, &from, &to, 1);    //  r= score(orf+from,to-from+1,sc[k],&from,&to);
-					from += from_pos;
-					to += from_pos;
-					from_pos= from;
-				}
+                    r= score(orf + from, to - from + 1, sc + k * CODONS, &from, &to, 1);
+			from += from_pos;
+			to += from_pos;
+			from_pos= from;
+		}
 
-                maxscore= score(orf + from, to - from + 1, sc, &from, &to, 1);    //  maxscore_array[j]= score(orf+from,to-from+1,sc[0],&from,&to);
-				from += from_pos;
-				to += from_pos;
-				from_pos= from;
-                to_pos= to;
+                maxscore= score(orf + from, to - from + 1, sc, &from, &to, 1);   
+//  maxscore_array[j]= score(orf+from,to-from+1,sc[0],&from,&to);
+			from += from_pos;
+			to += from_pos;
+			from_pos= from;
+                	to_pos= to;
 /**/
 
 				if (maxscore >= maxrscore[sig_pos])
@@ -820,13 +832,14 @@ int score_orf_random(char *orf, int n, int tot_hss)
                     hss[tot_hss + j].type= 0;
                     k= 0;
                     do ++k; while((sig_pos + k) < rep && maxscore >= maxrscore[sig_pos + k]);
-                    hss[tot_hss + j].prob= 1.0 - (float)(sig_pos + k - 1)/((float)rep);
+                    hss[tot_hss + j].prob= 1.0 - (float)(sig_pos + k - 1) / ((float)rep);
 				}
                 ++j;
 			}
 			last_zero = i;
 			to_pos= i - 1;
 			maxscore= 0.0;
+			ncod= 0;
 		}
 	}
 
@@ -839,11 +852,11 @@ int score_orf_random(char *orf, int n, int tot_hss)
 /*** Function score_orf_table() ***/
 /**************************************/
 
-// Requires global double sc[6 * 64]
+// Requires global double sc[6 * CODONS] where i*(CODONS-1) is the average of row i
 
 int score_orf_table(char *orf, int n, int tot_hss)
 {
-    int i, j, h, k, l, t, nuc[4]= {0}, from, to, last_zero= n, from_pos, to_pos= n - 1, cod, nt, flag;
+    int i, j, h, k, l, t, nuc[4]= {0}, from, to, last_zero= n, from_pos, to_pos= n - 1, cod, ncod, nt, flag;
     float	a[3], b[3], f;
     char *seq;
     double r, Score = 0.0, maxscore= 0.0, max_len;
@@ -907,6 +920,7 @@ int score_orf_table(char *orf, int n, int tot_hss)
 	
 // Finds HSSs in ORF:
 
+	ncod= 0;
 	last_zero= n;
 	Score= 0.0;
 	h= 0;
@@ -914,6 +928,7 @@ int score_orf_table(char *orf, int n, int tot_hss)
 	for(i= n - 3; i >= 0; i -= 3)
 	{
 	cod= get_codon(orf + i, 1);
+	if(cod == CODONS - 1) ++ncod;
         Score += sc[cod];    //  Score += sc[0][16*orf[i] + 4*orf[i+1] + orf[i+2]];
 
 		if(Score < 0.0 || maxscore - Score >= down_thr)
@@ -929,7 +944,7 @@ int score_orf_table(char *orf, int n, int tot_hss)
 		
 		if (Score == 0.0)
 		{
-			if (maxscore >= thr[t] && to_pos - from_pos + 1 >= mHL && thr[t] > 0.0)
+			if (maxscore >= thr[t] && to_pos - from_pos + 1 - 3 * ncod >= mHL && thr[t] > 0.0)
 			{
 				to_pos= last_zero - 1;
                 hss= (struct HSSs *)realloc(hss, (tot_hss + h + 1) * sizeof(struct HSSs));
@@ -952,7 +967,7 @@ int score_orf_table(char *orf, int n, int tot_hss)
 
                 for(k= 1; k <= 5; ++k)
                 {
-                    r= score(orf + from, to - from + 1, sc + k * 64, &from, &to, 1);    //  r= score(orf+from,to-from+1,sc[k],&from,&to);
+                    r= score(orf + from, to - from + 1, sc + k * CODONS, &from, &to, 1);    //  r= score(orf+from,to-from+1,sc[k],&from,&to);
 					from += from_pos;
 					to += from_pos;
 					from_pos= from;
@@ -974,35 +989,40 @@ int score_orf_table(char *orf, int n, int tot_hss)
 
                 for(k= hss[tot_hss + h].fromp; k >= 0 && k >=hss[tot_hss + h].fromp - START_POS5; k -= 3)
                 {
-					nt= 16 * orf[k] + 4 * orf[k + 1] + orf[k + 2];
+//					nt= 16 * orf[k] + 4 * orf[k + 1] + orf[k + 2];
+					nt= get_codon(orf + k, 1);
                     if(nt == 14) { hss[tot_hss + h].start_pos= k; k= 0; flag= 1; }
                 }
 
                 if(!flag)
                     for(k= hss[tot_hss + h].fromp; k < hss[tot_hss + h].top && k <= hss[tot_hss + h].fromp + START_POS3; k += 3)
                     {
-						nt= 16 * orf[k] + 4 * orf[k + 1] + orf[k + 2];
+//					nt= 16 * orf[k] + 4 * orf[k + 1] + orf[k + 2];
+					nt= get_codon(orf + k, 1);
                         if(nt == 14) { hss[tot_hss + h].start_pos= k; k= hss[tot_hss + h].top; flag= 1; }
                     }
 
                 if(!flag)
                     for(k= hss[tot_hss + h].fromp; k >= 0 && k >= hss[tot_hss + h].fromp - START_POS5; k -= 3)
                     {
-						nt= 16 * orf[k] + 4 * orf[k + 1] + orf[k + 2];
+//					nt= 16 * orf[k] + 4 * orf[k + 1] + orf[k + 2];
+					nt= get_codon(orf + k, 1);
                         if(nt == 46) { hss[tot_hss + h].start_pos= k; k= 0; flag= 3; }
                     }
 
                 if(!flag)
                     for(k= hss[tot_hss + h].fromp; k < hss[tot_hss + h].top && k <= hss[tot_hss + h].fromp + START_POS3; k += 3)
                     {
-						nt= 16 * orf[k] + 4 * orf[k + 1] + orf[k + 2];
+//					nt= 16 * orf[k] + 4 * orf[k + 1] + orf[k + 2];
+					nt= get_codon(orf + k, 1);
                         if(nt == 46) { hss[tot_hss + h].start_pos= k; k= hss[tot_hss + h].top; flag= 3; }
                     }
 
                 if(!flag)
                     for(k= hss[tot_hss + h].fromp - START_POS5 - 3; k >= 0; k -= 3)
                     {
-						nt= 16 * orf[k] + 4 * orf[k + 1] + orf[k + 2];
+//					nt= 16 * orf[k] + 4 * orf[k + 1] + orf[k + 2];
+					nt= get_codon(orf + k, 1);
                         if(nt == 14) { hss[tot_hss + h].start_pos= k; k= 0; flag= 2; }
                         else if(nt == 46) { hss[tot_hss + h].start_pos= k; k= 0; flag= 4; }
                     }
@@ -1010,63 +1030,72 @@ int score_orf_table(char *orf, int n, int tot_hss)
                 if(!flag)
                     for(k= hss[tot_hss + h].fromp; k >= 0 && k >= hss[tot_hss + h].fromp - START_POS5; k -= 3)
                     {
-						nt= 16 * orf[k] + 4 * orf[k + 1] + orf[k + 2];
+//					nt= 16 * orf[k] + 4 * orf[k + 1] + orf[k + 2];
+					nt= get_codon(orf + k, 1);
                         if(nt == 62) { hss[tot_hss + h].start_pos= k; k= 0; flag= 5; }
                     }
 
                 if(!flag)
                     for(k= hss[tot_hss + h].fromp; k < hss[tot_hss + h].top && k <= hss[tot_hss + h].fromp + START_POS3; k += 3)
                     {
-						nt= 16 * orf[k] + 4 * orf[k + 1] + orf[k + 2];
+//					nt= 16 * orf[k] + 4 * orf[k + 1] + orf[k + 2];
+					nt= get_codon(orf + k, 1);
                         if(nt == 62) { hss[tot_hss + h].start_pos= k; k= hss[tot_hss + h].top; flag= 5; }
                     }
 
                 if(!flag)
                     for(k= hss[tot_hss + h].fromp - START_POS5 - 3; k >= 0; k -= 3)
                     {
-						nt= 16 * orf[k] + 4 * orf[k + 1] + orf[k + 2];
+//					nt= 16 * orf[k] + 4 * orf[k + 1] + orf[k + 2];
+					nt= get_codon(orf + k, 1);
                         if(nt == 62) { hss[tot_hss + h].start_pos= k; k= 0; flag= 6; }
                     }
 
                 if(!flag)
                     for(k= hss[tot_hss + h].fromp; k >= 0 && k >= hss[tot_hss + h].fromp - START_POS5; k -= 3)
                     {
-						nt= 16 * orf[k] + 4 * orf[k + 1] + orf[k + 2];
+//					nt= 16 * orf[k] + 4 * orf[k + 1] + orf[k + 2];
+					nt= get_codon(orf + k, 1);
                         if(nt == 30) { hss[tot_hss + h].start_pos= k; k= 0; flag= 7; }
                     }
 
                 if(!flag)
                     for(k= hss[tot_hss + h].fromp; k < hss[tot_hss + h].top && k <= hss[tot_hss + h].fromp + START_POS3; k += 3)
                     {
-						nt= 16 * orf[k] + 4 * orf[k + 1] + orf[k + 2];
+//					nt= 16 * orf[k] + 4 * orf[k + 1] + orf[k + 2];
+					nt= get_codon(orf + k, 1);
                         if(nt == 30) { hss[tot_hss + h].start_pos= k; k= hss[tot_hss + h].top; flag= 7; }
                     }
 
                 if(!flag)
                     for(k= hss[tot_hss + h].fromp - START_POS5 - 3; k >= 0; k -= 3)
                     {
-						nt= 16 * orf[k] + 4 * orf[k + 1] + orf[k + 2];
+//					nt= 16 * orf[k] + 4 * orf[k + 1] + orf[k + 2];
+					nt= get_codon(orf + k, 1);
                         if(nt == 30) { hss[tot_hss + h].start_pos= k; k= 0; flag= 8; }
                     }
 
                 if(!flag)
                     for(k= hss[tot_hss + h].fromp; k >= 0 && k >= hss[tot_hss + h].fromp - START_POS5; k -= 3)
                     {
-						nt= 16 * orf[k] + 4 * orf[k + 1] + orf[k + 2];
+//					nt= 16 * orf[k] + 4 * orf[k + 1] + orf[k + 2];
+					nt= get_codon(orf + k, 1);
                         if(nt == 15) { hss[tot_hss + h].start_pos= k; k= 0; flag= 9; }
                     }
 
                 if(!flag)
                     for(k= hss[tot_hss + h].fromp; k < hss[tot_hss + h].top && k <= hss[tot_hss + h].fromp + START_POS3; k += 3)
                     {
-						nt= 16 * orf[k] + 4 * orf[k + 1] + orf[k + 2];
+//					nt= 16 * orf[k] + 4 * orf[k + 1] + orf[k + 2];
+					nt= get_codon(orf + k, 1);
                         if(nt == 15) { hss[tot_hss + h].start_pos= k; k= hss[tot_hss + h].top; flag= 9; }
                     }
 
                 if(!flag)
                     for(k= hss[tot_hss + h].fromp - START_POS5 - 3; k >= 0; k -= 3)
                     {
-						nt= 16 * orf[k] + 4 * orf[k + 1] + orf[k + 2];
+//					nt= 16 * orf[k] + 4 * orf[k + 1] + orf[k + 2];
+					nt= get_codon(orf + k, 1);
                         if(nt == 15) { hss[tot_hss + h].start_pos= k; k= 0; flag= 10; }
                     }
 
@@ -1110,7 +1139,7 @@ int score_orf_table(char *orf, int n, int tot_hss)
                 else if(k == 2) hss[tot_hss + h].prob= 0.0001;
 
 
-				if (to - from + 1 >= mHL)
+				if (to - from + 1 - 3 * ncod >= mHL)
 				{
 					if (maxscore >= thr[t] && thr[t] > 0.0) { hss[tot_hss + h].type= 0; }
                     ++h;
@@ -1119,6 +1148,7 @@ int score_orf_table(char *orf, int n, int tot_hss)
 			last_zero = i;
 			to_pos= i - 1;
 			maxscore= 0.0;
+			ncod= 0;
 		}
 	}
 
@@ -1134,7 +1164,7 @@ int score_orf_table(char *orf, int n, int tot_hss)
 double entropy(char *seq, int n)
 {
 	int i, j, k, l, codon, flag= 0, total_codon= 0;
-	double codon_arr[64]= {0.0}, entropy= 0.0, D;
+	double codon_arr[CODONS]= {0.0}, entropy= 0.0, D;
 
 	if(MYCOPLASMA) D= 62.0;
 	else           D= 61.0;
@@ -1147,16 +1177,16 @@ double entropy(char *seq, int n)
             ++codon_arr[codon];
             ++total_codon;
 		}
-		if(codon == 64) flag= 1;
+		if(codon == CODONS - 1) flag= 1;
 	}
 
 	if(total_codon)
 	{
-		for(k= 0; k < 64; k++) if(codon_arr[k]) codon_arr[k] /= (double)total_codon;
+		for(k= 0; k < CODONS - 1; k++) if(codon_arr[k]) codon_arr[k] /= (double)total_codon;
 	}
 	else return(-1.0);
 
-	for(k= 0; k < 64; k++)
+	for(k= 0; k < CODONS - 1; k++)
 		if(codon_arr[k] > 0.0)
 			entropy -= codon_arr[k] * log(codon_arr[k]);
 
@@ -1180,7 +1210,7 @@ int get_codon(char buff[], int strand)
 
         for(i = 0; i < 3; ++i)
         {
-                if(buff[i] < 0 || buff[i] > 3) return(64);
+                if(buff[i] < 0 || buff[i] > 3) return(CODONS - 1);
                 else if(strand) codon += power[i] * buff[i];
                 else            codon += power[2 - i] * buff[i];
         }
@@ -1631,10 +1661,13 @@ int maxG_test(char *seq, int len, int ori, char strand, int frame, int orfn, int
 
         for(j = 0; j < 3; ++j)
         {
+	    if(seq[k + j] >= 0)
+	    {
             ++usage[4 * seq[k + j] + j];
             ++usage[4 * seq[k + j] + 3];
             ++usage[4 * 4 + j];
             ++usage[4 * 4 + 3];
+	    }
         }
 
         G = 0.0;
@@ -1687,10 +1720,13 @@ int maxG_test(char *seq, int len, int ori, char strand, int frame, int orfn, int
                 {
                     for(j = 0; j < 3; ++j)
                     {
+			if(seq[h + j] >= 0)
+			{
                         ++usage[4 * seq[h + j] + j];
                         ++usage[4 * seq[h + j] + 3];
                         ++usage[4 * 4 + j];
                         ++usage[4 * 4 + 3];
+			}
                     }
 
                     G= 0.0;
@@ -1717,13 +1753,13 @@ int maxG_test(char *seq, int len, int ori, char strand, int frame, int orfn, int
                 if(maxG > HIGH_G && max_pos - from_max + 3 >= mHL)   //  h - bfrom + 1 is length of hit
                 {
                     flag= 1;
-                    build_scores(seq, len, sc);      // sc[6 * 64]
+                    build_scores(seq, len, sc);      // sc[6 * CODONS]
                     hss[hit].score= score(seq + hss[hit].fromp, hss[hit].top - hss[hit].fromp + 1, sc, &f, &t, 1);
                     composition(seq + hss[hit].fromp, hss[hit].top - hss[hit].fromp + 1, hss[hit].nuc, 0);
 
 					for(j= 0; j < 6; ++j)
 					{
-                        hss_score= score(seq + hss[hit].fromp, hss[hit].top - hss[hit].fromp + 1, sc + 64 * j, &f, &t, 0);
+                        hss_score= score(seq + hss[hit].fromp, hss[hit].top - hss[hit].fromp + 1, sc + CODONS * j, &f, &t, 0);
 						if(hss_score < 0.0) { flag= 0; j= 6; }
 					}
 
@@ -2007,21 +2043,25 @@ void difference_vector(double *vector, double *minus_vector, double *result_vect
 /*** Function build_scores() *************/
 /*****************************************/
 
-void build_scores(char *seg, int n, double *sc)      // sc[6 * 64]
+void build_scores(char *seg, int n, double *sc)      // sc[6 * CODONS]
 {
-    int i, j = 0, k, l, cod;
+    int i, j= 0, k, l, cod, nnuc= 0;
     char codon[3];
     double r, x1, y1, a, b;
-    double N[16] = {0.0}, stop0, stop1;     // N[4][4], sc[6* 64]
+    double N[16]= {0.0}, stop0, stop1;     // N[4][4], sc[6* CODONS]
 
-	for(i = 0; i < n; i++)
+	for(i= 0; i < n; i++)
 	{
-        ++N[seg[i]];                        // ++N[0][seg[i]];
-        ++N[(n % 3 + 1)*4 + seg[i]];        // ++N[n % 3 + 1][seg[i]];
+		if(seg[i] >= 0 && seg[i] < 4)
+		{
+        	++N[seg[i]];                        // ++N[0][seg[i]];
+        	++N[(n % 3 + 1) * 4 + seg[i]];        // ++N[n % 3 + 1][seg[i]];
+		}
+		else ++nnuc;
 	}
 
 	for(i = 0; i < 4; i++)
-		N[i] /= (double)n;       // N[0][i] /= (double)n;
+		N[i] /= (double)(n - nnuc);       // N[0][i] /= (double)n;
 	
 // SCORES WITH BOUNDARIES:
 
@@ -2169,27 +2209,21 @@ void build_scores(char *seg, int n, double *sc)      // sc[6 * 64]
 
 	stop1 = N[7] * N[8] * N[12] + N[7] * N[8] * N[14] + ( N[7] * N[10] * N[12] ) * (1 - MYCOPLASMA);
 
+	for(l = 0; l < 6; l++) sc[l * CODONS + CODONS - 1]= 0.0;  // Initializing average scores
+
 	for(codon[0] = 0; codon[0] < 4; ++codon[0])
 		for(codon[1] = 0; codon[1] < 4; ++codon[1])
 			for(codon[2] = 0; codon[2] < 4; ++codon[2])
 			{
 			cod= get_codon(codon, 1);
 			    for(l = 0; l < 6; l++)
-                    sc[l * 64 + cod] = log(N[4 + codon[0]] * N[8 + codon[1]] * N[12 + codon[2]] / (1.0 - stop1)); 
+                    sc[l * CODONS + cod] = log(N[4 + codon[0]] * N[8 + codon[1]] * N[12 + codon[2]] / (1.0 - stop1)); 
 			}
 
-// Old N[][]:				sc[l][16*i+4*j+k] = log(N[1][i] * N[2][j] * N[3][k] / (1.0 - stop1)); 
 
 // Scores against random:
 
-// Old N[][]:	stop0 = N[0][3] * N[0][0] * N[0][0] + N[0][3] * N[0][0] * N[0][2] + N[0][3] * N[0][2] * N[0][0];
-
 	stop0 = N[3] * N[0] * N[0] + N[3] * N[0] * N[2] + ( N[3] * N[2] * N[0]) * (1 - MYCOPLASMA);
-
-//	for(i = 0; i < 4; i++)
-//		for(j = 0; j < 4; j++)
-//			for(k = 0; k < 4; k++)
-//				sc[16*i+4*j+k] -= log(N[i] * N[j] * N[k] / (1.0 - stop0));
 
 	for(codon[0] = 0; codon[0] < 4; ++codon[0])
 		for(codon[1] = 0; codon[1] < 4; ++codon[1])
@@ -2197,9 +2231,10 @@ void build_scores(char *seg, int n, double *sc)      // sc[6 * 64]
 			{
 			cod= get_codon(codon, 1);
 			sc[cod] -= log(N[codon[0]] * N[codon[1]] * N[codon[2]] / (1.0 - stop0));
+			if(cod != 48 && cod != 50 && (cod != 56 || MYCOPLASMA))
+                        	sc[CODONS - 1] += sc[cod];  // Summing into average score
 			}
 
-// Old N[][]:				sc[0][16*i+4*j+k] -= log(N[0][i] * N[0][j] * N[0][k] / (1.0 - stop0));
 
 // Expected frequency of stop codons in direct frame:
 
@@ -2207,37 +2242,29 @@ void build_scores(char *seg, int n, double *sc)      // sc[6 * 64]
 
 // Scores against jki:
 
-//	for(i = 0; i < 4; i++)
-//		for(j = 0; j < 4; j++)
-//			for(k = 0; k < 4; k++)
-//				sc[64 + 16*i+4*j+k] -= log(N[4 + j] * N[8 + k] * N[12 + i] / (1.0 - stop0));
-
 	for(codon[0] = 0; codon[0] < 4; ++codon[0])
 		for(codon[1] = 0; codon[1] < 4; ++codon[1])
 			for(codon[2] = 0; codon[2] < 4; ++codon[2])
 			{
 			cod= get_codon(codon, 1);
-			sc[64 + cod] -= log(N[4 + codon[1]] * N[8 + codon[2]] * N[12 + codon[0]] / (1.0 - stop0));
+			sc[CODONS + cod] -= log(N[4 + codon[1]] * N[8 + codon[2]] * N[12 + codon[0]] / (1.0 - stop0));
+			if(cod != 48 && cod != 50 && (cod != 56 || MYCOPLASMA))
+                        	sc[CODONS + CODONS - 1] += sc[cod];  // Summing into average score
 			}
 
-// Old N[][]:				sc[1][16*i+4*j+k] -= log(N[1][j] * N[2][k] * N[3][i] / (1.0 - stop0));
 
 // Scores against kij:
 
-//	for(i = 0; i < 4; i++)
-//		for(j = 0; j < 4; j++)
-//			for(k = 0; k < 4; k++)
-//				sc[128 + 16*i+4*j+k] -= log(N[4 + k] * N[8 + i] * N[12 + j] / (1.0 - stop0));
-
 	for(codon[0] = 0; codon[0] < 4; ++codon[0])
 		for(codon[1] = 0; codon[1] < 4; ++codon[1])
 			for(codon[2] = 0; codon[2] < 4; ++codon[2])
 			{
 			cod= get_codon(codon, 1);
-			sc[128 + cod] -= log(N[4 + codon[2]] * N[8 + codon[0]] * N[12 + codon[1]] / (1.0 - stop0));
+			sc[2 * CODONS + cod] -= log(N[4 + codon[2]] * N[8 + codon[0]] * N[12 + codon[1]] / (1.0 - stop0));
+			if(cod != 48 && cod != 50 && (cod != 56 || MYCOPLASMA))
+                        	sc[2 * CODONS + CODONS - 1] += sc[cod];  // Summing into average score
 			}
 
-// Old N[][]:				sc[2][16*i+4*j+k] -= log(N[1][k] * N[2][i] * N[3][j] / (1.0 - stop0));
 
 // A
     if(N[3] < (x1= 0.1251 + EPSILON))    // if(N[0][3]<(x1=0.1251+EPSILON))
@@ -2384,58 +2411,48 @@ void build_scores(char *seg, int n, double *sc)      // sc[6 * 64]
 
 	stop0 = N[7] * N[8] * N[12] + N[7] * N[8] * N[14] + ( N[7] * N[10] * N[12] ) * (1 - MYCOPLASMA);
 
-// Old N[][]:	stop0 = N[1][3] * N[2][0] * N[3][0] + N[1][3] * N[2][0] * N[3][2] + N[1][3] * N[2][2] * N[3][0];
 
 // Scores against comp ijk:
 
-//	for(i = 0; i < 4; i++)
-//		for(j = 0; j < 4; j++)
-//			for(k = 0; k < 4; k++)
-//				sc[192 + 16*i+4*j+k] -= log(N[15-i] * N[11-j] * N[7-k] / (1.0 - stop0));
-
 	for(codon[0]= 0; codon[0] < 4; ++codon[0])
 		for(codon[1]= 0; codon[1] < 4; ++codon[1])
 			for(codon[2]= 0; codon[2] < 4; ++codon[2])
 			{
 			cod= get_codon(codon, 1);
-			sc[192 + cod] -= log(N[15 - codon[0]] * N[11 - codon[1]] * N[7 - codon[2]] / (1.0 - stop0));
+			sc[3 * CODONS + cod] -= log(N[15 - codon[0]] * N[11 - codon[1]] * N[7 - codon[2]] / (1.0 - stop0));
+			if(cod != 48 && cod != 50 && (cod != 56 || MYCOPLASMA))
+                        	sc[3 * CODONS + CODONS - 1] += sc[cod];  // Summing into average score
 			}
 
-// Old N[][]:				sc[3][16*i+4*j+k] -= log(N[3][3-i] * N[2][3-j] * N[1][3-k] / (1.0 - stop0));
 
 // Scores against comp jki:
 
-//	for(i = 0; i < 4; i++)
-//		for(j = 0; j < 4; j++)
-//			for(k = 0; k < 4; k++)
-//				sc[256 + 16*i+4*j+k] -= log(N[15-j] * N[11-k] * N[7-i] / (1.0 - stop0));
-
 	for(codon[0]= 0; codon[0] < 4; ++codon[0])
 		for(codon[1]= 0; codon[1] < 4; ++codon[1])
 			for(codon[2]= 0; codon[2] < 4; ++codon[2])
 			{
 			cod= get_codon(codon, 1);
-			sc[256 + cod] -= log(N[15 - codon[1]] * N[11 - codon[2]] * N[7 - codon[0]] / (1.0 - stop0));
+			sc[4 * CODONS + cod] -= log(N[15 - codon[1]] * N[11 - codon[2]] * N[7 - codon[0]] / (1.0 - stop0));
+			if(cod != 48 && cod != 50 && (cod != 56 || MYCOPLASMA))
+                        	sc[4 * CODONS + CODONS - 1] += sc[cod];  // Summing into average score
 			}
 
-// Old N[][]:				sc[4][16*i+4*j+k] -= log(N[3][3-j] * N[2][3-k] * N[1][3-i] / (1.0 - stop0));
 
 // Scores against comp kij:
 
-//	for(i = 0; i < 4; i++)
-//		for(j = 0; j < 4; j++)
-//			for(k = 0; k < 4; k++)
-//				sc[320 + 16*i+4*j+k] -= log(N[15-k] * N[11-i] * N[7-j] / (1.0 - stop0));
-
 	for(codon[0]= 0; codon[0] < 4; ++codon[0])
 		for(codon[1]= 0; codon[1] < 4; ++codon[1])
 			for(codon[2]= 0; codon[2] < 4; ++codon[2])
 			{
 			cod= get_codon(codon, 1);
-			sc[320 + cod] -= log(N[15 - codon[2]] * N[11 - codon[0]] * N[7 - codon[1]] / (1.0 - stop0));
+			sc[5 * CODONS + cod] -= log(N[15 - codon[2]] * N[11 - codon[0]] * N[7 - codon[1]] / (1.0 - stop0));
+			if(cod != 48 && cod != 50 && (cod != 56 || MYCOPLASMA))
+                        	sc[5 * CODONS + CODONS - 1] += sc[cod];  // Summing into average score
 			}
 
-// Old N[][]:				sc[5][16*i+4*j+k] -= log(N[3][3-k] * N[2][3-i] * N[1][3-j] / (1.0 - stop0));
+
+// Initializing average scores:
+	for(l = 0; l < 6; ++l) sc[l * CODONS + CODONS - 1] /= (double)(CODONS - 4 + MYCOPLASMA);
 }
 
 /*****End of function build_scores() *****/
