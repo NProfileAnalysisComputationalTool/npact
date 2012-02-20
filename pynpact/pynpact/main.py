@@ -193,10 +193,10 @@ multiprocess safe way) setting class defaults
                 util.capturedCall(cmd, cwd=dtemp, check=True,
                                   env={'BASE_DIR_THRESHOLD_TABLES':DATAPATH},
                                   logger=self.logger)
-                #the "exc_file", (.modified) contains an extra header line we need to strip.
-                util.file_delete_first_line(os.path.join(dtemp, gbkbase + ".modified"), 
-                                            logger=logger)
-                #TODO, while deleting this is inconsistent...
+                #TODO, while deleting this is inconsistent: files will
+                #be deleted out of outdir before the directory is
+                #deleted and the rename comes a moment later. During
+                #that time it will be inconsistent.
                 if os.path.exists(outdir):
                     self.logger.debug("Removing existing prediction output at %s", outdir)
                     shutil.rmtree(outdir)
@@ -292,7 +292,7 @@ period_of_frame       Number of frames.
         filenames = []
         with self.mkdtemp() as dtemp:
             #page number offset
-            i = config.get('start_page',1) - 1
+            page_num = config.get('start_page', 1)
             ppage = config['bp_per_page']
 
             #the hash of individual pages shouldn't depend on the
@@ -300,23 +300,26 @@ period_of_frame       Number of frames.
             #that out.
             pconfkeys = set(hashkeys).difference(set(["start_page", "end_page"]))
             pconfig,phash = util.reducehashdict(config, pconfkeys)
-            
-            while i*ppage < config['length'] and i < config.get('end_page', 1000):
+
+            page_start = lambda page_num: ppage * (page_num - 1)
+
+            while (page_start(page_num) < config['length']
+                   and page_num <= config.get('end_page', 1000)):
                 def thunk(psout):
-                    self.timer.check("Generating page %d" % i+1)
-                    self.write_allplots_def(pconfig, os.path.join(dtemp,"Allplots.def"), i+1)
+                    self.timer.check("Generating page %d" % page_num)
+                    self.write_allplots_def(pconfig, os.path.join(dtemp,"Allplots.def"), page_num)
 
                     self.logger.debug("Starting Allplots page %d for %r",
-                                      i+1, os.path.basename(self.gbkfile))
+                                      page_num, os.path.basename(self.gbkfile))
 
-                    cmd = [binfile("Allplots"), i*ppage, ppage, 5, 1000, config['period']]
+                    cmd = [binfile("Allplots"), page_start(page_num), ppage, 5, 1000, config['period']]
                     util.capturedCall(cmd, stdout=psout, stderr=False,
                                       logger=self.logger, cwd=dtemp, check=True)
-                psname = self.derivative_filename("%s.%03d.ps" % (phash,i+1))
+                psname = self.derivative_filename("%s.%03d.ps" % (phash, page_num))
                 filenames.append(psname)
                 self.safe_produce_new(psname, thunk,
-                                      dependencies=map(config.get,self.AP_file_keys))
-                i += 1
+                                      dependencies=map(config.get, self.AP_file_keys))
+                page_num += 1
 
 
             def combine_ps_files(psout):
