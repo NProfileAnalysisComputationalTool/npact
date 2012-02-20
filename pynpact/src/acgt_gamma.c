@@ -856,7 +856,7 @@ ncod= 0;
 
 int score_orf_table(char *orf, int n, int tot_hss)
 {
-    int i, j, h, k, l, t, nuc[4]= {0}, from, to, last_zero= n, from_pos, to_pos= n - 1, cod, ncod, nt, flag;
+    int i, j, h, k, l, t, nuc[4]= {0}, from, to, last_zero= n, from_pos, to_pos= n - 1, cod, ncod, nnuc= 0, nt, flag;
     float	a[3], b[3], f;
     char *seq;
     double r, Score = 0.0, maxscore= 0.0, max_len;
@@ -867,11 +867,14 @@ int score_orf_table(char *orf, int n, int tot_hss)
 
     build_scores(orf, n, sc);
 
-    for(i= 0; i < n; ++i) ++nuc[orf[i]];
+    for(i= 0; i < n; ++i)
+	if(orf[i] >= 0) ++nuc[orf[i]];
+	else ++nnuc;
+
     nuc[3]= 50;
     for(i= 0; i < 3; ++i)
     {
-		nuc[i]= (int)( (double)nuc[i] / (double)n * 50.0 + 0.5 );
+		nuc[i]= (int)( (double)nuc[i] / (double)(n - nnuc) * 50.0 + 0.5 );
 		nuc[3] -= nuc[i];
     }
 
@@ -1584,12 +1587,13 @@ void copy_sequence(char *seq,int len, char *cseq)
 
 void composition(char *seq, int len, double *nuc, int offset)
 {
-    int	i,j;
+    int	i, j;
     double	tot;
 
     for(i= 0; i < 4 * 6; ++i) nuc[i]= 0.0;
 
-    for(i= 0; i < len; ++i) ++nuc[ 6 * ( ( i + offset ) % 3 ) + seq[i] ];
+    for(i= 0; i < len; ++i)
+        if(seq[i] > 0) ++nuc[ 6 * ( ( i + offset ) % 3 ) + seq[i] ];
 
     for(i= 0; i < 3; ++i)
     {
