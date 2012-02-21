@@ -809,8 +809,8 @@ main(int argc, char *argv[]) {
             fprintf(stdout,"/R {0.835 0.369 0.000 setrgbcolor} def\n");  // Vermillion
             fprintf(stdout,"/G {0.800 0.475 0.655 setrgbcolor} def\n");  // Reddish purple
             fprintf(stdout,"/B {0.000 0.447 0.698 setrgbcolor} def\n");  // Blue
-            fprintf(stdout,"/LR {0.918 0.685 0.300 setrgbcolor} def\n");  // Light Vermillion
-            fprintf(stdout,"/LG {0.900 0.738 0.300 setrgbcolor} def\n");  // Light Reddish purple
+            fprintf(stdout,"/LR {1.000 0.592 0.027 setrgbcolor} def\n");  // Light Vermillion
+            fprintf(stdout,"/LG {0.914 0.686 0.812 setrgbcolor} def\n");  // Light Reddish purple
             fprintf(stdout,"/LB {0.300 0.724 0.849 setrgbcolor} def\n");  // Light Blue
 	    }
             else
