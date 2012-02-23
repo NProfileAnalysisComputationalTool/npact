@@ -38,7 +38,7 @@ def get_raw_url(request, path):
 def get_ti(size):
     return forms.TextInput(attrs={'size':size})
 
-class ConfigForm(forms.Form) :
+class ConfigForm(forms.Form):
     first_page_title = forms.CharField(widget=get_ti(40))
     following_page_title = forms.CharField(required=False, widget=get_ti(40))
     length=forms.IntegerField(required=True, min_value=0,

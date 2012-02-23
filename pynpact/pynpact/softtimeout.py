@@ -23,7 +23,6 @@ class SoftTimer(object):
             self.deadline = self.starttime + timeout
 
     def check(self, step=None, logfn=None, **kwargs):
-        
         self.checkcount +=1
         if step:
             self.steps.append(step)

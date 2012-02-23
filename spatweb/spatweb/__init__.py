@@ -31,4 +31,3 @@ def getabspath(relpath, raise_on_missing=True):
     if raise_on_missing and not os.path.exists(abspath):
         raise IOError("Path not found: " + relpath)
     return abspath
-
