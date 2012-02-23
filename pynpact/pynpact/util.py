@@ -8,7 +8,7 @@ from functools import wraps
 def reducehashdict(dict, keys):
     """pull the given keys out of the dictionary, return the reduced
     dictionary and the sha1 hash of that set of key values.
-"""
+    """
     outdict= {}
     h = hashlib.sha1()
     for k in sorted(keys):
