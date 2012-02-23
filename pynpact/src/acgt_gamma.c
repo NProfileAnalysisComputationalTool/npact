@@ -1771,102 +1771,102 @@ int maxG_test(char *seq, int len, int ori, char strand, int frame, int orfn, int
 
                     flags= 0;
 
-					for(k= hss[hit].fromp; k >= 0 && k >= hss[hit].fromp - START_POS5; k -= 3)
+					for(j= hss[hit].fromp; j >= 0 && j >= hss[hit].fromp - START_POS5; j -= 3)
 					{
-			    nt= get_codon(seq + k, 1);
-						if(nt == 14) { hss[hit].start_pos= k; k= 0; flags= 1; }
+			    nt= get_codon(seq + j, 1);
+						if(nt == 14) { hss[hit].start_pos= j; j= 0; flags= 1; }
 					}
 
 					if(!flags)
-						for(k= hss[hit].fromp; k < hss[hit].top && k <= hss[hit].fromp + START_POS3; k += 3)
+						for(j= hss[hit].fromp; j < hss[hit].top && j <= hss[hit].fromp + START_POS3; j += 3)
 						{
-			    nt= get_codon(seq + k, 1);
-							if(nt == 14) { hss[hit].start_pos= k; k= hss[hit].top; flags= 1; }
+			    nt= get_codon(seq + j, 1);
+							if(nt == 14) { hss[hit].start_pos= j; j= hss[hit].top; flags= 1; }
 						}
 
 					if(!flags)
-						for(k= hss[hit].fromp; k >= 0 && k >= hss[hit].fromp - START_POS5; k -= 3)
+						for(j= hss[hit].fromp; j >= 0 && j >= hss[hit].fromp - START_POS5; j -= 3)
 						{
-			    nt= get_codon(seq + k, 1);
-							if(nt == 46) { hss[hit].start_pos= k; k= 0; flags= 3; }
+			    nt= get_codon(seq + j, 1);
+							if(nt == 46) { hss[hit].start_pos= j; j= 0; flags= 3; }
 						}
 
 					if(!flags)
-						for(k= hss[hit].fromp; k < hss[hit].top && k <= hss[hit].fromp + START_POS3; k += 3)
+						for(j= hss[hit].fromp; j < hss[hit].top && j <= hss[hit].fromp + START_POS3; j += 3)
 						{
-			    nt= get_codon(seq + k, 1);
-							if(nt == 46) { hss[hit].start_pos= k; k= hss[hit].top; flags= 3; }
+			    nt= get_codon(seq + j, 1);
+							if(nt == 46) { hss[hit].start_pos= j; j= hss[hit].top; flags= 3; }
 						}
 
 					if(!flags)
-						for(k= hss[hit].fromp - START_POS5 - 3; k >= 0; k -= 3)
+						for(j= hss[hit].fromp - START_POS5 - 3; j >= 0; j -= 3)
 						{
-			    nt= get_codon(seq + k, 1);
-							if(nt == 14) { hss[hit].start_pos= k; k= 0; flags= 2; }
-							else if(nt == 46) { hss[hit].start_pos= k; k= 0; flags= 4; }
+			    nt= get_codon(seq + j, 1);
+							if(nt == 14) { hss[hit].start_pos= j; j= 0; flags= 2; }
+							else if(nt == 46) { hss[hit].start_pos= j; j= 0; flags= 4; }
 						}
 
 					if(!flags)
-						for(k= hss[hit].fromp; k >= 0 && k >= hss[hit].fromp - START_POS5; k -= 3)
+						for(j= hss[hit].fromp; j >= 0 && j >= hss[hit].fromp - START_POS5; j -= 3)
 						{
-			    nt= get_codon(seq + k, 1);
-							if(nt == 62) { hss[hit].start_pos= k; k= 0; flags= 5; }
+			    nt= get_codon(seq + j, 1);
+							if(nt == 62) { hss[hit].start_pos= j; j= 0; flags= 5; }
 						}
 
 					if(!flags)
-						for(k= hss[hit].fromp; k < hss[hit].top && k <= hss[hit].fromp + START_POS3; k += 3)
+						for(j= hss[hit].fromp; j < hss[hit].top && j <= hss[hit].fromp + START_POS3; j += 3)
 						{
-			    nt= get_codon(seq + k, 1);
-							if(nt == 62) { hss[hit].start_pos= k; k= hss[hit].top; flags= 5; }
+			    nt= get_codon(seq + j, 1);
+							if(nt == 62) { hss[hit].start_pos= j; j= hss[hit].top; flags= 5; }
 						}
 
 					if(!flags)
-						for(k= hss[hit].fromp - START_POS5 - 3; k >= 0; k -= 3)
+						for(j= hss[hit].fromp - START_POS5 - 3; j >= 0; j -= 3)
 						{
-			    nt= get_codon(seq + k, 1);
-							if(nt == 62) { hss[hit].start_pos= k; k= 0; flags= 6; }
+			    nt= get_codon(seq + j, 1);
+							if(nt == 62) { hss[hit].start_pos= j; j= 0; flags= 6; }
 						}
 
 					if(!flags)
-						for(k= hss[hit].fromp; k >= 0 && k >= hss[hit].fromp - START_POS5; k -= 3)
+						for(j= hss[hit].fromp; j >= 0 && j >= hss[hit].fromp - START_POS5; j -= 3)
 						{
-			    nt= get_codon(seq + k, 1);
-							if(nt == 30) { hss[hit].start_pos= k; k= 0; flags= 7; }
+			    nt= get_codon(seq + j, 1);
+							if(nt == 30) { hss[hit].start_pos= j; j= 0; flags= 7; }
 						}
 
 					if(!flags)
-						for(k= hss[hit].fromp; k < hss[hit].top && k <= hss[hit].fromp + START_POS3; k += 3)
+						for(j= hss[hit].fromp; j < hss[hit].top && j <= hss[hit].fromp + START_POS3; j += 3)
 						{
-			    nt= get_codon(seq + k, 1);
-							if(nt == 30) { hss[hit].start_pos= k; k= hss[hit].top; flags= 7; }
+			    nt= get_codon(seq + j, 1);
+							if(nt == 30) { hss[hit].start_pos= j; j= hss[hit].top; flags= 7; }
 						}
 
 					if(!flags)
-						for(k= hss[hit].fromp - START_POS5 - 3; k >= 0; k -= 3)
+						for(j= hss[hit].fromp - START_POS5 - 3; j >= 0; j -= 3)
 						{
-			    nt= get_codon(seq + k, 1);
-							if(nt == 30) { hss[hit].start_pos= k; k= 0; flags= 8; }
+			    nt= get_codon(seq + j, 1);
+							if(nt == 30) { hss[hit].start_pos= j; j= 0; flags= 8; }
 						}
 
 					if(!flags)
-						for(k= hss[hit].fromp; k >= 0 && k >= hss[hit].fromp - START_POS5; k -= 3)
+						for(j= hss[hit].fromp; j >= 0 && j >= hss[hit].fromp - START_POS5; j -= 3)
 						{
-			    nt= get_codon(seq + k, 1);
-							if(nt == 15) { hss[hit].start_pos= k; k= 0; flags= 9; }
+			    nt= get_codon(seq + j, 1);
+							if(nt == 15) { hss[hit].start_pos= j; j= 0; flags= 9; }
 						}
 
 					if(!flags)
-						for(k= hss[hit].fromp; k < hss[hit].top && k <= hss[hit].fromp + START_POS3; k += 3)
+						for(j= hss[hit].fromp; j < hss[hit].top && j <= hss[hit].fromp + START_POS3; j += 3)
 						{
-			    nt= get_codon(seq + k, 1);
-							if(nt == 15) { hss[hit].start_pos= k; k= hss[hit].top; flags= 9; }
+			    nt= get_codon(seq + j, 1);
+							if(nt == 15) { hss[hit].start_pos= j; j= hss[hit].top; flags= 9; }
 						}
 
 					if(!flags)
-						for(k= hss[hit].fromp - START_POS5 - 3; k >= 0; k -= 3)
+						for(j= hss[hit].fromp - START_POS5 - 3; j >= 0; j -= 3)
 						{
-			    nt= get_codon(seq + k, 1);
-							if(nt == 15) { hss[hit].start_pos= k; k= 0; flags= 10; }
+			    nt= get_codon(seq + j, 1);
+							if(nt == 15) { hss[hit].start_pos= j; j= 0; flags= 10; }
 						}
 
                     hss[hit].start= flags;
