@@ -613,7 +613,7 @@ int analyze_genome(int genome_size, int tot_hss, int *on)
                         hss[tot_hss + h].G= G_test(ORF + frame * MAX_ORF_SIZE + hss[tot_hss + h].fromp, hss[tot_hss + h].top - hss[tot_hss + h].fromp + 1, hss[tot_hss + h].pstring, &i);
 
                         hss[tot_hss + h].fromp += hss[tot_hss + h].stop1;
-						if(hss[tot_hss + h].start) hss[tot_hss + h].start_pos += hss[tot_hss + h].stop1;
+			hss[tot_hss + h].start_pos += hss[tot_hss + h].stop1;
                         hss[tot_hss + h].top +=   hss[tot_hss + h].stop1;
                         hss[tot_hss + h].len= hss[tot_hss + h].top - hss[tot_hss + h].fromp + 1;
 					}
@@ -682,11 +682,9 @@ int analyze_genome(int genome_size, int tot_hss, int *on)
                         hss[tot_hss + h].fromp = len[frame] - 1 - hss[tot_hss + h].top + hss[tot_hss + h].stop1;
                         hss[tot_hss + h].top = len[frame] - 1 - f + hss[tot_hss + h].stop1;
                         hss[tot_hss + h].len= hss[tot_hss + h].top - hss[tot_hss + h].fromp + 1;
-						if(hss[tot_hss + h].start)
-						{
-                            f= hss[tot_hss + h].start_pos;
-                            hss[tot_hss + h].start_pos = len[frame] - 1 - f + hss[tot_hss + h].stop1;
-						}
+
+                        f= hss[tot_hss + h].start_pos;
+                        hss[tot_hss + h].start_pos = len[frame] - 1 - f + hss[tot_hss + h].stop1;
 					}
 
 					if(th) orf_num[frame][tot_orfs[frame]][2]= tot_hss + th - 1;
@@ -989,6 +987,7 @@ int score_orf_table(char *orf, int n, int tot_hss)
 				hss[tot_hss + h].score= maxscore;
 
 				flag= 0;
+				hss[tot_hss + h].start_pos= hss[tot_hss + h].fromp;
 
                 for(k= hss[tot_hss + h].fromp; k >= 0 && k >=hss[tot_hss + h].fromp - START_POS5; k -= 3)
                 {
@@ -1107,27 +1106,10 @@ int score_orf_table(char *orf, int n, int tot_hss)
 
                 if(WRITE_SEQUENCES)
                 {
-                    if(flag = 1 || flag == 2)
-                    {
-						nt= n - hss[tot_hss + h].start_pos + 2;
-						hss[tot_hss + h].seqlen= nt - 1;
-						hss[tot_hss + h].seq= (char *)malloc(nt * sizeof(char));
-                        for(j= 0; j < nt - 1; ++j) hss[tot_hss + h].seq[j]= orf[hss[tot_hss + h].start_pos + j];
-                    }
-                    else if(flag == 3 || flag == 4)
-                    {
-						nt= n - hss[tot_hss + h].start_pos + 2;
-						hss[tot_hss + h].seqlen= nt - 1;
-						hss[tot_hss + h].seq= (char *)malloc(nt * sizeof(char));
-						strncpy(hss[tot_hss + h].seq, orf + hss[tot_hss + h].start_pos, nt - 1);
-                    }
-                    else
-                    {
-						nt= n - hss[tot_hss + h].fromp + 2;
-						hss[tot_hss + h].seqlen= nt - 1;
-						hss[tot_hss + h].seq= (char *)malloc(nt * sizeof(char));
-						strncpy(hss[tot_hss + h].seq, orf + hss[tot_hss + h].fromp, n);
-                    }
+		nt= n - hss[tot_hss + h].start_pos + 1;
+		hss[tot_hss + h].seqlen= nt;
+		hss[tot_hss + h].seq= (char *)malloc(nt * sizeof(char));
+                        for(j= 0; j < nt; ++j) hss[tot_hss + h].seq[j]= orf[hss[tot_hss + h].start_pos + j];
                 }
 
 				hss[tot_hss + h].sig_len= (maxscore - (double)b[0]) / ((double)a[0]); 
@@ -1770,6 +1752,7 @@ int maxG_test(char *seq, int len, int ori, char strand, int frame, int orfn, int
                     hss[hit].entropy= entropy(seq + hss[hit].fromp, hss[hit].top - hss[hit].fromp + 1);
 
                     flags= 0;
+		    hss[hit].start_pos= hss[hit].fromp;
 
 					for(j= hss[hit].fromp; j >= 0 && j >= hss[hit].fromp - START_POS5; j -= 3)
 					{
@@ -1871,29 +1854,13 @@ int maxG_test(char *seq, int len, int ori, char strand, int frame, int orfn, int
 
                     hss[hit].start= flags;
 
-					if(WRITE_SEQUENCES)
-					{
-						if(flags)
-						{
-                            nt= len - hss[hit].start_pos + 2;
-                            hss[hit].seqlen= nt - 1;
+				if(WRITE_SEQUENCES)
+				{
+                            nt= len - hss[hit].start_pos + 1;
+                            hss[hit].seqlen= nt;
                             hss[hit].seq= (char *)malloc(nt * sizeof(char));
-                            strncpy(hss[hit].seq, seq + hss[hit].start_pos, nt - 1);
-						}
-						else
-						{
-                            nt= len - hss[hit].fromp + 2;
-                            hss[hit].seqlen= nt - 1;
-                            hss[hit].seq= (char *)malloc(nt * sizeof(char));
-                            strncpy(hss[hit].seq, seq + hss[hit].fromp, len);
-						}
-					}
-
-					if(hss[hit].start)
-					{
-						if(strand == 'D') hss[hit].start_pos += ori;
-						else  hss[hit].start_pos= ori - hss[hit].start_pos;
-					}
+                            	for(j= 0; j < nt; ++j) hss[hit].seq[j]= seq[hss[hit].start_pos + j];
+				}
 
 					if(strand == 'D')
 					{
@@ -1901,6 +1868,7 @@ int maxG_test(char *seq, int len, int ori, char strand, int frame, int orfn, int
                         hss[hit].top += ori;
                         hss[hit].stop1= orf_num[frame][orfn][0];
                         hss[hit].stop2= orf_num[frame][orfn][1];
+			hss[hit].start_pos += ori;
 					}
 					else                  // strand == 'C'
 					{
@@ -1909,6 +1877,7 @@ int maxG_test(char *seq, int len, int ori, char strand, int frame, int orfn, int
                         hss[hit].fromp= j;
                         hss[hit].stop1= orf_num[frame][orfn][0];
                         hss[hit].stop2= orf_num[frame][orfn][1];
+			hss[hit].start_pos= ori - hss[hit].start_pos;
 					}
 
                     hss[hit].len= hss[hit].top - hss[hit].fromp + 1;
@@ -2607,16 +2576,12 @@ void process_hss(int from_hss, int to_hss, int ncds)
 
                         if(hss[o[i]].strand == 'D')                     // ORF from start codon (gfrom) to stop (gto)
                         {
-//                              if(!hss[o[i]].start) gfrom= hss[o[i]].stop1;
-                                if(!hss[o[i]].start) gfrom= hss[o[i]].fromp;
-                                else                 gfrom= hss[o[i]].start_pos;
+                        gfrom= hss[o[i]].start_pos;
                         gto= hss[o[i]].stop2;
                         }
                         else                                           // ORF from stop (gfrom) to start codon (gto)
                         {
-//                              if(!hss[o[i]].start) gto= hss[o[i]].stop2;
-                                if(!hss[o[i]].start) gto= hss[o[i]].top;
-                                else                 gto= hss[o[i]].start_pos;
+                        gto= hss[o[i]].start_pos;
                         gfrom= hss[o[i]].stop1;
                         }
 
@@ -2700,16 +2665,12 @@ void process_hss(int from_hss, int to_hss, int ncds)
                                         if(hss[o[j]].strand == 'D')      // ORF from start codon (from) to stop (to)
                                         {
                                         to= hss[o[j]].stop2;
-//                                              if(!hss[o[j]].start) from= hss[o[j]].stop1;
-                                		if(!hss[o[j]].start) from= hss[o[j]].fromp;
-                                                else                 from= hss[o[j]].start_pos;
+                                        from= hss[o[j]].start_pos;
                                         }
                                         else                              // ORF from stop (from) to start codon (to)
                                         {
                                         from= hss[o[j]].stop1;
-//                                              if(!hss[o[j]].start) to= hss[o[j]].stop2;
-                                		if(!hss[o[j]].start) to= hss[o[j]].top;
-                                                else                 to= hss[o[j]].start_pos;
+                                        to= hss[o[j]].start_pos;
                                         }
 	
 					if(!(to < gfrom + mHL/2 - 1 || from > gto - mHL/2 + 1))  // Two newly predicted genes are overlapping
