@@ -123,7 +123,7 @@ double sc[6 * CODONS];
 
 FILE *output, *fp;
 
-char Prediction[13][30];
+char Prediction[14][30];
 char Annotation[5][15];
 
 // Chi-square thresholds with d.f.=6
@@ -2691,6 +2691,7 @@ void process_hss(int from_hss, int to_hss, int ncds)
                                 hss[o[i]].type= k;
 							}
 						}
+						else hss[o[i]].type= 13;
 					}
 				}
 			}
@@ -3324,6 +3325,7 @@ void define_characterizations()
     strcpy(Prediction[10],"Extending predicted");
     strcpy(Prediction[11],"Embedded in predicted");
     strcpy(Prediction[12],"Overlapped to predicted");
+    strcpy(Prediction[13],"Extending predicted");
 
     strcpy(Annotation[0],"Not supported");
     strcpy(Annotation[1],"Confirmed");
