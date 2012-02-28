@@ -24,9 +24,11 @@ logger = logging.getLogger(__name__)
 
 
 
-def get_return_url(request):
-    if request.GET.get('path'):
-        return reverse('config', args=[request.GET.get('path')]) + "?" + urlencode(request.GET)
+def get_reconfigure_url(request, path=None):
+    if path is None:
+        path = request.GET.get('path')
+    if path:
+        return reverse('config', args=[path]) + "?" + urlencode(request.GET)
     else:
         return None
 
@@ -105,6 +107,8 @@ def build_config(path, request):
             if v:
                 logger.debug("Including %r:%r from request.", f.name, v)
                 config[f.name] = v
+        except forms.ValidationError, ve:
+            pass
         except:
             logger.exception("Error with %r", f.name)
     if cf.is_valid():
@@ -138,15 +142,17 @@ def run_step(request, path):
         #the frame is supposed to ensure this is in session.
         if not config:
             return HttpResponse('Session Timeout, please try again.', status=500)
-        
+
         gbp = main.GenBankProcessor(getabspath(path), config=config, timeout=4)
         nextstep = None
         try:
-            psname = gbp.process()
+            pspath = gbp.process()
             logger.debug("Finished processing.")
-            psname = getrelpath(psname)
-            url = reverse('results', args=[psname]) + encode_config(config, path=path)
-            nextstep = {'next':'results', 'url': url}
+            pspath = getrelpath(pspath)
+            #url = reverse('results', args=[psname]) + encode_config(config, path=path)
+            nextstep = {'next':'results', 
+                        'download_url': get_raw_url(request, pspath),
+                        'reconfigure_url': reverse('config', args=[path]) + encode_config(config)}
         except Timeout, pt:
             nextstep = {'next':'process', 'pt': vars(pt)}
         return HttpResponse(json.dumps(nextstep))

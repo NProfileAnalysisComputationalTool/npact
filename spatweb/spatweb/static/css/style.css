@@ -325,7 +325,7 @@ textarea { width: 100%; }
 
 #content input, #content select { margin-left: 6px; float:left; }
 
-li.error, ul.errorlist li { color:red; }
+.error, ul.errorlist li { color:red; }
 
 ul.messages { border: 1px dotted #444; } 
 

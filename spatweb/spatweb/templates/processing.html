@@ -4,80 +4,62 @@
 
 {% block addScript %}
   {% include_media 'jquery.js' %}
+  {% include_media 'processing.js' %}
+
+  <style>
+    #progress .ready { display:none; }
+    span.ui-icon { float:left; margin-right: .3em;}
+    #progress h3 + div { padding-left: 16px; }
+  </style>
 {% endblock addScript %}
 
 {% block content %}
-<h2>N-PACT is Running</h2>
-<h3>Status</h3>
+<h2 id="title">N-PACT Is Running</h2>
 
-<div class="contentPadding">
-  <span id="computationrunning">The computation is currently running.</span>
-  <div id="progressreport">
-    <div class="timer"></div>
-    <div class="text"> 
+<div id="progress" class="contentPadding">
+
+  <div id="results" style="display:none">
+    <h3><span class="ui-icon ui-icon-triangle-1-e">Collapse</span> Results </h3>
+    <div style="display:none">
+      <h4>Download</h4>
+      <p>
+        Your download should start shortly.
+        Here is <a id="downloadlink" href="#">the direct link</a>.
+      </p>
+      <h4>Not what you expected?</h4>
+      <ul>
+        <li><a id="reconfigurelink" href="#">Reconfigure it</a> and try again.</li>
+        <li><a href="{% url start %}">Start Over</a></li>
+      </ul>
+    </div>
+  </div>
+
+  
+  <h3 id="progressreport" >
+    <span class="ui-icon ui-icon-triangle-1-e ui-icon-triangle-1-s">Collapse</span> Status </h3>
+  <div>
+    <p id="computationrunning">The computation is currently running.</p>
+    <div id="computationerred" class="ui-state-error ui-corner-all" style="display:none">
+      <p>
+        <span style="" class="ui-icon ui-icon-alert"></span>
+        There was an error. You can click refresh to try again or return to the <a href="{% url start %}">start</a>.
+      </p>
+    </div>
+    
+    <p id="computationerred" style="display:none" class="error"></p>
+    <div id="timer" class="ui-state-highlight ui-icon ui-icon-info" style="display:none">
+      <span></span>
+    </div>
+    <div> 
       <h4>Current Progress</h4>
       <ul id="steps">
       </ul>
     </div>
   </div>
-<script type="text/javascript">
-  var progress ={
-     url:"{{ path }}",
-     dom: jQuery('#progressreport'),
-     timerDom: jQuery('#progressreport .timer'),
-     steps: jQuery('#steps'),
-     start: null,
-     updateTimer :function (){
-       if(progress.start){
-          progress.elapsed = new Date() - progress.start;
-          progress.timerDom.html(Math.floor(progress.elapsed/1000) + ' sec.');
-       }
-     }
-  };
-
-  function updateDisplay( data ){
-     //{"steps": ['a','b'], "tdiff": 10.32341, "step_desc": "a step description."}
-     console.log('Update Progress Display', data);
-     if(!data) return;
-     for(var i=0; i< data.steps.length; i++) {
-        progress.steps.append('<li>' + data.steps[i] + '</li>')
-     }
-  }
-  function onsuccess(data){
-     console.log('Progress', data);
-     if(data.next=='results'){
-       if(progress.interval)window.clearInterval(progress.interval);
-       progress.steps.append('<li>Finished! Sending file.</li>');
-       window.location = data.url;
-     }
-     else {
-       //data.pt looks has progress data
-       updateDisplay(data.pt);
-       runRequest();
-     }
-  }
-  function onerror(data){
-     $('#computationrunning').remove()
-     window.clearInterval(progress.interval);
-     progress.timerDom.html('There was an error. You can click refresh to try again or return to the <a href="{% url start %}">start</a>.')
-     //window.location = "{% url start %}";
-
-  }
-  function runRequest(){
-     console.log('Starting Progress Request Chain');
-     if(!progress.start) progress.start = new Date();
-     jQuery.ajax({
-       url: progress.url,
-       dataType:'json',
-       success:onsuccess,
-       error: onerror
-     })
-  }
-  jQuery(document).ready(function(){
-    runRequest();
-    progress.interval = window.setInterval(progress.updateTimer, 500);
-  });
-</script>
-
+  <script type="text/javascript">
+    jQuery(document).ready( function(){ 
+      progress.init("{{ path }}"); 
+    });
+  </script>
 </div>
 {%endblock content %}
