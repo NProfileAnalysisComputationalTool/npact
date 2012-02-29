@@ -13,7 +13,7 @@ from django.template import RequestContext
 from pynpact import prepare, main, util
 from pynpact.softtimeout import Timeout
 
-from spatweb import is_clean_path, getabspath, getrelpath
+from spatweb import assert_clean_path, getabspath, getrelpath
 from spatweb import helpers
 from spatweb.middleware import RedirectException
 
@@ -24,9 +24,11 @@ logger = logging.getLogger(__name__)
 
 
 
-def get_return_url(request):
-    if request.GET.get('path'):
-        return reverse('config', args=[request.GET.get('path')]) + "?" + urlencode(request.GET)
+def get_reconfigure_url(request, path=None):
+    if path is None:
+        path = request.GET.get('path')
+    if path:
+        return reverse('config', args=[path]) + "?" + urlencode(request.GET)
     else:
         return None
 
@@ -38,7 +40,7 @@ def get_raw_url(request, path):
 def get_ti(size):
     return forms.TextInput(attrs={'size':size})
 
-class ConfigForm(forms.Form) :
+class ConfigForm(forms.Form):
     first_page_title = forms.CharField(widget=get_ti(40))
     following_page_title = forms.CharField(required=False, widget=get_ti(40))
     length=forms.IntegerField(required=True, min_value=0,
@@ -57,29 +59,22 @@ class ConfigForm(forms.Form) :
 
 def get_display_items(request, config):
     yield ('Filename', config['basename'])
-    for key in ['date','length','description'] :
-        if config.get(key) :
+    for key in ['date','length','description']:
+        if config.get(key):
             yield key, config.get(key)
 
-
-
+        
 def config(request, path):
-    if not is_clean_path(path) :
-        messages.error(request,
-                       "Path contained illegal characters, please upload "
-                       "a file or go to the library and select one.")
-        return HttpResponseRedirect(reverse('spatweb.views.start.view'))
+    assert_clean_path(path, request)
+    config = build_config(path, request)
 
     form = None
-    config = build_config(path, request, False)
-    if request.method == 'POST' :
+    if request.method == 'POST':
         form = ConfigForm(request.POST)
         if form.is_valid():
             logger.info("Got clean post, running.")
-            config.update(form.cleaned_data)
-            url = reverse('run', args=[path]) + encode_config(config)
+            url = reverse('run', args=[path]) + "?" + urlencode(form.cleaned_data)
             return HttpResponseRedirect(url)
-            
     else:
         form = ConfigForm(initial=config)
 
@@ -90,14 +85,9 @@ def config(request, path):
                                'def_list_items': get_display_items(request,config)},
                                context_instance=RequestContext(request))
 
-def build_config(path, request, read_request=True):
-    if not is_clean_path(path) :
-        messages.error(request,
-                       "Path contained illegal characters. "
-                       "Please select a new GBK file.")
-        return HttpResponseRedirect(reverse('start'))
+def build_config(path, request):
+    assert_clean_path(path, request)
 
-    config = None
     try:
         config = prepare.default_config(getabspath(path))
     except prepare.InvalidGBKException, e:
@@ -108,12 +98,22 @@ def build_config(path, request, read_request=True):
         messages.error(request,
                        "There was a problem loading file '%s', "
                        "please try again or try a different record." % path)
-        return HttpResponseRedirect(reverse('start'))
+        raise RedirectException(reverse('start'))
 
-    if read_request:
-        cf = ConfigForm(request.REQUEST)
-        if cf.is_valid():
-            config.update(cf.cleaned_data)
+    cf = ConfigForm(request.REQUEST)
+    for f in cf.visible_fields():
+        try:
+            v=f.field.clean(f.field.to_python(f.data))
+            if v:
+                logger.debug("Including %r:%r from request.", f.name, v)
+                config[f.name] = v
+        except forms.ValidationError, ve:
+            pass
+        except:
+            logger.exception("Error with %r", f.name)
+    if cf.is_valid():
+        logger.debug('updating with %r', cf.cleaned_data)
+        config.update(cf.cleaned_data)
 
     return config
     
@@ -126,44 +126,44 @@ def encode_config(config, **urlconf):
 
 
 def run_frame(request, path):
-    full_path = request.get_full_path().replace('/run/', '/process/')
-    return render_to_response('processing.html', 
+    config = build_config(path, request)
+    request.session[path] = config
+    full_path = reverse('process',args=[path])
+    return render_to_response('processing.html',
                               {'path': full_path},
                               context_instance=RequestContext(request))
 
+
 def run_step(request, path):
-    try:
-        config =  request.session.get('config',
-                                  build_config(path, request, read_request=True))
-        gbp = main.GenBankProcessor(getabspath(path), config=config, timeout=2)
+    """Invoked via ajax, runs part of the process with a softtimeout until finished."""
+    assert_clean_path(path, request)
+    try: 
+        config = request.session.get(path)
+        #the frame is supposed to ensure this is in session.
+        if not config:
+            return HttpResponse('Session Timeout, please try again.', status=500)
+
+        gbp = main.GenBankProcessor(getabspath(path), config=config, timeout=4)
         nextstep = None
         try:
-            psname = gbp.process()
+            pspath = gbp.process()
             logger.debug("Finished processing.")
-            psname = getrelpath(psname)
-            url = reverse('results', args=[psname]) + encode_config(config, path=path)
-            request.session.modified = True
-            nextstep = {'next':'results', 'url': url}
-            
+            pspath = getrelpath(pspath)
+            #url = reverse('results', args=[psname]) + encode_config(config, path=path)
+            nextstep = {'next':'results', 
+                        'download_url': get_raw_url(request, pspath),
+                        'reconfigure_url': reverse('config', args=[path]) + encode_config(config)}
         except Timeout, pt:
-            request.session.modified = True
             nextstep = {'next':'process', 'pt': vars(pt)}
         return HttpResponse(json.dumps(nextstep))
     except:
         logger.exception("Error in run_step")
-        messages.error(request, "Error Processing Data File" )
         return HttpResponse('ERROR', status=500)
-        
 
 
 def results(request, path):
     """Serve a results page."""
-
-    if not is_clean_path(path) :
-        messages.error(request,
-                       "Path contained illegal characters, please upload "
-                       "a file or go to the library and select one.")
-        return HttpResponseRedirect(reverse('start'))
+    assert_clean_path(path, request)
 
     download_link = None
     try:
