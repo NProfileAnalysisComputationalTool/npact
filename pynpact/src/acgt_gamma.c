@@ -23,9 +23,9 @@ int	RANDOMIZE= 0;
 
 #define WRITE_SEQUENCES 0
 
-# define WEB_SERVER 0
+# define WEB_SERVER 1
 # define STEVE 0
-# define LUCIANO 1
+# define LUCIANO 0
 # define LUCIANO_HOME 0
 
 #if WEB_SERVER
@@ -3185,7 +3185,12 @@ void characterize_published_genes(int ncds, int tot_Ghits, double nuc[], long by
 						{
 							if(hss[i].fromp >= from - mHL/2 && hss[i].top <= to + mHL/2)  // hit embedded
 							{
-								if(gene[j].type[h] != 2) gene[j].type[h]= k= 1;
+								if(gene[j].type[h] != 2)
+								{
+								gene[j].type[h]= k= 1;
+									if(gene[j].strand == 'D') gene[j].newstart[h]= hss[i].fromp;
+									else                      gene[j].newstart[h]= hss[i].top;
+								}
                                 hss[i].type= 2;
 							}
 							else    // hit overlapped
