@@ -2577,12 +2577,16 @@ void process_hss(int from_hss, int to_hss, int ncds)
                         if(hss[o[i]].strand == 'D')                     // ORF from start codon (gfrom) to stop (gto)
                         {
                         gfrom= hss[o[i]].start_pos;
-                        gto= hss[o[i]].stop2;
+				if(hss[o[i]].next_hit >= 0 && hss[hss[o[i]].next_hit].score > hss[o[i]].score)
+				gto= hss[hss[o[i]].next_hit].fromp - 1;
+                        	else gto= hss[o[i]].stop2;
                         }
                         else                                           // ORF from stop (gfrom) to start codon (gto)
                         {
                         gto= hss[o[i]].start_pos;
-                        gfrom= hss[o[i]].stop1;
+				if(hss[o[i]].next_hit >= 0 && hss[hss[o[i]].next_hit].score > hss[o[i]].score)
+				gfrom= hss[hss[o[i]].next_hit].top + 1;
+                        	else gfrom= hss[o[i]].stop1;
                         }
 
             G= hss[o[i]].G;
