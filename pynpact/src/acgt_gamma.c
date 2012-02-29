@@ -2599,8 +2599,8 @@ void process_hss(int from_hss, int to_hss, int ncds)
                 nex= gene[j].num_exons;
 				for(h= 0; h < nex; ++h)
 				{
-					if(gene[j].strand == 'D') { from= gene[j].start[h]; to= gene[j].end[h]; }
-					else                      { to= gene[j].start[h]; from= gene[j].end[h]; }
+					if(gene[j].strand == 'D') { from= gene[j].newstart[h]; to= gene[j].end[h]; }
+					else                      { to= gene[j].newstart[h]; from= gene[j].end[h]; }
 
 					if(!(to < gfrom + mHL/2 - 1 || from > gto - mHL/2 + 1)) // predicted CDS overlapping published CDS (gene[])
 					{
@@ -3185,7 +3185,12 @@ void characterize_published_genes(int ncds, int tot_Ghits, double nuc[], long by
 						{
 							if(hss[i].fromp >= from - mHL/2 && hss[i].top <= to + mHL/2)  // hit embedded
 							{
-								if(gene[j].type[h] != 2) gene[j].type[h]= k= 1;
+								if(gene[j].type[h] != 2)
+								{
+								gene[j].type[h]= k= 1;
+									if(gene[j].strand == 'D') gene[j].newstart[h]= hss[i].fromp;
+									else                      gene[j].newstart[h]= hss[i].top;
+								}
                                 hss[i].type= 2;
 							}
 							else    // hit overlapped
