@@ -23,9 +23,9 @@ int	RANDOMIZE= 0;
 
 #define WRITE_SEQUENCES 0
 
-# define WEB_SERVER 0
+# define WEB_SERVER 1
 # define STEVE 0
-# define LUCIANO 1
+# define LUCIANO 0
 # define LUCIANO_HOME 0
 
 #if WEB_SERVER
@@ -2599,8 +2599,8 @@ void process_hss(int from_hss, int to_hss, int ncds)
                 nex= gene[j].num_exons;
 				for(h= 0; h < nex; ++h)
 				{
-					if(gene[j].strand == 'D') { from= gene[j].newstart[h]; to= gene[j].end[h]; }
-					else                      { to= gene[j].newstart[h]; from= gene[j].end[h]; }
+					if(gene[j].strand == 'D') { from= gene[j].start[h]; to= gene[j].end[h]; }
+					else                      { to= gene[j].start[h]; from= gene[j].end[h]; }
 
 					if(!(to < gfrom + mHL/2 - 1 || from > gto - mHL/2 + 1)) // predicted CDS overlapping published CDS (gene[])
 					{
@@ -3162,8 +3162,8 @@ void characterize_published_genes(int ncds, int tot_Ghits, double nuc[], long by
             fseek(fp, ffrom[gene[j].fpos[h]], SEEK_SET);
             s1= s2= 1;
 
-            if(gene[j].strand == 'D') { from= gene[j].newstart[h]= gene[j].start[h]; to= gene[j].end[h]; if(h == gene[j].num_exons - 1) s2= 4; }
-            else                      { to= gene[j].newstart[h]= gene[j].start[h]; from= gene[j].end[h]; if(h == gene[j].num_exons - 1) s1= -2; }
+            if(gene[j].strand == 'D') { from= gene[j].start[h]; to= gene[j].end[h]; if(h == gene[j].num_exons - 1) s2= 4; }
+            else                      { to= gene[j].start[h]; from= gene[j].end[h]; if(h == gene[j].num_exons - 1) s1= -2; }
 
             get_sequence(1, to - from + 1, gene[j].strand, ORF + l);
 
@@ -3185,12 +3185,7 @@ void characterize_published_genes(int ncds, int tot_Ghits, double nuc[], long by
 						{
 							if(hss[i].fromp >= from - mHL/2 && hss[i].top <= to + mHL/2)  // hit embedded
 							{
-								if(gene[j].type[h] != 2)
-								{
-								gene[j].type[h]= k= 1;
-									if(gene[j].strand == 'D') gene[j].newstart[h]= hss[i].fromp;
-									else                      gene[j].newstart[h]= hss[i].top;
-								}
+								if(gene[j].type[h] != 2) gene[j].type[h]= k= 1;
                                 hss[i].type= 2;
 							}
 							else    // hit overlapped
@@ -3199,19 +3194,41 @@ void characterize_published_genes(int ncds, int tot_Ghits, double nuc[], long by
                                 hss[i].type= 3;
 								if(gene[j].strand == 'D')
 								{
+									if(from > hss[i].fromp && to < hss[i].top)
+									{
+                                        hss[i].exten= from - hss[i].fromp + hss[i].top - to;
                                         from= gene[j].newstart[h]= hss[i].fromp;
                                         to= gene[j].newend[h]= hss[i].top;
-									if(from > hss[i].fromp && to < hss[i].top) hss[i].exten= from - hss[i].fromp + hss[i].top - to;
-									else if(from > hss[i].fromp)               hss[i].exten= from - hss[i].fromp;
-									else                                       hss[i].exten= hss[i].top - to;
+									}
+									else if(from > hss[i].fromp)
+									{
+                                        hss[i].exten= from - hss[i].fromp;
+                                        from= gene[j].newstart[h]= hss[i].fromp;
+									}
+									else
+									{
+                                        hss[i].exten= hss[i].top - to;
+                                        to= gene[j].newend[h]= hss[i].top;
+									}
 								}
 								else
 								{
+									if(from > hss[i].fromp && to < hss[i].top)
+									{
+                                        hss[i].exten= from - hss[i].fromp + hss[i].top - to;
                                         from= gene[j].newend[h]= hss[i].fromp;
                                         to= gene[j].newstart[h]= hss[i].top;
-									if(from > hss[i].fromp && to < hss[i].top) hss[i].exten= from - hss[i].fromp + hss[i].top - to;
-									else if(from > hss[i].fromp)               hss[i].exten= from - hss[i].fromp;
-									else                                       hss[i].exten= hss[i].top - to;
+									}
+									else if(from > hss[i].fromp)
+									{
+                                        hss[i].exten= from - hss[i].fromp;
+                                        from= gene[j].newend[h]= hss[i].fromp;
+									}
+									else
+									{
+                                        hss[i].exten= hss[i].top - to;
+                                        to= gene[j].newstart[h]= hss[i].top;
+									}
 								}
 							}
 						}
