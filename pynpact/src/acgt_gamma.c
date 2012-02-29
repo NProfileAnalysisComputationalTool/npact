@@ -23,9 +23,9 @@ int	RANDOMIZE= 0;
 
 #define WRITE_SEQUENCES 0
 
-# define WEB_SERVER 1
+# define WEB_SERVER 0
 # define STEVE 0
-# define LUCIANO 0
+# define LUCIANO 1
 # define LUCIANO_HOME 0
 
 #if WEB_SERVER
@@ -2577,12 +2577,16 @@ void process_hss(int from_hss, int to_hss, int ncds)
                         if(hss[o[i]].strand == 'D')                     // ORF from start codon (gfrom) to stop (gto)
                         {
                         gfrom= hss[o[i]].start_pos;
-                        gto= hss[o[i]].stop2;
+				if(hss[o[i]].next_hit >= 0 && hss[hss[o[i]].next_hit].score > hss[o[i]].score)
+				gto= hss[hss[o[i]].next_hit].fromp - 1;
+                        	else gto= hss[o[i]].stop2;
                         }
                         else                                           // ORF from stop (gfrom) to start codon (gto)
                         {
                         gto= hss[o[i]].start_pos;
-                        gfrom= hss[o[i]].stop1;
+				if(hss[o[i]].next_hit >= 0 && hss[hss[o[i]].next_hit].score > hss[o[i]].score)
+				gfrom= hss[hss[o[i]].next_hit].top + 1;
+                        	else gfrom= hss[o[i]].stop1;
                         }
 
             G= hss[o[i]].G;
@@ -2595,8 +2599,8 @@ void process_hss(int from_hss, int to_hss, int ncds)
                 nex= gene[j].num_exons;
 				for(h= 0; h < nex; ++h)
 				{
-					if(gene[j].strand == 'D') { from= gene[j].start[h]; to= gene[j].end[h]; }
-					else                      { to= gene[j].start[h]; from= gene[j].end[h]; }
+					if(gene[j].strand == 'D') { from= gene[j].newstart[h]; to= gene[j].end[h]; }
+					else                      { to= gene[j].newstart[h]; from= gene[j].end[h]; }
 
 					if(!(to < gfrom + mHL/2 - 1 || from > gto - mHL/2 + 1)) // predicted CDS overlapping published CDS (gene[])
 					{
