@@ -27,7 +27,10 @@ char	*argv[];
       exit(1);
    }
 
+   /* skip until we see ORIGIN (the line that starts the coding seq) */
    while(fgets(longstr,198,input) && strncmp(longstr,"ORIGIN",6));
+
+   /* how many bases from there */
    while(fgets(longstr,198,input) && !feof(input))
       for(i=0;i<strlen(longstr);++i)
          if(longstr[i]>='a' && longstr[i]<='z')
@@ -37,20 +40,25 @@ char	*argv[];
 
    input= fopen(argv[1],"r");
 
-   if(argc>=4) { start= atoi(argv[2]); end= atoi(argv[3]); }
+   if(argc >= 4) { start= atoi(argv[2]); end= atoi(argv[3]); }
    else { start= 1; end= tot; }
 
-   if(argc>=6) { window= atoi(argv[4]); step= atoi(argv[5]); }
-   if(argc==7) period= atoi(argv[6]);
+   if(argc >= 6) { 
+      window = atoi(argv[4]); 
+      step = atoi(argv[5]);
+   }
+   if(argc == 7) 
+      period = atoi(argv[6]);
 
-   S= (double *)calloc(period,sizeof(double));
+   S= (double *)calloc(period, sizeof(double));
 
-   if(end-start+1<0 || end-start+1>tot) {
+   if(end-start+1 < 0 || end-start+1 > tot) {
       fprintf(stderr,"\nERROR: Sequence must be longer than 0 and shorter than complete sequence (%d nt).\n%s",
               tot,usage);
       exit(1);
    }
-   if(window%period) {
+
+   if(window % period) {
       fprintf(stderr,"\nERROR: Window_size must be divisable by period_of_frames\n%s",usage);
       exit(1);
    }
@@ -64,15 +72,11 @@ char	*argv[];
 
    for(i=0;i<window;++i) box[i]= ' ';
 
-   while(fgets(longstr,198,input) && !feof(input) && (start+n)<=end)
-   {
-      for(i=0;i<strlen(longstr)-1 && (start+n)<=end;++i)
-      {
-         if(longstr[i]>='a' && longstr[i]<='z')
-         {
+   while(fgets(longstr,198,input) && !feof(input) && (start+n)<=end) {
+      for(i=0;i<strlen(longstr)-1 && (start+n)<=end;++i) {
+         if(longstr[i]>='a' && longstr[i]<='z') {
             ++m;
-            if(m>=start && m<=end)
-            {
+            if(m>=start && m<=end) {
                if(longstr[i]=='c' || longstr[i]=='g') {
                   if(box[n%window]!='S') {
                      ++S[(m-1)%(period)]; box[n%window]='S';
@@ -93,8 +97,7 @@ char	*argv[];
                   fprintf(stderr,"\nBase %c found at position %d\n",longstr[i],start+n);
                   ++n;
                }
-               if(n>=window && !((n-window)%step) && (start+n)<end)
-               {
+               if(n>=window && !((n-window)%step) && (start+n)<end) {
                   fprintf(stdout,"%8d",start+n-1-window/2);
                   for(j=0;j<period;++j)
                      fprintf(stdout,"%8.1f",100.0/(float)(window/period)*(float)S[j]);
