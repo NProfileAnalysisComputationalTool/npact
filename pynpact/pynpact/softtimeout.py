@@ -36,6 +36,3 @@ class SoftTimer(object):
                           checkcount=self.checkcount,
                           steps = self.steps,
                           **kwargs)
-
-
-

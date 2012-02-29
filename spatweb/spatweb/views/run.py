@@ -34,6 +34,8 @@ def get_reconfigure_url(request, path=None):
 
 def get_raw_url(request, path):
     #return request.build_absolute_uri(reverse('raw', path))
+    if path.startswith('/'):
+        path = getrelpath(path)
     return reverse('raw', args=[path])
 
 
@@ -152,9 +154,15 @@ def run_step(request, path):
             #url = reverse('results', args=[psname]) + encode_config(config, path=path)
             nextstep = {'next':'results', 
                         'download_url': get_raw_url(request, pspath),
-                        'reconfigure_url': reverse('config', args=[path]) + encode_config(config)}
+                        'reconfigure_url': reverse('config', args=[path]) + encode_config(config),
+                        'steps': gbp.timer.steps}
+            
         except Timeout, pt:
-            nextstep = {'next':'process', 'pt': vars(pt)}
+            nextstep = {'next':'process', 'steps': pt.steps}
+
+        nextstep['files'] = [get_raw_url(request, v) 
+                             for (k,v) in config.items() 
+                             if v and (k in gbp.AP_file_keys)]
         return HttpResponse(json.dumps(nextstep))
     except:
         logger.exception("Error in run_step")

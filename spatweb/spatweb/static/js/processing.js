@@ -12,11 +12,23 @@ $.fn.spinDown = function() {
 	
 };
 
+// The .bind method from Prototype.js 
+if (!Function.prototype.bind) { // check if native implementation available
+  Function.prototype.bind = function(){ 
+    var fn = this, args = Array.prototype.slice.call(arguments),
+        object = args.shift(); 
+    return function(){ 
+      return fn.apply(object, 
+        args.concat(Array.prototype.slice.call(arguments))); 
+    }; 
+  };
+}
+
+
 var progress = {
     start: null,
     
     init: function(url) {
-
         progress.url = url;
         progress.startRequest();
         progress.timerDom = jQuery('#timer > span');
@@ -24,14 +36,24 @@ var progress = {
         $('#progress  h3').spinDown();
     },
 
-    updateDisplay: function(data) {
+    updateStatusDisplay: function(data) {
         //{"steps": ['a','b'], "tdiff": 10.32341, "step_desc": "a step description."}
         console.log('Update Progress Display', data);
         if(!data) return;
-        for(var i=0; i< data.steps.length; i++) {
+        var steps = data.steps;
+        for(var i=0; i< steps.length; i++) {
             progress.steps.append('<li>' + data.steps[i] + '</li>');
         }
-
+        var files = data.files;
+        if (files.length) {
+            var newnode = $('<ul id="files"/>');
+            for(i=0; i < files.length; i++){
+                var href = files[i];
+                var name = /([^/]*)$/.exec(href)[1];
+                $(newnode).append('<li><a href="' + href + '">' + name + '</a></li>');
+            }
+            $('#files').replaceWith(newnode);
+        }
     },
 
     startRequest: function(){
@@ -59,14 +81,14 @@ var progress = {
 
     onsuccess: function(data){
         console.log('Progress', data);
-        if(data.next=='results'){
+        //async call
+        setTimeout(progress.updateStatusDisplay.bind(progress, data));
+
+        if(data.next=='results')
             progress.processResults(data);
-        }
-        else {
-            //data.pt has progress data
+        else 
             progress.startRequest();
-            progress.updateDisplay(data.pt);
-        }
+
     },
     
     processResults: function(data) {
@@ -75,6 +97,7 @@ var progress = {
             clearTimeout(progress.interval);
         $('#title').html('N-PACT Is Finished');
         $('#downloadlink').attr('href', data.download_url);
+        $('#timer').toggleClass('ui-state-highlight');
         $('#reconfigurelink').attr('href', data.reconfigure_url);
         $('#progressreport').trigger('click');
         $('#results').fadeIn(100);
@@ -88,7 +111,7 @@ var progress = {
             $('#timer').fadeIn();
             var elapsed = new Date() - progress.start;
             progress.timerDom.html(Math.floor(elapsed/1000) + ' sec.');
-            progress.interval = setTimeout(progress.updateTimer, elapsed % 1000);
+            progress.interval = setTimeout(progress.updateTimer, 1010 - (elapsed % 1000));
         }
     }
 };

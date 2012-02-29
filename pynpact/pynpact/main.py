@@ -177,8 +177,6 @@ multiprocess safe way) setting class defaults
         config,hash = util.reducehashdict(self.config,
                                           ['significance', 'GeneDescriptorSkip1'])
 
-        gbkbase = os.path.basename(self.gbkfile)[:-4]
-
         #TODO: acgt actually takes the string of characters to skip, not the length.
         outdir = self.derivative_filename('.{0}.predict'.format(hash))
         if util.is_outofdate(outdir, self.gbkfile, DATAPATH):
@@ -206,7 +204,7 @@ multiprocess safe way) setting class defaults
         self.logger.debug("Adding prediction filenames to config dict.")
         #strip 4 characters off here b/c that's how acgt_gamma does it
         #at about lines 262-270
-        j = lambda ext: os.path.join(outdir, gbkbase + ext)
+        j = lambda ext: os.path.join(outdir, os.path.basename(self.gbkfile)[:-4] + ext)
         self.config['File_of_new_CDSs'] = j(".newcds")
         self.config['File_of_published_rejected_CDSs'] = j(".modified")
         self.config['File_of_G+C_coding_potential_regions'] = j('.profiles')
