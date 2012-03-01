@@ -33,8 +33,8 @@ class build_pynpact(build) :
                                           exe_name,
                                           libraries=['m'],
                                           output_dir=output_dir,debug=self.debug)
-
-        super(build_pynpact, self).run()
+        build.run(self)
+        #super(build_pynpact, self).run()
 
 setup(name='pynpact',
       version='0.2',
