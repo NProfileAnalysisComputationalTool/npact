@@ -45,57 +45,71 @@ int mapfile(char* filename, char** addr, size_t* length) {
       perror ("close");
       return 1;
    }
+   return 0;
 }
 
-int calculateProfile(const char* origin, const size_t length,
-                     int start, int end, int window, int step, int period) {
+void calculateProfile(const char* origin, const size_t length,
+                      const int start, const int end, const int window,
+                      const int step, const int period) {
+
    char *box, base;
-   int offset, i, j, baseidx=0, n=0;
-   double	*S,k;
+   int offset =0 , j, baseidx=0, n=0;
+   size_t *S;
+   double normfactor = 100.0/(double)(window/period);
 
    fprintf(stderr,
            "Reading bases %d-%d with window %d nt, step %d nt and period %d nt.\n",
            start, end, window, step, period);
 
-   box = (char *)malloc(window*sizeof(char));
-   S = (double *)calloc(period, sizeof(double));
-   for(i=0; i<window; ++i) box[i]= ' ';
+   box = (char *)calloc(window, sizeof(char));
+   S = (size_t *)calloc(period, sizeof(size_t));
 
-   //while(fgets(longstr,198,input) && !feof(input) && (start+n)<=end) {
-   for(offset = 0; offset < length && start+n <= end; offset++) {
+
+   /* skip up till start, but don't move offset passed start. */
+   while (offset < length) {
+      base = origin[offset];
+      if(base >= 'a' && base <= 'z') {
+         if(baseidx + 1 == start)
+            break;
+         baseidx++;
+      }
+      offset++;
+   }
+
+   for(; offset < length && baseidx < end; offset++) {
       base = origin[offset];
       if(base >= 'a' && base <= 'z') {
          ++baseidx;
-         if(baseidx >= start && baseidx <= end) {
-            if(base=='c' || base=='g') {
-               if(box[n % window] != 'S') {
-                  ++S[(baseidx-1)%(period)]; box[n%window]='S';
-               }
-               ++n;
+         if(base=='c' || base=='g') {
+            if(! box[n % window]) {
+               //if the flag wasn't set, then set it and increase the count.
+               ++S[(baseidx-1) % period];
+               box[n % window] = 1;
             }
-            else if(base=='a' || base=='t' || base=='u') {
-               if(box[n%window]=='S') {
-                  --S[(baseidx-1)%(period)]; box[n%window]='W';
-               }
-               ++n;
+         }
+         else {
+            if(box[n % window]) {
+               //if the flag was set, clear it and decrease the count.
+               --S[(baseidx-1) % period];
+               box[n % window] = 0;
             }
-            else {
-               if(box[n%window]=='S') {
-                  --S[(baseidx-1)%(period)];
-                  box[n%window]='N';
-               }
-               fprintf(stderr,"\nBase %c found at position %d\n",base,start+n);
-               ++n;
-            }
-            if(n>=window && !((n-window)%step) && (start+n)<end) {
-               fprintf(stdout,"%8d",start+n-1-window/2);
-               for(j=0;j<period;++j)
-                  fprintf(stdout,"%8.1f", 100.0/(float)(window/period)*(float)S[j]);
-               fprintf(stdout,"\n");
-            }
+
+            //unexpected base, print warning.
+            if(! (base=='a' || base=='t' || base=='u'))
+               fprintf(stderr,"\nBase %c found at position %d\n",base,baseidx);
+         }
+         ++n;
+
+         if(n >= window && ((n-window) % step) == 0 && baseidx < end) {
+            fprintf(stdout, "%8d", baseidx-window/2);
+            for(j=0; j < period; ++j)
+               fprintf(stdout, "%8.1f", normfactor*S[j]);
+            fprintf(stdout,"\n");
          }
       }
    }
+   free(box);
+   free(S);
    fprintf(stderr,"Bases %d-%d read (%d nt)\n", start, end, n);
 }
 
@@ -108,53 +122,53 @@ int countBases(const char* origin, const size_t length) {
    return tot;
 }
 
-main(argc,argv)
-int	argc;
-char	*argv[];
-{
-   int start,end,window=201,step=51,period=3,tot=0;
+int main(int argc, char *argv[]) {
+   int start=1,end=0,window=201,step=51,period=3,tot=0;
    char* mapped_file;
    char* origin;
    size_t length, olength;
+   int argi = 1;
+   char* filename;
 
 
    if(!(argc==2 || argc==4 || argc==6 || argc==7)) {
       fputs(usage, stderr);
       exit(1);
    }
+   filename = argv[argi++];
 
-   if ( mapfile(argv[1], &mapped_file, &length) )
+
+   if ( mapfile(filename, &mapped_file, &length) )
       exit(1);
 
 
-   fprintf(stderr, "Searching for coding sequence in %s. ", argv[1]);
+   fprintf(stderr, "Searching for coding sequence in '%s'... ", filename);
    /* Skip until we see ORIGIN (the line that starts the coding seq)
     * If the file doesn't contain ORIGIN this may raise a segfault;
-    * but at that point error is about appropriate anyways.
+    * but at that point exiting with error is all we can do anyways.
     */
    origin = strstr(mapped_file, "\nORIGIN");
-   /* then saqve a pointer at the start of the next line */
+   /* then save a pointer at the start of the next line */
    origin = strchr(origin + strlen("\nORIGIN"), '\n') + 1;
    olength = length - (origin - mapped_file);
-
-   //while(fgets(longstr,198,input) && strncmp(longstr,"ORIGIN",6));
 
    tot = countBases(origin, olength);
    fprintf(stderr, "Found %d bases.\n", tot);
 
-   if(argc >= 4) { start= atoi(argv[2]); end= atoi(argv[3]); }
-   else { start= 1; end= tot; }
+   if(argc > argi)
+      start = atoi(argv[argi++]);
 
-   if(argc >= 6) {
-      window = atoi(argv[4]);
-      step = atoi(argv[5]);
-   }
-   if(argc == 7)
-      period = atoi(argv[6]);
+   end = (argc > argi) ? atoi(argv[argi++]) : tot;
+
+   if(argc > argi)
+      window = atoi(argv[argi++]);
+   if(argc > argi)
+      step = atoi(argv[argi++]);
+   if(argc > argi)
+      period = atoi(argv[argi++]);
 
 
-
-   if(end-start+1 < 0 || end-start+1 > tot) {
+   if(end > tot || start < 1 || end <= start) {
       fprintf(stderr,"ERROR: Sequence must be longer than 0 and shorter than complete sequence (%d nt).\n%s",
               tot,usage);
       exit(1);
@@ -168,7 +182,5 @@ char	*argv[];
    calculateProfile(origin, olength, start, end, window, step, period);
 
    munmap(mapped_file, length);
-
-
    exit(0);
 }
