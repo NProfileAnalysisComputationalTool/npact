@@ -145,16 +145,16 @@ multiprocess safe way) setting class defaults
         self.config['File_of_published_accepted_CDSs'] = filename
         return filename
 
-    def run_CG(self):
+    def run_nprofile(self):
         """Do the CG ratio calculations.
 
         $ CG MYCGE.gbk 1 580074 201 51 3 > MYCGE.CG200
         """
         config,hash = util.reducehashdict(self.config,['length','window_size','step','period'])
-        outfilename = self.derivative_filename(".%s.CG" % hash)
+        outfilename = self.derivative_filename(".%s.nprofile" % hash)
         def thunk(out):
-            self.timer.check("Calculating CG ratio.")
-            progargs = [binfile("CG"), self.gbkfile, 1, config['length'],
+            self.timer.check("Calculating n-profile.")
+            progargs = [binfile("nprofile"), self.gbkfile, 1, config['length'],
                         config['window_size'], config['step'], config['period']]
             return util.capturedCall(progargs, stdout=out, logger=self.logger, check=True)
         
@@ -341,13 +341,8 @@ period_of_frame       Number of frames.
             combined_ps_name = self.derivative_filename("%s.ps" %(hash,))
             return self.safe_produce_new(combined_ps_name, combine_ps_files, dependencies=filenames)
 
-    RUN_FNS=['run_extract','run_CG','acgt_gamma','run_Allplots']
-    RUN_FNS_DESC={
-        'run_extract': 'Extracting gene names',
-        'run_CG': 'Calculating profile',
-        'acgt_gamma': 'Predicting new gene locations',
-        'run_Allplots': 'Generating graphs.'
-    }
+    RUN_FNS=['run_extract','run_nprofile','acgt_gamma','run_Allplots']
+
     def process(self):
         val = None
         for fn in self.RUN_FNS:
