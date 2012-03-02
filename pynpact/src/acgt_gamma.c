@@ -2719,7 +2719,7 @@ void process_hss(int from_hss, int to_hss, int ncds)
 
 void write_results(int from_hss, int to_hss, int ncds, int genome_size)
 {
-    int	i, j, k, h, l, *o, s1, s2, types[13]= { 0 }, from, to, out;
+    int	i, j, k, h, l, *o, s1, s2, types[13]= { 0 }, from, to, out, flag;
     char	Pg[15], name[50];
     double	G, print_len, po;
     FILE	*output1, *output2, *output3, *output4, *output5, *output6, *output7, *output8;
@@ -2806,34 +2806,27 @@ fprintf(output6, "List of predicted ORFs modifying previous annotation.\n");
 					{
 						if(hss[o[i]].entropy > MAX_ENTROPY)
 						{
+						flag= 0;
 							if(hss[o[i]].start)
 							{
 				j= strlen(name);
                                 if(name[j - 1] != '*') { strcat(name, "-"); ++j; }
 				name[j]= start_char[hss[o[i]].start];
 				name[j + 1]= '\0';
-                                fprintf(output1,"%s %d..%d\n", name, hss[o[i]].start_pos + s1, hss[o[i]].stop2 + s2);
-                                if(k == 7) fprintf(output4,"%s %d..%d\n", name, hss[o[i]].start_pos + s1, hss[o[i]].stop2 + s2);
+				l= hss[o[i]].top - hss[o[i]].fromp + 1;
+				j= o[i];
+                   			while(j= hss[j].next_hit != -1) l += hss[j].top - hss[j].fromp + 1;
+					if(l * 5 > hss[o[i]].stop2 - hss[o[i]].start_pos + 1) flag= 1;
+							}
+                                if(flag) fprintf(output1,"%s %d..%d\n", name, hss[o[i]].start_pos + s1, hss[o[i]].stop2 + s2);
+                                if(k == 7 || !flag) fprintf(output4,"%s %d..%d\n", name, hss[o[i]].start_pos + s1, hss[o[i]].stop2 + s2);
 								if(WRITE_SEQUENCES)
 								{
-                                    fprintf(output7,">%s %d..%d\n", name, hss[o[i]].start_pos + s1, hss[o[i]].stop2 + s2);
-                                    fprintf(output8,">%s %d..%d\n", name, hss[o[i]].start_pos + s1, hss[o[i]].stop2 + s2);
+                                    fprintf(output7,">%s D %d..%d\n", name, hss[o[i]].start_pos + s1, hss[o[i]].stop2 + s2);
+                                    fprintf(output8,">%s D %d..%d\n", name, hss[o[i]].start_pos + s1, hss[o[i]].stop2 + s2);
                                     print_nucleotides(hss[o[i]].seq, hss[o[i]].seqlen, output7);
                                     print_amino_acids(hss[o[i]].seq, hss[o[i]].seqlen, output8);
 								}
-							}
-							else
-							{
-                                fprintf(output1,"%s %d..%d\n", name, hss[o[i]].fromp + s1, hss[o[i]].stop2 + s2);
-                                if(k == 7) fprintf(output4,"%s %d..%d\n", name, hss[o[i]].fromp + s1, hss[o[i]].stop2 + s2);
-								if(WRITE_SEQUENCES)
-								{
-                                    fprintf(output7,">%s %d..%d\n", name, hss[o[i]].fromp + s1, hss[o[i]].stop2 + s2);
-                                    fprintf(output8,">%s %d..%d\n", name, hss[o[i]].fromp + s1, hss[o[i]].stop2 + s2);
-                                    print_nucleotides(hss[o[i]].seq, hss[o[i]].seqlen, output7);
-                                    print_amino_acids(hss[o[i]].seq, hss[o[i]].seqlen, output8);
-								}
-							}
 						}
 						else fprintf(output5,"%s %d..%d %d %.4f\n", name, hss[o[i]].fromp + s1, hss[o[i]].stop2 + s2, hss[o[i]].len, hss[o[i]].entropy);
 // Length and Entropy to stdout:	fprintf(stdout,"%d\t%.5f\n", hss[o[i]].stop2 -  hss[o[i]].fromp + s2, hss[o[i]].entropy);
@@ -2843,34 +2836,27 @@ fprintf(output6, "List of predicted ORFs modifying previous annotation.\n");
 					{
 						if(hss[o[i]].entropy > MAX_ENTROPY)
 						{
+						flag= 0;
 							if(hss[o[i]].start)
 							{
 				j= strlen(name);
                                 if(name[j - 1] != '*') { strcat(name, "-"); ++j; }
 				name[j]= start_char[hss[o[i]].start];
 				name[j + 1]= '\0';
-                                fprintf(output1,"%s complement(%d..%d)\n", name, hss[o[i]].stop1 + s1, hss[o[i]].start_pos + s2);
-                                if(k == 7) fprintf(output4,"%s complement(%d..%d)\n", name, hss[o[i]].stop1 + s1, hss[o[i]].start_pos + s2);
+				l= hss[o[i]].top - hss[o[i]].fromp + 1;
+				j= o[i];
+                   			while(j= hss[j].next_hit != -1) l += hss[j].top - hss[j].fromp + 1;
+					if(l * 5 > hss[o[i]].start_pos - hss[o[i]].stop1 + 1) flag= 1;
+							}
+                                if(flag) fprintf(output1,"%s complement(%d..%d)\n", name, hss[o[i]].stop1 + s1, hss[o[i]].start_pos + s2);
+                                if(k == 7 || !flag) fprintf(output4,"%s complement(%d..%d)\n", name, hss[o[i]].stop1 + s1, hss[o[i]].start_pos + s2);
 								if(WRITE_SEQUENCES)
 								{
-                                    fprintf(output7,">%s++ %d..%d\n", name, hss[o[i]].stop1 + s1, hss[o[i]].start_pos + s2);
-                                    fprintf(output8,">%s++ %d..%d\n", name, hss[o[i]].stop1 + s1, hss[o[i]].start_pos + s2);
+                                    fprintf(output7,">%s C %d..%d\n", name, hss[o[i]].stop1 + s1, hss[o[i]].start_pos + s2);
+                                    fprintf(output8,">%s C %d..%d\n", name, hss[o[i]].stop1 + s1, hss[o[i]].start_pos + s2);
                                     print_nucleotides(hss[o[i]].seq, hss[o[i]].seqlen, output7);
                                     print_amino_acids(hss[o[i]].seq, hss[o[i]].seqlen, output8);
 								}
-							}
-							else
-							{
-                                fprintf(output1,"%s complement(%d..%d)\n", name, hss[o[i]].stop1 + s1, hss[o[i]].top + s2);
-                                if(k == 7) fprintf(output4,"%s complement(%d..%d)\n", name, hss[o[i]].stop1 + s1, hss[o[i]].top + s2);
-								if(WRITE_SEQUENCES)
-								{
-                                    fprintf(output7,">%s complement(%d..%d)\n", name, hss[o[i]].stop1 + s1, hss[o[i]].top + s2);
-                                    fprintf(output8,">%s complement(%d..%d)\n", name, hss[o[i]].stop1 + s1, hss[o[i]].top + s2);
-                                    print_nucleotides(hss[o[i]].seq, hss[o[i]].seqlen, output7);
-                                    print_amino_acids(hss[o[i]].seq, hss[o[i]].seqlen, output8);
-								}
-							}
 						}
 						else fprintf(output5,"%s complement(%d..%d) %d %.4f\n", name, hss[o[i]].stop1 + s1, hss[o[i]].top + s2, hss[o[i]].len, hss[o[i]].entropy);
 // Length and Entropy to stdout:	fprintf(stdout,"%d\t%.5f\n", hss[o[i]].top - hss[o[i]].stop1 + 4, hss[o[i]].entropy);
@@ -2938,9 +2924,9 @@ fprintf(output6, "List of predicted ORFs modifying previous annotation.\n");
 
     fprintf(output3,"Prediction type            Tot hits\n");
 
-	for(i= 0; i < from_hss; ++i) ++types[hss[o[i]].type];
+	for(i= 0; i < from_hss; ++i) ++types[hss[i].type];
 	for(k= 0; k < 13; ++k) { fprintf(output3,"H-%-23s  %d\n",Prediction[k],types[k]); types[k]= 0; }
-	for(i= from_hss; i < to_hss; ++i) ++types[hss[o[i]].type];
+	for(i= from_hss; i < to_hss; ++i) ++types[hss[i].type];
 	for(k= 0; k < 13; ++k) fprintf(output3,"G-%-23s  %d\n",Prediction[k],types[k]);
 
     fprintf(output3,"\n");
