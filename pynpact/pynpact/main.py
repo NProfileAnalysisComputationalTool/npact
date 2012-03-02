@@ -150,11 +150,12 @@ multiprocess safe way) setting class defaults
 
         $ CG MYCGE.gbk 1 580074 201 51 3 > MYCGE.CG200
         """
-        config,hash = util.reducehashdict(self.config,['length','window_size','step','period'])
+        config,hash = util.reducehashdict(self.config,['nucleotides', 'length','window_size','step','period'])
         outfilename = self.derivative_filename(".%s.nprofile" % hash)
         def thunk(out):
             self.timer.check("Calculating n-profile.")
-            progargs = [binfile("nprofile"), self.gbkfile, 1, config['length'],
+            progargs = [binfile("nprofile"), '-b', ''.join(config["nucleotides"]), 
+                        self.gbkfile, 1, config['length'],
                         config['window_size'], config['step'], config['period']]
             return util.capturedCall(progargs, stdout=out, logger=self.logger, check=True)
         
@@ -252,7 +253,7 @@ multiprocess safe way) setting class defaults
 
             #NB the "Plot Title" is disregarded, but that line should also contain the total number of bases
             ap_wl("%s %d" % ("FOOBAR", config['length']))     #Plot Title
-            ap_wl("C+G")                                      #Nucleotide(s)_plotted (e.g.: C+G)
+            ap_wl('+'.join(config['nucleotides']))            #Nucleotide(s)_plotted (e.g.: C+G)
             ap_wl(config['first_page_title'].format(page_num)) #First-Page title
             ap_wl(config['following_page_title'].format(page_num) ) #Title of following pages
 
@@ -283,7 +284,8 @@ period_of_frame       Number of frames.
           ['first_page_title', 
            'following_page_title', 
            'length', 'start_page',
-           'end_page', 'period', 'bp_per_page']
+           'end_page', 'period', 'bp_per_page',
+           'nucleotides']
         config,hash= util.reducehashdict(self.config, hashkeys)
 
         #build the individual ps page files.

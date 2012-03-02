@@ -129,7 +129,7 @@ def try_parse(abs_path, force=False):
 
 def default_config(abs_path):
     config={
-        'Nucleotides':'CG',
+        'nucleotides':['c','g'],
 
         ##keys for extract.c
         'GeneDescriptorKey1': 'gene',
@@ -170,7 +170,8 @@ CONFIG_HELP_TEXT={
     'first_page_title': "The title of the page containing the beginning of the genome.",
     'following_page_title': "The title of the pages after the first. Use {0} to get the page number.",
     'run_prediction': "Should the acgt_gamma prediction be run?",
-    'significance': "What should the acgt_gamma prediction consider significant?"
+    'significance': "What should the acgt_gamma prediction consider significant?",
+    'nucleotides': "The bases to count the frequency of on the primary strand."
     
     }
 

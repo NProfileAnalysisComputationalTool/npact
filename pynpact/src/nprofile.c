@@ -133,10 +133,6 @@ int main(int argc, char *argv[]) {
    char* bases = "cg";
 
 
-   if(!(argc==2 || argc==4 || argc==6 || argc==7)) {
-      fputs(usage, stderr);
-      exit(1);
-   }
    if(strcmp(argv[argi], "-b") == 0) {
       bases = (char*) argv[++argi];
       for (i = 0; bases[i]; i++)
