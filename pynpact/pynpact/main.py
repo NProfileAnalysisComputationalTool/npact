@@ -165,7 +165,7 @@ multiprocess safe way) setting class defaults
 
     def acgt_gamma(self):
         "Run the acgt_gamma gene prediction program."
-        if self.config.get('significance',True) in ["False",False]:
+        if not self.config.get('run_prediction', True):
             self.logger.debug("Skipping prediction.")
             return
         self.logger.debug("Starting prediction: %s", 

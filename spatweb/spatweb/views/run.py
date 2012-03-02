@@ -46,7 +46,10 @@ class ConfigForm(forms.Form):
     following_page_title = forms.CharField(required=False, widget=get_ti(40))
     length=forms.IntegerField(required=True, min_value=0,
                               widget=get_ti(8))
-    significance=forms.ChoiceField(choices=prepare.significance_levels)
+    
+    run_prediction=forms.BooleanField(required=False)
+    significance=forms.ChoiceField(choices=prepare.significance_levels, required=False,
+                                   label="Prediction Significance")
     start_page=forms.IntegerField(required=False)
     end_page=forms.IntegerField(required=False)
 

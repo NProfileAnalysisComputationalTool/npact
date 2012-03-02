@@ -143,6 +143,7 @@ def default_config(abs_path):
         'period':3,
 
         #acgt_gamma:
+        'run_prediction': True,
         'significance': "0.001",
 
         ##allplots
@@ -169,9 +170,9 @@ CONFIG_HELP_TEXT={
     'first_page_title': "The title of the page containing the beginning of the genome.",
     'following_page_title': "The title of the pages after the first. Use {0} to get the page number.",
     'run_prediction': "Should the acgt_gamma prediction be run?",
-    'significance': "What should acgt_gamma prediction consider significant?"
+    'significance': "What should the acgt_gamma prediction consider significant?"
     
     }
 
-significance_levels=("0.01","0.001","0.0001")
-significance_levels=[(False,"Don't Run")] + zip(significance_levels,significance_levels)
+significance_levels = ("0.01","0.001","0.0001")
+significance_levels = zip(significance_levels,significance_levels)
