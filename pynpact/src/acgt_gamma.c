@@ -1575,7 +1575,7 @@ void composition(char *seq, int len, double *nuc, int offset)
     for(i= 0; i < 4 * 6; ++i) nuc[i]= 0.0;
 
     for(i= 0; i < len; ++i)
-        if(seq[i] > 0) ++nuc[ 6 * ( ( i + offset ) % 3 ) + seq[i] ];
+        if(seq[i] >= 0) ++nuc[ 6 * ( ( i + offset ) % 3 ) + seq[i] ];
 
     for(i= 0; i < 3; ++i)
     {
@@ -2599,8 +2599,8 @@ void process_hss(int from_hss, int to_hss, int ncds)
                 nex= gene[j].num_exons;
 				for(h= 0; h < nex; ++h)
 				{
-					if(gene[j].strand == 'D') { from= gene[j].newstart[h]; to= gene[j].end[h]; }
-					else                      { to= gene[j].newstart[h]; from= gene[j].end[h]; }
+					if(gene[j].strand == 'D') { from= gene[j].start[h]; to= gene[j].end[h]; }
+					else                      { to= gene[j].start[h]; from= gene[j].end[h]; }
 
 					if(!(to < gfrom + mHL/2 - 1 || from > gto - mHL/2 + 1)) // predicted CDS overlapping published CDS (gene[])
 					{
