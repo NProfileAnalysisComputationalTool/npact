@@ -145,16 +145,16 @@ multiprocess safe way) setting class defaults
         self.config['File_of_published_accepted_CDSs'] = filename
         return filename
 
-    def run_CG(self):
+    def run_nprofile(self):
         """Do the CG ratio calculations.
 
         $ CG MYCGE.gbk 1 580074 201 51 3 > MYCGE.CG200
         """
         config,hash = util.reducehashdict(self.config,['length','window_size','step','period'])
-        outfilename = self.derivative_filename(".%s.CG" % hash)
+        outfilename = self.derivative_filename(".%s.nprofile" % hash)
         def thunk(out):
-            self.timer.check("Calculating CG ratio.")
-            progargs = [binfile("CG"), self.gbkfile, 1, config['length'],
+            self.timer.check("Calculating n-profile.")
+            progargs = [binfile("nprofile"), self.gbkfile, 1, config['length'],
                         config['window_size'], config['step'], config['period']]
             return util.capturedCall(progargs, stdout=out, logger=self.logger, check=True)
         
@@ -165,7 +165,7 @@ multiprocess safe way) setting class defaults
 
     def acgt_gamma(self):
         "Run the acgt_gamma gene prediction program."
-        if self.config.get('significance',True) in ["False",False]:
+        if not self.config.get('run_prediction', True):
             self.logger.debug("Skipping prediction.")
             return
         self.logger.debug("Starting prediction: %s", 
@@ -176,8 +176,6 @@ multiprocess safe way) setting class defaults
         
         config,hash = util.reducehashdict(self.config,
                                           ['significance', 'GeneDescriptorSkip1'])
-
-        gbkbase = os.path.basename(self.gbkfile)[:-4]
 
         #TODO: acgt actually takes the string of characters to skip, not the length.
         outdir = self.derivative_filename('.{0}.predict'.format(hash))
@@ -206,7 +204,7 @@ multiprocess safe way) setting class defaults
         self.logger.debug("Adding prediction filenames to config dict.")
         #strip 4 characters off here b/c that's how acgt_gamma does it
         #at about lines 262-270
-        j = lambda ext: os.path.join(outdir, gbkbase + ext)
+        j = lambda ext: os.path.join(outdir, os.path.basename(self.gbkfile)[:-4] + ext)
         self.config['File_of_new_CDSs'] = j(".newcds")
         self.config['File_of_published_rejected_CDSs'] = j(".modified")
         self.config['File_of_G+C_coding_potential_regions'] = j('.profiles')
@@ -343,13 +341,8 @@ period_of_frame       Number of frames.
             combined_ps_name = self.derivative_filename("%s.ps" %(hash,))
             return self.safe_produce_new(combined_ps_name, combine_ps_files, dependencies=filenames)
 
-    RUN_FNS=['run_extract','run_CG','acgt_gamma','run_Allplots']
-    RUN_FNS_DESC={
-        'run_extract': 'Extracting gene names',
-        'run_CG': 'Calculating profile',
-        'acgt_gamma': 'Predicting new gene locations',
-        'run_Allplots': 'Generating graphs.'
-    }
+    RUN_FNS=['run_extract','run_nprofile','acgt_gamma','run_Allplots']
+
     def process(self):
         val = None
         for fn in self.RUN_FNS:

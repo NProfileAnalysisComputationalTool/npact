@@ -14,7 +14,6 @@ from pynpact import prepare, main, util
 from pynpact.softtimeout import Timeout
 
 from spatweb import assert_clean_path, getabspath, getrelpath
-from spatweb import helpers
 from spatweb.middleware import RedirectException
 
 #from spatweb.helpers import add_help_text
@@ -34,6 +33,8 @@ def get_reconfigure_url(request, path=None):
 
 def get_raw_url(request, path):
     #return request.build_absolute_uri(reverse('raw', path))
+    if path.startswith('/'):
+        path = getrelpath(path)
     return reverse('raw', args=[path])
 
 
@@ -45,7 +46,10 @@ class ConfigForm(forms.Form):
     following_page_title = forms.CharField(required=False, widget=get_ti(40))
     length=forms.IntegerField(required=True, min_value=0,
                               widget=get_ti(8))
-    significance=forms.ChoiceField(choices=prepare.significance_levels)
+    
+    run_prediction=forms.BooleanField(required=False)
+    significance=forms.ChoiceField(choices=prepare.significance_levels, required=False,
+                                   label="Prediction Significance")
     start_page=forms.IntegerField(required=False)
     end_page=forms.IntegerField(required=False)
 
@@ -78,7 +82,11 @@ def config(request, path):
     else:
         form = ConfigForm(initial=config)
 
-    helpers.add_help_text(form, prepare.CONFIG_HELP_TEXT)
+    for key,field in form.fields.items():
+        if key in prepare.CONFIG_HELP_TEXT:
+            field.help_text = prepare.CONFIG_HELP_TEXT[key]
+        elif settings.DEBUG:
+            log.error("Help text missing for config form field: %r", key)
 
     return render_to_response('config.html',
                               {'form':form, 'parse_data':config,
@@ -152,9 +160,15 @@ def run_step(request, path):
             #url = reverse('results', args=[psname]) + encode_config(config, path=path)
             nextstep = {'next':'results', 
                         'download_url': get_raw_url(request, pspath),
-                        'reconfigure_url': reverse('config', args=[path]) + encode_config(config)}
+                        'reconfigure_url': reverse('config', args=[path]) + encode_config(config),
+                        'steps': gbp.timer.steps}
+            
         except Timeout, pt:
-            nextstep = {'next':'process', 'pt': vars(pt)}
+            nextstep = {'next':'process', 'steps': pt.steps}
+
+        nextstep['files'] = [get_raw_url(request, v) 
+                             for (k,v) in config.items() 
+                             if v and (k in gbp.AP_file_keys)]
         return HttpResponse(json.dumps(nextstep))
     except:
         logger.exception("Error in run_step")
