@@ -14,7 +14,6 @@ from pynpact import prepare, main, util
 from pynpact.softtimeout import Timeout
 
 from spatweb import assert_clean_path, getabspath, getrelpath
-from spatweb import helpers
 from spatweb.middleware import RedirectException
 
 #from spatweb.helpers import add_help_text
@@ -80,7 +79,11 @@ def config(request, path):
     else:
         form = ConfigForm(initial=config)
 
-    helpers.add_help_text(form, prepare.CONFIG_HELP_TEXT)
+    for key,field in form.fields.items():
+        if key in prepare.CONFIG_HELP_TEXT:
+            field.help_text = prepare.CONFIG_HELP_TEXT[key]
+        elif settings.DEBUG:
+            log.error("Help text missing for config form field: %r", key)
 
     return render_to_response('config.html',
                               {'form':form, 'parse_data':config,

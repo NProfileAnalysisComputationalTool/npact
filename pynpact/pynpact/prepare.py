@@ -168,7 +168,8 @@ CONFIG_HELP_TEXT={
     'length': "The length, in base pairs, of the genome being analyzed.",
     'first_page_title': "The title of the page containing the beginning of the genome.",
     'following_page_title': "The title of the pages after the first. Use {0} to get the page number.",
-    'significance': "Significance level for acgt_gamma prediction; \"Don't Run\" to skip this."
+    'run_prediction': "Should the acgt_gamma prediction be run?",
+    'significance': "What should acgt_gamma prediction consider significant?"
     
     }
 

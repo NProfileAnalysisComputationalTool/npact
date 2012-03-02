@@ -320,7 +320,7 @@ dd { margin-left: 8px; }
 textarea { width: 100%; }
 #content .ui-accordion-content p { margin: 0; }
 
-.helptext {font-size: 0.8em; float:right; }
+.helptext {font-size: 1em; float:right; }
 
 
 #content input, #content select { margin-left: 6px; float:left; }

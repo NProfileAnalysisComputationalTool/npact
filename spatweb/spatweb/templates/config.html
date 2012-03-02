@@ -10,10 +10,11 @@
     $('button').button()
     $("tbody input + br").remove();
     $("tbody tr").each(function() {
-       $("input", this).qtip({
+       $("input,select", this).qtip({
           content: $(".helptext", this),
           show: { event: "focus mouseenter",
                   solo: true},
+          hide: { event: 'unfocus' }
 
        });
 
