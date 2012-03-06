@@ -2815,7 +2815,7 @@ fprintf(output6, "List of predicted ORFs modifying previous annotation.\n");
 				name[j + 1]= '\0';
 				l= hss[o[i]].top - hss[o[i]].fromp + 1;
 				j= o[i];
-                   			while(j= hss[j].next_hit != -1) l += hss[j].top - hss[j].fromp + 1;
+                   			while((j= hss[j].next_hit) != -1) l += hss[j].top - hss[j].fromp + 1;
 					if(l * 5 > hss[o[i]].stop2 - hss[o[i]].start_pos + 1) flag= 1;
 							}
                                 if(flag) fprintf(output1,"%s %d..%d\n", name, hss[o[i]].start_pos + s1, hss[o[i]].stop2 + s2);
@@ -2845,7 +2845,7 @@ fprintf(output6, "List of predicted ORFs modifying previous annotation.\n");
 				name[j + 1]= '\0';
 				l= hss[o[i]].top - hss[o[i]].fromp + 1;
 				j= o[i];
-                   			while(j= hss[j].next_hit != -1) l += hss[j].top - hss[j].fromp + 1;
+                   			while((j= hss[j].next_hit) != -1) l += hss[j].top - hss[j].fromp + 1;
 					if(l * 5 > hss[o[i]].start_pos - hss[o[i]].stop1 + 1) flag= 1;
 							}
                                 if(flag) fprintf(output1,"%s complement(%d..%d)\n", name, hss[o[i]].stop1 + s1, hss[o[i]].start_pos + s2);
