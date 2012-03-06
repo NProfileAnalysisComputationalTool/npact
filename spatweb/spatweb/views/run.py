@@ -4,6 +4,7 @@ import os.path
 import json
 
 from django import forms
+from django.conf import settings
 from django.contrib import messages
 from django.core.urlresolvers import reverse
 from django.http import HttpResponseRedirect, HttpResponse
@@ -23,13 +24,6 @@ logger = logging.getLogger(__name__)
 
 
 
-def get_reconfigure_url(request, path=None):
-    if path is None:
-        path = request.GET.get('path')
-    if path:
-        return reverse('config', args=[path]) + "?" + urlencode(request.GET)
-    else:
-        return None
 
 def get_raw_url(request, path):
     #return request.build_absolute_uri(reverse('raw', path))
@@ -46,7 +40,8 @@ class ConfigForm(forms.Form):
     following_page_title = forms.CharField(required=False, widget=get_ti(40))
     length=forms.IntegerField(required=True, min_value=0,
                               widget=get_ti(8))
-    
+    nucleotides=forms.MultipleChoiceField(choices=[(i,i) for i in ['a','c','g','t']],
+                                          widget=forms.CheckboxSelectMultiple())
     run_prediction=forms.BooleanField(required=False)
     significance=forms.ChoiceField(choices=prepare.significance_levels, required=False,
                                    label="Prediction Significance")
@@ -77,7 +72,7 @@ def config(request, path):
         form = ConfigForm(request.POST)
         if form.is_valid():
             logger.info("Got clean post, running.")
-            url = reverse('run', args=[path]) + "?" + urlencode(form.cleaned_data)
+            url = reverse('run', args=[path]) + "?" + urlencode(form.cleaned_data,True)
             return HttpResponseRedirect(url)
     else:
         form = ConfigForm(initial=config)
@@ -86,7 +81,7 @@ def config(request, path):
         if key in prepare.CONFIG_HELP_TEXT:
             field.help_text = prepare.CONFIG_HELP_TEXT[key]
         elif settings.DEBUG:
-            log.error("Help text missing for config form field: %r", key)
+            logger.error("Help text missing for config form field: %r", key)
 
     return render_to_response('config.html',
                               {'form':form, 'parse_data':config,
@@ -130,7 +125,7 @@ def encode_config(config, **urlconf):
         v = config.get(k, None)
         if v:
             urlconf[k] = v
-    return "?" + urlencode(urlconf)
+    return "?" + urlencode(urlconf,True)
 
 
 def run_frame(request, path):
