@@ -21,7 +21,7 @@
 # define HAIRPIN_RADIUS 2.0
 # define STEM_SEPARATION 1.0
 
-# define ANOPIAS 1
+# define ANOPIAS 0
 
 # define VIEWER "showps"
 # define TIC_W 5.0
