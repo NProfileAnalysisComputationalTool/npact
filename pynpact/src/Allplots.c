@@ -128,7 +128,7 @@ main(int argc, char *argv[]) {
 
     char *unb_str=NULL, *con_str=NULL, *new_str=NULL, *newP_str=NULL, *cg_str=NULL,
         *pub_str=NULL, *mod_str=NULL, *block_str=NULL, *BLOCK_str=NULL,
-        *codpot_str=NULL, *codpot_col=NULL, *Scodpot_str=NULL, *Scodpot_col=NULL,
+        *codpot_str=NULL, *codpot_col=NULL, *Scodpot_str=NULL, *Scodpot_col=NULL, *Scodpot_type=NULL,
         *met_str=NULL, *tata_str=NULL, *cap_str=NULL, *ccaa_str=NULL,
         *gcbox_str=NULL, *stop_str=NULL, *kozak_str=NULL;
 
@@ -294,13 +294,14 @@ main(int argc, char *argv[]) {
             while(fgets(longstr,198,input) && !feof(input)) {
                 Scodpot_str= (char *)realloc(Scodpot_str,(nScp+1)*sizeof(char));
                 Scodpot_col= (char *)realloc(Scodpot_col,(nScp+1)*sizeof(char));
+                Scodpot_type= (char *)realloc(Scodpot_type,(nScp+1)*sizeof(char));
                 Scodpot= (int **)realloc(Scodpot,(nScp+1)*sizeof(int *));
                 Scodpot[nScp]= (int *)malloc(2*sizeof(int));
                 p= strchr(longstr,'.');
                 ge= atoi(p+2);
-                if(longstr[0]=='c') { gs= atoi(longstr+11); Scodpot_str[nScp]='C'; Scodpot_col[nScp]= gs%period; }
-                else if(longstr[0]=='r') { gs= atoi(longstr+7); Scodpot_str[nScp]='R'; }
-                else { gs= atoi(longstr); Scodpot_str[nScp]=' '; Scodpot_col[nScp]= ge%period; }
+                if(longstr[2]=='c') { gs= atoi(longstr+13); Scodpot_str[nScp]='C'; Scodpot_col[nScp]= gs%period; }
+                else if(longstr[2]=='r') { gs= atoi(longstr+9); Scodpot_str[nScp]='R'; }
+                else { gs= atoi(longstr + 2); Scodpot_str[nScp]=' '; Scodpot_col[nScp]= ge%period; }
                 if(gs>=start && gs<end && ge>start && ge<=end) { Scodpot[nScp][0]= gs; Scodpot[nScp][1]= ge; ++nScp; }
                 else if(gs>=start && gs<end && ge>end) { Scodpot[nScp][0]= gs; Scodpot[nScp][1]= end; ++nScp; }
                 else if(ge<=end && ge>start && gs<start)
@@ -913,7 +914,7 @@ main(int argc, char *argv[]) {
         // Prints HSSs
 
         if(Scpf) {
-            fprintf(stdout,"%.3f %.3f M (HSSs) Lshow\n",-15.0,HIGHT+HIGHT_SCP-2);
+            fprintf(stdout,"%.3f %.3f M (Hits) Lshow\n",-15.0,HIGHT+HIGHT_SCP-2);
             fprintf(stdout,"L025 LightGray\n");
             fprintf(stdout,"-4 %.3f M %.3f 0 RL -3 +3 RL stroke\n",HIGHT+HIGHT_SCP+1,(end-start)/delta*WIDTH+8);
             fprintf(stdout,"-1 %.3f -3 add M -3 3 RL %.3f 0 RL stroke\n",HIGHT+HIGHT_SCP-1,(end-start)/delta*WIDTH+8);
@@ -1336,25 +1337,29 @@ main(int argc, char *argv[]) {
         }
 
 
-        /***************************************/
-        /* Prints blocks of S coding potential */
-        /***************************************/
+        /***************/
+        /* Prints Hits */
+        /***************/
 
-        fprintf(stdout,"\nL1\n");
+        if(nScp) fprintf(stdout,"\nL1 ");
 
-        for(i=0;i<nScp;++i) {
-            if(Scodpot_str[i]!='R') {
-                if(Scodpot_col[i]==1) fprintf(stdout,"R");
-                else if(Scodpot_col[i]==2) fprintf(stdout,"G");
-                else if(Scodpot_col[i]==0) fprintf(stdout,"B");
+        for(i= 0; i < nScp; ++i) {
+            if(Scodpot_str[i] != 'R') {
+                if(Scodpot_col[i] == 1) fprintf(stdout, "R");
+                else if(Scodpot_col[i] == 2) fprintf(stdout, "G");
+                else if(Scodpot_col[i] == 0) fprintf(stdout, "B");
             }
+
+	    ifScodpot_type[i] == 'H') fprintf(stdout, " L1 ");
+	    else                      fprintf(stdout, " L05 ");
+
             if(Scodpot_str[i]==' ')
-                fprintf(stdout," %.1f %.2f M %.1f %.2f L stroke\n",(Scodpot[i][0]-(float)start)/delta*WIDTH,HIGHT+HIGHT_SCP+1.0,(Scodpot[i][1]-(float)start)/delta*WIDTH,HIGHT+HIGHT_SCP+1.0);
-            else if(Scodpot_str[i]=='C')
-                fprintf(stdout," %.1f %.2f M %.1f %.2f L stroke\n",(Scodpot[i][0]-(float)start)/delta*WIDTH,HIGHT+HIGHT_SCP-1.0,(Scodpot[i][1]-(float)start)/delta*WIDTH,HIGHT+HIGHT_SCP-1.0);
-            else if(Scodpot_str[i]=='R') {
-                fprintf(stdout,"Gray");
-                fprintf(stdout," %.1f %.2f M %.1f %.2f L stroke\n",(Scodpot[i][0]-(float)start)/delta*WIDTH,HIGHT+HIGHT_SCP,(Scodpot[i][1]-(float)start)/delta*WIDTH,HIGHT+HIGHT_SCP);
+                fprintf(stdout, " %.1f %.2f M %.1f %.2f L stroke\n", (Scodpot[i][0] - (float)start) / delta * WIDTH, HIGHT + HIGHT_SCP + 1.0, (Scodpot[i][1] - (float)start) / delta * WIDTH, HIGHT + HIGHT_SCP + 1.0);
+            else if(Scodpot_str[i] == 'C')
+                fprintf(stdout, " %.1f %.2f M %.1f %.2f L stroke\n", (Scodpot[i][0] - (float)start) / delta * WIDTH, HIGHT + HIGHT_SCP - 1.0, (Scodpot[i][1] - (float)start) / delta * WIDTH, HIGHT + HIGHT_SCP - 1.0);
+            else if(Scodpot_str[i] == 'R') {
+                fprintf(stdout, "Gray");
+                fprintf(stdout, " %.1f %.2f M %.1f %.2f L stroke\n", (Scodpot[i][0] - (float)start) / delta * WIDTH, HIGHT + HIGHT_SCP, (Scodpot[i][1] - (float)start) / delta * WIDTH, HIGHT + HIGHT_SCP);
             }
         }
 

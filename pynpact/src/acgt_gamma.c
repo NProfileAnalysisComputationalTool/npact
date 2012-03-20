@@ -2916,8 +2916,8 @@ fprintf(output6, "List of predicted ORFs modifying previous annotation.\n");
 				}
 			}
 
-			if(hss[o[i]].strand == 'D') fprintf(output2,"%d..%d\n", hss[o[i]].fromp + 1, hss[o[i]].top + 1);
-			else                        fprintf(output2,"complement(%d..%d)\n", hss[o[i]].fromp + 1, hss[o[i]].top + 1);
+			if(hss[o[i]].strand == 'D') fprintf(output2,"%c %d..%d\n", hss[o[i]].type, hss[o[i]].fromp + 1, hss[o[i]].top + 1);
+			else                        fprintf(output2,"%c complement(%d..%d)\n", hss[o[i]].type, hss[o[i]].fromp + 1, hss[o[i]].top + 1);
 		}
 	}
     fprintf(output3,"\n");
