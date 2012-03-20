@@ -1350,8 +1350,8 @@ main(int argc, char *argv[]) {
                 else if(Scodpot_col[i] == 0) fprintf(stdout, "B");
             }
 
-	    ifScodpot_type[i] == 'H') fprintf(stdout, " L1 ");
-	    else                      fprintf(stdout, " L05 ");
+	    if(Scodpot_type[i] == 'H') fprintf(stdout, " L1 ");
+	    else                       fprintf(stdout, " L05 ");
 
             if(Scodpot_str[i]==' ')
                 fprintf(stdout, " %.1f %.2f M %.1f %.2f L stroke\n", (Scodpot[i][0] - (float)start) / delta * WIDTH, HIGHT + HIGHT_SCP + 1.0, (Scodpot[i][1] - (float)start) / delta * WIDTH, HIGHT + HIGHT_SCP + 1.0);
