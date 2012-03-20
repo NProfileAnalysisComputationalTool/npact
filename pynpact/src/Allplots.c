@@ -297,6 +297,7 @@ main(int argc, char *argv[]) {
                 Scodpot_type= (char *)realloc(Scodpot_type,(nScp+1)*sizeof(char));
                 Scodpot= (int **)realloc(Scodpot,(nScp+1)*sizeof(int *));
                 Scodpot[nScp]= (int *)malloc(2*sizeof(int));
+		Scodpot_type[nScp]= longstr[0];
                 p= strchr(longstr,'.');
                 ge= atoi(p+2);
                 if(longstr[2]=='c') { gs= atoi(longstr+13); Scodpot_str[nScp]='C'; Scodpot_col[nScp]= gs%period; }
