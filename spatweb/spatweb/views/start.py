@@ -43,7 +43,7 @@ class StartForm(forms.Form):
     pastein = forms.CharField(label="Paste in as text",
                               widget=forms.Textarea(attrs={'rows':3, 'cols':""}),
                               required=False)
-    entrez_search_term = forms.CharField(label="Search Entrez for Term", required=False)
+    entrez_search_term = forms.CharField(label="Accession Number", required=False)
 
     def __init__(self,*args,**kwargs):
         super(StartForm,self).__init__(*args,**kwargs)
