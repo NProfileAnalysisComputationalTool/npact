@@ -44,8 +44,8 @@ char	*argv[];
       exit(1);
    }
 
-   fprintf(stderr,"\nCDS described in line \"%s\" skipping %d+1+%d\n",DESCRIPTION,strlen(DESCRIPTION),SKIP);
-   fprintf(stderr,"\nCDS described in line \"%s\" skipping %d+1+%d\n",DESCRIPTION2,strlen(DESCRIPTION2),SKIP2);
+   fprintf(stderr,"\nCDS described in line \"%s\" skipping %d+1+%d\n", DESCRIPTION, (int)strlen(DESCRIPTION), SKIP);
+   fprintf(stderr,"\nCDS described in line \"%s\" skipping %d+1+%d\n", DESCRIPTION2, (int)strlen(DESCRIPTION2), SKIP2);
 
    while(fgets(longstr,198,input) && !feof(input))
    {

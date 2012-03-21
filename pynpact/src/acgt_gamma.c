@@ -123,7 +123,7 @@ double sc[6 * CODONS];
 
 FILE *output, *fp;
 
-char Prediction[14][30];
+char Prediction[11][30];
 char Annotation[5][15];
 
 // Chi-square thresholds with d.f.=6
@@ -2463,7 +2463,7 @@ void rescue_hss(int to_hss)
 
 void process_hss(int from_hss, int to_hss, int ncds)
 {
-    int	i, j, k, h, l, *o, s1, s2, flag, types[13]= { 0 }, from, to, gfrom, gto, out, nex;
+    int	i, j, k, h, l, *o, s1, s2, flag, from, to, gfrom, gto, out, nex;
     char	Pg[15];
     double  scoi, scoj;
     double	li, lj, G;
@@ -2564,7 +2564,7 @@ void process_hss(int from_hss, int to_hss, int ncds)
 
     logmsg(10, "\n\nProcessing HSSs:     "); 
 
-// Checks overlap with annotated genes and with higher-scoring HSSs
+// Checks overlap first with annotated genes and then with higher-scoring HSSs
 
 	for(i= 0; i < to_hss; ++i)
 	{
@@ -2677,25 +2677,25 @@ void process_hss(int from_hss, int to_hss, int ncds)
                                         to= hss[o[j]].start_pos;
                                         }
 	
-					if(!(to < gfrom + mHL/2 - 1 || from > gto - mHL/2 + 1))  // Two newly predicted genes are overlapping
+					if(to > gfrom + mHL/2 - 1 && from < gto - mHL/2 + 1)  // Two newly predicted genes are overlapping
 					{
 						if(hss[o[i]].frame != hss[o[j]].frame)
 						{
 							if(gfrom >= from - mHL/2 && gto <= to + mHL/2)
 							{
-                                k= 11;
+                                k= 9;
                                 hss[o[i]].type= k;
 							}
 							else
 							{
 								if(gfrom < from) out += from - gfrom;
 								if(gto > to) out += gto - to;
-								if(gto - gfrom + 1 > 2 * out) k= 12;
+								if(gto - gfrom + 1 > 2 * out) k= 10;
 								else k= hss[o[i]].type;
                                 hss[o[i]].type= k;
 							}
 						}
-						else hss[o[i]].type= 13;
+						else hss[o[i]].type= 8;
 					}
 				}
 			}
@@ -2719,7 +2719,7 @@ void process_hss(int from_hss, int to_hss, int ncds)
 
 void write_results(int from_hss, int to_hss, int ncds, int genome_size)
 {
-    int	i, j, k, h, l, *o, s1, s2, types[13]= { 0 }, from, to, out, flag;
+    int	i, j, k, h, l, *o, s1, s2, types[11]= { 0 }, from, to, out, flag;
     char	Pg[15], name[50];
     double	G, print_len, po;
     FILE	*output1, *output2, *output3, *output4, *output5, *output6, *output7, *output8;
@@ -2925,9 +2925,9 @@ fprintf(output6, "List of predicted ORFs modifying previous annotation.\n");
     fprintf(output3,"Prediction type            Tot hits\n");
 
 	for(i= 0; i < from_hss; ++i) ++types[hss[i].type];
-	for(k= 0; k < 13; ++k) { fprintf(output3,"H-%-23s  %d\n",Prediction[k],types[k]); types[k]= 0; }
+	for(k= 0; k < 11; ++k) { fprintf(output3,"H-%-23s  %d\n",Prediction[k],types[k]); types[k]= 0; }
 	for(i= from_hss; i < to_hss; ++i) ++types[hss[i].type];
-	for(k= 0; k < 13; ++k) fprintf(output3,"G-%-23s  %d\n",Prediction[k],types[k]);
+	for(k= 0; k < 11; ++k) fprintf(output3,"G-%-23s  %d\n",Prediction[k],types[k]);
 
     fprintf(output3,"\n");
 
@@ -3315,12 +3315,9 @@ void define_characterizations()
     strcpy(Prediction[6],"Overlapped to annotated");
     strcpy(Prediction[7],"Replacing excluded");
 
-    strcpy(Prediction[8],"Identical to predicted");
-    strcpy(Prediction[9],"Within predicted");
-    strcpy(Prediction[10],"Extending predicted");
-    strcpy(Prediction[11],"Embedded in predicted");
-    strcpy(Prediction[12],"Overlapped to predicted");
-    strcpy(Prediction[13],"Extending predicted");
+    strcpy(Prediction[8],"Extending predicted");
+    strcpy(Prediction[9],"Embedded in predicted");
+    strcpy(Prediction[10],"Overlapped to predicted");
 
     strcpy(Annotation[0],"Not supported");
     strcpy(Annotation[1],"Confirmed");

@@ -795,6 +795,7 @@ main(int argc, char *argv[]) {
             fprintf(stdout,"/L2 { 2.0 setlinewidth } def\n");
             fprintf(stdout,"/L15 { 1.5 setlinewidth } def\n");
             fprintf(stdout,"/L1 { 1.0 setlinewidth } def\n");
+            fprintf(stdout,"/L2 { 2.0 setlinewidth } def\n");
             fprintf(stdout,"/L05 { 0.5 setlinewidth } def\n");
             fprintf(stdout,"/L025 { 0.25 setlinewidth } def\n");
             fprintf(stdout,"/M {moveto} def\n");
@@ -1351,8 +1352,8 @@ main(int argc, char *argv[]) {
                 else if(Scodpot_col[i] == 0) fprintf(stdout, "B");
             }
 
-	    if(Scodpot_type[i] == 'H') fprintf(stdout, " L1 ");
-	    else                       fprintf(stdout, " L05 ");
+	    if(Scodpot_type[i] == 'H') fprintf(stdout, " L2 ");
+	    else                       fprintf(stdout, " L1 ");
 
             if(Scodpot_str[i]==' ')
                 fprintf(stdout, " %.1f %.2f M %.1f %.2f L stroke\n", (Scodpot[i][0] - (float)start) / delta * WIDTH, HIGHT + HIGHT_SCP + 1.0, (Scodpot[i][1] - (float)start) / delta * WIDTH, HIGHT + HIGHT_SCP + 1.0);
