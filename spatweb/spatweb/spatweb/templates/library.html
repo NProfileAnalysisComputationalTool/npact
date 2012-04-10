@@ -1,0 +1,39 @@
+{% extends "base.html" %}
+{% block title %}Run S-P.A.T.{% endblock %}
+
+{% load url from future %}
+
+{%block content %}
+<div class="contentPadding">
+  <h2>Existing N-Profile Analyses</h2>
+  <p>Here you can find already calculated s-profile analyses.</p>
+  <p>
+    <ul>
+      {% for f in files %}
+      <li>
+        <a href="{{ f.url}}"> {% firstof f.id f.basename %}</a>:
+        {% if f.length %}{{f.length}}bp{% endif %}, {{ f.filesize}}; {{f.description}}
+      </li>
+      {% endfor %}
+    <ul>
+    <table width="100%" cellpadding="4" cellspacing="0" border="1" style="display:none;">
+      <thead>
+      <tr>
+        <th>Organism</th>
+        <th>Locus</th>
+        <th>Published</th>
+        <th>genebank sha1</th>
+      </tr>
+      </thead>
+      <tbody>
+        <tr>
+          <td><a href="#">Mycoplasma genitalium</a></td>
+          <td>NC_000908</td>
+          <td>12-MAR-2001</td>
+          <td>897c28f569d797b09a02bdb7d470817e8942df5c</td>
+        </tr>
+      </tbody>
+    </table>
+  </p>
+</div>
+{%endblock content %}

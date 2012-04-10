@@ -1,0 +1,14 @@
+				<form action="http://search.ufl.edu/search" method="get" name="search" id="search">
+		          <label for="source">
+			      <select id="source" name="source" onchange="document.getElementById('searchbox').focus()">
+				    <option value="web" selected="selected">UF Web with Google</option>
+		   		    <option value="phonebook">UF Phonebook</option>
+			      </select>
+		          </label>
+		          <input type="hidden" name="site" value="www.webadmin.ufl.edu" />
+		          <br />
+		          <label for="searchbox">
+			         <input name="query" id="searchbox" type="text" size="20" value="Search" alt="Search" onfocus="select()" />
+		          </label>
+		          <input type="submit" name="Submit" value="Go" />
+	            </form>

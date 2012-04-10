@@ -1,0 +1,13 @@
+{% extends "base.html" %}
+{% load media %}
+{% block title %}S-P.A.T. > Error{% endblock %}
+
+{%block content %}
+<div class="contentPadding">
+  <h2>Uh oh, that wasn't supposed to happen.</h2>
+  <p>We're sorry but there's been an error. You can try going <a href="javascript:history.back()">back</a> to the previous page and trying with a different set of options. Alternatively you can visit the <a href="{% url index %}">Home Page</a> or <a href="{% url start %}">start a new analysis</a>.
+  </p>
+
+  <p>If you think the page really should be here please submit an error report</p>
+</div>
+{%endblock content %}
