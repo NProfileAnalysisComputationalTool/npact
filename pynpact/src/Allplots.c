@@ -21,6 +21,8 @@
 # define HAIRPIN_RADIUS 2.0
 # define STEM_SEPARATION 1.0
 
+# define ANOPIAS 0
+
 # define VIEWER "showps"
 # define TIC_W 5.0
 # define NFS 7.0
@@ -126,7 +128,7 @@ main(int argc, char *argv[]) {
 
     char *unb_str=NULL, *con_str=NULL, *new_str=NULL, *newP_str=NULL, *cg_str=NULL,
         *pub_str=NULL, *mod_str=NULL, *block_str=NULL, *BLOCK_str=NULL,
-        *codpot_str=NULL, *codpot_col=NULL, *Scodpot_str=NULL, *Scodpot_col=NULL,
+        *codpot_str=NULL, *codpot_col=NULL, *Scodpot_str=NULL, *Scodpot_col=NULL, *Scodpot_type=NULL,
         *met_str=NULL, *tata_str=NULL, *cap_str=NULL, *ccaa_str=NULL,
         *gcbox_str=NULL, *stop_str=NULL, *kozak_str=NULL;
 
@@ -292,13 +294,15 @@ main(int argc, char *argv[]) {
             while(fgets(longstr,198,input) && !feof(input)) {
                 Scodpot_str= (char *)realloc(Scodpot_str,(nScp+1)*sizeof(char));
                 Scodpot_col= (char *)realloc(Scodpot_col,(nScp+1)*sizeof(char));
+                Scodpot_type= (char *)realloc(Scodpot_type,(nScp+1)*sizeof(char));
                 Scodpot= (int **)realloc(Scodpot,(nScp+1)*sizeof(int *));
                 Scodpot[nScp]= (int *)malloc(2*sizeof(int));
+		Scodpot_type[nScp]= longstr[0];
                 p= strchr(longstr,'.');
                 ge= atoi(p+2);
-                if(longstr[0]=='c') { gs= atoi(longstr+11); Scodpot_str[nScp]='C'; Scodpot_col[nScp]= gs%period; }
-                else if(longstr[0]=='r') { gs= atoi(longstr+7); Scodpot_str[nScp]='R'; }
-                else { gs= atoi(longstr); Scodpot_str[nScp]=' '; Scodpot_col[nScp]= ge%period; }
+                if(longstr[2]=='c') { gs= atoi(longstr+13); Scodpot_str[nScp]='C'; Scodpot_col[nScp]= gs%period; }
+                else if(longstr[2]=='r') { gs= atoi(longstr+9); Scodpot_str[nScp]='R'; }
+                else { gs= atoi(longstr + 2); Scodpot_str[nScp]=' '; Scodpot_col[nScp]= ge%period; }
                 if(gs>=start && gs<end && ge>start && ge<=end) { Scodpot[nScp][0]= gs; Scodpot[nScp][1]= ge; ++nScp; }
                 else if(gs>=start && gs<end && ge>end) { Scodpot[nScp][0]= gs; Scodpot[nScp][1]= end; ++nScp; }
                 else if(ge<=end && ge>start && gs<start)
@@ -521,26 +525,27 @@ main(int argc, char *argv[]) {
             newf= 1;
             while(fgets(longstr,198,input) && !feof(input)) {
                 new_name= (char **)realloc(new_name, (nn + 1) * sizeof(char *));
-                new_name[nn]= (char *)malloc(20 * sizeof(char *));
+                new_name[nn]= (char *)malloc(50 * sizeof(char *));
                 new_str= (char *)realloc(new_str, (nn + 1) * sizeof(char));
                 new= (int **)realloc(new, (nn + 1)*sizeof(int *));
                 new[nn]= (int *)malloc(2 * sizeof(int));
-                strncpy(new_name[nn], longstr, 12);
+                strncpy(new_name[nn], longstr, 48);
                 p= strchr(new_name[nn], ' ');
                 p[0]= '\0';
-                p= strchr(longstr + 12, '.'); p += 2;
+		p= strrchr(longstr, ' '); ++p;
+                p= strchr(p, '.'); p += 2;
 			if(p[0] == '>' || p[0] == '<') ++p;
                 ge= atoi(p);
-                if(longstr[12] == 'c')
+		p= strrchr(longstr, ' '); ++p;
+                if(p[0] == 'c')
 		{
-		p= longstr + 23;
+		p += 11;
 			if(p[0] == '>' || p[0] == '<') ++p;
 		gs= atoi(p);
 		new_str[nn]='C';
 		}
                 else
 		{
-		p= longstr + 12;
 			if(p[0] == '>' || p[0] == '<') ++p;
 		gs= atoi(p);
 		new_str[nn]=' ';
@@ -561,17 +566,28 @@ main(int argc, char *argv[]) {
         if(input= fopen(newP_file,"r")) { newPf= 1;
             while(fgets(longstr,198,input) && !feof(input)) {
                 newP_name= (char **)realloc(newP_name, (nnP + 1) * sizeof(char *));
-                newP_name[nnP]= (char *)malloc(20 * sizeof(char *));
+                newP_name[nnP]= (char *)malloc(50 * sizeof(char *));
                 newP_str= (char *)realloc(newP_str, (nnP + 1) * sizeof(char));
                 newP= (int **)realloc(newP, (nnP + 1) * sizeof(int *));
                 newP[nnP]= (int *)malloc(2 * sizeof(int));
-                strncpy(newP_name[nnP], longstr, 12);
+                strncpy(newP_name[nnP], longstr, 48);
                 p= strchr(newP_name[nnP], ' ');
                 p[0]= '\0';
-                p= strchr(longstr + 12, '.');
+		p= strrchr(longstr, ' '); ++p;
+                p= strchr(p, '.');
                 ge= atoi(p + 2);
-                if(longstr[12] == 'c') { gs= atoi(longstr + 23); newP_str[nnP]= 'C'; }
-                else { gs= atoi(longstr + 12); newP_str[nnP]= ' '; }
+		p= strrchr(longstr, ' '); ++p;
+                if(p[0] == 'c')
+		{
+		p += 11;
+		gs= atoi(p);
+		newP_str[nnP]= 'C';
+		}
+                else
+		{
+		gs= atoi(p);
+		newP_str[nnP]= ' ';
+		}
                 if(gs >= start - line_range / 50 && gs < end && ge <= end + line_range / 50) { newP[nnP][0]= gs; newP[nnP][1]= ge; ++nnP; }
                 else if(gs >= start - line_range / 50 && gs < end && ge > end + line_range / 50) { newP[nnP][0]= gs; newP[nnP][1]= end + line_range / 50; ++nnP; }
                 else if(ge <= end + line_range / 50 && ge > start && gs < start - line_range / 50)
@@ -612,26 +628,27 @@ main(int argc, char *argv[]) {
             logmsg(10, "Reading Pub file.\n");
             while(fgets(longstr, 198, input) && !feof(input)) {
                 pub_name= (char **)realloc(pub_name, (np + 1) * sizeof(char *));
-                pub_name[np]= (char *)malloc(20 * sizeof(char *));
+                pub_name[np]= (char *)malloc(50 * sizeof(char *));
                 pub_str= (char *)realloc(pub_str, (np + 1) * sizeof(char));
                 pub= (int **)realloc(pub, (np + 1) * sizeof(int *));
                 pub[np]= (int *)malloc(2 * sizeof(int));
-                strncpy(pub_name[np], longstr, 12);
+                strncpy(pub_name[np], longstr, 48);
                 p= strchr(pub_name[np],' ');
                 p[0]= '\0';
-                p= strchr(longstr + 12, '.'); p += 2;
+		p= strrchr(longstr, ' '); ++p;
+                p= strchr(p, '.'); p += 2;
 			if(p[0] == '>' || p[0] == '<') ++p;
                 ge= atoi(p);
-                if(longstr[12]=='c')
+		p= strrchr(longstr, ' '); ++p;
+                if(p[0]=='c')
 		{
-		p= longstr + 23;
+		p += 11;
 			if(p[0] == '>' || p[0] == '<') ++p;
 		gs= atoi(p);
 		pub_str[np]='C';
 		}
                 else
 		{
-		p= longstr + 12;
 			if(p[0] == '>' || p[0] == '<') ++p;
 		gs= atoi(p);
 		pub_str[np]=' ';
@@ -668,28 +685,31 @@ main(int argc, char *argv[]) {
 
         if(input= fopen(mod_file,"r")) {
             logmsg(10, "Reading modified-predictions file %s\n", mod_file);
+            /* Skip passed the header line */
+            fgets(longstr, 198, input);
             while(fgets(longstr, 198, input) && !feof(input)) {
                 mod_name= (char **)realloc(mod_name, (ne + 1) * sizeof(char *));
-                mod_name[ne]= (char *)malloc(20 * sizeof(char *));
+                mod_name[ne]= (char *)malloc(50 * sizeof(char *));
                 mod_str= (char *)realloc(mod_str, (ne + 1)*sizeof(char));
                 modified= (int **)realloc(modified,(ne + 1)*sizeof(int *));
                 modified[ne]= (int *)malloc(2 * sizeof(int));
-                strncpy(mod_name[ne], longstr, 12);
-                p= strchr(mod_name[ne],'_');
+                strncpy(mod_name[ne], longstr, 48);
+                p= strchr(mod_name[ne],' ');
                 p[0]= '\0';
-                p= strchr(longstr + 12,'.'); p += 2;
+                p= strrchr(longstr,' '); ++p;
+                p= strchr(p, '.'); p += 2;
 			if(p[0] == '<' || p[0] == '>') ++p;
                 ge= atoi(p);
-                if(longstr[12] =='c')
+                p= strrchr(longstr,' '); ++p;
+                if(p[0] =='c')
 		{
-		p= longstr + 23;
+		p += 11;
 			if(p[0] == '>' || p[0] == '<') ++p;
 		gs= atoi(p);
 		mod_str[ne]='C';
 		}
                 else
 		{
-		p= longstr+12;
 			if(p[0] == '>' || p[0] == '<') ++p;
 		gs= atoi(p);
 		mod_str[ne]=' ';
@@ -775,6 +795,7 @@ main(int argc, char *argv[]) {
             fprintf(stdout,"/L2 { 2.0 setlinewidth } def\n");
             fprintf(stdout,"/L15 { 1.5 setlinewidth } def\n");
             fprintf(stdout,"/L1 { 1.0 setlinewidth } def\n");
+            fprintf(stdout,"/L2 { 2.0 setlinewidth } def\n");
             fprintf(stdout,"/L05 { 0.5 setlinewidth } def\n");
             fprintf(stdout,"/L025 { 0.25 setlinewidth } def\n");
             fprintf(stdout,"/M {moveto} def\n");
@@ -785,12 +806,26 @@ main(int argc, char *argv[]) {
             fprintf(stdout,"/TitleFontSize {%.1f} def\n",TFS);
             fprintf(stdout,"/Title2FontSize {%.1f} def\n",TFS);
             fprintf(stdout,"/LegendFontSize {%.1f} def\n",LFS);
+
+            if(ANOPIAS)
+	    {
+            fprintf(stdout,"/R {0.835 0.369 0.000 setrgbcolor} def\n");  // Vermillion
+            fprintf(stdout,"/G {0.800 0.475 0.655 setrgbcolor} def\n");  // Reddish purple
+            fprintf(stdout,"/B {0.000 0.447 0.698 setrgbcolor} def\n");  // Blue
+            fprintf(stdout,"/LR {1.000 0.592 0.027 setrgbcolor} def\n");  // Light Vermillion
+            fprintf(stdout,"/LG {0.914 0.686 0.812 setrgbcolor} def\n");  // Light Reddish purple
+            fprintf(stdout,"/LB {0.300 0.724 0.849 setrgbcolor} def\n");  // Light Blue
+	    }
+            else
+	    {
             fprintf(stdout,"/R {1.0 0.0 0.0 setrgbcolor} def\n");
             fprintf(stdout,"/G {0.0 1.0 0.0 setrgbcolor} def\n");
             fprintf(stdout,"/B {0.0 0.0 1.0 setrgbcolor} def\n");
-            fprintf(stdout,"/LR {1.0 0.6 0.6 setrgbcolor} def\n");
-            fprintf(stdout,"/LG {0.6 1.0 0.6 setrgbcolor} def\n");
-            fprintf(stdout,"/LB {0.6 0.6 1.0 setrgbcolor} def\n");
+            fprintf(stdout,"/LR {1.0 0.5 0.5 setrgbcolor} def\n");
+            fprintf(stdout,"/LG {0.5 1.0 0.5 setrgbcolor} def\n");
+            fprintf(stdout,"/LB {0.5 0.5 1.0 setrgbcolor} def\n");
+	    }
+
             fprintf(stdout,"/DarkGray {0.25 0.25 0.25 setrgbcolor} def\n");
             fprintf(stdout,"/Gray {0.5 0.5 0.5 setrgbcolor} def\n");
             fprintf(stdout,"/LightGray {0.75 0.75 0.75 setrgbcolor} def\n");
@@ -881,7 +916,7 @@ main(int argc, char *argv[]) {
         // Prints HSSs
 
         if(Scpf) {
-            fprintf(stdout,"%.3f %.3f M (HSSs) Lshow\n",-15.0,HIGHT+HIGHT_SCP-2);
+            fprintf(stdout,"%.3f %.3f M (Hits) Lshow\n",-15.0,HIGHT+HIGHT_SCP-2);
             fprintf(stdout,"L025 LightGray\n");
             fprintf(stdout,"-4 %.3f M %.3f 0 RL -3 +3 RL stroke\n",HIGHT+HIGHT_SCP+1,(end-start)/delta*WIDTH+8);
             fprintf(stdout,"-1 %.3f -3 add M -3 3 RL %.3f 0 RL stroke\n",HIGHT+HIGHT_SCP-1,(end-start)/delta*WIDTH+8);
@@ -1304,25 +1339,29 @@ main(int argc, char *argv[]) {
         }
 
 
-        /***************************************/
-        /* Prints blocks of S coding potential */
-        /***************************************/
+        /***************/
+        /* Prints Hits */
+        /***************/
 
-        fprintf(stdout,"\nL1\n");
+        if(nScp) fprintf(stdout,"\nL1 ");
 
-        for(i=0;i<nScp;++i) {
-            if(Scodpot_str[i]!='R') {
-                if(Scodpot_col[i]==1) fprintf(stdout,"R");
-                else if(Scodpot_col[i]==2) fprintf(stdout,"G");
-                else if(Scodpot_col[i]==0) fprintf(stdout,"B");
+        for(i= 0; i < nScp; ++i) {
+            if(Scodpot_str[i] != 'R') {
+                if(Scodpot_col[i] == 1) fprintf(stdout, "R");
+                else if(Scodpot_col[i] == 2) fprintf(stdout, "G");
+                else if(Scodpot_col[i] == 0) fprintf(stdout, "B");
             }
+
+	    if(Scodpot_type[i] == 'H') fprintf(stdout, " L2 ");
+	    else                       fprintf(stdout, " L1 ");
+
             if(Scodpot_str[i]==' ')
-                fprintf(stdout," %.1f %.2f M %.1f %.2f L stroke\n",(Scodpot[i][0]-(float)start)/delta*WIDTH,HIGHT+HIGHT_SCP+1.0,(Scodpot[i][1]-(float)start)/delta*WIDTH,HIGHT+HIGHT_SCP+1.0);
-            else if(Scodpot_str[i]=='C')
-                fprintf(stdout," %.1f %.2f M %.1f %.2f L stroke\n",(Scodpot[i][0]-(float)start)/delta*WIDTH,HIGHT+HIGHT_SCP-1.0,(Scodpot[i][1]-(float)start)/delta*WIDTH,HIGHT+HIGHT_SCP-1.0);
-            else if(Scodpot_str[i]=='R') {
-                fprintf(stdout,"Gray");
-                fprintf(stdout," %.1f %.2f M %.1f %.2f L stroke\n",(Scodpot[i][0]-(float)start)/delta*WIDTH,HIGHT+HIGHT_SCP,(Scodpot[i][1]-(float)start)/delta*WIDTH,HIGHT+HIGHT_SCP);
+                fprintf(stdout, " %.1f %.2f M %.1f %.2f L stroke\n", (Scodpot[i][0] - (float)start) / delta * WIDTH, HIGHT + HIGHT_SCP + 1.0, (Scodpot[i][1] - (float)start) / delta * WIDTH, HIGHT + HIGHT_SCP + 1.0);
+            else if(Scodpot_str[i] == 'C')
+                fprintf(stdout, " %.1f %.2f M %.1f %.2f L stroke\n", (Scodpot[i][0] - (float)start) / delta * WIDTH, HIGHT + HIGHT_SCP - 1.0, (Scodpot[i][1] - (float)start) / delta * WIDTH, HIGHT + HIGHT_SCP - 1.0);
+            else if(Scodpot_str[i] == 'R') {
+                fprintf(stdout, "Gray");
+                fprintf(stdout, " %.1f %.2f M %.1f %.2f L stroke\n", (Scodpot[i][0] - (float)start) / delta * WIDTH, HIGHT + HIGHT_SCP, (Scodpot[i][1] - (float)start) / delta * WIDTH, HIGHT + HIGHT_SCP);
             }
         }
 
@@ -1339,19 +1378,19 @@ main(int argc, char *argv[]) {
         for(i= 0; i < ne; ++i) {
             if(mod_str[i] == ' ') {
                 if(period % 3) fprintf(stdout, "Black");
-                else if(modified[i][0] % period == 1) fprintf(stdout, "B");
-                else if(modified[i][0] % period == 2) fprintf(stdout, "R");
-                else if(modified[i][0] % period==0) fprintf(stdout, "G");
+                else if(modified[i][0] % period == 1) fprintf(stdout, "LB");
+                else if(modified[i][0] % period == 2) fprintf(stdout, "LR");
+                else if(modified[i][0] % period==0) fprintf(stdout, "LG");
                 fprintf(stdout," %.1f %.2f M %.2f Rarrow\n", (modified[i][0] - (float)start) / delta * WIDTH, HIGHT + HIGHT_MOD + 2.0, (modified[i][1] - modified[i][0]) / delta * WIDTH);
-//              fprintf(stdout,"Black %.1f %.2f M (%s) Cshow\n", ((modified[i][1] + modified[i][0]) / 2 - (float)start) / delta * WIDTH, HIGHT + HIGHT_MOD + 5.0, mod_name[i]);
+                fprintf(stdout,"Gray %.1f %.2f M (%s) Cshow\n", ((modified[i][1] + modified[i][0]) / 2 - (float)start) / delta * WIDTH, HIGHT + HIGHT_MOD + 5.0, mod_name[i]);
             }
             else {
                 if(period % 3) fprintf(stdout, "Black");
-                else if(modified[i][0] % period == 1) fprintf(stdout, "R");
-                else if(modified[i][0] % period == 2) fprintf(stdout, "G");
-                else if(modified[i][0] % period == 0) fprintf(stdout, "B");
+                else if(modified[i][0] % period == 1) fprintf(stdout, "LR");
+                else if(modified[i][0] % period == 2) fprintf(stdout, "LG");
+                else if(modified[i][0] % period == 0) fprintf(stdout, "LB");
                 fprintf(stdout," %.1f %.2f M %.2f Larrow\n", (modified[i][0] - (float)start) / delta * WIDTH, HIGHT + HIGHT_MOD - 2.0, (modified[i][1] - modified[i][0]) / delta * WIDTH);
-//              fprintf(stdout,"Black %.1f %.2f M (%s) Cshow\n", ((modified[i][1] + modified[i][0]) / 2 - (float)start) / delta * WIDTH, HIGHT + HIGHT_MOD - 10.0, mod_name[i]);
+                fprintf(stdout,"Gray %.1f %.2f M (%s) Cshow\n", ((modified[i][1] + modified[i][0]) / 2 - (float)start) / delta * WIDTH, HIGHT + HIGHT_MOD - 10.0, mod_name[i]);
             }
         }
 

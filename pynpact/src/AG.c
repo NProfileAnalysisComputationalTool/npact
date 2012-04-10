@@ -7,16 +7,14 @@
 
 char usage[]= "\nUsage: AG input.gbk [start end [window_size step [period_of_frames]]]\nDefaults: start= 1; end= end of genome sequence; window_size= 201; step= 51; period_of_frames= 3.\n";
 
-main(argc,argv)
-int	argc;
-char	*argv[];
+main(int argc, char *argv[])
 {
 int	i,j,n=0,m=0,start,end,window=201,step=51,period=3,tot=0;
 char	longstr[200],filename[200],*box;
 double	*S,k;
 FILE	*input;
 
-  if(!(argc==2 || argc==4 || argc==6 || argc==7)) { fprintf(stderr,usage); exit(1); }
+  if(!(argc==2 || argc==4 || argc==6 || argc==7)) { fprintf(stderr, usage); exit(1); }
 
   if((input= fopen(argv[1],"r"))==NULL) { fprintf(stderr,"\nERROR: Input file %s not found%s",argv[1],usage); exit(1); }
 
