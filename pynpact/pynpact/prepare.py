@@ -116,7 +116,7 @@ def try_parse(abs_path, force=False):
     except InvalidGBKException:
         raise
     except:
-        logger.debug("Failed parsing %s, trying regex search.")
+        logger.debug("Failed parsing %r, trying regex search.", abs_path)
         
         match = re.search(r'(\d+) ?bp', open(abs_path).readline())
         if match :
@@ -127,10 +127,9 @@ def try_parse(abs_path, force=False):
     parse_cache[abs_path] = (mtime,data)
     return data
 
-
 def default_config(abs_path):
     config={
-        'Nucleotides':'CG',
+        'nucleotides':['c','g'],
 
         ##keys for extract.c
         'GeneDescriptorKey1': 'gene',
@@ -144,6 +143,7 @@ def default_config(abs_path):
         'period':3,
 
         #acgt_gamma:
+        'run_prediction': True,
         'significance': "0.001",
 
         ##allplots
@@ -152,17 +152,16 @@ def default_config(abs_path):
         'following_page_title': 'Page {0}',
 
         'bp_per_page': 50000,
-        
-        
         }
-    
+
+
     if(abs_path):
         data = try_parse(abs_path)
         if data:
             config.update(data)
             config['first_page_title'] = config.get('description') or config.get('basename') or 'Page 1'
-
     return config
+
 
 CONFIG_HELP_TEXT={
     'start_page': "By page number, the first page to generate. Leave blank to start at the beginning.",
@@ -170,9 +169,11 @@ CONFIG_HELP_TEXT={
     'length': "The length, in base pairs, of the genome being analyzed.",
     'first_page_title': "The title of the page containing the beginning of the genome.",
     'following_page_title': "The title of the pages after the first. Use {0} to get the page number.",
-    'significance': "Significance level for acgt_gamma prediction; \"Don't Run\" to skip this."
+    'run_prediction': "Should the acgt_gamma prediction be run?",
+    'significance': "What should the acgt_gamma prediction consider significant?",
+    'nucleotides': "The bases to count the frequency of on the primary strand."
     
     }
 
-significance_levels=("0.01","0.001","0.0001")
-significance_levels=[(False,"Don't Run")] + zip(significance_levels,significance_levels)
+significance_levels = ("0.01","0.001","0.0001")
+significance_levels = zip(significance_levels,significance_levels)

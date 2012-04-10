@@ -5,10 +5,10 @@ from contextlib import contextmanager
 from functools import wraps
 
 
-def reducehashdict(dict,keys):
+def reducehashdict(dict, keys):
     """pull the given keys out of the dictionary, return the reduced
     dictionary and the sha1 hash of that set of key values.
-"""
+    """
     outdict= {}
     h = hashlib.sha1()
     for k in sorted(keys):
@@ -23,7 +23,7 @@ def reducehashdict(dict,keys):
     else:
         return outdict,None
 
-def reducedict(dict,keys):
+def reducedict(dict, keys):
     out = {}
     for k in keys:
         if dict.has_key(k):

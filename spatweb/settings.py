@@ -22,7 +22,7 @@ def ppath(rel, create=False):
 
 ADMINS = (
     ('Nathan Bird', 'nathan@acceleration.net'),
-)
+    )
 
 MANAGERS = ADMINS
 
@@ -61,19 +61,23 @@ PRODUCTION_MEDIA_URL = '/spat/assets/'
 
 MEDIA_BUNDLES= (
     ('main.css',
-     'css/basic.css',
-     'css/style.css',
-     'css/custom-theme/jquery-ui-1.8.16.custom.css',
-     'qtip2/jquery.qtip.css',
+    'css/basic.css',
+    'css/style.css',
+    'css/custom-theme/jquery-ui-1.8.16.custom.css',
+    'qtip2/jquery.qtip.css',
     ),
-
+     
     ('print.css',
      'css/print.css'),
-
+ 
     ('jquery.js',
      'js/jquery-1.6.4.min.js',
      'js/jquery-ui-1.8.16.custom.min.js',
-     'qtip2/jquery.qtip.js',),
+     'qtip2/jquery.qtip.js'
+     ),
+     ('processing.js',
+      'js/processing.js',
+     ),
     )
 GENERATED_MEDIA_DIR = ppath('_generated_media',create=True)
 GENERATED_MEDIA_NAMES_FILE = path(__file__).dirname() / '_generated_media_names.py'

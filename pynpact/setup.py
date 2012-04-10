@@ -1,8 +1,9 @@
 #!/usr/bin/env python
 import os, os.path, glob
 
+from setuptools import setup, Extension
 from distutils.command.build import build
-from distutils.core import setup
+
 from distutils.sysconfig import customize_compiler
 import distutils.ccompiler
 
@@ -32,17 +33,8 @@ class build_pynpact(build) :
                                           exe_name,
                                           libraries=['m'],
                                           output_dir=output_dir,debug=self.debug)
-
         build.run(self)
-        #TODO: perhaps we could include these into the script files so
-        #they are automatically copied into the virtuealenv's bin
-        #folder
-    
-    
-    # def install(self):
-    #     if os.path.isdir(self.build_dir):
-    #         outfiles = self.copy_tree(, self.install_dir)
-    #     
+        #super(build_pynpact, self).run()
 
 setup(name='pynpact',
       version='0.2',
@@ -51,9 +43,9 @@ setup(name='pynpact',
       author_email='nathan@acceleration.net',
       url='http://genome.ufl.edu/spat',
       packages=['pynpact'],
-
-      requires=["biopython(>=1.57)"],
-      #data_files = ['bin',[]],
+      package_data={
+          'pynpact': ['data/*']
+      },
+      install_requires=["biopython>=1.57"],
       cmdclass={'build': build_pynpact }
-      
-     )
+    )

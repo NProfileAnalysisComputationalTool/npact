@@ -43,7 +43,7 @@ class StartForm(forms.Form):
     pastein = forms.CharField(label="Paste in as text",
                               widget=forms.Textarea(attrs={'rows':3, 'cols':""}),
                               required=False)
-    entrez_search_term = forms.CharField(label="Search Entrez for Term", required=False)
+    entrez_search_term = forms.CharField(label="Accession Number", required=False)
 
     def __init__(self,*args,**kwargs):
         super(StartForm,self).__init__(*args,**kwargs)
@@ -172,10 +172,10 @@ def efetch(req, id):
         return re_search(req)
 
     path = getrelpath(abspath)
-    action=req.GET.get('action','run')
+    action=req.GET.get('action') or 'run'
     if action in ['run', 'config']:
         return HttpResponseRedirect(reverse(action, args=[path]))
     else:
         logger.error("Unknown action %r", action)
-        messages.error(request, "Unknown action.")
+        messages.error(req, "Unknown action.")
         return re_search(req)

@@ -122,7 +122,7 @@ margin: 10px;
 #content li {
 line-height: 110%;
 list-style:disc;
-margin:6px 0 6px 25px;
+margin:6px 0 6px 20px;
 }
 
 #content li li {
@@ -320,12 +320,11 @@ dd { margin-left: 8px; }
 textarea { width: 100%; }
 #content .ui-accordion-content p { margin: 0; }
 
-.helptext {font-size: 0.8em; float:right; }
+.helptext {font-size: 1em; float:right; }
 
 
-#content input, #content select { margin-left: 6px; float:left; }
 
-li.error, ul.errorlist li { color:red; }
+.error, ul.errorlist li { color:red; }
 
 ul.messages { border: 1px dotted #444; } 
 

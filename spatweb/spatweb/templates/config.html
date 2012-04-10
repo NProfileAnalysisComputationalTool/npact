@@ -5,21 +5,34 @@
 {% block addScript %}
 {% include_media 'jquery.js' %}
 <script type="text/javascript">
-
   $(function(){
     $('button').button()
     $("tbody input + br").remove();
     $("tbody tr").each(function() {
-       $("input", this).qtip({
+       $("input,select", this).qtip({
           content: $(".helptext", this),
           show: { event: "focus mouseenter",
                   solo: true},
+          hide: { event: 'unfocus' }
 
        });
-
     });
+    // Setup the significance trigger 
+    $('#id_run_prediction')
+     .change(function (event) {
+               var checked = $(this).is(':checked');
+               console.log('run prediction box clicked.', checked);
+               if(checked)
+                 $('#id_significance').removeAttr('disabled');
+               else 
+                 $('#id_significance').attr('disabled','true');
+              });
   });
 </script>
+<style>
+  #content ul li { display: inline; margin: 0 8px; }
+  #content ul { list-style-type: none; margin:4px 0;}
+</style>
 {% endblock %}
 
 {%block content %}

@@ -67,6 +67,7 @@ class EntrezSession(object):
     def _summarize(self):
         logger.info("Summarizing from %s, %s", self.WebEnv, self.QueryKey)
         self.summaries = Bio.Entrez.read(Bio.Entrez.esummary(db=self.db,
+                                                             retmax=20,
                                                              webenv=self.WebEnv,
                                                              query_key=self.QueryKey))
  
@@ -106,7 +107,7 @@ class EntrezSession(object):
         if (not os.path.exists(filename)):
             #or datetime.datetime.fromtimestamp(os.path.getmtime(filename)) < update_date:
             #file should be downloaded.
-            net_handle = Bio.Entrez.efetch(db=self.db, rettype='gb', id=id)
+            net_handle = Bio.Entrez.efetch(db=self.db, id=id, rettype='gb', retmode='text')
             logger.debug("Streaming handle to %r.", filename)
             with util.mkstemp_overwrite(filename, logger=logger) as f:
                 bytes = util.stream_to_file(net_handle, f)
