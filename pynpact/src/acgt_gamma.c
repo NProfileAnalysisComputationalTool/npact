@@ -2731,7 +2731,7 @@ void write_results(int from_hss, int to_hss, int ncds, int genome_size)
     output5= get_out_file(".repetitive", "w");
     output6= get_out_file(".modified", "w");
 
-fprintf(output6, "List of predicted ORFs modifying previous annotation.\n");
+// fprintf(output6, "List of predicted ORFs modifying previous annotation.\n");
 
 	if(WRITE_SEQUENCES)
 	{
