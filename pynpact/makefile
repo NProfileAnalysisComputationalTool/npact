@@ -13,7 +13,7 @@ PROGS = $(patsubst $(SRCDIR)/%.c, $(BINDIR)/%, $(SRC))
 
 all: clean init $(PROGS)
 clean:
-	rm -rfd $(OBJDIR) $(BINDIR)
+	rm -rf $(OBJDIR) $(BINDIR)
 
 init:
 	mkdir $(OBJDIR) $(BINDIR)
