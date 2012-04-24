@@ -7,12 +7,12 @@
 # define DICT_SIZE 500
 # define WIDTH 450.0
 # define TITLES_POSITION 780
-# define FIRST_TRANS -150
-# define TRANSLATE -130
+# define FIRST_TRANS -160
+# define TRANSLATE -135
 # define HIGHT 50.0
-# define HIGHT_PUB 22.0  // Published annotation ORFs
-# define HIGHT_MOD 40.0  // Modified ORFs
-# define HIGHT_NEW 40.0  // New ORFs (bold-face) and Potential new ORFs (roman)
+# define HIGHT_PUB 28.0  // Published annotation ORFs
+# define HIGHT_MOD 28.0  // Modified ORFs
+# define HIGHT_NEW 50.0  // New ORFs (bold-face) and Potential new ORFs (roman and light)
 # define HIGHT_BIA 22.0
 # define HIGHT_CP 8.0
 # define HIGHT_SCP 8.0
@@ -20,6 +20,7 @@
 # define HIGHT_MET 10.0
 # define HAIRPIN_RADIUS 2.0
 # define STEM_SEPARATION 1.0
+# define PRINT_ZERO_LINE 1
 
 # define ANOPIAS 0
 
@@ -27,12 +28,16 @@
 # define TIC_W 5.0
 # define NFS 7.0
 # define LFS 12.0
-# define TFS 18.0
-# define TFS2 16.0
+# define TFS 14.0
+# define TFS2 14.0
+# define HANGOVER 30
 
 float	MAX= 100.00;
+float   MAXLOG= 4.00;
+float   GRID_Y;
 float	TIC_X;
-float	TIC_Y= 20.0;
+float	TIC_Y;
+int     EVERY= 2;
 
 char NAME[100];
 char NUCLEOTIDES[10];
@@ -70,7 +75,7 @@ void printHelp() {
     fprintf(stderr,"File_of_kozak_positions\n");
     fprintf(stderr,"File_of_palindrom_positions_and_size\n");
     fprintf(stderr,"File_list_of_nucleotides_in_200bp windows.\n");
-    fprintf(stderr,"File_list_of_nucleotides_in_100bp windows.\n");
+    fprintf(stderr,"File_list_of_reads.\n");
 }
 
 int quiet = 0;
@@ -105,17 +110,87 @@ char * ap_getl(FILE * f) {
     }
 }
 
+/**************************************/
+/****** Function name_yoffset() *******/
+/**************************************/
+
+// pos and len are in the scale of line length, where
+// 50,000 bp equal 300 text positions.
+
+int name_yoffset(int *line, int *cline, int pos, int len, char strand)
+{
+int     i, j, n, s, k, y[4], cy[4], ctot[4]= { 0 }, tot[4]= { 0 };
+
+pos -= 1;
+len += 2;
+
+    if(strand == ' ')
+    {
+        for(i= 0; i < len; ++i)
+        {
+                for(j= 0; j < 4; ++j) y[j]= 0;
+        s= line[pos + i];
+        s %= 16;
+        n= (int)pow(2.0, (double)(3));
+                for(j= 3; j > 0; --j)
+                {
+                y[j]= s / n;
+                s %= n;
+                n /= 2;
+                }
+        y[0]= s;
+                for(j= 0; j < 4; ++j) if(!y[j]) ++tot[j];
+        }
+
+n= 0;
+        while(tot[n] < len) ++n;
+
+        for(i= pos; i < pos + len; ++i) line[i] +=  (int)pow(2.0, (double)n);
+    }
+    else
+    {
+        for(i= 0; i < len; ++i)
+        {
+                for(j= 0; j < 4; ++j) cy[j]= 0;
+        s= cline[pos + i];
+        s %= 16;
+        n= (int)pow(2.0, (double)(3));
+                for(j= 3; j > 0; --j)
+                {
+                cy[j]= s / n;
+                s %= n;
+                n /= 2;
+                }
+        cy[0]= s;
+                for(j= 0; j < 4; ++j) if(!cy[j]) ++ctot[j];
+        }
+
+n= 0;
+        while(ctot[n] < len) ++n;
+
+        for(i= pos; i < pos + len; ++i) cline[i] +=  (int)pow(2.0, (double)n);
+    }
+
+return(n);
+}
+
+/*********************************************/
+/****** End of function name_yoffset() *******/
+/*********************************************/
+
 
 main(int argc, char *argv[]) {
-    int	i,j,k,n,N,lines,nub,nc,nn,nnP,np,ne,nb,ns,ncg,nB,ncp,nScp,nm,nk,nt,ncap,ncca,ngcb,gs,ge,lp,len,period=3,swflag=1,
-        start,end,pos,tstart,line_range,unbf=0,conf=0,newf=0,newPf=0,cgf=0,cpf= 0,Scpf= 0, npali= 0;
-    float	r,tpr,delta,pp,S[3];
+    int	i, j, k, d, n, N, lines, nub, nc, nn, nnP, np, ne, nb, ns, ncg, nB, ncp, nScp, nm, nk, nt, ncap, ncca, ngcb, gs, ge, lp, len, period=3, swflag=1,
+        start, end, pos, tstart, name_pos, name_len, line_range, unbf=0, conf=0, newf=0, newPf=0, cgf=0, cpf= 0, Scpf= 0, npali= 0, wind,
+	pub_line[300 + 2 * HANGOVER], new_line[300 + 2 * HANGOVER], exc_line[300 + 2 * HANGOVER], newP_line[300 + 2 * HANGOVER],
+	pub_cline[300 + 2 * HANGOVER], new_cline[300 + 2 * HANGOVER], exc_cline[300 + 2 * HANGOVER], newP_cline[300 + 2 * HANGOVER];
+    float	y1, y2, r, tpr, delta, pp, S[3];
 
     /* Filename buffers */
     char *unb_file, *con_file, * new_file, *newP_file, *cg_file, *pub_file,
-        *mod_file, *block_file,*BLOCK_file,*codpot_file,*Scodpot_file,*met_file,
-        *kozak_file,*tata_file,*pali_file,*cap_file,*ccaa_file,*gcbox_file,
-        *stop_file,*CG200_file,*CG100_file;
+        *mod_file, *block_file, *BLOCK_file, *codpot_file, *Scodpot_file, *met_file,
+        *kozak_file, *tata_file, *pali_file, *cap_file, *ccaa_file, *gcbox_file,
+        *stop_file, *CG200_file, *read_file;
 
 
     /* by declaring them initially to be NULL, when realloc sees it, it
@@ -124,7 +199,7 @@ main(int argc, char *argv[]) {
         **modified=NULL, **block=NULL, **BLOCK=NULL, **codpot=NULL, **Scodpot=NULL,
         *met=NULL, *tata=NULL, *cap=NULL, *ccaa=NULL, *gcbox=NULL, *stop=NULL,
         *kozak=NULL, **pali=NULL, *X=NULL, *x=NULL;
-    float **y=NULL,**Y=NULL;
+    float **y=NULL,**Y=NULL, **reads= NULL;
 
     char *unb_str=NULL, *con_str=NULL, *new_str=NULL, *newP_str=NULL, *cg_str=NULL,
         *pub_str=NULL, *mod_str=NULL, *block_str=NULL, *BLOCK_str=NULL,
@@ -200,8 +275,8 @@ main(int argc, char *argv[]) {
     pali_file = ap_getl(files);  fprintf(stderr,"\n%s",pali_file);
     /*File_list_of_nucleotides_in_200bp windows. */
     CG200_file = ap_getl(files); fprintf(stderr,"\n%s",CG200_file);
-    /*File_list_of_nucleotides_in_100bp windows. */
-    CG100_file = ap_getl(files); fprintf(stderr,"\n%s",CG100_file);
+    /*File_list_of_read_numbers. */
+    read_file = ap_getl(files); fprintf(stderr,"\n%s",read_file);
 
     fclose(files);
     fprintf(stderr,"Done reading Allplots.def\n");
@@ -564,6 +639,9 @@ main(int argc, char *argv[]) {
         /* READS FILE OF NEW POTENTIAL CODING REGIONS */
 
         if(input= fopen(newP_file,"r")) { newPf= 1;
+            logmsg(10, "Reading modified-predictions file %s\n", mod_file);
+            /* Skip passed the header line */
+            fgets(longstr, 198, input);
             while(fgets(longstr,198,input) && !feof(input)) {
                 newP_name= (char **)realloc(newP_name, (nnP + 1) * sizeof(char *));
                 newP_name[nnP]= (char *)malloc(50 * sizeof(char *));
@@ -685,8 +763,8 @@ main(int argc, char *argv[]) {
 
         if(input= fopen(mod_file,"r")) {
             logmsg(10, "Reading modified-predictions file %s\n", mod_file);
-            /* acgt_gamma does not print header line anymore
-            fgets(longstr, 198, input); */
+            /* Skip passed the header line */
+            fgets(longstr, 198, input);
             while(fgets(longstr, 198, input) && !feof(input)) {
                 mod_name= (char **)realloc(mod_name, (ne + 1) * sizeof(char *));
                 mod_name[ne]= (char *)malloc(50 * sizeof(char *));
@@ -767,26 +845,30 @@ main(int argc, char *argv[]) {
             fprintf(stderr,"\nLarge window composition file %s read",CG200_file); }
         else fprintf(stderr,"\nLarge-window composition file NOT read");
 
-        if(input= fopen(CG100_file,"r")) {
-            while(!feof(input)) {
-                fscanf(input,"%d",&pos);
-                for(j=0;j<period;++j) fscanf(input,"%f",S+j);
-                if(pos>=start && pos<=end) {
-                    X= (int *)realloc(X,(N+1)*sizeof(int));
-                    Y= (float **)realloc(Y,(N+1)*sizeof(float *));
-                    Y[N]= (float *)malloc(period*sizeof(float));
-                    X[N]= pos;
-                    for(j=0;j<period;++j) Y[N][j]= S[j];
-                    ++N;
-                    pos= -1;
-                }
-                else fgets(longstr,198,input);
+/* READS FILE OF RNA-SEQ READ NUMBERS */
+
+        if(input= fopen(read_file,"r")) {
+        fscanf(input,"%d",&wind);
+          while(!feof(input))
+          {
+          fscanf(input,"%d",&pos);
+            for(j= 0; j < 4; ++j) fscanf(input,"%f", S + j);
+            if(pos >= start && pos < end)
+            {
+            X= (int *)realloc(X, (N + 1) * sizeof(int));
+            Y= (float **)realloc(Y, (N + 1) * sizeof(float *));
+            Y[N]= (float *)malloc(4 * sizeof(float));
+            X[N]= pos;
+              for(j= 0; j < 4; ++j) Y[N][j]= S[j];
+            ++N;
+            pos= -1;
             }
-            fclose(input);
-            fprintf(stderr,"\nSmall-window composition file %s read",CG100_file); }
-        else {
-            fprintf(stderr,"\nSmall window composition file NOT read"); swflag= 0;
-        }
+            else fgets(longstr, 198, input);
+          }
+          fclose(input);
+          fprintf(stderr,"\nRead-numbers file %s read", read_file); }
+          else { fprintf(stderr, "\nRead-numbers file NOT read"); swflag= 0; }
+
 
         if(!k) {
             fprintf(stdout,"%%!PS-Adobe-2.0\n\n");
@@ -839,18 +921,20 @@ main(int argc, char *argv[]) {
             fprintf(stdout,"/radius { %.1f } def\n",HAIRPIN_RADIUS);
             fprintf(stdout,"/thick { %.2f } def\n",STEM_SEPARATION);
             fprintf(stdout,"/hairpin { dup thick -2.0 div exch RL thick 0 RL -1 mul thick -2.0 div exch RL closepath } def\n");
+            fprintf(stdout,"/Ucol { dup 0.0 exch RL %.3f 0.0 RL %.3f exch dup 0.0 exch -1 mul RL pop pop } def\n", (float)wind / delta * WIDTH, (float)wind / delta * WIDTH);
+            fprintf(stdout,"/Dcol { dup 0.0 exch -1 mul RL %.3f 0.0 RL %.3f exch dup 0.0 exch RL pop pop } def\n", (float)wind / delta * WIDTH, (float)wind / delta * WIDTH);
             fprintf(stdout,"100 %d translate\n\n",TITLES_POSITION);
 
 
             if(atoi(argv[1])==0) {
                 fprintf(stdout,"/Times-Bold findfont TitleFontSize scalefont setfont\n");
                 fprintf(stdout,"%.3f %.3f M ",0.5*WIDTH-30,HIGHT-90.0);
-                fprintf(stdout,"(S-profiles of %s) Cshow\n",title1);
+                fprintf(stdout,"(%s-profiles of %s) Cshow\n", NUCLEOTIDES, title1);
             }
             else {
                 fprintf(stdout,"/Times-Italic findfont Title2FontSize scalefont setfont\n");
                 fprintf(stdout,"%.3f %.3f M ",0.0,HIGHT-90.0);
-                fprintf(stdout,"(S-profiles - %s) show\n",title2);
+                fprintf(stdout,"(%s-profiles - %s) show\n", NUCLEOTIDES, title2);
             }
         }
 
@@ -869,32 +953,70 @@ main(int argc, char *argv[]) {
             }
         }
 
-        /****************************************/
-        /* End printing regions of CG asymmetry */
-        /****************************************/
+        /************************************************/
+        /* End printing regions of nucleotide contrasts */
+        /************************************************/
 
         fprintf(stdout,"/Times-Roman findfont NumberFontSize scalefont setfont\n");
         fprintf(stdout,"L025 Gray\n");
 
-        for(r=TIC_X/5;r<end-start;r+=TIC_X/5)
+        for(r= TIC_X / 5; r < end - start; r += TIC_X / 5)
             fprintf(stdout,"%.3f 0.0 M 0 %.1f RL\n",r/delta*WIDTH,HIGHT);
-
-        for(r=0;r<=MAX;r+=TIC_Y)
-            fprintf(stdout,"0.0 %.3f M %.1f 0 RL\n",r/MAX*HIGHT,(end-start)/delta*WIDTH);
 
         fprintf(stdout,"stroke\nL05 Black\n");
         fprintf(stdout,"newpath 0 0 M 0 %.3f RL %.3f 0 RL 0 %.3f RL %.3f 0 RL closepath stroke\n",HIGHT,(end-start)/delta*WIDTH,-HIGHT,(start-end)/delta*WIDTH);
 
-        for(r=0;r<=end-start;r+=TIC_X)
+        for(r= 0; r <= end - start; r += TIC_X)
             fprintf(stdout,"%.3f %.3f M 0 %.3f RL 0 %.3f RM (%.0f) Cshow\n",r/delta*WIDTH,-TIC_W,TIC_W,-12.0,r+start);
 
+  if(swflag)
+  {
+  TIC_Y= MAX / (MAXLOG * 2.0);
+
+    for(i= 0; i <= MAXLOG; ++i)
+    {
+    fprintf(stdout, "%.3f %.3f M %.3f 0 RL %.3f %.3f RM ", -TIC_W, HIGHT / 2.0 + i * TIC_Y / MAX * HIGHT, TIC_W, -TIC_W - 5.0, -3.0);
+      if(!(i % EVERY)) fprintf(stdout, "(%d) Lshow\n", i);
+      else             fprintf(stdout, "\n");
+    }
+
+    for(i= 1; i <= MAXLOG; ++i)
+    {
+    fprintf(stdout, "%.3f %.3f M %.3f 0 RL %.3f %.3f RM ", -TIC_W, HIGHT / 2.0 -i * TIC_Y / MAX * HIGHT, TIC_W, -TIC_W - 5.0, -3.0, i + EVERY);
+      if(!(i % EVERY)) fprintf(stdout, "(%d) Lshow\n", i);
+      else             fprintf(stdout, "\n");
+    }
+  }
+  else
+  {
+  TIC_Y= 20.0;
+
+  for(r= 0; r <= MAX; r += TIC_Y)
+    fprintf(stdout, "%.3f %.3f M %.3f 0 RL %.3f %.3f RM (%.1f) Lshow\n", -TIC_W, r / MAX * HIGHT, TIC_W, -TIC_W - 5.0, -3.0, r);
+
+  fprintf(stdout,"L025 Gray\n");
+
+  for(r= TIC_Y; r < MAX; r += TIC_Y)
+    fprintf(stdout, "0.0 %.3f M %.3f 0 RL\n", r / MAX * HIGHT, (end - start) / delta * WIDTH);
+  }
+
+fprintf(stdout,"stroke Black %.3f %.3f M (Input file CDS) Lshow\n",-15.0,HIGHT+HIGHT_PUB - 2);
+
+  if(swflag)
+  {
+  fprintf(stdout,"%.3f %.3f M (0.0) show\n", (end-start)/delta*WIDTH + 3.0, -2.0);
+  fprintf(stdout,"%.3f %.3f M (50.0) show\n", (end-start)/delta*WIDTH + 3.0, HIGHT / 2.0 - 2.0);
+  fprintf(stdout,"%.3f %.3f M (100.0) show\n", (end-start)/delta*WIDTH + 3.0, HIGHT - 2.0);
+  fprintf(stdout,"90 rotate %.3f %.3f M (%% %s) Cshow -90 rotate\n", 0.5 * HIGHT, -((end-start)/delta*WIDTH) - 25.0, NUCLEOTIDES);
+  fprintf(stdout," 0.0 0.0 M 90 rotate %.3f %.3f M (Log-count) Cshow -90 rotate\n", 0.5 * HIGHT, 20.0);
+  }
+//  else fprintf(stdout," 0.0 0.0 M 90 rotate %.3f %.3f M (%% %s) Cshow -90 rotate\n", 0.5 * HIGHT, 30.0, NUCLEOTIDES);
+
+        /*
         for(r=0;r<=MAX;r+=TIC_Y)
             fprintf(stdout,"%.3f %.3f M %.3f 0 RL %.3f %.3f RM (%.1f) Lshow\n",-TIC_W,r/MAX*HIGHT,TIC_W,-TIC_W-5.0,-3.0,r);
 
-
         fprintf(stdout,"stroke %.3f %.3f M (Annotation) Lshow\n",-15.0,HIGHT+HIGHT_PUB-2);
-        /*
-          fprintf(stdout,"stroke %.3f %.3f M (Annotation) Lshow\n",-15.0,HIGHT+HIGHT_MOD-2);
         */
 
         /* Prints S-profile and Genemark coding potentials (DISABLED)
@@ -942,39 +1064,159 @@ main(int argc, char *argv[]) {
         for(i=1;i<n;++i)
             fprintf(stdout,"%.1f %.2f L\n",(x[i]-(float)start)/delta*WIDTH,HIGHT*y[i][period]/MAX);
 
-        /****************************************/
-        /* Prints S-profiles from small windows */
-        /****************************************/
+        /***************************************************/
+        /* Prints S-profiles from small windows - DISABLED */
+        /***************************************************/
 
-        if(swflag) {
-            fprintf(stdout,"stroke L05 LR 1 setlinejoin 1 setlinecap\n");
+//        if(swflag) {
+//            fprintf(stdout,"stroke L05 LR 1 setlinejoin 1 setlinecap\n");
+//
+//            fprintf(stdout,"%.1f %.2f M\n",(X[0]-(float)start)/delta*WIDTH,Y[0][0]/MAX*HIGHT);
+//            for(i=1;i<N;++i) fprintf(stdout,"%.1f %.2f L\n",(X[i]-(float)start)/delta*WIDTH,Y[i][0]/MAX*HIGHT);
+//
+//            if(period>=2) {
+//                fprintf(stdout,"stroke L05 LG\n");
+//
+//                fprintf(stdout,"%.1f %.2f M\n",(X[0]-(float)start)/delta*WIDTH,Y[0][1]/MAX*HIGHT);
+//                for(i=1;i<N;++i) fprintf(stdout,"%.1f %.2f L\n",(X[i]-(float)start)/delta*WIDTH,Y[i][1]/MAX*HIGHT);
+//
+//                if(period>=3) {
+//                    fprintf(stdout,"stroke L05 LB\n");
+//
+//                    fprintf(stdout,"%.1f %.2f M\n",(X[0]-(float)start)/delta*WIDTH,Y[0][2]/MAX*HIGHT);
+//                    for(i=1;i<N;++i)
+//                        fprintf(stdout,"%.1f %.2f L\n",(X[i]-(float)start)/delta*WIDTH,Y[i][2]/MAX*HIGHT);
+//                }
+//            }
+//        }
+//
+//        fprintf(stdout,"stroke L05 R 0 setlinejoin 0 setlinecap\n");
 
-            fprintf(stdout,"%.1f %.2f M\n",(X[0]-(float)start)/delta*WIDTH,Y[0][0]/MAX*HIGHT);
-            for(i=1;i<N;++i) fprintf(stdout,"%.1f %.2f L\n",(X[i]-(float)start)/delta*WIDTH,Y[i][0]/MAX*HIGHT);
-
-            if(period>=2) {
-                fprintf(stdout,"stroke L05 LG\n");
-
-                fprintf(stdout,"%.1f %.2f M\n",(X[0]-(float)start)/delta*WIDTH,Y[0][1]/MAX*HIGHT);
-                for(i=1;i<N;++i) fprintf(stdout,"%.1f %.2f L\n",(X[i]-(float)start)/delta*WIDTH,Y[i][1]/MAX*HIGHT);
-
-                if(period>=3) {
-                    fprintf(stdout,"stroke L05 LB\n");
-
-                    fprintf(stdout,"%.1f %.2f M\n",(X[0]-(float)start)/delta*WIDTH,Y[0][2]/MAX*HIGHT);
-                    for(i=1;i<N;++i)
-                        fprintf(stdout,"%.1f %.2f L\n",(X[i]-(float)start)/delta*WIDTH,Y[i][2]/MAX*HIGHT);
-                }
+      /**************************************/
+      /* Prints histograms of RNA-seq reads */
+      /**************************************/
+      
+        if(swflag)
+        {
+      fprintf(stderr, "\nPrints profiles of RNA-seq reads\n");
+      //  fprintf(stdout,"L05 Black 1 setlinejoin 1 setlinecap\n");
+        fprintf(stdout,"Black\n");
+      
+      // Writes histogram of most frequent reads
+      
+        fprintf(stdout, "newpath %.1f %.2f M\n", (X[0] - (float)start) / delta * WIDTH, 0.5 * HIGHT);
+          for(i= 0; i < N; ++i)
+          {
+              if(Y[i][0] + Y[i][2] > Y[i][1] + Y[i][3]) j= 0;
+              else j= 1;
+      
+              if(Y[i][j] == 0.0) r= 0.0;
+              else
+              {
+              r= (float)log10((double)Y[i][j]) / MAXLOG * (HIGHT / 2.0);
+                if(r < 0.25) r= 0.25;
+              }
+            if(j) fprintf(stdout, "%.3f Dcol\n", r);
+            else  fprintf(stdout, "%.3f Ucol\n", r);
+          }
+      
+      // Writes histogram of less frequent reads
+      
+        fprintf(stdout, "closepath fill newpath Gray %.1f %.2f M\n", (X[0] - (float)start) / delta * WIDTH, 0.5 * HIGHT);
+          for(i= 0; i < N; ++i)
+          {
+              if(Y[i][0] + Y[i][2] <= Y[i][1] + Y[i][3]) j= 0;
+              else j= 1;
+      
+              if(Y[i][j] == 0.0) r= 0.0;
+              else
+              {
+              r= (float)log10((double)Y[i][j]) / MAXLOG * (HIGHT / 2.0);
+                if(r < 0.25) r= 0.25;
+              }
+            if(j) fprintf(stdout, "%.3f Dcol\n", r);
+            else  fprintf(stdout, "%.3f Ucol\n", r);
+          }
+      
+        fprintf(stdout,"closepath fill\n");
+      
+        fprintf(stdout,"L025 Black 0 setlinejoin 0 setlinecap\n");
+      
+      // Adds histogram of most frequent multiple reads
+      
+          for(i= 0; i < N; ++i)
+          {
+            if(Y[i][0] + Y[i][2] > Y[i][1] + Y[i][3]) j= 0;
+            else j= 1;
+      
+            if(Y[i][j + 2])
+            {
+              if(Y[i][j])
+              {
+              y1= (float)log10((double)Y[i][j]) / MAXLOG * (HIGHT / 2.0);
+                if(y1 < 0.25) y1= 0.25;
+              }
+              else y1= 0.0;
+      
+              if(Y[i][j] + Y[i][j + 2])
+              {
+              y2= (float)log10((double)(Y[i][j] + Y[i][j + 2])) / MAXLOG * (HIGHT / 2.0);
+                if(y2 < 0.25) y2= 0.25;
+              }
+              else y2= 0.0;
+      
+              if(y2 > y1)
+              {
+                if(j) fprintf(stdout, "newpath %.3f %.3f %.3f Dbox\n", y2 - y1 - 0.125, (X[i] - (float)start) / delta * WIDTH, 0.5 * HIGHT - y1);
+                else  fprintf(stdout, "newpath %.3f %.3f %.3f Ubox\n", y2 - y1 - 0.125, (X[i] - (float)start) / delta * WIDTH, 0.5 * HIGHT + y1);
+              }
+      
+            fprintf(stdout, "stroke\n");
             }
+          }
+      
+        fprintf(stdout,"Gray\n");
+      
+      // Adds histogram of least frequent multiple reads
+      
+          for(i= 0; i < N; ++i)
+          {
+            if(Y[i][0] + Y[i][2] <= Y[i][1] + Y[i][3]) j= 0;
+            else j= 1;
+      
+            if(Y[i][j + 2])
+            {
+              if(Y[i][j])
+              {
+              y1= (float)log10((double)Y[i][j]) / MAXLOG * (HIGHT / 2.0);
+                if(y1 < 0.25) y1= 0.25;
+              }
+              else y1= 0.0;
+      
+              if(Y[i][j] + Y[i][j + 2])
+              {
+              y2= (float)log10((double)(Y[i][j] + Y[i][j + 2])) / MAXLOG * (HIGHT / 2.0);
+                if(y2 < 0.25) y2= 0.25;
+              }
+              else y2= 0.0;
+      
+              if(y2 > y1)
+              {
+                if(j) fprintf(stdout, "newpath %.3f %.3f %.3f Dbox\n", y2 - y1 - 0.125, (X[i] - (float)start) / delta * WIDTH, 0.5 * HIGHT - y1);
+                else  fprintf(stdout, "newpath %.3f %.3f %.3f Ubox\n", y2 - y1 - 0.125, (X[i] - (float)start) / delta * WIDTH, 0.5 * HIGHT + y1);
+              }
+      
+            fprintf(stdout, "stroke\n");
+            }
+          }
+      
         }
-
-        fprintf(stdout,"stroke L05 R 0 setlinejoin 0 setlinecap\n");
 
         /****************************************/
         /* Prints S-profiles from large windows */
         /****************************************/
 
-        fprintf(stdout,"%.1f %.2f M 1 setlinejoin 1 setlinecap\n",(x[0]-(float)start)/delta*WIDTH,y[0][0]/MAX*HIGHT);
+        fprintf(stdout,"\nstroke L05 R %.1f %.2f M 1 setlinejoin 1 setlinecap\n",(x[0]-(float)start)/delta*WIDTH,y[0][0]/MAX*HIGHT);
         for(i=1;i<n;++i)
             fprintf(stdout,"%.1f %.2f L\n",(x[i]-(float)start)/delta*WIDTH,y[i][0]/MAX*HIGHT);
 
@@ -1074,6 +1316,7 @@ main(int argc, char *argv[]) {
         /* Prints S-profiles from small windows */
         /****************************************/
 
+/*
         if(swflag) {
             fprintf(stdout,"stroke 1 setlinejoin 1 setlinecap L05 LR\n");
 
@@ -1099,11 +1342,13 @@ main(int argc, char *argv[]) {
         }
 
         fprintf(stdout,"stroke 1 setlinejoin 1 setlinecap L05 R\n");
+*/
 
         /****************************************/
         /* Prints S-profiles from large windows */
         /****************************************/
 
+/*
         fprintf(stdout,"%.1f %.2f M\n",(x[0]-(float)start)/delta*WIDTH,y[0][0]/MAX*HIGHT);
         for(i=1;i<n;++i)
             fprintf(stdout,"%.1f %.2f L\n",(x[i]-(float)start)/delta*WIDTH,y[i][0]/MAX*HIGHT);
@@ -1124,10 +1369,13 @@ main(int argc, char *argv[]) {
             }
         }
 
-        fprintf(stdout,"stroke 0 setlinejoin 0 setlinecap\n");
+        fprintf(stdout,"stroke\n");
+*/
 
         /****************************************/
         /* Prints new ORFs with low biases (DISABLED)
+
+fprintf(stdout,"\n0 setlinejoin 0 setlinecap\n");
 
            if(unbf)
            {
@@ -1399,22 +1647,32 @@ main(int argc, char *argv[]) {
         /* Prints accepted annotated genes */
         /***********************************/
 
-        for(i=0;i<np;++i) {
+	for(i= 0; i < 300 + 2 * HANGOVER; ++i) pub_line[i]= pub_cline[i]= 0;
+	
+
+        for(i=0;i<np;++i)
+	{
+	name_len= strlen(pub_name[i]);
+	name_pos= (int)(((pub[i][0] + pub[i][1]) / 2 - (float)start) * 300 / delta) - name_len + HANGOVER;
+	name_len *= 2;
+
+	d= 6 * name_yoffset(pub_line, pub_cline, name_pos, name_len, pub_str[i]);
+
             if(pub_str[i]==' ') {
                 if(period%3) fprintf(stdout,"Black");
                 else if(pub[i][0]%period==1) fprintf(stdout,"B");
                 else if(pub[i][0]%period==2) fprintf(stdout,"R");
                 else if(pub[i][0]%period==0) fprintf(stdout,"G");
-                fprintf(stdout," %.1f %.2f M %.2f Rarrow\n",(pub[i][0]-(float)start)/delta*WIDTH,HIGHT+HIGHT_PUB+2.0,(pub[i][1]-pub[i][0])/delta*WIDTH);
-                fprintf(stdout,"Black %.1f %.2f M (%s) Cshow\n",((pub[i][1]+pub[i][0])/2-(float)start)/delta*WIDTH,HIGHT+HIGHT_PUB+5.0,pub_name[i]);
+                fprintf(stdout," %.1f %.2f M %.2f Rarrow\n", (pub[i][0] - (float)start) / delta * WIDTH, HIGHT + HIGHT_PUB + 2.0, (pub[i][1] - pub[i][0]) / delta * WIDTH);
+                fprintf(stdout,"Black %.1f %.2f M (%s) Cshow\n", ((pub[i][1] + pub[i][0]) / 2 - (float)start) / delta * WIDTH, HIGHT + HIGHT_PUB + 5.0 + (float)d, pub_name[i]);
             }
             else {
                 if(period%3) fprintf(stdout,"Black");
                 else if(pub[i][0]%period==1) fprintf(stdout,"R");
                 else if(pub[i][0]%period==2) fprintf(stdout,"G");
                 else if(pub[i][0]%period==0) fprintf(stdout,"B");
-                fprintf(stdout," %.1f %.2f M %.2f Larrow\n",(pub[i][0]-(float)start)/delta*WIDTH,HIGHT+HIGHT_PUB-2.0,(pub[i][1]-pub[i][0])/delta*WIDTH);
-                fprintf(stdout,"Black %.1f %.2f M (%s) Cshow\n",((pub[i][1]+pub[i][0])/2-(float)start)/delta*WIDTH,HIGHT+HIGHT_PUB-10.0,pub_name[i]);
+                fprintf(stdout, " %.1f %.2f M %.2f Larrow\n", (pub[i][0] - (float)start) / delta * WIDTH, HIGHT + HIGHT_PUB - 2.0, (pub[i][1] - pub[i][0]) / delta * WIDTH);
+                fprintf(stdout,"Black %.1f %.2f M (%s) Cshow\n", ((pub[i][1] + pub[i][0]) / 2 - (float)start) / delta * WIDTH, HIGHT + HIGHT_PUB - 10.0 - (float)d, pub_name[i]);
             }
         }
 
@@ -1422,51 +1680,68 @@ main(int argc, char *argv[]) {
         /* Prints new potential ORFs */
         /*****************************/
 
-        if(newPf) {
-            for(i=0;i<nnP;++i) {
-                if(newP_str[i]==' ') {
-                    if(period%3) fprintf(stdout,"Gray");
-                    else if(newP[i][0]%period==1) fprintf(stdout,"LB");
-                    else if(newP[i][0]%period==2) fprintf(stdout,"LR");
-                    else if(newP[i][0]%period==0) fprintf(stdout,"LG");
-                    fprintf(stdout," %.1f %.2f M %.2f Rarrow\n",(newP[i][0]-(float)start)/delta*WIDTH,HIGHT+HIGHT_NEW+2.0,(newP[i][1]-newP[i][0])/delta*WIDTH);
-                    fprintf(stdout,"DarkGray %.1f %.2f M (%s) Cshow\n",((newP[i][1]+newP[i][0])/2-(float)start)/delta*WIDTH,HIGHT+HIGHT_NEW+5.0,newP_name[i]);
+	for(i= 0; i < 300 + 2 * HANGOVER; ++i) new_line[i]= new_cline[i]= 0;
+
+        if(newPf)
+	{
+            for(i=0;i<nnP;++i)
+	    {
+	    name_len= strlen(newP_name[i]);
+	    name_pos= (int)(((newP[i][0] + newP[i][1]) / 2 - (float)start) * 300 / delta) - name_len + HANGOVER;
+	    name_len *= 2;
+
+	    d= 6 * name_yoffset(new_line, new_cline, name_pos, name_len, newP_str[i]);
+
+                if(newP_str[i] == ' ') {
+                    if(period % 3) fprintf(stdout,"Gray");
+                    else if(newP[i][0] % period == 1) fprintf(stdout,"LB");
+                    else if(newP[i][0] % period == 2) fprintf(stdout,"LR");
+                    else if(newP[i][0] % period == 0) fprintf(stdout,"LG");
+                    fprintf(stdout," %.1f %.2f M %.2f Rarrow\n", (newP[i][0] - (float)start) / delta * WIDTH, HIGHT + HIGHT_NEW + 2.0, (newP[i][1] - newP[i][0]) / delta * WIDTH);
+                    fprintf(stdout,"DarkGray %.1f %.2f M (%s) Cshow\n", ((newP[i][1] + newP[i][0]) / 2 - (float)start) / delta * WIDTH, HIGHT + HIGHT_NEW + 5.0 + (float)d, newP_name[i]);
                 }
                 else {
-                    if(period%3) fprintf(stdout,"Gray");
-                    else if(newP[i][0]%period==1) fprintf(stdout,"LR");
-                    else if(newP[i][0]%period==2) fprintf(stdout,"LG");
-                    else if(newP[i][0]%period==0) fprintf(stdout,"LB");
-                    fprintf(stdout," %.1f %.2f M %.2f Larrow\n",(newP[i][0]-(float)start)/delta*WIDTH,HIGHT+HIGHT_NEW-2.0,(newP[i][1]-newP[i][0])/delta*WIDTH);
-                    fprintf(stdout,"DarkGray %.1f %.2f M (%s) Cshow\n",((newP[i][1]+newP[i][0])/2-(float)start)/delta*WIDTH,HIGHT+HIGHT_NEW-10.0,newP_name[i]);
+                    if(period % 3) fprintf(stdout, "Gray");
+                    else if(newP[i][0] % period == 1) fprintf(stdout, "LR");
+                    else if(newP[i][0] % period == 2) fprintf(stdout, "LG");
+                    else if(newP[i][0] % period == 0) fprintf(stdout, "LB");
+                    fprintf(stdout, " %.1f %.2f M %.2f Larrow\n", (newP[i][0] - (float)start) / delta * WIDTH, HIGHT + HIGHT_NEW - 2.0, (newP[i][1] - newP[i][0]) / delta * WIDTH);
+                    fprintf(stdout, "DarkGray %.1f %.2f M (%s) Cshow\n", ((newP[i][1] + newP[i][0]) / 2 - (float)start) / delta * WIDTH, HIGHT + HIGHT_NEW - 10.0 - (float)d, newP_name[i]);
                 }
             }
         }
-
 
         /*******************/
         /* Prints new ORFs */
         /*******************/
 
-        if(newf) {
+        if(newf)
+	{
             fprintf(stdout,"\nL15 ");
             fprintf(stdout,"/Times-Bold findfont NumberFontSize scalefont setfont\n");
-            for(i=0;i<nn;++i) {
-                if(new_str[i]==' ') {
-                    if(period%3) fprintf(stdout,"Black");
-                    else if(new[i][0]%period==1) fprintf(stdout,"B");
-                    else if(new[i][0]%period==2) fprintf(stdout,"R");
-                    else if(new[i][0]%period==0) fprintf(stdout,"G");
-                    fprintf(stdout," %.1f %.2f M %.2f Rarrow\n",(new[i][0]-(float)start)/delta*WIDTH,HIGHT+HIGHT_NEW+2.0,(new[i][1]-new[i][0])/delta*WIDTH);
-                    fprintf(stdout,"Black %.1f %.2f M (%s) Cshow\n",((new[i][1]+new[i][0])/2-(float)start)/delta*WIDTH,HIGHT+HIGHT_NEW+5.0,new_name[i]);
+            for(i= 0; i < nn; ++i)
+	    {
+            name_len= strlen(new_name[i]);
+            name_pos= (int)(((new[i][0] + new[i][1]) / 2 - (float)start) * 300 / delta) - name_len + HANGOVER;
+            name_len *= 2;
+
+            d= 6 * name_yoffset(new_line, new_cline, name_pos, name_len, new_str[i]);
+
+                if(new_str[i] == ' ') {
+                    if(period % 3) fprintf(stdout, "Black");
+                    else if(new[i][0] % period == 1) fprintf(stdout, "B");
+                    else if(new[i][0] % period == 2) fprintf(stdout, "R");
+                    else if(new[i][0] % period == 0) fprintf(stdout, "G");
+                    fprintf(stdout, " %.1f %.2f M %.2f Rarrow\n", (new[i][0] - (float)start) / delta * WIDTH, HIGHT + HIGHT_NEW + 2.0, (new[i][1] - new[i][0]) / delta * WIDTH);
+                    fprintf(stdout, "Black %.1f %.2f M (%s) Cshow\n", ((new[i][1] + new[i][0]) / 2 - (float)start) / delta * WIDTH, HIGHT + HIGHT_NEW + 5.0 + (float)d, new_name[i]);
                 }
                 else {
-                    if(period%3) fprintf(stdout,"Black");
-                    else if(new[i][0]%period==1) fprintf(stdout,"R");
-                    else if(new[i][0]%period==2) fprintf(stdout,"G");
-                    else if(new[i][0]%period==0) fprintf(stdout,"B");
-                    fprintf(stdout," %.1f %.2f M %.2f Larrow\n",(new[i][0]-(float)start)/delta*WIDTH,HIGHT+HIGHT_NEW-2.0,(new[i][1]-new[i][0])/delta*WIDTH);
-                    fprintf(stdout,"Black %.1f %.2f M (%s) Cshow\n",((new[i][1]+new[i][0])/2-(float)start)/delta*WIDTH,HIGHT+HIGHT_NEW-10.0,new_name[i]);
+                    if(period % 3) fprintf(stdout, "Black");
+                    else if(new[i][0] % period == 1) fprintf(stdout, "R");
+                    else if(new[i][0] % period == 2) fprintf(stdout, "G");
+                    else if(new[i][0] % period == 0) fprintf(stdout, "B");
+                    fprintf(stdout, " %.1f %.2f M %.2f Larrow\n", (new[i][0] - (float)start) / delta * WIDTH, HIGHT + HIGHT_NEW - 2.0, (new[i][1] - new[i][0]) / delta * WIDTH);
+                    fprintf(stdout, "Black %.1f %.2f M (%s) Cshow\n", ((new[i][1] + new[i][0]) / 2 - (float)start) / delta * WIDTH, HIGHT + HIGHT_NEW - 10.0 - (float)d, new_name[i]);
                 }
             }
         }

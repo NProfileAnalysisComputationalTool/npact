@@ -221,10 +221,10 @@ multiprocess safe way) setting class defaults
     AP_file_keys = ['File_of_unbiased_CDSs',
                     'File_of_conserved_CDSs',
                     'File_of_new_CDSs',
-                    'File_of_potential_new_CDSs',
+		    'File_of_published_rejected_CDSs',               #switched with "file_of_potential_new_CDs"
                     'File_of_stretches_where_CG_is_asymmetric',
                     'File_of_published_accepted_CDSs',
-                    'File_of_published_rejected_CDSs',
+		    'File_of_potential_new_CDSs',   		     #switched with "file_of_published_rejected_CDs"
                     'File_of_blocks_from_new_ORFs_as_cds',
                     'File_of_blocks_from_annotated_genes_as_cds',
                     'File_of_GeneMark_regions',
