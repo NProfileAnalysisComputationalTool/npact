@@ -42,7 +42,7 @@ class ConfigForm(forms.Form):
                               widget=get_ti(8))
     nucleotides=forms.MultipleChoiceField(choices=[(i,i) for i in ['a','c','g','t']],
                                           widget=forms.CheckboxSelectMultiple())
-    run_prediction=forms.BooleanField(required=False)
+    skip_prediction=forms.BooleanField(required=False)
     significance=forms.ChoiceField(choices=prepare.significance_levels, required=False,
                                    label="Prediction Significance")
     start_page=forms.IntegerField(required=False)
@@ -72,7 +72,7 @@ def config(request, path):
         form = ConfigForm(request.POST)
         if form.is_valid():
             logger.info("Got clean post, running.")
-            url = reverse('run', args=[path]) + "?" + urlencode(form.cleaned_data,True)
+            url = reverse('run', args=[path]) + "?" + urlencode(form.cleaned_data, True)
             return HttpResponseRedirect(url)
     else:
         form = ConfigForm(initial=config)

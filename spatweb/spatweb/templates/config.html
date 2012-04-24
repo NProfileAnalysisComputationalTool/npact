@@ -18,14 +18,14 @@
        });
     });
     // Setup the significance trigger 
-    $('#id_run_prediction')
+    $('#id_skip_prediction')
      .change(function (event) {
                var checked = $(this).is(':checked');
-               console.log('run prediction box clicked.', checked);
+               console.log('skip prediction box clicked.', checked);
                if(checked)
-                 $('#id_significance').removeAttr('disabled');
-               else 
                  $('#id_significance').attr('disabled','true');
+               else 
+                 $('#id_significance').removeAttr('disabled');
               });
   });
 </script>
