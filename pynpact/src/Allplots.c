@@ -636,12 +636,12 @@ main(int argc, char *argv[]) {
         }
         else fprintf(stderr,"\nNew file NOT read");
 
-        /* READS FILE OF NEW POTENTIAL CODING REGIONS */
+        /* READS FILE OF NEW PREDICTION CORRESPONDING TO ANNOTATED BUT WITH DIFFERENT PREDICTED START */
 
         if(input= fopen(newP_file,"r")) { newPf= 1;
             logmsg(10, "Reading modified-predictions file %s\n", mod_file);
-            /* Skip passed the header line */
-            fgets(longstr, 198, input);
+            /* Header line not printed in current version of acgt_gamma */
+//          fgets(longstr, 198, input);
             while(fgets(longstr,198,input) && !feof(input)) {
                 newP_name= (char **)realloc(newP_name, (nnP + 1) * sizeof(char *));
                 newP_name[nnP]= (char *)malloc(50 * sizeof(char *));
@@ -759,7 +759,8 @@ main(int argc, char *argv[]) {
         else fprintf(stderr,"\nPub file NOT read");
 
 
-        /* READS FILE OF MODIFIED PUBLIC GENES */
+        /* READS FILE OF MODIFIED PUBLIC GENES. FILE OF NEW PREDICTIONS MODIFYING STRAT OF TRANSLATION OF ANNOTATED GENES
+	   IS READ INSTEAD INTO NEW POTENTIAL CODING REGIONS (newP* variables) */
 
         if(input= fopen(mod_file,"r")) {
             logmsg(10, "Reading modified-predictions file %s\n", mod_file);
