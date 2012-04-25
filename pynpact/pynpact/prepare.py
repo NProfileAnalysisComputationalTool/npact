@@ -1,7 +1,7 @@
-import logging, os.path, tempfile, time, shutil
+import logging, os.path
 import re
-from optparse import OptionParser
-from contextlib import contextmanager
+
+
 
 import Bio.GenBank, Bio.GenBank.Scanner
 
@@ -51,7 +51,7 @@ def open_parse_gb_rec(gbkfile, reduce_first=False):
     #SeqIO.read(gbkfile,"genbank")
 
     with open(gbkfile,'r') as handle: 
-        rp =Bio.GenBank.RecordParser()
+        rp = Bio.GenBank.RecordParser()
         #rp._scanner = Bio.GenBank.Scanner.GenBankScanner()
         rp._consumer = Bio.GenBank._RecordConsumer()
         rp._scanner.feed(handle, rp._consumer, do_features=False)
@@ -74,13 +74,13 @@ def open_parse_seq_rec(gbkfile, reduce_first=False, do_features=False):
     #SeqIO.read(gbkfile,"genbank")
     
     with open(gbkfile,'r') as handle: 
-        rp =Bio.GenBank.FeatureParser()
+        rp = Bio.GenBank.FeatureParser()
         rp._consumer = Bio.GenBank._FeatureConsumer(rp.use_fuzziness,rp._cleaner)
         rp._scanner.feed(handle, rp._consumer, do_features=do_features)
         return rp._consumer.data
 
 def make_seq_unknown(seq_record):
-    seq_record.seq = Bio.Seq.UnknownSeq(len(seq_record),seq_record.seq.alphabet)
+    seq_record.seq = Bio.Seq.UnknownSeq(len(seq_record), seq_record.seq.alphabet)
 
 
 
@@ -102,10 +102,10 @@ def try_parse(abs_path, force=False):
             'mtime': mtime,
             'filesize': util.pprint_bytes(os.path.getsize(abs_path)),
             }
-    gbrec= None
+    gbrec = None
     try:
         gbrec = open_parse_seq_rec(abs_path)
-        if isinstance(gbrec.seq,Bio.Seq.UnknownSeq):
+        if isinstance(gbrec.seq, Bio.Seq.UnknownSeq):
             raise InvalidGBKException("File contains no sequence data.")
         
         data['length'] = len(gbrec)
@@ -120,7 +120,7 @@ def try_parse(abs_path, force=False):
         
         match = re.search(r'(\d+) ?bp', open(abs_path).readline())
         if match :
-            self.config['length'] = match.group(1)
+            data['length'] = match.group(1)
         else :
             raise InvalidGBKException("Unable to find sequence length.")
 
@@ -128,7 +128,7 @@ def try_parse(abs_path, force=False):
     return data
 
 def default_config(abs_path):
-    config={
+    config = {
         'nucleotides':['c','g'],
 
         ##keys for extract.c
@@ -163,7 +163,7 @@ def default_config(abs_path):
     return config
 
 
-CONFIG_HELP_TEXT={
+CONFIG_HELP_TEXT = {
     'start_page': "By page number, the first page to generate. Leave blank to start at the beginning.",
     'end_page': "By page number, the last page to generate. Leave blank to generate through to the end.",
     'length': "The length, in base pairs, of the genome being analyzed.",
@@ -175,5 +175,5 @@ CONFIG_HELP_TEXT={
     
     }
 
-significance_levels = ("0.01","0.001","0.0001")
-significance_levels = zip(significance_levels,significance_levels)
+significance_levels = ("0.01", "0.001", "0.0001")
+significance_levels = zip(significance_levels, significance_levels)

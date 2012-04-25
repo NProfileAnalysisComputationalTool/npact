@@ -1,11 +1,9 @@
 #!/usr/bin/env python
-import logging, os.path, tempfile, time, shutil, re
+import logging, os.path, tempfile, shutil
 from optparse import OptionParser
 from contextlib import contextmanager
 
-from Bio import SeqIO
-
-from __init__ import binfile,DATAPATH
+from __init__ import binfile, DATAPATH
 import prepare
 import util
 from softtimeout import SoftTimer, Timeout
@@ -60,7 +58,7 @@ class GenBankProcessor(object ):
 
     def parse(self, gbkfile):
         """Open up a GenBank file, trying to get the sequence record off of it."""
-        logger.info
+
         self.gbkfile = gbkfile
         if not os.path.exists(gbkfile):
             raise Exception("Asked to parse nonexistant genebank file: %r", gbkfile)
@@ -90,6 +88,7 @@ class GenBankProcessor(object ):
         return outfilename
 
     def mkstemp_overwrite(self, destination, **kwargs):
+        "wrapper for util.mkstemp_overwrite; provides default dir, logger, cleanup args"
         kwargs.setdefault('dir', self.outputdir)
         kwargs.setdefault('logger', self.logger)
         kwargs.setdefault('cleanup', self.cleanup)
@@ -106,7 +105,7 @@ multiprocess safe way) setting class defaults
         return util.safe_produce_new(filename, func, **kwargs)
 
     @contextmanager
-    def mkdtemp(self,**kwargs):
+    def mkdtemp(self, **kwargs):
         """A wrapper for tempfile.mkdtemp, sets defaults based on class variables"""
         kwargs.setdefault('dir', self.outputdir)
         path = tempfile.mkdtemp(**kwargs)
@@ -115,7 +114,7 @@ multiprocess safe way) setting class defaults
         finally:
             if self.cleanup:
                 self.logger.debug("Cleaning up mkdtemp %r", path)
-                shutil.rmtree(path,ignore_errors=True)
+                shutil.rmtree(path, ignore_errors=True)
 
     #####
 
@@ -150,7 +149,8 @@ multiprocess safe way) setting class defaults
 
         $ CG MYCGE.gbk 1 580074 201 51 3 > MYCGE.CG200
         """
-        config,hash = util.reducehashdict(self.config,['nucleotides', 'length','window_size','step','period'])
+        config,hash = util.reducehashdict(self.config,
+                                          ['nucleotides', 'length','window_size','step','period'])
         outfilename = self.derivative_filename(".%s.nprofile" % hash)
         def thunk(out):
             self.timer.check("Calculating n-profile.")
@@ -240,7 +240,7 @@ multiprocess safe way) setting class defaults
                     'File_list_of_nucleotides_in_200bp windows',
                     'File_list_of_nucleotides_in_100bp windows']
 
-    def write_allplots_def(self,config,allplots_name,page_num):
+    def write_allplots_def(self, config, allplots_name, page_num):
         "Writes out an Allplots.def for a single run through of allplots."
         self.logger.debug("Writing Allplots for %d %r", page_num, allplots_name)
 
@@ -286,7 +286,7 @@ period_of_frame       Number of frames.
            'length', 'start_page',
            'end_page', 'period', 'bp_per_page',
            'nucleotides']
-        config,hash= util.reducehashdict(self.config, hashkeys)
+        config,hash = util.reducehashdict(self.config, hashkeys)
 
         #build the individual ps page files.
         filenames = []
@@ -327,10 +327,10 @@ period_of_frame       Number of frames.
                 #it will appear correctly as many pages.
                 self.timer.check("Combining pages into output.")
                 self.logger.info("combining postscript files")
-                first=True
+                first = True
                 psout.write("%!PS-Adobe-2.0\n\n")
                 psout.write("%%Pages: {0}\n\n".format(len(filenames)))
-                idx=1
+                idx = 1
                 for psf in filenames:
                     psout.write("%%Page: {0}\n".format(idx))
                     with open(psf,'r') as infile:
@@ -371,7 +371,7 @@ if __name__ == '__main__':
     parser = OptionParser("""%prog <genebank file>""")
     parser.add_option("-v", "--verbose", action="store_true", dest="verbose",
                       help="Show more verbose log messages.")
-    parser.add_option("-f","--force",action="store_true",dest="force",
+    parser.add_option("-f", "--force", action="store_true", dest="force",
                       help="Force recomputation of intermediate products")
     (options,args) = parser.parse_args()
 

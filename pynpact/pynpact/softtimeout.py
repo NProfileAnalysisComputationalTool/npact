@@ -1,17 +1,21 @@
 import time
 
 class Timeout(Exception):
+    "Exception raised by SoftTimer to indicate computation has taken too long."
     def __init__(self, **args):
         self.__dict__.update(args)
 
 class SoftTimer(object):
+    """This class keeps track of how long it has been around and a
+    timeout. If the timeout has passed when check is called, it raises
+    a Timeout exception"""
     deadline = None
     starttime = None
     checkcount = 0
     steps = None
 
     def __init__(self, timeout=None, **kwargs):
-        self.set_timeout(timeout,from_now=True)
+        self.set_timeout(timeout, from_now=True)
         self.steps=[]
         super(SoftTimer, self).__init__(**kwargs)
 
@@ -23,7 +27,7 @@ class SoftTimer(object):
             self.deadline = self.starttime + timeout
 
     def check(self, step=None, logfn=None, **kwargs):
-        self.checkcount +=1
+        self.checkcount += 1
         if step:
             self.steps.append(step)
 
