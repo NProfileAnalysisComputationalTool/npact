@@ -64,7 +64,7 @@ class GenBankProcessor(object ):
         self.gbkfile = gbkfile
         if not os.path.exists(gbkfile):
             raise Exception("Asked to parse nonexistant genebank file: %r", gbkfile)
-        
+
         if self.config is None:
             self.config = prepare.default_config(self.gbkfile)
 
@@ -118,7 +118,7 @@ multiprocess safe way) setting class defaults
                 shutil.rmtree(path,ignore_errors=True)
 
     #####
-                
+
     def seqrec(self):
         if self._seqrec is None:
             self._seqrec = prepare.open_parse_seq_rec(self.gbkfile, do_features=True)
@@ -154,27 +154,27 @@ multiprocess safe way) setting class defaults
         outfilename = self.derivative_filename(".%s.nprofile" % hash)
         def thunk(out):
             self.timer.check("Calculating n-profile.")
-            progargs = [binfile("nprofile"), '-b', ''.join(config["nucleotides"]), 
+            progargs = [binfile("nprofile"), '-b', ''.join(config["nucleotides"]),
                         self.gbkfile, 1, config['length'],
                         config['window_size'], config['step'], config['period']]
             return util.capturedCall(progargs, stdout=out, logger=self.logger, check=True)
-        
+
         self.safe_produce_new(outfilename, thunk, dependencies=[self.gbkfile])
         self.config['File_list_of_nucleotides_in_200bp windows'] = outfilename
         return outfilename
-    
+
 
     def acgt_gamma(self):
         "Run the acgt_gamma gene prediction program."
         if self.config.get('skip_prediction', False):
             self.logger.debug("Skipping prediction.")
             return
-        self.logger.debug("Starting prediction: %s", 
+        self.logger.debug("Starting prediction: %s",
                           self.config.get('significance'))
-        
+
         assert os.path.exists(DATAPATH), \
                "Missing pynpact/data for acgt_gamma prediction. Expected at " + DATAPATH
-        
+
         config,hash = util.reducehashdict(self.config,
                                           ['significance', 'GeneDescriptorSkip1'])
 
@@ -221,10 +221,10 @@ multiprocess safe way) setting class defaults
     AP_file_keys = ['File_of_unbiased_CDSs',
                     'File_of_conserved_CDSs',
                     'File_of_new_CDSs',
-		    'File_of_published_rejected_CDSs',               #switched with "file_of_potential_new_CDs"
+                    'File_of_published_rejected_CDSs',               #switched with "file_of_potential_new_CDs"
                     'File_of_stretches_where_CG_is_asymmetric',
                     'File_of_published_accepted_CDSs',
-		    'File_of_potential_new_CDSs',   		     #switched with "file_of_published_rejected_CDs"
+                    'File_of_potential_new_CDSs',                    #switched with "file_of_published_rejected_CDs"
                     'File_of_blocks_from_new_ORFs_as_cds',
                     'File_of_blocks_from_annotated_genes_as_cds',
                     'File_of_GeneMark_regions',
@@ -281,8 +281,8 @@ period_of_frame       Number of frames.
 
         #figure out hashed filename of ps output.
         hashkeys = self.AP_file_keys + \
-          ['first_page_title', 
-           'following_page_title', 
+          ['first_page_title',
+           'following_page_title',
            'length', 'start_page',
            'end_page', 'period', 'bp_per_page',
            'nucleotides']
@@ -355,7 +355,7 @@ period_of_frame       Number of frames.
         self.safe_produce_new(pdf_filename, thunk, dependencies=[self.gbkfile])
         self.config['pdf_filename'] = pdf_filename
         return pdf_filename
-   
+
 
     RUN_FNS=['run_extract','run_nprofile','acgt_gamma','run_Allplots','run_ps2pdf']
 
