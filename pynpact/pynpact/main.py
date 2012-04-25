@@ -367,8 +367,6 @@ period_of_frame       Number of frames.
 
 
 
-
-
 if __name__ == '__main__':
     parser = OptionParser("""%prog <genebank file>""")
     parser.add_option("-v", "--verbose", action="store_true", dest="verbose",
@@ -386,4 +384,4 @@ if __name__ == '__main__':
                         datefmt='%H:%M:%S')
 
     gbkp = GenBankProcessor(args[0],force=options.force)
-    gbkp.run_Allplots()
+    gbkp.process()
