@@ -96,8 +96,8 @@ class GenBankProcessor(object ):
 
     def safe_produce_new(self, filename, func, **kwargs):
         """A wrapper for util.safe_produce_new (create a new file in a
-multiprocess safe way) setting class defaults
-"""
+        multiprocess safe way) setting class defaults
+        """
         kwargs.setdefault('dir', self.outputdir)
         kwargs.setdefault('logger', self.logger)
         kwargs.setdefault('cleanup', self.cleanup)
@@ -132,7 +132,7 @@ multiprocess safe way) setting class defaults
                                           ['GeneDescriptorKey1', 'GeneDescriptorKey2',
                                            'GeneDescriptorSkip1', 'GeneDescriptorSkip2',
                                            ])
-        def thunk(out):
+        def _extract(out):
             self.timer.check("Extracting genes in %s." % os.path.basename(self.gbkfile))
             self.logger.info("starting extract for %s", self.gbkfile)
             cmd = [binfile("extract"), self.gbkfile,
@@ -140,7 +140,7 @@ multiprocess safe way) setting class defaults
                    config['GeneDescriptorSkip2'], config['GeneDescriptorKey2']]
             return util.capturedCall(cmd, stdout=out, logger=self.logger, check=True)
         filename = self.derivative_filename(".%s.genes" % hash)
-        self.safe_produce_new(filename, thunk, dependencies=[self.gbkfile])
+        self.safe_produce_new(filename, _extract, dependencies=[self.gbkfile])
         self.config['File_of_published_accepted_CDSs'] = filename
         return filename
 
@@ -152,14 +152,14 @@ multiprocess safe way) setting class defaults
         config,hash = util.reducehashdict(self.config,
                                           ['nucleotides', 'length','window_size','step','period'])
         outfilename = self.derivative_filename(".%s.nprofile" % hash)
-        def thunk(out):
+        def _nprofile(out):
             self.timer.check("Calculating n-profile.")
             progargs = [binfile("nprofile"), '-b', ''.join(config["nucleotides"]),
                         self.gbkfile, 1, config['length'],
                         config['window_size'], config['step'], config['period']]
             return util.capturedCall(progargs, stdout=out, logger=self.logger, check=True)
 
-        self.safe_produce_new(outfilename, thunk, dependencies=[self.gbkfile])
+        self.safe_produce_new(outfilename, _nprofile, dependencies=[self.gbkfile])
         self.config['File_list_of_nucleotides_in_200bp windows'] = outfilename
         return outfilename
 
@@ -305,7 +305,7 @@ period_of_frame       Number of frames.
 
             while (page_start(page_num) < config['length']
                    and page_num <= config.get('end_page', 1000)):
-                def thunk(psout):
+                def _ap(psout):
                     self.timer.check("Generating page %d" % page_num)
                     self.write_allplots_def(pconfig, os.path.join(dtemp,"Allplots.def"), page_num)
 
@@ -317,7 +317,7 @@ period_of_frame       Number of frames.
                                       logger=self.logger, cwd=dtemp, check=True)
                 psname = self.derivative_filename("%s.%03d.ps" % (phash, page_num))
                 filenames.append(psname)
-                self.safe_produce_new(psname, thunk,
+                self.safe_produce_new(psname, _ap,
                                       dependencies=map(config.get, self.AP_file_keys))
                 page_num += 1
 
@@ -347,12 +347,12 @@ period_of_frame       Number of frames.
     def run_ps2pdf(self):
         config,hash= util.reducehashdict(self.config, ['combined_ps_name'])
         pdf_filename = self.derivative_filename(".%s.pdf" % hash)
-        def thunk(out):
+        def _ps2pdf(out):
             self.timer.check("Converting to PDF")
             self.logger.info("Converting to PDF")
             cmd = ["ps2pdf", config['combined_ps_name'], '-']
             return util.capturedCall(cmd, stdout=out, logger=self.logger, check=True)
-        self.safe_produce_new(pdf_filename, thunk, dependencies=[self.gbkfile])
+        self.safe_produce_new(pdf_filename, _ps2pdf, dependencies=[self.gbkfile])
         self.config['pdf_filename'] = pdf_filename
         return pdf_filename
 

@@ -104,7 +104,7 @@ class EntrezSession(object):
         #             summary.get('Create_Date'))
 
 
-        if (not os.path.exists(filename)):
+        if not os.path.exists(filename):
             #or datetime.datetime.fromtimestamp(os.path.getmtime(filename)) < update_date:
             #file should be downloaded.
             net_handle = Bio.Entrez.efetch(db=self.db, id=id, rettype='gb', retmode='text')
@@ -112,10 +112,12 @@ class EntrezSession(object):
             with util.mkstemp_overwrite(filename, logger=logger) as f:
                 bytes = util.stream_to_file(net_handle, f)
                 logger.info("Saved %s to %s.", util.pprint_bytes(bytes), filename)
+        else:
+            logger.debug("Using already present file %r", filename)
         return filename
 
     def fetch_id(self, id):
-        logger.info("Starting fetch of Id: %s", id)
+        logger.info("Starting fetch_id(%s)", id)
         summaries = Bio.Entrez.read(Bio.Entrez.esummary(db=self.db, id=id))
         if len(summaries):
             return self.fetch(summary=summaries[0])

@@ -214,21 +214,21 @@ def which(program):
 
     return None
 
+def stream_to_handle(stream, handle, bufsize=8192):
+    bytes=0
+    while True:
+        buf = stream.read(bufsize)
+        if buf == "":  break #EOF
+        bytes += len(buf)
+        f.write(buf)
+    return bytes
 
-def stream_to_file(stream,path,bufsize=8192):
-    def loop(f):
-        bytes=0
-        while True:
-            buf = stream.read(bufsize)
-            if buf == "":  break #EOF
-            bytes += len(buf)
-            f.write(buf)
-        return bytes
+def stream_to_file(stream, path, bufsize=8192):
     if hasattr(path,'write'):
-        return loop(path)
+        return stream_to_handle(stream, path, bufsize)
     else:
-        with open(path, "wb") as f:
-            return loop(f)
+        with open(path, "wb") as h:
+            return stream_to_handle(stream, h, bufsize)
 
 
 
@@ -309,8 +309,7 @@ def derivative_filename(base, part, replace_ext=True, outputdir=None):
 
     return outfilename
 
-def safe_produce_new(outfilename, func,
-                     replace_ext=True, force=False,dependencies=[], **kwargs):
+def safe_produce_new(outfilename, func, force=False, dependencies=[], **kwargs):
     outofdate = is_outofdate(outfilename, *dependencies)
     logger=kwargs.get('logger')
     if outofdate or force:
