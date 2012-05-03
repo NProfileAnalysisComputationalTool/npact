@@ -41,11 +41,11 @@ var progress = {
         console.log('Update Progress Display', data);
         if(!data) return;
         var steps = data.steps;
-        for(var i=0; i< steps.length; i++) {
+        for(var i=0; i < steps.length; i++) {
             progress.steps.append('<li>' + data.steps[i] + '</li>');
         }
         var files = data.files;
-        if (files.length) {
+        if (files && files.length) {
             var newnode = $('<ul id="files"/>');
             for(i=0; i < files.length; i++){
                 var href = files[i];
@@ -70,9 +70,11 @@ var progress = {
     },
 
     onerror: function(data){
+        console.log('Error', data);
         if(progress.interval)
-            window.clearInterval(progress.interval);
+            clearTimeout(progress.interval);
 
+        setTimeout(function() { progress.updateStatusDisplay(jQuery.parseJSON(data.responseText)); }, 0);
         $('#computationrunning').slideToggle()
             .after(function () {
                        $('#computationerred').slideToggle();
@@ -98,7 +100,6 @@ var progress = {
         $('#title').html('N-PACT Is Finished');
         $('#downloadlink').attr('href', data.download_url);
         $('#timer').toggleClass('ui-state-highlight');
-        $('#reconfigurelink').attr('href', data.reconfigure_url);
         $('#progressreport').trigger('click');
         $('#results').fadeIn(100);
         $('#results h3').trigger('click');

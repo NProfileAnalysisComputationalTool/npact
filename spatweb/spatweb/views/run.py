@@ -133,41 +133,50 @@ def run_frame(request, path):
     request.session[path] = config
     full_path = reverse('process',args=[path])
     return render_to_response('processing.html',
-                              {'path': full_path},
+                              {'path': full_path,
+                               'reconfigure_url': reverse('config', args=[path]) + encode_config(config),
+                               },
                               context_instance=RequestContext(request))
 
 
 def run_step(request, path):
     """Invoked via ajax, runs part of the process with a softtimeout until finished."""
     assert_clean_path(path, request)
-    try: 
+    gbp,config,result = None,None,None
+    status=200
+    
+    try:
         config = request.session.get(path)
         #the frame is supposed to ensure this is in session.
         if not config:
             return HttpResponse('Session Timeout, please try again.', status=500)
-
         gbp = main.GenBankProcessor(getabspath(path), config=config, timeout=4)
-        nextstep = None
-        try:
-            pspath = gbp.process()
-            logger.debug("Finished processing.")
-            pspath = getrelpath(pspath)
-            #url = reverse('results', args=[psname]) + encode_config(config, path=path)
-            nextstep = {'next':'results', 
-                        'download_url': get_raw_url(request, pspath),
-                        'reconfigure_url': reverse('config', args=[path]) + encode_config(config),
-                        'steps': gbp.timer.steps}
-            
-        except Timeout, pt:
-            nextstep = {'next':'process', 'steps': pt.steps}
+    except:
+        logger.exception("Error setting up run_step")
+        return HttpResponse('ERROR', status=500)
 
-        nextstep['files'] = [get_raw_url(request, v) 
-                             for (k,v) in config.items() 
-                             if v and (k in gbp.AP_file_keys)]
-        return HttpResponse(json.dumps(nextstep))
+    try:
+        pspath = gbp.process()
+        logger.debug("Finished processing.")
+        pspath = getrelpath(pspath)
+        #url = reverse('results', args=[psname]) + encode_config(config, path=path)
+        result = {'next':'results', 
+                  'download_url': get_raw_url(request, pspath),
+                  'steps': gbp.timer.steps}
+
+    except Timeout, pt:
+        result = {'next':'process', 
+                  'steps': pt.steps}
     except:
         logger.exception("Error in run_step")
-        return HttpResponse('ERROR', status=500)
+        result = {'next':'ERROR', 'steps': gbp.timer.steps}
+        status=500
+        
+    result['files'] = [get_raw_url(request, v) 
+                       for (k,v) in config.items() 
+                       if v and (k in gbp.AP_file_keys)]
+
+    return HttpResponse(json.dumps(result), status=status)
 
 
 def results(request, path):
