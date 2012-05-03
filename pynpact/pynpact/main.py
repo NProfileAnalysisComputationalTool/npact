@@ -340,21 +340,27 @@ period_of_frame       Number of frames.
                         for l in infile:
                             psout.write(l)
                     idx += 1
+
             combined_ps_name = self.derivative_filename("%s.ps" %(hash,))
             self.config['combined_ps_name'] = combined_ps_name
             return self.safe_produce_new(combined_ps_name, combine_ps_files, dependencies=filenames)
 
     def run_ps2pdf(self):
-        config,hash= util.reducehashdict(self.config, ['combined_ps_name'])
-        pdf_filename = self.derivative_filename(".%s.pdf" % hash)
-        def _ps2pdf(out):
-            self.timer.check("Converting to PDF")
-            self.logger.info("Converting to PDF")
-            cmd = ["ps2pdf", config['combined_ps_name'], '-']
-            return util.capturedCall(cmd, stdout=out, logger=self.logger, check=True)
-        self.safe_produce_new(pdf_filename, _ps2pdf, dependencies=[self.gbkfile])
-        self.config['pdf_filename'] = pdf_filename
-        return pdf_filename
+        ps2pdf = util.which('ps2pdf')
+        if ps2pdf:
+            config,hash= util.reducehashdict(self.config, ['combined_ps_name'])
+            pdf_filename = self.derivative_filename(".%s.pdf" % hash)
+            def _ps2pdf(out):
+                self.timer.check("Converting to PDF")
+                self.logger.info("Converting to PDF")
+                cmd = [ps2pdf, config['combined_ps_name'], '-']
+                return util.capturedCall(cmd, stdout=out, logger=self.logger, check=True)
+            self.safe_produce_new(pdf_filename, _ps2pdf, dependencies=[self.gbkfile])
+            self.config['pdf_filename'] = pdf_filename
+            return pdf_filename
+        else:
+            self.logger.info("Skipping ps2pdf translation, program not found.")
+            return self.config['combined_ps_name']
 
 
     RUN_FNS=['run_extract','run_nprofile','acgt_gamma','run_Allplots','run_ps2pdf']

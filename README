@@ -32,6 +32,8 @@ These you will need to setup on your system ahead of getting started.
 
 * [Git](http://git-scm.com/)  (OPTIONAL): The version control system this project is maintained in. Will be necessary to record changes but not for running the project.
 
+* [ps2pdf](http://ghostscript.com/doc/current/Ps2pdf.htm) (OPTIONAL): If present NPACT will convert the rendered postscript to a PDF file using this program.
+
 ### Packaged requirements
 The system uses (already included) several python packages for deployment: [virtualenv](http://pypi.python.org/pypi/virtualenv), [setuptools](http://pypi.python.org/pypi/setuptools), and [pip](http://www.pip-installer.org/en/latest/index.html).
 
