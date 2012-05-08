@@ -220,7 +220,7 @@ def stream_to_handle(stream, handle, bufsize=8192):
         buf = stream.read(bufsize)
         if buf == "":  break #EOF
         bytes += len(buf)
-        f.write(buf)
+        handle.write(buf)
     return bytes
 
 def stream_to_file(stream, path, bufsize=8192):
