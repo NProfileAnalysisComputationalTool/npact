@@ -9,6 +9,7 @@ import Bio.GenBank, Bio.GenBank.Scanner
 #from Bio.GenBank import RecordParser,_RecordConsumer
 #from Bio.GenBank.Scanner import GenBankScanner
 
+import capproc
 import util
 
 logger = logging.getLogger(__name__)

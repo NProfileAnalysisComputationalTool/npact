@@ -4,6 +4,7 @@ from optparse import OptionParser
 from contextlib import contextmanager
 
 from __init__ import binfile, DATAPATH
+import capproc
 import prepare
 import util
 from softtimeout import SoftTimer, Timeout
@@ -138,7 +139,7 @@ class GenBankProcessor(object ):
             cmd = [binfile("extract"), self.gbkfile,
                    config['GeneDescriptorSkip1'], config['GeneDescriptorKey1'],
                    config['GeneDescriptorSkip2'], config['GeneDescriptorKey2']]
-            return util.capturedCall(cmd, stdout=out, logger=self.logger, check=True)
+            return capproc.capturedCall(cmd, stdout=out, logger=self.logger, check=True)
         filename = self.derivative_filename(".%s.genes" % hash)
         self.safe_produce_new(filename, _extract, dependencies=[self.gbkfile])
         self.config['File_of_published_accepted_CDSs'] = filename
@@ -157,7 +158,7 @@ class GenBankProcessor(object ):
             progargs = [binfile("nprofile"), '-b', ''.join(config["nucleotides"]),
                         self.gbkfile, 1, config['length'],
                         config['window_size'], config['step'], config['period']]
-            return util.capturedCall(progargs, stdout=out, logger=self.logger, check=True)
+            return capproc.capturedCall(progargs, stdout=out, logger=self.logger, check=True)
 
         self.safe_produce_new(outfilename, _nprofile, dependencies=[self.gbkfile])
         self.config['File_list_of_nucleotides_in_200bp windows'] = outfilename
@@ -189,9 +190,9 @@ class GenBankProcessor(object ):
             with self.mkdtemp() as dtemp:
                 self.timer.check("Predicting new gene locations.")
                 self.logger.info("Starting prediction program in %s", dtemp)
-                util.capturedCall(cmd, cwd=dtemp, check=True,
-                                  env={'BASE_DIR_THRESHOLD_TABLES':DATAPATH},
-                                  logger=self.logger)
+                capproc.capturedCall(cmd, cwd=dtemp, check=True,
+                                     env={'BASE_DIR_THRESHOLD_TABLES':DATAPATH},
+                                     logger=self.logger)
                 #TODO, while deleting this is inconsistent: files will
                 #be deleted out of outdir before the directory is
                 #deleted and the rename comes a moment later. During
@@ -313,8 +314,8 @@ period_of_frame       Number of frames.
                                       page_num, os.path.basename(self.gbkfile))
 
                     cmd = [binfile("Allplots"), page_start(page_num), ppage, 5, 1000, config['period']]
-                    util.capturedCall(cmd, stdout=psout, stderr=False,
-                                      logger=self.logger, cwd=dtemp, check=True)
+                    capproc.capturedCall(cmd, stdout=psout, stderr=False,
+                                         logger=self.logger, cwd=dtemp, check=True)
                 psname = self.derivative_filename("%s.%03d.ps" % (phash, page_num))
                 filenames.append(psname)
                 self.safe_produce_new(psname, _ap,
@@ -354,7 +355,7 @@ period_of_frame       Number of frames.
                 self.timer.check("Converting to PDF")
                 self.logger.info("Converting to PDF")
                 cmd = [ps2pdf, config['combined_ps_name'], '-']
-                return util.capturedCall(cmd, stdout=out, logger=self.logger, check=True)
+                return capproc.capturedCall(cmd, stdout=out, logger=self.logger, check=True)
             self.safe_produce_new(pdf_filename, _ps2pdf, dependencies=[self.gbkfile])
             self.config['pdf_filename'] = pdf_filename
             return pdf_filename
