@@ -2,6 +2,7 @@
 import logging, os.path, tempfile, shutil
 from optparse import OptionParser
 from contextlib import contextmanager
+import math
 
 from __init__ import binfile, DATAPATH
 import capproc
@@ -279,72 +280,72 @@ x-tics                Number of subdivisions.
 period_of_frame       Number of frames.
 
 """
-
         #figure out hashed filename of ps output.
         hashkeys = self.AP_file_keys + \
-          ['first_page_title',
-           'following_page_title',
-           'length', 'start_page',
-           'end_page', 'period', 'bp_per_page',
-           'nucleotides']
+          ['first_page_title', 'following_page_title',
+           'length', 'start_base', 'end_base', 
+           'period', 'bp_per_page', 'nucleotides']
         config,hash = util.reducehashdict(self.config, hashkeys)
+        dependencies = map(config.get, self.AP_file_keys)
 
+        page_count = math.ceil((config['end_base'] - config['start_base']) * 1.0 / config['bp_per_page'])
+        
         #build the individual ps page files.
         filenames = []
         with self.mkdtemp() as dtemp:
             #page number offset
-            page_num = config.get('start_page', 1)
-            ppage = config['bp_per_page']
+            page_num = 1
 
             #the hash of individual pages shouldn't depend on the
-            #'start_page' and 'end_page' configuration, so we leave
-            #that out.
-            pconfkeys = set(hashkeys).difference(set(["start_page", "end_page"]))
-            pconfig,phash = util.reducehashdict(config, pconfkeys)
-
-            page_start = lambda page_num: ppage * (page_num - 1)
-
-            while (page_start(page_num) < config['length']
-                   and page_num <= config.get('end_page', 1000)):
+            #end_base, so leave that out.  We keep updating the
+            #start_base in *this* config (different than the general
+            #one).
+            pconfkeys = set(hashkeys).difference(set(["end_base"]))
+            
+            while (config['start_base'] < config['end_base']):
+                pconfig,phash = util.reducehashdict(config, pconfkeys)
                 def _ap(psout):
-                    self.timer.check("Generating page %d" % page_num)
+                    self.timer.check("Generating page %d/%d" % (page_num,page_count))
                     self.write_allplots_def(pconfig, os.path.join(dtemp,"Allplots.def"), page_num)
 
                     self.logger.debug("Starting Allplots page %d for %r",
                                       page_num, os.path.basename(self.gbkfile))
 
-                    cmd = [binfile("Allplots"), page_start(page_num), ppage, 5, 1000, config['period']]
+                    cmd = [binfile("Allplots"), config['start_base'], config['bp_per_page'], 
+                           5, 1000, #TODO: move these into config
+                           config['period']]
                     capproc.capturedCall(cmd, stdout=psout, stderr=False,
                                          logger=self.logger, cwd=dtemp, check=True)
-                psname = self.derivative_filename("%s.%03d.ps" % (phash, page_num))
+                psname = self.derivative_filename("%s.ps" % (phash))
                 filenames.append(psname)
-                self.safe_produce_new(psname, _ap,
-                                      dependencies=map(config.get, self.AP_file_keys))
+                self.safe_produce_new(psname, _ap, dependencies=dependencies)
                 page_num += 1
+                config['start_base'] += config['bp_per_page']
+                
 
 
-            def combine_ps_files(psout):
-                #While combining, insert the special markers so that
-                #it will appear correctly as many pages.
-                self.timer.check("Combining pages into output.")
-                self.logger.info("combining postscript files")
-                first = True
-                psout.write("%!PS-Adobe-2.0\n\n")
-                psout.write("%%Pages: {0}\n\n".format(len(filenames)))
-                idx = 1
-                for psf in filenames:
-                    psout.write("%%Page: {0}\n".format(idx))
-                    with open(psf,'r') as infile:
-                        infile.readline()
-                        infile.readline()
-                        psout.write(infile.readline())
-                        for l in infile:
-                            psout.write(l)
-                    idx += 1
+        def combine_ps_files(psout):
+            #While combining, insert the special markers so that
+            #it will appear correctly as many pages.
+            self.timer.check("Combining pages into output.")
+            self.logger.info("combining postscript files")
+            first = True
+            psout.write("%!PS-Adobe-2.0\n\n")
+            psout.write("%%Pages: {0}\n\n".format(len(filenames)))
+            idx = 1
+            for psf in filenames:
+                psout.write("%%Page: {0}\n".format(idx))
+                with open(psf,'r') as infile:
+                    infile.readline()
+                    infile.readline()
+                    psout.write(infile.readline())
+                    for l in infile:
+                        psout.write(l)
+                idx += 1
 
-            combined_ps_name = self.derivative_filename("%s.ps" %(hash,))
-            self.config['combined_ps_name'] = combined_ps_name
-            return self.safe_produce_new(combined_ps_name, combine_ps_files, dependencies=filenames)
+        combined_ps_name = self.derivative_filename("%s.ps" %(hash,))
+        self.config['combined_ps_name'] = combined_ps_name
+        return self.safe_produce_new(combined_ps_name, combine_ps_files, dependencies=filenames)
 
     def run_ps2pdf(self):
         ps2pdf = util.which('ps2pdf')

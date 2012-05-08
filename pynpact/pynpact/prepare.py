@@ -125,6 +125,10 @@ def try_parse(abs_path, force=False):
         else :
             raise InvalidGBKException("Unable to find sequence length.")
 
+    if 'length' in data:
+        data['end_base'] = data['length']
+        
+
     parse_cache[abs_path] = (mtime,data)
     return data
 
@@ -153,6 +157,8 @@ def default_config(abs_path):
         'following_page_title': 'Page {0}',
 
         'bp_per_page': 50000,
+        'start_base': 0,
+        
         }
 
 
@@ -165,8 +171,8 @@ def default_config(abs_path):
 
 
 CONFIG_HELP_TEXT = {
-    'start_page': "By page number, the first page to generate. Leave blank to start at the beginning.",
-    'end_page': "By page number, the last page to generate. Leave blank to generate through to the end.",
+    'start_base': "The base pair coordinate at which to start graphing.",
+    'end_base': "The base pair coordinate at which to end graphing.",
     'length': "The length, in base pairs, of the genome being analyzed.",
     'first_page_title': "The title of the page containing the beginning of the genome.",
     'following_page_title': "The title of the pages after the first. Use {0} to get the page number.",

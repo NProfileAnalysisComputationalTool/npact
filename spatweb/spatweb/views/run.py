@@ -45,13 +45,14 @@ class ConfigForm(forms.Form):
     skip_prediction=forms.BooleanField(required=False)
     significance=forms.ChoiceField(choices=prepare.significance_levels, required=False,
                                    label="Prediction Significance")
-    start_page=forms.IntegerField(required=False)
-    end_page=forms.IntegerField(required=False)
+    start_base=forms.IntegerField()
+    end_base=forms.IntegerField()
+
 
     def clean(self):
         cleaned_data = self.cleaned_data
-        start = cleaned_data.get('start_page')
-        end = cleaned_data.get('end_page')
+        start = cleaned_data.get('start_base')
+        end = cleaned_data.get('end_base')
         if start and end and start > end:
             raise forms.ValidationError("End page must be greater than or equal to start page.")
         return cleaned_data
@@ -64,6 +65,7 @@ def get_display_items(request, config):
 
         
 def config(request, path):
+    "The config view. Renders the configform for the given gbkpath."
     assert_clean_path(path, request)
     config = build_config(path, request)
 
@@ -89,6 +91,7 @@ def config(request, path):
                                context_instance=RequestContext(request))
 
 def build_config(path, request):
+    "Tries to build the config dictionary for the given path"
     assert_clean_path(path, request)
 
     try:
