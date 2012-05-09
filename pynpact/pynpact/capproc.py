@@ -132,7 +132,7 @@ def capturedPopen(cmd, stdin=None, stdout=None, stderr=None,
             if logger is logging:
                 sublog = logging.getLogger(lname)
             else: 
-                sublog = logger.getChild(lname)
+                sublog = logging.getLogger('%s.%s' % (logger.name,lname))
             if filter:
                 try:
                     map(sublog.addFilter, filter)
