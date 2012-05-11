@@ -34,7 +34,7 @@ if ret: exit(ret)
 if not os.path.exists('webroot'):
     os.makedirs('webroot')
 
-## no eggs
+### We've not used any eggs on this project, but perhaps in the future.
 # the_eggs = [os.path.basename(path) for path in
 #             glob.glob(os.path.join(pwd, "requirements", "eggs", "*.egg"))]
 # if the_eggs:
