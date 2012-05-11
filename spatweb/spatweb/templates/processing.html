@@ -6,12 +6,6 @@
   {% include_media 'jquery.js' %}
   {% include_media 'processing.js' %}
 
-  <style>
-    #progress .ready { display:none; }
-    span.ui-icon { float:left; margin-right: .3em;}
-    #progress h3 + div { padding-left: 16px; }
-    #timer {margin: 10px 0;}
-  </style>
 {% endblock addScript %}
 
 {% block content %}
@@ -60,10 +54,10 @@
     </div>
     
     <div> 
-      <h4>Current Progress</h4>
-      <ul id="steps"></ul>
       <h4>Intermediate results</h4>
       <ul id="files"></ul>
+      <h4>Current Progress</h4>
+      <ul id="steps"></ul>
     </div>
   </div>
   <script type="text/javascript">

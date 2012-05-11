@@ -332,3 +332,13 @@ ul.messages { border: 1px dotted #444; }
 button.Start { clear:both; margin: 8px;}
 
 .helptext {display:none;}
+
+
+/* ****** For the processing page ****** */
+#progress .ready { display:none; }
+#progress span.ui-icon { float:left; margin-right: .3em;}
+#progress h3 + div { padding-left: 16px; }
+
+#timer { margin: 10px 0; }
+#steps { max-height: 200px; overflow:auto; }
+#steps li {margin:3px 0 3px 20px;}

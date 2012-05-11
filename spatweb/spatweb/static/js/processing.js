@@ -42,7 +42,7 @@ var progress = {
         if(!data) return;
         var steps = data.steps;
         for(var i=0; i < steps.length; i++) {
-            progress.steps.append('<li>' + data.steps[i] + '</li>');
+            progress.steps.prepend('<li>' + data.steps[i] + '</li>');
         }
         var files = data.files;
         if (files && files.length) {
