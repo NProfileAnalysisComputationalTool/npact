@@ -170,7 +170,8 @@ def run_step(request, path):
 
     except Timeout, pt:
         result = {'next':'process', 
-                  'steps': pt.steps}
+                  'steps': pt.steps,
+                  }
     except:
         logger.exception("Error in run_step")
         result = {'next':'ERROR', 'steps': gbp.timer.steps}

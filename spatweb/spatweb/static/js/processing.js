@@ -5,7 +5,7 @@ $.fn.spinDown = function() {
             function() {
 		var $this = $(this);
 		$this.next().slideToggle();
-		$this.find('.ui-icon').toggleClass('ui-icon-triangle-1-s');
+		//$this.find('.ui-icon').toggleClass('ui-icon-triangle-1-s');
 		return false;
 		
 	});
@@ -30,20 +30,23 @@ var progress = {
     
     init: function(url) {
         progress.url = url;
-        progress.startRequest();
-        progress.timerDom = jQuery('#timer > span');
-        progress.steps =  jQuery('#steps');
-        $('#progress  h3').spinDown();
+        window.setTimeout(progress.startRequest, 50);
+        progress.currentstepdesc = $('#currentstepdesc');
     },
 
     updateStatusDisplay: function(data) {
         //{"steps": ['a','b'], "tdiff": 10.32341, "step_desc": "a step description."}
         console.log('Update Progress Display', data);
         if(!data) return;
+
         var steps = data.steps;
-        for(var i=0; i < steps.length; i++) {
-            progress.steps.prepend('<li>' + data.steps[i] + '</li>');
+        if(steps && steps.length > 0) {
+            progress.currentstepdesc.text(steps[steps.length -1]);
         }
+        // for(var i=0; i < steps.length; i++) {
+        //     progress.steps.prepend('<li>' + data.steps[i] + '</li>');
+        // }
+
         var files = data.files;
         if (files && files.length) {
             var newnode = $('<ul id="files"/>');
@@ -53,6 +56,8 @@ var progress = {
                 $(newnode).append('<li><a href="' + href + '">' + name + '</a></li>');
             }
             $('#files').replaceWith(newnode);
+            console.log("Finished building file list.");
+            $('#predictionresults').fadeIn(200);
         }
     },
 
@@ -99,11 +104,10 @@ var progress = {
             clearTimeout(progress.interval);
         $('#title').html('N-PACT Is Finished');
         $('#downloadlink').attr('href', data.download_url);
+        $('#graphicalresults').fadeIn(200);
         $('#timer').toggleClass('ui-state-highlight');
-        $('#progressreport').trigger('click');
-        $('#results').fadeIn(100);
-        $('#results h3').trigger('click');
-        $('#computationrunning').fadeOut(100);
+        $('#progressreport').fadeOut(100);
+
         //setTimeout(function() {window.location = data.download_url; }, 800);
     },
     
