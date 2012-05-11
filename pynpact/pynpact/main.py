@@ -46,7 +46,7 @@ class GenBankProcessor(object ):
     force = False
     logger = logger
     outputdir = None
-    cleanup = False
+    cleanup = True
     config = None
     timer = None
 
@@ -107,7 +107,7 @@ class GenBankProcessor(object ):
         return util.safe_produce_new(filename, func, **kwargs)
 
     @contextmanager
-    def mkdtemp(self, **kwargs):
+    def mkdtemp(self, ignore_errors=True, **kwargs):
         """A wrapper for tempfile.mkdtemp, sets defaults based on class variables"""
         kwargs.setdefault('dir', self.outputdir)
         path = tempfile.mkdtemp(**kwargs)
@@ -116,7 +116,7 @@ class GenBankProcessor(object ):
         finally:
             if self.cleanup:
                 self.logger.debug("Cleaning up mkdtemp %r", path)
-                shutil.rmtree(path, ignore_errors=True)
+                shutil.rmtree(path, ignore_errors=ignore_errors)
 
     #####
 
