@@ -1,5 +1,6 @@
 # Create your views here.
 import logging
+import os
 import os.path
 import json
 
@@ -174,11 +175,19 @@ def run_step(request, path):
         logger.exception("Error in run_step")
         result = {'next':'ERROR', 'steps': gbp.timer.steps}
         status=500
-        
-    result['files'] = [get_raw_url(request, v) 
-                       for (k,v) in config.items() 
-                       if v and (k in gbp.AP_file_keys)]
 
+    try:
+        ago = config.get('acgt_gamma_output')
+        if ago:
+            result['files'] = [get_raw_url(request, os.path.join(ago,v)) 
+                               for v in os.listdir(ago)]
+        # files = set([get_raw_url(request, v)
+        #              for (k,v) in config.items()
+        #              if v and (k in gbp.AP_file_keys)])
+
+    except:
+        logger.exception("Error building file list.")
+        
     return HttpResponse(json.dumps(result), status=status)
 
 

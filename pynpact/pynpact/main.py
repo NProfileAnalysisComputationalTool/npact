@@ -212,6 +212,7 @@ class GenBankProcessor(object ):
         self.config['File_of_new_CDSs'] = j(".newcds")
         self.config['File_of_published_rejected_CDSs'] = j(".modified")
         self.config['File_of_G+C_coding_potential_regions'] = j('.profiles')
+        self.config['acgt_gamma_output'] = outdir
 
 
 
