@@ -60,7 +60,7 @@ var progress = {
         console.log('Starting Progress Request Chain');
         if(!progress.start) {
             progress.start = new Date();
-            progress.interval = window.setTimeout(progress.updateTimer, 1000);
+            //progress.interval = window.setTimeout(progress.updateTimer, 1000);
         }
         jQuery.ajax({ url: progress.url,
                       dataType:'json',
