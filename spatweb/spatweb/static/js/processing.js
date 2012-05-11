@@ -104,7 +104,7 @@ var progress = {
         $('#results').fadeIn(100);
         $('#results h3').trigger('click');
         $('#computationrunning').fadeOut(100);
-        setTimeout(function() {window.location = data.download_url; }, 800);
+        //setTimeout(function() {window.location = data.download_url; }, 800);
     },
     
     updateTimer: function (){
