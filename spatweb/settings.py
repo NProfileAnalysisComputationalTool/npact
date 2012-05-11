@@ -155,7 +155,7 @@ LOGGING = {
             'format': '%(asctime)s %(process)d %(thread)d %(name)s %(levelname)s %(message)s'
             },
         'tty': {
-            'format': "%(asctime)s %(module)-10s %(levelname)-8s %(message)s",
+            'format': "%(asctime)s.%(msecs)d %(name)-10s %(levelname)-8s %(message)s",
             'datefmt': '%H:%M:%S'
             },
         'simple': {
