@@ -307,7 +307,7 @@ period_of_frame       Number of frames.
             while (config['start_base'] < config['end_base']):
                 pconfig,phash = util.reducehashdict(config, pconfkeys)
                 def _ap(psout):
-                    self.timer.check("Generating page %d/%d" % (page_num,page_count))
+                    self.timer.check("Generating pages %2d%%" % round(100.0 * page_num / page_count))
                     self.write_allplots_def(pconfig, os.path.join(dtemp,"Allplots.def"), page_num)
 
                     self.logger.debug("Starting Allplots page %d for %r",
