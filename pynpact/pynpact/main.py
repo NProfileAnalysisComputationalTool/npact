@@ -194,10 +194,11 @@ class GenBankProcessor(object ):
                 capproc.capturedCall(cmd, cwd=dtemp, check=True,
                                      env={'BASE_DIR_THRESHOLD_TABLES':DATAPATH},
                                      logger=self.logger)
-                #TODO, while deleting this is inconsistent: files will
-                #be deleted out of outdir before the directory is
-                #deleted and the rename comes a moment later. During
-                #that time it will be inconsistent.
+                #TODO, while deleting this is inconsistent (small
+                #window): files will #be deleted out of outdir before
+                #the directory is deleted and the rename comes a
+                #moment later. During that time it will be
+                #inconsistent.
                 if os.path.exists(outdir):
                     self.logger.debug("Removing existing prediction output at %s", outdir)
                     shutil.rmtree(outdir)
