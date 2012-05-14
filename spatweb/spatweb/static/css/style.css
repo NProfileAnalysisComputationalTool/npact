@@ -343,5 +343,5 @@ button.Start { clear:both; margin: 8px;}
 #timer { margin: 10px 0; }
 #steps { max-height: 200px; overflow:auto; }
 #steps li {margin:3px 0 3px 20px;}
-
+#currentstepdesc { font-weight:bold; }
 .spinner { height: 24px; width=24px; float:left;}
