@@ -53,7 +53,7 @@ var progress = {
             for(i=0; i < files.length; i++){
                 var href = files[i];
                 var name = /([^/]*)$/.exec(href)[1];
-                $(newnode).append('<li><a href="' + href + '">' + name + '</a></li>');
+                $(newnode).append('<li><a href="' + href + '" target="_blank">' + name + '</a></li>');
             }
             $('#files').replaceWith(newnode);
             console.log("Finished building file list.");
