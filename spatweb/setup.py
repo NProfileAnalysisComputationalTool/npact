@@ -21,5 +21,5 @@ setup(name='spatweb',
       requires=["biopython(>=1.57)",
                 "pynpact",
                 "django(==1.3)"],
-      scripts=['cleanup.py','django.fcgi']
+      scripts=['cleanup.py','django-main.fcgi', 'django-process.fcgi']
      )
