@@ -1,15 +1,23 @@
 #!/usr/bin/env python
+"""This script scans for apparently unused files in the upload path
+and deletes them.
 
+'unused files' are considered to be ones for which the atime is older
+than 14 days (see ATIME_DEFAULT)
+"""
+
+#Default number of days that files can remain unaccessed before deletion.
 ATIME_DEFAULT=14
 
 import os
 import logging
 import subprocess
-
+import sys
 from optparse import OptionParser
+
 from path import path
 
-from pynpact import util
+from pynpact import capproc
 from spatweb import library_root
 
 
@@ -18,15 +26,16 @@ logger = logging.getLogger('cleanup')
 
 
 def clean(path, days, verbose=False):
+    "This function actually runs the find and delete."
     logger.info("Cleaning up; days:%d, %r", days, path)
 
     if verbose:
         cmd=["find", path, "-atime", "+" + str(days),
-             "-exec", "rm","-v", "{}", "+"]
+             "-exec", "rm", "-f", "-v", "{}", "+"]
     else:
         cmd=["find", path, "-atime", "+" + str(days),
-             "-exec", "rm", "{}", "+"]
-    util.capturedCall(cmd,logger=logger,stderr_level=logging.WARNING)
+             "-exec", "rm", "-f", "{}", "+"]
+    return capproc.capturedCall(cmd, logger=logger, stdin=False, stderr_level=logging.WARNING)
 
 
 def setup_logger(verbose):
@@ -38,8 +47,15 @@ def setup_logger(verbose):
 
 if __name__ == '__main__' :
 
-    parser = OptionParser("""usage: %prog [options] [path]
-        src <- The file to decrypt. If a directory, decrypt the most recent in there.""")
+    parser = OptionParser("""usage: %prog [options]
+
+    This script scans for apparently unused files in the upload path
+    and deletes them.
+
+    'unused files' are considered to be ones for which the atime is
+    older than 14 days (see ATIME_DEFAULT)
+    """)
+
     parser.add_option("-v", "--verbose", action="store_true", dest="verbose",
                       help="Show more verbose log messages.")
 
@@ -49,7 +65,17 @@ if __name__ == '__main__' :
 
     (options,args) = parser.parse_args()
     setup_logger(options.verbose)
-    
-    clean(path(__file__).dirname().joinpath('../webroot/uploads').realpath(),
-          options.atime,
-          options.verbose)
+
+    if not 'DJANGO_SETTINGS_MODULE' in os.environ:
+        os.environ['DJANGO_SETTINGS_MODULE'] = 'settings'
+
+    try:
+        from django.conf import settings
+        path = path(settings.MEDIA_ROOT).realpath()
+        rc = clean(path, int(options.atime), options.verbose)
+        sys.exit(rc)
+    except SystemExit:
+        raise
+    except:
+        logger.exception("Error during cleanup.")
+        sys.exit(1)
