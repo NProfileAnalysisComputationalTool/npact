@@ -182,6 +182,10 @@ return(n);
 
 
 main(int argc, char *argv[]) {
+    /* For cmd line argument parsing. */
+    char* opt;
+    int argi = 1; 
+
     int	i, j, k, d, n, N, lines, nub, nc, nn, nnP, np, ne, nb, ns, ncg, nB, ncp, nScp, nm, nk, nt, ncap, ncca, ngcb, gs, ge, lp, len, period=3, swflag=1,
         start, end, pos, tstart, name_pos, name_len, line_range, unbf=0, conf=0, newf=0, newPf=0, cgf=0, cpf= 0, Scpf= 0, npali= 0, wind,
 	pub_line[300 + 2 * HANGOVER], new_line[300 + 2 * HANGOVER], exc_line[300 + 2 * HANGOVER], newP_line[300 + 2 * HANGOVER],
@@ -214,89 +218,123 @@ main(int argc, char *argv[]) {
     char	longstr[200],*p,tatastr[20],*title1,*title2,ts[2];
     FILE	*input,*files;
 
-    if(argc==1)
-    {
+
+    /**** Parse command line options ****/
+    while (argi < argc && argv[argi][0] == '-') {
+        opt = argv[argi];
+        if(strcmp(opt, "-q") == 0) {
+            quiet += 10;
+            argi++;
+        }
+        else if(strcmp(opt, "-C") == 0) {
+            /* Active the alternate color mode */
+            ANOPIAS = 1;
+            argi++;
+            logmsg(0,"Using alternate color scheme.\n");
+        }
+        else if(strcmp(opt, "--")) {
+            /* read Allplots.def from stdin; not yet impletmented. */
+            argi++;
+        }
+        /* else if (strcmp(opt, "") == 0) {} */
+    }
+
+    if (argi+3 > argc) {
         printHelp();
+        logmsg(10, "Not enough cmdline arguments.\n");
         exit(1);
     }
 
-    fprintf(stderr,"Starting read of Allplots.def\n");
-    files= fopen("Allplots.def","r");
+    tstart = atoi(argv[argi++]);
+    line_range = atoi(argv[argi++]);
+    lines = atoi(argv[argi++]);
+    line_range /= lines;
+    delta = (float)(line_range);
+
+
+    if(argi < argc) 
+        TIC_X = atof(argv[argi++]);
+    else       
+        TIC_X = (float)(line_range/10);
+
+    if(argi < argc) 
+        period = atoi(argv[argi++]);
+
+    
+    /****** Parse definition file ******/
+    logmsg(10, "Starting read of Allplots.def\n");
+    files = fopen("Allplots.def","r");
     if(!files) {
         printHelp();
-        fprintf(stderr,"Couldn't find Allplots.def in current directory.\n");
+        logmsg(20, "Couldn't find Allplots.def in current directory.\n");
         exit(1);
     }
 
     fgets(longstr,98,files);
 
-    sscanf(longstr,"%s %d",NAME,&len);
-    fprintf(stderr,"\n%s %d nt",NAME,len);
+    sscanf(longstr,"%s %d", NAME, &len);
+    logmsg(10, "%s %d nt\n", NAME, len);
+
     fgets(NUCLEOTIDES,8,files);
     NUCLEOTIDES[strlen(NUCLEOTIDES)-1]='\0';
-    fprintf(stderr,"\n%s",NUCLEOTIDES);
-    title1 = ap_getl(files);     fprintf(stderr,"\n%s",title1);
-    title2 = ap_getl(files);     fprintf(stderr,"\n%s",title2);
+    logmsg(0, "%s\n", NUCLEOTIDES);
+
+    title1 = ap_getl(files);     logmsg(0,"\n%s",title1);
+    title2 = ap_getl(files);     logmsg(0,"%s\n",title2);
     /* File_of_unbiased_CDSs */
-    unb_file = ap_getl(files);   fprintf(stderr,"\n%s",unb_file);
+    unb_file = ap_getl(files);   logmsg(0,"%s\n",unb_file);
     /* File_of_conserved_CDSs */
-    con_file = ap_getl(files);   fprintf(stderr,"\n%s",con_file);
+    con_file = ap_getl(files);   logmsg(0,"%s\n",con_file);
     /* File_of_new_CDSs */
-    new_file = ap_getl(files);   fprintf(stderr,"\n%s",new_file);
+    new_file = ap_getl(files);   logmsg(0,"%s\n",new_file);
     /* File_of_potential_new_CDSs */
-    newP_file = ap_getl(files);  fprintf(stderr,"\n%s",newP_file);
+    newP_file = ap_getl(files);  logmsg(0,"%s\n",newP_file);
     /*File_of_stretches_where_CG_is_asymmetric */
-    cg_file = ap_getl(files);    fprintf(stderr,"\n%s",cg_file);
+    cg_file = ap_getl(files);    logmsg(0,"%s\n",cg_file);
     /*File_of_published_accepted_CDSs */
-    pub_file = ap_getl(files);   fprintf(stderr,"\n%s",pub_file);
+    pub_file = ap_getl(files);   logmsg(0,"%s\n",pub_file);
     /*File_of_published_rejected_CDSs */
-    mod_file = ap_getl(files);   fprintf(stderr,"\n%s",mod_file);
+    mod_file = ap_getl(files);   logmsg(0,"%s\n",mod_file);
     /*File_of_blocks_from_new_ORFs_as_cds */
-    block_file = ap_getl(files); fprintf(stderr,"\n%s",block_file);
+    block_file = ap_getl(files); logmsg(0,"%s\n",block_file);
     /*File_of_blocks_from_annotated_genes_as_cds */
-    BLOCK_file = ap_getl(files); fprintf(stderr,"\n%s",BLOCK_file);
+    BLOCK_file = ap_getl(files); logmsg(0,"%s\n",BLOCK_file);
     /*File_of_GeneMark_regions */
-    codpot_file = ap_getl(files); fprintf(stderr,"\n%s",codpot_file);
+    codpot_file = ap_getl(files); logmsg(0,"%s\n",codpot_file);
     /*File_of_G+C_coding_potential_regions */
-    Scodpot_file = ap_getl(files); fprintf(stderr,"\n%s",Scodpot_file);
+    Scodpot_file = ap_getl(files); logmsg(0,"%s\n",Scodpot_file);
     /*File_of_met_positions (e.g.:D 432) */
-    met_file = ap_getl(files);   fprintf(stderr,"\n%s",met_file);
+    met_file = ap_getl(files);   logmsg(0,"%s\n",met_file);
     /*File_of_stop_positions (e.g.:D 432) */
-    stop_file = ap_getl(files);  fprintf(stderr,"\n%s",stop_file);
+    stop_file = ap_getl(files);  logmsg(0,"%s\n",stop_file);
     /*File_of_tatabox_positions (e.g.:105.73 D 432 TATAAAAG) */
-    tata_file = ap_getl(files);  fprintf(stderr,"\n%s",tata_file);
+    tata_file = ap_getl(files);  logmsg(0,"%s\n",tata_file);
     /*File_of_capbox_positions */
-    cap_file = ap_getl(files);   fprintf(stderr,"\n%s",cap_file);
+    cap_file = ap_getl(files);   logmsg(0,"%s\n",cap_file);
     /*File_of_ccaatbox_positions */
-    ccaa_file = ap_getl(files);  fprintf(stderr,"\n%s",ccaa_file);
+    ccaa_file = ap_getl(files);  logmsg(0,"%s\n",ccaa_file);
     /*File_of_gcbox_positions */
-    gcbox_file = ap_getl(files); fprintf(stderr,"\n%s",gcbox_file);
+    gcbox_file = ap_getl(files); logmsg(0,"%s\n",gcbox_file);
     /*File_of_kozak_positions */
-    kozak_file = ap_getl(files); fprintf(stderr,"\n%s",kozak_file);
+    kozak_file = ap_getl(files); logmsg(0,"%s\n",kozak_file);
     /*File_of_palindrom_positions_and_size */
-    pali_file = ap_getl(files);  fprintf(stderr,"\n%s",pali_file);
+    pali_file = ap_getl(files);  logmsg(0,"%s\n",pali_file);
     /*File_list_of_nucleotides_in_200bp windows. */
-    CG200_file = ap_getl(files); fprintf(stderr,"\n%s",CG200_file);
+    CG200_file = ap_getl(files); logmsg(0,"%s\n",CG200_file);
     /*File_list_of_read_numbers. */
-    read_file = ap_getl(files); fprintf(stderr,"\n%s",read_file);
+    read_file = ap_getl(files); logmsg(0,"%s\n",read_file);
 
     fclose(files);
-    fprintf(stderr,"Done reading Allplots.def\n");
+    logmsg(20,"Done reading Allplots.def\n");
 
-    tstart= atoi(argv[1]);
-    line_range= atoi(argv[2]);
-    lines= atoi(argv[3]);
-    line_range /= lines;
-    delta= (float)(line_range);
 
-    if(argc==5) TIC_X= atof(argv[4]);
-    else        TIC_X= (float)(line_range/10);
+    logmsg(10, "\nData read from position %d to position %d.\n", tstart, tstart+line_range);
+    logmsg(10, "Nucleotide frequencies computed with period %d\n", period);
+    logmsg(10, "Plots of %d line per page, %d positions per line,tics every %.0f positions.\n", 
+           lines, line_range, TIC_X);
 
-    if(argc==6) period= atoi(argv[5]);
 
-    fprintf(stderr,"\nData read from position %d to position %d.\n",tstart,tstart+line_range);
-    fprintf(stderr,"Nucleotide frequencies computed with period %d\n",period);
-    fprintf(stderr,"Plots of %d line per page, %d positions per line,tics every %.0f positions.\n",lines,line_range,TIC_X);
+    /************ Start Working **********/
 
     for(k=0; k<lines && tstart + k*line_range<len; ++k) {
         n= N= nub= nc= nn= nnP= ncg= nm= nk= nt= ncap= ncca= ngcb= ns= np= ne= nb= nB= ncp= nScp= npali= 0;
@@ -322,7 +360,7 @@ main(int argc, char *argv[]) {
             }
             fclose(input);
         }
-        else fprintf(stderr,"\nFile of blocks from annotated genes %s NOT read",BLOCK_file);
+        else logmsg(10, "File of blocks from annotated genes %s NOT read\n", BLOCK_file);
 
         if(input=fopen(block_file,"r")) {
             while(fgets(longstr,198,input) && !feof(input)) {
@@ -342,7 +380,7 @@ main(int argc, char *argv[]) {
             }
             fclose(input);
         }
-        else fprintf(stderr,"\nFile of new blocks %s NOT read",block_file);
+        else logmsg(10, "File of new blocks %s NOT read\n", block_file);
 
         if(input=fopen(codpot_file,"r")) {
             ++cpf;
@@ -364,7 +402,7 @@ main(int argc, char *argv[]) {
             }
             fclose(input);
         }
-        else fprintf(stderr,"\nFile of GeneMark coding potential %s NOT read",codpot_file);
+        else logmsg(10, "File of GeneMark coding potential %s NOT read\n", codpot_file);
 
         if(input=fopen(Scodpot_file,"r")) {
             ++Scpf;
@@ -389,7 +427,7 @@ main(int argc, char *argv[]) {
             }
             fclose(input);
         }
-        else fprintf(stderr,"\nFile of G+C coding potential %s NOT read",Scodpot_file);
+        else logmsg(10, "File of G+C coding potential %s NOT read\n", Scodpot_file);
 
         if(input=fopen(met_file,"r")) {
             while(fgets(longstr,198,input) && !feof(input)) {
@@ -406,7 +444,7 @@ main(int argc, char *argv[]) {
             }
             fclose(input);
         }
-        else fprintf(stderr,"\nFile of Met %s NOT read",met_file);
+        else logmsg(10,"File of Met %s NOT read\n", met_file);
 
         if(input=fopen(stop_file,"r")) {
             while(fgets(longstr,198,input) && !feof(input)) {
@@ -423,7 +461,7 @@ main(int argc, char *argv[]) {
             }
             fclose(input);
         }
-        else fprintf(stderr,"\nFile of Stop %s NOT read",stop_file);
+        else logmsg(10,"File of Stop %s NOT read\n", stop_file);
 
 
         if(input=fopen(tata_file,"r")) {
@@ -440,7 +478,7 @@ main(int argc, char *argv[]) {
             }
             fclose(input);
         }
-        else fprintf(stderr,"\nFile of TATA box %s NOT read",tata_file);
+        else logmsg(10,"File of TATA box %s NOT read\n", tata_file);
 
         if(input=fopen(cap_file,"r")) {
             while(fgets(longstr,198,input) && !feof(input)) {
@@ -456,7 +494,7 @@ main(int argc, char *argv[]) {
             }
             fclose(input);
         }
-        else fprintf(stderr,"\nFile of CAP box %s NOT read",cap_file);
+        else logmsg(10,"File of CAP box %s NOT read\n", cap_file);
 
         if(input=fopen(ccaa_file,"r")) {
             while(fgets(longstr,198,input) && !feof(input)) {
@@ -472,7 +510,7 @@ main(int argc, char *argv[]) {
             }
             fclose(input);
         }
-        else fprintf(stderr,"\nFile of CCAAT box %s NOT read",ccaa_file);
+        else logmsg(10,"File of CCAAT box %s NOT read\n", ccaa_file);
 
         if(input=fopen(gcbox_file,"r")) {
             while(fgets(longstr,198,input) && !feof(input)) {
@@ -488,7 +526,7 @@ main(int argc, char *argv[]) {
             }
             fclose(input);
         }
-        else fprintf(stderr,"\nFile of GC box %s NOT read",gcbox_file);
+        else logmsg(10,"File of GC box %s NOT read\n", gcbox_file);
 
         if(input=fopen(kozak_file,"r")) {
             while(fgets(longstr,198,input) && !feof(input)) {
@@ -504,7 +542,7 @@ main(int argc, char *argv[]) {
             }
             fclose(input);
         }
-        else fprintf(stderr,"\nFile of Kozak sequences %s NOT read",kozak_file);
+        else logmsg(10,"File of Kozak sequences %s NOT read\n", kozak_file);
 
 
         if(input=fopen(pali_file,"r")) {
@@ -520,7 +558,7 @@ main(int argc, char *argv[]) {
             }
             fclose(input);
         }
-        else fprintf(stderr,"\nFile of palindromes %s NOT read",pali_file);
+        else logmsg(10,"File of palindromes %s NOT read\n", pali_file);
 
 
         /* READS FILE OF UNBIASED ORFS */
@@ -557,7 +595,7 @@ main(int argc, char *argv[]) {
             }
             fclose(input);
         }
-        else fprintf(stderr,"\nAcc file NOT read");
+        else logmsg(10,"Acc file NOT read\n") ;
 
 
         /* READS FILE OF CONSERVED ORFS */
@@ -594,7 +632,7 @@ main(int argc, char *argv[]) {
             }
             fclose(input);
         }
-        else fprintf(stderr,"\nConserved file NOT read");
+        else logmsg(10,"Conserved file NOT read\n") ;
 
         /* READS FILE OF NEW PROPOSED CODING REGIONS */
 
@@ -636,7 +674,7 @@ main(int argc, char *argv[]) {
             }
             fclose(input);
         }
-        else fprintf(stderr,"\nNew file NOT read");
+        else logmsg(10,"New file NOT read\n") ;
 
         /* READS FILE OF NEW PREDICTION CORRESPONDING TO ANNOTATED BUT WITH DIFFERENT PREDICTED START */
 
@@ -677,7 +715,7 @@ main(int argc, char *argv[]) {
             }
             fclose(input);
         }
-        else fprintf(stderr,"\nNew file NOT read");
+        else logmsg(10,"New file NOT read\n") ;
 
 
 
@@ -700,7 +738,7 @@ main(int argc, char *argv[]) {
             }
             fclose(input);
         }
-        else fprintf(stderr,"\nFiles with blocks of asymmetric CG content NOT read");
+        else logmsg(10,"Files with blocks of asymmetric CG content NOT read\n") ;
 
         /* READS FILE OF ACCEPTED PUBLIC GENES */
 
@@ -758,7 +796,7 @@ main(int argc, char *argv[]) {
             }
             fclose(input);
         }
-        else fprintf(stderr,"\nPub file NOT read");
+        else logmsg(10,"Pub file NOT read\n") ;
 
 
         /* READS FILE OF MODIFIED PUBLIC GENES. FILE OF NEW PREDICTIONS MODIFYING STRAT OF TRANSLATION OF ANNOTATED GENES
@@ -820,9 +858,9 @@ main(int argc, char *argv[]) {
                 }
             }
             fclose(input);
-            fprintf(stderr,"\nModified file %s read",mod_file);
+            logmsg(10,"Modified file %s read\n", mod_file);
         }
-        else fprintf(stderr,"\nModified file NOT read");
+        else logmsg(10,"Modified file NOT read\n") ;
 
         if(input= fopen(CG200_file,"r")) {
             while(!feof(input)) {
@@ -844,9 +882,12 @@ main(int argc, char *argv[]) {
                 else
                     fgets(longstr,198,input);
             }
+
             fclose(input);
-            fprintf(stderr,"\nLarge window composition file %s read",CG200_file); }
-        else fprintf(stderr,"\nLarge-window composition file NOT read");
+            logmsg(10,"Large window composition file %s read\n", CG200_file);
+        }
+        else 
+            logmsg(10,"Large-window composition file NOT read\n");
 
 /* READS FILE OF RNA-SEQ READ NUMBERS */
 
@@ -869,8 +910,8 @@ main(int argc, char *argv[]) {
             else fgets(longstr, 198, input);
           }
           fclose(input);
-          fprintf(stderr,"\nRead-numbers file %s read", read_file); }
-          else { fprintf(stderr, "\nRead-numbers file NOT read"); swflag= 0; }
+          logmsg(10,"Read-numbers file %s read\n",  read_file); }
+          else { logmsg(10, "Read-numbers file NOT read\n") ; swflag= 0; }
 
 
         if(!k) {
@@ -929,7 +970,7 @@ main(int argc, char *argv[]) {
             fprintf(stdout,"100 %d translate\n\n",TITLES_POSITION);
 
 
-            if(atoi(argv[1])==0) {
+            if(tstart==0) {
                 fprintf(stdout,"/Times-Bold findfont TitleFontSize scalefont setfont\n");
                 fprintf(stdout,"%.3f %.3f M ",0.5*WIDTH-30,HIGHT-90.0);
                 fprintf(stdout,"(%s-profiles of %s) Cshow\n", NUCLEOTIDES, title1);
@@ -1101,7 +1142,7 @@ fprintf(stdout,"stroke Black %.3f %.3f M (Input file CDS) Lshow\n",-15.0,HIGHT+H
       
         if(swflag)
         {
-      fprintf(stderr, "\nPrints profiles of RNA-seq reads\n");
+            logmsg(10, "\nPrints profiles of RNA-seq reads\n");
       //  fprintf(stdout,"L05 Black 1 setlinejoin 1 setlinecap\n");
         fprintf(stdout,"Black\n");
       
