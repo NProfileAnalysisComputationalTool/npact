@@ -90,10 +90,13 @@ char * ap_getl(FILE * f) {
     if(feof(f)) 
         return NULL;
     do {
-        size += BUFSIZ; /* BUFSIZ is defined as "the optimal read size for this platform" */
-        buf = (char*) realloc(buf,size); /* realloc(NULL,n) is the same as malloc(n) */
-        /* Actually do the read. Note that fgets puts a terminal '\0' on the
-           end of the string, so we make sure we overwrite this */
+        /* BUFSIZ is defined as "the optimal read size for this platform" */
+        size += BUFSIZ; 
+        /* realloc(NULL,n) is the same as malloc(n) */
+        buf = (char*) realloc(buf,size); 
+        /* Actually do the read. Note that fgets puts a terminal '\0'
+           on the end of the string, so we make sure we overwrite
+           this */
         fgets(buf+len, BUFSIZ, f);
         len += strlen(buf+len);
         last = len - 1;
