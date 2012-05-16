@@ -22,8 +22,6 @@
 # define STEM_SEPARATION 1.0
 # define PRINT_ZERO_LINE 1
 
-# define ANOPIAS 0
-
 # define VIEWER "showps"
 # define TIC_W 5.0
 # define NFS 7.0
@@ -32,6 +30,7 @@
 # define TFS2 14.0
 # define HANGOVER 30
 
+char	ANOPIAS= 0;
 float	MAX= 100.00;
 float   MAXLOG= 4.00;
 float   GRID_Y;
