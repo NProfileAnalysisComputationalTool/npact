@@ -283,10 +283,10 @@ period_of_frame       Number of frames.
 
 """
         #figure out hashed filename of ps output.
-        hashkeys = self.AP_file_keys + \
-          ['first_page_title', 'following_page_title',
-           'length', 'start_base', 'end_base', 
-           'period', 'bp_per_page', 'nucleotides']
+        hashkeys = self.AP_file_keys + [
+            'first_page_title', 'following_page_title',
+            'length', 'start_base', 'end_base', 'period', 'bp_per_page',
+            'nucleotides', 'alternate_colors']
         config,hash = util.reducehashdict(self.config, hashkeys)
         dependencies = map(config.get, self.AP_file_keys)
 
@@ -314,9 +314,15 @@ period_of_frame       Number of frames.
                     self.logger.debug("Starting Allplots page %d for %r",
                                       page_num, os.path.basename(self.gbkfile))
 
-                    cmd = [binfile("Allplots"), config['start_base'], config['bp_per_page'], 
-                           5, 1000, #TODO: move these into config
-                           config['period']]
+                    cmd = [binfile("Allplots"), "-q",]
+                    if config.get('alternate_colors'):
+                        cmd.append("-C")
+
+                    #add the rest of the required args
+                    cmd += [config['start_base'], config['bp_per_page'], 
+                            5, 1000, #TODO: move these into config
+                            config['period']]
+                    
                     capproc.capturedCall(cmd, stdout=psout, stderr=False,
                                          logger=self.logger, cwd=dtemp, check=True)
                 psname = self.derivative_filename("%s.ps" % (phash))

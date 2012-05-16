@@ -48,6 +48,7 @@ class ConfigForm(forms.Form):
                                    label="Prediction Significance")
     start_base=forms.IntegerField()
     end_base=forms.IntegerField()
+    alternate_colors=forms.BooleanField(required=False)
 
 
     def clean(self):

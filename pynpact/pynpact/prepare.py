@@ -178,8 +178,8 @@ CONFIG_HELP_TEXT = {
     'following_page_title': "The title of the pages after the first. Use {0} to get the page number.",
     'skip_prediction': "Should the acgt_gamma prediction be run? (click here to skip)",
     'significance': "What should the acgt_gamma prediction consider significant?",
-    'nucleotides': "The bases to count the frequency of on the primary strand."
-    
+    'nucleotides': "The bases to count the frequency of on the primary strand.",
+    'alternate_colors': "Modifies graph colors from RGB to an alternative set that should be more easily distinguishable by people with certain color-blindness conditions.",
     }
 
 significance_levels = ("0.01", "0.001", "0.0001")
