@@ -3,6 +3,7 @@ import logging, os.path, tempfile, shutil
 from optparse import OptionParser
 from contextlib import contextmanager
 import math
+from subprocess import PIPE
 
 from __init__ import binfile, DATAPATH
 import capproc
@@ -244,28 +245,9 @@ class GenBankProcessor(object ):
                     'File_list_of_nucleotides_in_200bp windows',
                     'File_list_of_nucleotides_in_100bp windows']
 
-    def write_allplots_def(self, config, allplots_name, page_num):
+    def write_allplots_def(self, config, page_num, stream):
         "Writes out an Allplots.def for a single run through of allplots."
-        self.logger.debug("Writing Allplots for %d %r", page_num, allplots_name)
-
-        with open(allplots_name, 'w') as allplots:
-
-            #helper function for writing a line to the allplots file.
-            def ap_wl(str):
-                if str: allplots.write(str)
-                allplots.write('\n')
-
-            #NB the "Plot Title" is disregarded, but that line should also contain the total number of bases
-            ap_wl("%s %d" % ("FOOBAR", config['length']))     #Plot Title
-            ap_wl('+'.join(config['nucleotides']))            #Nucleotide(s)_plotted (e.g.: C+G)
-            ap_wl(config['first_page_title'].format(page_num)) #First-Page title
-            ap_wl(config['following_page_title'].format(page_num) ) #Title of following pages
-
-
-            for f in self.AP_file_keys:
-                ap_wl(config.get(f,"None"))
-        return allplots_name
-
+       
 
     def run_Allplots(self):
         """Actually invoke Allplots, once for each page we're generating.
@@ -294,42 +276,67 @@ period_of_frame       Number of frames.
         
         #build the individual ps page files.
         filenames = []
-        with self.mkdtemp() as dtemp:
-            #page number offset
-            page_num = 1
 
-            #the hash of individual pages shouldn't depend on the
-            #end_base, so leave that out.  We keep updating the
-            #start_base in *this* config (different than the general
-            #one).
-            pconfkeys = set(hashkeys).difference(set(["end_base"]))
-            
-            while (config['start_base'] < config['end_base']):
-                pconfig,phash = util.reducehashdict(config, pconfkeys)
-                def _ap(psout):
-                    self.timer.check("Generating %d pages of graphical output: %2d%%" %
-                                     (page_count, round(100.0 * page_num / page_count)))
-                    self.write_allplots_def(pconfig, os.path.join(dtemp,"Allplots.def"), page_num)
+        #page number offset
+        page_num = 1
 
-                    self.logger.debug("Starting Allplots page %d for %r",
-                                      page_num, os.path.basename(self.gbkfile))
+        #the hash of individual pages shouldn't depend on the
+        #end_base, so leave that out.  We keep updating the
+        #start_base in *this* config (different than the general
+        #one).
+        pconfkeys = set(hashkeys).difference(set(["end_base"]))
 
-                    cmd = [binfile("Allplots"), "-q",]
-                    if config.get('alternate_colors'):
-                        cmd.append("-C")
+        while (config['start_base'] < config['end_base']):
+            pconfig,phash = util.reducehashdict(config, pconfkeys)
+            def _ap(psout):
+                self.timer.check("Generating %d pages of graphical output: %2d%%" %
+                                 (page_count, round(100.0 * page_num / page_count)))
 
-                    #add the rest of the required args
-                    cmd += [config['start_base'], config['bp_per_page'], 
-                            5, 1000, #TODO: move these into config
-                            config['period']]
-                    
-                    capproc.capturedCall(cmd, stdout=psout, stderr=False,
-                                         logger=self.logger, cwd=dtemp, check=True)
-                psname = self.derivative_filename("%s.ps" % (phash))
-                filenames.append(psname)
-                self.safe_produce_new(psname, _ap, dependencies=dependencies)
-                page_num += 1
-                config['start_base'] += config['bp_per_page']
+                self.logger.debug("Starting Allplots page %d for %r",
+                                  page_num, os.path.basename(self.gbkfile))
+
+                cmd = [binfile("Allplots"), "-q", "--stdin",]
+                if config.get('alternate_colors'):
+                    cmd.append("-C")
+
+                #add the rest of the required args
+                cmd += [config['start_base'], config['bp_per_page'], 
+                        5, 1000, #TODO: move these into config
+                        config['period']]
+
+                with capproc.guardPopen(cmd, stdin=PIPE,
+                                        stdout=psout,
+                                        stderr=False
+                                        logger=self.logger) as ap:
+
+
+                    self.logger.debug("Writing Allplots for %d", page_num)
+
+                    #helper function for writing a line to the allplots file.
+                    def ap_wl(str):
+                        if str: ap.stdin.write(str)
+                        ap.stdin.write('\n')
+
+                    #NB the "Plot Title" is disregarded, but that line
+                    #should also contain the total number of bases
+                    ap_wl("%s %d" % ("FOOBAR", pconfig['length']))     #Plot Title
+                    ap_wl('+'.join(pconfig['nucleotides']))            #Nucleotide(s)_plotted (e.g.: C+G)
+                    ap_wl(pconfig['first_page_title'].format(page_num)) #First-Page title
+                    ap_wl(pconfig['following_page_title'].format(page_num) ) #Title of following pages
+
+
+                    for f in self.AP_file_keys:
+                        ap_wl(pconfig.get(f,"None"))
+
+                    ap.stdin.close()
+                    self.logger.info("Finished writing allplots.")
+                    ap.wait()
+
+            psname = self.derivative_filename("%s.ps" % (phash))
+            filenames.append(psname)
+            self.safe_produce_new(psname, _ap, dependencies=dependencies)
+            page_num += 1
+            config['start_base'] += config['bp_per_page']
                 
 
 

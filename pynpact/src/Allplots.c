@@ -184,7 +184,8 @@ return(n);
 main(int argc, char *argv[]) {
     /* For cmd line argument parsing. */
     char* opt;
-    int argi = 1; 
+    int argi = 1;
+    char use_stdin=0;
 
     int	i, j, k, d, n, N, lines, nub, nc, nn, nnP, np, ne, nb, ns, ncg, nB, ncp, nScp, nm, nk, nt, ncap, ncca, ngcb, gs, ge, lp, len, period=3, swflag=1,
         start, end, pos, tstart, name_pos, name_len, line_range, unbf=0, conf=0, newf=0, newPf=0, cgf=0, cpf= 0, Scpf= 0, npali= 0, wind,
@@ -232,11 +233,14 @@ main(int argc, char *argv[]) {
             argi++;
             logmsg(0,"Using alternate color scheme.\n");
         }
-        else if(strcmp(opt, "--")) {
+        else if(strcmp(opt, "--stdin") == 0) {
             /* read Allplots.def from stdin; not yet impletmented. */
+            use_stdin = 1;
             argi++;
         }
-        /* else if (strcmp(opt, "") == 0) {} */
+        else {
+            logmsg(20,"Got invalid optional argument %s", opt)
+        }
     }
 
     if (argi+3 > argc) {
@@ -263,7 +267,7 @@ main(int argc, char *argv[]) {
     
     /****** Parse definition file ******/
     logmsg(10, "Starting read of Allplots.def\n");
-    files = fopen("Allplots.def","r");
+    files = use_stdin ? stdin : fopen("Allplots.def","r");
     if(!files) {
         printHelp();
         logmsg(20, "Couldn't find Allplots.def in current directory.\n");
