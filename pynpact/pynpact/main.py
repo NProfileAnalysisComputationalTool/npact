@@ -306,7 +306,7 @@ period_of_frame       Number of frames.
 
                 with capproc.guardPopen(cmd, stdin=PIPE,
                                         stdout=psout,
-                                        stderr=False
+                                        stderr=False,
                                         logger=self.logger) as ap:
 
 
