@@ -89,13 +89,12 @@ var progress = {
     onsuccess: function(data){
         console.log('Progress', data);
         //async call
-        setTimeout(progress.updateStatusDisplay.bind(progress, data));
-
         if(data.next=='results')
-            progress.processResults(data);
+            setTimeout(progress.processResults.bind(progress, data));
         else 
-            progress.startRequest();
+            setTimeout(progress.startRequest.bind(progress, data));
 
+        setTimeout(progress.updateStatusDisplay.bind(progress, data));
     },
     
     processResults: function(data) {
