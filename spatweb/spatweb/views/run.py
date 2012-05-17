@@ -134,6 +134,8 @@ def encode_config(config, **urlconf):
 
 
 def run_frame(request, path):
+    """This is the main processing page. However, that page is just
+    frame in which ajax requests spur the actual processing"""
     config = build_config(path, request)
     request.session[path] = config
     full_path = reverse('process',args=[path])
