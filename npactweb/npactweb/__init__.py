@@ -4,12 +4,12 @@ import os.path
 from django.conf import settings
 from django.contrib import messages
 
-from spatweb.middleware import RedirectException
+from npactweb.middleware import RedirectException
 
 logger = logging.getLogger(__name__)
 
 
-logger.info("Starting the main spat site.")
+logger.info("Starting the main npact site.")
 
 
 def library_root():

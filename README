@@ -10,7 +10,7 @@ This file is written using [Markdown](http://daringfireball.net/projects/markdow
 
 # Using 
 
-This project is primarily meant to be used as a website (See the spatweb component). The pynpact component can be used directly on the command line though this has not been tested recently.
+This project is primarily meant to be used as a website (See the npactweb component). The pynpact component can be used directly on the command line though this has not been tested recently.
 
 ## Requirements
 As much as possible the required libraries are packaged with this project to make it easier to get started and more resistant to external changes.
@@ -65,10 +65,10 @@ Primarily this should be run underneath a fcgi webserver. Look at `apache.conf` 
 ### Development mode
 Django does have a builtin webserver that will work for local installations, to use it.
 
-1. edit `spatweb/settings.py` to change DEBUG from False to True at the top of the file.
+1. edit `npactweb/settings.py` to change DEBUG from False to True at the top of the file.
 2. `source ve/bin/activate`
 3. `python manage.py runserver`
-4. open [http://127.0.0.1:8000/spat/]()
+4. open [http://127.0.0.1:8000/npact/]()
 
 ### command line interface
 The project was developed with this in mind but has been extended beyond it so there is no good way to provide detailed configuration via the command line-- it's only available via the website.
@@ -102,15 +102,15 @@ The C code at `pynpact/src` does most of the analysis and the python code in `py
 * `pynpact/pynpact/main.py` actually coordinates the running of the C programs and produces the PS output.
 
 
-## spatweb
+## npactweb
 This is the code for the website. It is built on top of [Django](http://djangoproject.com/).
-* `spatweb/settings.py` is the configuration for this django website. Tells what modules and applications to load; configures where paths for different content are.
-* `spatweb/spatweb/static/` holds the static images, CSS, and javascript used on the website.
-* `spatweb/spatweb/templates/` holds the templates that generate html on the website. Go here to change text on the site, rearrange blocks, or add new content.
-* `spatweb/spatweb/urls.py` controls the web sites url space; django uses this to dispatch incoming requests to views.
-* `spatweb/spatweb/views/` holds the code that gets run on an incoming request.
-* `spatweb/cleanup.py` used to clean out old uploaded files so they don't take too much space on the server.
-* `spatweb/django.fcgi` is the entry point for fcgi webservers.
+* `npactweb/settings.py` is the configuration for this django website. Tells what modules and applications to load; configures where paths for different content are.
+* `npactweb/npactweb/static/` holds the static images, CSS, and javascript used on the website.
+* `npactweb/npactweb/templates/` holds the templates that generate html on the website. Go here to change text on the site, rearrange blocks, or add new content.
+* `npactweb/npactweb/urls.py` controls the web sites url space; django uses this to dispatch incoming requests to views.
+* `npactweb/npactweb/views/` holds the code that gets run on an incoming request.
+* `npactweb/cleanup.py` used to clean out old uploaded files so they don't take too much space on the server.
+* `npactweb/django.fcgi` is the entry point for fcgi webservers.
 
 
 
@@ -124,7 +124,7 @@ In order for any editing to work well you should activate the python virtual env
     source ve/bin/activate
 
 ## Editing the website
-Website content is mostly in the templates at `spatweb/spatweb/templates`. This uses the [Django template language](https://docs.djangoproject.com/en/1.3/topics/templates/). To alter the default values or help text given on the run page go look in `pynpact/pynpact/prepare.py`. 
+Website content is mostly in the templates at `npactweb/npactweb/templates`. This uses the [Django template language](https://docs.djangoproject.com/en/1.3/topics/templates/). To alter the default values or help text given on the run page go look in `pynpact/pynpact/prepare.py`. 
 
 This can be tested out by running the development server. See Using > Running > Development mode section above.
 

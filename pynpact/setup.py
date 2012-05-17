@@ -41,7 +41,7 @@ setup(name='pynpact',
       description='Python N-Profile Analysis Computation Tool',
       author='Luciano Brocchieri and Nathan Bird',
       author_email='nathan@acceleration.net',
-      url='http://genome.ufl.edu/spat',
+      url='http://genome.ufl.edu/npact/',
       packages=['pynpact'],
       package_data={
           'pynpact': ['data/*']

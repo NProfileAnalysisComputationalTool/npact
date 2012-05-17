@@ -2,7 +2,7 @@
 
 HOST="genome"
 #make sure root doesn't have spaces in it or we'll have problems.
-ROOT="/var/www/html/genome.ufl.edu/spat"
+ROOT="/var/www/html/genome.ufl.edu/npact"
 
 #HOST="progden"
 

@@ -15,10 +15,10 @@ from django.template import RequestContext
 from pynpact import prepare, main, util
 from pynpact.softtimeout import Timeout
 
-from spatweb import assert_clean_path, getabspath, getrelpath
-from spatweb.middleware import RedirectException
+from npactweb import assert_clean_path, getabspath, getrelpath
+from npactweb.middleware import RedirectException
 
-#from spatweb.helpers import add_help_text
+#from npactweb.helpers import add_help_text
 
 # Get an instance of a logger
 logger = logging.getLogger(__name__)

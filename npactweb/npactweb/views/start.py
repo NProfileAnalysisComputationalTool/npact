@@ -15,8 +15,8 @@ from django.shortcuts import render_to_response
 from django.template import RequestContext
 
 
-from spatweb import is_clean_path, getabspath, getrelpath, library_root
-from spatweb.middleware import RedirectException
+from npactweb import is_clean_path, getabspath, getrelpath, library_root
+from npactweb.middleware import RedirectException
 
 
 # Get an instance of a logger

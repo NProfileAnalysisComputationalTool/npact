@@ -8,7 +8,7 @@ from django.utils.http import urlencode
 from django.views import static
 
 from pynpact import prepare
-from spatweb import library_root
+from npactweb import library_root
 
 
 logger = logging.getLogger(__name__)
@@ -45,4 +45,4 @@ def view_none(request) :
     messages.error(request,
                    "No genome source selected, please upload one, "
                    "or go to the library and select one.")
-    return HttpResponseRedirect(reverse('spatweb.views.start.view'))
+    return HttpResponseRedirect(reverse('start'))

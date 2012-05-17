@@ -18,7 +18,7 @@ from optparse import OptionParser
 from path import path
 
 from pynpact import capproc
-from spatweb import library_root
+from npactweb import library_root
 
 
 logger = logging.getLogger('cleanup')

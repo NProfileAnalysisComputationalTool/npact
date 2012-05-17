@@ -3,8 +3,8 @@ from django.conf import settings
 from django.views.generic.simple import direct_to_template
 
 
-spatpatterns = \
-            patterns('spatweb.views',
+npact_patterns = \
+            patterns('npactweb.views',
                      url(r'^$' , 'start.view', name='start'),
                      url(r'^about$' , direct_to_template, {'template': 'about.html'}, name='about'),
                      url(r'^efetch/(\d+)' , 'start.efetch', name="efetch"),
@@ -19,4 +19,4 @@ spatpatterns = \
                      url(r'^raw/(?P<path>.*)$', 'static_serve_wrapper', name='raw'),
                      )
 
-urlpatterns = patterns('', ('^spat/', include(spatpatterns)))
+urlpatterns = patterns('', ('^npact/', include(npact_patterns)))

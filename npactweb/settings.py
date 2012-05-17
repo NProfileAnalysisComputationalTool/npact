@@ -54,8 +54,8 @@ MEDIA_RETAIN_FOR=7
 ######## django-mediagenerator settings
 
 MEDIA_DEV_MODE = DEBUG
-DEV_MEDIA_URL = '/spat/devassets/'
-PRODUCTION_MEDIA_URL = '/spat/assets/'
+DEV_MEDIA_URL = '/npact/devassets/'
+PRODUCTION_MEDIA_URL = '/npact/assets/'
 #GLOBAL_MEDIA_DIRS=(str(ppath('www')),)
 
 
@@ -103,7 +103,7 @@ MIDDLEWARE_CLASSES = (
     'django.middleware.csrf.CsrfViewMiddleware',
     'django.contrib.auth.middleware.AuthenticationMiddleware',
     'django.contrib.messages.middleware.MessageMiddleware',
-    'spatweb.middleware.RedirectExceptionHandler',
+    'npactweb.middleware.RedirectExceptionHandler',
 )
 
 
@@ -116,11 +116,11 @@ TEMPLATE_CONTEXT_PROCESSORS = (
     "django.core.context_processors.static",
     "django.contrib.messages.context_processors.messages",
     #addons
-    "spatweb.context_processors.resolvermatch",
+    "npactweb.context_processors.resolvermatch",
 
      )
 
-ROOT_URLCONF = 'spatweb.urls'
+ROOT_URLCONF = 'npactweb.urls'
 
 #since we use the django.template.loaders.app_directories.Loader it automatically looks for apps' templates directory.
 TEMPLATE_DIRS = ()
@@ -135,7 +135,7 @@ INSTALLED_APPS = (
     'django.contrib.messages',
     
     'mediagenerator',
-    'spatweb'
+    'npactweb'
     #'django.contrib.staticfiles',
     # Uncomment the next line to enable the admin:
     # 'django.contrib.admin',
@@ -189,7 +189,7 @@ LOGGING = {
             'level': 'ERROR',
             'propagate': True,
             },
-        # 'spat': {
+        # 'npact': {
         #     'handlers': ['console'],
         #     'level': 'DEBUG',
         #     'propagate': True,
