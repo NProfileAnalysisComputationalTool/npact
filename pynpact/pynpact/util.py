@@ -197,12 +197,10 @@ def safe_produce_new(outfilename, func, force=False, dependencies=[], **kwargs):
     logger=kwargs.get('logger')
     if outofdate or force:
         if logger:
-            logger.debug("Regenerating, checked:%d force:%r", len(dependencies),force)
+            logger.debug("Regenerating, checked:%d force:%r", len(dependencies), force)
 
         with mkstemp_overwrite(outfilename,**kwargs) as f:
             func(f)
-    elif kwargs.get('logger',False):
-        kwargs.get('logger').debug("Skipped producing %r", outfilename)
     return outfilename
 
 

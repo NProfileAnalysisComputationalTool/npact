@@ -327,9 +327,7 @@ period_of_frame       Number of frames.
 
                     for f in self.AP_file_keys:
                         ap_wl(pconfig.get(f,"None"))
-
                     ap.stdin.close()
-                    self.logger.info("Finished writing allplots.")
                     ap.wait()
 
             psname = self.derivative_filename("%s.ps" % (phash))
