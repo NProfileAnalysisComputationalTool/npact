@@ -392,7 +392,7 @@ int main (int argc, char *argv[])
     t2= time(NULL);
     minutes= (int)(t2 - t1) / 60;
     secs= ((int)(t2 - t1)) % 60;
-    fprintf(stdout, "G-test time: %d\' %d\"\n", minutes, secs);
+    fprintf(stdout, "\nG-test time: %d\' %d\"\n", minutes, secs);
 
     logmsg(10, "\nCharacterizing %d published genes:     ",ncds);
     characterize_published_genes(ncds, tot_Ghits, nuc, bytes_from_origin, ffrom);   // List published genes characterized by content annotation
