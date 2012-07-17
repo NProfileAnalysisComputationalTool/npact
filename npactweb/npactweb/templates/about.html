@@ -5,12 +5,13 @@
 {%block content %}
 <div class="contentPadding">
 <h2 id="secHeader" title="N-PACT - About"><span><!--header image here--></span>N-PACT About</h2>
-<p>N-PACT is a computational tool designed to identify protein-coding regions in a nucleotide sequence of any length and composition, using a new quantitative approach extending the principle of visual frame analysis (<a href="http://www.sciencedirect.com/science/article/pii/0378111984901161">Bibb et al. 1984</a>). N-PACT identifies sequence segments of statistically significant compositional contrast, and uses them for gene prediction (<a href="">Oden and Brocchieri 2012</a>). </p>
+<p></p><h4>About</h4>
+<p>N-PACT is a computational tool designed to identify protein-coding regions in a nucleotide sequence of any length and composition, using a new quantitative approach extending the principle of visual frame analysis (<a href="http://www.sciencedirect.com/science/article/pii/0378111984901161">Bibb et al. 1984</a>). N-PACT identifies sequence segments of statistically significant compositional contrast, and uses them for gene prediction (<a href="">Oden and Brocchieri 2012</a>, in preparation). </p>
 
 <p>The N-PACT server produces a multi-page graphical output representing, along the sequence, frame-specific GC (or any nucleotide) content for frame analysis (<a href="http://www.bioinformatika.pbf.hr/Articles/FramePlot.pdf">Ishikawa and Hotta 1999</a>; <a href="http://www.ncbi.nlm.nih.gov/pubmed/15919911">Brocchieri et al. 2005</a>), published gene annotations (when available), high-scoring segments and new gene predictions.</p>
 
 <h4>Getting Started</h4>
-<p>To start the analysis upload a nucleotide sequence file in the GenBank format, using any of the methods provided. Directly start the analysis with default parameters clicking "Get Analysis!", or change options with "Configure Analysis". The program accepts as input a GenBank-like sequence text file that, minimally, must include a header with the fields DEFINITION, describing the sequence, and ORIGIN, with following lines containing sequence data. Starting from the line subsequent to ORIGIN all alphabetic characters are interpreted as sequence characters. Any alphabetic character other than A/a, C/c, G/g, T/t, U/u is treated as unknown, and all non-alphabetic characters are ignored. Optional annotated coding sequences are read from the file from the " CDS " fields, following the GenBank format. Gene names are assigned reading them from the variables "gene" (first choice) or "locus_tag" (second choice).</p>
+<p>To start the analysis upload a nucleotide sequence file in the Genbank format, using any of the methods provided. Directly start the analysis with default parameters clicking "Get Analysis!", or change options with "Configure Analysis". The program accepts as input a Genbank-like sequence text file that, minimally, must include a header with the fields DEFINITION, describing the sequence, and ORIGIN, with following lines containing sequence data. Starting from the line subsequent to ORIGIN all alphabetic characters are interpreted as sequence characters. Any alphabetic character other than A/a, C/c, G/g, T/t, U/u is treated as unknown, and all non-alphabetic characters are ignored. Optional annotated coding sequences are read from the file from the " CDS " fields, following the Genbank format. Gene names are assigned reading them from the variables "gene" (first choice) or "locus_tag" (second choice).</p>
 
 <h4>N-profile and prediction graphical output</h4>
 <p>N-PACT produces a multi-page graphical ouput in Postscript or PDF format. This output contains the following information:</p>
@@ -29,7 +30,7 @@
 <p>		CTG (C/c)</p>
 <p>		ATT (W/w)</p>
 </list>
-<p>Input file CDS. Coding regions reported in the annotation of the GenBank input file, from the CDS field (see above).</p>
+<p>Input file CDS. Coding regions reported in the annotation of the Genbank input file, from the CDS field (see above).</p>
 <p>Hits. Graphical representation of high-scoring segments identified as colored segments on two tracks, corresponding to direct strand (upper track) and complementary strand (lower track).</p>
 <p>Profiles. These curves represent by default GC content within a moving window of 201 nucleotides. The user can choose to display other nucleotide type combinations (e.g., purines). Each curve represents percent frequencies within a subsequence composed of every third nucleotide of the input sequence, starting, respectively, from position 1 (red), 2 (green) or 3 (blue). A light-gray curve indicates the overall composition of the genome within corresponding intervals.</p>
 </list>

@@ -19,6 +19,7 @@
 
 {%block content %}
 <div class="contentPadding">
+<<<<<<< HEAD
   <h2>NPACT - N-Profile Analysis Computational Tool (Prokaryotes)</h2>
   <p>For quantitative frame-analysis and <b> prokaryotic </b> gene prediction from a sequence file in the Genbank format (see a <a href="http://www.ncbi.nlm.nih.gov/Sitemap/samplerecord.html">sample record</a> or the <a href="{% url about %}">About</a> page).</p>
   <p>After seleting a sequence file, "Start Analysis!" will result in a graphical output showing sequence compositional contrasts for frame analysis, gene annotation (when available), and, by default, regions of non-random compositional contrast (hits), gene predictions, and corresponding output text files. Parameters can be modified using "Configure Analysis", which leads to a page where the user can choose which nucleotide type(s) to represent for frame analysis, start and end position of the analysis, and level of significance of high scoring segments (hits). From this page the user can also disable identification of high-scoring segments and new gene predictions altogether, in which case N-PACT will only produce the graph of frame-specific nucleotide content and positions of genes annotated in the input file. </p>
@@ -26,6 +27,11 @@
   <p>The NPACT server can process uploaded files, files fetched from a url, or
     genbank data pasted directly in. Only one of the  following is neccessary</p>
 
+=======
+  <h2>NPACT - N-Profile Analysis Computational Tool</h2>
+  <p>N-PACT identifies, in a nucleotide sequence of any length, regions of significant period-three (frame-specific) compositional contrast, and uses them to predict coding sequences. N-PACT can be used for identifying compositional contrasts, for <it>de novo</it> gene prediction, or for supporting or revising sequence annotations obtained with other methods. The N-PACT combined quantitative and visual frame-analysis is most effective in sequences of high GC content (e.g., > 55%), but can also be used for sequences of any composition. In contrast to visual frame analysis, N-PACT uses a four-nucleotide alphabet, determines the statistical significance and precise boundaries of regions of contrast, and takes into consideration the ORF structure and local compositional properties of the sequence.</p>
+  <p>To use N-PACT, input a sequence file in the Genbank format (see the <a href="{% url about %}">About</a> page) using any of the methods provided, and "Start Analysis!" to obtain output text files and a graphical representation showing frame-specific sequence composition, genes annotated in the original file (when available), sequence regions with compositional contrast (hits), and new gene predictions. Parameters and plot properties can be modified with "Configure Analysis".</p>
+>>>>>>> f974043d169e63fb8f7808a99aef9d418adf24ec
 
   <input type="hidden" name="selected" value="" id="selected"/>
   <form method="post" action="{% url start %}" enctype="multipart/form-data">

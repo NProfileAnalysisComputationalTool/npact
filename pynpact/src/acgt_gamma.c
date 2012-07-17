@@ -12,7 +12,7 @@
 
 double	SIGNIFICANCE= 0.001;
 int	RANDOMIZE= 0;
-#define MAX_ENTROPY 0.65
+#define MAX_ENTROPY 0.40
 
 // Hits are sorted by length of global significance (the sequence length at which
 // the hit has significance p < 0.01 ) if none of these conditions below apply:
@@ -27,6 +27,7 @@ int	RANDOMIZE= 0;
 # define STEVE 0
 # define LUCIANO 0
 # define LUCIANO_HOME 0
+# define ROOT_HOME 0
 
 #if WEB_SERVER
 #define BASE_DIR NULL
@@ -45,6 +46,11 @@ int	RANDOMIZE= 0;
 
 #if LUCIANO_HOME
 #define BASE_DIR "/Users/luciano/GENOMES/"
+#define BASE_DIR_THRESHOLD_TABLES "/Users/luciano/ACGT_ORFS/data/"
+#endif
+
+#if ROOT_HOME
+#define BASE_DIR ""
 #define BASE_DIR_THRESHOLD_TABLES "/Users/luciano/ACGT_ORFS/data/"
 #endif
 
