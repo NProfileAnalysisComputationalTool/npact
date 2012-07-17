@@ -12,7 +12,7 @@
 
 double	SIGNIFICANCE= 0.001;
 int	RANDOMIZE= 0;
-#define MAX_ENTROPY 0.40
+#define MAX_ENTROPY 0.65
 
 // Hits are sorted by length of global significance (the sequence length at which
 // the hit has significance p < 0.01 ) if none of these conditions below apply:
