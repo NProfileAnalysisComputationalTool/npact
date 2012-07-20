@@ -13,7 +13,7 @@ main(argc,argv)
 int	argc;
 char	*argv[];
 {
-   char	longstr[400],shortstr[200],extrastr[200],*p,*q, exon[100][3], name[50],str;
+   char	longstr[400],shortstr[200],extrastr[200],*p,*q, exon[100][30], name[50],str;
    int	i,ex,stop=0;
    FILE	*input;
 
