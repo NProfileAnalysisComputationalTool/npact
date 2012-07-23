@@ -13,7 +13,7 @@ main(argc,argv)
 int	argc;
 char	*argv[];
 {
-   char	longstr[400],shortstr[200],extrastr[200],*p,*q, exon[100][30], name[50],str;
+   char	longstr[400],shortstr[200],extrastr[200],*p,*q,exon[100][30],name[50],str;
    int	i,ex,stop=0;
    FILE	*input;
 
@@ -51,7 +51,6 @@ char	*argv[];
    {
       if(!strncmp(longstr,"     CDS",8))
       {
-//	 exon= (char **)malloc(sizeof(char *));
          ex= 0;
          if(strstr(longstr,"join"))
          { ex= 0;
@@ -65,15 +64,11 @@ char	*argv[];
             while(p= strchr(q,','))
             {
                p[0]='\0';
-// 	       exon= (char **)realloc(exon, (ex + 1) * sizeof(char *));
-// 	       exon[ex]= (char *)malloc(30 * sizeof(char));
                strcpy(exon[ex],q);
                q= p+1; ++ex;
             }
             p= strchr(q,')');
             p[0]='\0';
-// 	    exon= (char **)realloc(exon, (ex + 1) * sizeof(char *));
-// 	    exon[ex]= (char *)malloc(30 * sizeof(char));
             strcpy(exon[ex],q);
             ++ex;
          }
@@ -114,8 +109,7 @@ char	*argv[];
 
          if(!ex) fprintf(stdout,"%s %s",name,shortstr);
          else
-	 {
-            for(i= 0; i < ex; ++i)
+            for(i=0;i<ex;++i)
             {
                strcpy(shortstr,name);
                if(str=='C') sprintf(shortstr+strlen(shortstr),"_E%d",ex-i);
@@ -125,10 +119,7 @@ char	*argv[];
                fprintf(stdout,"%s",exon[i]);
                if(str=='C') fprintf(stdout,")\n");
                else fprintf(stdout,"\n");
-//              free(exon[i]);
             }
-//	 free(exon);
-	 }
          fflush(stdout);
       }
    }
