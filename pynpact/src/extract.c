@@ -13,7 +13,7 @@ main(argc,argv)
 int	argc;
 char	*argv[];
 {
-   char	longstr[400],shortstr[200],extrastr[200],*p,*q,exon[20][30],name[50],str;
+   char	longstr[2000],shortstr[200],extrastr[200],*p,*q, exon[100][30],name[50],str;
    int	i,ex,stop=0;
    FILE	*input;
 
@@ -47,13 +47,13 @@ char	*argv[];
    fprintf(stderr,"\nCDS described in line \"%s\" skipping %d+1+%d\n", DESCRIPTION, (int)strlen(DESCRIPTION), SKIP);
    fprintf(stderr,"\nCDS described in line \"%s\" skipping %d+1+%d\n", DESCRIPTION2, (int)strlen(DESCRIPTION2), SKIP2);
 
-   while(fgets(longstr,198,input) && !feof(input))
+   while(fgets(longstr,198,input) && strncmp(longstr, "ORIGIN", 6) && !feof(input))
    {
       if(!strncmp(longstr,"     CDS",8))
       {
          ex= 0;
          if(strstr(longstr,"join"))
-         { ex= 0;
+         {
             while(longstr[strlen(longstr)-2]==',')
             {
                fgets(extrastr,98,input);
