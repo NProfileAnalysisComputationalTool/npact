@@ -997,7 +997,7 @@ int score_orf_table(char *orf, int n, int tot_hss)
                 }
 
                 if(!flag)
-                    for(k= hss[tot_hss + h].fromp; k < hss[tot_hss + h].top && k <= hss[tot_hss + h].fromp + START_POS3; k += 3)
+                    for(k= hss[tot_hss + h].fromp; k < hss[tot_hss + h].top - mHL && k <= hss[tot_hss + h].fromp + START_POS3; k += 3)
                     {
 //					nt= 16 * orf[k] + 4 * orf[k + 1] + orf[k + 2];
 					nt= get_codon(orf + k, 1);
@@ -1013,7 +1013,7 @@ int score_orf_table(char *orf, int n, int tot_hss)
                     }
 
                 if(!flag)
-                    for(k= hss[tot_hss + h].fromp; k < hss[tot_hss + h].top && k <= hss[tot_hss + h].fromp + START_POS3; k += 3)
+                    for(k= hss[tot_hss + h].fromp; k < hss[tot_hss + h].top - mHL && k <= hss[tot_hss + h].fromp + START_POS3; k += 3)
                     {
 //					nt= 16 * orf[k] + 4 * orf[k + 1] + orf[k + 2];
 					nt= get_codon(orf + k, 1);
@@ -1038,7 +1038,7 @@ int score_orf_table(char *orf, int n, int tot_hss)
                     }
 
                 if(!flag)
-                    for(k= hss[tot_hss + h].fromp; k < hss[tot_hss + h].top && k <= hss[tot_hss + h].fromp + START_POS3; k += 3)
+                    for(k= hss[tot_hss + h].fromp; k < hss[tot_hss + h].top - mHL && k <= hss[tot_hss + h].fromp + START_POS3; k += 3)
                     {
 //					nt= 16 * orf[k] + 4 * orf[k + 1] + orf[k + 2];
 					nt= get_codon(orf + k, 1);
@@ -1062,7 +1062,7 @@ int score_orf_table(char *orf, int n, int tot_hss)
                     }
 
                 if(!flag)
-                    for(k= hss[tot_hss + h].fromp; k < hss[tot_hss + h].top && k <= hss[tot_hss + h].fromp + START_POS3; k += 3)
+                    for(k= hss[tot_hss + h].fromp; k < hss[tot_hss + h].top - mHL && k <= hss[tot_hss + h].fromp + START_POS3; k += 3)
                     {
 //					nt= 16 * orf[k] + 4 * orf[k + 1] + orf[k + 2];
 					nt= get_codon(orf + k, 1);
@@ -1086,7 +1086,7 @@ int score_orf_table(char *orf, int n, int tot_hss)
                     }
 
                 if(!flag)
-                    for(k= hss[tot_hss + h].fromp; k < hss[tot_hss + h].top && k <= hss[tot_hss + h].fromp + START_POS3; k += 3)
+                    for(k= hss[tot_hss + h].fromp; k < hss[tot_hss + h].top - mHL && k <= hss[tot_hss + h].fromp + START_POS3; k += 3)
                     {
 //					nt= 16 * orf[k] + 4 * orf[k + 1] + orf[k + 2];
 					nt= get_codon(orf + k, 1);
@@ -1761,7 +1761,7 @@ int maxG_test(char *seq, int len, int ori, char strand, int frame, int orfn, int
 					}
 
 					if(!flags)
-						for(j= hss[hit].fromp; j < hss[hit].top && j <= hss[hit].fromp + START_POS3; j += 3)
+						for(j= hss[hit].fromp; j < hss[hit].top - mHL && j <= hss[hit].fromp + START_POS3; j += 3)
 						{
 			    nt= get_codon(seq + j, 1);
 							if(nt == 14) { hss[hit].start_pos= j; j= hss[hit].top; flags= 1; }
@@ -1775,7 +1775,7 @@ int maxG_test(char *seq, int len, int ori, char strand, int frame, int orfn, int
 						}
 
 					if(!flags)
-						for(j= hss[hit].fromp; j < hss[hit].top && j <= hss[hit].fromp + START_POS3; j += 3)
+						for(j= hss[hit].fromp; j < hss[hit].top - mHL && j <= hss[hit].fromp + START_POS3; j += 3)
 						{
 			    nt= get_codon(seq + j, 1);
 							if(nt == 46) { hss[hit].start_pos= j; j= hss[hit].top; flags= 3; }
@@ -1797,7 +1797,7 @@ int maxG_test(char *seq, int len, int ori, char strand, int frame, int orfn, int
 						}
 
 					if(!flags)
-						for(j= hss[hit].fromp; j < hss[hit].top && j <= hss[hit].fromp + START_POS3; j += 3)
+						for(j= hss[hit].fromp; j < hss[hit].top - mHL && j <= hss[hit].fromp + START_POS3; j += 3)
 						{
 			    nt= get_codon(seq + j, 1);
 							if(nt == 62) { hss[hit].start_pos= j; j= hss[hit].top; flags= 5; }
@@ -1818,7 +1818,7 @@ int maxG_test(char *seq, int len, int ori, char strand, int frame, int orfn, int
 						}
 
 					if(!flags)
-						for(j= hss[hit].fromp; j < hss[hit].top && j <= hss[hit].fromp + START_POS3; j += 3)
+						for(j= hss[hit].fromp; j < hss[hit].top - mHL && j <= hss[hit].fromp + START_POS3; j += 3)
 						{
 			    nt= get_codon(seq + j, 1);
 							if(nt == 30) { hss[hit].start_pos= j; j= hss[hit].top; flags= 7; }
@@ -1839,7 +1839,7 @@ int maxG_test(char *seq, int len, int ori, char strand, int frame, int orfn, int
 						}
 
 					if(!flags)
-						for(j= hss[hit].fromp; j < hss[hit].top && j <= hss[hit].fromp + START_POS3; j += 3)
+						for(j= hss[hit].fromp; j < hss[hit].top - mHL && j <= hss[hit].fromp + START_POS3; j += 3)
 						{
 			    nt= get_codon(seq + j, 1);
 							if(nt == 15) { hss[hit].start_pos= j; j= hss[hit].top; flags= 9; }
