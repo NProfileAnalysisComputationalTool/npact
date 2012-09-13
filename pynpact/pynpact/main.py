@@ -267,11 +267,16 @@ period_of_frame       Number of frames.
 
 """
         #figure out hashed filename of ps output.
-        hashkeys = self.AP_file_keys + [
+        hashkeys = set(
+            self.AP_file_keys + [
             'first_page_title', 'following_page_title',
             'length', 'start_base', 'end_base', 'period', 'bp_per_page',
             'nucleotides', 'alternate_colors']
+            )
+
+        #this hash is used down below for the final combined pages file
         config,hash = util.reducehashdict(self.config, hashkeys)
+        #get the list of filenames this step depends on.
         dependencies = map(config.get, self.AP_file_keys)
 
         page_count = math.ceil((config['end_base'] - config['start_base']) * 1.0 / config['bp_per_page'])
@@ -286,9 +291,13 @@ period_of_frame       Number of frames.
         #end_base, so leave that out.  We keep updating the
         #start_base in *this* config (different than the general
         #one).
-        pconfkeys = set(hashkeys).difference(set(["end_base"]))
-
+        pconfkeys = hashkeys.difference(set(["end_base"]))
+        
         while (config['start_base'] < config['end_base']):
+            if (config['start_base'] + config['bp_per_page']) >= config['end_base']:
+                #we're on the last page: end base should be included in pconfkeys
+                pconfkeys = hashkeys
+            
             pconfig,phash = util.reducehashdict(config, pconfkeys)
             def _ap(psout):
                 self.timer.check("Generating %d pages of graphical output: %2d%%" %
@@ -302,9 +311,13 @@ period_of_frame       Number of frames.
                     cmd.append("-C")
 
                 #add the rest of the required args
-                cmd += [config['start_base'], config['bp_per_page'], 
-                        5, 1000, #TODO: move these into config
-                        config['period']]
+                cmd += [config['start_base'],
+                        config['bp_per_page'],
+                        #TODO: move these into config
+                        5,    #lines on a page
+                        1000, #Number of subdivisions
+                        config['period'],
+                        config['end_base']]
 
                 with capproc.guardPopen(cmd, stdin=PIPE,
                                         stdout=psout,
