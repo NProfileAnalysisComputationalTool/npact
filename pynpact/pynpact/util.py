@@ -14,6 +14,8 @@ def reducehashdict(dict, keys):
     """
     outdict= {}
     h = hashlib.sha1()
+    #We go through in sorted order to ensure stability of the ordering
+    #between runs.
     for k in sorted(keys):
         val = dict.get(k)
         if val is not None:

@@ -42,12 +42,13 @@ char NAME[100];
 char NUCLEOTIDES[10];
 
 void printHelp() {
-    fprintf(stderr,"\nUsage:\n\n  Allplots start interval lines [x-tics period_of_frames]\n");
-    fprintf(stderr,"\nstart                 Genome interval first base.");
-    fprintf(stderr,"\ninterval              Number of bases.\n");
-    fprintf(stderr,"\nlines                 Number of lines on page (one page).\n");
-    fprintf(stderr,"\nx-tics                Number of subdivisions.\n");
-    fprintf(stderr,"\nperiod_of_frame       Number of frames.\n");
+    fprintf(stderr,"\nUsage:\n\n  Allplots start interval lines [x-tics] [period_of_frames] [end_base]\n");
+    fprintf(stderr,"start                 Genome interval first base.\n");
+    fprintf(stderr,"interval              Number of bases.\n");
+    fprintf(stderr,"lines                 Number of lines on page (one page).\n");
+    fprintf(stderr,"x-tics                Number of subdivisions.\n");
+    fprintf(stderr,"period_of_frame       Number of frames.\n");
+    fprintf(stderr,"end_base              Genome interval of final base.\n");
 
     fprintf(stderr,"\nNeeds imput file \"Allplots.def\" of the form:\n\n");
     fprintf(stderr,"Plot_title\n");
@@ -75,6 +76,7 @@ void printHelp() {
     fprintf(stderr,"File_of_palindrom_positions_and_size\n");
     fprintf(stderr,"File_list_of_nucleotides_in_200bp windows.\n");
     fprintf(stderr,"File_list_of_reads.\n");
+    fprintf(stderr,"Allplots.def should be in the current directory or provided on stdin with the --stdin option\n");
 }
 
 int quiet = 0;
@@ -216,9 +218,8 @@ main(int argc, char *argv[]) {
 
     char **pub_name=NULL,**mod_name=NULL,**new_name=NULL,**newP_name=NULL;
 
-    char	longstr[200],*p,tatastr[20],*title1,*title2,ts[2];
-    FILE	*input,*files;
-
+    char longstr[200], *p, tatastr[20], *title1, *title2, ts[2];
+    FILE *input, *files;
 
     /**** Parse command line options ****/
     while (argi < argc && argv[argi][0] == '-') {
@@ -234,9 +235,13 @@ main(int argc, char *argv[]) {
             logmsg(0,"Using alternate color scheme.\n");
         }
         else if(strcmp(opt, "--stdin") == 0) {
-            /* read Allplots.def from stdin; not yet impletmented. */
+            /* read Allplots.def from stdin instead of from file */
             use_stdin = 1;
             argi++;
+        }
+        else if(strcmp(opt, "-h") == 0) {
+            printHelp();
+            exit(0);
         }
         else {
             logmsg(20,"Got invalid optional argument %s", opt)
@@ -268,9 +273,9 @@ main(int argc, char *argv[]) {
     /****** Parse definition file ******/
     logmsg(10, "Starting read of Allplots.def\n");
     files = use_stdin ? stdin : fopen("Allplots.def","r");
-    if(!files) {
+    if(!files || feof(files)) {
         printHelp();
-        logmsg(20, "Couldn't find Allplots.def in current directory.\n");
+        logmsg(20, "Missing or empty Allplots.def.\n");
         exit(1);
     }
 
