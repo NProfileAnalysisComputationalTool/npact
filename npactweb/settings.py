@@ -47,6 +47,8 @@ USE_L10N = False
 # Example: "/home/media/media.lawrence.com/media/"
 MEDIA_ROOT = ppath('uploads',True)
 
+QUEUE_DIR = ppath('tasqueue', True)
+
 # how many days should we keep uploaded files and products that
 # haven't been accessed before we delete them.
 MEDIA_RETAIN_FOR=7
