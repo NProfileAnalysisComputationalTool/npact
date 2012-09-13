@@ -275,11 +275,12 @@ main(int argc, char *argv[]) {
     if(argi < argc)
         period = atoi(argv[argi++]);
 
-    /* What's the final base we should evaluate through UNIMPLEMENTED */
+    /* What's the final base we should evaluate through */
     if(argi < argc)
         tend = atoi(argv[argi++]);
     else
         tend = tstart + bp_per_page;
+    logmsg(0, "Using end value %d\n", tend);
 
 
     /****** Parse definition file ******/
@@ -361,7 +362,10 @@ main(int argc, char *argv[]) {
         n= N= nub= nc= nn= nnP= ncg= nm= nk= nt= ncap= ncca= ngcb= ns= np= ne= nb= nB= ncp= nScp= npali= 0;
         start= tstart + k*line_range;
         end= tstart + (k+1)*line_range;
-        if(end > len) end= len;
+        if(end > len) end = len;
+        if(end > tend) end = tend;
+        if(end < start) break;
+
 
         if(input=fopen(BLOCK_file,"r")) {
             while(fgets(longstr,198,input) && !feof(input)) {
