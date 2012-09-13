@@ -89,13 +89,13 @@ int quiet = 0;
 char * ap_getl(FILE * f) {
     size_t size = 0,last= 0, len = 0;
     char * buf  = NULL;
-    if(feof(f)) 
+    if(feof(f))
         return NULL;
     do {
         /* BUFSIZ is defined as "the optimal read size for this platform" */
-        size += BUFSIZ; 
+        size += BUFSIZ;
         /* realloc(NULL,n) is the same as malloc(n) */
-        buf = (char*) realloc(buf,size); 
+        buf = (char*) realloc(buf,size);
         /* Actually do the read. Note that fgets puts a terminal '\0'
            on the end of the string, so we make sure we overwrite
            this */
@@ -433,7 +433,7 @@ main(int argc, char *argv[]) {
                 Scodpot_type= (char *)realloc(Scodpot_type,(nScp+1)*sizeof(char));
                 Scodpot= (int **)realloc(Scodpot,(nScp+1)*sizeof(int *));
                 Scodpot[nScp]= (int *)malloc(2*sizeof(int));
-		Scodpot_type[nScp]= longstr[0];
+                Scodpot_type[nScp]= longstr[0];
                 p= strchr(longstr,'.');
                 ge= atoi(p+2);
                 if(longstr[2]=='c') { gs= atoi(longstr+13); Scodpot_str[nScp]='C'; Scodpot_col[nScp]= gs%period; }
