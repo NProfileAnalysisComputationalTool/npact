@@ -51,7 +51,7 @@ void printHelp() {
     fprintf(stderr,"end_base              Genome interval of final base.\n");
 
     fprintf(stderr,"\nNeeds imput file \"Allplots.def\" of the form:\n\n");
-    fprintf(stderr,"Plot_title\n");
+    fprintf(stderr,"<Plot_title> <gbkfile length>\n");
     fprintf(stderr,"Nucleotide(s)_plotted (e.g.: C+G)\n");
     fprintf(stderr,"First-page title\n");
     fprintf(stderr,"Title of following pages\n");
@@ -188,11 +188,18 @@ main(int argc, char *argv[]) {
     char* opt;
     int argi = 1;
     char use_stdin=0;
+    int tstart, bp_per_page, tend, lines, period=3;
 
-    int	i, j, k, d, n, N, lines, nub, nc, nn, nnP, np, ne, nb, ns, ncg, nB, ncp, nScp, nm, nk, nt, ncap, ncca, ngcb, gs, ge, lp, len, period=3, swflag=1,
-        start, end, pos, tstart, name_pos, name_len, line_range, unbf=0, conf=0, newf=0, newPf=0, cgf=0, cpf= 0, Scpf= 0, npali= 0, wind,
-	pub_line[300 + 2 * HANGOVER], new_line[300 + 2 * HANGOVER], exc_line[300 + 2 * HANGOVER], newP_line[300 + 2 * HANGOVER],
-	pub_cline[300 + 2 * HANGOVER], new_cline[300 + 2 * HANGOVER], exc_cline[300 + 2 * HANGOVER], newP_cline[300 + 2 * HANGOVER];
+    /* other counters, values, variables for the program */
+
+    int	i, j, k, d, n, N, nub, nc, nn, nnP, np, ne, nb, ns, ncg, nB, ncp, nScp,
+        nm, nk, nt, ncap, ncca, ngcb, gs, ge, lp, len, swflag=1,
+        start, end, pos, name_pos, name_len, line_range,
+        unbf=0, conf=0, newf=0, newPf=0, cgf=0, cpf= 0, Scpf= 0, npali= 0, wind,
+        pub_line[300 + 2 * HANGOVER], new_line[300 + 2 * HANGOVER],
+        exc_line[300 + 2 * HANGOVER], newP_line[300 + 2 * HANGOVER],
+        pub_cline[300 + 2 * HANGOVER], new_cline[300 + 2 * HANGOVER],
+        exc_cline[300 + 2 * HANGOVER], newP_cline[300 + 2 * HANGOVER];
     float	y1, y2, r, tpr, delta, pp, S[3];
 
     /* Filename buffers */
@@ -255,21 +262,26 @@ main(int argc, char *argv[]) {
     }
 
     tstart = atoi(argv[argi++]);
-    line_range = atoi(argv[argi++]);
+    bp_per_page = atoi(argv[argi++]);
     lines = atoi(argv[argi++]);
-    line_range /= lines;
+    line_range = bp_per_page / lines;
     delta = (float)(line_range);
 
-
-    if(argi < argc) 
+    if(argi < argc)
         TIC_X = atof(argv[argi++]);
-    else       
+    else
         TIC_X = (float)(line_range/10);
 
-    if(argi < argc) 
+    if(argi < argc)
         period = atoi(argv[argi++]);
 
-    
+    /* What's the final base we should evaluate through UNIMPLEMENTED */
+    if(argi < argc)
+        tend = atoi(argv[argi++]);
+    else
+        tend = tstart + bp_per_page;
+
+
     /****** Parse definition file ******/
     logmsg(10, "Starting read of Allplots.def\n");
     files = use_stdin ? stdin : fopen("Allplots.def","r");
@@ -339,7 +351,7 @@ main(int argc, char *argv[]) {
 
     logmsg(10, "\nData read from position %d to position %d.\n", tstart, tstart+line_range);
     logmsg(10, "Nucleotide frequencies computed with period %d\n", period);
-    logmsg(10, "Plots of %d line per page, %d positions per line,tics every %.0f positions.\n", 
+    logmsg(10, "Plots of %d line per page, %d positions per line,tics every %.0f positions.\n",
            lines, line_range, TIC_X);
 
 
