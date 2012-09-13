@@ -40,6 +40,8 @@ class GenBankProcessor(object ):
        to create intermediate and PS files in.
      * cleanup: (default: False) Should the temporary files (not
        intermediate products) be deleted in case of errors
+     * timeout: (default: None) Don't start a new processing step if
+       this number of seconds has already elapsed
 
 """
     #
