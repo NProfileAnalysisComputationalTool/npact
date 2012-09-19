@@ -14,51 +14,21 @@
 #   * have one process doing the dequeue, use multiprocessing module beyond that.
  
 
-
+http://pypi.python.org/pypi/python-daemon/
 """
 
-import os
 import logging
-import tempfile
 import sys
 from optparse import OptionParser
 
 from path import path
 
-from pynpact import capproc
-from npactweb import library_root
 
-if not 'DJANGO_SETTINGS_MODULE' in os.environ:
-    os.environ['DJANGO_SETTINGS_MODULE'] = 'settings'
-from django.conf import settings
+logger = logging.getLogger('taskqueue.daemon')
 
-
-logger = logging.getLogger('taskqueue')
-
-def get_queue_directory():
-    return path(settings.QUEUE_DIR).realpath()
-
-def enqueue(task, args):
-    """Enqueue a task. 
-
-    Task should be the name of afully referenced python callable and
-    will be passed the given args. Everything should be picklable.
-    """
-    fd,abspath = tempfile.mkstemp(dir=get_queue_directory())
-    #write task as first line
-    #write args as pickled rest
-    
-
-def status(id):
-    """Gets the current status of the identified task"""
-    pass
-
-
-def dequeue():
-    pass
 
 def setup_logger(verbose):
-    logging.basicConfig("", level=(verbose and logging.DEBUG or logging.WARNING),
+    logging.basicConfig( level=(verbose and logging.DEBUG or logging.WARNING),
                         format="%(asctime)s %(name)-10s %(levelname)-8s %(message)s",
                         datefmt='%H:%M:%S')
     if verbose:
@@ -75,14 +45,10 @@ if __name__ == '__main__' :
 
     (options,args) = parser.parse_args()
     setup_logger(options.verbose)
-
-    if not 'DJANGO_SETTINGS_MODULE' in os.environ:
-        os.environ['DJANGO_SETTINGS_MODULE'] = 'settings'
-
     try:
-        from django.conf import settings
-        
-        sys.exit(rc)
+        from taskqueue import server
+        server.Server().run()
+        sys.exit(0)
     except SystemExit:
         raise
     except:
