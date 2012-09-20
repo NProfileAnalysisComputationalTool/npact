@@ -22,13 +22,17 @@ import tempfile
 from multiprocessing.connection import Listener
 from path import path
 
-from pynpact import capproc
+
 import taskqueue
 
 
 
 log = logging.getLogger(__name__)
 
+class Task(object):
+    backing_file = None
+    desc = None
+    promise = None
 
 class Server(object):
     socket = None
@@ -52,8 +56,7 @@ class Server(object):
             try:
                 response = self.dispatch(message)
             except Exception,e:
-                response = {'status': 'error', 'description': e}
-
+                response = {'status': 'error', 'exception': e}
             pipe.send(response)
         log.info("Exiting")
 
@@ -66,35 +69,38 @@ class Server(object):
     def dispatch(self, message):
         log.debug("Got message: %r", message)
         if not 'action' in message:
-            raise
+            raise ArgumentError('Message must contain action')
         else:
-            action = message['action']
-        if 'enqueue' == action:
-            task = message['task']
-            #an AsyncResult object not sure if we can pass it back.
-            promise = self.pool.apply_async(*task)
-            id = self.random_id()
-            self.tasks[id] = promise
-            return {'status': 'ok', 'id': id, }
+            action = message.pop('action')
 
-        elif 'ready' == action:
-            id = message['id']
-            if id in self.tasks:
-                promise = self.tasks[id]
-                return {'status': 'ok', 'ready': promise.ready(), 'id': id}
-            else:
-                return Exception("No such task")
-        elif 'result' == action:
-            id = message['id']
-            if id in self.tasks:
-                promise = self.tasks[id]
-                try:
-                    return {'status':'ok',
-                            'ready': True,
-                            'result': promise.get()}
-                except multiprocessing.TimeoutError, te:
-                    return {'status': 'ok', 'ready': False, 'id': id}
-            else:
-                return Exception("No such task")
+        if action in ['enqueue','result','ready']:
+            try:
+                r = getattr(self, action)(**message)
+                return {'status': 'ok', 'result': r}
+            except Exception,e:
+                log.exception("Error handling request.")
+                return {'status': 'error', 'exception': e}
         else:
             return Exception("Unknown command")
+
+    
+    def ready(self, id):
+        if id in self.tasks:
+            promise = self.tasks[id]
+            return promise.ready()
+        else:
+            raise Exception("No such task")
+
+    def result(self, id):
+        if id in self.tasks:
+            promise = self.tasks[id]
+            return promise.get(0)
+        else:
+            return Exception("No such task")
+
+    def enqueue(self, task):
+        #an AsyncResult object not sure if we can pass it back.
+        promise = self.pool.apply_async(*task)
+        id = self.random_id()
+        self.tasks[id] = promise
+        return id

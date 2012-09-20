@@ -7,28 +7,30 @@ from multiprocessing.connection import Client
 from optparse import OptionParser
 
 from path import path
-from pynpact import capproc
 import taskqueue
 
 
 logger = logging.getLogger(__name__)
 
+def client_call(action, **kwargs):
+    client = Client(taskqueue.LISTEN_ADDRESS, authkey=taskqueue.AUTH_KEY)
+    kwargs['action'] = action
+    client.send(kwargs)
+    response =  client.recv()
+    if response['status'] == 'ok':
+        return response['result']
+    elif 'exception' in response:
+        raise response['exception']
+    else:
+        raise Exception("Bad Response", response)
+
 
 def ready(id):
-    client = Client(taskqueue.LISTEN_ADDRESS, authkey=taskqueue.AUTH_KEY)
-    client.send({'action': 'ready',
-                 'id': id})
-    return client.recv()
+    return client_call('ready', id=id)
+
 
 def enqueue(task):
-    client = Client(taskqueue.LISTEN_ADDRESS, authkey=taskqueue.AUTH_KEY)
-    client.send({'action': 'enqueue',
-                 'task': task})
-    return client.recv()
-    
+    return client_call('enqueue', task=task)
 
 def result(id):
-    client = Client(taskqueue.LISTEN_ADDRESS, authkey=taskqueue.AUTH_KEY)
-    client.send({'action': 'result',
-                 'id': id})
-    return client.recv()
+    return client_call('action', id=id)
