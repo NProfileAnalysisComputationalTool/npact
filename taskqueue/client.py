@@ -29,8 +29,8 @@ def ready(id):
     return client_call('ready', id=id)
 
 
-def enqueue(task):
-    return client_call('enqueue', task=task)
+def enqueue(fn, args=[], kwargs={}):
+    return client_call('enqueue', fn=fn, args=args, kwargs=kwargs)
 
 def result(id):
-    return client_call('action', id=id)
+    return client_call('result', id=id)
