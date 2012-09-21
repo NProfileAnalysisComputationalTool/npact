@@ -35,6 +35,16 @@ def reducedict(dict, keys):
             out[k] = dict[k]
     return out
 
+def hashdict(dict):
+    h = hashlib.sha1()
+    for k in sorted(dict.keys()):
+        val = dict.get(k)
+        if val is not None:
+            h.update(k)
+            h.update(str(val))
+    return h.hexdigest()
+        
+
 
 def ensure_dir(dir, logger=None):
     if not os.path.exists(dir):
