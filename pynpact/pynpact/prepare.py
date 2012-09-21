@@ -85,7 +85,9 @@ def make_seq_unknown(seq_record):
 
 
 
+#TODO: This should probably be on disk so it can be shared amongst processes.
 parse_cache = {}
+
 def try_parse(abs_path, force=False):
     if not os.path.exists(abs_path):
         return None
