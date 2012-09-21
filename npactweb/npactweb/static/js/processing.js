@@ -1,33 +1,33 @@
-//set up spindowns	
+//set up spindowns
 
 $.fn.spinDown = function() {
-	return this.click(
+    return this.click(
             function() {
-		var $this = $(this);
-		$this.next().slideToggle();
-		//$this.find('.ui-icon').toggleClass('ui-icon-triangle-1-s');
-		return false;
-		
-	});
-	
+        var $this = $(this);
+        $this.next().slideToggle();
+        //$this.find('.ui-icon').toggleClass('ui-icon-triangle-1-s');
+        return false;
+
+    });
+
 };
 
-// The .bind method from Prototype.js 
+// The .bind method from Prototype.js
 if (!Function.prototype.bind) { // check if native implementation available
-  Function.prototype.bind = function(){ 
+  Function.prototype.bind = function(){
     var fn = this, args = Array.prototype.slice.call(arguments),
-        object = args.shift(); 
-    return function(){ 
-      return fn.apply(object, 
-        args.concat(Array.prototype.slice.call(arguments))); 
-    }; 
+        object = args.shift();
+    return function(){
+      return fn.apply(object,
+        args.concat(Array.prototype.slice.call(arguments)));
+    };
   };
 }
 
 
 var progress = {
     start: null,
-    
+
     init: function(url) {
         progress.url = url;
         window.setTimeout(progress.startRequest, 50);
@@ -91,12 +91,12 @@ var progress = {
         //async call
         if(data.next=='results')
             setTimeout(progress.processResults.bind(progress, data));
-        else 
+        else
             setTimeout(progress.startRequest.bind(progress, data));
 
         setTimeout(progress.updateStatusDisplay.bind(progress, data));
     },
-    
+
     processResults: function(data) {
         console.log('finished: ', data.download_url);
         if(progress.interval)
@@ -109,7 +109,7 @@ var progress = {
 
         //setTimeout(function() {window.location = data.download_url; }, 800);
     },
-    
+
     updateTimer: function (){
         if(progress.start) {
             $('#timer').fadeIn();
