@@ -48,16 +48,16 @@ def open_parse_gb_rec(gbkfile, reduce_first=False):
     if reduce_first:
         raise NotImplementedError("reduce_first option must be False for now")
 
-    #rec = GenBankScanner().parse(open('NC_007912.gbk','r'), do_features=False) 
+    #rec = GenBankScanner().parse(open('NC_007912.gbk','r'), do_features=False)
     #SeqIO.read(gbkfile,"genbank")
 
-    with open(gbkfile,'r') as handle: 
+    with open(gbkfile,'r') as handle:
         rp = Bio.GenBank.RecordParser()
         #rp._scanner = Bio.GenBank.Scanner.GenBankScanner()
         rp._consumer = Bio.GenBank._RecordConsumer()
         rp._scanner.feed(handle, rp._consumer, do_features=False)
         return rp._consumer.data
-    
+
 def open_parse_seq_rec(gbkfile, reduce_first=False, do_features=False):
     """Open the GenBank file using the underlying biopython libraries
     so we can get at the do_features keyword (False is generally quite
@@ -71,10 +71,10 @@ def open_parse_seq_rec(gbkfile, reduce_first=False, do_features=False):
     logger.info("Parsing genbank file (features:%s): %r",
                 do_features, gbkfile)
 
-    #rec = GenBankScanner().parse(open('NC_007912.gbk','r'), do_features=False) 
+    #rec = GenBankScanner().parse(open('NC_007912.gbk','r'), do_features=False)
     #SeqIO.read(gbkfile,"genbank")
-    
-    with open(gbkfile,'r') as handle: 
+
+    with open(gbkfile,'r') as handle:
         rp = Bio.GenBank.FeatureParser()
         rp._consumer = Bio.GenBank._FeatureConsumer(rp.use_fuzziness,rp._cleaner)
         rp._scanner.feed(handle, rp._consumer, do_features=do_features)
@@ -110,7 +110,7 @@ def try_parse(abs_path, force=False):
         gbrec = open_parse_seq_rec(abs_path)
         if isinstance(gbrec.seq, Bio.Seq.UnknownSeq):
             raise InvalidGBKException("File contains no sequence data.")
-        
+
         data['length'] = len(gbrec)
         data['id'] = gbrec.id
         data['date'] = gbrec.annotations.get('date')
@@ -120,7 +120,7 @@ def try_parse(abs_path, force=False):
         raise
     except:
         logger.debug("Failed parsing %r, trying regex search.", abs_path)
-        
+
         match = re.search(r'(\d+) ?bp', open(abs_path).readline())
         if match :
             data['length'] = match.group(1)
@@ -129,7 +129,7 @@ def try_parse(abs_path, force=False):
 
     if 'length' in data:
         data['end_base'] = data['length']
-        
+
 
     parse_cache[abs_path] = (mtime,data)
     return data
@@ -160,7 +160,7 @@ def default_config(abs_path):
 
         'bp_per_page': 50000,
         'start_base': 0,
-        
+
         }
 
 

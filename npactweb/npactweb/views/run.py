@@ -70,7 +70,7 @@ def get_display_items(request, config):
         if config.get(key):
             yield key, config.get(key)
 
-        
+
 def config(request, path):
     "The config view. Renders the configform for the given gbkpath."
     assert_clean_path(path, request)
@@ -129,7 +129,7 @@ def build_config(path, request):
         config.update(cf.cleaned_data)
 
     return config
-    
+
 def encode_config(config, **urlconf):
     for k in ConfigForm().fields.keys():
         v = config.get(k, None)
@@ -212,7 +212,7 @@ def run_step(request, path):
     assert_clean_path(path, request)
     gbp,config,result = None,None,None
     status=200
-    
+
     try:
         config = request.session.get(path)
         #the frame is supposed to ensure this is in session.
@@ -252,7 +252,7 @@ def run_step(request, path):
 
     except:
         logger.exception("Error building file list.")
-        
+
     return HttpResponse(json.dumps(result), status=status)
 
 

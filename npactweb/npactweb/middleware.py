@@ -34,7 +34,7 @@ class SaveTraceExceptionMiddleware(object):
         if not settings.DEBUG and settings.EXC_TRAC_PATH:
             try:
                 tech_response = technical_500_response(request, *sys.exc_info())
-                
+
                 error_id = datetime.now().isoformat("-").replace(":","-")
                 fname = "{0}/{1}.txt".format(settings.EXC_TRACE_PATH, error_id)
                 with open(fname,"w") as fout:

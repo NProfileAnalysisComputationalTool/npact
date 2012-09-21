@@ -43,7 +43,7 @@ def hashdict(dict):
             h.update(k)
             h.update(str(val))
     return h.hexdigest()
-        
+
 
 
 def ensure_dir(dir, logger=None):

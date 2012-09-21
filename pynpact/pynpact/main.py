@@ -249,7 +249,7 @@ class GenBankProcessor(object ):
 
     def write_allplots_def(self, config, page_num, stream):
         "Writes out an Allplots.def for a single run through of allplots."
-       
+
 
     def run_Allplots(self):
         """Actually invoke Allplots, once for each page we're generating.
@@ -280,7 +280,7 @@ period_of_frame       Number of frames.
         dependencies = map(config.get, self.AP_file_keys)
 
         page_count = math.ceil((config['end_base'] - config['start_base']) * 1.0 / config['bp_per_page'])
-        
+
         #build the individual ps page files.
         filenames = []
 
@@ -292,12 +292,12 @@ period_of_frame       Number of frames.
         #start_base in *this* config (different than the general
         #one).
         pconfkeys = hashkeys.difference(set(["end_base"]))
-        
+
         while (config['start_base'] < config['end_base']):
             if (config['start_base'] + config['bp_per_page']) >= config['end_base']:
                 #we're on the last page: end base should be included in pconfkeys
                 pconfkeys = hashkeys
-            
+
             pconfig,phash = util.reducehashdict(config, pconfkeys)
             def _ap(psout):
                 self.timer.check("Generating %d pages of graphical output: %2d%%" %
@@ -350,7 +350,7 @@ period_of_frame       Number of frames.
             self.safe_produce_new(psname, _ap, dependencies=dependencies)
             page_num += 1
             config['start_base'] += config['bp_per_page']
-                
+
 
 
         def combine_ps_files(psout):
