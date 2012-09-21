@@ -403,6 +403,11 @@ period_of_frame       Number of frames.
         return val
 
 
+def process_all(path, config):
+    gbp = GenBankProcessor(path, config=config)
+    gbp.process()
+    return gbp.config
+
 
 if __name__ == '__main__':
     parser = OptionParser("""%prog <genebank file>""")

@@ -108,7 +108,7 @@ class Server(object):
             if os.path.exists(path):
                 return self.unpickle_task(id, path)
             else:
-                raise Exception("No such task")
+                raise taskqueue.NoSuchTaskError()
 
     def pickle_task(self, task):
         with tempfile.NamedTemporaryFile(delete=False, dir=self.work_dir, prefix='tq-', suffix='.todo') as f:

@@ -3,6 +3,7 @@ import logging
 import os
 import os.path
 import json
+from datetime import datetime
 
 from django import forms
 from django.conf import settings
@@ -12,13 +13,17 @@ from django.http import HttpResponseRedirect, HttpResponse
 from django.shortcuts import render_to_response
 from django.utils.http import urlencode
 from django.template import RequestContext
-from pynpact import prepare, main, util
+
+from pynpact import prepare, util
+from pynpact.main import process_all
 from pynpact.softtimeout import Timeout
 
 from npactweb import assert_clean_path, getabspath, getrelpath
 from npactweb.middleware import RedirectException
 
-#from npactweb.helpers import add_help_text
+from taskqueue import client, NoSuchTaskError
+
+
 
 # Get an instance of a logger
 logger = logging.getLogger(__name__)
@@ -136,14 +141,70 @@ def encode_config(config, **urlconf):
 def run_frame(request, path):
     """This is the main processing page. However, that page is just
     frame in which ajax requests spur the actual processing"""
+    assert_clean_path(path, request)
+
     config = build_config(path, request)
     request.session[path] = config
-    full_path = reverse('process',args=[path])
+
+
+    #TODO: Some logic here to see if they're already running a job and
+    #propose cancelling it
+
+    jobid = client.enqueue(process_all, [getabspath(path), config])
+    request.session[util.hashdict(config)] = jobid
+
+    full_path = reverse('runstatus',args=[jobid])
     return render_to_response('processing.html',
-                              {'path': full_path,
+                              {'statusurl': full_path,
                                'reconfigure_url': reverse('config', args=[path]) + encode_config(config),
                                },
                               context_instance=RequestContext(request))
+
+def run_status(request, jobid):
+    config = None
+    result = {}
+    status = 200
+
+    try:
+        ready = client.ready(jobid)
+    except NoSuchTaskError:
+        result['message'] = 'Unknown task identifier. Please retry.'
+        status = 500
+    except Exception,e:
+        result['message'] = 'Fatal error.'
+        status = 500
+        logger.exception("Error getting job status. %r", jobid)
+
+    if status != 200:
+        #something has already gone wrong.
+        return HttpResponse(json.dumps(result), status=status)
+
+    if not ready:
+        result['steps'] = ['Still running @ ' + str(datetime.now())]
+    else:
+        try:
+            config = client.result(jobid)
+        except NoSuchTaskError:
+            result['message'] = 'Unknown task identifier. Please retry.'
+            status = 500
+        except Exception,e:
+            result['message'] = 'Fatal error.'
+            status = 500
+            logger.exception("Error getting job result. %r", jobid)
+
+    if config:
+        pdf_url = get_raw_url(request, getrelpath(config['pdf_filename']))
+        result['next'] = 'results'
+        result['download_url'] = pdf_url
+
+        ago = config.get('acgt_gamma_output')
+        if ago:
+            result['files'] = [get_raw_url(request, os.path.join(ago, v))
+                               for v in os.listdir(ago)]
+
+    return HttpResponse(json.dumps(result), status=status)
+
+
 
 
 def run_step(request, path):
@@ -167,12 +228,12 @@ def run_step(request, path):
         logger.debug("Finished processing.")
         pspath = getrelpath(pspath)
         #url = reverse('results', args=[psname]) + encode_config(config, path=path)
-        result = {'next':'results', 
+        result = {'next':'results',
                   'download_url': get_raw_url(request, pspath),
                   'steps': gbp.timer.steps}
 
     except Timeout, pt:
-        result = {'next':'process', 
+        result = {'next':'process',
                   'steps': pt.steps,
                   }
     except:
@@ -183,7 +244,7 @@ def run_step(request, path):
     try:
         ago = config.get('acgt_gamma_output')
         if ago:
-            result['files'] = [get_raw_url(request, os.path.join(ago,v)) 
+            result['files'] = [get_raw_url(request, os.path.join(ago,v))
                                for v in os.listdir(ago)]
         # files = set([get_raw_url(request, v)
         #              for (k,v) in config.items()

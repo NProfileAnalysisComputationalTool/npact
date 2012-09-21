@@ -92,7 +92,7 @@ var progress = {
         if(data.next=='results')
             setTimeout(progress.processResults.bind(progress, data));
         else
-            setTimeout(progress.startRequest.bind(progress, data));
+            setTimeout(progress.startRequest.bind(progress, data), 4000);
 
         setTimeout(progress.updateStatusDisplay.bind(progress, data));
     },
