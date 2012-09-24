@@ -143,10 +143,10 @@ def run_frame(request, path):
     frame in which ajax requests spur the actual processing"""
     assert_clean_path(path, request)
     config = build_config(path, request)
-    
+
     jobid = kickstart(request, path, config)
 
-    
+
     full_path = reverse('runstatus',args=[jobid])
     return render_to_response('processing.html',
                               {'statusurl': full_path,
@@ -280,5 +280,3 @@ def kickstart(request, path, config):
 
     jobid = client.enqueue(main.process_all, [getabspath(path), config])
     return jobid
-
-

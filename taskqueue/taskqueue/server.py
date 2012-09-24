@@ -14,66 +14,47 @@ import multiprocessing
 import os.path
 import tempfile
 from multiprocessing.connection import Listener
+from multiprocessing.managers import SyncManager
 
 import taskqueue
 
-
 log = logging.getLogger(__name__)
+
+class Manager(SyncManager):
+    pass
+
+method_to_typeid = {
+    'get_task': 'AsyncResult'
+}
+
+def start_everything():
+    the_server = Server()
+    Manager.register('the_server', callable=lambda: the_server, method_to_typeid=method_to_typeid)
+    log.info("Opening a socket at %r", taskqueue.LISTEN_ADDRESS)
+    manager = Manager(taskqueue.LISTEN_ADDRESS, authkey=taskqueue.AUTH_KEY)
+    the_server.manager = manager
+    manager.get_server().serve_forever()
 
 
 class Server(object):
-    socket = None
     pool = None
     tasks = None
-    helper = None
-    helper_queue = None
     work_dir = '/tmp/'
-
+    manager = None
     def __init__(self, **kwargs):
         self.__dict__.update(kwargs)
-        self.pool = multiprocessing.Pool()
         self.tasks = dict()
-        log.info("Opening a socket at %r", taskqueue.LISTEN_ADDRESS)
-        self.socket = Listener(taskqueue.LISTEN_ADDRESS, authkey=taskqueue.AUTH_KEY, backlog=4)
-
-
-    def run(self):
-        log.info("Accepting connections")
-        while True:
-            pipe = self.socket.accept()
-            message = pipe.recv()
-            try:
-                response = self.dispatch(message)
-            except Exception,e:
-                response = {'status': 'error', 'exception': e}
-            pipe.send(response)
-        log.info("Exiting")
-
-    def dispatch(self, message):
-        log.debug("Got message: %r", message)
-        if not 'action' in message:
-            raise ArgumentError('Message must contain action')
-        else:
-            action = message.pop('action')
-
-        if action in ['enqueue','result','ready']:
-            try:
-                r = getattr(self, action)(**message)
-                return {'status': 'ok', 'result': r}
-            except Exception,e:
-                if not isinstance(e, multiprocessing.TimeoutError):
-                    log.exception("Error handling request.")
-                return {'status': 'error', 'exception': e}
-        else:
-            return Exception("Unknown command")
+        self.pool = multiprocessing.Pool()
 
 
     def ready(self, id):
+        log.debug("Checking on status of %s", id)
         promise = self.get_task(id)
         return promise.ready()
 
 
     def result(self, id):
+        log.debug("Checking on result of %s", id)
         promise = self.get_task(id)
         return promise.get(0.05)
 

@@ -21,7 +21,7 @@ logger = logging.getLogger('taskqueue.daemon')
 
 if __name__ == '__main__' :
     parser = OptionParser("""usage: %prog [options]
-    
+
     """)
 
     parser.add_option("-v", "--verbose", action="store_true", dest="verbose",
@@ -31,10 +31,10 @@ if __name__ == '__main__' :
     taskqueue.setup_logger(options.verbose)
     try:
         from taskqueue import server
-        server.Server().run()
+        server.start_everything()
         sys.exit(0)
     except SystemExit:
         raise
     except:
-        logger.exception("Error during cleanup.")
+        logger.exception("Error in daemon")
         sys.exit(1)
