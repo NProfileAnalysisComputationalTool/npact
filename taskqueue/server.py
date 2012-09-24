@@ -1,31 +1,21 @@
 #!/usr/bin/env python
 """
+This module listens on a TCP socket (specified by taskqueue.LISTEN_ADDRESS) and runs a worker pool.
 
+Tasks (a python callable and arguments) can be enqueued into the pool
+which returns an alphanumeric id to calling connection. That id can
+then be used to request the current status or final result of the
+task.
 
-# ENQUEUE:  mkstemp should guarantee uniquenames
-
-# DEQUEUE: list files in directory, sort by date modified, start working on job.
-#  * multiple pool processes?
-#   * have one process doing the dequeue, use multiprocessing module beyond that.
-
-
-http://pypi.python.org/pypi/python-daemon/
 """
 import cPickle
 import logging
 import multiprocessing
-import os
 import os.path
-import random
-import sys
 import tempfile
-
 from multiprocessing.connection import Listener
-from path import path
-
 
 import taskqueue
-
 
 
 log = logging.getLogger(__name__)
@@ -46,9 +36,6 @@ class Server(object):
         log.info("Opening a socket at %r", taskqueue.LISTEN_ADDRESS)
         self.socket = Listener(taskqueue.LISTEN_ADDRESS, authkey=taskqueue.AUTH_KEY, backlog=4)
 
-
-    def create_pool(self):
-        pass
 
     def run(self):
         log.info("Accepting connections")
@@ -93,7 +80,7 @@ class Server(object):
     def enqueue(self, fn, args=[], kwargs={}):
         path = self.pickle_task([fn, args, kwargs])
         id = os.path.splitext(os.path.basename(path))[0]
-        self.tasks[id] = self.pool.apply_async(async_do_and_cleanup, [id, path, fn, args, kwargs])
+        self.tasks[id] = self.pool.apply_async(async_wrapper, [id, path, fn, args, kwargs])
 
         return id
 
@@ -111,21 +98,30 @@ class Server(object):
                 raise taskqueue.NoSuchTaskError()
 
     def pickle_task(self, task):
+        "Writes the task definition to a file via pickle in case of server restart"
         with tempfile.NamedTemporaryFile(delete=False, dir=self.work_dir, prefix='tq-', suffix='.todo') as f:
             log.info("tempfile: %r", f.name)
             cPickle.dump(task, f, cPickle.HIGHEST_PROTOCOL)
             return f.name
 
     def unpickle_task(self, id, path):
+        "Read a task definition from file and restart that process."
         with open(path, 'rb') as f:
             task = cPickle.load(f)
         if path.endswith('todo'):
             log.warning("Unpickling a TODO task: %r", path)
-        promise = self.pool.apply_async(async_do_and_cleanup, [id, path] + task)
+        promise = self.pool.apply_async(async_wrapper, [id, path] + task)
         self.tasks[id] = promise
         return promise
 
-def async_do_and_cleanup(id, task_path, fn, args, kwargs):
+def async_wrapper(id, task_path, fn, args, kwargs):
+    """Wrapper function around executing a task to ensure env setup and teardown.
+
+    * This is run inside a pool process via the pool apply_async above.
+    * Ensures the job 'todo' file is marked finished
+    * sets up logging to a file for this task
+    """
+    
     try:
         rc = fn(*args, **kwargs)
         log.debug("Finished %r", id)

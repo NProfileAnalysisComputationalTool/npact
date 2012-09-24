@@ -1,18 +1,8 @@
 #!/usr/bin/env python
 """
 
-# This should be a daemon or a cron task?
+# This should be a daemon or a cron task?  daemon i think
 
-# there will be a queue directory that holds to be done tasks. 
-
-#Do tasks in the directory in date created order.
-
-# ENQUEUE:  mkstemp should guarantee uniquenames
-
-# DEQUEUE: list files in directory, sort by date modified, start working on job.
-#  * multiple pool processes?
-#   * have one process doing the dequeue, use multiprocessing module beyond that.
- 
 
 http://pypi.python.org/pypi/python-daemon/
 """
