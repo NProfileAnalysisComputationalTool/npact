@@ -114,6 +114,8 @@ class Server(object):
         self.tasks[id] = promise
         return promise
 
+
+
 def async_wrapper(id, task_path, fn, args, kwargs):
     """Wrapper function around executing a task to ensure env setup and teardown.
 
@@ -121,15 +123,29 @@ def async_wrapper(id, task_path, fn, args, kwargs):
     * Ensures the job 'todo' file is marked finished
     * sets up logging to a file for this task
     """
-    
+    task_base,task_ext = os.path.splitext(task_path)
+
+    ### Logging setup:
+    ### In this pro all logging should go to a file named after the task
+
+    log_path = task_base + ".log"
+    file_handler = logging.FileHandler(log_path, mode='a')
+    file_handler.setFormatter(logging.Formatter('%(asctime)s %(name)-10s'
+                                                ' %(levelname)-8s %(message)s',
+                                                datefmt='%Y%m%d %H:%M:%S'))
+    root_logger = logging.getLogger('')
+    #remove any other handlers from previous uses of this process.
+    for h in root_logger.handlers: root_logger.removeHandler(h)
+    root_logger.setLevel(logging.DEBUG)
+    root_logger.addHandler(file_handler)
+
     try:
         rc = fn(*args, **kwargs)
         log.debug("Finished %r", id)
     finally:
         try:
-            root,ext = os.path.splitext(task_path)
-            if os.path.exists(task_path) and ext == '.todo':
-                os.rename(task_path, root)
+            if os.path.exists(task_path) and task_ext == '.todo':
+                os.rename(task_path, task_base)
             else:
                 log.warning("Refinished finished task %r", id)
         except:
