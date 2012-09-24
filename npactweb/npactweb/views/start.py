@@ -11,11 +11,12 @@ from django.conf import settings
 from django.contrib import messages
 from django.core.urlresolvers import reverse
 from django.http import HttpResponseRedirect
-from django.shortcuts import render_to_response
+from django.shortcuts import render_to_response, redirect
 from django.template import RequestContext
 
 
 from npactweb import is_clean_path, getabspath, getrelpath, library_root
+from npactweb.helpers import dict_to_querystring
 from npactweb.middleware import RedirectException
 
 
@@ -35,15 +36,23 @@ def mksavefile(prefix):
     return (fd,abspath,relpath)
 
 
+def get_ti(size):
+    return forms.TextInput(attrs={'size':size})
 
 class StartForm(forms.Form):
     active = None
+    accordion_fields = ['file_upload','url','pastein','entrez_search_term']
     file_upload = forms.FileField(required=False)
-    url = forms.URLField(label="From URL",required=False)
+    url = forms.URLField(label="From URL",
+                         widget=get_ti(50),
+                         required=False)
     pastein = forms.CharField(label="Paste in as text",
                               widget=forms.Textarea(attrs={'rows':3, 'cols':""}),
                               required=False)
     entrez_search_term = forms.CharField(label="Accession Number", required=False)
+    email = forms.EmailField(required=False)
+
+    
 
     def __init__(self,*args,**kwargs):
         super(StartForm,self).__init__(*args,**kwargs)
@@ -133,9 +142,11 @@ def view(req) :
         if startform.is_valid():
 
             logger.info("Form is valid; action is %r", action)
-            path = startform.cleaned_data['path']
+            kwargs = startform.cleaned_data
+            path = kwargs.pop('path')
             if action in ['run', 'config']:
-                return HttpResponseRedirect(reverse(action, args=[path]))
+                return HttpResponseRedirect(reverse(action, args=[path]) + 
+                                            dict_to_querystring(kwargs))
             else:
                 logger.error("Unknown action %r", action)
                 messages.error(request, "Unknown action.")
@@ -172,9 +183,11 @@ def efetch(req, id):
         return re_search(req)
 
     path = getrelpath(abspath)
-    action=req.GET.get('action') or 'run'
+    remaining_args = req.GET
+    action = remaining_args.pop('action','run')
+
     if action in ['run', 'config']:
-        return HttpResponseRedirect(reverse(action, args=[path]))
+        return HttpResponseRedirect(reverse(action, args=[path])+ dict_to_querystring(remaining_args))
     else:
         logger.error("Unknown action %r", action)
         messages.error(req, "Unknown action.")

@@ -32,9 +32,11 @@
     {{ form.non_field_errors }}
     <div id="accordion">
       {% for field in form %}
-      <div
-           >
-        <h3 {% if field.html_name == form.active %}class="active"{% endif %}><a name="#"> {{ field.label_tag }} </a></h3>
+      {% if field.name in form.accordion_fields %}
+      <div>
+        <h3 {% if field.html_name == form.active %}class="active"{% endif %}>
+          <a name="#"> {{ field.label_tag }} </a>
+        </h3>
         <div>
           {{ field.errors }}
           {{ field }}
@@ -43,8 +45,13 @@
           {% endif %}
         </div>
       </div>
+      {% endif %}
       {% endfor %}
     </div>
+    <p>
+      Email me the results
+      {{ form.email }}
+    </p>
     <button class="Start" type="submit" name="action" value="run" 
             title="Get the analysis results based on default configuration.">
       Start Analysis!

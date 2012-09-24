@@ -15,7 +15,7 @@ from django.utils.http import urlencode
 from django.template import RequestContext
 
 from pynpact import prepare, util
-from pynpact.main import process_all
+from pynpact import main
 from pynpact.softtimeout import Timeout
 
 from npactweb import assert_clean_path, getabspath, getrelpath
@@ -54,7 +54,7 @@ class ConfigForm(forms.Form):
     start_base=forms.IntegerField()
     end_base=forms.IntegerField()
     alternate_colors=forms.BooleanField(required=False, label="Alternative colors")
-
+    email = forms.EmailField(required=False)
 
     def clean(self):
         cleaned_data = self.cleaned_data
@@ -142,17 +142,11 @@ def run_frame(request, path):
     """This is the main processing page. However, that page is just
     frame in which ajax requests spur the actual processing"""
     assert_clean_path(path, request)
-
     config = build_config(path, request)
-    request.session[path] = config
+    
+    jobid = kickstart(request, path, config)
 
-
-    #TODO: Some logic here to see if they're already running a job and
-    #propose cancelling it
-
-    jobid = client.enqueue(process_all, [getabspath(path), config])
-    request.session[util.hashdict(config)] = jobid
-
+    
     full_path = reverse('runstatus',args=[jobid])
     return render_to_response('processing.html',
                               {'statusurl': full_path,
@@ -205,55 +199,56 @@ def run_status(request, jobid):
     return HttpResponse(json.dumps(result), status=status)
 
 
+### This isn't used anymore (in favor of runstatus). Not deleted yet
+### in case we want to try to keep this branch as a fallback path in
+### case the processing daemon isn't running.
+# def run_step(request, path):
+#     """Invoked via ajax, runs part of the process with a softtimeout until finished."""
+#     assert_clean_path(path, request)
+#     gbp,config,result = None,None,None
+#     status=200
 
+#     try:
+#         config = request.session.get(path)
+#         #the frame is supposed to ensure this is in session.
+#         if not config:
+#             return HttpResponse('Session Timeout, please try again.', status=500)
+#         gbp = main.GenBankProcessor(getabspath(path), config=config, timeout=4)
+#     except:
+#         logger.exception("Error setting up run_step")
+#         return HttpResponse('ERROR', status=500)
 
-def run_step(request, path):
-    """Invoked via ajax, runs part of the process with a softtimeout until finished."""
-    assert_clean_path(path, request)
-    gbp,config,result = None,None,None
-    status=200
+#     try:
+#         pspath = gbp.process()
+#         logger.debug("Finished processing.")
+#         pspath = getrelpath(pspath)
+#         #url = reverse('results', args=[psname]) + encode_config(config, path=path)
+#         result = {'next':'results',
+#                   'download_url': get_raw_url(request, pspath),
+#                   'steps': gbp.timer.steps}
 
-    try:
-        config = request.session.get(path)
-        #the frame is supposed to ensure this is in session.
-        if not config:
-            return HttpResponse('Session Timeout, please try again.', status=500)
-        gbp = main.GenBankProcessor(getabspath(path), config=config, timeout=4)
-    except:
-        logger.exception("Error setting up run_step")
-        return HttpResponse('ERROR', status=500)
+#     except Timeout, pt:
+#         result = {'next':'process',
+#                   'steps': pt.steps,
+#                   }
+#     except:
+#         logger.exception("Error in run_step")
+#         result = {'next':'ERROR', 'steps': gbp.timer.steps}
+#         status=500
 
-    try:
-        pspath = gbp.process()
-        logger.debug("Finished processing.")
-        pspath = getrelpath(pspath)
-        #url = reverse('results', args=[psname]) + encode_config(config, path=path)
-        result = {'next':'results',
-                  'download_url': get_raw_url(request, pspath),
-                  'steps': gbp.timer.steps}
+#     try:
+#         ago = config.get('acgt_gamma_output')
+#         if ago:
+#             result['files'] = [get_raw_url(request, os.path.join(ago,v))
+#                                for v in os.listdir(ago)]
+#         # files = set([get_raw_url(request, v)
+#         #              for (k,v) in config.items()
+#         #              if v and (k in gbp.AP_file_keys)])
 
-    except Timeout, pt:
-        result = {'next':'process',
-                  'steps': pt.steps,
-                  }
-    except:
-        logger.exception("Error in run_step")
-        result = {'next':'ERROR', 'steps': gbp.timer.steps}
-        status=500
+#     except:
+#         logger.exception("Error building file list.")
 
-    try:
-        ago = config.get('acgt_gamma_output')
-        if ago:
-            result['files'] = [get_raw_url(request, os.path.join(ago,v))
-                               for v in os.listdir(ago)]
-        # files = set([get_raw_url(request, v)
-        #              for (k,v) in config.items()
-        #              if v and (k in gbp.AP_file_keys)])
-
-    except:
-        logger.exception("Error building file list.")
-
-    return HttpResponse(json.dumps(result), status=status)
+#     return HttpResponse(json.dumps(result), status=status)
 
 
 def results(request, path):
@@ -276,3 +271,14 @@ def results(request, path):
                               {'download_link': download_link,
                                'return_url': return_url},
                               context_instance=RequestContext(request))
+
+
+def kickstart(request, path, config):
+
+    #TODO: Some logic here to see if they're already running a job and
+    #propose cancelling it
+
+    jobid = client.enqueue(main.process_all, [getabspath(path), config])
+    return jobid
+
+
