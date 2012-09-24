@@ -7,4 +7,5 @@ lib/numpy-1.6.1.tar.gz
 -e lib/biopython/
 
 -e pynpact/
+-e taskqueue/
 -e npactweb/
