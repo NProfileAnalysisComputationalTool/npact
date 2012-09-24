@@ -1,7 +1,5 @@
 import logging
 
-PERSISTENCE_DIR = '/tmp/taskqueue'
-
 LISTEN_ADDRESS = ('localhost', 57129)
 
 AUTH_KEY = 'npact'
