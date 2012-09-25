@@ -169,6 +169,9 @@ LOGGING = {
         'simple': {
             'format': '%(levelname)s %(message)s'
             },
+        'named_processes': {
+            'format': "%(asctime)s %(processName)s/%(name)s %(levelname)-8s %(message)s"
+            },
     },
     'handlers': {
         'mail_admins': {
@@ -184,8 +187,12 @@ LOGGING = {
             'class':'logging.handlers.WatchedFileHandler',
             'filename': ppath("logs",True) / "main.log",
             'formatter': 'verbose'
-
-            }
+        },
+        'django-tqdaemon': {
+            'class':'logging.handlers.WatchedFileHandler',
+            'filename': ppath("logs",True) / "django-tqdaemon.log",
+            'formatter': 'named_processes',
+        },
     },
     'loggers': {
         '': {
@@ -207,9 +214,18 @@ LOGGING = {
         #     'level': 'DEBUG',
         #     'propagate': True,
         #     }
+        'taskqueue': {
+            'propagate': False,
+            'level': 'DEBUG',
+            'handlers': ['django-tqdaemon','console']
+        },
+        'multiprocessing': {
+            'propagate': False,
+            'level': 'INFO',
+            'handlers': ['django-tqdaemon','console']
         }
     }
+}
 
 if DEBUG:
     LOGGING['loggers']['']['handlers'].append('console')
-    
