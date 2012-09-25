@@ -12,7 +12,8 @@ from django.core.urlresolvers import reverse
 from django.http import HttpResponseRedirect, HttpResponse
 from django.shortcuts import render_to_response
 from django.utils.http import urlencode
-from django.template import RequestContext
+from django.template import RequestContext, Context
+from django.template.loader import get_template
 
 from pynpact import prepare, util
 from pynpact import main
@@ -130,27 +131,33 @@ def build_config(path, request):
 
     return config
 
-def encode_config(config, **urlconf):
-    for k in ConfigForm().fields.keys():
-        v = config.get(k, None)
-        if v:
-            urlconf[k] = v
-    return "?" + urlencode(urlconf,True)
 
+def urlencode_config(config, exclude=None):
+    """Encode a config dictionary suitably for passing in a url.
+
+    This doesn't need to have anything in it but what can be entered
+    in the ConfigForm; everything else can be recalculated based on
+    that.
+    """
+    keys = ConfigForm().fields.keys()
+    if exclude:
+        keys = set(keys) - set(exclude)
+    return urlencode(util.reducedict(config, keys), True)
 
 def run_frame(request, path):
     """This is the main processing page. However, that page is just
     frame in which ajax requests spur the actual processing"""
     assert_clean_path(path, request)
     config = build_config(path, request)
-
     jobid = kickstart(request, path, config)
-
+    
+    #TODO: we could wait a tiny amount of time here to see if the job is already done.
 
     full_path = reverse('runstatus',args=[jobid])
+    reconfigure_url = reverse('config', args=[path]) + "?" + urlencode_config(config)
     return render_to_response('processing.html',
                               {'statusurl': full_path,
-                               'reconfigure_url': reverse('config', args=[path]) + encode_config(config),
+                               'reconfigure_url': reconfigure_url,
                                },
                               context_instance=RequestContext(request))
 
@@ -279,4 +286,34 @@ def kickstart(request, path, config):
     #propose cancelling it
 
     jobid = client.enqueue(main.process_all, [getabspath(path), config])
+    email = request.GET.get('email')
+    if email:
+        results_link = reverse('run', args=[path]) + '?' + urlencode_config(config, exclude=['email'])
+        results_link = request.build_absolute_uri(results_link)
+        
+        
+        # the config dictionary at the end of the process is what is
+        # returned by the above job, will be passed as the first
+        # argument to the function called by client.after: send_email
+        client.after(jobid, send_email, [results_link, email])
     return jobid
+
+def send_email(config, results_link, email_address):
+    #config is the result of running the process, needs to be first parameter
+    try:
+        logger.debug("Task completed; sending email to %r", email_address)
+        from django.core.mail import EmailMultiAlternatives
+        subject = 'NPACT results ready for "{0}"'.format(config['first_page_title'])
+        plaintext = get_template('email-results.txt')
+        htmly     = get_template('email-results.html')
+
+        d = Context({ 'keep_days': settings.ATIME_DEFAULT,
+                      'results_link': results_link})
+
+        text_content = plaintext.render(d)
+        html_content = htmly.render(d)
+        msg = EmailMultiAlternatives(subject, text_content, settings.EMAIL_FROM, [email_address])
+        msg.attach_alternative(html_content, "text/html")
+        msg.send(fail_silently=False)
+    except:
+        logger.exception("Failed sending email to %r", to_address)

@@ -26,6 +26,11 @@ ADMINS = (
 
 MANAGERS = ADMINS
 
+EMAIL_FROM = 'npact@genome.ufl.edu'
+#EMAIL_HOST = ''
+#EMAIL_PORT=''
+
+
 
 TIME_ZONE = 'America/New_York'
 
@@ -47,11 +52,12 @@ USE_L10N = False
 # Example: "/home/media/media.lawrence.com/media/"
 MEDIA_ROOT = ppath('uploads',True)
 
-QUEUE_DIR = ppath('tasqueue', True)
+QUEUE_DIR = ppath('taskqueue', True)
 
 # how many days should we keep uploaded files and products that
 # haven't been accessed before we delete them.
 MEDIA_RETAIN_FOR=7
+ATIME_DEFAULT = 14
 
 ######## django-mediagenerator settings
 

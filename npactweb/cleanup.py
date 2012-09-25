@@ -7,6 +7,7 @@ than 14 days (see ATIME_DEFAULT)
 """
 
 #Default number of days that files can remain unaccessed before deletion.
+#nb: this setting is duplicated in settings module for printing on the website.
 ATIME_DEFAULT=14
 
 import os

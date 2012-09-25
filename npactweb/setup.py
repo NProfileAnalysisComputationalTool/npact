@@ -10,7 +10,7 @@ def recursive_files(*roots):
                 yield os.path.join(root,i)
 
 setup(name='npactweb',
-      version='0.2',
+      version='0.4',
       description='Website for PYNPACT, the Python N-Profile Analysis Computation Tool',
       author='Nathan Bird',
       author_email='nathan@acceleration.net',
