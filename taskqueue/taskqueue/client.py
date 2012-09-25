@@ -57,3 +57,15 @@ def get_task(id):
 
 def perform(fn, args=None, kwargs=None):
     return get_task(enqueue(fn, args, kwargs)).get()
+
+def after(id, fn, additional_args=None, kwargs=None):
+
+    #enqueue new task that will wait on this task and then call the fn
+    return enqueue(_after, [id, fn, additional_args, kwargs])
+    
+def _after(id, fn, additional_args=None, kwargs=None):
+    task = get_task(id)
+    result = task.get()
+    if additional_args is None : additional_args = []
+    if kwargs is None          : kwargs = {}
+    return fn(result, *additional_args, **kwargs)
