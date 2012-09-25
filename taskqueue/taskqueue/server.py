@@ -58,7 +58,7 @@ class Server(object):
         promise = self.get_task(id)
         return promise.get(0.05)
 
-    def enqueue(self, fn, args=[], kwargs={}):
+    def enqueue(self, fn, args=None, kwargs=None):
         path = self.pickle_task([fn, args, kwargs])
         id = os.path.splitext(os.path.basename(path))[0]
         self.tasks[id] = self.pool.apply_async(async_wrapper, [id, path, fn, args, kwargs])
@@ -121,6 +121,8 @@ def async_wrapper(id, task_path, fn, args, kwargs):
     root_logger.addHandler(file_handler)
 
     try:
+        if args is None:   args = []
+        if kwargs is None: kwargs = {}
         rc = fn(*args, **kwargs)
         log.debug("Finished %r", id)
     finally:

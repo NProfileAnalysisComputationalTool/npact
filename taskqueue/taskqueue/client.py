@@ -33,7 +33,7 @@ def ready(id):
         return server.ready(id)
 
 
-def enqueue(fn, args=[], kwargs={}):
+def enqueue(fn, args=None, kwargs=None):
     """Enqueue the function in the task queue and return an identifier
     that can be used to check status or get the result later.
     """
@@ -52,5 +52,5 @@ def get_task(id):
         return server.get_task(id)
 
 
-def perform(fn, args=[], kwargs={}):
+def perform(fn, args=None, kwargs=None):
     return get_task(enqueue(fn, args, kwargs)).get()
