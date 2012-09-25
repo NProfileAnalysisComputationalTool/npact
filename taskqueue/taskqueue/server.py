@@ -57,6 +57,17 @@ class Server(object):
         promise = self.get_task(id)
         return promise.get(0.05)
 
+
+    def log_output(self, id, position=0):
+        log.debug("Retrieving log output for %s from pos:%s", id, position)
+        path = os.path.join(self.work_dir, id + '.log')
+        with open(path, 'rb') as f:
+            f.seek(position)
+            buf = f.read()
+        log.debug("Read %d bytes from log.", len(buf))
+        return buf
+            
+
     def _enqueue(self, id, path, task):
         log.info('Enqueuing [%r,...]', task[0])
         promise = self.pool.apply_async(async_wrapper, [id, path] + task)

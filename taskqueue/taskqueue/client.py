@@ -32,6 +32,9 @@ def ready(id):
     with server_call() as server:
         return server.ready(id)
 
+def log_output(id, position=0):
+    with server_call() as server:
+        return server.log_output(id, position)
 
 def enqueue(fn, args=None, kwargs=None):
     """Enqueue the function in the task queue and return an identifier
