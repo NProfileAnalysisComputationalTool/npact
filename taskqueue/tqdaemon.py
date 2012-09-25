@@ -15,8 +15,8 @@ from optparse import OptionParser
 logger = logging.getLogger('taskqueue.daemon')
 
 def setup_logger(verbose):
-    tq_logger = logging.getLogger('')
-    tq_logger.propagate=False
+    tq_logger = logging.getLogger('taskqueue')
+    tq_logger.propagate = False
     tq_logger.setLevel(logging.DEBUG if verbose else logging.WARNING)
     handler = logging.StreamHandler()
     handler.setLevel(logging.DEBUG)

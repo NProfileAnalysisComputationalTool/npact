@@ -30,9 +30,8 @@ method_to_typeid = {
 def start_everything():
     the_server = Server()
     Manager.register('the_server', callable=lambda: the_server, method_to_typeid=method_to_typeid)
-    log.info("Opening a socket at %r", taskqueue.LISTEN_ADDRESS)
+    log.info("Opening a socket at %s", taskqueue.LISTEN_ADDRESS)
     manager = Manager(taskqueue.LISTEN_ADDRESS, authkey=taskqueue.AUTH_KEY)
-    the_server.manager = manager
     manager.get_server().serve_forever()
 
 
@@ -69,7 +68,7 @@ class Server(object):
         if id in self.tasks:
             return self.tasks[id]
         else:
-            log.debug("Missing task %r, checking filesystem.", id)
+            log.debug("Missing task %s, checking filesystem.", id)
             path = os.path.join(self.work_dir, id)
             if not os.path.exists(path):
                 path = path + ".todo"

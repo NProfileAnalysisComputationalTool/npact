@@ -8,7 +8,7 @@ import taskqueue
 class Manager(SyncManager):
     pass
 
-logger = logging.getLogger(__name__)
+log = logging.getLogger(__name__)
 
 Manager.register('the_server')
 
@@ -19,7 +19,7 @@ def server_call():
     try:
         yield manager.the_server()
     except RemoteError:
-        logger.exception("Error in remote process")
+        log.exception("Error in remote process")
         raise
 
 
