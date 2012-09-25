@@ -57,10 +57,16 @@ class Server(object):
         promise = self.get_task(id)
         return promise.get(0.05)
 
+    def _enqueue(self, id, path, task):
+        log.info('Enqueuing [%r,...]', task[0])
+        promise = self.pool.apply_async(async_wrapper, [id, path] + task)
+        self.tasks[id] = promise
+        return promise
+
     def enqueue(self, fn, args=None, kwargs=None):
         path = self.pickle_task([fn, args, kwargs])
         id = os.path.splitext(os.path.basename(path))[0]
-        self.tasks[id] = self.pool.apply_async(async_wrapper, [id, path, fn, args, kwargs])
+        self._enqueue(id, path, [fn, args, kwargs])
 
         return id
 
@@ -90,9 +96,7 @@ class Server(object):
             task = cPickle.load(f)
         if path.endswith('todo'):
             log.warning("Unpickling a TODO task: %r", path)
-        promise = self.pool.apply_async(async_wrapper, [id, path] + task)
-        self.tasks[id] = promise
-        return promise
+        return self._enqueue(id, path, task)
 
 
 
