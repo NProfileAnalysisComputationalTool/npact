@@ -13,10 +13,10 @@ import logging
 import multiprocessing
 import os.path
 import tempfile
-from multiprocessing.connection import Listener
 from multiprocessing.managers import SyncManager
 
 import taskqueue
+
 
 log = logging.getLogger(__name__)
 

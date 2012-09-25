@@ -1,15 +1,9 @@
-import os
 import logging
-import tempfile
-import sys
-from multiprocessing.connection import Client
-from multiprocessing.managers import RemoteError, SyncManager
 from contextlib import contextmanager
-
-from optparse import OptionParser
-
+from multiprocessing.managers import RemoteError, SyncManager
 
 import taskqueue
+
 
 class Manager(SyncManager):
     pass
@@ -52,3 +46,11 @@ def result(id):
     """
     with server_call() as server:
         return server.result(id)
+
+def get_task(id):
+    with server_call() as server:
+        return server.get_task(id)
+
+
+def perform(fn, args=[], kwargs={}):
+    return get_task(enqueue(fn, args, kwargs)).get()
