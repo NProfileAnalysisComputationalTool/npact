@@ -129,8 +129,8 @@ def async_wrapper(id, task_path, fn, args, kwargs):
                                                 ' %(levelname)-8s %(message)s',
                                                 datefmt='%Y%m%d %H:%M:%S'))
     root_logger = logging.getLogger('')
-    #remove any other handlers from previous uses of this process.
-    for h in root_logger.handlers: root_logger.removeHandler(h)
+    #blow away any other handlers from previous uses of this process.
+    root_logger.handlers = []
     root_logger.setLevel(logging.DEBUG)
     root_logger.addHandler(file_handler)
 

@@ -217,15 +217,19 @@ LOGGING = {
         'taskqueue': {
             'propagate': False,
             'level': 'DEBUG',
-            'handlers': ['django-tqdaemon','console']
+            'handlers': ['django-tqdaemon']
         },
         'multiprocessing': {
             'propagate': False,
             'level': 'INFO',
-            'handlers': ['django-tqdaemon','console']
+            'handlers': ['django-tqdaemon']
         }
     }
 }
 
 if DEBUG:
-    LOGGING['loggers']['']['handlers'].append('console')
+    def add_console_to(logger_name):
+        LOGGING['loggers'][logger_name]['handlers'].append('console')
+    add_console_to('')
+    add_console_to('taskqueue')
+    add_console_to('multiprocessing')
