@@ -174,8 +174,6 @@ class GenBankProcessor(object ):
         if self.config.get('skip_prediction', False):
             self.logger.debug("Skipping prediction.")
             return
-        self.logger.debug("Starting prediction: %s",
-                          self.config.get('significance'))
 
         assert os.path.exists(DATAPATH), \
                "Missing pynpact/data for acgt_gamma prediction. Expected at " + DATAPATH
@@ -193,7 +191,9 @@ class GenBankProcessor(object ):
 
             with self.mkdtemp() as dtemp:
                 self.timer.check("Predicting new gene locations.")
-                self.logger.info("Starting prediction program in %s", dtemp)
+                self.logger.info("Starting prediction(sig:%s) program in %s",
+                                 self.config.get('significance'),
+                                 dtemp)
                 capproc.capturedCall(cmd, cwd=dtemp, check=True,
                                      env={'BASE_DIR_THRESHOLD_TABLES':DATAPATH},
                                      logger=self.logger)
