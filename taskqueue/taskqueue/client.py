@@ -23,8 +23,6 @@ def server_call():
         raise
 
 
-
-
 def ready(id):
     """Check to see if the task with the given id is finished
     executing yet.
