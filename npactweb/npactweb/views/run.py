@@ -150,6 +150,18 @@ def run_frame(request, path):
     assert_clean_path(path, request)
     config = build_config(path, request)
     jobid = kickstart(request, path, config)
+    email = request.GET.get('email')
+    if email:
+        results_link = reverse('run', args=[path]) + '?' + urlencode_config(config, exclude=['email'])
+        results_link = request.build_absolute_uri(results_link)
+        
+        
+        # the config dictionary at the end of the process is what is
+        # returned by the above job, will be passed as the first
+        # argument to the function called by client.after: send_email
+        email_jobid = client.after(jobid, send_email, [results_link, email])
+
+
     
     #TODO: we could wait a tiny amount of time here to see if the job is already done.
 
@@ -158,6 +170,7 @@ def run_frame(request, path):
     return render_to_response('processing.html',
                               {'statusurl': full_path,
                                'reconfigure_url': reconfigure_url,
+                               'email': email,
                                },
                               context_instance=RequestContext(request))
 
@@ -286,16 +299,6 @@ def kickstart(request, path, config):
     #propose cancelling it
 
     jobid = client.enqueue(main.process_all, [getabspath(path), config])
-    email = request.GET.get('email')
-    if email:
-        results_link = reverse('run', args=[path]) + '?' + urlencode_config(config, exclude=['email'])
-        results_link = request.build_absolute_uri(results_link)
-        
-        
-        # the config dictionary at the end of the process is what is
-        # returned by the above job, will be passed as the first
-        # argument to the function called by client.after: send_email
-        client.after(jobid, send_email, [results_link, email])
     return jobid
 
 def send_email(config, results_link, email_address):

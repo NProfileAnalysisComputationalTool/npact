@@ -104,6 +104,7 @@ var progress = {
         $('#title').html('N-PACT Is Finished');
         $('#downloadlink').attr('href', data.download_url);
         $('#graphicalresults').fadeIn(200);
+        $('#emailsent').fadeIn(200);
         $('#timer').toggleClass('ui-state-highlight');
         $('#progressreport').fadeOut(100);
 

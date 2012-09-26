@@ -38,6 +38,12 @@
         <li><a id="reconfigurelink" href="{{ reconfigure_url }}">Reconfigure it</a> and try again.</li>
         <li><a href="{% url start %}">Start Over</a></li>
       </ul>
+      {% if email %}
+      <div id="emailsent" style="display:none;">
+        <h4>Email results</h4>
+        <p>A link to this results page was sent to <tt>{{email}}</tt>.</p>
+      </div>
+      {% endif %}
     </div>
   </div>
 
@@ -58,6 +64,9 @@
       <img src="{% media_url "images/spinner.gif" %}" class="spinner"/>
       <p id="currentstep">N-PACT is: <span id="currentstepdesc">Parsing GenBank file.</span></p>
     </div>
+    {% if email %}
+    <p>An email link to the results will be sent to <tt>{{email}}</tt>. You may leave this page at any time and return via that link.</p>
+    {% endif %}
   </div>
 
   <script type="text/javascript">
