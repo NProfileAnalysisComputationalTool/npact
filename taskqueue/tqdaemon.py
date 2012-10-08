@@ -9,7 +9,7 @@ http://pypi.python.org/pypi/python-daemon/
 import logging
 from optparse import OptionParser
 
-logger = logging.getLogger('taskqueue.daemon')
+logger = logging.getLogger('taskqueue.tqdaemon')
 
 
 
@@ -22,6 +22,6 @@ if __name__ == '__main__' :
                       help="Show more verbose log messages.")
 
     (options,args) = parser.parse_args()
-    import taskqueue
+    import taskqueue.tqdaemon
     taskqueue.setup_logger(options.verbose)
-    taskqueue.daemonize()
+    taskqueue.tqdaemon.daemonize()

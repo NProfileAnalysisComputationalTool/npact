@@ -1,29 +1,13 @@
 
-LISTEN_ADDRESS = ('localhost', 57129)
 
+LISTEN_ADDRESS = ('localhost', 57129)
 AUTH_KEY = 'npact'
+BASE_DIR = '/tmp/'
 
 
 class NoSuchTaskError(Exception):
     pass
 
-
-
-def daemonize():
-    import sys
-    import logging
-    
-    #http://pypi.python.org/pypi/python-daemon/
-    logger = logging.getLogger('taskqueue.daemon')
-    try:
-        from taskqueue import server
-        server.start_everything()
-        sys.exit(0)
-    except SystemExit:
-        raise
-    except:
-        logger.exception("Error in daemon")
-        sys.exit(1)
 
 def setup_logger(verbose):
     import logging

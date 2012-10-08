@@ -3,6 +3,9 @@ lib/flup-1.0.2.tar.gz
 lib/Django-1.3.tar.gz
 lib/django-mediagenerator-1.10.4.zip
 
+lib/lockfile-0.9.1.tar.gz
+lib/python-daemon-1.5.5.tar.gz
+
 lib/numpy-1.6.1.tar.gz
 -e lib/biopython/
 

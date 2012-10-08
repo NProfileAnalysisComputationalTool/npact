@@ -38,10 +38,15 @@ def start_everything():
 class Server(object):
     pool = None
     tasks = None
-    work_dir = '/tmp/'
+    work_dir = None
     manager = None
     def __init__(self, **kwargs):
         self.__dict__.update(kwargs)
+        if not self.work_dir:
+            #storage for tasks in progress/log info.
+            self.work_dir = os.path.join(taskqueue.BASE_DIR, 'queue')
+        if not os.path.exists(self.work_dir):
+            os.makedirs(self.work_dir)
         self.tasks = dict()
         self.pool = multiprocessing.Pool()
 
