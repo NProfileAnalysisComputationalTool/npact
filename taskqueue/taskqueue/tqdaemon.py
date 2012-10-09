@@ -1,6 +1,8 @@
 import os
 import os.path
-import logging 
+import logging
+import signal
+import time
 
 import lockfile
 from lockfile import pidlockfile
@@ -36,39 +38,69 @@ def stop():
 
     pid = status()
     if not pid:
+        logger.warn("Daemon not running.")
         return INSTANCE_NOT_RUNNING
 
-    # Try killing the daemon process	
+    # Try killing the daemon process
     try:
         for i in range(0, 30):
-            os.kill(pid, SIGTERM)
+            os.kill(pid, signal.SIGTERM)
             time.sleep(0.5)
     except OSError, err:
         err = str(err)
         if err.find("No such process") > 0:
-            self.pidfile.break_lock()
+            get_pidfile().break_lock()
         else:
+            logger.exception("Failed to stop daemon.")
             return OPERATION_FAILED
     return OPERATION_SUCCESSFUL
 
 def restart():
     "Restart a daemon process"
     if status():
-        kill_status = kill()
+        kill_status = stop()
         if kill_status == OPERATION_FAILED:
             return kill_status
     return daemonize()
 
-
 def daemonize():
-    "Start a deaemonized taskqueue"
+    "Start a daemonized taskqueue"
     import logging
-    
     import daemon
-    with daemon.DaemonContext(pidfile=get_pidfile()):
+
+    ##Before daemonizing figure out which handlers we want to keep.
+    ##We only want to keep handlers for this library that aren't going
+    ##to stderr or stdout
+    other_handlers = set(logging._handlerList)
+    fds = []
+    l = logger
+    while l:
+        for h in l.handlers:
+            if hasattr(h, 'stream') and \
+              hasattr(h.stream, 'fileno') and \
+              h.stream.fileno() not in [1,2]:
+                fds.append(h.stream.fileno())
+                other_handlers.discard(h)
+        l = l.propagate and l.parent
+
+    ## Kill of any other loggers
+    logging.raiseExceptions = False
+    logger.debug("Killing other loggers")
+    logging.shutdown(list(other_handlers))
+    #logger.debug("Remaining loggers: %r:%r", fds, logging._handlerList)
+    
+    pidfile = get_pidfile()
+    if pidfile.is_locked():
+        logger.error("Daemon already running")
+        return INSTANCE_ALREADY_RUNNING
+    else:
+        logger.debug("Daemonizing, pidfile: %r", pidfile.path)
+    with daemon.DaemonContext(pidfile=pidfile, files_preserve=fds, detach_process=True):
+        logging.raiseExceptions = True
         import taskqueue.server
         logger.info("Daemonized context")
         taskqueue.server.start_everything()
+
 
 def start():
     "alias for daemonize"

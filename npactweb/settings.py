@@ -53,6 +53,9 @@ USE_L10N = False
 MEDIA_ROOT = ppath('uploads',True)
 
 TQ_DIR = ppath('taskqueue', True)
+import taskqueue
+taskqueue.BASE_DIR = TQ_DIR
+    
 
 # how many days should we keep uploaded files and products that
 # haven't been accessed before we delete them.

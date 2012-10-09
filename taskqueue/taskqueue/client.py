@@ -3,7 +3,7 @@ from contextlib import contextmanager
 from multiprocessing.managers import RemoteError, SyncManager
 
 import taskqueue
-
+from taskqueue import tqdaemon
 
 class Manager(SyncManager):
     pass
@@ -12,8 +12,15 @@ log = logging.getLogger(__name__)
 
 Manager.register('the_server')
 
+def ensure_daemon():
+    if not tqdaemon.status():
+        import multiprocessing
+        multiprocessing.Process(target=tqdaemon.daemonize).start()
+    
+
 @contextmanager
 def server_call():
+    ensure_daemon()
     manager = Manager(taskqueue.LISTEN_ADDRESS, authkey=taskqueue.AUTH_KEY)
     manager.connect()
     try:
