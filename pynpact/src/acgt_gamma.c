@@ -28,6 +28,7 @@ int	RANDOMIZE= 0;
 # define LUCIANO 0
 # define LUCIANO_HOME 0
 # define ROOT_HOME 0
+# define LOCAL_DIST 0
 
 #if WEB_SERVER
 #define BASE_DIR NULL
@@ -52,6 +53,11 @@ int	RANDOMIZE= 0;
 #if ROOT_HOME
 #define BASE_DIR ""
 #define BASE_DIR_THRESHOLD_TABLES "/Users/luciano/ACGT_ORFS/data/"
+#endif
+
+#if LOCAL_DIST
+#define BASE_DIR NULL
+#define BASE_DIR_THRESHOLD_TABLES "tables/"
 #endif
 
 # define START_POS5 45
