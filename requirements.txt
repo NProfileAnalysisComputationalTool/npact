@@ -1,4 +1,4 @@
-lib/path.py-2.2.2.tar.gz
+lib/path.py-2.4.1.zip
 lib/flup-1.0.2.tar.gz
 lib/Django-1.3.tar.gz
 lib/django-mediagenerator-1.10.4.zip

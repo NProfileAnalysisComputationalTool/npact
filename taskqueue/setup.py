@@ -10,12 +10,12 @@ def recursive_files(*roots):
                 yield os.path.join(root,i)
 
 setup(name='taskqueue',
-      version='0.1',
+      version='0.2',
       description='Basic process pool daemon that can run python tasks asynchronously',
       author='Nathan Bird',
       author_email='nathan@acceleration.net',
       url='http://genome.ufl.edu/npact/',
       packages=['taskqueue'],
-      requires=["pynpact",],
+      requires=["lockfile",],
       scripts=['tqdaemon.py']
      )
