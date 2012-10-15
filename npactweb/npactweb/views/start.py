@@ -152,8 +152,9 @@ def view(req) :
                 messages.error(request, "Unknown action.")
     else:
         startform = StartForm()
-
-    return render_to_response('start.html', {'form': startform, 'action': action},
+    return render_to_response('start.html', 
+                              {'form': startform, 'action': action, 
+                               'email': startform['email'].value() or req.GET.get('email')},
                               context_instance=RequestContext(req))
 
 
@@ -169,25 +170,26 @@ def efetch(req, id):
     logger.info("Asked to fetch Id: %s", id)
     session = entrez.EntrezSession(library_root())
     abspath = session.fetch_id(id)
-
+    path = getrelpath(abspath)
+    
     try:
         prepare.try_parse(abspath)
     except prepare.InvalidGBKException, e:
         messages.error(req, str(e))
         return re_search(req)
     except:
-        messages.error(request,
+        messages.error(req,
                        "There was a problem loading file '%s', "
                        "please try again or try a different record."
                        % path)
         return re_search(req)
 
     path = getrelpath(abspath)
-    remaining_args = req.GET
-    action = remaining_args.pop('action','run')
+    remaining_args = dict(req.REQUEST.items())
+    action = remaining_args.pop('action', 'run')
 
     if action in ['run', 'config']:
-        return HttpResponseRedirect(reverse(action, args=[path])+ dict_to_querystring(remaining_args))
+        return HttpResponseRedirect(reverse(action, args=[path]) + dict_to_querystring(remaining_args))
     else:
         logger.error("Unknown action %r", action)
         messages.error(req, "Unknown action.")

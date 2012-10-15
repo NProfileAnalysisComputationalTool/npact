@@ -13,7 +13,7 @@
     {% for summary in form.session.summarize %}
     <tr>
       <td>
-        <a href="{% url efetch summary.Id %}?entrez_search_term={{entrez_search_term}}&action={{action}}">
+        <a href="{% url efetch summary.Id %}?entrez_search_term={{entrez_search_term}}&action={{action}}&email={{email|urlencode}}">
           {{summary.Title}}
         </a>
       </td>
@@ -21,7 +21,7 @@
       <td>{{summary.CreateDate}}<br/>
           {{summary.UpdateDate}}</td>
       <td>
-        <a href="http://www.ncbi.nlm.nih.gov/nuccore/{{summary.Caption}}">{{summary.Caption}}
+        <a href="http://www.ncbi.nlm.nih.gov/nuccore/{{summary.Caption|urlencode}}">{{summary.Caption}}
           <!-- <img src="{% media_url "images/ncbi.gif" %}" height="12" width="25"></a> -->
       </td>
     </tr>

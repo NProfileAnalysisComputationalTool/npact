@@ -160,6 +160,7 @@ def run_frame(request, path):
         # returned by the above job, will be passed as the first
         # argument to the function called by client.after: send_email
         email_jobid = client.after(jobid, send_email, [results_link, email])
+        logger.debug("Schedule email to %r with jobid: %s", email, email_jobid)
 
 
     
