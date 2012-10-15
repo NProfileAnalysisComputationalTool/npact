@@ -28,7 +28,7 @@ def status():
     if pid:
         try:
             os.kill(pid, 0) #no-op signal, only indicates whether it could be sent
-        except OSError, e:
+        except OSError:
             plf.break_lock()
             return False
     return pid
@@ -65,7 +65,6 @@ def restart():
 
 def daemonize():
     "Start a daemonized taskqueue"
-    import logging
     import daemon
 
     ##Before daemonizing figure out which handlers we want to keep.

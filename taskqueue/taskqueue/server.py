@@ -51,21 +51,21 @@ class Server(object):
         self.pool = multiprocessing.Pool()
 
 
-    def ready(self, id):
-        log.debug("Checking on status of %s", id)
-        promise = self.get_task(id)
+    def ready(self, tid):
+        log.debug("Checking on status of %s", tid)
+        promise = self.get_task(tid)
         return promise.ready()
 
 
-    def result(self, id):
-        log.debug("Checking on result of %s", id)
-        promise = self.get_task(id)
+    def result(self, tid):
+        log.debug("Checking on result of %s", tid)
+        promise = self.get_task(tid)
         return promise.get(0.05)
 
 
-    def log_output(self, id, position=0):
-        log.debug("Retrieving log output for %s from pos:%s", id, position)
-        path = os.path.join(self.work_dir, id + '.log')
+    def log_output(self, tid, position=0):
+        log.debug("Retrieving log output for %s from pos:%s", tid, position)
+        path = os.path.join(self.work_dir, tid + '.log')
         with open(path, 'rb') as f:
             f.seek(position)
             buf = f.read()
@@ -73,29 +73,29 @@ class Server(object):
         return buf
             
 
-    def _enqueue(self, id, path, task):
+    def _enqueue(self, tid, path, task):
         log.info('Enqueuing [%r,...]', task[0])
-        promise = self.pool.apply_async(async_wrapper, [id, path] + task)
-        self.tasks[id] = promise
+        promise = self.pool.apply_async(async_wrapper, [tid, path] + task)
+        self.tasks[tid] = promise
         return promise
 
     def enqueue(self, fn, args=None, kwargs=None):
         path = self.pickle_task([fn, args, kwargs])
-        id = os.path.splitext(os.path.basename(path))[0]
-        self._enqueue(id, path, [fn, args, kwargs])
+        tid = os.path.splitext(os.path.basename(path))[0]
+        self._enqueue(tid, path, [fn, args, kwargs])
 
-        return id
+        return tid
 
-    def get_task(self, id):
-        if id in self.tasks:
-            return self.tasks[id]
+    def get_task(self, tid):
+        if tid in self.tasks:
+            return self.tasks[tid]
         else:
-            log.debug("Missing task %s, checking filesystem.", id)
-            path = os.path.join(self.work_dir, id)
+            log.debug("Missing task %s, checking filesystem.", tid)
+            path = os.path.join(self.work_dir, tid)
             if not os.path.exists(path):
                 path = path + ".todo"
             if os.path.exists(path):
-                return self.unpickle_task(id, path)
+                return self.unpickle_task(tid, path)
             else:
                 raise taskqueue.NoSuchTaskError()
 
@@ -106,17 +106,17 @@ class Server(object):
             cPickle.dump(task, f, cPickle.HIGHEST_PROTOCOL)
             return f.name
 
-    def unpickle_task(self, id, path):
+    def unpickle_task(self, tid, path):
         "Read a task definition from file and restart that process."
         with open(path, 'rb') as f:
             task = cPickle.load(f)
         if path.endswith('todo'):
             log.warning("Unpickling a TODO task: %r", path)
-        return self._enqueue(id, path, task)
+        return self._enqueue(tid, path, task)
 
 
 
-def async_wrapper(id, task_path, fn, args, kwargs):
+def async_wrapper(tid, task_path, fn, args, kwargs):
     """Wrapper function around executing a task to ensure env setup and teardown.
 
     * This is run inside a pool process via the pool apply_async above.
@@ -143,13 +143,13 @@ def async_wrapper(id, task_path, fn, args, kwargs):
         if args is None:   args = []
         if kwargs is None: kwargs = {}
         rc = fn(*args, **kwargs)
-        log.debug("Finished %r", id)
+        log.debug("Finished %r", tid)
     finally:
         try:
             if os.path.exists(task_path) and task_ext == '.todo':
                 os.rename(task_path, task_base)
             else:
-                log.warning("Refinished finished task %r", id)
+                log.warning("Refinished finished task %r", tid)
         except:
-            log.exception("Error cleaning up after finished task: %r", id)
+            log.exception("Error cleaning up after finished task: %r", tid)
     return rc

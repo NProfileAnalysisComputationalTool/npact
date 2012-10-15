@@ -44,17 +44,17 @@ def server_call():
         raise
 
 
-def ready(id):
+def ready(tid):
     """Check to see if the task with the given id is finished
     executing yet.
     """
     with server_call() as server:
-        return server.ready(id)
+        return server.ready(tid)
 
-def log_output(id, position=0):
+def log_output(tid, position=0):
     "Get the log of the process starting at given position."
     with server_call() as server:
-        return server.log_output(id, position)
+        return server.log_output(tid, position)
 
 def enqueue(fn, args=None, kwargs=None):
     """Enqueue the function in the task queue and return an identifier
@@ -63,29 +63,30 @@ def enqueue(fn, args=None, kwargs=None):
     with server_call() as server:
         return server.enqueue(fn, args, kwargs)
 
-def result(id):
+def result(tid):
     """Get the result of the task with the given ID. NB: If the task
     isn't finished this will raise a timeout exception.
     """
     with server_call() as server:
-        return server.result(id)
+        return server.result(tid)
 
-def get_task(id):
+def get_task(tid):
     "Get a async_result proxy reference to the task"
     with server_call() as server:
-        return server.get_task(id)
+        return server.get_task(tid)
 
 def perform(fn, args=None, kwargs=None):
     "Do the given task synchronously in the separate daemon process."
     return get_task(enqueue(fn, args, kwargs)).get()
 
-def after(id, fn, additional_args=None, kwargs=None):
+def after(tid, fn, additional_args=None, kwargs=None):
     "enqueue new task that will wait on this task and then call the fn"
-    return enqueue(_after, [id, fn, additional_args, kwargs])
+    return enqueue(_after, [tid, fn, additional_args, kwargs])
 
-def _after(id, fn, additional_args=None, kwargs=None):
-    task = get_task(id)
-    result = task.get()
+def _after(tid, fn, additional_args=None, kwargs=None):
+    "helper function for after"
+    task = get_task(tid)
+    task_result = task.get()
     if additional_args is None : additional_args = []
     if kwargs is None          : kwargs = {}
-    return fn(result, *additional_args, **kwargs)
+    return fn(task_result, *additional_args, **kwargs)
