@@ -208,6 +208,11 @@ LOGGING = {
             'level': 'ERROR',
             'propagate': True,
             },
+        'cleanup': {
+            'handlers': ['console'],
+            'level': 'WARNING',
+            'propagate': False,
+        },
         # 'npact': {
         #     'handlers': ['console'],
         #     'level': 'DEBUG',
