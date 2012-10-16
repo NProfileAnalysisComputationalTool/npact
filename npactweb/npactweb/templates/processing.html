@@ -38,10 +38,16 @@
         <li><a id="reconfigurelink" href="{{ reconfigure_url }}">Reconfigure it</a> and try again.</li>
         <li><a href="{% url start %}">Start Over</a></li>
       </ul>
+      {% if email %}
+      <div id="emailsent" style="display:none;">
+        <h4>Email results</h4>
+        <p>A link to this results page was sent to <tt>{{email}}</tt>.</p>
+      </div>
+      {% endif %}
     </div>
   </div>
 
-  
+
 
   <div id="progressreport">
     <h3 > Status </h3>
@@ -49,7 +55,7 @@
       <p>
         <span style="" class="ui-icon ui-icon-alert"></span>
         There was an error. You can click refresh to try again,
-        <a href="{{ reconfigure_url }}">reconfigure this report</a>, 
+        <a href="{{ reconfigure_url }}">reconfigure this report</a>,
         or return to the <a href="{% url start %}">start</a>.
       </p>
     </div>
@@ -58,11 +64,14 @@
       <img src="{% media_url "images/spinner.gif" %}" class="spinner"/>
       <p id="currentstep">N-PACT is: <span id="currentstepdesc">Parsing GenBank file.</span></p>
     </div>
+    {% if email %}
+    <p>An email link to the results will be sent to <tt>{{email}}</tt>. You may leave this page at any time and return via that link.</p>
+    {% endif %}
   </div>
 
   <script type="text/javascript">
-    jQuery(document).ready( function(){ 
-      progress.init("{{ path }}"); 
+    jQuery(document).ready( function(){
+      progress.init("{{ statusurl }}");
     });
   </script>
 </div>

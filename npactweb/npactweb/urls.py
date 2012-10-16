@@ -12,8 +12,8 @@ npact_patterns = \
                      url(r'^config/(.+\.gbk?)', 'run.config', name="config"),
                      url(r'^run/(.+\.gbk?)' , 'run.run_frame', name="run"),
 
-                     url(r'^process/(.+\.gbk?)' , 'run.run_step', name="process"),
-                     
+                     url(r'^runstatus/(.+)', 'run.run_status', name='runstatus'),
+
                      url(r'^(run|config)^' , 'view_none'),
                      url(r'^results/(.+)' , 'run.results', name='results'),
                      url(r'^raw/(?P<path>.*)$', 'static_serve_wrapper', name='raw'),

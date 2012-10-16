@@ -10,7 +10,7 @@ def recursive_files(*roots):
                 yield os.path.join(root,i)
 
 setup(name='npactweb',
-      version='0.2',
+      version='0.5',
       description='Website for PYNPACT, the Python N-Profile Analysis Computation Tool',
       author='Nathan Bird',
       author_email='nathan@acceleration.net',
@@ -18,8 +18,10 @@ setup(name='npactweb',
       py_modules=['settings'],
       packages=['npactweb'],
       package_data={'npactweb': list(recursive_files('static','templates'))},
+#also requires django-mediagenerator but can't specify that here.
       requires=["biopython(>=1.57)",
-                "pynpact",
-                "django(==1.3)"],
-      scripts=['cleanup.py', 'django-main.fcgi', 'django-process.fcgi']
+                "django(==1.3)",
+                "flup(>=1.0)",
+                "taskqueue"],
+      scripts=['cleanup.py', 'django.fcgi']
      )

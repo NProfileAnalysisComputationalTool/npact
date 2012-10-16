@@ -3,6 +3,7 @@ import logging
 import os
 import os.path
 import json
+from datetime import datetime
 
 from django import forms
 from django.conf import settings
@@ -11,14 +12,19 @@ from django.core.urlresolvers import reverse
 from django.http import HttpResponseRedirect, HttpResponse
 from django.shortcuts import render_to_response
 from django.utils.http import urlencode
-from django.template import RequestContext
-from pynpact import prepare, main, util
+from django.template import RequestContext, Context
+from django.template.loader import get_template
+
+from pynpact import prepare, util
+from pynpact import main
 from pynpact.softtimeout import Timeout
 
 from npactweb import assert_clean_path, getabspath, getrelpath
 from npactweb.middleware import RedirectException
 
-#from npactweb.helpers import add_help_text
+from taskqueue import client, NoSuchTaskError
+
+
 
 # Get an instance of a logger
 logger = logging.getLogger(__name__)
@@ -49,7 +55,7 @@ class ConfigForm(forms.Form):
     start_base=forms.IntegerField()
     end_base=forms.IntegerField()
     alternate_colors=forms.BooleanField(required=False, label="Alternative colors")
-
+    email = forms.EmailField(required=False)
 
     def clean(self):
         cleaned_data = self.cleaned_data
@@ -65,7 +71,7 @@ def get_display_items(request, config):
         if config.get(key):
             yield key, config.get(key)
 
-        
+
 def config(request, path):
     "The config view. Renders the configform for the given gbkpath."
     assert_clean_path(path, request)
@@ -124,75 +130,146 @@ def build_config(path, request):
         config.update(cf.cleaned_data)
 
     return config
-    
-def encode_config(config, **urlconf):
-    for k in ConfigForm().fields.keys():
-        v = config.get(k, None)
-        if v:
-            urlconf[k] = v
-    return "?" + urlencode(urlconf,True)
 
+
+def urlencode_config(config, exclude=None):
+    """Encode a config dictionary suitably for passing in a url.
+
+    This doesn't need to have anything in it but what can be entered
+    in the ConfigForm; everything else can be recalculated based on
+    that.
+    """
+    keys = ConfigForm().fields.keys()
+    if exclude:
+        keys = set(keys) - set(exclude)
+    return urlencode(util.reducedict(config, keys), True)
 
 def run_frame(request, path):
     """This is the main processing page. However, that page is just
     frame in which ajax requests spur the actual processing"""
+    assert_clean_path(path, request)
     config = build_config(path, request)
-    request.session[path] = config
-    full_path = reverse('process',args=[path])
+    jobid = kickstart(request, path, config)
+    email = request.GET.get('email')
+    if email:
+        results_link = reverse('run', args=[path]) + '?' + urlencode_config(config, exclude=['email'])
+        results_link = request.build_absolute_uri(results_link)
+        
+        
+        # the config dictionary at the end of the process is what is
+        # returned by the above job, will be passed as the first
+        # argument to the function called by client.after: send_email
+        email_jobid = client.after(jobid, send_email, [results_link, email])
+        logger.debug("Schedule email to %r with jobid: %s", email, email_jobid)
+
+
+    
+    #TODO: we could wait a tiny amount of time here to see if the job is already done.
+
+    full_path = reverse('runstatus',args=[jobid])
+    reconfigure_url = reverse('config', args=[path]) + "?" + urlencode_config(config)
     return render_to_response('processing.html',
-                              {'path': full_path,
-                               'reconfigure_url': reverse('config', args=[path]) + encode_config(config),
+                              {'statusurl': full_path,
+                               'reconfigure_url': reconfigure_url,
+                               'email': email,
                                },
                               context_instance=RequestContext(request))
 
-
-def run_step(request, path):
-    """Invoked via ajax, runs part of the process with a softtimeout until finished."""
-    assert_clean_path(path, request)
-    gbp,config,result = None,None,None
-    status=200
-    
-    try:
-        config = request.session.get(path)
-        #the frame is supposed to ensure this is in session.
-        if not config:
-            return HttpResponse('Session Timeout, please try again.', status=500)
-        gbp = main.GenBankProcessor(getabspath(path), config=config, timeout=4)
-    except:
-        logger.exception("Error setting up run_step")
-        return HttpResponse('ERROR', status=500)
+def run_status(request, jobid):
+    config = None
+    result = {}
+    status = 200
 
     try:
-        pspath = gbp.process()
-        logger.debug("Finished processing.")
-        pspath = getrelpath(pspath)
-        #url = reverse('results', args=[psname]) + encode_config(config, path=path)
-        result = {'next':'results', 
-                  'download_url': get_raw_url(request, pspath),
-                  'steps': gbp.timer.steps}
+        ready = client.ready(jobid)
+    except NoSuchTaskError:
+        result['message'] = 'Unknown task identifier. Please retry.'
+        status = 500
+    except Exception,e:
+        result['message'] = 'Fatal error.'
+        status = 500
+        logger.exception("Error getting job status. %r", jobid)
 
-    except Timeout, pt:
-        result = {'next':'process', 
-                  'steps': pt.steps,
-                  }
-    except:
-        logger.exception("Error in run_step")
-        result = {'next':'ERROR', 'steps': gbp.timer.steps}
-        status=500
+    if status != 200:
+        #something has already gone wrong.
+        return HttpResponse(json.dumps(result), status=status)
 
-    try:
+    if not ready:
+        result['steps'] = ['Still running @ ' + str(datetime.now())]
+    else:
+        try:
+            config = client.result(jobid)
+        except NoSuchTaskError:
+            result['message'] = 'Unknown task identifier. Please retry.'
+            status = 500
+        except Exception,e:
+            result['message'] = 'Fatal error.'
+            status = 500
+            logger.exception("Error getting job result. %r", jobid)
+
+    if config:
+        pdf_url = get_raw_url(request, getrelpath(config['pdf_filename']))
+        result['next'] = 'results'
+        result['download_url'] = pdf_url
+
         ago = config.get('acgt_gamma_output')
         if ago:
-            result['files'] = [get_raw_url(request, os.path.join(ago,v)) 
+            result['files'] = [get_raw_url(request, os.path.join(ago, v))
                                for v in os.listdir(ago)]
-        # files = set([get_raw_url(request, v)
-        #              for (k,v) in config.items()
-        #              if v and (k in gbp.AP_file_keys)])
 
-    except:
-        logger.exception("Error building file list.")
-        
     return HttpResponse(json.dumps(result), status=status)
+
+
+### This isn't used anymore (in favor of runstatus). Not deleted yet
+### in case we want to try to keep this branch as a fallback path in
+### case the processing daemon isn't running.
+# def run_step(request, path):
+#     """Invoked via ajax, runs part of the process with a softtimeout until finished."""
+#     assert_clean_path(path, request)
+#     gbp,config,result = None,None,None
+#     status=200
+
+#     try:
+#         config = request.session.get(path)
+#         #the frame is supposed to ensure this is in session.
+#         if not config:
+#             return HttpResponse('Session Timeout, please try again.', status=500)
+#         gbp = main.GenBankProcessor(getabspath(path), config=config, timeout=4)
+#     except:
+#         logger.exception("Error setting up run_step")
+#         return HttpResponse('ERROR', status=500)
+
+#     try:
+#         pspath = gbp.process()
+#         logger.debug("Finished processing.")
+#         pspath = getrelpath(pspath)
+#         #url = reverse('results', args=[psname]) + encode_config(config, path=path)
+#         result = {'next':'results',
+#                   'download_url': get_raw_url(request, pspath),
+#                   'steps': gbp.timer.steps}
+
+#     except Timeout, pt:
+#         result = {'next':'process',
+#                   'steps': pt.steps,
+#                   }
+#     except:
+#         logger.exception("Error in run_step")
+#         result = {'next':'ERROR', 'steps': gbp.timer.steps}
+#         status=500
+
+#     try:
+#         ago = config.get('acgt_gamma_output')
+#         if ago:
+#             result['files'] = [get_raw_url(request, os.path.join(ago,v))
+#                                for v in os.listdir(ago)]
+#         # files = set([get_raw_url(request, v)
+#         #              for (k,v) in config.items()
+#         #              if v and (k in gbp.AP_file_keys)])
+
+#     except:
+#         logger.exception("Error building file list.")
+
+#     return HttpResponse(json.dumps(result), status=status)
 
 
 def results(request, path):
@@ -215,3 +292,32 @@ def results(request, path):
                               {'download_link': download_link,
                                'return_url': return_url},
                               context_instance=RequestContext(request))
+
+
+def kickstart(request, path, config):
+
+    #TODO: Some logic here to see if they're already running a job and
+    #propose cancelling it
+
+    jobid = client.enqueue(main.process_all, [getabspath(path), config])
+    return jobid
+
+def send_email(config, results_link, email_address):
+    #config is the result of running the process, needs to be first parameter
+    try:
+        logger.debug("Task completed; sending email to %r", email_address)
+        from django.core.mail import EmailMultiAlternatives
+        subject = 'NPACT results ready for "{0}"'.format(config['first_page_title'])
+        plaintext = get_template('email-results.txt')
+        htmly     = get_template('email-results.html')
+
+        d = Context({ 'keep_days': settings.ATIME_DEFAULT,
+                      'results_link': results_link})
+
+        text_content = plaintext.render(d)
+        html_content = htmly.render(d)
+        msg = EmailMultiAlternatives(subject, text_content, settings.EMAIL_FROM, [email_address])
+        msg.attach_alternative(html_content, "text/html")
+        msg.send(fail_silently=False)
+    except:
+        logger.exception("Failed sending email to %r", to_address)

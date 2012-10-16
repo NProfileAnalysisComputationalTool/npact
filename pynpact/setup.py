@@ -37,7 +37,7 @@ class build_pynpact(build) :
         #super(build_pynpact, self).run()
 
 setup(name='pynpact',
-      version='0.2',
+      version='0.3',
       description='Python N-Profile Analysis Computation Tool',
       author='Luciano Brocchieri and Nathan Bird',
       author_email='nathan@acceleration.net',

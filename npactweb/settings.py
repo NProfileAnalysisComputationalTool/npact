@@ -26,6 +26,12 @@ ADMINS = (
 
 MANAGERS = ADMINS
 
+#https://docs.djangoproject.com/en/dev/topics/email/#smtp-backend
+EMAIL_FROM = 'npact@genome.ufl.edu'
+#EMAIL_HOST = ''
+#EMAIL_PORT=''
+
+
 
 TIME_ZONE = 'America/New_York'
 
@@ -47,9 +53,15 @@ USE_L10N = False
 # Example: "/home/media/media.lawrence.com/media/"
 MEDIA_ROOT = ppath('uploads',True)
 
+TQ_DIR = ppath('taskqueue', True)
+import taskqueue
+taskqueue.BASE_DIR = TQ_DIR
+    
+
 # how many days should we keep uploaded files and products that
 # haven't been accessed before we delete them.
 MEDIA_RETAIN_FOR=7
+ATIME_DEFAULT = 14
 
 ######## django-mediagenerator settings
 
@@ -161,6 +173,9 @@ LOGGING = {
         'simple': {
             'format': '%(levelname)s %(message)s'
             },
+        'named_processes': {
+            'format': "%(asctime)s %(processName)s/%(name)s %(levelname)-8s %(message)s"
+            },
     },
     'handlers': {
         'mail_admins': {
@@ -176,8 +191,12 @@ LOGGING = {
             'class':'logging.handlers.WatchedFileHandler',
             'filename': ppath("logs",True) / "main.log",
             'formatter': 'verbose'
-
-            }
+        },
+        'django-tqdaemon': {
+            'class':'logging.handlers.WatchedFileHandler',
+            'filename': ppath("logs",True) / "django-tqdaemon.log",
+            'formatter': 'named_processes',
+        },
     },
     'loggers': {
         '': {
@@ -189,6 +208,11 @@ LOGGING = {
             'level': 'ERROR',
             'propagate': True,
             },
+        'cleanup': {
+            'handlers': ['console'],
+            'level': 'WARNING',
+            'propagate': False,
+        },
         # 'npact': {
         #     'handlers': ['console'],
         #     'level': 'DEBUG',
@@ -199,9 +223,22 @@ LOGGING = {
         #     'level': 'DEBUG',
         #     'propagate': True,
         #     }
+        'taskqueue': {
+            'propagate': False,
+            'level': 'DEBUG',
+            'handlers': ['django-tqdaemon']
+        },
+        'multiprocessing': {
+            'propagate': False,
+            'level': 'INFO',
+            'handlers': ['django-tqdaemon']
         }
     }
+}
 
 if DEBUG:
-    LOGGING['loggers']['']['handlers'].append('console')
-    
+    def add_console_to(logger_name):
+        LOGGING['loggers'][logger_name]['handlers'].append('console')
+    add_console_to('')
+    add_console_to('taskqueue')
+    add_console_to('multiprocessing')
