@@ -11,6 +11,10 @@ vedir = os.path.abspath(os.path.join(pwd,"ve"))
 if os.path.exists(vedir):
     shutil.rmtree(vedir)
 
+ret = subprocess.call(['git', 'submodule', 'update', '--init'])
+if ret:
+    print "Error updating git libraries; may not build properly."
+
 virtualenv_support_dir = os.path.abspath(os.path.join(pwd, "lib", "virtualenv_support"))
 
 ret = subprocess.call(["python", "virtualenv.py",
@@ -18,8 +22,8 @@ ret = subprocess.call(["python", "virtualenv.py",
                        "--distribute",
                        "--no-site-packages",
                        "--prompt=(npact)",
-#                      "-p", "python2.6",
-#                      "--never-download",
+                      "-p", "python2.6",
+                      "--never-download",
                        vedir],
                       cwd=pwd)
 if ret: exit(ret)
