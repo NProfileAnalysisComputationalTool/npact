@@ -98,6 +98,8 @@ The C code at `pynpact/src` does most of the analysis and the python code in `py
 ## taskqueue/
 This is a small daemon that will host long running computation external to the web process. Clients can enqueue a task getting back an ID. This ID can then be used to check the status, obtain log output, or get the result of the original task when it is finished.
 
+The process will automatically create a daemon process (named `npact-taskqueue-daemon`) as neccessary. This can be managed manually with `manage.py tqdaemon {start,stop,status,restart}`. NB. if the daemon was started by the webserver it must be shutdown as the same user. e.g. `sudo -u www-data manage.py tqdaemon stop`.
+
 ## npactweb/
 This is the code for the website. It is built on top of [Django](http://djangoproject.com/).
 * `npactweb/settings.py` is the configuration for this django website. Tells what modules and applications to load; configures where paths for different content are.
