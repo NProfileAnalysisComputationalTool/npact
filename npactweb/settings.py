@@ -26,6 +26,7 @@ ADMINS = (
 
 MANAGERS = ADMINS
 
+#https://docs.djangoproject.com/en/dev/topics/email/#smtp-backend
 EMAIL_FROM = 'npact@genome.ufl.edu'
 #EMAIL_HOST = ''
 #EMAIL_PORT=''
