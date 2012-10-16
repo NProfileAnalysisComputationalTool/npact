@@ -1,4 +1,5 @@
 
+PROC_TITLE = 'npact-taskqueue-daemon'
 
 LISTEN_ADDRESS = ('localhost', 57129)
 AUTH_KEY = 'npact'

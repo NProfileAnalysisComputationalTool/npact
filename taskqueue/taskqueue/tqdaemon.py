@@ -87,18 +87,30 @@ def daemonize():
     logger.debug("Killing other loggers")
     logging.shutdown(list(other_handlers))
     #logger.debug("Remaining loggers: %r:%r", fds, logging._handlerList)
-    
+
     pidfile = get_pidfile()
     if pidfile.is_locked():
         logger.error("Daemon already running")
         return INSTANCE_ALREADY_RUNNING
     else:
         logger.debug("Daemonizing, pidfile: %r", pidfile.path)
-    with daemon.DaemonContext(pidfile=pidfile, files_preserve=fds, detach_process=True):
-        logging.raiseExceptions = True
-        import taskqueue.server
-        logger.info("Daemonized context")
-        taskqueue.server.start_everything()
+    try:
+        with daemon.DaemonContext(pidfile=pidfile, files_preserve=fds, detach_process=True):
+            logging.raiseExceptions = True
+            try:
+                import setproctitle
+                import taskqueue
+                setproctitle.setproctitle(taskqueue.PROC_TITLE)
+                logger.debug("Successfully setproctitle: %r", taskqueue.PROC_TITLE)
+            except:
+                logger.exception("Couldn't setproctitle.")
+                pass
+
+            import taskqueue.server
+            logger.info("Daemonized context")
+            taskqueue.server.start_everything()
+    finally:
+        logger.warning("Exiting (hopefully intentionally)")
 
 
 def start():

@@ -28,11 +28,14 @@ method_to_typeid = {
 }
 
 def start_everything():
-    the_server = Server()
-    Manager.register('the_server', callable=lambda: the_server, method_to_typeid=method_to_typeid)
-    log.info("Opening a socket at %s", taskqueue.LISTEN_ADDRESS)
-    manager = Manager(taskqueue.LISTEN_ADDRESS, authkey=taskqueue.AUTH_KEY)
-    manager.get_server().serve_forever()
+    try:
+        the_server = Server()
+        Manager.register('the_server', callable=lambda: the_server, method_to_typeid=method_to_typeid)
+        log.info("Opening a socket at %s", taskqueue.LISTEN_ADDRESS)
+        manager = Manager(taskqueue.LISTEN_ADDRESS, authkey=taskqueue.AUTH_KEY)
+        manager.get_server().serve_forever()
+    except:
+        log.exception("Error starting taskqueue server")
 
 
 class Server(object):
@@ -71,7 +74,7 @@ class Server(object):
             buf = f.read()
         log.debug("Read %d bytes from log.", len(buf))
         return buf
-            
+
 
     def _enqueue(self, tid, path, task):
         log.info('Enqueuing [%r,...]', task[0])
