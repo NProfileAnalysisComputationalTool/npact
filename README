@@ -1,7 +1,7 @@
 # About
-NPACT is the N-Profile Analysis and Computation Tool. It is a way to analyze the ratios of different base pairs across a genome sections.  The primary output is a PostScript file that graphs the ratios across the genome.
+NPACT is the N-Profile Analysis and Computation Tool. It is a way to analyze the ratios of different base pairs across a genome sections.  The primary output is a Postscript or PDF file that graphs the ratios across the genome.
 
-This project was developed in 2011 by acceleration.net under contract from Luciano Brocchieri at the [University of Florida Genetics Institute](http://www.ufgi.ufl.edu/).
+This project was developed in 2011-2012 by Acceleration.net under contract from Luciano Brocchieri at the [University of Florida Genetics Institute](http://www.ufgi.ufl.edu/).
 
 ## About this file
 This file is written using [Markdown](http://daringfireball.net/projects/markdown/). It should be fairly legible as plain text but there are tools that will produce a bit nicer output, e.g. http://daringfireball.net/projects/markdown/dingus.
@@ -22,20 +22,18 @@ These you will need to setup on your system ahead of getting started.
 
 * A [posix](http://en.wikipedia.org/wiki/POSIX) environment for python. It works on CentOS and Ubuntu; it should work on any posix environment build of python. Mac OS X is expected to work.
 
-* [sed](http://www.gnu.org/s/sed/): used to assemble the output. This will most likely already be present in a posix environment.
-
 * A C compiler: the actual analysis code is written in C. Tested with gcc 4.6.1. Others should work, I don't think there is anything too crazy being used. There is a makefile that can be used to build all the C if you have [make](http://www.gnu.org/s/make/) installed.
 
 * Some sort of PostScript viewer to view the output files.
 
-* An fcgi server to run the website. The included apache.conf works with apache 2.2 running mod_fcgid but other fcgi servers should work as well. If you intend to only run it locally there is a builtin webserver that will do well enough.
+* An fcgi server to run the website. The included apache.conf works with Apache 2.2 running mod_fcgid but other fcgi servers should work as well. If you intend to only run it locally there is a builtin webserver that will do well enough.
 
 * [Git](http://git-scm.com/)  (OPTIONAL): The version control system this project is maintained in. Will be necessary to record changes but not for running the project.
 
-* [ps2pdf](http://ghostscript.com/doc/current/Ps2pdf.htm) (OPTIONAL): If present NPACT will convert the rendered postscript to a PDF file using this program.
+* [ps2pdf](http://ghostscript.com/doc/current/Ps2pdf.htm) (OPTIONAL): If present NPACT will convert the rendered Postscript to a PDF file using this program.
 
 ### Packaged requirements
-The system uses (already included) several python packages for deployment: [virtualenv](http://pypi.python.org/pypi/virtualenv), [setuptools](http://pypi.python.org/pypi/setuptools), and [pip](http://www.pip-installer.org/en/latest/index.html).
+The system uses several python packages for deployment: [virtualenv](http://pypi.python.org/pypi/virtualenv), [setuptools](http://pypi.python.org/pypi/setuptools), and [pip](http://www.pip-installer.org/en/latest/index.html). These are already included.
 
 The `requirements.txt` contains the exact libraries beyond that. It is in a [format](http://www.pip-installer.org/en/latest/requirements.html) that pip understands.
 
@@ -47,18 +45,12 @@ Notes:
 
 
 ## Building
-1. After cloning the repository from git, submodules will also need to be initialized (necessary for at least biopython).
-
-        git submodule update --init
-        
-2. run bootstrap.py to get everything going.
+1. run bootstrap.py to get everything going.
 
         python bootstrap.py
 
 If that completes successfuly then you should see "Successfully finished bootstrap.py". If it doesn't the rest won't work.
         
-N.B. To target a different version of python, simply invoke with that version of python. E.g. `python2.6 bootrap.py`
-
 ## Running
 Primarily this should be run underneath a fcgi webserver. Look at `apache.conf` for an example of how to do that.
 
@@ -69,6 +61,8 @@ Django does have a builtin webserver that will work for local installations, to 
 2. `source ve/bin/activate`
 3. `python manage.py runserver`
 4. open [http://127.0.0.1:8000/npact/]()
+
+NB: Apache normally runs as a different user and you may encounter permissions issues if you run the developmenet server in the same directory that has been served under Apache.
 
 ### command line interface
 The project was developed with this in mind but has been extended beyond it so there is no good way to provide detailed configuration via the command line-- it's only available via the website.
@@ -90,10 +84,10 @@ In the root of the project are several configuration and build files.
 * `manage.py` - the Django script for managing the website portion.
 * `lib/` -  contains the libraries this project depends on.
 * `ve/` - holds the python virtual environment-- won't exist until after `bootstrap.py` has been called. Can be deleted and recreated with `boostrap.py` at any point.
-* `webroot/` - a container for the dynamic portion that will change while running as a website. Uploaded files are written to here, logs are written to here.
+* `webroot/` - a container for the dynamic portion that will change while running as a website. Uploaded files, logs, daemon pidfile, and deferred tasks are all written underneath here.
 
 ## pynpact/
-For Python N-Profile Analysis and Computation Tool.  This is the main module that interacts with [Genbank](http://www.ncbi.nlm.nih.gov/genbank/) files to compute the graphs of N-Profile ratios. (NB: It's currently limitted to S-Profiles but this is high on the TODO list.)
+For Python N-Profile Analysis and Computation Tool.  This is the main module that interacts with [Genbank](http://www.ncbi.nlm.nih.gov/genbank/) files to compute the graphs of N-Profile ratios.
 
 The C code at `pynpact/src` does most of the analysis and the python code in `pynpact/pynpact` helps glue it together into an easy-to-run process.
 
@@ -101,8 +95,10 @@ The C code at `pynpact/src` does most of the analysis and the python code in `py
 * `pynpact/pynpact/entrez.py` is used for querying entrez to find gbk files.
 * `pynpact/pynpact/main.py` actually coordinates the running of the C programs and produces the PS output.
 
+## taskqueue/
+This is a small daemon that will host long running computation external to the web process. Clients can enqueue a task getting back an ID. This ID can then be used to check the status, obtain log output, or get the result of the original task when it is finished.
 
-## npactweb
+## npactweb/
 This is the code for the website. It is built on top of [Django](http://djangoproject.com/).
 * `npactweb/settings.py` is the configuration for this django website. Tells what modules and applications to load; configures where paths for different content are.
 * `npactweb/npactweb/static/` holds the static images, CSS, and javascript used on the website.
