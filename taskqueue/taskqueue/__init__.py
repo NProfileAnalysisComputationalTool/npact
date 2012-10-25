@@ -1,7 +1,7 @@
 
 PROC_TITLE = 'npact-taskqueue-daemon'
 
-LISTEN_ADDRESS = ('localhost', 57129)
+LISTEN_ADDRESS = ('127.0.0.1', 57129)
 AUTH_KEY = 'npact'
 BASE_DIR = '/tmp/'
 
