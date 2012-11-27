@@ -316,8 +316,9 @@ def send_email(config, results_link, email_address):
 
         text_content = plaintext.render(d)
         html_content = htmly.render(d)
-        msg = EmailMultiAlternatives(subject, text_content, settings.EMAIL_FROM, [email_address])
+        msg = EmailMultiAlternatives(subject, text_content, to=[email_address])
         msg.attach_alternative(html_content, "text/html")
         msg.send(fail_silently=False)
+        logger.debug("Finished sending email.")
     except:
         logger.exception("Failed sending email to %r", to_address)

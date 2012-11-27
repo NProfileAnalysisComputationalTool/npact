@@ -27,7 +27,6 @@ ADMINS = (
 MANAGERS = ADMINS
 
 #https://docs.djangoproject.com/en/dev/topics/email/#smtp-backend
-EMAIL_FROM = 'npact1.0@gmail.com'
 EMAIL_USE_TLS = True
 EMAIL_HOST = 'smtp.gmail.com'
 EMAIL_PORT = 587
