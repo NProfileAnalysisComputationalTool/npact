@@ -57,7 +57,7 @@ var progress = {
             }
             $('#files').replaceWith(newnode);
             console.log("Finished building file list.");
-            $('#predictionresults').fadeIn(200);
+            $('#results').fadeIn(200);
         }
     },
 
