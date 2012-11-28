@@ -26,6 +26,8 @@ if (!Function.prototype.bind) { // check if native implementation available
 
 
 var progress = {
+    POLLTIME: 4000,
+
     start: null,
 
     init: function(url) {
@@ -92,7 +94,7 @@ var progress = {
         if(data.next=='results')
             setTimeout(progress.processResults.bind(progress, data));
         else
-            setTimeout(progress.startRequest.bind(progress, data), 4000);
+            setTimeout(progress.startRequest.bind(progress, data), progress.POLLTIME);
 
         setTimeout(progress.updateStatusDisplay.bind(progress, data));
     },
