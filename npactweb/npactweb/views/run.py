@@ -98,6 +98,10 @@ def config(request, path):
                                'def_list_items': get_display_items(request,config)},
                                context_instance=RequestContext(request))
 
+#Variables, mostly for debugging, that aren't exposed anywhere but
+#that if present in the request should be added to the config
+MAGIC_PARAMS = ['raiseerror', 'force']
+
 def build_config(path, request):
     "Tries to build the config dictionary for the given path"
     assert_clean_path(path, request)
@@ -129,6 +133,10 @@ def build_config(path, request):
         logger.debug('updating with %r', cf.cleaned_data)
         config.update(cf.cleaned_data)
 
+    for key in MAGIC_PARAMS:
+        if key in request.GET:
+            config[key] = request.GET[key]
+
     return config
 
 
@@ -139,7 +147,7 @@ def urlencode_config(config, exclude=None):
     in the ConfigForm; everything else can be recalculated based on
     that.
     """
-    keys = ConfigForm().fields.keys()
+    keys = ConfigForm().fields.keys() + MAGIC_PARAMS
     if exclude:
         keys = set(keys) - set(exclude)
     return urlencode(util.reducedict(config, keys), True)
@@ -151,6 +159,7 @@ def run_frame(request, path):
     config = build_config(path, request)
     jobid = kickstart(request, path, config)
     email = request.GET.get('email')
+
     if email:
         results_link = reverse('run', args=[path]) + '?' + urlencode_config(config, exclude=['email'])
         results_link = request.build_absolute_uri(results_link)

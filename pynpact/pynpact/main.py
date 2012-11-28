@@ -55,7 +55,13 @@ class GenBankProcessor(object ):
 
     def __init__(self, gbkfile = None, timeout=None, **kwargs):
         self.__dict__.update(kwargs)
-        #for k in kwargs: setattr(self,k, kwargs[k])
+        if self.config and self.config.get('force'):
+            self.logger.debug("Forcing recalculation")
+            self.force = self.config.get('force')
+
+        if self.config and self.config.get('raiseerror'):
+            raise Exception("You asked me to.")
+            
         if not self.timer:
             self.timer = SoftTimer(timeout=timeout)
 
@@ -425,5 +431,5 @@ if __name__ == '__main__':
                         format="%(asctime)s %(name)-10s %(levelname)-8s %(message)s",
                         datefmt='%H:%M:%S')
 
-    gbkp = GenBankProcessor(args[0],force=options.force)
+    gbkp = GenBankProcessor(args[0], force=options.force)
     gbkp.process()
