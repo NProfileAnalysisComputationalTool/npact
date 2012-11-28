@@ -335,8 +335,8 @@ button.Start { clear:both; margin: 8px;}
 
 
 /* ****** For the processing page ****** */
-#progress .ready { display:none; }
-#progress span.ui-icon { float:left; margin-right: .5em;}
+#progress .onsuccess, #progress .onerror { display:none; }
+#progress .ui-icon { float:left;  margin-right: .5em;}
 #progress h3 + div { padding-left: 16px; }
 #progress h4 { margin-top: 6px; }
 
@@ -345,3 +345,6 @@ button.Start { clear:both; margin: 8px;}
 #steps li {margin:3px 0 3px 20px;}
 #currentstepdesc { font-weight:bold; }
 .spinner { height: 24px; width=24px; float:left;}
+
+#content .ui-state-error { font-size: 1.2em; }
+#content .ui-corner-all p { margin: .5em .7em .7em .7em }

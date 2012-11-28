@@ -65,7 +65,7 @@ var progress = {
         console.log('Starting Progress Request Chain');
         if(!progress.start) {
             progress.start = new Date();
-            //progress.interval = window.setTimeout(progress.updateTimer, 1000);
+
         }
         jQuery.ajax({ url: progress.url,
                       dataType:'json',
@@ -82,8 +82,8 @@ var progress = {
         setTimeout(function() { progress.updateStatusDisplay(jQuery.parseJSON(data.responseText)); }, 0);
         $('#computationrunning').slideToggle()
             .after(function () {
-                       $('#computationerred').slideToggle();
-                   });
+                $('.onerror').slideToggle();
+            });
     },
 
     onsuccess: function(data){
@@ -101,22 +101,10 @@ var progress = {
         console.log('finished: ', data.download_url);
         if(progress.interval)
             clearTimeout(progress.interval);
-        $('#title').html('N-PACT Is Finished');
         $('#downloadlink').attr('href', data.download_url);
-        $('#graphicalresults').fadeIn(200);
-        $('#emailsent').fadeIn(200);
-        $('#timer').toggleClass('ui-state-highlight');
+        $('#title').html('N-PACT Is Finished');
         $('#progressreport').fadeOut(100);
+        $('.onsuccess').fadeIn(600);
 
-        //setTimeout(function() {window.location = data.download_url; }, 800);
     },
-
-    updateTimer: function (){
-        if(progress.start) {
-            $('#timer').fadeIn();
-            var elapsed = new Date() - progress.start;
-            progress.timerDom.html(Math.floor(elapsed/1000) + ' sec.');
-            progress.interval = setTimeout(progress.updateTimer, 1010 - (elapsed % 1000));
-        }
-    }
 };
