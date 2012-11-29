@@ -13,6 +13,9 @@ import logging
 import multiprocessing
 import os.path
 import tempfile
+import collections
+import sys
+
 from multiprocessing.managers import SyncManager
 
 import taskqueue
@@ -75,6 +78,21 @@ class Server(object):
         log.debug("Read %d bytes from log.", len(buf))
         return buf
 
+    def log_tail(self, tid, line_count=1):
+        log.debug("Retrieving %d log lines for %s", line_count, tid)
+        path = os.path.join(self.work_dir, tid + '.stderr')
+        with open(path, 'rb') as f:
+            try:
+                f.seek(- (line_count + 1) * 120, 2) # 2 is from end
+            except:
+                f.seek(0)
+            lines = collections.deque(maxlen=line_count)
+            while True:
+                line = f.readline()
+                if line == '':
+                    return list(lines)
+                else:
+                    lines.append(line)
 
     def _enqueue(self, tid, path, task):
         log.info('Enqueuing [%r,...]', task[0])
@@ -142,17 +160,22 @@ def async_wrapper(tid, task_path, fn, args, kwargs):
     root_logger.setLevel(logging.DEBUG)
     root_logger.addHandler(file_handler)
 
-    try:
-        if args is None:   args = []
-        if kwargs is None: kwargs = {}
-        rc = fn(*args, **kwargs)
-        log.debug("Finished %r", tid)
-    finally:
+    stderrlog = task_base + ".stderr"
+    oldstderr = sys.stderr
+    with open(stderrlog, 'w') as f:
+        sys.stderr = f
         try:
-            if os.path.exists(task_path) and task_ext == '.todo':
-                os.rename(task_path, task_base)
-            else:
-                log.warning("Refinished finished task %r", tid)
-        except:
-            log.exception("Error cleaning up after finished task: %r", tid)
-    return rc
+            if args is None:   args = []
+            if kwargs is None: kwargs = {}
+            rc = fn(*args, **kwargs)
+            log.debug("Finished %r", tid)
+        finally:
+            try:
+                if os.path.exists(task_path) and task_ext == '.todo':
+                    os.rename(task_path, task_base)
+                else:
+                    log.warning("Refinished finished task %r", tid)
+            except:
+                log.exception("Error cleaning up after finished task: %r", tid)
+        return rc
+    sys.stderr = oldstderr

@@ -56,6 +56,10 @@ def log_output(tid, position=0):
     with server_call() as server:
         return server.log_output(tid, position)
 
+def log_tail(tid, line_count=1):
+    with server_call() as server:
+        return server.log_tail(tid, line_count)
+
 def enqueue(fn, args=None, kwargs=None):
     """Enqueue the function in the task queue and return an identifier
     that can be used to check status or get the result later.

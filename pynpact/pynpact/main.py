@@ -1,5 +1,6 @@
 #!/usr/bin/env python
 import logging, os.path, tempfile, shutil
+import sys
 from optparse import OptionParser
 from contextlib import contextmanager
 import math
@@ -149,7 +150,9 @@ class GenBankProcessor(object ):
             cmd = [binfile("extract"), self.gbkfile,
                    config['GeneDescriptorSkip1'], config['GeneDescriptorKey1'],
                    config['GeneDescriptorSkip2'], config['GeneDescriptorKey2']]
-            return capproc.capturedCall(cmd, stdout=out, logger=self.logger, check=True)
+            return capproc.capturedCall(cmd, 
+                                        stdout=out, stderr=sys.stderr,
+                                        logger=self.logger, check=True)
         filename = self.derivative_filename(".%s.genes" % hash)
         self.safe_produce_new(filename, _extract, dependencies=[self.gbkfile])
         self.config['File_of_published_accepted_CDSs'] = filename
@@ -168,7 +171,8 @@ class GenBankProcessor(object ):
             progargs = [binfile("nprofile"), '-b', ''.join(config["nucleotides"]),
                         self.gbkfile, 1, config['length'],
                         config['window_size'], config['step'], config['period']]
-            return capproc.capturedCall(progargs, stdout=out, logger=self.logger, check=True)
+            return capproc.capturedCall(progargs, stdout=out, stderr=sys.stderr,
+                                        logger=self.logger, check=True)
 
         self.safe_produce_new(outfilename, _nprofile, dependencies=[self.gbkfile])
         self.config['File_list_of_nucleotides_in_200bp windows'] = outfilename
@@ -202,6 +206,7 @@ class GenBankProcessor(object ):
                                  dtemp)
                 capproc.capturedCall(cmd, cwd=dtemp, check=True,
                                      env={'BASE_DIR_THRESHOLD_TABLES':DATAPATH},
+                                     stderr=sys.stderr,
                                      logger=self.logger)
                 #TODO, while deleting this is inconsistent (small
                 #window): files will #be deleted out of outdir before

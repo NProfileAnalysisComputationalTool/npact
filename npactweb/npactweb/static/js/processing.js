@@ -42,8 +42,8 @@ var progress = {
         if(!data) return;
 
         var steps = data.steps;
-        if(steps && steps.length > 0) {
-            progress.currentstepdesc.text(steps[steps.length -1]);
+        if(steps) {
+            progress.currentstepdesc.html(steps.join("<br/>"));
         }
         // for(var i=0; i < steps.length; i++) {
         //     progress.steps.prepend('<li>' + data.steps[i] + '</li>');
