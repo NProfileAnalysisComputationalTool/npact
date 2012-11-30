@@ -200,14 +200,11 @@ def derivative_filename(base, part, replace_ext=True, outputdir=None):
     if replace_ext:
         filename = os.path.splitext(filename)[0]
 
-    outfilename = os.path.join(outputdir, filename + part)
-
-    return outfilename
+    return os.path.join(outputdir, filename + part)
 
 def safe_produce_new(outfilename, func, force=False, dependencies=[], **kwargs):
-    outofdate = is_outofdate(outfilename, *dependencies)
-    logger=kwargs.get('logger')
-    if outofdate or force:
+    logger = kwargs.get('logger')
+    if force or is_outofdate(outfilename, *dependencies):
         if logger:
             logger.debug("Regenerating, checked:%d force:%r", len(dependencies), force)
 

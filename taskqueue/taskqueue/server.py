@@ -91,7 +91,7 @@ class Server(object):
                 line = f.readline()
                 if line == '':
                     return list(lines)
-                else:
+                elif line != '\n':
                     lines.append(line)
 
     def _enqueue(self, tid, path, task):
