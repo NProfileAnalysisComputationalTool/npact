@@ -10,9 +10,8 @@ from __init__ import binfile, DATAPATH
 import capproc
 import prepare
 import util
-from softtimeout import SoftTimer, Timeout
 
-logger = logging.getLogger(__name__)
+logger = logging.getLogger('pynpact')
 
 
 
@@ -41,20 +40,19 @@ class GenBankProcessor(object ):
        to create intermediate and PS files in.
      * cleanup: (default: False) Should the temporary files (not
        intermediate products) be deleted in case of errors
-     * timeout: (default: None) Don't start a new processing step if
-       this number of seconds has already elapsed
 
 """
     #
-    gbkfile = None
-    force = False
-    logger = logger
-    outputdir = None
-    cleanup = True
-    config = None
-    timer = None
+    gbkfile     = None
+    force       = False
+    logger      = logger #logger is for internal debugging purposes
+    statuslog   = True   #logger for printing external messages to end users 
+    outputdir   = None
+    cleanup     = True
+    config      = None
 
-    def __init__(self, gbkfile = None, timeout=None, **kwargs):
+
+    def __init__(self, gbkfile = None, **kwargs):
         self.__dict__.update(kwargs)
         if self.config and self.config.get('force'):
             self.logger.debug("Forcing recalculation")
@@ -62,10 +60,16 @@ class GenBankProcessor(object ):
 
         if self.config and self.config.get('raiseerror'):
             raise Exception("You asked me to.")
-            
-        if not self.timer:
-            self.timer = SoftTimer(timeout=timeout)
 
+        if self.statuslog is True:
+            #we want this to just print raw messages to stderr; they
+            #will be piped onto the webpage.
+            self.statuslog = logging.getLogger('pynpact.statuslog')
+            self.statuslog.setLevel(logging.DEBUG)
+            sh = logging.StreamHandler()
+            sh.setFormatter(logging.Formatter('%(message)s'))
+            self.statuslog.addHandler(sh)
+            
         self.parse(gbkfile)
 
     def parse(self, gbkfile):
@@ -80,8 +84,6 @@ class GenBankProcessor(object ):
 
         if not self.outputdir:
             self.outputdir = os.path.dirname(os.path.realpath(self.gbkfile))
-
-
 
     ####################################################################
     ## Helper Functions
@@ -145,8 +147,7 @@ class GenBankProcessor(object ):
                                            'GeneDescriptorSkip1', 'GeneDescriptorSkip2',
                                            ])
         def _extract(out):
-            self.timer.check("Extracting genes in %s." % os.path.basename(self.gbkfile))
-            self.logger.info("starting extract for %s", self.gbkfile)
+            self.statuslog.debug("Extracting genes in %s.", os.path.basename(self.gbkfile))
             cmd = [binfile("extract"), self.gbkfile,
                    config['GeneDescriptorSkip1'], config['GeneDescriptorKey1'],
                    config['GeneDescriptorSkip2'], config['GeneDescriptorKey2']]
@@ -167,11 +168,12 @@ class GenBankProcessor(object ):
                                           ['nucleotides', 'length','window_size','step','period'])
         outfilename = self.derivative_filename(".%s.nprofile" % hash)
         def _nprofile(out):
-            self.timer.check("Calculating n-profile.")
+            self.statuslog.info("Calculating n-profile.")
             progargs = [binfile("nprofile"), '-b', ''.join(config["nucleotides"]),
                         self.gbkfile, 1, config['length'],
                         config['window_size'], config['step'], config['period']]
-            return capproc.capturedCall(progargs, stdout=out, stderr=sys.stderr,
+            return capproc.capturedCall(progargs, 
+                                        stdout=out, stderr=sys.stderr,
                                         logger=self.logger, check=True)
 
         self.safe_produce_new(outfilename, _nprofile, dependencies=[self.gbkfile])
@@ -182,7 +184,7 @@ class GenBankProcessor(object ):
     def acgt_gamma(self):
         "Run the acgt_gamma gene prediction program."
         if self.config.get('skip_prediction', False):
-            self.logger.debug("Skipping prediction.")
+            self.statuslog("Skipping prediction.")
             return
 
         assert os.path.exists(DATAPATH), \
@@ -193,23 +195,22 @@ class GenBankProcessor(object ):
 
         #TODO: acgt actually takes the string of characters to skip, not the length.
         outdir = self.derivative_filename('.{0}.predict'.format(hash))
-        if util.is_outofdate(outdir, self.gbkfile, DATAPATH):
-            cmd = [binfile("acgt_gamma"), "-q", "-q", self.gbkfile]
+        if self.force or util.is_outofdate(outdir, self.gbkfile, DATAPATH):
+            cmd = [binfile("acgt_gamma"), "-q", self.gbkfile]
             if config.has_key('significance'):
                 cmd.append(config['significance'])
 
 
             with self.mkdtemp() as dtemp:
-                self.timer.check("Predicting new gene locations.")
-                self.logger.info("Starting prediction(sig:%s) program in %s",
-                                 self.config.get('significance'),
-                                 dtemp)
+                self.statuslog.info("Predicting new gene locations with significance: %s.",
+                                    self.config.get('significance'))
+                self.logger.debug("Starting prediction program in %s", dtemp)
                 capproc.capturedCall(cmd, cwd=dtemp, check=True,
-                                     env={'BASE_DIR_THRESHOLD_TABLES':DATAPATH},
+                                     env={'BASE_DIR_THRESHOLD_TABLES': DATAPATH},
                                      stderr=sys.stderr,
                                      logger=self.logger)
                 #TODO, while deleting this is inconsistent (small
-                #window): files will #be deleted out of outdir before
+                #window): files will be deleted out of outdir before
                 #the directory is deleted and the rename comes a
                 #moment later. During that time it will be
                 #inconsistent.
@@ -227,7 +228,6 @@ class GenBankProcessor(object ):
         self.config['File_of_published_rejected_CDSs'] = j(".modified")
         self.config['File_of_G+C_coding_potential_regions'] = j('.profiles')
         self.config['acgt_gamma_output'] = outdir
-
 
 
 
@@ -290,7 +290,8 @@ period_of_frame       Number of frames.
         #get the list of filenames this step depends on.
         dependencies = map(config.get, self.AP_file_keys)
 
-        page_count = math.ceil((config['end_base'] - config['start_base']) * 1.0 / config['bp_per_page'])
+        page_count = math.ceil(float(config['end_base'] - config['start_base'])
+                               / config['bp_per_page'])
 
         #build the individual ps page files.
         filenames = []
@@ -299,23 +300,21 @@ period_of_frame       Number of frames.
         page_num = 1
 
         #the hash of individual pages shouldn't depend on the
-        #end_base, so leave that out.  We keep updating the
-        #start_base in *this* config (different than the general
-        #one).
+        #end_base, so leave that out.  We keep updating the start_base
+        #in *this* config (different than the general one).
         pconfkeys = hashkeys.difference(set(["end_base"]))
 
         while (config['start_base'] < config['end_base']):
             if (config['start_base'] + config['bp_per_page']) >= config['end_base']:
-                #we're on the last page: end base should be included in pconfkeys
+                #we're on the last page: include end_base for hash
+                #generation as the end_base might abridge the page's
+                #output
                 pconfkeys = hashkeys
 
             pconfig,phash = util.reducehashdict(config, pconfkeys)
             def _ap(psout):
-                self.timer.check("Generating %d pages of graphical output: %2d%%" %
-                                 (page_count, round(100.0 * page_num / page_count)))
-
-                self.logger.debug("Starting Allplots page %d for %r",
-                                  page_num, os.path.basename(self.gbkfile))
+                self.statuslog.info("Generating %d pages of graphical output: %2d%%",
+                                    page_count, round(100.0 * page_num / page_count))
 
                 cmd = [binfile("Allplots"), "-q", "--stdin",]
                 if config.get('alternate_colors'):
@@ -334,25 +333,20 @@ period_of_frame       Number of frames.
                                         stdout=psout,
                                         stderr=False,
                                         logger=self.logger) as ap:
-
-
-                    self.logger.debug("Writing Allplots for %d", page_num)
-
-                    #helper function for writing a line to the allplots file.
-                    def ap_wl(str):
-                        if str: ap.stdin.write(str)
+                    #write the allplots.def file information through stdin.
+                    def ap_wl(line):
+                        "helper function for writing a line to the allplots file."
+                        if line: ap.stdin.write(line)
                         ap.stdin.write('\n')
 
                     #NB the "Plot Title" is disregarded, but that line
                     #should also contain the total number of bases
-                    ap_wl("%s %d" % ("FOOBAR", pconfig['length']))     #Plot Title
-                    ap_wl('+'.join(pconfig['nucleotides']))            #Nucleotide(s)_plotted (e.g.: C+G)
-                    ap_wl(pconfig['first_page_title'].format(page_num)) #First-Page title
+                    ap_wl("%s %d" % ("FOOBAR", pconfig['length']))           #Plot Title
+                    ap_wl('+'.join(pconfig['nucleotides']))                  #Nucleotide(s)_plotted (e.g.: C+G)
+                    ap_wl(pconfig['first_page_title'].format(page_num))      #First-Page title
                     ap_wl(pconfig['following_page_title'].format(page_num) ) #Title of following pages
-
-
                     for f in self.AP_file_keys:
-                        ap_wl(pconfig.get(f,"None"))
+                        ap_wl(pconfig.get(f, "None"))
                     ap.stdin.close()
                     ap.wait()
 
@@ -363,12 +357,10 @@ period_of_frame       Number of frames.
             config['start_base'] += config['bp_per_page']
 
 
-
         def combine_ps_files(psout):
             #While combining, insert the special markers so that
             #it will appear correctly as many pages.
-            self.timer.check("Combining pages into output.")
-            self.logger.info("combining postscript files")
+            self.statuslog.info("Combining pages into output.")
             first = True
             psout.write("%!PS-Adobe-2.0\n\n")
             psout.write("%%Pages: {0}\n\n".format(len(filenames)))
@@ -393,15 +385,14 @@ period_of_frame       Number of frames.
             config,hash= util.reducehashdict(self.config, ['combined_ps_name'])
             pdf_filename = self.derivative_filename(".%s.pdf" % hash)
             def _ps2pdf(out):
-                self.timer.check("Converting to PDF")
-                self.logger.info("Converting to PDF")
+                self.statuslog.info("Converting to PDF")
                 cmd = [ps2pdf, config['combined_ps_name'], '-']
                 return capproc.capturedCall(cmd, stdout=out, logger=self.logger, check=True)
             self.safe_produce_new(pdf_filename, _ps2pdf, dependencies=[self.gbkfile])
             self.config['pdf_filename'] = pdf_filename
             return pdf_filename
         else:
-            self.logger.info("Skipping ps2pdf translation, program not found.")
+            self.logger.warn("Skipping ps2pdf translation, program not found.")
             return self.config['combined_ps_name']
 
 
