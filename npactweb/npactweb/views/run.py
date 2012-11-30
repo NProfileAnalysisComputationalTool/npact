@@ -204,7 +204,7 @@ def run_status(request, jobid):
         return HttpResponse(json.dumps(result), status=status)
 
     if not ready:
-        result['steps'] = client.log_tail(jobid, 4)
+        result['steps'] = client.log_tail(jobid, 1)
     else:
         try:
             config = client.result(jobid)

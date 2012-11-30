@@ -1,5 +1,8 @@
 #!/usr/bin/env python
-import logging, os.path, tempfile, shutil
+import logging
+import os, os.path
+import tempfile
+import shutil
 import sys
 from optparse import OptionParser
 from contextlib import contextmanager
@@ -46,7 +49,7 @@ class GenBankProcessor(object ):
     gbkfile     = None
     force       = False
     logger      = logger #logger is for internal debugging purposes
-    statuslog   = True   #logger for printing external messages to end users 
+    statuslog   = None   #logger for printing external messages to end users 
     outputdir   = None
     cleanup     = True
     config      = None
@@ -54,22 +57,23 @@ class GenBankProcessor(object ):
 
     def __init__(self, gbkfile = None, **kwargs):
         self.__dict__.update(kwargs)
-        if self.config and self.config.get('force'):
-            self.logger.debug("Forcing recalculation")
-            self.force = self.config.get('force')
 
         if self.config and self.config.get('raiseerror'):
             raise Exception("You asked me to.")
 
-        if self.statuslog is True:
-            #we want this to just print raw messages to stderr; they
-            #will be piped onto the webpage.
-            self.statuslog = logging.getLogger('pynpact.statuslog')
-            self.statuslog.setLevel(logging.DEBUG)
-            sh = logging.StreamHandler()
-            sh.setFormatter(logging.Formatter('%(message)s'))
-            self.statuslog.addHandler(sh)
-            
+        #we want this to just print raw messages to stderr; they
+        #will be piped onto the webpage.
+        self.statuslog = logging.getLogger('pynpact.statuslog')
+        self.statuslog.setLevel(logging.DEBUG)
+        
+        # sh = logging.StreamHandler()
+        # sh.setFormatter(logging.Formatter('%(message)s'))
+        # self.statuslog.addHandler(sh)
+
+        if self.config and self.config.get('force'):
+            self.statuslog.debug("Forcing recalculation")
+            self.force = self.config.get('force')
+        
         self.parse(gbkfile)
 
     def parse(self, gbkfile):

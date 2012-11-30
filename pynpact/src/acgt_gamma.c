@@ -1,4 +1,4 @@
-/*  -*- c-file-style:"linux" c-basic-offset:4 tab-width:4 -*-  */
+/*  -*- c-file-style:"linux" c-basic-offset:4 tab-width:8 -*-  */
 #include <stdlib.h>
 #include <math.h>
 #include <stdio.h>
@@ -347,7 +347,7 @@ int main (int argc, char *argv[])
     // Reads annotated CDSs and records start-of-sequence position in the file
     bytes_from_origin= annotation(&ncds, &nexons);		
     
-    logmsg(10,"\nNum CDS: %d\nNum exons: %d\n", ncds, nexons);
+    logmsg(10,"Num CDS: %d; Num exons: %d\n", ncds, nexons);
 
     ffrom= (long *)malloc(nexons * sizeof(long));
     o= (int *)malloc(nexons * sizeof(int));
@@ -368,8 +368,7 @@ int main (int argc, char *argv[])
             tnuc[0]*100.0/tnuc[4],tnuc[1]*100.0/tnuc[4],tnuc[2]*100.0/tnuc[4],tnuc[3]*100.0/tnuc[4]);
     fprintf(stdout,"Significance level: %.4f\n", SIGNIFICANCE);
 
-    logmsg(10,"\nAnalyzing genome reading frames:     ");
-
+    
 /* Finds and tests orfs in all 6 frames */
 
 	for(k= 0; k < 6; ++k)
@@ -396,7 +395,7 @@ int main (int argc, char *argv[])
     secs= ((int)(t1 - t0)) % 60;
 
     fprintf(stdout, "Scoring time: %d\' %d\"\n", minutes, secs);
-    logmsg(10, "\nChecking for other compositional asymmetries (G-tests):     ");
+    
 
     tot_Ghits= find_Ghits(genome_size, tot_hss, bytes_from_origin, &on);     // G-tests
     fseek(fp, bytes_from_origin, SEEK_SET);
@@ -406,7 +405,6 @@ int main (int argc, char *argv[])
     secs= ((int)(t2 - t1)) % 60;
     fprintf(stdout, "\nG-test time: %d\' %d\"\n", minutes, secs);
 
-    logmsg(10, "\nCharacterizing %d published genes:     ",ncds);
     characterize_published_genes(ncds, tot_Ghits, nuc, bytes_from_origin, ffrom);   // List published genes characterized by content annotation
 
     process_hss(tot_hss, tot_Ghits, ncds);     // Characterizes genes predicted by G-test
@@ -564,7 +562,10 @@ int analyze_genome(int genome_size, int tot_hss, int *on)
 		if (c >= 'a' && c <= 'z')
 		{
             ++pos;
-            logmsg(0,"\b\b\b\b%3d%%",(int)((double)pos / ((double)genome_size) * 100.0 + 0.5));
+            if (! (pos & 0xfffff))
+                logmsg(10, "Analyzing genome reading frames: %3d%%\n",
+                       (int)((double) pos / ((double)genome_size) * 100.0 + 0.5));
+
 
 			for(k= 0; k < 3; ++k)
 			{
@@ -710,8 +711,7 @@ int analyze_genome(int genome_size, int tot_hss, int *on)
 			}
 		}
 	}
-
-    logmsg(0,"\b\b\b\b100%%\n");
+    logmsg(10, "Analyzing genome reading frames: 100%%\n");
     fprintf(stdout,"Total # orfs (len >= %d): %d\n", mHL, tot_orfs[0] + tot_orfs[1] + tot_orfs[2] + tot_orfs[3] + tot_orfs[4] + tot_orfs[5]);
 
     return(tot_hss);
@@ -2464,7 +2464,7 @@ void rescue_hss(int to_hss)
 		}
 	}
 
-    logmsg(10,"\n\nTotal rescued hss: %d\n\n",tot);
+    logmsg(10, "Total rescued hss: %d\n",tot);
 }
 
 /***** End of function rescue_hss()  *****/
@@ -2486,7 +2486,7 @@ void process_hss(int from_hss, int to_hss, int ncds)
 
 //Hits sorted by maximum length of global significance (the longer the length the higher the significance)
 
-    logmsg(10, "\n\nEvaluating global significance.."); 
+    logmsg(10, "Evaluating global significance..\n"); 
 
 	for(i= 0; i < to_hss - 1; ++i)
 		for(j= i + 1; j < to_hss; ++j)
@@ -2509,7 +2509,7 @@ void process_hss(int from_hss, int to_hss, int ncds)
  
 	if(SORT_BY_SCORE)
 	{
-     logmsg(10, "\n\nSorting hits by score..."); 
+     logmsg(10, "Sorting hits by score...\n"); 
  
  	for(i= 0; i < to_hss; ++i) o[i]= i;
  
@@ -2524,7 +2524,7 @@ void process_hss(int from_hss, int to_hss, int ncds)
  
 	if(SORT_BY_HIT_SLOPE)
 	{
-      logmsg(10, "\n\nSorting hits by hit-score slope.."); 
+      logmsg(10, "Sorting hits by hit-score slope..\n"); 
  
 	for(i= 0; i < to_hss; ++i) o[i]= i;
 
@@ -2544,7 +2544,7 @@ void process_hss(int from_hss, int to_hss, int ncds)
  
 	if(SORT_BY_ORF_SLOPE)
 	{
-    logmsg(10, "\n\nSorting hits by score per ORF position"); 
+    logmsg(10, "Sorting hits by score per ORF position\n"); 
 
          for(i= 0; i < to_hss; ++i)
          {
@@ -2574,13 +2574,15 @@ void process_hss(int from_hss, int to_hss, int ncds)
 
 // End of sorting.
 
-    logmsg(10, "\n\nProcessing HSSs:     "); 
+    
 
 // Checks overlap first with annotated genes and then with higher-scoring HSSs
 
 	for(i= 0; i < to_hss; ++i)
 	{
-        logmsg(0,"\b\b\b\b%3.0f%%", (float)(i + 1) / (float)(to_hss + 1) * 100.0);
+        if (! (i & 0xfff))
+            logmsg(10, "Processing %d HSSs: %3.0f%%\n", to_hss,
+                   (float)(i + 1) / (float)(to_hss + 1) * 100.0);
 		if(hss[o[i]].type != 5)
 		{
             k= 0;
@@ -2713,8 +2715,8 @@ void process_hss(int from_hss, int to_hss, int ncds)
 			}
 		}
 	}
-
-    logmsg(0,"\b\b\b\b100%%");
+    
+    logmsg(10, "Processing %d HSSs: 100%%\n", to_hss);
 
 // Renumbers hits within each orf including only those of type 5:
 
@@ -3023,7 +3025,9 @@ int find_Ghits(int genome_size, int tot_hss, long bytes_from_origin, int *on)
 		
 		if(g1 - g0 + 1  >= mHL)
 		{
-            logmsg(0,"\b\b\b\b%3d%%",(int)((double)g0 / ((double)genome_size) * 100.0) );
+            if (! (g1 & 0xffff))
+                logmsg(10, "Checking for other compositional asymmetries (G-tests): %3d%%\n",
+                       (int)((double)g0 / ((double)genome_size) * 100.0));
 
             get_sequence(g0 - g3 + 1, g1 - g0 + 1, 'D', ORF);
 
@@ -3108,8 +3112,7 @@ int find_Ghits(int genome_size, int tot_hss, long bytes_from_origin, int *on)
 	}
 	
     free(o);
-	
-    logmsg(0,"\b\b\b\b100%%\n");
+    logmsg(10, "Checking for other compositional asymmetries (G-tests): 100%%\n");
     fprintf(stdout,"\nTotal G-hits: %d", tot_Ghits - tot_hss);
 	
     return(tot_Ghits);
@@ -3150,7 +3153,9 @@ void characterize_published_genes(int ncds, int tot_Ghits, double nuc[], long by
 
 	for(j= 0; j < ncds; ++j)
 	{
-        logmsg(0,"\b\b\b\b%3.0f%%",(float)(j+1)/((float)ncds)*100.0);
+        if (! (j & 0x7ff))  // Every 511
+            logmsg(10, "Characterizing %d published genes: %3.0f%%\n",
+                   ncds, (float)(j+1)/((float)ncds)*100.0);
         l= 0;
 
 // Assembles exons

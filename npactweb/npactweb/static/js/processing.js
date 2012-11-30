@@ -26,7 +26,7 @@ if (!Function.prototype.bind) { // check if native implementation available
 
 
 var progress = {
-    POLLTIME: 4000,
+    POLLTIME: 2500,
 
     start: null,
 
