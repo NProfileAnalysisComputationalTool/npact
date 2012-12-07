@@ -286,33 +286,52 @@ int main (int argc, char *argv[])
     /**** Parse command line options ****/
     while (argi < argc && argv[argi][0] == '-') {
         opt = argv[argi];
-        if(strcmp(opt, "-q") == 0) {
+        if(strcmp(opt, "-q") == 0) 
             quiet += 10;
-            argi++;
-        }
-        /* else if (strcmp(opt, "") == 0) {} */
+        else 
+            logmsg(10, "Unknown option: %s", argv[argi])
+        argi++;
     }
 
-
-    /* Consume the GBK filename the 1st argument */
-    if(BASE_DIR) {
-        organism_file = (char*) malloc(sizeof(char) * (strlen(BASE_DIR) + strlen(argv[argi]) + 1));
-        strcpy(organism_file, BASE_DIR);
+    /* Consume the GBK filename in the 1st argument, relative to BASE_DIR if it exists */
+    char* base_dir = getenv("BASE_DIR"); //if set in environment, supercede configuration.
+    if (!base_dir) 
+        base_dir = BASE_DIR;
+    if(base_dir) {
+        logmsg(0, "Using BASE_DIR of %s\n", base_dir)
+        len = strlen(base_dir) + strlen(argv[argi]) + 2;
+        organism_file = (char*) calloc(len, sizeof(char));
+        strcpy(organism_file, base_dir);
+        if (organism_file[strlen(organism_file)] != '/')
+            strcat(organism_file, "/");
         strcat(organism_file, argv[argi]);
     }
-    else{
-        organism_file=(char*)malloc(sizeof(char) * (strlen(argv[argi]) + 1));
-        strcpy(organism_file,argv[argi]);
+    else {
+        organism_file = (char*) calloc(strlen(argv[argi]) + 1, sizeof(char));
+        organism_file = strcpy(organism_file, argv[argi]);
+    }
+    argi++; //move past organism_file
+
+    /* consume the significance, the 2nd argument. */
+    if(argc > argi) 
+        SIGNIFICANCE= atof(argv[argi]);
+    argi++;
+
+    /* consume the offset name, 3rd argument */
+    if(argc > argi) {
+        NAME_OFFSET= strlen(argv[argi]);
+        strcpy(common_name, argv[argi]);
     }
     argi++;
 
+    /* Done processing command line arguments */
     if(strstr(organism_file, "Mycoplasma") || 
        strstr(organism_file, "Mesoplasma") || 
        strstr(organism_file, "Ureaplasma") || 
        strstr(organism_file, "Candidatus_Hodgkinia")) 
         MYCOPLASMA= 1;
 
-    p = strrchr(organism_file,'/');
+    p = strrchr(organism_file, '/');
     if(p)
         p++;
     else
@@ -321,18 +340,6 @@ int main (int argc, char *argv[])
     organism_name = (char*) malloc( (len + 1) * sizeof(char));
     memcpy(organism_name, p, len);
     organism_name[len]='\0';
-
-    /* consume the significance, the 2nd argument. */
-	if(argc > argi) 
-        SIGNIFICANCE= atof(argv[argi]);
-    argi++;
-
-    /* consume the offset name, 3rd argument */
-	if(argc > argi) {
-        NAME_OFFSET= strlen(argv[argi]);
-        strcpy(common_name, argv[argi]);
-	}
-    argi++;
 
     hss= (struct HSSs *)malloc(sizeof(struct HSSs));
     gene= (struct exons *)malloc(sizeof(struct exons));
@@ -3406,7 +3413,9 @@ void read_table(char* filename, int array_pos) {
     FILE	*input;
     
     
-    base_dir = BASE_DIR_THRESHOLD_TABLES ? BASE_DIR_THRESHOLD_TABLES : getenv("BASE_DIR_THRESHOLD_TABLES");
+    base_dir =  getenv("BASE_DIR_THRESHOLD_TABLES");
+    if (!base_dir) 
+        base_dir = BASE_DIR_THRESHOLD_TABLES
 
     if(base_dir) {
         len = strlen(base_dir) + strlen(filename) + 2;
