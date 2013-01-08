@@ -259,7 +259,7 @@ void	renumber_orf_hits();
 void	check_lists();
 void	print_nucleotides(char *seq, int len, FILE *output);
 void	print_amino_acids(char *seq, int len, FILE *output);
-
+char*   join_paths(char* base, char* filename);
 int check;
 
 int quiet = 0;
@@ -293,24 +293,12 @@ int main (int argc, char *argv[])
         argi++;
     }
 
-    /* Consume the GBK filename in the 1st argument, relative to BASE_DIR if it exists */
-    char* base_dir = getenv("BASE_DIR"); //if set in environment, supercede configuration.
-    if (!base_dir) 
-        base_dir = BASE_DIR;
-    if(base_dir) {
-        logmsg(0, "Using BASE_DIR of %s\n", base_dir)
-        len = strlen(base_dir) + strlen(argv[argi]) + 2;
-        organism_file = (char*) calloc(len, sizeof(char));
-        strcpy(organism_file, base_dir);
-        if (organism_file[strlen(organism_file)] != '/')
-            strcat(organism_file, "/");
-        strcat(organism_file, argv[argi]);
-    }
-    else {
-        organism_file = (char*) calloc(strlen(argv[argi]) + 1, sizeof(char));
-        organism_file = strcpy(organism_file, argv[argi]);
-    }
-    argi++; //move past organism_file
+    /* Consume the GBK filename in the 1st argument. relative to
+     * BASE_DIR environment variable or compiled value.
+     */
+    organism_file = join_paths(
+        getenv("BASE_DIR") != NULL ? getenv("BASE_DIR") : BASE_DIR,
+        argv[argi++]);
 
     /* consume the significance, the 2nd argument. */
     if(argc > argi) 
@@ -344,12 +332,12 @@ int main (int argc, char *argv[])
     hss= (struct HSSs *)malloc(sizeof(struct HSSs));
     gene= (struct exons *)malloc(sizeof(struct exons));
 
-    //sprintf(organism_file, "%s", organism_file);
-
-	if((fp = fopen(organism_file, "r")) == NULL) { 
+    if((fp = fopen(organism_file, "r")) == NULL) {
         fprintf(stderr, "Organism file %s not found.\n", organism_file); 
         exit(1);
     }
+    //done using the filename.
+    free(organism_file);
 
     // Reads annotated CDSs and records start-of-sequence position in the file
     bytes_from_origin= annotation(&ncds, &nexons);		
@@ -3405,46 +3393,35 @@ int position(int a, int c, int g, int t)
 /*******************************/
 /*** Function read_tables()  ***/
 /*******************************/
-
+/*
+ * Reads from a file in BASE_DIR_THRESHOLD_TABLES directory into
+ * `threshold[array_pos]`.
+ */
 void read_table(char* filename, int array_pos) {
     int len;
     int	i, j;
     char	*base_dir, *absfilename, longstr[1000];
     FILE	*input;
-    
-    
-    base_dir =  getenv("BASE_DIR_THRESHOLD_TABLES");
-    if (!base_dir) 
-        base_dir = BASE_DIR_THRESHOLD_TABLES
 
-    if(base_dir) {
-        len = strlen(base_dir) + strlen(filename) + 2;
-        absfilename = (char*) malloc(sizeof(char) * len);
-        strcpy(absfilename, base_dir);
-        if (absfilename[strlen(absfilename)] != '/') {
-            strcat(absfilename,"/");
-        }
-        strcat(absfilename, filename);
-    }
-    else {
-        fprintf(stderr,"\nNo BASE_DIR_THRESHOLD_TABLES given in environment.\n");
+
+    /* If set in the environment use it, otherwise fall back to compiled value. */
+    absfilename = join_paths(getenv("BASE_DIR_THRESHOLD_TABLES") ? getenv("BASE_DIR_THRESHOLD_TABLES") 
+                                                                 : BASE_DIR_THRESHOLD_TABLES,
+                             filename);
+    if((input=fopen(absfilename, "r")) == NULL) {
+        logmsg(25, "\n\nInput table \"%s\" not found.\n", absfilename);
         exit(1);
     }
-
-	if((input= fopen(absfilename,"r"))==NULL) { 
-        fprintf(stderr,"\n\nInput table %s not found.\n",absfilename); 
-        exit(1);
-    }
+    free(absfilename);
 
     fgets(longstr, 998, input);
 
-	for(i= 0; i < 23426; ++i) {
+    for(i= 0; i < 23426; ++i) {
         fgets(longstr, 998, input);
-        sscanf(longstr + 39 * LEN_TRANSFORM,"%f %f", threshold[array_pos][i], threshold[array_pos][i] + 1);
-	}
+        sscanf(longstr + 39 * LEN_TRANSFORM, "%f %f", threshold[array_pos][i], threshold[array_pos][i] + 1);
+    }
 
     fclose(input);
-    free(absfilename);
 }
 
 void read_tables() {
@@ -3703,4 +3680,32 @@ void	print_amino_acids(char *seq, int len, FILE *output)
 	}
 
 	if(i % 60) fprintf(output, "\n");
+}
+
+/**********************************/
+/****  Function join_paths()   ****/
+/**********************************/
+/*
+ * This function will join a directory base and filename semi-intelligently.
+ * If base or filename is null they are returned raw;
+ * returns a freshly allocated, null terminated string.
+ */
+char* join_paths(char* base, char* filename) {
+    char* returnfile = NULL;
+    int len;
+    if(!base)
+        return filename;
+    else if(!filename)
+        return base;
+    //2 = 1 null terminator + 1 path separator.
+    len = strlen(base) + strlen(filename) + 2;
+    returnfile = (char*) calloc(len, sizeof(char));
+    //Start with the base
+    strcpy(returnfile, base);
+    //Add a path separator if needed
+    if (returnfile[strlen(returnfile)] != '/')
+        strcat(returnfile, "/");
+    //Finally add the filename
+    strcat(returnfile, filename);
+    return returnfile;
 }
