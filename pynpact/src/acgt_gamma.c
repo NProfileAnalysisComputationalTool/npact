@@ -336,8 +336,6 @@ int main (int argc, char *argv[])
         fprintf(stderr, "Organism file %s not found.\n", organism_file); 
         exit(1);
     }
-    //done using the filename.
-    free(organism_file);
 
     // Reads annotated CDSs and records start-of-sequence position in the file
     bytes_from_origin= annotation(&ncds, &nexons);		
@@ -407,11 +405,13 @@ int main (int argc, char *argv[])
 
 // check_lists();
 
+    logmsg(0, "Cleaning up.\n");
     fclose(fp);
     free(o);
     free(hss);
     free(gene);
     free(ffrom);
+    free(organism_file);
 
 
     fprintf(stdout, "\nTotal hss scored: %d\n", tot_Ghits);
@@ -3412,7 +3412,6 @@ void read_table(char* filename, int array_pos) {
         logmsg(25, "\n\nInput table \"%s\" not found.\n", absfilename);
         exit(1);
     }
-    free(absfilename);
 
     fgets(longstr, 998, input);
 
@@ -3420,8 +3419,8 @@ void read_table(char* filename, int array_pos) {
         fgets(longstr, 998, input);
         sscanf(longstr + 39 * LEN_TRANSFORM, "%f %f", threshold[array_pos][i], threshold[array_pos][i] + 1);
     }
-
     fclose(input);
+    free(absfilename);
 }
 
 void read_tables() {
@@ -3434,6 +3433,7 @@ void read_tables() {
 
     // Reads threshold values at p= 0.0001
     read_table("scores10000.table",2);
+    logmsg(0, "Finished reading data tables.\n");
 }
 
 /*** End of function read_tables() ***/
@@ -3687,24 +3687,24 @@ void	print_amino_acids(char *seq, int len, FILE *output)
 /**********************************/
 /*
  * This function will join a directory base and filename semi-intelligently.
- * If base or filename is null they are returned raw;
  * returns a freshly allocated, null terminated string.
  */
 char* join_paths(char* base, char* filename) {
     char* returnfile = NULL;
-    int len;
-    if(!base)
-        return filename;
-    else if(!filename)
-        return base;
-    //2 = 1 null terminator + 1 path separator.
-    len = strlen(base) + strlen(filename) + 2;
+    int len = strlen(filename) + 1;
+    if(base) {
+        // add an extra space in case we need a path separator.
+        len += strlen(base) + 1;
+    }
+    
     returnfile = (char*) calloc(len, sizeof(char));
     //Start with the base
-    strcpy(returnfile, base);
-    //Add a path separator if needed
-    if (returnfile[strlen(returnfile)] != '/')
-        strcat(returnfile, "/");
+    if(base) {
+        strcpy(returnfile, base);
+        //Add a path separator if needed
+        if (returnfile[strlen(returnfile)] != '/')
+            strcat(returnfile, "/");
+    }
     //Finally add the filename
     strcat(returnfile, filename);
     return returnfile;
