@@ -370,11 +370,11 @@ button.Start { clear:both; margin: 8px;}
 #results h4 {color:#FF4A00;margin-left:14px;}
 #graphicalresults {border:none;}
 
-.ui-state-highlight {background-color:#E5EAFC;margin-top:10px;padding:10px;width:94%;}
+.ui-state-highlight { margin-top:10px; padding:10px; width:94%; }
 	.ui-state-highlight p {color:#000;}
 	
 	.ui-state-highlight li a {font-weight:bold;}
 		#files li {color:#000;}
 		#files li:hover {color:#C60;}
-	
+
 #tryagain {padding:8px;}
