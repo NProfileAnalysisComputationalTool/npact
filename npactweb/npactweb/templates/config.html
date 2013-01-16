@@ -50,13 +50,14 @@
   <h2>N-Profile Analysis Options</h2>
   <p>From here you can customize the options on an N-Profile analysis.</p>
 
-
+<div id="form-container">
   <form method="POST">
     {% csrf_token %} 
-    <table>
+    <table id="n-config-options">
     {{ form.as_table }}
     </table>
     <p><button type="submit">Get Analysis!</button></p>
   </form>
+  </div>
 </div>
 {%endblock content %}

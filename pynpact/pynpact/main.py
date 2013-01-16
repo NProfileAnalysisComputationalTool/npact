@@ -391,7 +391,9 @@ period_of_frame       Number of frames.
             def _ps2pdf(out):
                 self.statuslog.info("Converting to PDF")
                 cmd = [ps2pdf, config['combined_ps_name'], '-']
-                return capproc.capturedCall(cmd, stdout=out, logger=self.logger, check=True)
+                capproc.capturedCall(cmd, stdout=out, logger=self.logger, check=True)
+                self.statuslog.info("Finished PDF conversion")
+
             self.safe_produce_new(pdf_filename, _ps2pdf, dependencies=[self.gbkfile])
             self.config['pdf_filename'] = pdf_filename
             return pdf_filename

@@ -82,7 +82,7 @@ font-weight:400;
 
 p,li,td,dd,dt {
 color:#444;
-font-size:70%;
+font-size:75%;
 }
 
 th { color:#222; font-size: .75em; }
@@ -106,13 +106,15 @@ min-height: 376px;
 padding-top: 2px;
 }
 
-#content h2 { margin:5px 0 0 8px; }
+#content h2 { margin:12px 0 15px 8px; }
 #content h3 { /*font-size:125%;  margin:5px 0 0 12px; */}
 #content h2 + h3 { margin-top: 2px; }
 
 #content h4 {
 color:#000;
-font:normal 85% Trebuchet MS, Arial, Helvetica, sans-serif;
+font-family:Trebuchet MS, Arial, Helvetica, sans-serif;
+font-size:18px;
+margin: 10px 0 10px 12px;
 }
 
 #content ul {
@@ -238,13 +240,13 @@ letter-spacing:1px;
 font:125%/18px 'Trebuchet MS', verdana, geneva, Arial, Helvetica, sans-serif;
 }
 
-#priNav li a,#priNav #active {
+#priNav li a {
 background:url(../images/pointer.gif) no-repeat 10px 11px;
 border-bottom:1px solid #e6e6e6;
 color:#0021a5;
 display:block;
 letter-spacing:1px;
-padding:7px 0 6px 20px;
+padding:7px 0 6px 23px;
 width:230px;
 }
 
@@ -310,19 +312,27 @@ width:516px;
 #secHeader span {
 height:100%;
 position:absolute;
-width:100%;
+width:98.5%;
 }
 
+dl { margin-bottom:25px;}
+dt { font-weight: bold; margin-left: 10px; margin-top:4px;}
+dd { margin-left: 18px; margin-bottom:10px;}
 
-dt { font-weight: bold; margin-top:4px;}
-dd { margin-left: 8px; }
+#form-container {background:#E5EAFC;margin-bottom:10px;margin-left:5px;padding:10px;width:94%;}
+#n-config-options {margin-left:8px;width:95%;}
+	#n-config-options td {padding:8px 0px;}
 
 textarea { width: 100%; }
 #content .ui-accordion-content p { margin: 0; }
 
 .helptext {font-size: 1em; float:right; }
 
+#accordion {margin-left:9px;width:95%;}
 
+#accordion div {margin-top:5px;}
+#accordion div div {margin-top:0px;}
+#id_url {width:98%;}
 
 .error, ul.errorlist li { color:red; }
 
@@ -333,7 +343,12 @@ button.Start { clear:both; margin: 8px;}
 
 .helptext {display:none;}
 
+.blue-text {color:#5368C1;}
+.orange-text {color:#FF4A00;}
 
+#start-over {font-size:14px;font-weight:bold;}
+#start-over a, #start-over a:visited {color:#FF4A00;}
+	
 /* ****** For the processing page ****** */
 #progress .onsuccess, #progress .onerror { display:none; }
 #progress .ui-icon { float:left;  margin-right: .5em;}
@@ -348,3 +363,18 @@ button.Start { clear:both; margin: 8px;}
 
 #content .ui-state-error { font-size: 1.2em; }
 #content .ui-corner-all p { margin: .5em .7em .7em .7em }
+
+
+/* ****** For the Results page ****** */
+#results h3 {color:#0021A5;margin-left:4px;}
+#results h4 {color:#FF4A00;margin-left:14px;}
+#graphicalresults {border:none;}
+
+.ui-state-highlight { margin-top:10px; padding:10px; width:94%; }
+	.ui-state-highlight p {color:#000;}
+	
+	.ui-state-highlight li a {font-weight:bold;}
+		#files li {color:#000;}
+		#files li:hover {color:#C60;}
+
+#tryagain {padding:8px;}
