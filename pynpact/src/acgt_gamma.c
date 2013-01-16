@@ -3415,7 +3415,7 @@ void read_table(char* filename, int array_pos) {
     
     base_dir =  getenv("BASE_DIR_THRESHOLD_TABLES");
     if (!base_dir) 
-        base_dir = BASE_DIR_THRESHOLD_TABLES
+        base_dir = BASE_DIR_THRESHOLD_TABLES;
 
     if(base_dir) {
         len = strlen(base_dir) + strlen(filename) + 2;
