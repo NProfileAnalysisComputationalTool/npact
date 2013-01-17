@@ -13,11 +13,11 @@ import re
 pwd = os.path.abspath(os.path.dirname(__file__))
 vedir = os.path.abspath(os.path.join(pwd, "ve"))
 
-def kill_daemons(sig=signal.SIGTERM):
+def kill_daemons(sig=signal.SIGKILL):
     uid = os.getuid()
     proc = subprocess.Popen(['ps', 'x', '-U', str(uid), '-o', 'pid,command'], stdout=subprocess.PIPE)
     lines = proc.stdout.readlines()[1:]
-    logging.debug("Found %d processes for this user.", len(lines))
+    logging.debug("Searching %d processes for this user.", len(lines))
     for l in lines:
         l = l.strip()
         m = re.match('(\\d+) (npact-.*)', l)
