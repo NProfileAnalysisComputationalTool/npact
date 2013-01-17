@@ -66,9 +66,9 @@ class GenBankProcessor(object ):
         self.statuslog = logging.getLogger('pynpact.statuslog')
         self.statuslog.setLevel(logging.DEBUG)
         
-        # sh = logging.StreamHandler()
-        # sh.setFormatter(logging.Formatter('%(message)s'))
-        # self.statuslog.addHandler(sh)
+        sh = logging.StreamHandler()
+        sh.setFormatter(logging.Formatter('%(message)s'))
+        self.statuslog.addHandler(sh)
 
         if self.config and self.config.get('force'):
             self.statuslog.debug("Forcing recalculation")
