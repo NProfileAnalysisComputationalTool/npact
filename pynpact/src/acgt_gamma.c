@@ -402,10 +402,9 @@ int main (int argc, char *argv[])
 
     process_hss(tot_hss, tot_Ghits, ncds);     // Characterizes genes predicted by G-test
     write_results(tot_hss, tot_Ghits, ncds, genome_size);     // Writes all results
-
 // check_lists();
 
-    logmsg(0, "Cleaning up.\n");
+    logmsg(10, "Performing acgt_gamma cleanup.\n");
     fclose(fp);
     free(o);
     free(hss);
@@ -2458,8 +2457,6 @@ void rescue_hss(int to_hss)
 			if(flag) hss[i].type= 0;
 		}
 	}
-
-    logmsg(10, "Total rescued hss: %d\n",tot);
 }
 
 /***** End of function rescue_hss()  *****/
@@ -2733,12 +2730,13 @@ void write_results(int from_hss, int to_hss, int ncds, int genome_size)
     double	G, print_len, po;
     FILE	*output1, *output2, *output3, *output4, *output5, *output6, *output7, *output8;
 
-    output1 = get_out_file(".newcds","w");
+    output1= get_out_file(".newcds","w");
     output2= get_out_file(".profiles", "w");
     output3= get_out_file(".verbose", "a");
     output4= get_out_file(".altcds", "w");
     output5= get_out_file(".repetitive", "w");
     output6= get_out_file(".modified", "w");
+    logmsg(10, "Writing acgt_gamma results.\n");
 
 // fprintf(output6, "List of predicted ORFs modifying previous annotation.\n");
 
