@@ -7,9 +7,25 @@ import sys
 import subprocess
 import shutil
 import logging
+import signal
+import re
 
 pwd = os.path.abspath(os.path.dirname(__file__))
-vedir = os.path.abspath(os.path.join(pwd,"ve"))
+vedir = os.path.abspath(os.path.join(pwd, "ve"))
+
+def kill_daemons(sig=signal.SIGTERM):
+    uid = os.getuid()
+    proc = subprocess.Popen(['ps', 'x', '-U', str(uid), '-o', 'pid,command'], stdout=subprocess.PIPE)
+    lines = proc.stdout.readlines()[1:]
+    logging.debug("Found %d processes for this user.", len(lines))
+    for l in lines:
+        l = l.strip()
+        m = re.match('(\\d+) (npact-.*)', l)
+        if m:
+            pid,name = m.groups()
+            logging.warning("Killing proc %s %r", pid, name)
+            os.kill(int(pid), sig)
+
 
 def cleanup_existing():
     if os.path.exists(vedir):
@@ -67,11 +83,19 @@ def build_pynpact():
         print "Successfully finished bootstrap.py"
 
 if __name__ == '__main__':
-    parser = OptionParser("""%prog [options]
+    parser = OptionParser("""%prog [options] [Command ...]
 
     Runs the initialization and building code to get the system into a
     working state after a fresh checkout.
-    
+
+    When given with no commands does the full process. Specific steps
+    can be invoked by name, including:
+     * kill-daemons
+     * cleanup-existing
+     * perform-checkouts
+     * init-virtualenv
+     * create-aux-directories
+     * build-pynpact
     """)
     parser.add_option("-v", "--verbose", action="store_true", dest="verbose",
                       help="Show more verbose log messages.")
@@ -79,9 +103,15 @@ if __name__ == '__main__':
     logging.basicConfig(level=(options.verbose and logging.DEBUG or logging.INFO),
                         format="%(asctime)s %(levelname)-8s %(message)s",
                         datefmt='%H:%M:%S')
-    cleanup_existing()
-    perform_checkouts()
-    init_virtualenv()
-    create_aux_directories()
-    build_pynpact()
-    
+
+    if len(args) == 0:
+        cleanup_existing()
+        kill_daemons()
+        perform_checkouts()
+        init_virtualenv()
+        create_aux_directories()
+        build_pynpact()
+    else:
+        for arg in args:
+            globals()[arg.replace('-','_')]()
+    print globals()

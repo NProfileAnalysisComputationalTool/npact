@@ -5,7 +5,7 @@ import taskqueue
 import taskqueue.tqdaemon
 
 class Command(BaseCommand):
-    args = '<run|start|stop|restart|status>'
+    args = '<run|start|stop|restart|status|kill>'
     help = 'Runs the background processing taskqueue daemon'
 
     def handle(self, *args, **options):
