@@ -9,9 +9,6 @@ from npactweb.middleware import RedirectException
 logger = logging.getLogger(__name__)
 
 
-logger.info("Starting the main npact site.")
-
-
 def library_root():
     abspath = getabspath("library", False)
     if not os.path.exists(abspath):
