@@ -27,13 +27,18 @@ def status():
     "Check whether daemon is already running. return pid or False"
     plf = get_pidfile()
     pid = plf.read_pid()
+    if pid and check_for_process(pid):
+        return pid
+    return False
+
+def check_for_process(pid):
     if pid:
         try:
             os.kill(pid, 0) #no-op signal, only indicates whether it could be sent
+            return True
         except OSError:
-            plf.break_lock()
+            get_pidfile().break_lock()
             return False
-    return pid
 
 def stop():
     "Kill a running daemon instance"
@@ -106,6 +111,7 @@ def daemonize():
     #logger.debug("Remaining loggers: %r:%r", fds, logging._handlerList)
 
     pidfile = get_pidfile()
+    check_for_process(pidfile.read_pid())
     if pidfile.is_locked():
         logger.error("Daemon already running")
         return INSTANCE_ALREADY_RUNNING
