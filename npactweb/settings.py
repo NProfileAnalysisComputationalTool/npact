@@ -176,7 +176,7 @@ LOGGING = {
             'format': '%(levelname)s %(message)s'
             },
         'named_processes': {
-            'format': "%(asctime)s %(processName)s/%(name)s %(levelname)-8s %(message)s"
+            'format': "%(asctime)s %(process)s/%(name)s %(levelname)-8s %(message)s"
             },
     },
     'handlers': {
