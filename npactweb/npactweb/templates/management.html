@@ -11,6 +11,22 @@
 {%block content %}
 <div class="contentPadding">
   <h2>NPACT - Management</h2>
+  <form  method="POST">
+    {% csrf_token %}
+    <h3>Taskqueue daemon</h3>
+    <div>
+      <p>This is the background working daemon in which the heavy lifting takes place.</p>
+      <p>Current status: <span class="orange-text">{{daemon_status}}</span></p>
+      <ul>
+        {% if daemon_status == 'stopped' %}
+        <li><button type="submit" name="action" value="start-daemon">Start Daemon</button></li>
+        {% else %}
+        <li><button type="submit" name="action" value="restart-daemon">Restart Daemon</button></li>
+        {% endif %}
+        <li><button type="submit" name="action" value="kill-daemon">Kill any daemon processes</button></li>
+      </ul>
+    </div>
+  </form>
 
 </div>
 {%endblock content %}
