@@ -74,13 +74,13 @@ def kill(sig=signal.SIGKILL):
     uid = os.getuid()
     proc = subprocess.Popen(['ps', 'x', '-U', str(uid), '-o', 'pid,command'], stdout=subprocess.PIPE)
     lines = proc.stdout.readlines()[1:]
-    logging.debug("Searching %d processes for this user.", len(lines))
+    logger.debug("Searching %d processes for this user.", len(lines))
     for l in lines:
         l = l.strip()
         m = re.match('(\\d+) (npact-.*)', l)
         if m:
             pid,name = m.groups()
-            logging.warning("Killing proc %s %r", pid, name)
+            logger.warning("Killing proc %s %r", pid, name)
             os.kill(int(pid), sig)
 
 

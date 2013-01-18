@@ -217,7 +217,9 @@ def run_status(request, jobid):
             logger.exception("Error getting job result. %r", jobid)
 
     if config:
-        pdf_url = get_raw_url(request, getrelpath(config['pdf_filename']))
+        pdf_url = get_raw_url(request,
+                              getrelpath(config.get('pdf_filename') or
+                                         config.get('combined_ps_name')))
         result['next'] = 'results'
         result['download_url'] = pdf_url
 

@@ -24,7 +24,10 @@ def ensure_daemon():
     """
     if not tqdaemon.status():
         log.info("Attempting to start missing tqdaemon.")
-        multiprocessing.Process(target=tqdaemon.daemonize).start()
+        p = multiprocessing.Process(target=tqdaemon.daemonize)
+        p.start()
+        p.join(1)
+
 
 @contextmanager
 def server_call():
