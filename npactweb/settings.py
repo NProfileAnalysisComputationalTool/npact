@@ -116,6 +116,7 @@ MIDDLEWARE_CLASSES = (
     'django.contrib.sessions.middleware.SessionMiddleware',
     'django.middleware.csrf.CsrfViewMiddleware',
     'django.contrib.auth.middleware.AuthenticationMiddleware',
+    'django.contrib.auth.middleware.RemoteUserMiddleware',    
     'django.contrib.messages.middleware.MessageMiddleware',
     'npactweb.middleware.RedirectExceptionHandler',
 )
@@ -123,7 +124,7 @@ MIDDLEWARE_CLASSES = (
 
 TEMPLATE_CONTEXT_PROCESSORS = (
     #The defaults
-    "django.contrib.auth.context_processors.auth",
+    #"django.contrib.auth.context_processors.auth",
     "django.core.context_processors.debug",
     "django.core.context_processors.i18n",
     "django.core.context_processors.media",
@@ -157,6 +158,7 @@ INSTALLED_APPS = (
     # 'django.contrib.admindocs',
 )
 
+DATABASES = {}
 
 MESSAGE_STORAGE='django.contrib.messages.storage.cookie.CookieStorage'
 
