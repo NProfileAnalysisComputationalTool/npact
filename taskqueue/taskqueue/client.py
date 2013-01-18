@@ -2,7 +2,7 @@ import logging
 from contextlib import contextmanager
 import multiprocessing
 from multiprocessing.managers import RemoteError, SyncManager
-
+import time
 
 
 import taskqueue
@@ -27,6 +27,7 @@ def ensure_daemon():
         p = multiprocessing.Process(target=tqdaemon.daemonize)
         p.start()
         p.join(1)
+        time.sleep(0.1)
 
 
 @contextmanager
