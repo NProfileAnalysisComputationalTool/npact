@@ -37,12 +37,6 @@ def cleanup_existing():
         logging.info("Removing existing virtual environment")
         shutil.rmtree(vedir)
 
-def perform_checkouts():
-    logging.debug("Checking out submodules")
-    ret = subprocess.call(['git', 'submodule', 'update', '--init'])
-    if ret:
-        print "Error updating git libraries; may not build properly."
-
 def init_virtualenv():
     logging.info("Creating virtualenvironment")
     virtualenv_support_dir = os.path.abspath(os.path.join(pwd, "lib", "virtualenv_support"))
@@ -92,7 +86,6 @@ if __name__ == '__main__':
     can be invoked by name, including:
      * kill-daemons
      * cleanup-existing
-     * perform-checkouts
      * init-virtualenv
      * create-aux-directories
      * build-pynpact
@@ -107,11 +100,9 @@ if __name__ == '__main__':
     if len(args) == 0:
         cleanup_existing()
         kill_daemons()
-        perform_checkouts()
         init_virtualenv()
         create_aux_directories()
         build_pynpact()
     else:
         for arg in args:
             globals()[arg.replace('-','_')]()
-    print globals()
