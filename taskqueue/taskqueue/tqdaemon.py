@@ -81,7 +81,10 @@ def kill(sig=signal.SIGKILL):
         if m:
             pid,name = m.groups()
             logger.warning("Killing proc %s %r", pid, name)
-            os.kill(int(pid), sig)
+            try:
+                os.kill(int(pid), sig)
+            except:
+                logger.exception("Error killing %s %r", pid, name)
 
 
 
