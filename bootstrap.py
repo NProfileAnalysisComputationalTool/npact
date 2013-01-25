@@ -29,10 +29,13 @@ def kill_daemons(sig=signal.SIGKILL):
 
 def cleanup_existing():
     if os.path.exists(vedir):
-        logging.debug("Attempting to shutdown tqdaemon")
-        rc = subprocess.call(['ve/bin/python', 'manage.py', 'tqdaemon', 'stop'])
-        if rc != 0:
-            logging.info("Unable to shutdown tqdaemon")
+        try:
+            logging.debug("Attempting to shutdown tqdaemon")
+            rc = subprocess.call(['ve/bin/python', 'manage.py', 'tqdaemon', 'stop'])
+            if rc != 0:
+                logging.info("Unable to shutdown tqdaemon")
+        except:
+            pass
 
         logging.info("Removing existing virtual environment")
         shutil.rmtree(vedir)
