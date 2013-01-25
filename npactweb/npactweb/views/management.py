@@ -49,7 +49,8 @@ def handle_post(request):
         stop_daemon(request)
         start_daemon(request)
     elif action == 'kill-daemon':
-        tqdaemon.kill()
+        count = tqdaemon.kill()
+        messages.info(request, "Killed {0} processes".format(count))
 
     messages.info(request, "Handled {0}".format(action))
 
