@@ -43,7 +43,6 @@ def init_virtualenv():
     ret = subprocess.call(["python", "virtualenv.py",
                            "--extra-search-dir=%s" % virtualenv_support_dir,
                            "--distribute",
-                           "--no-site-packages",
                            "--prompt=(npact)",
                           "-p", "python2.6",
                           "--never-download",
@@ -55,7 +54,6 @@ def init_virtualenv():
 
     logging.debug("Installing libraries")
     ret = subprocess.call([os.path.join(vedir, 'bin', 'pip'), "install",
-                           "-E", vedir,
                            "--index-url=''",
                            "--requirement",os.path.join(pwd,"requirements.txt")],
                           cwd=pwd)
