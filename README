@@ -22,7 +22,9 @@ These you will need to setup on your system ahead of getting started.
 
 * A [posix](http://en.wikipedia.org/wiki/POSIX) environment for python. It works on CentOS and Ubuntu; it should work on any posix environment build of python. Mac OS X is expected to work.
 
-* A C compiler: the actual analysis code is written in C. Tested with gcc 4.6.1. Others should work, I don't think there is anything too crazy being used. There is a makefile that can be used to build all the C if you have [make](http://www.gnu.org/s/make/) installed.
+* A C compiler: the actual analysis code is written in C. Tested with gcc 4.6.1. Others should work, I don't think there is anything too crazy being used. 
+
+* Make: A makefile is used to build all the C. [make](http://www.gnu.org/s/make/).
 
 * Some sort of PostScript viewer to view the output files.
 
@@ -129,21 +131,12 @@ This can be tested out by running the development server. See Using > Running > 
 ## Editing the C code
 All of the C lives in `pynpact/src`. 
 
-### Building with make (recommended)
+### Building with make
+To build the C code associated with this project Make is required.
 There are two methods for building the code. This first is to use the makefile at `pynpact/makefile`. e.g.
 
     cd pynpact
     make
-
-### building with setup.py
-The second (which should work if make is unavailable, but is a bit more involved) is to use `pynpact/setup.py` to build it. This requires the virtualenv being activated (see Virtualenv section above).
-
-Before this can work however you will need to edit `requirements.txt`. In that file you should see a line for pynpact. Ensure that it does not begin with `-e`. The `-e` puts it in a development mode that makes it easier to see changes in the python take effect immediately but causes this system to put the bin files in the wrong place. Once the `-e` is removed you should rerun `bootstrap.py` once. After that subsequent rebuilds can be done with:
-
-    cd pynpact
-    python setup.py install
-
-This will build the C code and copy both the python code and C binaries into the correct location of the virtual environment for everything to be seen correctly. Note: The C binaries aren't added to the system path; if you wish to call one directly either use the make approach above, or look in `ve/lib/python2.6/site-packages/pynpact/bin/`.
 
 
 ## Recording changes

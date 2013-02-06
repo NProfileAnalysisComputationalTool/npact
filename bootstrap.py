@@ -75,9 +75,7 @@ def build_pynpact():
     pynpact_dir = os.path.join(os.path.dirname(__file__), "pynpact/")
     ret = subprocess.call(["make"], cwd=pynpact_dir)
     if ret:
-        print "Make failed C programs may not be available."
-    else:
-        print "Successfully finished bootstrap.py"
+        logging.critical("Make failed; C programs may not be availalbe.")
 
 if __name__ == '__main__':
     parser = OptionParser("""%prog [options] [Command ...]
@@ -106,6 +104,7 @@ if __name__ == '__main__':
         init_virtualenv()
         create_aux_directories()
         build_pynpact()
+        print "Successfully finished bootstrap.py"
     else:
         for arg in args:
             globals()[arg.replace('-','_')]()
