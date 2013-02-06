@@ -4,6 +4,8 @@
 # include <stdlib.h>
 # include <string.h>
 
+#include "util.h"
+
 # define DICT_SIZE 500
 # define WIDTH 450.0
 # define TITLES_POSITION 780
@@ -81,38 +83,6 @@ void printHelp() {
 
 int quiet = 0;
 #define logmsg(level,...) if(level >= quiet) { fprintf(stderr,__VA_ARGS__); }
-
-/*
- * Read a line of arbitrary length from a file, returning a malloced
- * null-terminated string with the \n already stripped.
- */
-char * ap_getl(FILE * f) {
-    size_t size = 0,last= 0, len = 0;
-    char * buf  = NULL;
-    if(feof(f))
-        return NULL;
-    do {
-        /* BUFSIZ is defined as "the optimal read size for this platform" */
-        size += BUFSIZ;
-        /* realloc(NULL,n) is the same as malloc(n) */
-        buf = (char*) realloc(buf,size);
-        /* Actually do the read. Note that fgets puts a terminal '\0'
-           on the end of the string, so we make sure we overwrite
-           this */
-        fgets(buf+len, BUFSIZ, f);
-        len += strlen(buf+len);
-        last = len - 1;
-    } while (!feof(f) && buf[last] != '\n');
-
-    if(buf[last] == '\n') {
-        /* get rid of the newline */
-        buf[last] = '\0';
-        return (char*) realloc(buf,len);
-    }
-    else {
-        return (char*) realloc(buf,len+1);
-    }
-}
 
 /**************************************/
 /****** Function name_yoffset() *******/
@@ -301,50 +271,50 @@ main(int argc, char *argv[]) {
     NUCLEOTIDES[strlen(NUCLEOTIDES)-1]='\0';
     logmsg(0, "%s\n", NUCLEOTIDES);
 
-    title1 = ap_getl(files);     logmsg(0,"\n%s",title1);
-    title2 = ap_getl(files);     logmsg(0,"%s\n",title2);
+    title1 = np_getl(files);     logmsg(0,"\n%s",title1);
+    title2 = np_getl(files);     logmsg(0,"%s\n",title2);
     /* File_of_unbiased_CDSs */
-    unb_file = ap_getl(files);   logmsg(0,"%s\n",unb_file);
+    unb_file = np_getl(files);   logmsg(0,"%s\n",unb_file);
     /* File_of_conserved_CDSs */
-    con_file = ap_getl(files);   logmsg(0,"%s\n",con_file);
+    con_file = np_getl(files);   logmsg(0,"%s\n",con_file);
     /* File_of_new_CDSs */
-    new_file = ap_getl(files);   logmsg(0,"%s\n",new_file);
+    new_file = np_getl(files);   logmsg(0,"%s\n",new_file);
     /* File_of_potential_new_CDSs */
-    newP_file = ap_getl(files);  logmsg(0,"%s\n",newP_file);
+    newP_file = np_getl(files);  logmsg(0,"%s\n",newP_file);
     /*File_of_stretches_where_CG_is_asymmetric */
-    cg_file = ap_getl(files);    logmsg(0,"%s\n",cg_file);
+    cg_file = np_getl(files);    logmsg(0,"%s\n",cg_file);
     /*File_of_published_accepted_CDSs */
-    pub_file = ap_getl(files);   logmsg(0,"%s\n",pub_file);
+    pub_file = np_getl(files);   logmsg(0,"%s\n",pub_file);
     /*File_of_published_rejected_CDSs */
-    mod_file = ap_getl(files);   logmsg(0,"%s\n",mod_file);
+    mod_file = np_getl(files);   logmsg(0,"%s\n",mod_file);
     /*File_of_blocks_from_new_ORFs_as_cds */
-    block_file = ap_getl(files); logmsg(0,"%s\n",block_file);
+    block_file = np_getl(files); logmsg(0,"%s\n",block_file);
     /*File_of_blocks_from_annotated_genes_as_cds */
-    BLOCK_file = ap_getl(files); logmsg(0,"%s\n",BLOCK_file);
+    BLOCK_file = np_getl(files); logmsg(0,"%s\n",BLOCK_file);
     /*File_of_GeneMark_regions */
-    codpot_file = ap_getl(files); logmsg(0,"%s\n",codpot_file);
+    codpot_file = np_getl(files); logmsg(0,"%s\n",codpot_file);
     /*File_of_G+C_coding_potential_regions */
-    Scodpot_file = ap_getl(files); logmsg(0,"%s\n",Scodpot_file);
+    Scodpot_file = np_getl(files); logmsg(0,"%s\n",Scodpot_file);
     /*File_of_met_positions (e.g.:D 432) */
-    met_file = ap_getl(files);   logmsg(0,"%s\n",met_file);
+    met_file = np_getl(files);   logmsg(0,"%s\n",met_file);
     /*File_of_stop_positions (e.g.:D 432) */
-    stop_file = ap_getl(files);  logmsg(0,"%s\n",stop_file);
+    stop_file = np_getl(files);  logmsg(0,"%s\n",stop_file);
     /*File_of_tatabox_positions (e.g.:105.73 D 432 TATAAAAG) */
-    tata_file = ap_getl(files);  logmsg(0,"%s\n",tata_file);
+    tata_file = np_getl(files);  logmsg(0,"%s\n",tata_file);
     /*File_of_capbox_positions */
-    cap_file = ap_getl(files);   logmsg(0,"%s\n",cap_file);
+    cap_file = np_getl(files);   logmsg(0,"%s\n",cap_file);
     /*File_of_ccaatbox_positions */
-    ccaa_file = ap_getl(files);  logmsg(0,"%s\n",ccaa_file);
+    ccaa_file = np_getl(files);  logmsg(0,"%s\n",ccaa_file);
     /*File_of_gcbox_positions */
-    gcbox_file = ap_getl(files); logmsg(0,"%s\n",gcbox_file);
+    gcbox_file = np_getl(files); logmsg(0,"%s\n",gcbox_file);
     /*File_of_kozak_positions */
-    kozak_file = ap_getl(files); logmsg(0,"%s\n",kozak_file);
+    kozak_file = np_getl(files); logmsg(0,"%s\n",kozak_file);
     /*File_of_palindrom_positions_and_size */
-    pali_file = ap_getl(files);  logmsg(0,"%s\n",pali_file);
+    pali_file = np_getl(files);  logmsg(0,"%s\n",pali_file);
     /*File_list_of_nucleotides_in_200bp windows. */
-    CG200_file = ap_getl(files); logmsg(0,"%s\n",CG200_file);
+    CG200_file = np_getl(files); logmsg(0,"%s\n",CG200_file);
     /*File_list_of_read_numbers. */
-    read_file = ap_getl(files); logmsg(0,"%s\n",read_file);
+    read_file = np_getl(files); logmsg(0,"%s\n",read_file);
 
     fclose(files);
     logmsg(20,"Done reading Allplots.def\n");
