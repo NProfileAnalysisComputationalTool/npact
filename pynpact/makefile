@@ -24,12 +24,13 @@ init:
 
 #A general rule of make an object file for any C file, rebuild if the
 #corresponding C file changes or any of the include files change
+#(heavy handed but easy).
 $(OBJDIR)/%.o: $(SRCDIR)/%.c $(DEPS)
 	$(CC) $(FLAGS) -c $< -o $@
 
 
 #Link acgt_gamma if the object file changes include lib m
-$(BINDIR)/acgt_gamma: $(OBJDIR)/acgt_gamma.o
+$(BINDIR)/acgt_gamma: $(OBJDIR)/acgt_gamma.o $(OBJDIR)/util.o
 	$(CC) $(FLAGS) -o $@ $^  -lm
 
 #Allplots needs util and lib m

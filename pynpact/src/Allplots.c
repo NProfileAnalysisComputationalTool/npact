@@ -81,8 +81,6 @@ void printHelp() {
     fprintf(stderr,"Allplots.def should be in the current directory or provided on stdin with the --stdin option\n");
 }
 
-int quiet = 0;
-#define logmsg(level,...) if(level >= quiet) { fprintf(stderr,__VA_ARGS__); }
 
 /**************************************/
 /****** Function name_yoffset() *******/

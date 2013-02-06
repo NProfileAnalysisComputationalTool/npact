@@ -10,6 +10,8 @@
 #include <ctype.h>
 #include <stdbool.h>
 
+#include "util.h"
+
 double	SIGNIFICANCE= 0.001;
 int	RANDOMIZE= 0;
 #define MAX_ENTROPY 0.40
@@ -259,11 +261,7 @@ void	renumber_orf_hits();
 void	check_lists();
 void	print_nucleotides(char *seq, int len, FILE *output);
 void	print_amino_acids(char *seq, int len, FILE *output);
-char*   join_paths(char* base, char* filename);
 int check;
-
-int quiet = 0;
-#define logmsg(level,...) if(level >= quiet) { fprintf(stderr,__VA_ARGS__); }
 
 int main (int argc, char *argv[])
 {
@@ -3680,30 +3678,3 @@ void	print_amino_acids(char *seq, int len, FILE *output)
 	if(i % 60) fprintf(output, "\n");
 }
 
-/**********************************/
-/****  Function join_paths()   ****/
-/**********************************/
-/*
- * This function will join a directory base and filename semi-intelligently.
- * returns a freshly allocated, null terminated string.
- */
-char* join_paths(char* base, char* filename) {
-    char* returnfile = NULL;
-    int len = strlen(filename) + 1;
-    if(base) {
-        // add an extra space in case we need a path separator.
-        len += strlen(base) + 1;
-    }
-    
-    returnfile = (char*) calloc(len, sizeof(char));
-    //Start with the base
-    if(base) {
-        strcpy(returnfile, base);
-        //Add a path separator if needed
-        if (returnfile[strlen(returnfile)] != '/')
-            strcat(returnfile, "/");
-    }
-    //Finally add the filename
-    strcat(returnfile, filename);
-    return returnfile;
-}

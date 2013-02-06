@@ -2,9 +2,16 @@
 # include <stdio.h>
 # include <string.h>
 
+#include "util.h"
+
+
+/* For use with logmsg, controls how verbose the message stream is. */
+int quiet = 0;
+
 /*
- * Read a line of arbitrary length from a file, returning a malloced
- * null-terminated string with the \n already stripped.
+ * Read a line of arbitrary length from a file; strips the \n off the end.
+ *
+ * Returns a malloced null-terminated string, should be freed by caller.
  */
 char * np_getl(FILE * f) {
     size_t size = 0,last= 0, len = 0;
@@ -32,4 +39,35 @@ char * np_getl(FILE * f) {
     else {
         return (char*) realloc(buf,len+1);
     }
+}
+
+
+/**********************************/
+/****  Function join_paths()   ****/
+/**********************************/
+/*
+ * This function will join a directory base and filename semi-intelligently.
+ *
+ *
+ * Returns a malloced null-terminated string, should be freed by caller.
+ */
+char* join_paths(char* base, char* filename) {
+    char* returnfile = NULL;
+    int len = strlen(filename) + 1;
+    if(base) {
+        // add an extra space in case we need a path separator.
+        len += strlen(base) + 1;
+    }
+
+    returnfile = (char*) calloc(len, sizeof(char));
+    //Start with the base
+    if(base) {
+        strcpy(returnfile, base);
+        //Add a path separator if needed
+        if (returnfile[strlen(returnfile)] != '/')
+            strcat(returnfile, "/");
+    }
+    //Finally add the filename
+    strcat(returnfile, filename);
+    return returnfile;
 }
