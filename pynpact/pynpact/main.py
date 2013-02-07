@@ -429,9 +429,10 @@ if __name__ == '__main__':
         parser.print_help()
         exit(1)
 
+    gbkfile = os.path.realpath(args[0])
     logging.basicConfig(level=(options.verbose and logging.DEBUG or logging.INFO),
                         format="%(asctime)s %(name)-10s %(levelname)-8s %(message)s",
                         datefmt='%H:%M:%S')
 
-    gbkp = GenBankProcessor(args[0], force=options.force)
+    gbkp = GenBankProcessor(gbkfile, force=options.force)
     gbkp.process()
