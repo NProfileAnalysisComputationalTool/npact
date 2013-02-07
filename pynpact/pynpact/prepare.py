@@ -135,6 +135,7 @@ def try_parse(abs_path, force=False):
     return data
 
 def default_config(abs_path):
+    "Build the default configuration for a gbk file."
     config = {
         'nucleotides':['c','g'],
 
