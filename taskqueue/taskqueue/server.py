@@ -80,19 +80,29 @@ class Server(object):
 
     def log_tail(self, tid, line_count=1):
         log.debug("Retrieving %d log lines for %s", line_count, tid)
+
+        #make sure we have the running task (raises exception if missing)
+        task = self.get_task(tid)
+
         path = os.path.join(self.work_dir, tid + '.stderr')
-        with open(path, 'rb') as f:
-            try:
-                f.seek(- (line_count + 1) * 120, 2) # 2 is from end
-            except:
-                f.seek(0)
-            lines = collections.deque(maxlen=line_count)
-            while True:
-                line = f.readline()
-                if line == '':
-                    return list(lines)
-                elif line != '\n':
-                    lines.append(line)
+        if not os.path.exists(path):
+            return ["Queued\n"]
+        try:
+            with open(path, 'rb') as f:
+                try:
+                    f.seek(- (line_count + 1) * 120, 2) # 2 is from end
+                except:
+                    f.seek(0)
+                lines = collections.deque(maxlen=line_count)
+                while True:
+                    line = f.readline()
+                    if line == '':
+                        return list(lines)
+                    elif line != '\n':
+                        lines.append(line)
+        except:
+            log.exception("Error reading lines from %r", path)
+            raise
 
     def _enqueue(self, tid, path, task):
         log.info('Enqueuing [%r,...]', task[0])
@@ -147,16 +157,18 @@ def async_wrapper(tid, task_path, fn, args, kwargs):
     task_base,task_ext = os.path.splitext(task_path)
 
     ### Logging setup:
-    ### In this pro all logging should go to a file named after the task
+    ### In this proc all logging should go to a file named after the task
+
+    root_logger = logging.root
+    #blow away any other handlers from previous uses of this process.
+    root_logger.handlers = []
 
     log_path = task_base + ".log"
     file_handler = logging.FileHandler(log_path, mode='a')
     file_handler.setFormatter(logging.Formatter('%(asctime)s %(name)-10s'
                                                 ' %(levelname)-8s %(message)s',
                                                 datefmt='%Y%m%d %H:%M:%S'))
-    root_logger = logging.getLogger('')
-    #blow away any other handlers from previous uses of this process.
-    root_logger.handlers = []
+
     root_logger.setLevel(logging.DEBUG)
     root_logger.addHandler(file_handler)
 
@@ -168,7 +180,7 @@ def async_wrapper(tid, task_path, fn, args, kwargs):
             if args is None:   args = []
             if kwargs is None: kwargs = {}
             rc = fn(*args, **kwargs)
-            log.debug("Finished %r", tid)
+            log.info("Finished %r", tid)
         finally:
             try:
                 if os.path.exists(task_path) and task_ext == '.todo':
