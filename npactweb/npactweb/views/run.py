@@ -112,7 +112,7 @@ def build_config(path, request):
         messages.error(request, str(e))
         raise RedirectException(reverse('start'))
     except:
-        logger.exception("Error parsing gbk: %r", getabspath(path))
+        logger.exception("Error parsing gbk: %r", getabspath(path, raise_on_missing=False))
         messages.error(request,
                        "There was a problem loading file '%s', "
                        "please try again or try a different record." % path)
