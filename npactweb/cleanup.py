@@ -26,13 +26,7 @@ def clean(path, days, verbose=False):
     "This function actually runs the find and delete."
     logger.info("Cleaning older than: %d @ %r", days, path)
 
-    if verbose:
-        #add the -v flag to rm so it prints removed files.
-        cmd=["find", path, "-atime", "+" + str(days),
-             "-exec", "rm", "-f", "-v", "{}", "+"]
-    else:
-        cmd=["find", path, "-atime", "+" + str(days),
-             "-exec", "rm", "-f", "{}", "+"]
+    cmd=["find", path, "-atime", "+" + str(days), "-delete"]
     return capproc.capturedCall(cmd, logger=logger, stdin=False, stderr_level=logging.WARNING)
 
 
