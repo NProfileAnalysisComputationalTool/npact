@@ -63,7 +63,7 @@ taskqueue.BASE_DIR = TQ_DIR
 # how many days should we keep uploaded files and products that
 # haven't been accessed before we delete them.
 MEDIA_RETAIN_FOR=7
-ATIME_DEFAULT = 14
+ATIME_DEFAULT = 30
 
 ######## django-mediagenerator settings
 
