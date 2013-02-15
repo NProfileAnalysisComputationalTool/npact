@@ -25,6 +25,11 @@ int	RANDOMIZE= 0;
 
 #define WRITE_SEQUENCES 0
 
+# define TABLE_OFFSET_CHAR 0
+# define MAX_OVER 5
+# define SIM_SHORT 0              // If true generates random sequences to obtain threshold scores for H-hits in ORFs < RND_SHORTER
+# define RND_SHORTER 100
+
 # define WEB_SERVER 1
 # define STEVE 0
 # define LUCIANO 0
@@ -85,6 +90,7 @@ int	MYCOPLASMA= 0;
 
 #if !REPETITIONS
 float	threshold[3][23426][2];
+float   sscore[3][23426];
 #endif
 
 #if REPETITIONS
@@ -230,8 +236,10 @@ void	get_sequence(int from, int len, char strand, char *ORF);
 long	annotation(int *ncds, int *nexons);
 void	sort(double * array, int size);
 void	build_scores(char *seg, int n, double *sc);
-int	score_orf_random(char *seg, int n, int tot_hss);
+int     score_orf_random(char *orf, int n, double *sc, double *thr, int t, double maxscore, int rep);
 int	score_orf_table(char *seg, int n, int tot_hss);
+void    generate_sequence(char *seq, int len, double *q);
+int     find_probabilities(double Pi[], double p[], double delta);
 double	score(char *seq,int n,double *sc,int *from,int *to, int flag);
 double entropy(char *seq, int n);
 int	get_codon(char *seq, int strand);
@@ -596,8 +604,7 @@ int analyze_genome(int genome_size, int tot_hss, int *on)
 	
 					if(RANDOMIZE) shuffle(ORF + frame*MAX_ORF_SIZE, len[frame], 1);
 
-					if(REPETITIONS) th= score_orf_random(ORF + frame * MAX_ORF_SIZE, len[frame], tot_hss);	// SCORING SEGMENT BY SIMULATIONS
-					else            th= score_orf_table(ORF + frame * MAX_ORF_SIZE, len[frame], tot_hss);	// SCORING SEGMENT USING TABLE OF THRESHOLDS
+				th= score_orf_table(ORF + frame * MAX_ORF_SIZE, len[frame], tot_hss);	// SCORING SEGMENT USING TABLE OF THRESHOLDS
 
 					for(h= 0; h < th; ++h)
 					{
@@ -662,8 +669,7 @@ int analyze_genome(int genome_size, int tot_hss, int *on)
 
 					if(RANDOMIZE) shuffle(ORF + frame*MAX_ORF_SIZE, len[frame], 1);
 
-					if(REPETITIONS) th= score_orf_random(ORF + frame * MAX_ORF_SIZE, len[frame], tot_hss);	// SCORING SEGMENT
-					else            th= score_orf_table(ORF + frame * MAX_ORF_SIZE, len[frame], tot_hss);	// SCORING SEGMENT
+				th= score_orf_table(ORF + frame * MAX_ORF_SIZE, len[frame], tot_hss);	// SCORING SEGMENT
 
 					for(h= 0; h < th; ++h)
 					{
@@ -858,11 +864,11 @@ ncod= 0;
 
 int score_orf_table(char *orf, int n, int tot_hss)
 {
-    int i, j, h, k, l, t, nuc[4]= {0}, from, to, last_zero= n, from_pos, to_pos= n - 1, cod, ncod, nnuc= 0, nt, flag;
+    int i, j, h, k, l, t, nuc[4]= {0}, from, to, last_zero= n, from_pos, to_pos= n - 1, cod, ncod, nnuc= 0, nt, flag, rflag, rn, sl, rep;
     float	a[3], b[3], f;
     char *seq;
-    double r, Score = 0.0, maxscore= 0.0, max_len;
-    double down_thr, thr[3], X;
+    double r, Score = 0.0, maxscore= 0.0, max_len, rs;
+    double down_thr, thr[3], X, X0, X1, Y1[3];
 
     max_len= pow(2.0, 1023.0);
 	for(k= 0; k < LEN_TRANSFORM; ++k) max_len= log(max_len);
@@ -882,35 +888,39 @@ int score_orf_table(char *orf, int n, int tot_hss)
 
 	i= position(nuc[0], nuc[1], nuc[2], nuc[3]);
 
-	a[0]= threshold[0][i][0];
-	b[0]= threshold[0][i][1];
+    if(LEN_TRANSFORM == 0)
+        { X= (double)n; X0= 36.0; X1= (double)RND_SHORTER; }
+    else if(LEN_TRANSFORM == 1)
+        { X= log((double)n); X0= log(36.0); X1= log((double)RND_SHORTER); }
+    else if(LEN_TRANSFORM == 2)
+        { X= log(log((double)n)); X0= log(log(36.0)); X1= log(log((double)RND_SHORTER)); }
+    else if(LEN_TRANSFORM == 3)
+        { X= log(log(log((double)n))); X0= log(log(log(36.0))); X1= log(log(log((double)RND_SHORTER))); }
+    else {
+        fprintf(stderr,"\n\nLEN_TRANSFORM can only be defined as 0= len, 1= ln(len), 2= ln(ln(len)), or 3= ln(ln(ln(len)))\n");
+        exit(1); }
 
-	a[1]= threshold[1][i][0];
-	b[1]= threshold[1][i][1];
+        for(j= 0; j < 3; ++j)
+        {
+        a[j]= threshold[j][i][0];
+        b[j]= threshold[j][i][1];
+        }
 
-	a[2]= threshold[2][i][0];
-	b[2]= threshold[2][i][1];
+        if(n <= RND_SHORTER && TABLE_OFFSET_CHAR)
+        {
+                for(j= 0; j < 3; ++j)
+                {
+                Y1[j]= a[j] * X1 + b[j];
+                a[j]= (Y1[j] - sscore[j][i]) / (X1 - X0);
+                b[j]= sscore[j][i] - a[j] * X0;
+                }
+        }
 
-    if(LEN_TRANSFORM == 0) 
-        X= (double)n; 
-    else if(LEN_TRANSFORM == 1) 
-        X= log((double)n); 
-    else if(LEN_TRANSFORM == 2) 
-        X= log(log((double)n)); 
-    else if(LEN_TRANSFORM == 3) 
-        X= log(log(log((double)n))); 
-    else { 
-        fprintf(stderr,"\n\nLEN_TRANSFORM can only be defined as 0= len, 1= ln(len), 2= ln(ln(len)), or 3= ln(ln(ln(len)))\n"); 
-        exit(1);
-    }
-
-	thr[0]= a[0] * X + b[0];
-	thr[1]= a[1] * X + b[1];
-	thr[2]= a[2] * X + b[2];
-
-    //logmsg(10,"\n%d %d %d %d %d   %.3f %.3f %.3f\n",n,nuc[0], nuc[1], nuc[2], nuc[3], thr[0],thr[1],thr[2]);
+        for(j= 0; j < 3; ++j) thr[j]= a[j] * X + b[j];
 
 	down_thr= thr[0];
+
+    //logmsg(10,"\n%d %d %d %d %d   %.3f %.3f %.3f\n",n,nuc[0], nuc[1], nuc[2], nuc[3], thr[0],thr[1],thr[2]);
 
     if(SIGNIFICANCE == 0.01) 
         t= 0;
@@ -949,7 +959,17 @@ int score_orf_table(char *orf, int n, int tot_hss)
 		
 		if (Score == 0.0)
 		{
-			if (maxscore >= thr[t] && to_pos - from_pos + 1 - 3 * ncod >= mHL && thr[t] > 0.0)
+                sl= to_pos - from_pos + 1 - 3 * ncod;
+                rflag= 1;
+
+                        if (maxscore >= thr[t] && sl >= mHL && n < RND_SHORTER && SIM_SHORT)
+                        {
+                        rn= score_orf_random(orf, n, sc, thr, t, maxscore, rep);
+
+                                if(rn > MAX_OVER) rflag= 0;
+                        }
+
+			if (maxscore >= thr[t] && sl >= mHL && rflag)
 			{
 				to_pos= last_zero - 1;
                 hss= (struct HSSs *)realloc(hss, (tot_hss + h + 1) * sizeof(struct HSSs));
@@ -3413,8 +3433,10 @@ void read_table(char* filename, int array_pos) {
 
     for(i= 0; i < 23426; ++i) {
         fgets(longstr, 998, input);
-        sscanf(longstr + 39 * LEN_TRANSFORM, "%f %f", threshold[array_pos][i], threshold[array_pos][i] + 1);
-    }
+            if(TABLE_OFFSET_CHAR) sscanf(longstr,"%f", sscore[array_pos] + i);
+        sscanf(longstr + 39 * LEN_TRANSFORM + TABLE_OFFSET_CHAR,"%f %f", threshold[array_pos][i], threshold[array_pos][i] + 1);
+        }
+
     fclose(input);
     free(absfilename);
 }
@@ -3678,3 +3700,115 @@ void	print_amino_acids(char *seq, int len, FILE *output)
 	if(i % 60) fprintf(output, "\n");
 }
 
+/****************************************/
+/****  Function find_probabilities() ****/
+/****************************************/
+
+int find_probabilities(double Pi[], double p[], double delta)
+{
+int     k, l, m, k1, l1, m1, steps= 0;
+double  p1[4], Epi[4], delta2, s[3], dist, dist1;
+
+s[0]= -0.5;
+s[1]= 0.0;
+s[2]= 0.5;
+
+delta2= delta * delta;
+
+p[0]= Pi[0];
+p[2]= Pi[2];
+p[3]= Pi[3];
+p[1]= Pi[1]= 1.0 - p[0] - p[2] - p[3];
+
+Epi[0]= p[0] * ( 1.0 - 2.0 * p[3] * (p[0] + p[2]) / 3.0 ) / ( 1.0 - p[0] * p[3] * (p[0] + 2.0 * p[2]) );
+Epi[2]= p[2] * ( 1.0 - 2.0 * p[3] * p[0] / 3.0 ) / ( 1.0 - p[0] * p[3] * (p[0] + 2.0 * p[2]) );
+Epi[3]= p[3] * ( 1.0 - p[0] * (p[0] + 2.0 * p[2]) / 3.0 ) / ( 1.0 - p[0] * p[3] * (p[0] + 2.0 * p[2]) );
+
+dist= (Epi[0] - Pi[0]) * (Epi[0] - Pi[0]);
+dist += (Epi[2] - Pi[2]) * (Epi[2] - Pi[2]);
+dist += (Epi[3] - Pi[3]) * (Epi[3] - Pi[3]);
+
+        do
+        {
+        k1= 1;
+        l1= 1;
+        m1= 1;
+                for(k= 0; k < 3; ++k)
+                        for(l= 0; l < 3; ++l)
+                                for(m= 0; m < 3; ++m)
+                                {
+                                p1[0]= p[0] + s[k] * delta;
+                                p1[2]= p[2] + s[l] * delta;
+                                p1[3]= p[3] + s[m] * delta;
+
+                                        if(p1[0] + p1[2] + p1[3] >= 0.0 && p1[0] + p1[2] + p1[3] <= 1.0)
+                                        {
+                                        Epi[0]= p1[0] * ( 1.0 - 2.0 * p1[3] * (p1[0] + p1[2]) / 3.0 ) / ( 1.0 - p1[0] * p1[3] * (p1[0] + 2.0 * p1[2]) );
+                                        Epi[2]= p1[2] * ( 1.0 - 2.0 * p1[3] * p1[0] / 3.0 ) / ( 1.0 - p1[0] * p1[3] * (p1[0] + 2.0 * p1[2]) );
+                                        Epi[3]= p1[3] * ( 1.0 - p1[0] * (p1[0] + 2.0 * p1[2]) / 3.0 ) / ( 1.0 - p1[0] * p1[3] * (p1[0] + 2.0 * p1[2]) );
+
+                                        dist1= (Epi[0] - Pi[0]) * (Epi[0] - Pi[0]);
+                                        dist1 += (Epi[2] - Pi[2]) * (Epi[2] - Pi[2]);
+                                        dist1 += (Epi[3] - Pi[3]) * (Epi[3] - Pi[3]);
+
+
+                                                if(dist1 < dist)
+                                                {
+                                                dist= dist1;
+                                                k1= k;
+                                                l1= l;
+                                                m1= m;
+                                                }
+                                        }
+                                }
+
+        p[0] += s[k1] * delta;
+        p[2] += s[l1] * delta;
+        p[3] += s[m1] * delta;
+
+        ++steps;
+        }
+        while(dist >= delta2);
+
+p[1]= 1.0 - p[0] - p[2] - p[3];
+Epi[1]= 1.0 - Epi[0] - Epi[2] - Epi[3];
+
+return(steps);
+}
+
+/******** end find_probabilities() *******/
+
+void    generate_sequence(char *seq, int len, double *q)
+{
+int     i, k, j, nuc;
+double  r;
+
+        for(i= 0; i < len; i += 3)
+        {
+        j= 16;
+        nuc= 0;
+        r= drand48();
+        k= 0;
+                while(r >= q[k]) ++k;
+        seq[i]= k;
+        nuc += k * j;
+        j /= 4;
+
+        r= drand48();
+        k= 0;
+                while(r >= q[k]) ++k;
+        seq[i + 1]= k;
+        nuc += k * j;
+        j /= 4;
+
+        r= drand48();
+        k= 0;
+                while(r >= q[k]) ++k;
+        seq[i + 2]= k;
+        nuc += k * j;
+
+                if(nuc == 48 || nuc == 50 || (nuc == 56 && !MYCOPLASMA)) i -= 3;
+        }
+}
+
+/******** end generate_sequence() *******/
