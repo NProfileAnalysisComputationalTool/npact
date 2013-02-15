@@ -19,7 +19,9 @@ from django.core.exceptions import PermissionDenied
 from django.contrib.auth.decorators import login_required
 
 from npactweb import assert_clean_path, getabspath, getrelpath
+from npactweb import management
 from npactweb.middleware import RedirectException
+
 
 from taskqueue import client, tqdaemon
 
@@ -37,7 +39,7 @@ def view(request):
         return HttpResponseRedirect(reverse('management'))
     daemon_status = 'running' if tqdaemon.status() else 'stopped'
     return render_to_response('management.html',
-                              locals(),
+                              {'settings':settings},
                               context_instance=RequestContext(request))
 
 
@@ -51,6 +53,8 @@ def handle_post(request):
     elif action == 'kill-daemon':
         count = tqdaemon.kill()
         messages.info(request, "Killed {0} processes".format(count))
+    elif action == 'cleanup':
+        cleanup(request)
 
     messages.info(request, "Handled {0}".format(action))
 
@@ -65,3 +69,23 @@ def stop_daemon(request):
     rc = tqdaemon.stop()
     if rc == 0:
         messages.info(request, "Daemon stopped successfully.")
+
+def cleanup(request):
+    try:
+        days = int(request.POST.get('days', settings.ATIME_DEFAULT))
+        if management.cleanup_old_files(days):
+            messages.info(request, "Successfully purged files older than %d days." % days)
+        else:
+            messages.error(request, "Error removing old files.")
+    except Exception,e:
+        messages.error(request, "Error removing old files: %s" % e)
+
+    try:
+        stdout, stderr = management.report_file_size()
+        if stdout:
+            for l in stdout.split('\n'):
+                messages.info(request, l)
+        if stderr:
+            messages.error(request, stderr)
+    except Exception,e:
+        messages.error(request, 'Error finding file size' % e)

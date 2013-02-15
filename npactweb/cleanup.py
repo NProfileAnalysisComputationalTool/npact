@@ -5,35 +5,14 @@ and deletes them.
 'unused files' are considered to be ones for which the atime is older
 than 14 days (see ATIME_DEFAULT)
 """
-
-import os
 import logging
-import subprocess
+import os
 import sys
 from optparse import OptionParser
 
-from path import path
-
-from pynpact import capproc
-from npactweb import library_root
 
 
 logger = logging.getLogger('cleanup')
-
-
-
-def clean(path, days, verbose=False):
-    "This function actually runs the find and delete."
-    logger.info("Cleaning older than: %d @ %r", days, path)
-
-    if verbose:
-        #add the -v flag to rm so it prints removed files.
-        cmd=["find", path, "-atime", "+" + str(days),
-             "-exec", "rm", "-f", "-v", "{}", "+"]
-    else:
-        cmd=["find", path, "-atime", "+" + str(days),
-             "-exec", "rm", "-f", "{}", "+"]
-    return capproc.capturedCall(cmd, logger=logger, stdin=False, stderr_level=logging.WARNING)
 
 
 if __name__ == '__main__' :
@@ -41,7 +20,7 @@ if __name__ == '__main__' :
     if 'DJANGO_SETTINGS_MODULE' not in os.environ:
         os.environ['DJANGO_SETTINGS_MODULE'] = 'settings'
     from django.conf import settings
-
+    from npactweb import management
 
     parser = OptionParser("""usage: %prog [options]
 
@@ -59,7 +38,7 @@ if __name__ == '__main__' :
                       default=settings.ATIME_DEFAULT,
                       help="argument to find's atime predicate for how many "
                       "days since it has been accessed before we decide to "
-                      "delete it. Defaults to %s" % settings.ATIME_DEFAULT)
+                      "delete it. Defaults to %default")
 
     (options,args) = parser.parse_args()
 
@@ -75,9 +54,8 @@ if __name__ == '__main__' :
         sys.exit(1)
 
     try:
-        rc1 = clean(path(settings.MEDIA_ROOT).realpath(), days, options.verbose)
-        rc2 = clean(path(settings.TQ_DIR).realpath(), days, options.verbose)
-        sys.exit(rc1 or rc2)
+        if management.cleanup_old_files(options.atime):
+            logger.info("Success!")
     except SystemExit:
         raise
     except:

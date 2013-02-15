@@ -26,6 +26,16 @@
         <li><button type="submit" name="action" value="kill-daemon">Kill any daemon processes</button></li>
       </ul>
     </div>
+    <h3>Cleanup</h3>
+    <div>
+      <p>This needs to be done from time to time to help prevent disk space usage from going crazy</p>
+      <p>
+        <label>Cleanup files older than:
+          <input type="text" name="days" size="2" value="{{settings.ATIME_DEFAULT}}"/> days.
+        </label>
+        <button type="submit" name="action" value="cleanup">Run Cleanup</button>
+      </p>
+    </div>
   </form>
 
 </div>
