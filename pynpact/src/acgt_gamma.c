@@ -25,10 +25,10 @@ int	RANDOMIZE= 0;
 
 #define WRITE_SEQUENCES 0
 
-# define TABLE_OFFSET_CHAR 0
+# define TABLE_OFFSET_CHAR 12
 # define MAX_OVER 5
 # define SIM_SHORT 0              // If true generates random sequences to obtain threshold scores for H-hits in ORFs < RND_SHORTER
-# define RND_SHORTER 100
+# define RND_SHORTER 150
 
 # define WEB_SERVER 1
 # define STEVE 0
@@ -744,115 +744,60 @@ void sort(double * array, int size)
 
 // Requires global double sc[6 * CODONS] where i*(CODONS-1) is the average of row i
 
-int score_orf_random(char *orf, int n, int tot_hss)
+int score_orf_random(char *orf, int n, double *sc, double *thr, int t, double maxscore, int rep)
 {
-    int i, j = 0, k, nuc[4]= {0}, downthr_pos, rep, sig_pos, from, to, last_zero= n, from_pos, to_pos= n - 1, cod, ncod;
+    int i, k, nuc[4]= {0}, sig_pos, from, to, rt= 0, rm= 0, n1= 0;
     char *seq;
-    double r, Score = 0.0, maxscore= 0.0;
-    double maxrscore[REPETITIONS + 1] = {0.0};
+    double fr[5]= { 0.0 }, pr[4]= { 0.0 }, q[4], delta= 0.0000001, rs, s;
+    double maxs, mins;
 
-    build_scores(orf, n, sc);
+        seq = (char *) malloc(n * sizeof(char));
 
-    rep = REPETITIONS;
+        for(i = 0; i < n; i++)
+        {
+                if(orf[i] >= 0 && orf[i] < 4)
+                {
+                ++n1;
+                ++fr[orf[i]];
+                ++fr[4];
+                }
+        }
 
-	seq = (char *) malloc(n * sizeof(char));
+        for(i= 0; i < 3; ++i) fr[i] /= fr[4];
 
-    for(i = 0; i < n; i++) seq[i]= orf[i];
+    fr[3]= 1.0 - fr[0] - fr[1] - fr[2];
 
-// Shuffles (removing stop codons) and scores randomized sequences:
+
+// Calculates nucleotide probabilities from observed frequencies:
+
+                find_probabilities(fr, pr, delta);
+
+                q[0]= pr[0];
+                q[1]= q[0] + pr[1];
+                q[2]= q[1] + pr[2];
+                q[3]= 1.0;
+
+  maxs= 0.0;
 
     for(k = 0; k < rep; k++)
     {
-		shuffle(seq, n, 1);
-		maxrscore[k]= score(seq, n, sc, &from, &to, 1);
+                generate_sequence(seq, n, q);
+                rs= score(seq, n, sc, &from, &to, 1);
+                if(rs > maxs) maxs= rs;
+                if(rs >= thr[t]) ++rt;
+                if(rs >= maxscore) ++rm;
     }
 
-// Sorts scores of randomized sequences:
+free(seq);
 
-	sort(maxrscore, rep);
+// fprintf(stderr, "\nlen= %d; score= %.4f; rand= %.4f (thr= %.4f) %d %d       ", n, maxscore, maxs, thr[t], rt, rm);
 
-	free(seq);
+        if(rt > MAX_OVER && rm > MAX_OVER) thr[t]= maxs;
 
-	sig_pos = (rep * (1.0 -SIGNIFICANCE));
-	downthr_pos = (rep * (1.0 - DOWNTHR));
-	
-// Finds HSSs in ORF:
-
-ncod= 0;
-
-	for(i = n - 3; i >= 0; i -= 3)
-	{
-	cod= get_codon(orf + i, 1);
-	if(cod == CODONS - 1) ++ncod;
-		Score += sc[cod];    //  Score += sc[0][16*orf[i] + 4*orf[i+1] + orf[i+2]];
-
-		if(Score < 0.0 || maxscore - Score >= maxrscore[downthr_pos])
-			Score = 0.0;
-		
-		if(Score && Score > maxscore)
-		{
-			maxscore = Score;
-			from_pos= i;
-		}
-
-        if(i==0) Score= 0;
-		
-		if (Score == 0.0)
-		{
-			if (maxscore >= maxrscore[sig_pos] && to_pos - from_pos + 1 - 3 * ncod >= mHL)
-			{
-				to_pos= last_zero - 1;
-                hss= (struct HSSs *)realloc(hss, (tot_hss + j + 1) * sizeof(struct HSSs));
-                hss[tot_hss + j].fromp= from_pos;
-                hss[tot_hss + j].top= to_pos;
-                hss[tot_hss + j].score= maxscore;
-                k= 0;
-                do ++k; while((sig_pos + k) < rep && maxscore >= maxrscore[sig_pos + k]);
-                hss[tot_hss + j].prob= 1.0 - (float)(sig_pos + k - 1) / ((float)rep);
-                hss[tot_hss + j].type= 5;
-
-// Checks HSS against alternative reading frames:
-
-			from= from_pos;
-			to= to_pos;
-
-                for(k= 1; k <= 5; ++k)
-                {
-                    r= score(orf + from, to - from + 1, sc + k * CODONS, &from, &to, 1);
-			from += from_pos;
-			to += from_pos;
-			from_pos= from;
-		}
-
-                maxscore= score(orf + from, to - from + 1, sc, &from, &to, 1);   
-//  maxscore_array[j]= score(orf+from,to-from+1,sc[0],&from,&to);
-			from += from_pos;
-			to += from_pos;
-			from_pos= from;
-                	to_pos= to;
-/**/
-
-				if (maxscore >= maxrscore[sig_pos])
-				{
-                    hss[tot_hss + j].fromp= from_pos;
-                    hss[tot_hss + j].top= to_pos;
-                    hss[tot_hss + j].score= maxscore;
-                    hss[tot_hss + j].type= 0;
-                    k= 0;
-                    do ++k; while((sig_pos + k) < rep && maxscore >= maxrscore[sig_pos + k]);
-                    hss[tot_hss + j].prob= 1.0 - (float)(sig_pos + k - 1) / ((float)rep);
-				}
-                ++j;
-			}
-			last_zero = i;
-			to_pos= i - 1;
-			maxscore= 0.0;
-			ncod= 0;
-		}
-	}
-
-    return(j);         // Returns the number of HSSs found.
+return(rm);         // Returns the significance from simulations
 }
+
+
 
 // End of function score_orf_random()
 
