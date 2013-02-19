@@ -262,6 +262,7 @@ int 	find_Ghits(int genome_size, int tot_hss, long bytes_from_origin, int *on);
 void	characterize_published_genes(int ncds, int tot_Ghits, double nuc[], long bytes_from_origin, long *ffrom);
 void	write_published_exon(int j, int h, int k, int from, int to, int s1, int s2, double G, char Pg[], double nuc[], FILE *output1, FILE *output2, FILE *output3);
 void	shuffle(char *seq, int n, int remove_stops);
+void	randomize(char *seq, int n);
 int	position(int a, int c, int g, int t);
 void	assign_gene_positions(long *ffrom, int *o, int ncds, int nexons);
 void	reorder_hits(int n, int orfn);
@@ -602,7 +603,7 @@ int analyze_genome(int genome_size, int tot_hss, int *on)
                     orf_num[frame][tot_orfs[frame]][0]= first_stop[frame];
                     orf_num[frame][tot_orfs[frame]][1]= second_stop[frame];
 	
-					if(RANDOMIZE) shuffle(ORF + frame*MAX_ORF_SIZE, len[frame], 1);
+					if(RANDOMIZE) randomize(ORF + frame*MAX_ORF_SIZE, len[frame]);
 
 				th= score_orf_table(ORF + frame * MAX_ORF_SIZE, len[frame], tot_hss);	// SCORING SEGMENT USING TABLE OF THRESHOLDS
 
@@ -667,7 +668,7 @@ int analyze_genome(int genome_size, int tot_hss, int *on)
 	
                     invert_sequence(ORF + frame * MAX_ORF_SIZE, len[frame]);   // strand = 'C'
 
-					if(RANDOMIZE) shuffle(ORF + frame*MAX_ORF_SIZE, len[frame], 1);
+					if(RANDOMIZE) randomize(ORF + frame*MAX_ORF_SIZE, len[frame]);
 
 				th= score_orf_table(ORF + frame * MAX_ORF_SIZE, len[frame], tot_hss);	// SCORING SEGMENT
 
@@ -3011,7 +3012,7 @@ int find_Ghits(int genome_size, int tot_hss, long bytes_from_origin, int *on)
                             if(RANDOMIZE)
                             {
                                 copy_sequence(ORF + h0, h1 - h0 + 1, ORF + g1 - g0 + 1);
-                                shuffle(ORF + g1 - g0 + 1, h1 - h0 + 1, 1);
+                                randomize(ORF + g1 - g0 + 1, h1 - h0 + 1);
                                 tot_Ghits= maxG_test(ORF + g1 - g0 + 1, h1 - h0 + 1, g0 + h0, 'D', frame, n[frame], tot_Ghits, on);
                             }
 							else tot_Ghits= maxG_test(ORF + h0, h1 - h0 + 1, g0 + h0, 'D', frame, n[frame], tot_Ghits, on);
@@ -3050,7 +3051,7 @@ int find_Ghits(int genome_size, int tot_hss, long bytes_from_origin, int *on)
                             if(RANDOMIZE)
                             {
                                 copy_sequence(ORF + h0, h1 - h0 + 1, ORF + g1 - g0 + 1);
-                                shuffle(ORF + g1 - g0 + 1, h1 - h0 + 1, 1);
+                                randomize(ORF + g1 - g0 + 1, h1 - h0 + 1);
                                 tot_Ghits= maxG_test(ORF + g1 - g0 + 1, h1 - h0 + 1, g1 - h0, 'C', frame, n[frame], tot_Ghits, on);
                             }
 							else tot_Ghits= maxG_test(ORF + h0, h1 - h0 + 1, g1 - h0, 'C', frame, n[frame], tot_Ghits, on);
@@ -3757,3 +3758,40 @@ double  r;
 }
 
 /******** end generate_sequence() *******/
+
+/*******************************/
+/****  Function randomize() ****/
+/*******************************/
+
+void randomize(char *seq, int n)
+{
+    int i;
+    double fr[5]= { 0.0 }, pr[4]= { 0.0 }, q[4], delta= 0.0000001;
+
+        for(i = 0; i < n; i++)
+        {
+                if(seq[i] >= 0 && seq[i] < 4)
+                {
+                ++fr[seq[i]];
+                ++fr[4];
+                }
+        }
+
+        for(i= 0; i < 3; ++i) fr[i] /= fr[4];
+
+    fr[3]= 1.0 - fr[0] - fr[1] - fr[2];
+
+// Calculates nucleotide probabilities from observed frequencies:
+
+    find_probabilities(fr, pr, delta);
+
+    q[0]= pr[0];
+    q[1]= q[0] + pr[1];
+    q[2]= q[1] + pr[2];
+    q[3]= 1.0;
+
+    generate_sequence(seq, n, q);
+}
+
+/******** end randomize() *******/
+
