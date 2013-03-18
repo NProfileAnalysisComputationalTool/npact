@@ -287,7 +287,11 @@ int main (int argc, char *argv[])
     define_characterizations();
 	if(!REPETITIONS) read_tables();
 
-    srand48(time(NULL));
+    #ifdef WIN32
+     srand((long)time(NULL));
+    #else
+     srand48(time(NULL));
+    #endif
     t0= time(NULL);
 
     /**** Parse command line options ****/
@@ -3316,9 +3320,15 @@ void shuffle(char *seq, int n, int remove_stops)
 
 	for(i = n - 1; i > 0; i--)
 	{
+        #ifdef WIN32
+           while ((r = (double)(rand())/(double)RAND_MAX+1) >= 1.0);
+        j = (int) (r * (double)(i + 1));
+        c = seq[i]; seq[i] = seq[j]; seq[j] = c;
+        #else
 		while((r = drand48()) >= 1.0);
         j = (int)(r * (double)(i + 1));
         c = seq[i]; seq[i] = seq[j]; seq[j] = c;
+        #endif
 	}
 
 // Removes stop codons shuffling codon
@@ -3733,21 +3743,33 @@ double  r;
         {
         j= 16;
         nuc= 0;
-        r= drand48();
+        #ifdef WIN32
+         r = (double)(rand())/(double)RAND_MAX+1;
+        #else
+         r= drand48();
+        #endif
         k= 0;
                 while(r >= q[k]) ++k;
         seq[i]= k;
         nuc += k * j;
         j /= 4;
 
-        r= drand48();
+        #ifdef WIN32
+         r = (double)(rand())/(double)RAND_MAX+1;
+        #else
+         r= drand48();
+        #endif
         k= 0;
                 while(r >= q[k]) ++k;
         seq[i + 1]= k;
         nuc += k * j;
         j /= 4;
 
-        r= drand48();
+        #ifdef WIN32
+         r = (double)(rand())/(double)RAND_MAX+1;
+        #else
+         r= drand48();
+        #endif
         k= 0;
                 while(r >= q[k]) ++k;
         seq[i + 2]= k;
