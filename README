@@ -112,6 +112,10 @@ NB: Apache normally runs as a different user and you may encounter
 permissions issues if you run the developmenet server in the same
 directory that has been served under Apache.
 
+To log in to the npact management page use:
+username: npactmanager
+password: "pointy haired daemon"   -> no quotes, make sure to use the spaces
+
 ### command line interface
 
 The project was developed with this in mind but has been extended
