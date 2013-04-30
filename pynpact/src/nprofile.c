@@ -68,6 +68,7 @@ void calculateProfile(const char* origin, const size_t length,
    /* skip up till start, but don't move offset passed start. */
    while (offset < length) {
       base = origin[offset];
+      if(base >= 'A' && base <= 'Z') base += 'a' - 'A';
       if(base >= 'a' && base <= 'z') {
          if(baseidx + 1 == start)
             break;
@@ -78,6 +79,7 @@ void calculateProfile(const char* origin, const size_t length,
 
    for(; offset < length && baseidx < end; offset++) {
       base = origin[offset];
+      if(base >= 'A' && base <= 'Z') base += 'a' - 'A';
       if(base >= 'a' && base <= 'z') {
          ++baseidx;
          if(strchr(bases, base)) {
@@ -117,7 +119,7 @@ int countBases(const char* origin, const size_t length) {
    /* how many bases from there */
    int i, tot=0;
    for(i=0; i < length; i++)
-      if(origin[i] >= 'a' && origin[i] <= 'z')
+      if((origin[i] >= 'a' && origin[i] <= 'z') || (origin[i] >= 'A' && origin[i] <= 'Z'))
          ++tot;
    return tot;
 }
@@ -148,7 +150,7 @@ int main(int argc, char *argv[]) {
 
 
    fprintf(stderr, "Searching for coding sequence in '%s'... ", filename);
-   /* Skip until we see ORIGIN (the line that starts the coding seq)
+   /* Skip until we see ORIGIN (the line that starts the seq)
     * If the file doesn't contain ORIGIN this may raise a segfault;
     * but at that point exiting with error is all we can do anyways.
     */
