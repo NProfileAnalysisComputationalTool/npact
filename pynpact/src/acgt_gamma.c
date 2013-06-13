@@ -1395,8 +1395,8 @@ long annotation(int *ncds, int *nexons)
 
 double G_test(char *seq, int n,char Pg[], int *th)
 {
-    int     i,j,k,pos;
-    double  G,E,O,usage[5][4]= { 0.0 };
+    int     i, j, k, pos;
+    double  G, E, O, usage[5][4]= { 0.0 };
     char	Prob[14][15];
 
     strcpy(Prob[0],"(p >= 5.0e-01)");
@@ -1414,12 +1414,15 @@ double G_test(char *seq, int n,char Pg[], int *th)
     strcpy(Prob[12],"(p <= 2.5e-02)");
     strcpy(Prob[13],"(p <= 5.0e-02)");
 
-    for(k=0;k<n;++k)
+    for(k= 0; k < n; ++k)
     {
-        ++usage[seq[k]][k%3];
+	if(seq[k] >= 0 && seq[k] < 4)
+	{
+        ++usage[seq[k]][k % 3];
         ++usage[seq[k]][3];
-        ++usage[4][k%3];
+        ++usage[4][k % 3];
         ++usage[4][3];
+	}
     }
 
     G= 0.0;
