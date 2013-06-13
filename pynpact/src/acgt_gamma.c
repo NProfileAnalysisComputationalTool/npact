@@ -260,7 +260,7 @@ void	process_hss(int from_hss, int to_hss, int ncds);
 void	write_results(int from_hss, int to_hss, int ncds, int genome_size);
 int 	find_Ghits(int genome_size, int tot_hss, long bytes_from_origin, int *on);
 void	characterize_published_genes(int ncds, int tot_Ghits, double nuc[], long bytes_from_origin, long *ffrom);
-void	write_published_exon(int j, int h, int k, int from, int to, int s1, int s2, double G, char Pg[], double nuc[], FILE *output1, FILE *output2, FILE *output3, output4);
+void	write_published_exon(int j, int h, int k, int from, int to, int s1, int s2, double G, char Pg[], double nuc[], FILE *output1, FILE *output2, FILE *output3, FILE *output4);
 void	shuffle(char *seq, int n, int remove_stops);
 void	randomize(char *seq, int n);
 int	position(int a, int c, int g, int t);
@@ -2592,7 +2592,7 @@ void process_hss(int from_hss, int to_hss, int ncds)
                                 k= 2;		// Part of published gene
                                 hss[o[i]].type= k;
                                 j= ncds;
-/MO: Command not found.
+                                h= nex;
 							}
 							else
 							{
