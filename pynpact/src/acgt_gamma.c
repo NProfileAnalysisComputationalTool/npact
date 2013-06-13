@@ -260,7 +260,7 @@ void	process_hss(int from_hss, int to_hss, int ncds);
 void	write_results(int from_hss, int to_hss, int ncds, int genome_size);
 int 	find_Ghits(int genome_size, int tot_hss, long bytes_from_origin, int *on);
 void	characterize_published_genes(int ncds, int tot_Ghits, double nuc[], long bytes_from_origin, long *ffrom);
-void	write_published_exon(int j, int h, int k, int from, int to, int s1, int s2, double G, char Pg[], double nuc[], FILE *output1, FILE *output2, FILE *output3);
+void	write_published_exon(int j, int h, int k, int from, int to, int s1, int s2, double G, char Pg[], double nuc[], FILE *output1, FILE *output2, FILE *output3, output4);
 void	shuffle(char *seq, int n, int remove_stops);
 void	randomize(char *seq, int n);
 int	position(int a, int c, int g, int t);
@@ -2592,7 +2592,7 @@ void process_hss(int from_hss, int to_hss, int ncds)
                                 k= 2;		// Part of published gene
                                 hss[o[i]].type= k;
                                 j= ncds;
-                                h= nex;
+/MO: Command not found.
 							}
 							else
 							{
@@ -2857,8 +2857,8 @@ void write_results(int from_hss, int to_hss, int ncds, int genome_size)
                                 fprintf(output6,"%s %d..%d\n", name, hss[o[i]].start_pos + s1, hss[o[i]].stop2 + s2);
 								if(WRITE_SEQUENCES)
 								{
-                                    fprintf(output7,">%s %d..%d\n", name, hss[o[i]].start_pos + s1, hss[o[i]].stop2 + s2);
-                                    fprintf(output8,">%s %d..%d\n", name, hss[o[i]].start_pos + s1, hss[o[i]].stop2 + s2);
+                                    fprintf(output7,">%s D %d..%d\n", name, hss[o[i]].start_pos + s1, hss[o[i]].stop2 + s2);
+                                    fprintf(output8,">%s D %d..%d\n", name, hss[o[i]].start_pos + s1, hss[o[i]].stop2 + s2);
                                     print_nucleotides(hss[o[i]].seq, hss[o[i]].seqlen, output7);
                                     print_amino_acids(hss[o[i]].seq, hss[o[i]].seqlen, output8);
 								}
@@ -2878,8 +2878,8 @@ void write_results(int from_hss, int to_hss, int ncds, int genome_size)
                                 fprintf(output6,"%s complement(%d..%d)\n", name, hss[o[i]].stop1 + s1, hss[o[i]].start_pos + s2);
 								if(WRITE_SEQUENCES)
 								{
-                                    fprintf(output7,">%s++ %d..%d\n", name, hss[o[i]].stop1 + s1, hss[o[i]].start_pos + s2);
-                                    fprintf(output8,">%s++ %d..%d\n", name, hss[o[i]].stop1 + s1, hss[o[i]].start_pos + s2);
+                                    fprintf(output7,">%s C %d..%d\n", name, hss[o[i]].stop1 + s1, hss[o[i]].start_pos + s2);
+                                    fprintf(output8,">%s C %d..%d\n", name, hss[o[i]].stop1 + s1, hss[o[i]].start_pos + s2);
                                     print_nucleotides(hss[o[i]].seq, hss[o[i]].seqlen, output7);
                                     print_amino_acids(hss[o[i]].seq, hss[o[i]].seqlen, output8);
 								}
@@ -3092,17 +3092,20 @@ void characterize_published_genes(int ncds, int tot_Ghits, double nuc[], long by
     int	i, j, l, k, h, from, to, s1, s2, out;
     char	Pg[15];
     double	G;
-    FILE	*output1, *output2, *output3;
+    FILE	*output1, *output2, *output3, *output4;
 
     output1= get_out_file(".excluded", "w");
     output2= get_out_file(".confirmed", "w");
     output3= get_out_file(".verbose", "w");
+    output4= get_out_file(".extended", "w");
 
 // output1 = *.excluded ( published CDSs contradicted or not supported)
 // output2 = *.confirmed ( published CDSs confirmed)
 // output3 = *.verbose   ( detailed features of all annotations and hits )
+// output4 = *.extended ( published CDSs extended by hit)
 
     fprintf(output1,"List of published CDSs with NS= Not supported or CO= Contradicted annotation.\n");
+    fprintf(output4,"List of published CDSs EX= Extended by hits.\n");
     fprintf(output2,"List of published CDSs confirmed by this analysis (p <= %.5f) (coordinates from start of first hit to stop codon)\n", SIGNIFICANCE);
     fprintf(output3,"PUBLISHED ANNOTATION\n\nNo\tGene\tCDS-fm\tCDS-to\tCDS-len\tStrand\tColor\tEntropy\tG-test (significance)\tCharacterization\n");
 
@@ -3131,7 +3134,7 @@ void characterize_published_genes(int ncds, int tot_Ghits, double nuc[], long by
 
             get_sequence(1, to - from + 1, gene[j].strand, ORF + l);
 
-            gene[j].entropy= entropy(ORF, to - from + 1);
+            	if(h == gene[j].num_exons - 1) gene[j].entropy= entropy(ORF, l + to - from + 1);
 
             G= G_test(ORF + l, to - from + 1, Pg, &k);  // Multi-exon structure implemented!!
             gene[j].type[h]= k;
@@ -3216,13 +3219,14 @@ void characterize_published_genes(int ncds, int tot_Ghits, double nuc[], long by
 					}
 				}
 			}
-            write_published_exon(j, h, k, from, to, s1, s2, G, Pg, nuc, output1, output2, output3);
+            write_published_exon(j, h, k, from, to, s1, s2, G, Pg, nuc, output1, output2, output3, output4);
 		}
 	}
 
     fclose(output1);
     fclose(output2);
     fclose(output3);
+    fclose(output4);
     fseek(fp, bytes_from_origin, SEEK_SET);
 }
 
@@ -3234,7 +3238,7 @@ void characterize_published_genes(int ncds, int tot_Ghits, double nuc[], long by
 
 // Requires global FILE *fp
 
-void write_published_exon(int j, int h, int k, int from, int to, int s1, int s2, double G, char Pg[], double nuc[], FILE *output1, FILE *output2, FILE *output3)
+void write_published_exon(int j, int h, int k, int from, int to, int s1, int s2, double G, char Pg[], double nuc[], FILE *output1, FILE *output2, FILE *output3, FILE *output4)
 {
     int         hi;
     char	name[50];
@@ -3249,24 +3253,37 @@ void write_published_exon(int j, int h, int k, int from, int to, int s1, int s2,
 	if(gene[j].entropy <= MAX_ENTROPY) fprintf(output3, " repetitive");
     fprintf(output3, "\n\tA= %5.2f  C= %5.2f  G= %5.2f  T= %5.2f  S= %5.2f  S1= %5.2f  S2= %5.2f  S3= %5.2f  R= %5.2f  R1= %5.2f  R2= %5.2f  R3= %5.2f\n", nuc[3*6+0], nuc[3*6+1], nuc[3*6+2], nuc[3*6+3], nuc[3*6+4], nuc[0*6+4], nuc[1*6+4], nuc[2*6+4], nuc[3*6+5], nuc[0*6+5], nuc[1*6+5], nuc[2*6+5]);
 
-	if(k == 0 || k == 2 || k == 3) 
+	if(k == 0 || k == 3) 
 	{
 		if(strlen(gene[j].name))
 		{
 			if(k == 0) sprintf(name, "NS_");
-			else if(k == 2) sprintf(name, "MO_");
 			else if(k == 3) { sprintf(name, "CO_"); hi= gene[j].sup[h]; }
             strcat(name, gene[j].name);
 		}
 		else
 		{
 			if(k == 0) sprintf(name, "NS%d", j+1);
-			else if(k == 2) sprintf(name, "MO%d", j+1);
 			else if(k == 3) sprintf(name, "CO%d", j+1);
 		}
 			
 		if(gene[j].strand == 'D') fprintf(output1,"%s %d..%d\n", name, from + s1, to + s2);
 		else                      fprintf(output1,"%s complement(%d..%d)\n", name, from + s1, to + s2);
+	}
+	else if(k == 2) 
+	{
+		if(strlen(gene[j].name))
+		{
+		sprintf(name, "EX_");
+            strcat(name, gene[j].name);
+		}
+		else
+		{
+		sprintf(name, "EX%d", j+1);
+		}
+			
+		if(gene[j].strand == 'D') fprintf(output4,"%s %d..%d\n", name, from + s1, to + s2);
+		else                      fprintf(output4,"%s complement(%d..%d)\n", name, from + s1, to + s2);
 	}
 	else
 	{
