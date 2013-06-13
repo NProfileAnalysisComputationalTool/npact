@@ -185,7 +185,7 @@ struct exons
     int     *frame;		// frame of exon.
     int     span;		// Length of gene from first coding position to last coding position (excluding stop codon) = to - from + 1.
     int     len;		// Sum of the lengths of all exons (including stop codon).
-	double  entropy;
+    double  *entropy;
 } *gene;
 
 struct HSSs {
@@ -243,7 +243,7 @@ int	score_orf_table(char *seg, int n, int tot_hss);
 void    generate_sequence(char *seq, int len, double *q);
 int     find_probabilities(double Pi[], double p[], double delta);
 double	score(char *seq,int n,double *sc,int *from,int *to, int flag);
-double entropy(char *seq, int n);
+double	entropy(char *seq, int n);
 int	get_codon(char *seq, int strand);
 int	maxG_test(char *seq, int len, int ori, char strand, int frame, int orfn, int tot_Ghits, int *on);
 double	G_test(char *seq, int n, char Pg[], int *k);
@@ -1129,8 +1129,8 @@ double entropy(char *seq, int n)
 
 	if(MYCOPLASMA) D= 62.0;
 	else           D= 61.0;
-		
-	for(i= 0; i < n - n % 3; i += 3)
+
+	for(i= 0; i < n - (n % 3); i += 3)
 	{
 	codon= get_codon(seq + i, 1);
 		if(codon != 48 && codon != 50 && (codon != 56 || MYCOPLASMA))
@@ -1143,7 +1143,7 @@ double entropy(char *seq, int n)
 
 	if(total_codon)
 	{
-		for(k= 0; k < CODONS - 1; k++) if(codon_arr[k]) codon_arr[k] /= (double)total_codon;
+		for(k= 0; k < CODONS - 1; k++) if(codon_arr[k] > 0.0) codon_arr[k] /= (double)total_codon;
 	}
 	else return(-1.0);
 
@@ -1274,6 +1274,7 @@ long annotation(int *ncds, int *nexons)
             gene[n].type= (int *)malloc(gene[n].num_exons*sizeof(int));
             gene[n].color= (char *)malloc(gene[n].num_exons*sizeof(char));
             gene[n].frame= (int *)malloc(gene[n].num_exons*sizeof(int));
+            gene[n].entropy= (double *)malloc(gene[n].num_exons*sizeof(double));
 		
             p= cds;
             gene[n].len= 0;
@@ -3136,7 +3137,7 @@ void characterize_published_genes(int ncds, int tot_Ghits, double nuc[], long by
 
             get_sequence(1, to - from + 1, gene[j].strand, ORF + l);
 
-            	if(h == gene[j].num_exons - 1) gene[j].entropy= entropy(ORF, l + to - from + 1);
+	    gene[j].entropy[h]= entropy(ORF + l, to - from + 1);
 
             G= G_test(ORF + l, to - from + 1, Pg, &k);  // Multi-exon structure implemented!!
             gene[j].type[h]= k;
@@ -3251,8 +3252,8 @@ void write_published_exon(int j, int h, int k, int from, int to, int s1, int s2,
 
     fprintf(output3,"%d\t%s",j+1, gene[j].name);
 	if(gene[j].num_exons > 1) fprintf(output3,".%d",h+1);
-    fprintf(output3, "\t%d\t%d\t%d\t%c\t%c\t%.2f\t%6.2f %s\t%s", from + s1, to + s2, to - from + 4, gene[j].strand, gene[j].color[h], gene[j].entropy, G, Pg, Annotation[k]);
-	if(gene[j].entropy <= MAX_ENTROPY) fprintf(output3, " repetitive");
+    fprintf(output3, "\t%d\t%d\t%d\t%c\t%c\t%.2f\t%6.2f %s\t%s", from + s1, to + s2, to - from + 4, gene[j].strand, gene[j].color[h], gene[j].entropy[h], G, Pg, Annotation[k]);
+	if(gene[j].entropy[h] <= MAX_ENTROPY) fprintf(output3, " repetitive");
     fprintf(output3, "\n\tA= %5.2f  C= %5.2f  G= %5.2f  T= %5.2f  S= %5.2f  S1= %5.2f  S2= %5.2f  S3= %5.2f  R= %5.2f  R1= %5.2f  R2= %5.2f  R3= %5.2f\n", nuc[3*6+0], nuc[3*6+1], nuc[3*6+2], nuc[3*6+3], nuc[3*6+4], nuc[0*6+4], nuc[1*6+4], nuc[2*6+4], nuc[3*6+5], nuc[0*6+5], nuc[1*6+5], nuc[2*6+5]);
 
 	if(k == 0 || k == 3) 
