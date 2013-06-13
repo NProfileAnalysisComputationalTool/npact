@@ -24,6 +24,8 @@ int	RANDOMIZE= 0;
 #define SORT_BY_ORF_SLOPE 0
 
 #define WRITE_SEQUENCES 0
+#define WRITE_MODIFIED_SEQS 0
+#define WRITE_ALTERNATIVE_SEQS 0
 
 # define TABLE_OFFSET_CHAR 12
 # define MAX_OVER 5
@@ -1078,7 +1080,7 @@ int score_orf_table(char *orf, int n, int tot_hss)
 				hss[tot_hss + h].start= flag;
 
 
-                if(WRITE_SEQUENCES)
+                if(WRITE_SEQUENCES || WRITE_MODIFIED_SEQS || WRITE_ALTERNATIVE_SEQS)
                 {
 		nt= n - hss[tot_hss + h].start_pos + 1;
 		hss[tot_hss + h].seqlen= nt;
@@ -1828,7 +1830,7 @@ int maxG_test(char *seq, int len, int ori, char strand, int frame, int orfn, int
 
                     hss[hit].start= flags;
 
-				if(WRITE_SEQUENCES)
+				if(WRITE_SEQUENCES || WRITE_MODIFIED_SEQS || WRITE_ALTERNATIVE_SEQS)
 				{
                             nt= len - hss[hit].start_pos + 1;
                             hss[hit].seqlen= nt;
@@ -2708,7 +2710,7 @@ void write_results(int from_hss, int to_hss, int ncds, int genome_size)
 
 // fprintf(output6, "List of predicted ORFs modifying previous annotation.\n");
 
-	if(WRITE_SEQUENCES)
+	if(WRITE_SEQUENCES || WRITE_MODIFIED_SEQS || WRITE_ALTERNATIVE_SEQS)
 	{
         output7= get_out_file(".ffn", "w");
         output8= get_out_file(".faa", "w");
@@ -2795,7 +2797,7 @@ void write_results(int from_hss, int to_hss, int ncds, int genome_size)
 							}
                                 if(flag) fprintf(output1,"%s %d..%d\n", name, hss[o[i]].start_pos + s1, hss[o[i]].stop2 + s2);
                                 if(k == 7 || !flag) fprintf(output4,"%s %d..%d\n", name, hss[o[i]].start_pos + s1, hss[o[i]].stop2 + s2);
-								if(WRITE_SEQUENCES)
+								if(WRITE_ALTERNATIVE_SEQS)
 								{
                                     fprintf(output7,">%s D %d..%d\n", name, hss[o[i]].start_pos + s1, hss[o[i]].stop2 + s2);
                                     fprintf(output8,">%s D %d..%d\n", name, hss[o[i]].start_pos + s1, hss[o[i]].stop2 + s2);
@@ -2825,7 +2827,7 @@ void write_results(int from_hss, int to_hss, int ncds, int genome_size)
 							}
                                 if(flag) fprintf(output1,"%s complement(%d..%d)\n", name, hss[o[i]].stop1 + s1, hss[o[i]].start_pos + s2);
                                 if(k == 7 || !flag) fprintf(output4,"%s complement(%d..%d)\n", name, hss[o[i]].stop1 + s1, hss[o[i]].start_pos + s2);
-								if(WRITE_SEQUENCES)
+								if(WRITE_ALTERNATIVE_SEQS)
 								{
                                     fprintf(output7,">%s C %d..%d\n", name, hss[o[i]].stop1 + s1, hss[o[i]].start_pos + s2);
                                     fprintf(output8,">%s C %d..%d\n", name, hss[o[i]].stop1 + s1, hss[o[i]].start_pos + s2);
@@ -2855,7 +2857,7 @@ void write_results(int from_hss, int to_hss, int ncds, int genome_size)
 				name[j]= start_char[hss[o[i]].start];
 				name[j + 1]= '\0';
                                 fprintf(output6,"%s %d..%d\n", name, hss[o[i]].start_pos + s1, hss[o[i]].stop2 + s2);
-								if(WRITE_SEQUENCES)
+								if(WRITE_MODIFIED_SEQS)
 								{
                                     fprintf(output7,">%s D %d..%d\n", name, hss[o[i]].start_pos + s1, hss[o[i]].stop2 + s2);
                                     fprintf(output8,">%s D %d..%d\n", name, hss[o[i]].start_pos + s1, hss[o[i]].stop2 + s2);
@@ -2876,7 +2878,7 @@ void write_results(int from_hss, int to_hss, int ncds, int genome_size)
 				name[j]= start_char[hss[o[i]].start];
 				name[j + 1]= '\0';
                                 fprintf(output6,"%s complement(%d..%d)\n", name, hss[o[i]].stop1 + s1, hss[o[i]].start_pos + s2);
-								if(WRITE_SEQUENCES)
+								if(WRITE_MODIFIED_SEQS)
 								{
                                     fprintf(output7,">%s C %d..%d\n", name, hss[o[i]].stop1 + s1, hss[o[i]].start_pos + s2);
                                     fprintf(output8,">%s C %d..%d\n", name, hss[o[i]].stop1 + s1, hss[o[i]].start_pos + s2);
@@ -2913,7 +2915,7 @@ void write_results(int from_hss, int to_hss, int ncds, int genome_size)
     fclose(output5);
     fclose(output6);
 
-	if(WRITE_SEQUENCES)
+	if(WRITE_SEQUENCES || WRITE_MODIFIED_SEQS || WRITE_ALTERNATIVE_SEQS)
 	{
         fclose(output7);
         fclose(output8);
