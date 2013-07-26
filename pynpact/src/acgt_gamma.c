@@ -955,7 +955,7 @@ int score_orf_table(char *orf, int n, int tot_hss)
 				from += from_pos;
 				to += from_pos;
 				from_pos= from;
-                to_pos= to;
+                		to_pos= to;
 
 				hss[tot_hss + h].entropy= entropy(orf + from_pos, to_pos - from_pos + 1);
 
@@ -1081,14 +1081,6 @@ int score_orf_table(char *orf, int n, int tot_hss)
 				hss[tot_hss + h].start= flag;
 
 
-/*                if(WRITE_SEQUENCES || WRITE_MODIFIED_SEQS || WRITE_ALTERNATIVE_SEQS)
-                {
-		nt= n - hss[tot_hss + h].start_pos + 1;
-		hss[tot_hss + h].seqlen= nt;
-		hss[tot_hss + h].seq= (char *)malloc(nt * sizeof(char));
-                        for(j= 0; j < nt; ++j) hss[tot_hss + h].seq[j]= orf[hss[tot_hss + h].start_pos + j];
-                }
-*/
 				hss[tot_hss + h].sig_len= (maxscore - (double)b[0]) / ((double)a[0]); 
                 if(hss[tot_hss + h].sig_len < max_len)
                     for(k= 0; k < LEN_TRANSFORM; ++k) hss[tot_hss + h].sig_len= exp(hss[tot_hss + h].sig_len);
@@ -1836,14 +1828,7 @@ int maxG_test(char *seq, int len, int ori, char strand, int frame, int orfn, int
 						
 						hss[hit].start= flags;
 						
-/*						if(WRITE_SEQUENCES || WRITE_MODIFIED_SEQS || WRITE_ALTERNATIVE_SEQS)
-						{
-                            nt= len - hss[hit].start_pos + 1;
-                            hss[hit].seqlen= nt;
-                            hss[hit].seq= (char *)malloc(nt * sizeof(char));
-							for(j= 0; j < nt; ++j) hss[hit].seq[j]= seq[hss[hit].start_pos + j];
-						}
-*/						
+
 						if(strand == 'D')
 						{
 							hss[hit].fromp += ori;
