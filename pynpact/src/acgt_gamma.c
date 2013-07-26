@@ -32,9 +32,9 @@ int	RANDOMIZE= 0;
 # define SIM_SHORT 0              // If true generates random sequences to obtain threshold scores for H-hits in ORFs < RND_SHORTER
 # define RND_SHORTER 150
 
-# define WEB_SERVER 0
+# define WEB_SERVER 1
 # define STEVE 0
-# define LUCIANO 1
+# define LUCIANO 0
 # define LUCIANO_HOME 0
 # define ROOT_HOME 0
 # define LOCAL_DIST 0
@@ -242,6 +242,7 @@ int     score_orf_random(char *orf, int n, double *sc, double *thr, int t, doubl
 int	score_orf_table(char *seg, int n, int tot_hss);
 void    generate_sequence(char *seq, int len, double *q);
 int     find_probabilities(double Pi[], double p[], double delta);
+int	find_start_of_translation(int h, char *orf);
 double	score(char *seq,int n,double *sc,int *from,int *to, int flag);
 double	entropy(char *seq, int n);
 int	get_codon(char *seq, int strand);
@@ -963,123 +964,7 @@ int score_orf_table(char *orf, int n, int tot_hss)
 				hss[tot_hss + h].top= to_pos;
 				hss[tot_hss + h].score= maxscore;
 
-				flag= 0;
-				hss[tot_hss + h].start_pos= hss[tot_hss + h].fromp;
-
-                for(k= hss[tot_hss + h].fromp; k >= 0 && k >=hss[tot_hss + h].fromp - START_POS5; k -= 3)
-                {
-//					nt= 16 * orf[k] + 4 * orf[k + 1] + orf[k + 2];
-					nt= get_codon(orf + k, 1);
-                    if(nt == 14) { hss[tot_hss + h].start_pos= k; k= 0; flag= 1; }
-                }
-
-                if(!flag)
-                    for(k= hss[tot_hss + h].fromp; k < hss[tot_hss + h].top - mHL && k <= hss[tot_hss + h].fromp + START_POS3; k += 3)
-                    {
-//					nt= 16 * orf[k] + 4 * orf[k + 1] + orf[k + 2];
-					nt= get_codon(orf + k, 1);
-                        if(nt == 14) { hss[tot_hss + h].start_pos= k; k= hss[tot_hss + h].top; flag= 1; }
-                    }
-
-                if(!flag)
-                    for(k= hss[tot_hss + h].fromp; k >= 0 && k >= hss[tot_hss + h].fromp - START_POS5; k -= 3)
-                    {
-//					nt= 16 * orf[k] + 4 * orf[k + 1] + orf[k + 2];
-					nt= get_codon(orf + k, 1);
-                        if(nt == 46) { hss[tot_hss + h].start_pos= k; k= 0; flag= 3; }
-                    }
-
-                if(!flag)
-                    for(k= hss[tot_hss + h].fromp; k < hss[tot_hss + h].top - mHL && k <= hss[tot_hss + h].fromp + START_POS3; k += 3)
-                    {
-//					nt= 16 * orf[k] + 4 * orf[k + 1] + orf[k + 2];
-					nt= get_codon(orf + k, 1);
-                        if(nt == 46) { hss[tot_hss + h].start_pos= k; k= hss[tot_hss + h].top; flag= 3; }
-                    }
-
-                if(!flag)
-                    for(k= hss[tot_hss + h].fromp - START_POS5 - 3; k >= 0; k -= 3)
-                    {
-//					nt= 16 * orf[k] + 4 * orf[k + 1] + orf[k + 2];
-					nt= get_codon(orf + k, 1);
-                        if(nt == 14) { hss[tot_hss + h].start_pos= k; k= 0; flag= 2; }
-                        else if(nt == 46) { hss[tot_hss + h].start_pos= k; k= 0; flag= 4; }
-                    }
-
-                if(!flag)
-                    for(k= hss[tot_hss + h].fromp; k >= 0 && k >= hss[tot_hss + h].fromp - START_POS5; k -= 3)
-                    {
-//					nt= 16 * orf[k] + 4 * orf[k + 1] + orf[k + 2];
-					nt= get_codon(orf + k, 1);
-                        if(nt == 62) { hss[tot_hss + h].start_pos= k; k= 0; flag= 5; }
-                    }
-
-                if(!flag)
-                    for(k= hss[tot_hss + h].fromp; k < hss[tot_hss + h].top - mHL && k <= hss[tot_hss + h].fromp + START_POS3; k += 3)
-                    {
-//					nt= 16 * orf[k] + 4 * orf[k + 1] + orf[k + 2];
-					nt= get_codon(orf + k, 1);
-                        if(nt == 62) { hss[tot_hss + h].start_pos= k; k= hss[tot_hss + h].top; flag= 5; }
-                    }
-
-                if(!flag)
-                    for(k= hss[tot_hss + h].fromp - START_POS5 - 3; k >= 0; k -= 3)
-                    {
-//					nt= 16 * orf[k] + 4 * orf[k + 1] + orf[k + 2];
-					nt= get_codon(orf + k, 1);
-                        if(nt == 62) { hss[tot_hss + h].start_pos= k; k= 0; flag= 6; }
-                    }
-
-                if(!flag)
-                    for(k= hss[tot_hss + h].fromp; k >= 0 && k >= hss[tot_hss + h].fromp - START_POS5; k -= 3)
-                    {
-//					nt= 16 * orf[k] + 4 * orf[k + 1] + orf[k + 2];
-					nt= get_codon(orf + k, 1);
-                        if(nt == 30) { hss[tot_hss + h].start_pos= k; k= 0; flag= 7; }
-                    }
-
-                if(!flag)
-                    for(k= hss[tot_hss + h].fromp; k < hss[tot_hss + h].top - mHL && k <= hss[tot_hss + h].fromp + START_POS3; k += 3)
-                    {
-//					nt= 16 * orf[k] + 4 * orf[k + 1] + orf[k + 2];
-					nt= get_codon(orf + k, 1);
-                        if(nt == 30) { hss[tot_hss + h].start_pos= k; k= hss[tot_hss + h].top; flag= 7; }
-                    }
-
-                if(!flag)
-                    for(k= hss[tot_hss + h].fromp - START_POS5 - 3; k >= 0; k -= 3)
-                    {
-//					nt= 16 * orf[k] + 4 * orf[k + 1] + orf[k + 2];
-					nt= get_codon(orf + k, 1);
-                        if(nt == 30) { hss[tot_hss + h].start_pos= k; k= 0; flag= 8; }
-                    }
-
-                if(!flag)
-                    for(k= hss[tot_hss + h].fromp; k >= 0 && k >= hss[tot_hss + h].fromp - START_POS5; k -= 3)
-                    {
-//					nt= 16 * orf[k] + 4 * orf[k + 1] + orf[k + 2];
-					nt= get_codon(orf + k, 1);
-                        if(nt == 15) { hss[tot_hss + h].start_pos= k; k= 0; flag= 9; }
-                    }
-
-                if(!flag)
-                    for(k= hss[tot_hss + h].fromp; k < hss[tot_hss + h].top - mHL && k <= hss[tot_hss + h].fromp + START_POS3; k += 3)
-                    {
-//					nt= 16 * orf[k] + 4 * orf[k + 1] + orf[k + 2];
-					nt= get_codon(orf + k, 1);
-                        if(nt == 15) { hss[tot_hss + h].start_pos= k; k= hss[tot_hss + h].top; flag= 9; }
-                    }
-
-                if(!flag)
-                    for(k= hss[tot_hss + h].fromp - START_POS5 - 3; k >= 0; k -= 3)
-                    {
-//					nt= 16 * orf[k] + 4 * orf[k + 1] + orf[k + 2];
-					nt= get_codon(orf + k, 1);
-                        if(nt == 15) { hss[tot_hss + h].start_pos= k; k= 0; flag= 10; }
-                    }
-
-				hss[tot_hss + h].start= flag;
-
+				hss[tot_hss + h].start= find_start_of_translation(tot_hss + h, orf);
 
 				hss[tot_hss + h].sig_len= (maxscore - (double)b[0]) / ((double)a[0]); 
                 if(hss[tot_hss + h].sig_len < max_len)
@@ -1582,7 +1467,7 @@ struct HSSs *hss;
 
 int maxG_test(char *seq, int len, int ori, char strand, int frame, int orfn, int hit, int *on)
 {
-    int i, j, k, h, l, from = len - 3, nhit= 0, to, bfrom, cod, last_stop= 0, f, t, flag, flags, nt, from_max, max_pos;
+    int i, j, k, h, l, from = len - 3, nhit= 0, to, bfrom, cod, last_stop= 0, f, t, flag, nt, from_max, max_pos;
     double G, H, E, O, usage[5 * 4] = { 0.0 }, Maxusage[5 * 4] = {0.0}, diffusage[5 * 4], maxG, thr, HIGH_G, lg, hss_score, max_len;
 
     max_len= pow(2.0, 1023.0);
@@ -1724,109 +1609,8 @@ int maxG_test(char *seq, int len, int ori, char strand, int frame, int orfn, int
 					if(flag)
 					{
 						hss[hit].entropy= entropy(seq + hss[hit].fromp, hss[hit].top - hss[hit].fromp + 1);
-						
-						flags= 0;
-						hss[hit].start_pos= hss[hit].fromp;
-						
-						for(j= hss[hit].fromp; j >= 0 && j >= hss[hit].fromp - START_POS5; j -= 3)
-						{
-							nt= get_codon(seq + j, 1);
-							if(nt == 14) { hss[hit].start_pos= j; j= 0; flags= 1; }
-						}
-						
-						if(!flags)
-							for(j= hss[hit].fromp; j < hss[hit].top - mHL && j <= hss[hit].fromp + START_POS3; j += 3)
-							{
-								nt= get_codon(seq + j, 1);
-								if(nt == 14) { hss[hit].start_pos= j; j= hss[hit].top; flags= 1; }
-							}
-						
-						if(!flags)
-							for(j= hss[hit].fromp; j >= 0 && j >= hss[hit].fromp - START_POS5; j -= 3)
-							{
-								nt= get_codon(seq + j, 1);
-								if(nt == 46) { hss[hit].start_pos= j; j= 0; flags= 3; }
-							}
-						
-						if(!flags)
-							for(j= hss[hit].fromp; j < hss[hit].top - mHL && j <= hss[hit].fromp + START_POS3; j += 3)
-							{
-								nt= get_codon(seq + j, 1);
-								if(nt == 46) { hss[hit].start_pos= j; j= hss[hit].top; flags= 3; }
-							}
-						
-						if(!flags)
-							for(j= hss[hit].fromp - START_POS5 - 3; j >= 0; j -= 3)
-							{
-								nt= get_codon(seq + j, 1);
-								if(nt == 14) { hss[hit].start_pos= j; j= 0; flags= 2; }
-								else if(nt == 46) { hss[hit].start_pos= j; j= 0; flags= 4; }
-							}
-						
-						if(!flags)
-							for(j= hss[hit].fromp; j >= 0 && j >= hss[hit].fromp - START_POS5; j -= 3)
-							{
-								nt= get_codon(seq + j, 1);
-								if(nt == 62) { hss[hit].start_pos= j; j= 0; flags= 5; }
-							}
-						
-						if(!flags)
-							for(j= hss[hit].fromp; j < hss[hit].top - mHL && j <= hss[hit].fromp + START_POS3; j += 3)
-							{
-								nt= get_codon(seq + j, 1);
-								if(nt == 62) { hss[hit].start_pos= j; j= hss[hit].top; flags= 5; }
-							}
-						
-						if(!flags)
-							for(j= hss[hit].fromp - START_POS5 - 3; j >= 0; j -= 3)
-							{
-								nt= get_codon(seq + j, 1);
-								if(nt == 62) { hss[hit].start_pos= j; j= 0; flags= 6; }
-							}
-						
-						if(!flags)
-							for(j= hss[hit].fromp; j >= 0 && j >= hss[hit].fromp - START_POS5; j -= 3)
-							{
-								nt= get_codon(seq + j, 1);
-								if(nt == 30) { hss[hit].start_pos= j; j= 0; flags= 7; }
-							}
-						
-						if(!flags)
-							for(j= hss[hit].fromp; j < hss[hit].top - mHL && j <= hss[hit].fromp + START_POS3; j += 3)
-							{
-								nt= get_codon(seq + j, 1);
-								if(nt == 30) { hss[hit].start_pos= j; j= hss[hit].top; flags= 7; }
-							}
-						
-						if(!flags)
-							for(j= hss[hit].fromp - START_POS5 - 3; j >= 0; j -= 3)
-							{
-								nt= get_codon(seq + j, 1);
-								if(nt == 30) { hss[hit].start_pos= j; j= 0; flags= 8; }
-							}
-						
-						if(!flags)
-							for(j= hss[hit].fromp; j >= 0 && j >= hss[hit].fromp - START_POS5; j -= 3)
-							{
-								nt= get_codon(seq + j, 1);
-								if(nt == 15) { hss[hit].start_pos= j; j= 0; flags= 9; }
-							}
-						
-						if(!flags)
-							for(j= hss[hit].fromp; j < hss[hit].top - mHL && j <= hss[hit].fromp + START_POS3; j += 3)
-							{
-								nt= get_codon(seq + j, 1);
-								if(nt == 15) { hss[hit].start_pos= j; j= hss[hit].top; flags= 9; }
-							}
-						
-						if(!flags)
-							for(j= hss[hit].fromp - START_POS5 - 3; j >= 0; j -= 3)
-							{
-								nt= get_codon(seq + j, 1);
-								if(nt == 15) { hss[hit].start_pos= j; j= 0; flags= 10; }
-							}
-						
-						hss[hit].start= flags;
+
+						hss[hit].start= find_start_of_translation(hit, seq);
 						
 
 						if(strand == 'D')
@@ -4052,3 +3836,116 @@ void randomize(char *seq, int n)
 
 /******** end randomize() *******/
 
+
+/***********************************************/
+/****  Function find_start_of_translation() ****/
+/***********************************************/
+
+int find_start_of_translation(int h, char *orf)
+{
+int	flag= 0, k, nt;
+
+				hss[h].start_pos= hss[h].fromp;
+
+                for(k= hss[h].fromp; k >= 0 && k >=hss[h].fromp - START_POS5; k -= 3)
+                {
+					nt= get_codon(orf + k, 1);
+                    if(nt == 14) { hss[h].start_pos= k; k= 0; flag= 1; }
+                }
+
+                if(!flag)
+                    for(k= hss[h].fromp; k < hss[h].top - mHL && k <= hss[h].fromp + START_POS3; k += 3)
+                    {
+					nt= get_codon(orf + k, 1);
+                        if(nt == 14) { hss[h].start_pos= k; k= hss[h].top; flag= 1; }
+                    }
+
+                if(!flag)
+                    for(k= hss[h].fromp; k >= 0 && k >= hss[h].fromp - START_POS5; k -= 3)
+                    {
+					nt= get_codon(orf + k, 1);
+                        if(nt == 46) { hss[h].start_pos= k; k= 0; flag= 3; }
+                    }
+
+                if(!flag)
+                    for(k= hss[h].fromp; k < hss[h].top - mHL && k <= hss[h].fromp + START_POS3; k += 3)
+                    {
+					nt= get_codon(orf + k, 1);
+                        if(nt == 46) { hss[h].start_pos= k; k= hss[h].top; flag= 3; }
+                    }
+
+                if(!flag)
+                    for(k= hss[h].fromp - START_POS5 - 3; k >= 0; k -= 3)
+                    {
+					nt= get_codon(orf + k, 1);
+                        if(nt == 14) { hss[h].start_pos= k; k= 0; flag= 2; }
+                        else if(nt == 46) { hss[h].start_pos= k; k= 0; flag= 4; }
+                    }
+
+                if(!flag)
+                    for(k= hss[h].fromp; k >= 0 && k >= hss[h].fromp - START_POS5; k -= 3)
+                    {
+					nt= get_codon(orf + k, 1);
+                        if(nt == 62) { hss[h].start_pos= k; k= 0; flag= 5; }
+                    }
+
+                if(!flag)
+                    for(k= hss[h].fromp; k < hss[h].top - mHL && k <= hss[h].fromp + START_POS3; k += 3)
+                    {
+					nt= get_codon(orf + k, 1);
+                        if(nt == 62) { hss[h].start_pos= k; k= hss[h].top; flag= 5; }
+                    }
+
+                if(!flag)
+                    for(k= hss[h].fromp - START_POS5 - 3; k >= 0; k -= 3)
+                    {
+					nt= get_codon(orf + k, 1);
+                        if(nt == 62) { hss[h].start_pos= k; k= 0; flag= 6; }
+                    }
+
+                if(!flag)
+                    for(k= hss[h].fromp; k >= 0 && k >= hss[h].fromp - START_POS5; k -= 3)
+                    {
+					nt= get_codon(orf + k, 1);
+                        if(nt == 30) { hss[h].start_pos= k; k= 0; flag= 7; }
+                    }
+
+                if(!flag)
+                    for(k= hss[h].fromp; k < hss[h].top - mHL && k <= hss[h].fromp + START_POS3; k += 3)
+                    {
+					nt= get_codon(orf + k, 1);
+                        if(nt == 30) { hss[h].start_pos= k; k= hss[h].top; flag= 7; }
+                    }
+
+                if(!flag)
+                    for(k= hss[h].fromp - START_POS5 - 3; k >= 0; k -= 3)
+                    {
+					nt= get_codon(orf + k, 1);
+                        if(nt == 30) { hss[h].start_pos= k; k= 0; flag= 8; }
+                    }
+
+                if(!flag)
+                    for(k= hss[h].fromp; k >= 0 && k >= hss[h].fromp - START_POS5; k -= 3)
+                    {
+					nt= get_codon(orf + k, 1);
+                        if(nt == 15) { hss[h].start_pos= k; k= 0; flag= 9; }
+                    }
+
+                if(!flag)
+                    for(k= hss[h].fromp; k < hss[h].top - mHL && k <= hss[h].fromp + START_POS3; k += 3)
+                    {
+					nt= get_codon(orf + k, 1);
+                        if(nt == 15) { hss[h].start_pos= k; k= hss[h].top; flag= 9; }
+                    }
+
+                if(!flag)
+                    for(k= hss[h].fromp - START_POS5 - 3; k >= 0; k -= 3)
+                    {
+					nt= get_codon(orf + k, 1);
+                        if(nt == 15) { hss[h].start_pos= k; k= 0; flag= 10; }
+                    }
+
+return(flag);
+}
+
+/****  End find_start_of_translation() ****/
