@@ -44,7 +44,7 @@
             <li {%if resolved.view_name == 'about' %}id="active"{%endif%} >
               <a href="{% url about %}">About</a>
             </li>
-            <li><a href="">Downloads</a></li>
+            <li><a href="{% url downloads %}">Downloads</a></li>
           </ul>
         </div>
         <div id="related">
