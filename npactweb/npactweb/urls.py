@@ -7,6 +7,7 @@ npact_patterns = \
             patterns('npactweb.views',
                      url(r'^$' , 'start.view', name='start'),
                      url(r'^about$' , direct_to_template, {'template': 'about.html'}, name='about'),
+                     url(r'^downloads$' , direct_to_template, {'template': 'downloads.html'}, name='downloads'),
                      url(r'^efetch/(\d+)' , 'start.efetch', name="efetch"),
                      url(r'^library' , 'library'),
                      url(r'^config/(.+\.gbk?)', 'run.config', name="config"),
