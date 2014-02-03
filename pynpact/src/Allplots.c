@@ -951,10 +951,10 @@ main(int argc, char *argv[]) {
             fprintf(stdout,"/Black {0.0 0.0 0.0 setrgbcolor} def\n");
             fprintf(stdout,"/Cshow { dup stringwidth pop -2 div 0 RM show } def\n");
             fprintf(stdout,"/Lshow { dup stringwidth pop -1 mul 0 RM show } def\n");
-            fprintf(stdout,"/Rarrow { 1 setlinejoin 1 setlinecap dup 4 lt { 0 3 RM dup -3 RL -1 mul -3 RL } { 0 1 RM 4 sub dup 0 RL 0 2 RL 4 -3 RL -4 -3 RL 0 2 RL -1 mul 0 RL } ifelse closepath stroke 0 setlinejoin 0 setlinecap } def\n");
-            fprintf(stdout,"/Larrow { 1 setlinejoin 1 setlinecap dup 4 lt { 3 RL 0 -6 RL } { 4 3 RL 0 -2 RL dup 4 sub dup 0 RL 0 -2 RL -1 mul 0 RL 0 -2 RL } ifelse closepath stroke 0 setlinejoin 0 setlinecap } def\n");
-            fprintf(stdout,"/Rhssline { dup 4 lt { 0 3 RM dup -3 RL -1 mul -3 RL } { 0 1 RM 4 sub dup 0 RL 0 2 RL 4 -3 RL -4 -3 RL 0 2 RL -1 mul 0 RL } ifelse closepath } def\n");
-            fprintf(stdout,"/Lhssline { dup 4 lt { 3 RL 0 -6 RL } { 4 3 RL 0 -2 RL dup 4 sub dup 0 RL 0 -2 RL -1 mul 0 RL 0 -2 RL } ifelse closepath } def\n");
+            fprintf(stdout,"/Rarrow { 1 setlinejoin 1 setlinecap dup 2 lt { 0 2 RM dup -2 RL -1 mul -2 RL } { 0 2 RM 2 sub dup 0 RL 2 -2 RL -2 -2 RL -1 mul 0 RL } ifelse closepath stroke 0 setlinejoin 0 setlinecap } def\n");
+            fprintf(stdout,"/Larrow { 1 setlinejoin 1 setlinecap dup 2 lt { 2 RL 0 -4 RL } { 2 2 RL dup 2 sub dup 0 RL 0 -4 RL -1 mul 0 RL } ifelse closepath stroke 0 setlinejoin 0 setlinecap } def\n");
+            fprintf(stdout,"/Rhssline { dup 2 lt { 0 2 RM dup -2 RL -1 mul -2 RL } { 0 2 RM 2 sub dup 0 RL 2 -2 RL -2 -2 RL -1 mul 0 RL } ifelse closepath } def\n");
+            fprintf(stdout,"/Lhssline { dup 2 lt { 2 RL 0 -4 RL } { 2 2 RL dup 2 sub dup 0 RL -1 mul 0 RL } ifelse closepath } def\n");
             fprintf(stdout,"/radius { %.1f } def\n",HAIRPIN_RADIUS);
             fprintf(stdout,"/thick { %.2f } def\n",STEM_SEPARATION);
             fprintf(stdout,"/hairpin { dup thick -2.0 div exch RL thick 0 RL -1 mul thick -2.0 div exch RL closepath } def\n");
