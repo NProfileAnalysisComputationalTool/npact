@@ -186,9 +186,9 @@ class GenBankProcessor(object ):
 
 
     def acgt_gamma(self):
-        "Run the acgt_gamma gene prediction program."
+        "Identifying ORFs with significant 3-base periodicities."
         if self.config.get('skip_prediction', False):
-            self.statuslog("Skipping prediction.")
+            self.statuslog("Skipping ORF identification.")
             return
 
         assert os.path.exists(DATAPATH), \
@@ -206,7 +206,7 @@ class GenBankProcessor(object ):
 
 
             with self.mkdtemp() as dtemp:
-                self.statuslog.info("Predicting new gene locations with significance: %s.",
+                self.statuslog.info("Identifying ORFs with 3-base compositional periodicity with significance: %s.",
                                     self.config.get('significance'))
                 self.logger.debug("Starting prediction program in %s", dtemp)
                 capproc.capturedCall(cmd, cwd=dtemp, check=True,
@@ -219,7 +219,7 @@ class GenBankProcessor(object ):
                 #moment later. During that time it will be
                 #inconsistent.
                 if os.path.exists(outdir):
-                    self.logger.debug("Removing existing prediction output at %s", outdir)
+                    self.logger.debug("Removing existing output at %s", outdir)
                     shutil.rmtree(outdir)
                 self.logger.debug("Renaming from %s to %s", dtemp, outdir)
                 os.rename(dtemp, outdir)
