@@ -270,8 +270,7 @@ main(int argc, char *argv[]) {
     fgets(NUCLEOTIDES,8,files);
     NUCLEOTIDES[strlen(NUCLEOTIDES)-1]= '\0';
         for(i= 0; i < strlen(NUCLEOTIDES); i += 2) NUCLEOTIDES[i / 2]= NUCLEOTIDES[i] + 'A' - 'a';
-    --i;
-    NUCLEOTIDES[i]= '\0';
+    NUCLEOTIDES[i - 2]= '\0';
     logmsg(0, "%s\n", NUCLEOTIDES);
 
     title1 = np_getl(files);     logmsg(0,"\n%s",title1);
