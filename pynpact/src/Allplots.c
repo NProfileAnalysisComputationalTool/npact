@@ -265,8 +265,13 @@ main(int argc, char *argv[]) {
     sscanf(longstr,"%s %d", NAME, &len);
     logmsg(10, "%s %d nt\n", NAME, len);
 
+// NUCLEOTIDES string should be written differently (in main.py?)
+// Temporary fix:
     fgets(NUCLEOTIDES,8,files);
-    NUCLEOTIDES[strlen(NUCLEOTIDES)-1]='\0';
+    NUCLEOTIDES[strlen(NUCLEOTIDES)-1]= '\0';
+        for(i= 0; i < strlen(NUCLEOTIDES); i += 2) NUCLEOTIDES[i / 2]= NUCLEOTIDES[i] + 'A' - 'a';
+    --i;
+    NUCLEOTIDES[i]= '\0';
     logmsg(0, "%s\n", NUCLEOTIDES);
 
     title1 = np_getl(files);     logmsg(0,"\n%s",title1);
