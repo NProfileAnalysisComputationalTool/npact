@@ -1089,7 +1089,7 @@ fprintf(stdout,"stroke Black %.3f %.3f M (Input file CDS) Lshow\n",-15.0,HIGHT+H
             fprintf(stdout,"0 %.3f M %.3f 0 RL stroke\n",HIGHT+HIGHT_HOM-1.5,(end-start)/delta*WIDTH);
             fprintf(stdout," Black\n");
         }
-        if(newf) fprintf(stdout,"%.3f %.3f M (Newly annotated) Lshow\n",-15.0,HIGHT+HIGHT_NEW-2);
+        if(newf) fprintf(stdout,"%.3f %.3f M (Newly identified ORFs) Lshow\n",-15.0,HIGHT+HIGHT_NEW-2);
 
         fprintf(stdout,"/Times-Bold findfont LegendFontSize scalefont setfont Black\n");
         /*  if(k==lines-1) fprintf(stdout,"%.3f %.3f M (Genome position) Cshow\n",0.5*WIDTH,-40.0); */
