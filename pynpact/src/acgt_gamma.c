@@ -72,6 +72,8 @@ int	RANDOMIZE= 0;
 # define START_POS5 45
 # define START_POS3 12
 
+# define LEN_RATIO 1.2
+
 # define CODONS 65
 
 int	MYCOPLASMA= 0;
@@ -2216,6 +2218,7 @@ void process_hss(int from_hss, int to_hss, int ncds)
 {
     int	i, j, k, h, l, *o, s1, s2, flag, from, to, gfrom, gto, out, nex;
     char	Pg[15];
+    float	lr;
     double  scoi, scoj;
     double	li, lj, G;
 
@@ -2359,23 +2362,27 @@ void process_hss(int from_hss, int to_hss, int ncds)
 					{
 						if(hss[o[i]].frame == gene[j].frame[h])
 						{
-							if(gfrom == from && gto == to)
-							{
-                                k= 1;		// Identical to published gene
-                                hss[o[i]].type= k;
-                                j= ncds;
-                                h= nex;
-							}
-							else if(gfrom >= from - mHL/2 && gto <= to + mHL/2)
+						lr= (float)(gto - gfrom + 1) / (float)(to - from + 1);
+							if(gfrom >= from - mHL/2 && gto <= to + mHL/2)
+							if(lr < 1.0/LEN_RATIO)
 							{
                                 k= 2;		// Part of published gene
                                 hss[o[i]].type= k;
                                 j= ncds;
                                 h= nex;
 							}
-							else
+							// else if(gfrom >= from - mHL/2 && gto <= to + mHL/2)
+							else if(lr > LEN_RATIO)
 							{
                                 k= 3;           // Extending published gene
+                                hss[o[i]].type= k;
+                                j= ncds;
+                                h= nex;
+							}
+							// if(gfrom == from && gto == to)
+							else
+							{
+                                k= 1;		// Similar to published gene
                                 hss[o[i]].type= k;
                                 j= ncds;
                                 h= nex;
@@ -2552,10 +2559,10 @@ void write_results(int from_hss, int to_hss, int ncds, int genome_size, long byt
 		if(hss[o[i]].sig_len < po) print_len= hss[o[i]].sig_len;
 		else print_len= po;
 
-        fprintf(output3,"%d.%d\t%s\t%d\t%d\t%d\t%c\t%c\t%d\t%d\t%d\t%d\t%.2f\t%.2f\t%.4f\t%6.2f %s\t%.5e\t%c-%s", hss[o[i]].orf_num, hss[o[i]].frame, name, hss[o[i]].stop1+s1, hss[o[i]].stop2+s2, hss[o[i]].stop2-hss[o[i]].stop1+1, hss[o[i]].strand, hss[o[i]].color, hss[o[i]].hit_num, hss[o[i]].fromp+1, hss[o[i]].top+1, hss[o[i]].top-hss[o[i]].fromp+1, hss[o[i]].entropy, hss[o[i]].score, hss[o[i]].prob, G, Pg, print_len, hss[o[i]].hit_type, Prediction[k]);
+        fprintf(output3, "%d.%d\t%s\t%d\t%d\t%d\t%c\t%c\t%d\t%d\t%d\t%d\t%.2f\t%.2f\t%.4f\t%6.2f %s\t%.5e\t%c-%s", hss[o[i]].orf_num, hss[o[i]].frame, name, hss[o[i]].stop1+s1, hss[o[i]].stop2+s2, hss[o[i]].stop2-hss[o[i]].stop1+1, hss[o[i]].strand, hss[o[i]].color, hss[o[i]].hit_num, hss[o[i]].fromp+1, hss[o[i]].top+1, hss[o[i]].top-hss[o[i]].fromp+1, hss[o[i]].entropy, hss[o[i]].score, hss[o[i]].prob, G, Pg, print_len, hss[o[i]].hit_type, Prediction[k]);
 		if(hss[o[i]].entropy <= MAX_ENTROPY) fprintf(output3, " repetitive");
 
-		if(k==3) fprintf(output3," %d",hss[o[i]].exten);
+		if(k == 3) fprintf(output3," %d",hss[o[i]].exten);
 
         fprintf(output3,"\n\tA= %5.2f  C= %5.2f  G= %5.2f  T= %5.2f  S= %5.2f  S1= %5.2f  S2= %5.2f  S3= %5.2f  R= %5.2f  R1= %5.2f  R2= %5.2f  R3= %5.2f\n", hss[o[i]].nuc[3*6+0], hss[o[i]].nuc[3*6+1], hss[o[i]].nuc[3*6+2], hss[o[i]].nuc[3*6+3],  hss[o[i]].nuc[3*6+4], hss[o[i]].nuc[0*6+4], hss[o[i]].nuc[1*6+4], hss[o[i]].nuc[2*6+4], hss[o[i]].nuc[3*6+5], hss[o[i]].nuc[0*6+5], hss[o[i]].nuc[1*6+5], hss[o[i]].nuc[2*6+5]);
 
