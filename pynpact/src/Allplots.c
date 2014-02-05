@@ -1003,10 +1003,13 @@ main(int argc, char *argv[]) {
 
         fprintf(stdout,"/Times-Roman findfont NumberFontSize scalefont setfont\n");
 
-//      fprintf(stdout,"L025 Gray\n");
+/*  Vertical grid: */
+
+        fprintf(stdout,"L025 Gray\n");
 //      for(r= TIC_X / 5; r < end - start; r += TIC_X / 5)
-//          fprintf(stdout,"%.3f 0.0 M 0 %.1f RL\n",r/delta*WIDTH,HIGHT);
-//      fprintf(stdout,"stroke\n");
+        for(r= TIC_X; r < end - start; r += TIC_X)
+            fprintf(stdout,"%.3f 0.0 M 0 %.1f RL\n",r/delta*WIDTH,HIGHT);
+        fprintf(stdout,"stroke\n");
 
         fprintf(stdout,"L05 Black\n");
         fprintf(stdout,"newpath 0 0 M 0 %.3f RL %.3f 0 RL 0 %.3f RL %.3f 0 RL closepath stroke\n",HIGHT,(end-start)/delta*WIDTH,-HIGHT,(start-end)/delta*WIDTH);
@@ -1039,6 +1042,8 @@ main(int argc, char *argv[]) {
 
   for(r= 0; r <= MAX; r += TIC_Y)
     fprintf(stdout, "%.3f %.3f M %.3f 0 RL %.3f %.3f RM (%.1f) Lshow\n", -TIC_W, r / MAX * HIGHT, TIC_W, -TIC_W - 5.0, -3.0, r);
+
+/*  Horizontal grid: */
 
 //  fprintf(stdout,"L025 Gray\n");
 
