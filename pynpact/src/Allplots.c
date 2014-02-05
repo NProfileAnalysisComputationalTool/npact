@@ -1051,30 +1051,6 @@ fprintf(stdout,"stroke Black %.3f %.3f M (Input file CDS) Lshow\n",-15.0,HIGHT+H
   fprintf(stdout,"90 rotate %.3f %.3f M (%% %s) Cshow -90 rotate\n", 0.5 * HIGHT, -((end-start)/delta*WIDTH) - 25.0, NUCLEOTIDES);
   fprintf(stdout," 0.0 0.0 M 90 rotate %.3f %.3f M (Log-count) Cshow -90 rotate\n", 0.5 * HIGHT, 20.0);
   }
-//  else fprintf(stdout," 0.0 0.0 M 90 rotate %.3f %.3f M (%% %s) Cshow -90 rotate\n", 0.5 * HIGHT, 30.0, NUCLEOTIDES);
-
-        /*
-        for(r=0;r<=MAX;r+=TIC_Y)
-            fprintf(stdout,"%.3f %.3f M %.3f 0 RL %.3f %.3f RM (%.1f) Lshow\n",-TIC_W,r/MAX*HIGHT,TIC_W,-TIC_W-5.0,-3.0,r);
-
-        fprintf(stdout,"stroke %.3f %.3f M (Annotation) Lshow\n",-15.0,HIGHT+HIGHT_PUB-2);
-        */
-
-        /* Prints S-profile and Genemark coding potentials (DISABLED)
-
-           if(cpf && Scpf)
-           {
-           fprintf(stdout,"%.3f %.3f M (Coding Potential) Lshow\n",-25.0,HIGHT+(HIGHT_CP+HIGHT_SCP)/2-2);
-           fprintf(stdout,"%.3f %.3f M (S) Lshow\n",-15.0,HIGHT+HIGHT_SCP-2);
-           fprintf(stdout,"%.3f %.3f M (G) Lshow\n",-15.0,HIGHT+HIGHT_CP-2);
-           fprintf(stdout,"L025 LightGray\n");
-           fprintf(stdout,"0 %.3f M %.3f 0 RL stroke\n",HIGHT+HIGHT_SCP+1,(end-start)/delta*WIDTH);
-           fprintf(stdout,"0 %.3f M %.3f 0 RL stroke\n",HIGHT+HIGHT_SCP-1,(end-start)/delta*WIDTH);
-           fprintf(stdout,"0 %.3f M %.3f 0 RL stroke\n",HIGHT+HIGHT_CP+1,(end-start)/delta*WIDTH);
-           fprintf(stdout,"0 %.3f M %.3f 0 RL stroke\n",HIGHT+HIGHT_CP-1,(end-start)/delta*WIDTH);
-           fprintf(stdout," Black\n");
-           }
-        */
 
         // Prints HSSs
 
@@ -1096,7 +1072,6 @@ fprintf(stdout,"stroke Black %.3f %.3f M (Input file CDS) Lshow\n",-15.0,HIGHT+H
         if(newf) fprintf(stdout,"%.3f %.3f M (Newly identified ORFs) Lshow\n",-15.0,HIGHT+HIGHT_NEW-2);
 
         fprintf(stdout,"/Times-Bold findfont LegendFontSize scalefont setfont Black\n");
-        /*  if(k==lines-1) fprintf(stdout,"%.3f %.3f M (Genome position) Cshow\n",0.5*WIDTH,-40.0); */
         fprintf(stdout,"90 rotate %.3f %.3f M (%% %s) Cshow -90 rotate\n",0.5*HIGHT,40.0,NUCLEOTIDES);
 
         fprintf(stdout,"stroke DarkGray\n");
@@ -1105,34 +1080,6 @@ fprintf(stdout,"stroke Black %.3f %.3f M (Input file CDS) Lshow\n",-15.0,HIGHT+H
         for(i=1;i<n;++i)
             fprintf(stdout,"%.1f %.2f L\n",(x[i]-(float)start)/delta*WIDTH,HIGHT*y[i][period]/MAX);
 
-        /***************************************************/
-        /* Prints S-profiles from small windows - DISABLED */
-        /***************************************************/
-
-//        if(swflag) {
-//            fprintf(stdout,"stroke L05 LR 1 setlinejoin 1 setlinecap\n");
-//
-//            fprintf(stdout,"%.1f %.2f M\n",(X[0]-(float)start)/delta*WIDTH,Y[0][0]/MAX*HIGHT);
-//            for(i=1;i<N;++i) fprintf(stdout,"%.1f %.2f L\n",(X[i]-(float)start)/delta*WIDTH,Y[i][0]/MAX*HIGHT);
-//
-//            if(period>=2) {
-//                fprintf(stdout,"stroke L05 LG\n");
-//
-//                fprintf(stdout,"%.1f %.2f M\n",(X[0]-(float)start)/delta*WIDTH,Y[0][1]/MAX*HIGHT);
-//                for(i=1;i<N;++i) fprintf(stdout,"%.1f %.2f L\n",(X[i]-(float)start)/delta*WIDTH,Y[i][1]/MAX*HIGHT);
-//
-//                if(period>=3) {
-//                    fprintf(stdout,"stroke L05 LB\n");
-//
-//                    fprintf(stdout,"%.1f %.2f M\n",(X[0]-(float)start)/delta*WIDTH,Y[0][2]/MAX*HIGHT);
-//                    for(i=1;i<N;++i)
-//                        fprintf(stdout,"%.1f %.2f L\n",(X[i]-(float)start)/delta*WIDTH,Y[i][2]/MAX*HIGHT);
-//                }
-//            }
-//        }
-//
-//        fprintf(stdout,"stroke L05 R 0 setlinejoin 0 setlinecap\n");
-
       /**************************************/
       /* Prints histograms of RNA-seq reads */
       /**************************************/
@@ -1140,7 +1087,6 @@ fprintf(stdout,"stroke Black %.3f %.3f M (Input file CDS) Lshow\n",-15.0,HIGHT+H
         if(swflag)
         {
             logmsg(10, "\nPrints profiles of RNA-seq reads\n");
-      //  fprintf(stdout,"L05 Black 1 setlinejoin 1 setlinecap\n");
         fprintf(stdout,"Black\n");
       
       // Writes histogram of most frequent reads
