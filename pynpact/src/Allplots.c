@@ -1002,12 +1002,13 @@ main(int argc, char *argv[]) {
         /************************************************/
 
         fprintf(stdout,"/Times-Roman findfont NumberFontSize scalefont setfont\n");
-        fprintf(stdout,"L025 Gray\n");
 
-        for(r= TIC_X / 5; r < end - start; r += TIC_X / 5)
-            fprintf(stdout,"%.3f 0.0 M 0 %.1f RL\n",r/delta*WIDTH,HIGHT);
+//      fprintf(stdout,"L025 Gray\n");
+//      for(r= TIC_X / 5; r < end - start; r += TIC_X / 5)
+//          fprintf(stdout,"%.3f 0.0 M 0 %.1f RL\n",r/delta*WIDTH,HIGHT);
+//      fprintf(stdout,"stroke\n");
 
-        fprintf(stdout,"stroke\nL05 Black\n");
+        fprintf(stdout,"L05 Black\n");
         fprintf(stdout,"newpath 0 0 M 0 %.3f RL %.3f 0 RL 0 %.3f RL %.3f 0 RL closepath stroke\n",HIGHT,(end-start)/delta*WIDTH,-HIGHT,(start-end)/delta*WIDTH);
 
         for(r= 0; r <= end - start; r += TIC_X)
@@ -1030,6 +1031,7 @@ main(int argc, char *argv[]) {
       if(!(i % EVERY)) fprintf(stdout, "(%d) Lshow\n", i);
       else             fprintf(stdout, "\n");
     }
+  fprintf(stdout, "stroke\n");
   }
   else
   {
@@ -1038,13 +1040,14 @@ main(int argc, char *argv[]) {
   for(r= 0; r <= MAX; r += TIC_Y)
     fprintf(stdout, "%.3f %.3f M %.3f 0 RL %.3f %.3f RM (%.1f) Lshow\n", -TIC_W, r / MAX * HIGHT, TIC_W, -TIC_W - 5.0, -3.0, r);
 
-  fprintf(stdout,"L025 Gray\n");
+//  fprintf(stdout,"L025 Gray\n");
 
-  for(r= TIC_Y; r < MAX; r += TIC_Y)
-    fprintf(stdout, "0.0 %.3f M %.3f 0 RL\n", r / MAX * HIGHT, (end - start) / delta * WIDTH);
+//  for(r= TIC_Y; r < MAX; r += TIC_Y)
+//    fprintf(stdout, "0.0 %.3f M %.3f 0 RL\n", r / MAX * HIGHT, (end - start) / delta * WIDTH);
+//  fprintf(stdout, "stroke\n");
   }
 
-fprintf(stdout,"stroke Black %.3f %.3f M (Input file CDS) Lshow\n",-15.0,HIGHT+HIGHT_PUB - 2);
+fprintf(stdout,"Black %.3f %.3f M (Input file CDS) Lshow\n",-15.0,HIGHT+HIGHT_PUB - 2);
 
   if(swflag)
   {
