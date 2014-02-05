@@ -1006,7 +1006,7 @@ main(int argc, char *argv[]) {
 /*  Vertical grid: */
 
         fprintf(stdout,"L025 Gray\n");
-//      for(r= TIC_X / 5; r < end - start; r += TIC_X / 5)
+//        for(r= TIC_X / 5; r < end - start; r += TIC_X / 5)
         for(r= TIC_X; r < end - start; r += TIC_X)
             fprintf(stdout,"%.3f 0.0 M 0 %.1f RL\n",r/delta*WIDTH,HIGHT);
         fprintf(stdout,"stroke\n");
