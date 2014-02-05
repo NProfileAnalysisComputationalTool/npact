@@ -2363,7 +2363,7 @@ void process_hss(int from_hss, int to_hss, int ncds)
 						if(hss[o[i]].frame == gene[j].frame[h])
 						{
 						lr= (float)(gto - gfrom + 1) / (float)(to - from + 1);
-							if(gfrom >= from - mHL/2 && gto <= to + mHL/2)
+							// if(gfrom >= from - mHL/2 && gto <= to + mHL/2)
 							if(lr < 1.0/LEN_RATIO)
 							{
                                 k= 2;		// Part of published gene
@@ -2382,7 +2382,7 @@ void process_hss(int from_hss, int to_hss, int ncds)
 							// if(gfrom == from && gto == to)
 							else
 							{
-                                k= 1;		// Similar to published gene
+                                k= 1;		// Length similar to published gene
                                 hss[o[i]].type= k;
                                 j= ncds;
                                 h= nex;
