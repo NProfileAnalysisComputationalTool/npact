@@ -2216,7 +2216,7 @@ void rescue_hss(int to_hss)
 
 void process_hss(int from_hss, int to_hss, int ncds)
 {
-    int	i, j, k, h, l, *o, s1, s2, flag, from, to, gfrom, gto, out, nex;
+    int	i, j, k, h, l, *o, s1, s2, flag, from, to, newfrom, newto, gfrom, gto, out, nex;
     char	Pg[15];
     float	lr;
     double  scoi, scoj;
@@ -2355,8 +2355,8 @@ void process_hss(int from_hss, int to_hss, int ncds)
                 nex= gene[j].num_exons;
 				for(h= 0; h < nex; ++h)
 				{
-					if(gene[j].strand == 'D') { from= gene[j].start[h]; to= gene[j].end[h]; }
-					else                      { to= gene[j].start[h]; from= gene[j].end[h]; }
+					if(gene[j].strand == 'D') { from= gene[j].start[h]; newfrom= gene[j].newstart[h]; to= newto= gene[j].end[h]; }
+					else                      { to= gene[j].start[h]; newto= gene[j].newstart[h]; from= newfrom= gene[j].end[h]; }
 
 					if(!(to < gfrom + mHL/2 - 1 || from > gto - mHL/2 + 1)) // predicted CDS overlapping published CDS (gene[])
 					{
@@ -2392,7 +2392,17 @@ void process_hss(int from_hss, int to_hss, int ncds)
 						{
 							if(gfrom >= from - mHL/2 && gto <= to + mHL/2)
 							{
-								if(gene[j].type[h] == 1 || gene[j].type[h] == 2 || RANDOMIZE) k= 4;// Embedded in published
+								if(gene[j].type[h] == 1 || gene[j].type[h] == 2 || RANDOMIZE)
+								{
+                                    out= 0;
+									if(gfrom < newfrom) out += newfrom - gfrom;
+									if(gto > newto) out += gto - newto;
+
+                                    hss[o[i]].gsuper += gto - gfrom + 1 - out;
+
+									if(hss[o[i]].gsuper * 2 > gto - gfrom + 1) k= 4;  // Embedded in published
+									else k= 7;
+								}
 								else k= 7;	// Replacing published
                                 hss[o[i]].type= k;
                                 j= ncds;
@@ -2403,8 +2413,8 @@ void process_hss(int from_hss, int to_hss, int ncds)
 								if(gene[j].type[h] == 1 || gene[j].type[h] == 2 || RANDOMIZE)
 								{
                                     out= 0;
-									if(gfrom < from) out += from - gfrom;
-									if(gto > to) out += gto - to;
+									if(gfrom < from) out += newfrom - gfrom;
+									if(gto > to) out += gto - newto;
 
                                     hss[o[i]].gsuper += gto - gfrom + 1 - out;
 
