@@ -1110,7 +1110,7 @@ fprintf(stdout,"Black %.3f %.3f M (Input file CDS) Lshow\n",-15.0,HIGHT+HIGHT_PU
 
         fprintf(stdout,"/Helvetica-Roman findfont LegendFontSize scalefont setfont Black\n");
         if(!swflag) fprintf(stdout,"90 rotate %.3f %.3f M (%% %s) Cshow -90 rotate\n", 0.5 * HIGHT, 25.0, NUCLEOTIDES);
-        if(k == (lines - 1)) fprintf(stdout,"%.3f %.3f M (Sequence position / nt) Cshow\n", 0.5 * WIDTH, -30.0);
+        if(k == (lines - 1) || (end-start) < line_range) fprintf(stdout,"%.3f %.3f M (Sequence position / nt) Cshow\n", 0.5 * WIDTH, -30.0);
 
         fprintf(stdout,"stroke DarkGray\n");
 
@@ -1326,7 +1326,7 @@ fprintf(stdout,"Black %.3f %.3f M (Input file CDS) Lshow\n",-15.0,HIGHT+HIGHT_PU
           if(newf) fprintf(stdout,"%.3f %.3f M (Mrazek-Karlin annotation) Lshow\n",-15.0,HIGHT+HIGHT_NEW-2);
 
           fprintf(stdout,"/Helvetica-Roman findfont LegendFontSize scalefont setfont Black\n");
-          if(k == (lines - 1)) fprintf(stdout,"%.3f %.3f M (Sequence position / nt) Cshow\n", 0.5 * WIDTH, -40.0);
+          if(k == (lines - 1) || (end-start) < line_range) fprintf(stdout,"%.3f %.3f M (Sequence position / nt) Cshow\n", 0.5 * WIDTH, -40.0);
           fprintf(stdout,"90 rotate %.3f %.3f M (%% %s) Cshow -90 rotate\n",0.5*HIGHT,40.0,NUCLEOTIDES);
 
 
