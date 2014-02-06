@@ -25,9 +25,10 @@
 # define PRINT_ZERO_LINE 1
 
 # define VIEWER "showps"
-# define TIC_W 5.0
-# define NFS 7.0
-# define LFS 12.0
+# define TIC_W 3.0
+# define NFS 6.0
+# define NaFS 5.0
+# define LFS 9.0
 # define TFS 14.0
 # define TFS2 14.0
 # define HANGOVER 30
@@ -193,7 +194,7 @@ main(int argc, char *argv[]) {
 
     char **pub_name=NULL,**mod_name=NULL,**new_name=NULL,**newP_name=NULL;
 
-    char longstr[200], *p, tatastr[20], *title1, *title2, ts[2];
+    char longstr[200], *p, tatastr[20], *title1, *title2, ts[2], pos_string[15];
     FILE *input, *files;
 
     /**** Parse command line options ****/
@@ -929,6 +930,7 @@ main(int argc, char *argv[]) {
             fprintf(stdout,"/RM {rmoveto} def\n");
             fprintf(stdout,"/RL {rlineto} def\n");
             fprintf(stdout,"/NumberFontSize {%1.f} def\n",NFS);
+            fprintf(stdout,"/NamesFontSize {%1.f} def\n",NaFS);
             fprintf(stdout,"/TitleFontSize {%.1f} def\n",TFS);
             fprintf(stdout,"/Title2FontSize {%.1f} def\n",TFS);
             fprintf(stdout,"/LegendFontSize {%.1f} def\n",LFS);
@@ -955,6 +957,7 @@ main(int argc, char *argv[]) {
             fprintf(stdout,"/DarkGray {0.25 0.25 0.25 setrgbcolor} def\n");
             fprintf(stdout,"/Gray {0.5 0.5 0.5 setrgbcolor} def\n");
             fprintf(stdout,"/LightGray {0.75 0.75 0.75 setrgbcolor} def\n");
+            fprintf(stdout,"/GrayShade {0.95 0.95 0.95 setrgbcolor} def\n");
             fprintf(stdout,"/Black {0.0 0.0 0.0 setrgbcolor} def\n");
             fprintf(stdout,"/Cshow { dup stringwidth pop -2 div 0 RM show } def\n");
             fprintf(stdout,"/Lshow { dup stringwidth pop -1 mul 0 RM show } def\n");
@@ -1002,28 +1005,39 @@ main(int argc, char *argv[]) {
         /* End printing regions of nucleotide contrasts */
         /************************************************/
 
-        fprintf(stdout,"/Times-Roman findfont NumberFontSize scalefont setfont\n");
+        fprintf(stdout,"/Helvetica-Roman findfont NumberFontSize scalefont setfont\n");
 
 /*  Vertical grid: */
 
-      fprintf(stdout,"L025 Gray\n");
-//    for(r= TIC_X / 5.0; r < end - start; r += TIC_X / 5.0)
-      for(r= TIC_X; r < end - start; r += TIC_X)
-          fprintf(stdout,"%.3f 0.0 M 0 %.1f RL\n",r/delta*WIDTH,HIGHT);
-      fprintf(stdout,"stroke\n");
+//      fprintf(stdout,"L025 Gray\n");
+//      for(r= TIC_X / 5.0; r < end - start; r += TIC_X / 5.0)
+//          fprintf(stdout,"%.3f 0.0 M 0 %.1f RL\n", r / delta * WIDTH, HIGHT);
+//      fprintf(stdout,"stroke\n");
 
 /*  Shade pattern: */
 
-//      fprintf(stdout,"LightGray\n");
-//       for(r= TIC_X / 5.0; r < end - start - TIC_X / 5.0; r += 2.0 * TIC_X / 5.0)
-//           fprintf(stdout,"%.3f 0.0 M %.1f %.1f ShadeBox\n", r / delta * WIDTH, HIGHT, (TIC_X * WIDTH) / (5.0 * delta), HIGHT);
-//	if(r < end - start) fprintf(stdout,"%.3f 0.0 M %.1f %.1f ShadeBox\n", r / delta * WIDTH, HIGHT, (end - start - r) * WIDTH / delta, HIGHT);
+        fprintf(stdout,"GrayShade\n");
+        for(r= TIC_X / 2.0; r < end - start - TIC_X / 2.0; r += 2.0 * TIC_X / 2.0)
+            fprintf(stdout,"%.3f 0.0 M %.1f %.1f ShadeBox\n", r / delta * WIDTH, (TIC_X * WIDTH) / (2.0 * delta), HIGHT);
+	if(r < end - start) fprintf(stdout,"%.3f 0.0 M %.1f %.1f ShadeBox\n", r / delta * WIDTH, (end - start - r) * WIDTH / delta, HIGHT);
 
-//        fprintf(stdout,"L05 Black\n");
-//        fprintf(stdout,"newpath 0 0 M 0 %.3f RL %.3f 0 RL 0 %.3f RL %.3f 0 RL closepath stroke\n",HIGHT,(end-start)/delta*WIDTH,-HIGHT,(start-end)/delta*WIDTH);
+// X-axis tics and labels
 
+        fprintf(stdout, "L025 Black\n");
         for(r= 0; r <= end - start; r += TIC_X)
-            fprintf(stdout,"%.3f %.3f M 0 %.3f RL 0 %.3f RM (%.0f) Cshow\n",r/delta*WIDTH,-TIC_W,TIC_W,-12.0,r+start);
+	{
+//          fprintf(stdout,"%.3f %.3f M 0 %.3f RL 0 %.3f RM (%.0f) Cshow\n", r / delta * WIDTH, -TIC_W, TIC_W, -8.0 - TIC_W, r + start);
+            fprintf(stdout,"%.3f %.3f M 0 %.3f RL 0 %.3f RM (", r / delta * WIDTH, -TIC_W, TIC_W, -8.0 - TIC_W);
+	    sprintf(pos_string, "%.0f", r + start);
+
+            for(i= 0; i < strlen(pos_string) - 1; ++i)
+            {
+            fprintf(stdout,"%c", pos_string[i]);
+                if(!((strlen(pos_string) - 1 - i) % 3)) fprintf(stdout, ",");
+            }
+            fprintf(stdout,"%c) Cshow\n", pos_string[i]);
+	}
+	fprintf(stdout, "stroke\n");
 
   if(swflag)
   {
@@ -1038,7 +1052,7 @@ main(int argc, char *argv[]) {
 
     for(i= 1; i <= MAXLOG; ++i)
     {
-    fprintf(stdout, "%.3f %.3f M %.3f 0 RL %.3f %.3f RM ", -TIC_W, HIGHT / 2.0 -i * TIC_Y / MAX * HIGHT, TIC_W, -TIC_W - 5.0, -3.0, i + EVERY);
+    fprintf(stdout, "%.3f %.3f M %.3f 0 RL %.3f %.3f RM ", -TIC_W, HIGHT / 2.0 -i * TIC_Y / MAX * HIGHT, TIC_W, -TIC_W - 3.0, -3.0, i + EVERY);
       if(!(i % EVERY)) fprintf(stdout, "(%d) Lshow\n", i);
       else             fprintf(stdout, "\n");
     }
@@ -1049,7 +1063,8 @@ main(int argc, char *argv[]) {
   TIC_Y= 20.0;
 
   for(r= 0; r <= MAX; r += TIC_Y)
-    fprintf(stdout, "%.3f %.3f M %.3f 0 RL %.3f %.3f RM (%.1f) Lshow\n", -TIC_W, r / MAX * HIGHT, TIC_W, -TIC_W - 5.0, -3.0, r);
+    fprintf(stdout, "%.3f %.3f M %.3f 0 RL %.3f %.3f RM (%.1f) Lshow\n", -TIC_W, r / MAX * HIGHT, TIC_W, -TIC_W - 3.0, -3.0, r);
+  fprintf(stdout, "stroke\n");
 
 /*  Horizontal grid: */
 
@@ -1059,6 +1074,9 @@ main(int argc, char *argv[]) {
 //    fprintf(stdout, "0.0 %.3f M %.3f 0 RL\n", r / MAX * HIGHT, (end - start) / delta * WIDTH);
 //  fprintf(stdout, "stroke\n");
   }
+
+fprintf(stdout,"L05 Black\n");
+fprintf(stdout,"newpath 0 0 M 0 %.3f RL %.3f 0 RL 0 %.3f RL %.3f 0 RL closepath stroke\n",HIGHT,(end-start)/delta*WIDTH,-HIGHT,(start-end)/delta*WIDTH);
 
 fprintf(stdout,"Black %.3f %.3f M (Input file CDS) Lshow\n",-15.0,HIGHT+HIGHT_PUB - 2);
 
@@ -1084,14 +1102,15 @@ fprintf(stdout,"Black %.3f %.3f M (Input file CDS) Lshow\n",-15.0,HIGHT+HIGHT_PU
         if(conf) {
             fprintf(stdout,"%.3f %.3f M (Conserved) Lshow\n",-25.0,HIGHT+HIGHT_HOM-2);
             fprintf(stdout," L025 LightGray\n");
-            fprintf(stdout,"0 %.3f M %.3f 0 RL stroke\n",HIGHT+HIGHT_HOM+1.5,(end-start)/delta*WIDTH);
-            fprintf(stdout,"0 %.3f M %.3f 0 RL stroke\n",HIGHT+HIGHT_HOM-1.5,(end-start)/delta*WIDTH);
+            fprintf(stdout,"0 %.3f M %.3f 0 RL stroke\n", HIGHT+HIGHT_HOM + 1.5, (end - start) / delta * WIDTH);
+            fprintf(stdout,"0 %.3f M %.3f 0 RL stroke\n", HIGHT+HIGHT_HOM - 1.5, (end - start) / delta * WIDTH);
             fprintf(stdout," Black\n");
         }
-        if(newf) fprintf(stdout,"%.3f %.3f M (Newly identified ORFs) Lshow\n",-15.0,HIGHT+HIGHT_NEW-2);
+        if(newf) fprintf(stdout,"%.3f %.3f M (Newly identified ORFs) Lshow\n", -15.0, HIGHT + HIGHT_NEW-2);
 
-        fprintf(stdout,"/Times-Bold findfont LegendFontSize scalefont setfont Black\n");
-        fprintf(stdout,"90 rotate %.3f %.3f M (%% %s) Cshow -90 rotate\n",0.5*HIGHT,40.0,NUCLEOTIDES);
+        fprintf(stdout,"/Helvetica-Roman findfont LegendFontSize scalefont setfont Black\n");
+        if(!swflag) fprintf(stdout,"90 rotate %.3f %.3f M (%% %s) Cshow -90 rotate\n", 0.5 * HIGHT, 25.0, NUCLEOTIDES);
+        if(k == (lines - 1)) fprintf(stdout,"%.3f %.3f M (Sequence position / nt) Cshow\n", 0.5 * WIDTH, -30.0);
 
         fprintf(stdout,"stroke DarkGray\n");
 
@@ -1306,8 +1325,8 @@ fprintf(stdout,"Black %.3f %.3f M (Input file CDS) Lshow\n",-15.0,HIGHT+HIGHT_PU
           }
           if(newf) fprintf(stdout,"%.3f %.3f M (Mrazek-Karlin annotation) Lshow\n",-15.0,HIGHT+HIGHT_NEW-2);
 
-          fprintf(stdout,"/Times-Bold findfont LegendFontSize scalefont setfont Black\n");
-          if(k==lines-1) fprintf(stdout,"%.3f %.3f M (Genome position) Cshow\n",0.5*WIDTH,-40.0);
+          fprintf(stdout,"/Helvetica-Roman findfont LegendFontSize scalefont setfont Black\n");
+          if(k == (lines - 1)) fprintf(stdout,"%.3f %.3f M (Sequence position / nt) Cshow\n", 0.5 * WIDTH, -40.0);
           fprintf(stdout,"90 rotate %.3f %.3f M (%% %s) Cshow -90 rotate\n",0.5*HIGHT,40.0,NUCLEOTIDES);
 
 
@@ -1622,7 +1641,7 @@ fprintf(stdout,"\n0 setlinejoin 0 setlinecap\n");
         fprintf(stdout,"\nL05\n");
 
         if(np || ne)
-            fprintf(stdout,"/Times-Roman findfont NumberFontSize scalefont setfont\n");
+            fprintf(stdout,"/Helvetica-Roman findfont NamesFontSize scalefont setfont\n");
 
 
         /***********************************/
@@ -1724,7 +1743,7 @@ fprintf(stdout,"\n0 setlinejoin 0 setlinecap\n");
         if(newf)
 	{
             fprintf(stdout,"\nL15 ");
-            fprintf(stdout,"/Times-Bold findfont NumberFontSize scalefont setfont\n");
+            fprintf(stdout,"/Helvetica-Bold findfont NamesFontSize scalefont setfont\n");
             for(i= 0; i < nn; ++i)
 	    {
             name_len= strlen(new_name[i]);
