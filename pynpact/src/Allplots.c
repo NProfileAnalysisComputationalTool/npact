@@ -967,6 +967,7 @@ main(int argc, char *argv[]) {
             fprintf(stdout,"/hairpin { dup thick -2.0 div exch RL thick 0 RL -1 mul thick -2.0 div exch RL closepath } def\n");
             fprintf(stdout,"/Ucol { dup 0.0 exch RL %.3f 0.0 RL %.3f exch dup 0.0 exch -1 mul RL pop pop } def\n", (float)wind / delta * WIDTH, (float)wind / delta * WIDTH);
             fprintf(stdout,"/Dcol { dup 0.0 exch -1 mul RL %.3f 0.0 RL %.3f exch dup 0.0 exch RL pop pop } def\n", (float)wind / delta * WIDTH, (float)wind / delta * WIDTH);
+	    fprintf(stdout,"/ShadeBox { dup -1 mul 3 1 roll 0 exch RL 0 RL 0 exch RL closepath fill } def\n");
             fprintf(stdout,"100 %d translate\n\n",TITLES_POSITION);
 
 
@@ -1005,11 +1006,17 @@ main(int argc, char *argv[]) {
 
 /*  Vertical grid: */
 
-        fprintf(stdout,"L025 Gray\n");
-//        for(r= TIC_X / 5; r < end - start; r += TIC_X / 5)
-        for(r= TIC_X; r < end - start; r += TIC_X)
-            fprintf(stdout,"%.3f 0.0 M 0 %.1f RL\n",r/delta*WIDTH,HIGHT);
-        fprintf(stdout,"stroke\n");
+//      fprintf(stdout,"L025 Gray\n");
+//      for(r= TIC_X / 5.0; r < end - start; r += TIC_X / 5.0)
+//          fprintf(stdout,"%.3f 0.0 M 0 %.1f RL\n",r/delta*WIDTH,HIGHT);
+//      fprintf(stdout,"stroke\n");
+
+/*  Shade pattern: */
+
+        fprintf(stdout,"LightGray\n");
+        for(r= TIC_X / 5.0; r < end - start - TIC_X / 5.0; r += 2.0 * TIC_X / 5.0)
+            fprintf(stdout,"%.3f 0.0 M %.1f %.1f ShadeBox\n", r / delta * WIDTH, HIGHT, (TIC_X * WIDTH) / (5.0 * delta), HIGHT);
+	if(r < end - start) fprintf(stdout,"%.3f 0.0 M %.1f %.1f ShadeBox\n", r / delta * WIDTH, HIGHT, (end - start - r) * WIDTH / delta, HIGHT);
 
         fprintf(stdout,"L05 Black\n");
         fprintf(stdout,"newpath 0 0 M 0 %.3f RL %.3f 0 RL 0 %.3f RL %.3f 0 RL closepath stroke\n",HIGHT,(end-start)/delta*WIDTH,-HIGHT,(start-end)/delta*WIDTH);
