@@ -2559,8 +2559,8 @@ void write_results(int from_hss, int to_hss, int ncds, int genome_size, long byt
 
 		if(k == 0 || k == 7)
 		{
-            if(hss[o[i]].global_sig == 1) sprintf(name, "%c-%d*", hss[o[i]].hit_type, o[i]);
-            else                          sprintf(name, "%c-%d", hss[o[i]].hit_type, o[i]);
+            if(hss[o[i]].global_sig == 1) sprintf(name, "%c-%d*", hss[o[i]].hit_type, o[i] + 1);
+            else                          sprintf(name, "%c-%d", hss[o[i]].hit_type, o[i] + 1);
 		}
 		else sprintf(name, "-");
 
@@ -2582,8 +2582,8 @@ void write_results(int from_hss, int to_hss, int ncds, int genome_size, long byt
 			{
 				if(hss[o[i]].hit_num == 1)
 				{
-					if(hss[o[i]].global_sig == 1) sprintf(name, "%c-%d*", hss[o[i]].hit_type, o[i]);
-					else                          sprintf(name, "%c-%d", hss[o[i]].hit_type, o[i]);
+					if(hss[o[i]].global_sig == 1) sprintf(name, "%c-%d*", hss[o[i]].hit_type, o[i] + 1);
+					else                          sprintf(name, "%c-%d", hss[o[i]].hit_type, o[i] + 1);
 
 					if(hss[o[i]].strand == 'D')
 					{
@@ -2785,8 +2785,8 @@ void write_results(int from_hss, int to_hss, int ncds, int genome_size, long byt
 			{
 				if(hss[o[i]].hit_num == 1)
 				{
-					if(hss[o[i]].global_sig == 1) sprintf(name, "%c-%d*", hss[o[i]].hit_type, o[i]);
-					else                          sprintf(name, "%c-%d", hss[o[i]].hit_type, o[i]);
+					if(hss[o[i]].global_sig == 1) sprintf(name, "%c-%d*", hss[o[i]].hit_type, o[i] + 1);
+					else                          sprintf(name, "%c-%d", hss[o[i]].hit_type, o[i] + 1);
 
 					if(hss[o[i]].strand == 'D')
 					{

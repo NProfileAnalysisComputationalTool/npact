@@ -1006,20 +1006,21 @@ main(int argc, char *argv[]) {
 
 /*  Vertical grid: */
 
-//      fprintf(stdout,"L025 Gray\n");
-//      for(r= TIC_X / 5.0; r < end - start; r += TIC_X / 5.0)
-//          fprintf(stdout,"%.3f 0.0 M 0 %.1f RL\n",r/delta*WIDTH,HIGHT);
-//      fprintf(stdout,"stroke\n");
+      fprintf(stdout,"L025 Gray\n");
+//    for(r= TIC_X / 5.0; r < end - start; r += TIC_X / 5.0)
+      for(r= TIC_X; r < end - start; r += TIC_X)
+          fprintf(stdout,"%.3f 0.0 M 0 %.1f RL\n",r/delta*WIDTH,HIGHT);
+      fprintf(stdout,"stroke\n");
 
 /*  Shade pattern: */
 
-        fprintf(stdout,"LightGray\n");
-        for(r= TIC_X / 5.0; r < end - start - TIC_X / 5.0; r += 2.0 * TIC_X / 5.0)
-            fprintf(stdout,"%.3f 0.0 M %.1f %.1f ShadeBox\n", r / delta * WIDTH, HIGHT, (TIC_X * WIDTH) / (5.0 * delta), HIGHT);
-	if(r < end - start) fprintf(stdout,"%.3f 0.0 M %.1f %.1f ShadeBox\n", r / delta * WIDTH, HIGHT, (end - start - r) * WIDTH / delta, HIGHT);
+//      fprintf(stdout,"LightGray\n");
+//       for(r= TIC_X / 5.0; r < end - start - TIC_X / 5.0; r += 2.0 * TIC_X / 5.0)
+//           fprintf(stdout,"%.3f 0.0 M %.1f %.1f ShadeBox\n", r / delta * WIDTH, HIGHT, (TIC_X * WIDTH) / (5.0 * delta), HIGHT);
+//	if(r < end - start) fprintf(stdout,"%.3f 0.0 M %.1f %.1f ShadeBox\n", r / delta * WIDTH, HIGHT, (end - start - r) * WIDTH / delta, HIGHT);
 
-        fprintf(stdout,"L05 Black\n");
-        fprintf(stdout,"newpath 0 0 M 0 %.3f RL %.3f 0 RL 0 %.3f RL %.3f 0 RL closepath stroke\n",HIGHT,(end-start)/delta*WIDTH,-HIGHT,(start-end)/delta*WIDTH);
+//        fprintf(stdout,"L05 Black\n");
+//        fprintf(stdout,"newpath 0 0 M 0 %.3f RL %.3f 0 RL 0 %.3f RL %.3f 0 RL closepath stroke\n",HIGHT,(end-start)/delta*WIDTH,-HIGHT,(start-end)/delta*WIDTH);
 
         for(r= 0; r <= end - start; r += TIC_X)
             fprintf(stdout,"%.3f %.3f M 0 %.3f RL 0 %.3f RM (%.0f) Cshow\n",r/delta*WIDTH,-TIC_W,TIC_W,-12.0,r+start);
