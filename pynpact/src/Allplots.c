@@ -94,6 +94,7 @@ int name_yoffset(int *line, int *cline, int pos, int len, char strand)
 {
 int     i, j, n, s, k, y[4], cy[4], ctot[4]= { 0 }, tot[4]= { 0 };
 
+len *= 2;
 pos -= 1;
 len += 2;
 
@@ -1679,9 +1680,8 @@ fprintf(stdout,"\n0 setlinejoin 0 setlinecap\n");
 	{
 	name_len= strlen(pub_name[i]);
 	name_pos= (int)(((pub[i][0] + pub[i][1]) / 2 - (float)start) * 300 / delta) - name_len + HANGOVER;
-	name_len *= 2;
 
-	d= 6 * name_yoffset(pub_line, pub_cline, name_pos, name_len, pub_str[i]);
+	d= (int)NaFS * name_yoffset(pub_line, pub_cline, name_pos, name_len, pub_str[i]);
 
             if(pub_str[i]==' ') {
                 if(period%3) fprintf(stdout,"Black");
@@ -1713,9 +1713,8 @@ fprintf(stdout,"\n0 setlinejoin 0 setlinecap\n");
 	    {
 	    name_len= strlen(newP_name[i]);
 	    name_pos= (int)(((newP[i][0] + newP[i][1]) / 2 - (float)start) * 300 / delta) - name_len + HANGOVER;
-	    name_len *= 2;
 
-	    d= 6 * name_yoffset(new_line, new_cline, name_pos, name_len, newP_str[i]);
+	    d= (int)NaFS * name_yoffset(new_line, new_cline, name_pos, name_len, newP_str[i]);
 
                 if(newP_str[i] == ' ') {
                     if(period % 3) fprintf(stdout,"Gray");
@@ -1748,9 +1747,8 @@ fprintf(stdout,"\n0 setlinejoin 0 setlinecap\n");
 	    {
             name_len= strlen(new_name[i]);
             name_pos= (int)(((new[i][0] + new[i][1]) / 2 - (float)start) * 300 / delta) - name_len + HANGOVER;
-            name_len *= 2;
 
-            d= 6 * name_yoffset(new_line, new_cline, name_pos, name_len, new_str[i]);
+            d= (int)NaFS * name_yoffset(new_line, new_cline, name_pos, name_len, new_str[i]);
 
                 if(new_str[i] == ' ') {
                     if(period % 3) fprintf(stdout, "Black");
