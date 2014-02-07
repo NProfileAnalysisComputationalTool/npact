@@ -1689,7 +1689,7 @@ fprintf(stdout,"\n0 setlinejoin 0 setlinecap\n");
                 else if(pub[i][0]%period==2) fprintf(stdout,"R");
                 else if(pub[i][0]%period==0) fprintf(stdout,"G");
                 fprintf(stdout," %.1f %.2f M %.2f Rarrow\n", (pub[i][0] - (float)start) / delta * WIDTH, HIGHT + HIGHT_PUB + 2.0, (pub[i][1] - pub[i][0]) / delta * WIDTH);
-                fprintf(stdout,"Black %.1f %.2f M (%s) Cshow\n", ((pub[i][1] + pub[i][0]) / 2 - (float)start) / delta * WIDTH, HIGHT + HIGHT_PUB + 5.0 + (float)d, pub_name[i]);
+                fprintf(stdout,"Black %.1f %.2f M (%s) Cshow\n", ((pub[i][1] + pub[i][0]) / 2 - (float)start) / delta * WIDTH, HIGHT + HIGHT_PUB + 6.0 + (float)d, pub_name[i]);
             }
             else {
                 if(period%3) fprintf(stdout,"Black");
@@ -1697,7 +1697,7 @@ fprintf(stdout,"\n0 setlinejoin 0 setlinecap\n");
                 else if(pub[i][0]%period==2) fprintf(stdout,"G");
                 else if(pub[i][0]%period==0) fprintf(stdout,"B");
                 fprintf(stdout, " %.1f %.2f M %.2f Larrow\n", (pub[i][0] - (float)start) / delta * WIDTH, HIGHT + HIGHT_PUB - 2.0, (pub[i][1] - pub[i][0]) / delta * WIDTH);
-                fprintf(stdout,"Black %.1f %.2f M (%s) Cshow\n", ((pub[i][1] + pub[i][0]) / 2 - (float)start) / delta * WIDTH, HIGHT + HIGHT_PUB - 10.0 - (float)d, pub_name[i]);
+                fprintf(stdout,"Black %.1f %.2f M (%s) Cshow\n", ((pub[i][1] + pub[i][0]) / 2 - (float)start) / delta * WIDTH, HIGHT + HIGHT_PUB - 8.5 - (float)d, pub_name[i]);
             }
         }
 
@@ -1722,7 +1722,7 @@ fprintf(stdout,"\n0 setlinejoin 0 setlinecap\n");
                     else if(newP[i][0] % period == 2) fprintf(stdout,"LR");
                     else if(newP[i][0] % period == 0) fprintf(stdout,"LG");
                     fprintf(stdout," %.1f %.2f M %.2f Rarrow\n", (newP[i][0] - (float)start) / delta * WIDTH, HIGHT + HIGHT_NEW + 2.0, (newP[i][1] - newP[i][0]) / delta * WIDTH);
-                    fprintf(stdout,"DarkGray %.1f %.2f M (%s) Cshow\n", ((newP[i][1] + newP[i][0]) / 2 - (float)start) / delta * WIDTH, HIGHT + HIGHT_NEW + 5.0 + (float)d, newP_name[i]);
+                    fprintf(stdout,"DarkGray %.1f %.2f M (%s) Cshow\n", ((newP[i][1] + newP[i][0]) / 2 - (float)start) / delta * WIDTH, HIGHT + HIGHT_NEW + 6.0 + (float)d, newP_name[i]);
                 }
                 else {
                     if(period % 3) fprintf(stdout, "Gray");
@@ -1730,7 +1730,7 @@ fprintf(stdout,"\n0 setlinejoin 0 setlinecap\n");
                     else if(newP[i][0] % period == 2) fprintf(stdout, "LG");
                     else if(newP[i][0] % period == 0) fprintf(stdout, "LB");
                     fprintf(stdout, " %.1f %.2f M %.2f Larrow\n", (newP[i][0] - (float)start) / delta * WIDTH, HIGHT + HIGHT_NEW - 2.0, (newP[i][1] - newP[i][0]) / delta * WIDTH);
-                    fprintf(stdout, "DarkGray %.1f %.2f M (%s) Cshow\n", ((newP[i][1] + newP[i][0]) / 2 - (float)start) / delta * WIDTH, HIGHT + HIGHT_NEW - 10.0 - (float)d, newP_name[i]);
+                    fprintf(stdout, "DarkGray %.1f %.2f M (%s) Cshow\n", ((newP[i][1] + newP[i][0]) / 2 - (float)start) / delta * WIDTH, HIGHT + HIGHT_NEW - 8.5 - (float)d, newP_name[i]);
                 }
             }
         }
@@ -1756,7 +1756,7 @@ fprintf(stdout,"\n0 setlinejoin 0 setlinecap\n");
                     else if(new[i][0] % period == 2) fprintf(stdout, "R");
                     else if(new[i][0] % period == 0) fprintf(stdout, "G");
                     fprintf(stdout, " %.1f %.2f M %.2f Rarrow\n", (new[i][0] - (float)start) / delta * WIDTH, HIGHT + HIGHT_NEW + 2.0, (new[i][1] - new[i][0]) / delta * WIDTH);
-                    fprintf(stdout, "Black %.1f %.2f M (%s) Cshow\n", ((new[i][1] + new[i][0]) / 2 - (float)start) / delta * WIDTH, HIGHT + HIGHT_NEW + 5.0 + (float)d, new_name[i]);
+                    fprintf(stdout, "Black %.1f %.2f M (%s) Cshow\n", ((new[i][1] + new[i][0]) / 2 - (float)start) / delta * WIDTH, HIGHT + HIGHT_NEW + 6.0 + (float)d, new_name[i]);
                 }
                 else {
                     if(period % 3) fprintf(stdout, "Black");
@@ -1764,7 +1764,7 @@ fprintf(stdout,"\n0 setlinejoin 0 setlinecap\n");
                     else if(new[i][0] % period == 2) fprintf(stdout, "G");
                     else if(new[i][0] % period == 0) fprintf(stdout, "B");
                     fprintf(stdout, " %.1f %.2f M %.2f Larrow\n", (new[i][0] - (float)start) / delta * WIDTH, HIGHT + HIGHT_NEW - 2.0, (new[i][1] - new[i][0]) / delta * WIDTH);
-                    fprintf(stdout, "Black %.1f %.2f M (%s) Cshow\n", ((new[i][1] + new[i][0]) / 2 - (float)start) / delta * WIDTH, HIGHT + HIGHT_NEW - 10.0 - (float)d, new_name[i]);
+                    fprintf(stdout, "Black %.1f %.2f M (%s) Cshow\n", ((new[i][1] + new[i][0]) / 2 - (float)start) / delta * WIDTH, HIGHT + HIGHT_NEW - 8.5 - (float)d, new_name[i]);
                 }
             }
         }
