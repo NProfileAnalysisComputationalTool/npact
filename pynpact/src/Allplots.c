@@ -32,6 +32,10 @@
 # define TFS 14.0
 # define TFS2 14.0
 # define HANGOVER 30
+# define DSHORT_OFFSET 0.5
+# define CSHORT_OFFSET -3.5
+# define DLONG_OFFSET 6.5
+# define CLONG_OFFSET -9.5
 
 char	ANOPIAS= 0;
 float	MAX= 100.00;
@@ -94,7 +98,6 @@ int name_yoffset(int *line, int *cline, int pos, int len, char strand)
 {
 int     i, j, n, s, k, y[4], cy[4], ctot[4]= { 0 }, tot[4]= { 0 };
 
-len *= 2;
 pos -= 1;
 len += 2;
 
@@ -170,7 +173,7 @@ main(int argc, char *argv[]) {
         exc_line[300 + 2 * HANGOVER], newP_line[300 + 2 * HANGOVER],
         pub_cline[300 + 2 * HANGOVER], new_cline[300 + 2 * HANGOVER],
         exc_cline[300 + 2 * HANGOVER], newP_cline[300 + 2 * HANGOVER];
-    float	y1, y2, r, tpr, delta, pp, S[3];
+    float	y1, y2, r, tpr, delta, pp, S[3], cds_len;
 
     /* Filename buffers */
     char *unb_file, *con_file, * new_file, *newP_file, *cg_file, *pub_file,
@@ -923,7 +926,6 @@ main(int argc, char *argv[]) {
             fprintf(stdout,"/L2 { 2.0 setlinewidth } def\n");
             fprintf(stdout,"/L15 { 1.5 setlinewidth } def\n");
             fprintf(stdout,"/L1 { 1.0 setlinewidth } def\n");
-            fprintf(stdout,"/L2 { 2.0 setlinewidth } def\n");
             fprintf(stdout,"/L05 { 0.5 setlinewidth } def\n");
             fprintf(stdout,"/L025 { 0.25 setlinewidth } def\n");
             fprintf(stdout,"/M {moveto} def\n");
@@ -962,10 +964,10 @@ main(int argc, char *argv[]) {
             fprintf(stdout,"/Black {0.0 0.0 0.0 setrgbcolor} def\n");
             fprintf(stdout,"/Cshow { dup stringwidth pop -2 div 0 RM show } def\n");
             fprintf(stdout,"/Lshow { dup stringwidth pop -1 mul 0 RM show } def\n");
-            fprintf(stdout,"/Rarrow { 1 setlinejoin 1 setlinecap dup 2 lt { 0 2 RM dup -2 RL -1 mul -2 RL } { 0 2 RM 2 sub dup 0 RL 2 -2 RL -2 -2 RL -1 mul 0 RL } ifelse closepath stroke 0 setlinejoin 0 setlinecap } def\n");
-            fprintf(stdout,"/Larrow { 1 setlinejoin 1 setlinecap dup 2 lt { 2 RL 0 -4 RL } { 2 2 RL dup 2 sub dup 0 RL 0 -4 RL -1 mul 0 RL } ifelse closepath stroke 0 setlinejoin 0 setlinecap } def\n");
-            fprintf(stdout,"/Rhssline { dup 2 lt { 0 2 RM dup -2 RL -1 mul -2 RL } { 0 2 RM 2 sub dup 0 RL 2 -2 RL -2 -2 RL -1 mul 0 RL } ifelse closepath } def\n");
-            fprintf(stdout,"/Lhssline { dup 2 lt { 2 RL 0 -4 RL } { 2 2 RL dup 2 sub dup 0 RL -1 mul 0 RL } ifelse closepath } def\n");
+//          fprintf(stdout,"/Rarrow { 1 setlinejoin 1 setlinecap dup 2 lt { 0 2 RM dup -2 RL -1 mul -2 RL } { 0 2 RM 2 sub dup 0 RL 2 -2 RL -2 -2 RL -1 mul 0 RL } ifelse closepath stroke 0 setlinejoin 0 setlinecap } def\n");
+//          fprintf(stdout,"/Larrow { 1 setlinejoin 1 setlinecap dup 2 lt { 2 RL 0 -4 RL } { 2 2 RL dup 2 sub dup 0 RL 0 -4 RL -1 mul 0 RL } ifelse closepath stroke 0 setlinejoin 0 setlinecap } def\n");
+           fprintf(stdout,"/Rarrow { 1 setlinejoin 1 setlinecap dup 3 lt { 0 3 RM dup -3 RL -1 mul -3 RL } { 0 3 RM 3 sub dup 0 RL 3 -3 RL -3 -3 RL -1 mul 0 RL } ifelse closepath stroke 0 setlinejoin 0 setlinecap } def\n");
+           fprintf(stdout,"/Larrow { 1 setlinejoin 1 setlinecap dup 3 lt { 3 RL 0 -6 RL } { 3 3 RL dup 3 sub dup 0 RL 0 -6 RL -1 mul 0 RL } ifelse closepath stroke 0 setlinejoin 0 setlinecap } def\n");
             fprintf(stdout,"/radius { %.1f } def\n",HAIRPIN_RADIUS);
             fprintf(stdout,"/thick { %.2f } def\n",STEM_SEPARATION);
             fprintf(stdout,"/hairpin { dup thick -2.0 div exch RL thick 0 RL -1 mul thick -2.0 div exch RL closepath } def\n");
@@ -1645,43 +1647,17 @@ fprintf(stdout,"\n0 setlinejoin 0 setlinecap\n");
             fprintf(stdout,"/Helvetica-Roman findfont NamesFontSize scalefont setfont\n");
 
 
-        /***********************************/
-        /* Prints modified annotated genes */
-        /***********************************/
-
-        for(i= 0; i < ne; ++i) {
-            if(mod_str[i] == ' ') {
-                if(period % 3) fprintf(stdout, "Black");
-                else if(modified[i][0] % period == 1) fprintf(stdout, "LB");
-                else if(modified[i][0] % period == 2) fprintf(stdout, "LR");
-                else if(modified[i][0] % period==0) fprintf(stdout, "LG");
-                fprintf(stdout," %.1f %.2f M %.2f Rarrow\n", (modified[i][0] - (float)start) / delta * WIDTH, HIGHT + HIGHT_MOD + 2.0, (modified[i][1] - modified[i][0]) / delta * WIDTH);
-                fprintf(stdout,"Gray %.1f %.2f M (%s) Cshow\n", ((modified[i][1] + modified[i][0]) / 2 - (float)start) / delta * WIDTH, HIGHT + HIGHT_MOD + 5.0, mod_name[i]);
-            }
-            else {
-                if(period % 3) fprintf(stdout, "Black");
-                else if(modified[i][0] % period == 1) fprintf(stdout, "LR");
-                else if(modified[i][0] % period == 2) fprintf(stdout, "LG");
-                else if(modified[i][0] % period == 0) fprintf(stdout, "LB");
-                fprintf(stdout," %.1f %.2f M %.2f Larrow\n", (modified[i][0] - (float)start) / delta * WIDTH, HIGHT + HIGHT_MOD - 2.0, (modified[i][1] - modified[i][0]) / delta * WIDTH);
-                fprintf(stdout,"Gray %.1f %.2f M (%s) Cshow\n", ((modified[i][1] + modified[i][0]) / 2 - (float)start) / delta * WIDTH, HIGHT + HIGHT_MOD - 10.0, mod_name[i]);
-            }
-        }
-
-
-        /***********************************/
-        /* Prints accepted annotated genes */
-        /***********************************/
-
-	for(i= 0; i < 300 + 2 * HANGOVER; ++i) pub_line[i]= pub_cline[i]= 0;
+        /****************************************************/
+        /* Prints accepted annotated genes with short names */
+        /****************************************************/
 	
-
         for(i=0;i<np;++i)
 	{
-	name_len= strlen(pub_name[i]);
-	name_pos= (int)(((pub[i][0] + pub[i][1]) / 2 - (float)start) * 300 / delta) - name_len + HANGOVER;
-
-	d= (int)NaFS * name_yoffset(pub_line, pub_cline, name_pos, name_len, pub_str[i]);
+	name_len= 2 * strlen(pub_name[i]);
+	cds_len= (pub[i][1] - pub[i][0]) / delta * WIDTH;
+	  if(name_len * 1.4 < cds_len)
+	  {
+	  name_pos= (int)(((pub[i][0] + pub[i][1]) / 2 - (float)start) * 300 / delta) - name_len + HANGOVER;
 
             if(pub_str[i]==' ') {
                 if(period%3) fprintf(stdout,"Black");
@@ -1689,7 +1665,7 @@ fprintf(stdout,"\n0 setlinejoin 0 setlinecap\n");
                 else if(pub[i][0]%period==2) fprintf(stdout,"R");
                 else if(pub[i][0]%period==0) fprintf(stdout,"G");
                 fprintf(stdout," %.1f %.2f M %.2f Rarrow\n", (pub[i][0] - (float)start) / delta * WIDTH, HIGHT + HIGHT_PUB + 2.0, (pub[i][1] - pub[i][0]) / delta * WIDTH);
-                fprintf(stdout,"Black %.1f %.2f M (%s) Cshow\n", ((pub[i][1] + pub[i][0]) / 2 - (float)start) / delta * WIDTH, HIGHT + HIGHT_PUB + 6.0 + (float)d, pub_name[i]);
+                fprintf(stdout,"Black %.1f %.2f M (%s) Cshow\n", ((pub[i][1] + pub[i][0]) / 2 - (float)start) / delta * WIDTH, HIGHT + HIGHT_PUB + (DSHORT_OFFSET), pub_name[i]);
             }
             else {
                 if(period%3) fprintf(stdout,"Black");
@@ -1697,24 +1673,55 @@ fprintf(stdout,"\n0 setlinejoin 0 setlinecap\n");
                 else if(pub[i][0]%period==2) fprintf(stdout,"G");
                 else if(pub[i][0]%period==0) fprintf(stdout,"B");
                 fprintf(stdout, " %.1f %.2f M %.2f Larrow\n", (pub[i][0] - (float)start) / delta * WIDTH, HIGHT + HIGHT_PUB - 2.0, (pub[i][1] - pub[i][0]) / delta * WIDTH);
-                fprintf(stdout,"Black %.1f %.2f M (%s) Cshow\n", ((pub[i][1] + pub[i][0]) / 2 - (float)start) / delta * WIDTH, HIGHT + HIGHT_PUB - 8.5 - (float)d, pub_name[i]);
+                fprintf(stdout,"Black %.1f %.2f M (%s) Cshow\n", ((pub[i][1] + pub[i][0]) / 2 - (float)start) / delta * WIDTH, HIGHT + HIGHT_PUB + (CSHORT_OFFSET), pub_name[i]);
             }
+	  }
         }
 
-        /*****************************/
-        /* Prints new potential ORFs */
-        /*****************************/
+        /****************************************************/
+        /* Prints modified annotated genes with short names */
+        /****************************************************/
 
-	for(i= 0; i < 300 + 2 * HANGOVER; ++i) new_line[i]= new_cline[i]= 0;
+        for(i= 0; i < ne; ++i)
+	{
+	name_len= 2 *strlen(mod_name[i]);
+	cds_len= (modified[i][1] - modified[i][0]) / delta * WIDTH;
+	  if(name_len * 1.4 < cds_len)
+	  {
+	  name_pos= (int)(((modified[i][0] + modified[i][1]) / 2 - (float)start) * 300 / delta) - name_len + HANGOVER;
+
+            if(mod_str[i] == ' ') {
+                if(period % 3) fprintf(stdout, "Black");
+                else if(modified[i][0] % period == 1) fprintf(stdout, "LB");
+                else if(modified[i][0] % period == 2) fprintf(stdout, "LR");
+                else if(modified[i][0] % period==0) fprintf(stdout, "LG");
+                fprintf(stdout," %.1f %.2f M %.2f Rarrow\n", (modified[i][0] - (float)start) / delta * WIDTH, HIGHT + HIGHT_MOD + 2.0, (modified[i][1] - modified[i][0]) / delta * WIDTH);
+                fprintf(stdout,"Gray %.1f %.2f M (%s) Cshow\n", ((modified[i][1] + modified[i][0]) / 2 - (float)start) / delta * WIDTH, HIGHT + HIGHT_MOD + (DSHORT_OFFSET), mod_name[i]);
+            }
+            else {
+                if(period % 3) fprintf(stdout, "Black");
+                else if(modified[i][0] % period == 1) fprintf(stdout, "LR");
+                else if(modified[i][0] % period == 2) fprintf(stdout, "LG");
+                else if(modified[i][0] % period == 0) fprintf(stdout, "LB");
+                fprintf(stdout," %.1f %.2f M %.2f Larrow\n", (modified[i][0] - (float)start) / delta * WIDTH, HIGHT + HIGHT_MOD - 2.0, (modified[i][1] - modified[i][0]) / delta * WIDTH);
+                fprintf(stdout,"Gray %.1f %.2f M (%s) Cshow\n", ((modified[i][1] + modified[i][0]) / 2 - (float)start) / delta * WIDTH, HIGHT + HIGHT_MOD + (CSHORT_OFFSET), mod_name[i]);
+            }
+	  }
+        }
+
+        /**********************************************/
+        /* Prints new potential ORFs with short names */
+        /**********************************************/
 
         if(newPf)
 	{
-            for(i=0;i<nnP;++i)
+            for(i= 0; i < nnP; ++i)
 	    {
-	    name_len= strlen(newP_name[i]);
-	    name_pos= (int)(((newP[i][0] + newP[i][1]) / 2 - (float)start) * 300 / delta) - name_len + HANGOVER;
-
-	    d= (int)NaFS * name_yoffset(new_line, new_cline, name_pos, name_len, newP_str[i]);
+	    name_len= 2 * strlen(newP_name[i]);
+	    cds_len=  (newP[i][1] - newP[i][0]) / delta * WIDTH;
+	      if(name_len * 1.4 < cds_len)
+	      {
+	      name_pos= (int)(((newP[i][0] + newP[i][1]) / 2 - (float)start) * 300 / delta) - name_len + HANGOVER;
 
                 if(newP_str[i] == ' ') {
                     if(period % 3) fprintf(stdout,"Gray");
@@ -1722,7 +1729,7 @@ fprintf(stdout,"\n0 setlinejoin 0 setlinecap\n");
                     else if(newP[i][0] % period == 2) fprintf(stdout,"LR");
                     else if(newP[i][0] % period == 0) fprintf(stdout,"LG");
                     fprintf(stdout," %.1f %.2f M %.2f Rarrow\n", (newP[i][0] - (float)start) / delta * WIDTH, HIGHT + HIGHT_NEW + 2.0, (newP[i][1] - newP[i][0]) / delta * WIDTH);
-                    fprintf(stdout,"DarkGray %.1f %.2f M (%s) Cshow\n", ((newP[i][1] + newP[i][0]) / 2 - (float)start) / delta * WIDTH, HIGHT + HIGHT_NEW + 6.0 + (float)d, newP_name[i]);
+                    fprintf(stdout,"DarkGray %.1f %.2f M (%s) Cshow\n", ((newP[i][1] + newP[i][0]) / 2 - (float)start) / delta * WIDTH, HIGHT + HIGHT_NEW + (DSHORT_OFFSET), newP_name[i]);
                 }
                 else {
                     if(period % 3) fprintf(stdout, "Gray");
@@ -1730,25 +1737,27 @@ fprintf(stdout,"\n0 setlinejoin 0 setlinecap\n");
                     else if(newP[i][0] % period == 2) fprintf(stdout, "LG");
                     else if(newP[i][0] % period == 0) fprintf(stdout, "LB");
                     fprintf(stdout, " %.1f %.2f M %.2f Larrow\n", (newP[i][0] - (float)start) / delta * WIDTH, HIGHT + HIGHT_NEW - 2.0, (newP[i][1] - newP[i][0]) / delta * WIDTH);
-                    fprintf(stdout, "DarkGray %.1f %.2f M (%s) Cshow\n", ((newP[i][1] + newP[i][0]) / 2 - (float)start) / delta * WIDTH, HIGHT + HIGHT_NEW - 8.5 - (float)d, newP_name[i]);
+                    fprintf(stdout, "DarkGray %.1f %.2f M (%s) Cshow\n", ((newP[i][1] + newP[i][0]) / 2 - (float)start) / delta * WIDTH, HIGHT + HIGHT_NEW + (CSHORT_OFFSET), newP_name[i]);
                 }
+	      }
             }
         }
 
-        /*******************/
-        /* Prints new ORFs */
-        /*******************/
+        /************************************/
+        /* Prints new ORFs with short names */
+        /************************************/
 
         if(newf)
 	{
-            fprintf(stdout,"\nL15 ");
+            fprintf(stdout,"\nL1 ");
             fprintf(stdout,"/Helvetica-Bold findfont NamesFontSize scalefont setfont\n");
             for(i= 0; i < nn; ++i)
 	    {
-            name_len= strlen(new_name[i]);
-            name_pos= (int)(((new[i][0] + new[i][1]) / 2 - (float)start) * 300 / delta) - name_len + HANGOVER;
-
-            d= (int)NaFS * name_yoffset(new_line, new_cline, name_pos, name_len, new_str[i]);
+            name_len= 2 * strlen(new_name[i]);
+	    cds_len= (new[i][1] - new[i][0]) / delta * WIDTH;
+	      if(name_len * 1.4 < cds_len)
+	      {
+              name_pos= (int)(((new[i][0] + new[i][1]) / 2 - (float)start) * 300 / delta) - name_len + HANGOVER;
 
                 if(new_str[i] == ' ') {
                     if(period % 3) fprintf(stdout, "Black");
@@ -1756,7 +1765,7 @@ fprintf(stdout,"\n0 setlinejoin 0 setlinecap\n");
                     else if(new[i][0] % period == 2) fprintf(stdout, "R");
                     else if(new[i][0] % period == 0) fprintf(stdout, "G");
                     fprintf(stdout, " %.1f %.2f M %.2f Rarrow\n", (new[i][0] - (float)start) / delta * WIDTH, HIGHT + HIGHT_NEW + 2.0, (new[i][1] - new[i][0]) / delta * WIDTH);
-                    fprintf(stdout, "Black %.1f %.2f M (%s) Cshow\n", ((new[i][1] + new[i][0]) / 2 - (float)start) / delta * WIDTH, HIGHT + HIGHT_NEW + 6.0 + (float)d, new_name[i]);
+                    fprintf(stdout, "Black %.1f %.2f M (%s) Cshow\n", ((new[i][1] + new[i][0]) / 2 - (float)start) / delta * WIDTH, HIGHT + HIGHT_NEW + (DSHORT_OFFSET), new_name[i]);
                 }
                 else {
                     if(period % 3) fprintf(stdout, "Black");
@@ -1764,8 +1773,160 @@ fprintf(stdout,"\n0 setlinejoin 0 setlinecap\n");
                     else if(new[i][0] % period == 2) fprintf(stdout, "G");
                     else if(new[i][0] % period == 0) fprintf(stdout, "B");
                     fprintf(stdout, " %.1f %.2f M %.2f Larrow\n", (new[i][0] - (float)start) / delta * WIDTH, HIGHT + HIGHT_NEW - 2.0, (new[i][1] - new[i][0]) / delta * WIDTH);
-                    fprintf(stdout, "Black %.1f %.2f M (%s) Cshow\n", ((new[i][1] + new[i][0]) / 2 - (float)start) / delta * WIDTH, HIGHT + HIGHT_NEW - 8.5 - (float)d, new_name[i]);
+                    fprintf(stdout, "Black %.1f %.2f M (%s) Cshow\n", ((new[i][1] + new[i][0]) / 2 - (float)start) / delta * WIDTH, HIGHT + HIGHT_NEW + (CSHORT_OFFSET), new_name[i]);
                 }
+	      }
+            }
+        }
+
+        fprintf(stdout,"\nL05\n");
+
+        if(np || ne)
+            fprintf(stdout,"/Helvetica-Roman findfont NamesFontSize scalefont setfont\n");
+
+
+        /***************************************************/
+        /* Prints accepted annotated genes with long names */
+        /***************************************************/
+
+	for(i= 0; i < 300 + 2 * HANGOVER; ++i) pub_line[i]= pub_cline[i]= 0;
+
+        for(i= 0; i < np; ++i)
+	{
+	name_len= 2 * strlen(pub_name[i]);
+	cds_len= (pub[i][1] - pub[i][0]) / delta * WIDTH;
+	  if(name_len * 1.4 >= cds_len)
+	  {
+	  name_pos= (int)(((pub[i][0] + pub[i][1]) / 2 - (float)start) * 300 / delta) - name_len + HANGOVER;
+
+	  d= (int)NaFS * name_yoffset(pub_line, pub_cline, name_pos, name_len, pub_str[i]);
+
+            if(pub_str[i]==' ') {
+                if(period%3) fprintf(stdout,"Black");
+                else if(pub[i][0]%period==1) fprintf(stdout,"B");
+                else if(pub[i][0]%period==2) fprintf(stdout,"R");
+                else if(pub[i][0]%period==0) fprintf(stdout,"G");
+                fprintf(stdout," %.1f %.2f M %.2f Rarrow\n", (pub[i][0] - (float)start) / delta * WIDTH, HIGHT + HIGHT_PUB + 2.0, (pub[i][1] - pub[i][0]) / delta * WIDTH);
+                fprintf(stdout,"Black %.1f %.2f M (%s) Cshow\n", ((pub[i][1] + pub[i][0]) / 2 - (float)start) / delta * WIDTH, HIGHT + HIGHT_PUB + (DLONG_OFFSET) + (float)d, pub_name[i]);
+            }
+            else {
+                if(period%3) fprintf(stdout,"Black");
+                else if(pub[i][0]%period==1) fprintf(stdout,"R");
+                else if(pub[i][0]%period==2) fprintf(stdout,"G");
+                else if(pub[i][0]%period==0) fprintf(stdout,"B");
+                fprintf(stdout, " %.1f %.2f M %.2f Larrow\n", (pub[i][0] - (float)start) / delta * WIDTH, HIGHT + HIGHT_PUB - 2.0, (pub[i][1] - pub[i][0]) / delta * WIDTH);
+                fprintf(stdout,"Black %.1f %.2f M (%s) Cshow\n", ((pub[i][1] + pub[i][0]) / 2 - (float)start) / delta * WIDTH, HIGHT + HIGHT_PUB + (CLONG_OFFSET) - (float)d, pub_name[i]);
+            }
+	  }
+        }
+
+        /***************************************************/
+        /* Prints modified annotated genes with long names */
+        /***************************************************/
+
+	for(i= 0; i < 300 + 2 * HANGOVER; ++i) new_line[i]= new_cline[i]= 0;
+
+        for(i= 0; i < ne; ++i)
+	{
+	name_len= 2 * strlen(mod_name[i]);
+	cds_len= (modified[i][1] - modified[i][0]) / delta * WIDTH;
+	  if(name_len * 1.4 >= cds_len)
+	  {
+	  name_pos= (int)(((modified[i][0] + modified[i][1]) / 2 - (float)start) * 300 / delta) - name_len + HANGOVER;
+
+	  d= (int)NaFS * name_yoffset(new_line, new_cline, name_pos, name_len, mod_str[i]);
+
+            if(mod_str[i] == ' ') {
+                if(period % 3) fprintf(stdout, "Black");
+                else if(modified[i][0] % period == 1) fprintf(stdout, "LB");
+                else if(modified[i][0] % period == 2) fprintf(stdout, "LR");
+                else if(modified[i][0] % period==0) fprintf(stdout, "LG");
+                fprintf(stdout," %.1f %.2f M %.2f Rarrow\n", (modified[i][0] - (float)start) / delta * WIDTH, HIGHT + HIGHT_MOD + 2.0, (modified[i][1] - modified[i][0]) / delta * WIDTH);
+                fprintf(stdout,"Gray %.1f %.2f M (%s) Cshow\n", ((modified[i][1] + modified[i][0]) / 2 - (float)start) / delta * WIDTH, HIGHT + HIGHT_MOD + (DLONG_OFFSET) + (float)d, mod_name[i]);
+            }
+            else {
+                if(period % 3) fprintf(stdout, "Black");
+                else if(modified[i][0] % period == 1) fprintf(stdout, "LR");
+                else if(modified[i][0] % period == 2) fprintf(stdout, "LG");
+                else if(modified[i][0] % period == 0) fprintf(stdout, "LB");
+                fprintf(stdout," %.1f %.2f M %.2f Larrow\n", (modified[i][0] - (float)start) / delta * WIDTH, HIGHT + HIGHT_MOD - 2.0, (modified[i][1] - modified[i][0]) / delta * WIDTH);
+                fprintf(stdout,"Gray %.1f %.2f M (%s) Cshow\n", ((modified[i][1] + modified[i][0]) / 2 - (float)start) / delta * WIDTH, HIGHT + HIGHT_MOD + (CLONG_OFFSET) - (float)d, mod_name[i]);
+            }
+	  }
+        }
+
+
+        /*********************************************/
+        /* Prints new potential ORFs with long names */
+        /*********************************************/
+
+        if(newPf)
+	{
+            for(i=0;i<nnP;++i)
+	    {
+	    name_len= 2 * strlen(newP_name[i]);
+	    cds_len= (newP[i][1] - newP[i][0]) / delta * WIDTH;
+	      if(name_len * 1.4 >= cds_len)
+	      {
+	      name_pos= (int)(((newP[i][0] + newP[i][1]) / 2 - (float)start) * 300 / delta) - name_len + HANGOVER;
+
+	      d= (int)NaFS * name_yoffset(new_line, new_cline, name_pos, name_len, newP_str[i]);
+
+                if(newP_str[i] == ' ') {
+                    if(period % 3) fprintf(stdout,"Gray");
+                    else if(newP[i][0] % period == 1) fprintf(stdout,"LB");
+                    else if(newP[i][0] % period == 2) fprintf(stdout,"LR");
+                    else if(newP[i][0] % period == 0) fprintf(stdout,"LG");
+                    fprintf(stdout," %.1f %.2f M %.2f Rarrow\n", (newP[i][0] - (float)start) / delta * WIDTH, HIGHT + HIGHT_NEW + 2.0, (newP[i][1] - newP[i][0]) / delta * WIDTH);
+                    fprintf(stdout,"DarkGray %.1f %.2f M (%s) Cshow\n", ((newP[i][1] + newP[i][0]) / 2 - (float)start) / delta * WIDTH, HIGHT + HIGHT_NEW + (DLONG_OFFSET) + (float)d, newP_name[i]);
+                }
+                else {
+                    if(period % 3) fprintf(stdout, "Gray");
+                    else if(newP[i][0] % period == 1) fprintf(stdout, "LR");
+                    else if(newP[i][0] % period == 2) fprintf(stdout, "LG");
+                    else if(newP[i][0] % period == 0) fprintf(stdout, "LB");
+                    fprintf(stdout, " %.1f %.2f M %.2f Larrow\n", (newP[i][0] - (float)start) / delta * WIDTH, HIGHT + HIGHT_NEW - 2.0, (newP[i][1] - newP[i][0]) / delta * WIDTH);
+                    fprintf(stdout, "DarkGray %.1f %.2f M (%s) Cshow\n", ((newP[i][1] + newP[i][0]) / 2 - (float)start) / delta * WIDTH, HIGHT + HIGHT_NEW + (CLONG_OFFSET) - (float)d, newP_name[i]);
+                }
+	      }
+            }
+        }
+
+        /***********************************/
+        /* Prints new ORFs with long names */
+        /***********************************/
+
+        if(newf)
+	{
+            fprintf(stdout,"\nL1 ");
+            fprintf(stdout,"/Helvetica-Bold findfont NamesFontSize scalefont setfont\n");
+            for(i= 0; i < nn; ++i)
+	    {
+            name_len= 2 * strlen(new_name[i]);
+	    cds_len= (new[i][1] - new[i][0]) / delta * WIDTH;
+	      if(name_len * 1.4 >= cds_len)
+	      {
+              name_pos= (int)(((new[i][0] + new[i][1]) / 2 - (float)start) * 300 / delta) - name_len + HANGOVER;
+
+              d= (int)NaFS * name_yoffset(new_line, new_cline, name_pos, name_len, new_str[i]);
+
+                if(new_str[i] == ' ') {
+                    if(period % 3) fprintf(stdout, "Black");
+                    else if(new[i][0] % period == 1) fprintf(stdout, "B");
+                    else if(new[i][0] % period == 2) fprintf(stdout, "R");
+                    else if(new[i][0] % period == 0) fprintf(stdout, "G");
+                    fprintf(stdout, " %.1f %.2f M %.2f Rarrow\n", (new[i][0] - (float)start) / delta * WIDTH, HIGHT + HIGHT_NEW + 2.0, (new[i][1] - new[i][0]) / delta * WIDTH);
+                    fprintf(stdout, "Black %.1f %.2f M (%s) Cshow\n", ((new[i][1] + new[i][0]) / 2 - (float)start) / delta * WIDTH, HIGHT + HIGHT_NEW + (DLONG_OFFSET) + (float)d, new_name[i]);
+                }
+                else {
+                    if(period % 3) fprintf(stdout, "Black");
+                    else if(new[i][0] % period == 1) fprintf(stdout, "R");
+                    else if(new[i][0] % period == 2) fprintf(stdout, "G");
+                    else if(new[i][0] % period == 0) fprintf(stdout, "B");
+                    fprintf(stdout, " %.1f %.2f M %.2f Larrow\n", (new[i][0] - (float)start) / delta * WIDTH, HIGHT + HIGHT_NEW - 2.0, (new[i][1] - new[i][0]) / delta * WIDTH);
+                    fprintf(stdout, "Black %.1f %.2f M (%s) Cshow\n", ((new[i][1] + new[i][0]) / 2 - (float)start) / delta * WIDTH, HIGHT + HIGHT_NEW + (CLONG_OFFSET) - (float)d, new_name[i]);
+                }
+	      }
             }
         }
 
