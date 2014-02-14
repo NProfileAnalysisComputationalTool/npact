@@ -101,7 +101,7 @@ int     i, j, n, s, k, y[4], cy[4], ctot[4]= { 0 }, tot[4]= { 0 };
 pos -= 1;
 len += 2;
 
-    if(strand == ' ')
+    if(strand == 'D')
     {
         for(i= 0; i < len; ++i)
         {
@@ -355,7 +355,7 @@ main(int argc, char *argv[]) {
                 p= strchr(longstr,'.');
                 ge= atoi(p+2);
                 if(longstr[0]=='c') { gs= atoi(longstr+11); BLOCK_str[nB]='C'; }
-                else { gs= atoi(longstr); BLOCK_str[nB]=' '; }
+                else { gs= atoi(longstr); BLOCK_str[nB]='D'; }
                 if(gs>=start-line_range/50 && gs<end && ge>start && ge<=end+line_range/50) { BLOCK[nB][0]= gs; BLOCK[nB][1]= ge; ++nB; }
                 else if(gs>=start && gs<end && ge>end+line_range/50) { BLOCK[nB][0]= gs; BLOCK[nB][1]= end+line_range/50; ++nB; }
                 else if(ge<=end+line_range/50 && ge>start && gs<start-line_range/50)
@@ -375,7 +375,7 @@ main(int argc, char *argv[]) {
                 p= strchr(longstr,'.');
                 ge= atoi(p+2);
                 if(longstr[0]=='c') { gs= atoi(longstr+11); block_str[nb]='C'; }
-                else { gs= atoi(longstr); block_str[nb]=' '; }
+                else { gs= atoi(longstr); block_str[nb]='D'; }
                 if(gs>=start-line_range/50 && gs<end && ge>start && ge<=end+line_range/50) { block[nb][0]= gs; block[nb][1]= ge; ++nb; }
                 else if(gs>=start && gs<end && ge>end+line_range/50) { block[nb][0]= gs; block[nb][1]= end+line_range/50; ++nb; }
                 else if(ge<=end+line_range/50 && ge>start && gs<start-line_range/50)
@@ -397,7 +397,7 @@ main(int argc, char *argv[]) {
                 p= strchr(longstr,'.');
                 ge= atoi(p+2);
                 if(longstr[0]=='c') { gs= atoi(longstr+11); codpot_str[ncp]='C'; codpot_col[ncp]= gs%period; }
-                else { gs= atoi(longstr); codpot_str[ncp]=' '; codpot_col[ncp]= ge%period; }
+                else { gs= atoi(longstr); codpot_str[ncp]='D'; codpot_col[ncp]= ge%period; }
                 if(gs>=start && gs<end && ge>start && ge<=end) { codpot[ncp][0]= gs; codpot[ncp][1]= ge; ++ncp; }
                 else if(gs>=start && gs<end && ge>end) { codpot[ncp][0]= gs; codpot[ncp][1]= end; ++ncp; }
                 else if(ge<=end && ge>start && gs<start)
@@ -422,7 +422,7 @@ main(int argc, char *argv[]) {
                 ge= atoi(p+2);
                 if(longstr[2]=='c') { gs= atoi(longstr+13); Scodpot_str[nScp]='C'; Scodpot_col[nScp]= gs%period; }
                 else if(longstr[2]=='r') { gs= atoi(longstr+9); Scodpot_str[nScp]='R'; }
-                else { gs= atoi(longstr + 2); Scodpot_str[nScp]=' '; Scodpot_col[nScp]= ge%period; }
+                else { gs= atoi(longstr + 2); Scodpot_str[nScp]='D'; Scodpot_col[nScp]= ge%period; }
                 if(gs>=start && gs<end && ge>start && ge<=end) { Scodpot[nScp][0]= gs; Scodpot[nScp][1]= ge; ++nScp; }
                 else if(gs>=start && gs<end && ge>end) { Scodpot[nScp][0]= gs; Scodpot[nScp][1]= end; ++nScp; }
                 else if(ge<=end && ge>start && gs<start)
@@ -459,7 +459,7 @@ main(int argc, char *argv[]) {
                     stop_str= (char *)realloc(stop_str,(ns+1)*sizeof(char));
                     stop= (int *)realloc(stop,(ns+1)*sizeof(int));
                     if(longstr[0]=='C') stop_str[ns]='C';
-                    else stop_str[ns]=' ';
+                    else stop_str[ns]='D';
                     stop[ns]= gs;
                     ++ns;
                 }
@@ -476,7 +476,7 @@ main(int argc, char *argv[]) {
                     tata_str= (char *)realloc(tata_str,(nt+1)*sizeof(char));
                     tata= (int *)realloc(tata,(nt+1)*sizeof(int));
                     if(ts[0]=='C') tata_str[nt]='C';
-                    else tata_str[nt]=' ';
+                    else tata_str[nt]='D';
                     tata[nt]= gs;
                     ++nt;
                 }
@@ -492,7 +492,7 @@ main(int argc, char *argv[]) {
                     cap_str= (char *)realloc(cap_str,(ncap+1)*sizeof(char));
                     cap= (int *)realloc(cap,(ncap+1)*sizeof(int));
                     if(ts[0]=='C') cap_str[ncap]='C';
-                    else cap_str[ncap]=' ';
+                    else cap_str[ncap]='D';
                     cap[ncap]= gs;
                     ++ncap;
                 }
@@ -508,7 +508,7 @@ main(int argc, char *argv[]) {
                     ccaa_str= (char *)realloc(ccaa_str,(ncca+1)*sizeof(char));
                     ccaa= (int *)realloc(ccaa,(ncca+1)*sizeof(int));
                     if(ts[0]=='C') ccaa_str[ncca]='C';
-                    else ccaa_str[ncca]=' ';
+                    else ccaa_str[ncca]='D';
                     ccaa[ncca]= gs;
                     ++ncca;
                 }
@@ -524,7 +524,7 @@ main(int argc, char *argv[]) {
                     gcbox_str= (char *)realloc(gcbox_str,(ngcb+1)*sizeof(char));
                     gcbox= (int *)realloc(gcbox,(ngcb+1)*sizeof(int));
                     if(ts[0]=='C') gcbox_str[ngcb]='C';
-                    else gcbox_str[ngcb]=' ';
+                    else gcbox_str[ngcb]='D';
                     gcbox[ngcb]= gs;
                     ++ngcb;
                 }
@@ -540,7 +540,7 @@ main(int argc, char *argv[]) {
                     kozak_str= (char *)realloc(kozak_str,(nk+1)*sizeof(char));
                     kozak= (int *)realloc(kozak,(nk+1)*sizeof(int));
                     if(ts[0]=='C') kozak_str[nk]='C';
-                    else kozak_str[nk]=' ';
+                    else kozak_str[nk]='D';
                     kozak[nk]= gs;
                     ++nk;
                 }
@@ -589,7 +589,7 @@ main(int argc, char *argv[]) {
 		p= longstr;
 			if(p[0] == '>' || p[0] == '<') ++p;
 		gs= atoi(p);
-		unb_str[nub]=' ';
+		unb_str[nub]='D';
 		}
                 if(gs>=start-line_range/50 && gs<end && ge>start && ge<=end+line_range/50) { unb[nub][0]= gs; unb[nub][1]= ge; ++nub; }
                 else if(gs>=start && gs<end && ge>end+line_range/50) { unb[nub][0]= gs; unb[nub][1]= end+line_range/50; ++nub; }
@@ -626,7 +626,7 @@ main(int argc, char *argv[]) {
 		p= longstr;
 			if(p[0] == '>' || p[0] == '<') ++p;
 		gs= atoi(p);
-		con_str[nc]=' ';
+		con_str[nc]='D';
 		}
                 if(gs>=start-line_range/50 && gs<end && ge<=end+line_range/50) { con[nc][0]= gs; con[nc][1]= ge; ++nc; }
                 else if(gs>=start-line_range/50 && gs<end && ge>end+line_range/50) { con[nc][0]= gs; con[nc][1]= end+line_range/50; ++nc; }
@@ -650,13 +650,13 @@ main(int argc, char *argv[]) {
                 new= (int **)realloc(new, (nn + 1)*sizeof(int *));
                 new[nn]= (int *)malloc(2 * sizeof(int));
                 strncpy(new_name[nn], longstr, 48);
-                p= strchr(new_name[nn], ' ');
+                p= strchr(new_name[nn], 'D');
                 p[0]= '\0';
-		p= strrchr(longstr, ' '); ++p;
+		p= strrchr(longstr, 'D'); ++p;
                 p= strchr(p, '.'); p += 2;
 			if(p[0] == '>' || p[0] == '<') ++p;
                 ge= atoi(p);
-		p= strrchr(longstr, ' '); ++p;
+		p= strrchr(longstr, 'D'); ++p;
                 if(p[0] == 'c')
 		{
 		p += 11;
@@ -668,7 +668,7 @@ main(int argc, char *argv[]) {
 		{
 			if(p[0] == '>' || p[0] == '<') ++p;
 		gs= atoi(p);
-		new_str[nn]=' ';
+		new_str[nn]='D';
 		}
                 if(gs >= start - line_range / 50 && gs < end && ge <= end + line_range / 50) { new[nn][0]= gs; new[nn][1]= ge; ++nn; }
                 else if(gs >= start - line_range / 50 && gs < end && ge > end + line_range / 50) { new[nn][0]= gs; new[nn][1]= end + line_range / 50; ++nn; }
@@ -694,12 +694,12 @@ main(int argc, char *argv[]) {
                 newP= (int **)realloc(newP, (nnP + 1) * sizeof(int *));
                 newP[nnP]= (int *)malloc(2 * sizeof(int));
                 strncpy(newP_name[nnP], longstr, 48);
-                p= strchr(newP_name[nnP], ' ');
+                p= strchr(newP_name[nnP], 'D');
                 p[0]= '\0';
-		p= strrchr(longstr, ' '); ++p;
+		p= strrchr(longstr, 'D'); ++p;
                 p= strchr(p, '.');
                 ge= atoi(p + 2);
-		p= strrchr(longstr, ' '); ++p;
+		p= strrchr(longstr, 'D'); ++p;
                 if(p[0] == 'c')
 		{
 		p += 11;
@@ -709,7 +709,7 @@ main(int argc, char *argv[]) {
                 else
 		{
 		gs= atoi(p);
-		newP_str[nnP]= ' ';
+		newP_str[nnP]= 'D';
 		}
                 if(gs >= start - line_range / 50 && gs < end && ge <= end + line_range / 50) { newP[nnP][0]= gs; newP[nnP][1]= ge; ++nnP; }
                 else if(gs >= start - line_range / 50 && gs < end && ge > end + line_range / 50) { newP[nnP][0]= gs; newP[nnP][1]= end + line_range / 50; ++nnP; }
@@ -734,7 +734,7 @@ main(int argc, char *argv[]) {
                 p= strchr(longstr,'.');
                 ge= atoi(p+2)+50;
                 if(longstr[0]=='c') { gs= atoi(longstr+11)-50; cg_str[ncg]='C'; }
-                else { gs= atoi(longstr)-50; cg_str[ncg]=' '; }
+                else { gs= atoi(longstr)-50; cg_str[ncg]='D'; }
                 if(gs>=start && gs<end && ge<=end) { cg[ncg][0]= gs; cg[ncg][1]= ge; ++ncg; }
                 else if(gs>=start && gs<end && ge>end) { cg[ncg][0]= gs; cg[ncg][1]= end; ++ncg; }
                 else if(ge<=end && ge>start && gs<start) { cg[ncg][0]= start; cg[ncg][1]= ge; ++ncg; }
@@ -756,13 +756,13 @@ main(int argc, char *argv[]) {
                 pub= (int **)realloc(pub, (np + 1) * sizeof(int *));
                 pub[np]= (int *)malloc(2 * sizeof(int));
                 strncpy(pub_name[np], longstr, 48);
-                p= strchr(pub_name[np],' ');
+                p= strchr(pub_name[np],'D');
                 p[0]= '\0';
-		p= strrchr(longstr, ' '); ++p;
+		p= strrchr(longstr, 'D'); ++p;
                 p= strchr(p, '.'); p += 2;
 			if(p[0] == '>' || p[0] == '<') ++p;
                 ge= atoi(p);
-		p= strrchr(longstr, ' '); ++p;
+		p= strrchr(longstr, 'D'); ++p;
                 if(p[0]=='c')
 		{
 		p += 11;
@@ -774,7 +774,7 @@ main(int argc, char *argv[]) {
 		{
 			if(p[0] == '>' || p[0] == '<') ++p;
 		gs= atoi(p);
-		pub_str[np]=' ';
+		pub_str[np]='D';
 		}
                 if(gs >= start - line_range / 50 && gs < end && ge <= end + line_range / 50 && ge > start) { 
                     pub[np][0] = gs;
@@ -818,13 +818,13 @@ main(int argc, char *argv[]) {
                 modified= (int **)realloc(modified,(ne + 1)*sizeof(int *));
                 modified[ne]= (int *)malloc(2 * sizeof(int));
                 strncpy(mod_name[ne], longstr, 48);
-                p= strchr(mod_name[ne],' ');
+                p= strchr(mod_name[ne],'D');
                 p[0]= '\0';
-                p= strrchr(longstr,' '); ++p;
+                p= strrchr(longstr,'D'); ++p;
                 p= strchr(p, '.'); p += 2;
 			if(p[0] == '<' || p[0] == '>') ++p;
                 ge= atoi(p);
-                p= strrchr(longstr,' '); ++p;
+                p= strrchr(longstr,'D'); ++p;
                 if(p[0] =='c')
 		{
 		p += 11;
@@ -836,7 +836,7 @@ main(int argc, char *argv[]) {
 		{
 			if(p[0] == '>' || p[0] == '<') ++p;
 		gs= atoi(p);
-		mod_str[ne]=' ';
+		mod_str[ne]='D';
 		}
 
                 if(gs >= start - line_range / 50 && gs < end && ge <= end + line_range / 50 && ge > start) { 
@@ -1272,7 +1272,7 @@ fprintf(stdout,"Black %.3f %.3f M (Input file CDS) Lshow\n",-15.0,HIGHT+HIGHT_PU
            if(unbf)
            {
            for(i=0;i<nub;++i)
-           if(unb_str[i]==' ')
+           if(unb_str[i]=='D')
            {
            if(unb[i][0]%period==1) fprintf(stdout,"B");
            else if(unb[i][0]%period==2) fprintf(stdout,"R");
@@ -1296,7 +1296,7 @@ fprintf(stdout,"Black %.3f %.3f M (Input file CDS) Lshow\n",-15.0,HIGHT+HIGHT_PU
 
         if(conf) {
             for(i=0;i<nc;++i) {
-                if(con_str[i]==' ') {
+                if(con_str[i]=='D') {
                     if(con[i][0]%period==1) fprintf(stdout,"B");
                     else if(con[i][0]%period==2) fprintf(stdout,"R");
                     else if(con[i][0]%period==0) fprintf(stdout,"G");
@@ -1316,7 +1316,7 @@ fprintf(stdout,"Black %.3f %.3f M (Input file CDS) Lshow\n",-15.0,HIGHT+HIGHT_PU
         /*
 
           for(i=0;i<ns;++i)
-          if(stop_str[i]==' ')
+          if(stop_str[i]=='D')
           {
           if(conf)
           {
@@ -1408,7 +1408,7 @@ fprintf(stdout,"\n0 setlinejoin 0 setlinecap\n");
            if(unbf)
            {
            for(i=0;i<nub;++i)
-           if(unb_str[i]==' ')
+           if(unb_str[i]=='D')
            {
            if(unb[i][0]%period==1) fprintf(stdout,"B");
            else if(unb[i][0]%period==2) fprintf(stdout,"R");
@@ -1432,7 +1432,7 @@ fprintf(stdout,"\n0 setlinejoin 0 setlinecap\n");
 
         if(conf) {
             for(i=0;i<nc;++i) {
-                if(con_str[i]==' ') {
+                if(con_str[i]=='D') {
                     if(con[i][0]%period==1) fprintf(stdout,"B");
                     else if(con[i][0]%period==2) fprintf(stdout,"R");
                     else if(con[i][0]%period==0) fprintf(stdout,"G");
@@ -1452,7 +1452,7 @@ fprintf(stdout,"\n0 setlinejoin 0 setlinecap\n");
         /*
 
           for(i=0;i<ns;++i)
-          if(stop_str[i]==' ')
+          if(stop_str[i]=='D')
           {
           if(stop[i]%period==1) fprintf(stdout,"B");
           else if(stop[i]%period==2) fprintf(stdout,"R");
@@ -1496,7 +1496,7 @@ fprintf(stdout,"\n0 setlinejoin 0 setlinecap\n");
         fprintf(stdout,"\nL05 0 setlinecap\n");
 
         for(i=0;i<nk;++i) {
-            if(kozak_str[i]==' ') {
+            if(kozak_str[i]=='D') {
                 if(kozak[i]%period==1) fprintf(stdout,"B");
                 else if(kozak[i]%period==2) fprintf(stdout,"R");
                 else if(kozak[i]%period==0) fprintf(stdout,"G");
@@ -1522,7 +1522,7 @@ fprintf(stdout,"\n0 setlinejoin 0 setlinecap\n");
         fprintf(stdout,"\nL025 0 setlinecap Black\n");
 
         for(i=0;i<nt;++i)
-            if(tata_str[i]==' ')
+            if(tata_str[i]=='D')
                 fprintf(stdout," %.1f %.2f M 0 5 RL 2 0 RL stroke\n",(tata[i]-(float)start)/delta*WIDTH,0.0);
             else
                 fprintf(stdout," %.1f %.2f M 0 5 RL -2 0 RL stroke\n",(tata[i]-(float)start)/delta*WIDTH,0.0);
@@ -1532,7 +1532,7 @@ fprintf(stdout,"\n0 setlinejoin 0 setlinecap\n");
         fprintf(stdout,"\nDarkGray\n");
 
         for(i=0;i<ncca;++i)
-            if(ccaa_str[i]==' ')
+            if(ccaa_str[i]=='D')
                 fprintf(stdout," %.1f %.2f M 0 3 RL 2 0 RL stroke\n",(ccaa[i]-(float)start)/delta*WIDTH,0.0);
             else
                 fprintf(stdout," %.1f %.2f M 0 3 RL -2 0 RL stroke\n",(ccaa[i]-(float)start)/delta*WIDTH,0.0);
@@ -1542,7 +1542,7 @@ fprintf(stdout,"\n0 setlinejoin 0 setlinecap\n");
         fprintf(stdout,"\nGray\n");
 
         for(i=0;i<ncap;++i)
-            if(cap_str[i]==' ')
+            if(cap_str[i]=='D')
                 fprintf(stdout," %.1f %.2f M 0 4 RL 2 0 RL stroke\n",(cap[i]-(float)start)/delta*WIDTH,0.0);
             else
                 fprintf(stdout," %.1f %.2f M 0 4 RL -2 0 RL stroke\n",(cap[i]-(float)start)/delta*WIDTH,0.0);
@@ -1552,7 +1552,7 @@ fprintf(stdout,"\n0 setlinejoin 0 setlinecap\n");
         fprintf(stdout,"\nLightGray\n");
 
         for(i=0;i<ngcb;++i)
-            if(gcbox_str[i]==' ')
+            if(gcbox_str[i]=='D')
                 fprintf(stdout," %.1f %.2f M 0 2 RL 2 0 RL stroke\n",(gcbox[i]-(float)start)/delta*WIDTH,0.0);
             else
                 fprintf(stdout," %.1f %.2f M 0 2 RL -2 0 RL stroke\n",(gcbox[i]-(float)start)/delta*WIDTH,0.0);
@@ -1565,7 +1565,7 @@ fprintf(stdout,"\n0 setlinejoin 0 setlinecap\n");
         fprintf(stdout,"\nL2\n");
 
         for(i=0;i<nB;++i) {
-            if(BLOCK_str[i]==' ') {
+            if(BLOCK_str[i]=='D') {
                 if(BLOCK[i][0]%period==1) fprintf(stdout,"B");
                 else if(BLOCK[i][0]%period==2) fprintf(stdout,"R");
                 else if(BLOCK[i][0]%period==0) fprintf(stdout,"G");
@@ -1585,7 +1585,7 @@ fprintf(stdout,"\n0 setlinejoin 0 setlinecap\n");
         /***************************************************************/
 
         for(i=0;i<nb;++i) {
-            if(block_str[i]==' ') {
+            if(block_str[i]=='D') {
                 if(block[i][0]%period==1) fprintf(stdout,"B");
                 else if(block[i][0]%period==2) fprintf(stdout,"R");
                 else if(block[i][0]%period==0) fprintf(stdout,"G");
@@ -1610,7 +1610,7 @@ fprintf(stdout,"\n0 setlinejoin 0 setlinecap\n");
             if(codpot_col[i]==1) fprintf(stdout,"R");
             else if(codpot_col[i]==2) fprintf(stdout,"G");
             else if(codpot_col[i]==0) fprintf(stdout,"B");
-            if(codpot_str[i]==' ') fprintf(stdout," %.1f %.2f M %.1f %.2f L stroke\n",(codpot[i][0]-(float)start)/delta*WIDTH,HIGHT+HIGHT_CP+1.0,(codpot[i][1]-(float)start)/delta*WIDTH,HIGHT+HIGHT_CP+1.0);
+            if(codpot_str[i]=='D') fprintf(stdout," %.1f %.2f M %.1f %.2f L stroke\n",(codpot[i][0]-(float)start)/delta*WIDTH,HIGHT+HIGHT_CP+1.0,(codpot[i][1]-(float)start)/delta*WIDTH,HIGHT+HIGHT_CP+1.0);
             else fprintf(stdout," %.1f %.2f M %.1f %.2f L stroke\n",(codpot[i][0]-(float)start)/delta*WIDTH,HIGHT+HIGHT_CP-1.0,(codpot[i][1]-(float)start)/delta*WIDTH,HIGHT+HIGHT_CP-1.0);
         }
 
@@ -1631,7 +1631,7 @@ fprintf(stdout,"\n0 setlinejoin 0 setlinecap\n");
 	    if(Scodpot_type[i] == 'H') fprintf(stdout, " L2 ");
 	    else                       fprintf(stdout, " L1 ");
 
-            if(Scodpot_str[i]==' ')
+            if(Scodpot_str[i]=='D')
                 fprintf(stdout, " %.1f %.2f M %.1f %.2f L stroke\n", (Scodpot[i][0] - (float)start) / delta * WIDTH, HIGHT + HIGHT_SCP + 1.0, (Scodpot[i][1] - (float)start) / delta * WIDTH, HIGHT + HIGHT_SCP + 1.0);
             else if(Scodpot_str[i] == 'C')
                 fprintf(stdout, " %.1f %.2f M %.1f %.2f L stroke\n", (Scodpot[i][0] - (float)start) / delta * WIDTH, HIGHT + HIGHT_SCP - 1.0, (Scodpot[i][1] - (float)start) / delta * WIDTH, HIGHT + HIGHT_SCP - 1.0);
@@ -1659,7 +1659,7 @@ fprintf(stdout,"\n0 setlinejoin 0 setlinecap\n");
 	  {
 	  name_pos= (int)(((pub[i][0] + pub[i][1]) / 2 - (float)start) * 300 / delta) - name_len + HANGOVER;
 
-            if(pub_str[i]==' ') {
+            if(pub_str[i]=='D') {
                 if(period%3) fprintf(stdout,"Black");
                 else if(pub[i][0]%period==1) fprintf(stdout,"B");
                 else if(pub[i][0]%period==2) fprintf(stdout,"R");
@@ -1690,7 +1690,7 @@ fprintf(stdout,"\n0 setlinejoin 0 setlinecap\n");
 	  {
 	  name_pos= (int)(((modified[i][0] + modified[i][1]) / 2 - (float)start) * 300 / delta) - name_len + HANGOVER;
 
-            if(mod_str[i] == ' ') {
+            if(mod_str[i] == 'D') {
                 if(period % 3) fprintf(stdout, "Black");
                 else if(modified[i][0] % period == 1) fprintf(stdout, "LB");
                 else if(modified[i][0] % period == 2) fprintf(stdout, "LR");
@@ -1723,7 +1723,7 @@ fprintf(stdout,"\n0 setlinejoin 0 setlinecap\n");
 	      {
 	      name_pos= (int)(((newP[i][0] + newP[i][1]) / 2 - (float)start) * 300 / delta) - name_len + HANGOVER;
 
-                if(newP_str[i] == ' ') {
+                if(newP_str[i] == 'D') {
                     if(period % 3) fprintf(stdout,"Gray");
                     else if(newP[i][0] % period == 1) fprintf(stdout,"LB");
                     else if(newP[i][0] % period == 2) fprintf(stdout,"LR");
@@ -1759,7 +1759,7 @@ fprintf(stdout,"\n0 setlinejoin 0 setlinecap\n");
 	      {
               name_pos= (int)(((new[i][0] + new[i][1]) / 2 - (float)start) * 300 / delta) - name_len + HANGOVER;
 
-                if(new_str[i] == ' ') {
+                if(new_str[i] == 'D') {
                     if(period % 3) fprintf(stdout, "Black");
                     else if(new[i][0] % period == 1) fprintf(stdout, "B");
                     else if(new[i][0] % period == 2) fprintf(stdout, "R");
@@ -1801,7 +1801,7 @@ fprintf(stdout,"\n0 setlinejoin 0 setlinecap\n");
 
 	  d= (int)NaFS * name_yoffset(pub_line, pub_cline, name_pos, name_len, pub_str[i]);
 
-            if(pub_str[i]==' ') {
+            if(pub_str[i]=='D') {
                 if(period%3) fprintf(stdout,"Black");
                 else if(pub[i][0]%period==1) fprintf(stdout,"B");
                 else if(pub[i][0]%period==2) fprintf(stdout,"R");
@@ -1836,7 +1836,7 @@ fprintf(stdout,"\n0 setlinejoin 0 setlinecap\n");
 
 	  d= (int)NaFS * name_yoffset(new_line, new_cline, name_pos, name_len, mod_str[i]);
 
-            if(mod_str[i] == ' ') {
+            if(mod_str[i] == 'D') {
                 if(period % 3) fprintf(stdout, "Black");
                 else if(modified[i][0] % period == 1) fprintf(stdout, "LB");
                 else if(modified[i][0] % period == 2) fprintf(stdout, "LR");
@@ -1872,7 +1872,7 @@ fprintf(stdout,"\n0 setlinejoin 0 setlinecap\n");
 
 	      d= (int)NaFS * name_yoffset(new_line, new_cline, name_pos, name_len, newP_str[i]);
 
-                if(newP_str[i] == ' ') {
+                if(newP_str[i] == 'D') {
                     if(period % 3) fprintf(stdout,"Gray");
                     else if(newP[i][0] % period == 1) fprintf(stdout,"LB");
                     else if(newP[i][0] % period == 2) fprintf(stdout,"LR");
@@ -1910,7 +1910,7 @@ fprintf(stdout,"\n0 setlinejoin 0 setlinecap\n");
 
               d= (int)NaFS * name_yoffset(new_line, new_cline, name_pos, name_len, new_str[i]);
 
-                if(new_str[i] == ' ') {
+                if(new_str[i] == 'D') {
                     if(period % 3) fprintf(stdout, "Black");
                     else if(new[i][0] % period == 1) fprintf(stdout, "B");
                     else if(new[i][0] % period == 2) fprintf(stdout, "R");
