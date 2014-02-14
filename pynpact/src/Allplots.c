@@ -650,13 +650,13 @@ main(int argc, char *argv[]) {
                 new= (int **)realloc(new, (nn + 1)*sizeof(int *));
                 new[nn]= (int *)malloc(2 * sizeof(int));
                 strncpy(new_name[nn], longstr, 48);
-                p= strchr(new_name[nn], 'D');
+                p= strchr(new_name[nn], ' ');
                 p[0]= '\0';
-		p= strrchr(longstr, 'D'); ++p;
+		p= strrchr(longstr, ' '); ++p;
                 p= strchr(p, '.'); p += 2;
 			if(p[0] == '>' || p[0] == '<') ++p;
                 ge= atoi(p);
-		p= strrchr(longstr, 'D'); ++p;
+		p= strrchr(longstr, ' '); ++p;
                 if(p[0] == 'c')
 		{
 		p += 11;
@@ -694,12 +694,12 @@ main(int argc, char *argv[]) {
                 newP= (int **)realloc(newP, (nnP + 1) * sizeof(int *));
                 newP[nnP]= (int *)malloc(2 * sizeof(int));
                 strncpy(newP_name[nnP], longstr, 48);
-                p= strchr(newP_name[nnP], 'D');
+                p= strchr(newP_name[nnP], ' ');
                 p[0]= '\0';
-		p= strrchr(longstr, 'D'); ++p;
+		p= strrchr(longstr, ' '); ++p;
                 p= strchr(p, '.');
                 ge= atoi(p + 2);
-		p= strrchr(longstr, 'D'); ++p;
+		p= strrchr(longstr, ' '); ++p;
                 if(p[0] == 'c')
 		{
 		p += 11;
@@ -756,13 +756,13 @@ main(int argc, char *argv[]) {
                 pub= (int **)realloc(pub, (np + 1) * sizeof(int *));
                 pub[np]= (int *)malloc(2 * sizeof(int));
                 strncpy(pub_name[np], longstr, 48);
-                p= strchr(pub_name[np],'D');
+                p= strchr(pub_name[np],' ');
                 p[0]= '\0';
-		p= strrchr(longstr, 'D'); ++p;
+		p= strrchr(longstr, ' '); ++p;
                 p= strchr(p, '.'); p += 2;
 			if(p[0] == '>' || p[0] == '<') ++p;
                 ge= atoi(p);
-		p= strrchr(longstr, 'D'); ++p;
+		p= strrchr(longstr, ' '); ++p;
                 if(p[0]=='c')
 		{
 		p += 11;
@@ -818,13 +818,13 @@ main(int argc, char *argv[]) {
                 modified= (int **)realloc(modified,(ne + 1)*sizeof(int *));
                 modified[ne]= (int *)malloc(2 * sizeof(int));
                 strncpy(mod_name[ne], longstr, 48);
-                p= strchr(mod_name[ne],'D');
+                p= strchr(mod_name[ne],' ');
                 p[0]= '\0';
-                p= strrchr(longstr,'D'); ++p;
+                p= strrchr(longstr,' '); ++p;
                 p= strchr(p, '.'); p += 2;
 			if(p[0] == '<' || p[0] == '>') ++p;
                 ge= atoi(p);
-                p= strrchr(longstr,'D'); ++p;
+                p= strrchr(longstr,' '); ++p;
                 if(p[0] =='c')
 		{
 		p += 11;
