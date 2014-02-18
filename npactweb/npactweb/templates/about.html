@@ -6,37 +6,37 @@
 <div class="contentPadding">
 <h2 id="secHeader" title="N-PACT - About"><span><!--header image here--></span>N-PACT About</h2>
 <p></p><h4>About</h4>
-<p>N-PACT is a computational tool designed to identify protein-coding regions in a nucleotide sequence of any length and composition, using a new quantitative approach extending the principle of visual frame analysis (<a href="http://www.sciencedirect.com/science/article/pii/0378111984901161">Bibb et al. 1984</a>). N-PACT identifies sequence segments of statistically significant compositional contrast, and uses them for gene prediction (<a href="">Oden and Brocchieri 2012</a>, in preparation). </p>
+<p>N-PACT is a computational tool designed ultimately to identify protein-coding regions within a nucleotide sequence, for gene finding and sequence annotation. It uses a new quantitative approach that extends the principle of visual frame analysis (<a href="http://www.sciencedirect.com/science/article/pii/0378111984901161">Bibb et al. 1984</a>). N-PACT identifies sequence segments of any length multiple of three, showing statistically significant 3-base periodicities and associated with ORF structures (<a href="">Oden and Brocchieri 2012</a>, in preparation). </p>
 
-<p>The N-PACT server produces a multi-page graphical output representing, along the sequence, frame-specific GC (or any nucleotide) content for frame analysis (<a href="http://www.bioinformatika.pbf.hr/Articles/FramePlot.pdf">Ishikawa and Hotta 1999</a>; <a href="http://www.ncbi.nlm.nih.gov/pubmed/15919911">Brocchieri et al. 2005</a>), published gene annotations (when available), high-scoring segments and new gene predictions.</p>
+<p>The N-PACT server produces a multi-page graphical output representing, along sequence positions, frame-specific GC (or optionally any nucleotide combination) content for frame analysis (<a href="http://www.bioinformatika.pbf.hr/Articles/FramePlot.pdf">Ishikawa and Hotta 1999</a>; <a href="http://www.ncbi.nlm.nih.gov/pubmed/15919911">Brocchieri et al. 2005</a>), published gene annotations (when available), high-scoring segments and new gene predictions.</p>
 
 <h4>Getting Started</h4>
-<p>To start the analysis upload a nucleotide sequence file in the Genbank format, using any of the methods provided. Directly start the analysis with default parameters clicking "Get Analysis!", or change options with "Configure Analysis". The program accepts as input a Genbank-like sequence text file that, minimally, must include a header with the fields DEFINITION, describing the sequence, and ORIGIN, with following lines containing sequence data. Starting from the line subsequent to ORIGIN all alphabetic characters are interpreted as sequence characters. Any alphabetic character other than A/a, C/c, G/g, T/t, U/u is treated as unknown, and all non-alphabetic characters are ignored. Optional annotated coding sequences are read from the file from the " CDS " fields, following the Genbank format. Gene names are assigned reading them from the variables "gene" (first choice) or "locus_tag" (second choice).</p>
+<p>To start the analysis first upload a nucleotide sequence file in the Genbank format, using any of the methods provided. Directly start the analysis with default parameters clicking "Get Analysis!", or change options with "Configure Analysis". The program accepts as input a Genbank-like sequence text file that, minimally, must include a header with the fields DEFINITION, describing the sequence, and ORIGIN, with following lines expected to contain sequence data. Starting from the line subsequent to ORIGIN all alphabetic characters are interpreted as sequence characters. Any alphabetic character other than A/a, C/c, G/g, T/t, U/u is treated as unknown, and all non-alphabetic characters are ignored. Optional annotated coding sequences are read from the file " CDS " fields, following the Genbank format. Gene names are read from the variables "gene" (first choice) or "locus_tag" (second choice).</p>
 
 <h4>N-profile and prediction graphical output</h4>
 <p>N-PACT produces a multi-page graphical ouput in Postscript or PDF format. This output contains the following information:</p>
-<p> Newly Annotated. These are coding regions newly predicted by the N-PACT procedure, represented by arrows pointing in the 5'-to-3' orientation. Newly predicted coding regions are in bold-face, whereas coding regions corresponding to published genes but with modified starting position are displayed in lighter color. The names of the coding regions are in the form: [H/G]-number[-/*][A/a/G/g/T/t/C/c/W/w], for example, H-2335*A, G-123-t, where:</p>
+<p> Newly Identified ORFs. These are ORFs newly identified by the N-PACT procedure (not included in the submitted CDS annotations) or potentially significantly modifying start of translation of an annotated CDS. ORFS are represented as pointing in the 5'-to-3' orientation (see Coloring Scheme below). Newly identified ORFs are in bold-face, whereas those matching coding regions corresponding to published genes but with modified starting position are displayed in lighter color. The names assigned to the newly identified ORFs are in the form: [H/G]-number[-/*][A/a/G/g/T/t/C/c/W/w], for example, H-2335*A, G-123-t, where:</p>
 <list>
-<p>	[H/G] identifies the type of hit and assumes values:</p>
+<p>	[H/G] identifies the type of hit:</p>
 <p>		H: H-type hit, identified using a scoring scheme based on compositional expectations of coding regions.</p>
-<p>		G: G-type hit, identified by non-random association of base type with codon position.</p>
+<p>		G: G-type hit, identified by any non-random association of base type with codon position.</p>
 <p>	number: A unique identification number followed by:</p>
-<p>	'-', if significance does not reach global threshold (less strong contrast).</p>
-<p>	'*', if ignificance reaches global threshold (stronger contrast).</p>
-<p>	[A/a/G/g/T/t/C/c/W/w] is an upper or lower case character describing the predicted start-of-translation codon. Upper case indicates that the predicted codon is within 15 codons of the start of the hit, lower case indicates that it is more distant. The potential start-of-translation codons looked for are, in the order:</p>
+<p>	'-', if E-value does not reach a global threshold of 0.01 (less strong compositional periodicity).</p>
+<p>	'*', if E-value reaches the global threshold of 0.01 (stronger compositional periodicity).</p>
+<p>	[A/a/G/g/T/t/C/c/W/w] is one upper or lower case character indicating the potential start-of-translation codon closest to the 5'-end of the hit. Upper case indicates that the predicted codon is within 15 codons of the start of the hit (and up to three codons within the hit), lower case indicates that it is more distant. The potential start-of-translation codons considered are, in the order:</p>
 <list>
 <p>		ATG (A/a) or GTG (G/g)</p>
 <p>		TTG (T/t)</p>
 <p>		CTG (C/c)</p>
 <p>		ATT (W/w)</p>
 </list>
-<p>Input file CDS. Coding regions reported in the annotation of the Genbank input file, from the CDS field (see above).</p>
-<p>Hits. Graphical representation of high-scoring segments identified as colored segments on two tracks, corresponding to direct strand (upper track) and complementary strand (lower track).</p>
-<p>Profiles. These curves represent by default GC content within a moving window of 201 nucleotides. The user can choose to display other nucleotide type combinations (e.g., purines). Each curve represents percent frequencies within a subsequence composed of every third nucleotide of the input sequence, starting, respectively, from position 1 (red), 2 (green) or 3 (blue). A light-gray curve indicates the overall composition of the genome within corresponding intervals.</p>
+<p>Input file CDS. Coding regions reported in the annotation of the Genbank input file, from the CDS field (see Coloring Scheme below).</p>
+<p>Hits. Graphical representation of high-scoring segments identified as colored segments on two tracks, corresponding to direct strand (upper track) and complementary strand (lower track). See COroring Scheme below for color assignment.</p>
+<p>Profiles. These curves represent by default GC content within a moving window of 201 nucleotides. The user can choose to display other nucleotide type combinations (e.g., purines). Each curve represents percent frequencies within a subsequence composed of every third nucleotide of the input sequence, starting, respectively, from position 1 (red), 2 (green) or 3 (blue) of the input sequence. A light-gray curve indicates the overall composition of the genome within the corresponding interval. Other nucleotide type combinations (e.g., purines) can optionally be displayed from the Configure Analysis page.</p>
 </list>
 
-<h4>Coloring scheme</h4>
-<p>The coloring scheme used throughout the graphical output follows the following rules. The nucleotide sub-sequences starting, respectively, from position 1, 2 or 3 of the sequence - composed of positions (<it>i</it> mod 3) where <it>i</it> = 1, 2 or 3 - are assigned by defalut color red (R), green (G), and blue (B), respectively. Annotated genes, newly predicted genes, and high-scoring segments, are assigned the same color of the sub-sequence corresponding to their third codon positions.</p>
+<h4>Coloring Scheme</h4>
+<p>The coloring scheme used throughout the graphical output follows the following rules. The nucleotide sub-sequences starting, respectively, from position 1, 2 or 3 of the sequence - composed of positions (<it>i</it> mod 3) where <it>i</it> = 1, 2 or 3 - are colored in red (R), green (G), and blue (B), respectively. Annotated genes, newly predicted genes, and high-scoring segments, are colored as the sub-sequence in phase with their third codon positions.</p>
 </div>
 
 {%endblock content %}
