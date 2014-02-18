@@ -17,12 +17,17 @@
 <p>N-PACT produces a multi-page graphical ouput in Postscript or PDF format, containing the following information:</p>
 <p> <b>Newly Identified ORFs</b>. These are ORFs newly identified by the N-PACT procedure (not included in the submitted CDS annotations) or potentially significantly modifying start of translation of an annotated CDS. ORFS are represented as pointing in the 5'-to-3' orientation (see Coloring Scheme below coloring-key). Newly identified ORFs are in bold-face, whereas those matching coding regions corresponding to published genes but with modified starting position are displayed in lighter color. The names assigned to the newly identified ORFs are in the form:</p><p>[H/G]-####[-/*][A/a/G/g/T/t/C/c/W/w]</p><p>For example: H-2335*A, G-123-t, where:</p>
 <list>
-<p>	[H/G] identifies the type of hit:</p>
+<p>	<b>[H/G]</b> identifies the type of hit:</p>
+<list>
 <p>		<b>H</b>: H-type hit, identified using a scoring scheme based on compositional expectations of coding regions.</p>
 <p>		<b>G</b>: G-type hit, identified by any non-random association of base type with codon position.</p>
+</list>
 <p>	<b>####</b>: A unique identification number followed by:</p>
-<p>	<b>'-'</b>, if E-value does not reach a global threshold of 0.01 (less strong compositional periodicity).</p>
-<p>	<b>'*'</b>, if E-value reaches the global threshold of 0.01 (stronger compositional periodicity).</p>
+<p>	<b>[-/*]</b> identifies the E-value:</p>
+<list>
+<p>	<b>'-'</b>, if E-value > 0.01 (weaker compositional periodicity).</p>
+<p>	<b>'*'</b>, if E-value >= 0.01 (stronger compositional periodicity).</p>
+</list>
 <p>	<b>[A/a/G/g/T/t/C/c/W/w]</b> is an upper- or lower-case character indicating the potential start-of-translation codon closest to the 5'-end of the hit. Upper case indicates that the predicted codon is within 15 codons of the start of the hit (and up to three codons within the hit), lower case indicates that it is more distant. The potential start-of-translation codons considered are, in the order:</p>
 <list>
 <p>		ATG (A/a) or GTG (G/g)</p>
