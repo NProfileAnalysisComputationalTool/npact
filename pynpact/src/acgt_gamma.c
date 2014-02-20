@@ -3112,7 +3112,7 @@ void characterize_published_genes(int ncds, int tot_Ghits, double nuc[], long by
 // output3 = *.verbose   ( detailed features of all annotations and hits )
 // output4 = *.extended ( published CDSs extended by hit)
 
-    fprintf(output1,"List of published CDSs with NS= Not supported or CO= Contradicted annotation.\n");
+    fprintf(output1,"List of published CDSs with NS= Not supported, CO= Contradicted, or EX= Extended annotation.\n");
 //  fprintf(output4,"List of published CDSs EX= Extended by hits.\n");
     fprintf(output2,"List of published CDSs confirmed by this analysis (p <= %.5f) (coordinates from start of first hit to stop codon)\n", SIGNIFICANCE);
     fprintf(output3,"PUBLISHED ANNOTATION\n\nNo\tGene\tCDS-fm\tCDS-to\tCDS-len\tStrand\tColor\tEntropy\tG-test (significance)\tCharacterization\n");
