@@ -265,7 +265,7 @@ void	process_hss(int from_hss, int to_hss, int ncds);
 void	write_results(int from_hss, int to_hss, int ncds, int genome_size, long bytes_from_origin);
 int 	find_Ghits(int genome_size, int tot_hss, long bytes_from_origin, int *on);
 void	characterize_published_genes(int ncds, int tot_Ghits, double nuc[], long bytes_from_origin, long *ffrom);
-void	write_published_exon(int j, int h, int k, int from, int to, int s1, int s2, double G, char Pg[], double nuc[], FILE *output1, FILE *output2, FILE *output3, FILE *output4);
+void	write_published_exon(int j, int h, int k, int from, int to, int s1, int s2, double G, char Pg[], double nuc[], FILE *output1, FILE *output2, FILE *output3);
 void	shuffle(char *seq, int n, int remove_stops);
 void	randomize(char *seq, int n);
 int	position(int a, int c, int g, int t);
@@ -3099,12 +3099,13 @@ void characterize_published_genes(int ncds, int tot_Ghits, double nuc[], long by
     int	i, j, l, k, h, from, to, s1, s2, out;
     char	Pg[15];
     double	G;
-    FILE	*output1, *output2, *output3, *output4;
+    FILE	*output1, *output2, *output3;
+//  FILE	*output4;
 
     output1= get_out_file(".excluded", "w");
     output2= get_out_file(".confirmed", "w");
     output3= get_out_file(".verbose", "w");
-    output4= get_out_file(".extended", "w");
+//  output4= get_out_file(".extended", "w");
 
 // output1 = *.excluded ( published CDSs contradicted or not supported)
 // output2 = *.confirmed ( published CDSs confirmed)
@@ -3112,7 +3113,7 @@ void characterize_published_genes(int ncds, int tot_Ghits, double nuc[], long by
 // output4 = *.extended ( published CDSs extended by hit)
 
     fprintf(output1,"List of published CDSs with NS= Not supported or CO= Contradicted annotation.\n");
-    fprintf(output4,"List of published CDSs EX= Extended by hits.\n");
+//  fprintf(output4,"List of published CDSs EX= Extended by hits.\n");
     fprintf(output2,"List of published CDSs confirmed by this analysis (p <= %.5f) (coordinates from start of first hit to stop codon)\n", SIGNIFICANCE);
     fprintf(output3,"PUBLISHED ANNOTATION\n\nNo\tGene\tCDS-fm\tCDS-to\tCDS-len\tStrand\tColor\tEntropy\tG-test (significance)\tCharacterization\n");
 
@@ -3226,14 +3227,14 @@ void characterize_published_genes(int ncds, int tot_Ghits, double nuc[], long by
 					}
 				}
 			}
-            write_published_exon(j, h, k, from, to, s1, s2, G, Pg, nuc, output1, output2, output3, output4);
+            write_published_exon(j, h, k, from, to, s1, s2, G, Pg, nuc, output1, output2, output3);
 		}
 	}
 
     fclose(output1);
     fclose(output2);
     fclose(output3);
-    fclose(output4);
+//  fclose(output4);
     fseek(fp, bytes_from_origin, SEEK_SET);
 }
 
@@ -3245,7 +3246,7 @@ void characterize_published_genes(int ncds, int tot_Ghits, double nuc[], long by
 
 // Requires global FILE *fp
 
-void write_published_exon(int j, int h, int k, int from, int to, int s1, int s2, double G, char Pg[], double nuc[], FILE *output1, FILE *output2, FILE *output3, FILE *output4)
+void write_published_exon(int j, int h, int k, int from, int to, int s1, int s2, double G, char Pg[], double nuc[], FILE *output1, FILE *output2, FILE *output3)
 {
     int         hi;
     char	name[50];
@@ -3289,8 +3290,8 @@ void write_published_exon(int j, int h, int k, int from, int to, int s1, int s2,
 		sprintf(name, "EX%d", j+1);
 		}
 			
-		if(gene[j].strand == 'D') fprintf(output4,"%s %d..%d\n", name, from + s1, to + s2);
-		else                      fprintf(output4,"%s complement(%d..%d)\n", name, from + s1, to + s2);
+		if(gene[j].strand == 'D') fprintf(output1,"%s %d..%d\n", name, from + s1, to + s2);
+		else                      fprintf(output1,"%s complement(%d..%d)\n", name, from + s1, to + s2);
 	}
 	else
 	{
