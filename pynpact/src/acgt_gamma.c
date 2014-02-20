@@ -3102,7 +3102,7 @@ void characterize_published_genes(int ncds, int tot_Ghits, double nuc[], long by
     FILE	*output1, *output2, *output3;
 //  FILE	*output4;
 
-    output1= get_out_file(".excluded", "w");
+    output1= get_out_file(".not_confirmed", "w");
     output2= get_out_file(".confirmed", "w");
     output3= get_out_file(".verbose", "w");
 //  output4= get_out_file(".extended", "w");
