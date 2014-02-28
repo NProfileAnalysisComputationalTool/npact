@@ -334,6 +334,7 @@ int main (int argc, char *argv[])
        strstr(organism_file, "Ureaplasma") || 
        strstr(organism_file, "Candidatus_Hodgkinia")) 
         MYCOPLASMA= 1;
+     else aa_letters[56]= '*';
 
     p = strrchr(organism_file, '/');
     if(p)
