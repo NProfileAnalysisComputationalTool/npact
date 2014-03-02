@@ -237,6 +237,7 @@ void	read_tables();
 int	analyze_genome(int n, int tot_hss, int *on);
 int	genome_composition(double *tnuc, long *ffrom, int *o, int k);
 void	get_sequence(int from, int len, char strand, char *ORF);
+int	mycoplasma_code();
 long	annotation(int *ncds, int *nexons);
 void	sort(double * array, int size);
 void	build_scores(char *seg, int n, double *sc);
@@ -328,14 +329,6 @@ int main (int argc, char *argv[])
     }
     argi++;
 
-    /* Done processing command line arguments */
-    if(strstr(organism_file, "Mycoplasma") || 
-       strstr(organism_file, "Mesoplasma") || 
-       strstr(organism_file, "Ureaplasma") || 
-       strstr(organism_file, "Candidatus_Hodgkinia")) 
-        MYCOPLASMA= 1;
-     else aa_letters[56]= '*';
-
     p = strrchr(organism_file, '/');
     if(p)
         p++;
@@ -353,6 +346,10 @@ int main (int argc, char *argv[])
         fprintf(stderr, "Organism file %s not found.\n", organism_file); 
         exit(1);
     }
+
+    // Determines from DEFINITION line of Genbank file if the Mycoplasma genetic code should be used
+     if(MYCOPLASMA= mycoplasma_code());
+     else aa_letters[56]= '*';
 
     // Reads annotated CDSs and records start-of-sequence position in the file
     bytes_from_origin= annotation(&ncds, &nexons);		
@@ -1099,6 +1096,27 @@ double score(char *seq,int n,double *sc,int *from,int *to, int flag)
 }
 
 // End of function score()
+
+/************************************/
+/**** Function mycoplasma_code() ****/
+/************************************/
+
+int mycoplasma_code()
+{
+    int     flag= 0;
+    char    longstr[512];
+
+	while(fgets(longstr, 510, fp) && strncmp(longstr, "DEFINITION", 10) && !feof(fp));
+
+    if(!strncmp(longstr, "DEFINITION", 10) && 
+      (strstr(longstr, "Mycoplasma") || 
+       strstr(longstr, "Mesoplasma") || 
+       strstr(longstr, "Ureaplasma") || 
+       strstr(longstr, "Candidatus_Hodgkinia"))) 
+        flag= 1;
+
+return(flag);
+}
 
 /*******************************/
 /**** Function annotation() ****/
