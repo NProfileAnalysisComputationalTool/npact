@@ -1,4 +1,4 @@
-/*  -*- c-file-style:"linux" c-basic-offset:4 tab-width:8 -*-  */
+/*  -*- c-file-stwyle:"linux" c-basic-offset:4 tab-width:8 -*-  */
 #include <stdlib.h>
 #include <math.h>
 #include <stdio.h>
@@ -3117,6 +3117,7 @@ void characterize_published_genes(int ncds, int tot_Ghits, double nuc[], long by
 {
     int	i, j, l, k, h, from, to, s1, s2, out;
     char	Pg[15];
+    float	lr;
     double	G;
     FILE	*output1, *output2, *output3;
 //  FILE	*output4;
@@ -3179,18 +3180,22 @@ void characterize_published_genes(int ncds, int tot_Ghits, double nuc[], long by
 						{
 							if(hss[i].fromp >= from - mHL/2 && hss[i].top <= to + mHL/2)  // hit embedded
 							{
+							lr= (float)(hss[i].top - hss[i].fromp + 1) / (float)(to - from + 1);
 								if(gene[j].type[h] != 2)
 								{
 								gene[j].type[h]= k= 1;
 									if(gene[j].strand == 'D') gene[j].newstart[h]= hss[i].fromp;
 									else                      gene[j].newstart[h]= hss[i].top;
 								}
-                                hss[i].type= 2;
+                                if(lr < 1.0 / LEN_RATIO) hss[i].type= 2;
+                                else                     hss[i].type= 1;
 							}
 							else    // hit overlapped
 							{
+							lr= (float)(hss[i].top - hss[i].fromp + 1) / (float)(to - from + 1);
                                 gene[j].type[h]= k= 2;
-                                hss[i].type= 3;
+                                if(lr > LEN_RATIO) hss[i].type= 3;
+                                else               hss[i].type= 1;
 								if(gene[j].strand == 'D')
 								{
 									if(from > hss[i].fromp && to < hss[i].top)
