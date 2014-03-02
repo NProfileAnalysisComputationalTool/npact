@@ -1052,13 +1052,6 @@ main(int argc, char *argv[]) {
       if(!(i % EVERY)) fprintf(stdout, "(%d) Lshow\n", i);
       else             fprintf(stdout, "\n");
     }
-
-    for(i= 1; i <= MAXLOG; ++i)
-    {
-    fprintf(stdout, "%.3f %.3f M %.3f 0 RL %.3f %.3f RM ", -TIC_W, HIGHT / 2.0 -i * TIC_Y / MAX * HIGHT, TIC_W, -TIC_W - 3.0, -3.0, i + EVERY);
-      if(!(i % EVERY)) fprintf(stdout, "(%d) Lshow\n", i);
-      else             fprintf(stdout, "\n");
-    }
   fprintf(stdout, "stroke\n");
   }
   else
