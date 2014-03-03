@@ -14,7 +14,7 @@
 
 double	SIGNIFICANCE= 0.001;
 int	RANDOMIZE= 0;
-#define MAX_ENTROPY 0.40
+#define MIN_ENTROPY 0.40
 
 // Hits are sorted by length of global significance (the sequence length at which
 // the hit has significance p < 0.01 ) if none of these conditions below apply:
@@ -2585,7 +2585,7 @@ void write_results(int from_hss, int to_hss, int ncds, int genome_size, long byt
 		else print_len= po;
 
         fprintf(output3, "%d.%d\t%s\t%d\t%d\t%d\t%c\t%c\t%d\t%d\t%d\t%d\t%.2f\t%.2f\t%.4f\t%6.2f %s\t%.5e\t%c-%s", hss[o[i]].orf_num, hss[o[i]].frame, name, hss[o[i]].stop1+s1, hss[o[i]].stop2+s2, hss[o[i]].stop2-hss[o[i]].stop1+1, hss[o[i]].strand, hss[o[i]].color, hss[o[i]].hit_num, hss[o[i]].fromp+1, hss[o[i]].top+1, hss[o[i]].top-hss[o[i]].fromp+1, hss[o[i]].entropy, hss[o[i]].score, hss[o[i]].prob, G, Pg, print_len, hss[o[i]].hit_type, Prediction[k]);
-		if(hss[o[i]].entropy <= MAX_ENTROPY) fprintf(output3, " repetitive");
+		if(hss[o[i]].entropy <= MIN_ENTROPY) fprintf(output3, " repetitive");
 
 		if(k == 3) fprintf(output3," %d",hss[o[i]].exten);
 
@@ -2602,7 +2602,7 @@ void write_results(int from_hss, int to_hss, int ncds, int genome_size, long byt
 
 					if(hss[o[i]].strand == 'D')
 					{
-						if(hss[o[i]].entropy > MAX_ENTROPY)
+						if(hss[o[i]].entropy > MIN_ENTROPY)
 						{
 						flag= 0;
 							if(hss[o[i]].start)
@@ -2688,7 +2688,7 @@ void write_results(int from_hss, int to_hss, int ncds, int genome_size, long byt
 					}
 					else
 					{
-						if(hss[o[i]].entropy > MAX_ENTROPY)
+						if(hss[o[i]].entropy > MIN_ENTROPY)
 						{
 						flag= 0;
 							if(hss[o[i]].start)
@@ -2805,7 +2805,7 @@ void write_results(int from_hss, int to_hss, int ncds, int genome_size, long byt
 
 					if(hss[o[i]].strand == 'D')
 					{
-						if(hss[o[i]].entropy > MAX_ENTROPY)
+						if(hss[o[i]].entropy > MIN_ENTROPY)
 						{
 				j= strlen(name);
                                 if(name[j - 1] != '*') { strcat(name, "-"); ++j; }
@@ -2848,7 +2848,7 @@ void write_results(int from_hss, int to_hss, int ncds, int genome_size, long byt
 					}
 					else
 					{
-						if(hss[o[i]].entropy > MAX_ENTROPY)
+						if(hss[o[i]].entropy > MIN_ENTROPY)
 						{
 				j= strlen(name);
                                 if(name[j - 1] != '*') { strcat(name, "-"); ++j; }
@@ -3274,7 +3274,7 @@ void write_published_exon(int j, int h, int k, int from, int to, int s1, int s2,
     fprintf(output3,"%d\t%s",j+1, gene[j].name);
 	if(gene[j].num_exons > 1) fprintf(output3,".%d",h+1);
     fprintf(output3, "\t%d\t%d\t%d\t%c\t%c\t%.2f\t%6.2f %s\t%s", from + s1, to + s2, to - from + 4, gene[j].strand, gene[j].color[h], gene[j].entropy[h], G, Pg, Annotation[k]);
-	if(gene[j].entropy[h] <= MAX_ENTROPY) fprintf(output3, " repetitive");
+	if(gene[j].entropy[h] <= MIN_ENTROPY) fprintf(output3, " repetitive");
     fprintf(output3, "\n\tA= %5.2f  C= %5.2f  G= %5.2f  T= %5.2f  S= %5.2f  S1= %5.2f  S2= %5.2f  S3= %5.2f  R= %5.2f  R1= %5.2f  R2= %5.2f  R3= %5.2f\n", nuc[3*6+0], nuc[3*6+1], nuc[3*6+2], nuc[3*6+3], nuc[3*6+4], nuc[0*6+4], nuc[1*6+4], nuc[2*6+4], nuc[3*6+5], nuc[0*6+5], nuc[1*6+5], nuc[2*6+5]);
 
 	if(k == 0 || k == 3) 
