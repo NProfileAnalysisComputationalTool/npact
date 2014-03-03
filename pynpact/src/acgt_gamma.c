@@ -177,8 +177,6 @@ struct exons
     int     from;		// First coding position encountered along the genome
     int     to;		// Last coding position encountered along the genome (excluding stop codon).
     int     *start;		// 5' position of each exon, numbered 5' to 3'.
-    int     *newstart;	// Modified 5' position of each exon, numbered 5' to 3'.
-    int     *newend;	// Modified 3' position of each exon, numbered 5' to 3'.
     int     *sup;	// Superimposed contradicting hit.
     int     *end;		// 3' position of each exon (excluding stop codon), numbered 5' to 3'.
     int     *fpos;		// Position in ffrom array where file-address of start of exon sequence is recorded.
@@ -1165,9 +1163,7 @@ long annotation(int *ncds, int *nexons)
 			while(p= strchr(p, ',')) { gene[n].num_exons += 1; ++p; }
 		
             gene[n].start= (int *)malloc(gene[n].num_exons*sizeof(int));
-            gene[n].newstart= (int *)malloc(gene[n].num_exons*sizeof(int));
             gene[n].end= (int *)malloc(gene[n].num_exons*sizeof(int));
-            gene[n].newend= (int *)malloc(gene[n].num_exons*sizeof(int));
             gene[n].sup= (int *)malloc(gene[n].num_exons*sizeof(int));
             gene[n].fpos= (int *)malloc(gene[n].num_exons*sizeof(int));
             gene[n].type= (int *)malloc(gene[n].num_exons*sizeof(int));
@@ -1187,7 +1183,7 @@ long annotation(int *ncds, int *nexons)
 					{
                         ++p;
 					}
-                    gene[n].start[i]= gene[n].newstart[i]= atoi(p) - 1;
+                    gene[n].start[i]= atoi(p) - 1;
                     p1= strchr(p,',');
                     p2= strchr(p,'.');
 					if((p1 && p2 && p1<p2) || !p2) gene[n].end[i]= gene[n].start[i];
@@ -1195,7 +1191,7 @@ long annotation(int *ncds, int *nexons)
 					{
                         p= strstr(p,".."); p += 2;
 						while(p[0]<'0' || p[0]>'9') ++p;
-                        gene[n].end[i]= gene[n].newend[i]= atoi(p) - 1;
+                        gene[n].end[i]= atoi(p) - 1;
 					}
                     p= strchr(p,','); ++p;
                     gene[n].color[i]= RGB[ ( gene[n].start[i] - gene[n].len % 3 + 2 ) % 3 ];
@@ -1219,7 +1215,7 @@ long annotation(int *ncds, int *nexons)
                     ++p;
 					while(p[0] < '0' || p[0] > '9') ++p;
 
-                    gene[n].start[i]= gene[n].newstart[i]= atoi(p) - 1; --p;
+                    gene[n].start[i]= atoi(p) - 1; --p;
 					if(p1[0] != '.')
 					{
                         gene[n].end[i]= gene[n].start[i];
@@ -1230,7 +1226,7 @@ long annotation(int *ncds, int *nexons)
 						while(p[0]<'0' || p[0]>'9') --p;
 						while(p[0]>='0' && p[0]<='9') --p;
                         ++p;
-                        gene[n].end[i]= gene[n].newend[i]= atoi(p) - 1;
+                        gene[n].end[i]= atoi(p) - 1;
 						while(p[0]!=',' && p>cds) --p;
                         --p;
 					}
@@ -2235,7 +2231,7 @@ void rescue_hss(int to_hss)
 
 void process_hss(int from_hss, int to_hss, int ncds)
 {
-    int	i, j, k, h, l, *o, s1, s2, flag, from, to, newfrom, newto, gfrom, gto, out, nex;
+    int	i, j, k, h, l, *o, s1, s2, flag, from, to, gfrom, gto, out, nex;
     char	Pg[15];
     float	lr;
     double  scoi, scoj;
@@ -2374,8 +2370,8 @@ void process_hss(int from_hss, int to_hss, int ncds)
                 nex= gene[j].num_exons;
 				for(h= 0; h < nex; ++h)
 				{
-					if(gene[j].strand == 'D') { from= gene[j].start[h]; newfrom= gene[j].newstart[h]; to= newto= gene[j].end[h]; }
-					else                      { to= gene[j].start[h]; newto= gene[j].newstart[h]; from= newfrom= gene[j].end[h]; }
+					if(gene[j].strand == 'D') { from= gene[j].start[h]; to= gene[j].end[h]; }
+					else                      { to= gene[j].start[h]; from= gene[j].end[h]; }
 
 					if(!(to < gfrom + mHL/2 - 1 || from > gto - mHL/2 + 1)) // predicted CDS overlapping published CDS (gene[])
 					{
@@ -2414,8 +2410,8 @@ void process_hss(int from_hss, int to_hss, int ncds)
 								if(gene[j].type[h] == 1 || gene[j].type[h] == 2 || RANDOMIZE)
 								{
                                     out= 0;
-									if(gfrom < newfrom) out += newfrom - gfrom;
-									if(gto > newto) out += gto - newto;
+									if(gfrom < from) out += from - gfrom;
+									if(gto > to) out += gto - to;
 
                                     hss[o[i]].gsuper += gto - gfrom + 1 - out;
 
@@ -2432,8 +2428,8 @@ void process_hss(int from_hss, int to_hss, int ncds)
 								if(gene[j].type[h] == 1 || gene[j].type[h] == 2 || RANDOMIZE)
 								{
                                     out= 0;
-									if(gfrom < from) out += newfrom - gfrom;
-									if(gto > to) out += gto - newto;
+									if(gfrom < from) out += from - gfrom;
+									if(gto > to) out += gto - to;
 
                                     hss[o[i]].gsuper += gto - gfrom + 1 - out;
 
@@ -2484,7 +2480,7 @@ void process_hss(int from_hss, int to_hss, int ncds)
                                 hss[o[i]].type= k;
 							}
 						}
-						else hss[o[i]].type= 8;
+						else hss[o[i]].type= 1;
 					}
 				}
 			}
@@ -3182,11 +3178,7 @@ void characterize_published_genes(int ncds, int tot_Ghits, double nuc[], long by
 							{
 							lr= (float)(hss[i].top - hss[i].fromp + 1) / (float)(to - from + 1);
 								if(gene[j].type[h] != 2)
-								{
-								gene[j].type[h]= k= 1;
-									if(gene[j].strand == 'D') gene[j].newstart[h]= hss[i].fromp;
-									else                      gene[j].newstart[h]= hss[i].top;
-								}
+									gene[j].type[h]= k= 1;
                                 if(lr < 1.0 / LEN_RATIO) hss[i].type= 2;
                                 else                     hss[i].type= 1;
 							}
@@ -3201,18 +3193,18 @@ void characterize_published_genes(int ncds, int tot_Ghits, double nuc[], long by
 									if(from > hss[i].fromp && to < hss[i].top)
 									{
                                         hss[i].exten= from - hss[i].fromp + hss[i].top - to;
-                                        from= gene[j].newstart[h]= hss[i].fromp;
-                                        to= gene[j].newend[h]= hss[i].top;
+                                        from= hss[i].fromp;
+                                        to= hss[i].top;
 									}
 									else if(from > hss[i].fromp)
 									{
                                         hss[i].exten= from - hss[i].fromp;
-                                        from= gene[j].newstart[h]= hss[i].fromp;
+                                        from= hss[i].fromp;
 									}
 									else
 									{
                                         hss[i].exten= hss[i].top - to;
-                                        to= gene[j].newend[h]= hss[i].top;
+                                        to= hss[i].top;
 									}
 								}
 								else
@@ -3220,18 +3212,18 @@ void characterize_published_genes(int ncds, int tot_Ghits, double nuc[], long by
 									if(from > hss[i].fromp && to < hss[i].top)
 									{
                                         hss[i].exten= from - hss[i].fromp + hss[i].top - to;
-                                        from= gene[j].newend[h]= hss[i].fromp;
-                                        to= gene[j].newstart[h]= hss[i].top;
+                                        from= hss[i].fromp;
+                                        to= hss[i].top;
 									}
 									else if(from > hss[i].fromp)
 									{
                                         hss[i].exten= from - hss[i].fromp;
-                                        from= gene[j].newend[h]= hss[i].fromp;
+                                        from= hss[i].fromp;
 									}
 									else
 									{
                                         hss[i].exten= hss[i].top - to;
-                                        to= gene[j].newstart[h]= hss[i].top;
+                                        to= hss[i].top;
 									}
 								}
 							}
