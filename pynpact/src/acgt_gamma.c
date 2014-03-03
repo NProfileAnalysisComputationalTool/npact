@@ -2241,7 +2241,7 @@ void process_hss(int from_hss, int to_hss, int ncds)
 
 	for(i= 0; i < to_hss; ++i) o[i]= i;
 
-//Hits sorted by maximum length of global significance (the longer the length the higher the significance)
+//Hits sorted by maximum length of global significance (the longer the length the higher the significance) to evaluate global significance.
 
     logmsg(10, "Evaluating global significance..\n"); 
 
@@ -2348,16 +2348,18 @@ void process_hss(int from_hss, int to_hss, int ncds)
                         if(hss[o[i]].strand == 'D')                     // ORF from start codon (gfrom) to stop (gto)
                         {
                         gfrom= hss[o[i]].start_pos;
-				if(hss[o[i]].next_hit >= 0 && hss[hss[o[i]].next_hit].score > hss[o[i]].score)
-				gto= hss[hss[o[i]].next_hit].fromp - 1;
-                        	else gto= hss[o[i]].stop2;
+//				if(hss[o[i]].next_hit >= 0 && hss[hss[o[i]].next_hit].score > hss[o[i]].score)
+//				gto= hss[hss[o[i]].next_hit].fromp - 1;
+//                        	else gto= hss[o[i]].stop2;
+                        	gto= hss[o[i]].stop2;
                         }
                         else                                           // ORF from stop (gfrom) to start codon (gto)
                         {
                         gto= hss[o[i]].start_pos;
-				if(hss[o[i]].next_hit >= 0 && hss[hss[o[i]].next_hit].score > hss[o[i]].score)
-				gfrom= hss[hss[o[i]].next_hit].top + 1;
-                        	else gfrom= hss[o[i]].stop1;
+//				if(hss[o[i]].next_hit >= 0 && hss[hss[o[i]].next_hit].score > hss[o[i]].score)
+//				gfrom= hss[hss[o[i]].next_hit].top + 1;
+//                        	else gfrom= hss[o[i]].stop1;
+                        	gfrom= hss[o[i]].stop1;
                         }
 
             G= hss[o[i]].G;
@@ -2373,51 +2375,38 @@ void process_hss(int from_hss, int to_hss, int ncds)
 					if(gene[j].strand == 'D') { from= gene[j].start[h]; to= gene[j].end[h]; }
 					else                      { to= gene[j].start[h]; from= gene[j].end[h]; }
 
-					if(!(to < gfrom + mHL/2 - 1 || from > gto - mHL/2 + 1)) // predicted CDS overlapping published CDS (gene[])
+					if(from <= gto && to >= gfrom) // Published gene overalapping identified ORF
 					{
-						if(hss[o[i]].frame == gene[j].frame[h])
+						if(hss[o[i]].frame == gene[j].frame[h])  // Same stop
 						{
 						lr= (float)(gto - gfrom + 1) / (float)(to - from + 1);
-							// if(gfrom >= from - mHL/2 && gto <= to + mHL/2)
-							if(lr < 1.0/LEN_RATIO)
+							if(lr < 1.0/LEN_RATIO)  // Newly identified ORF shorter than published gene
 							{
                                 k= 2;		// Part of published gene
                                 hss[o[i]].type= k;
                                 j= ncds;
                                 h= nex;
 							}
-							// else if(gfrom >= from - mHL/2 && gto <= to + mHL/2)
-							else if(lr > LEN_RATIO)
+							else if(lr > LEN_RATIO)  // Newly identified ORF longer than published gene
 							{
                                 k= 3;           // Extending published gene
                                 hss[o[i]].type= k;
                                 j= ncds;
                                 h= nex;
 							}
-							// if(gfrom == from && gto == to)
-							else
+							else  // Length similar to published gene
 							{
-                                k= 1;		// Length similar to published gene
+                                k= 1;
                                 hss[o[i]].type= k;
                                 j= ncds;
                                 h= nex;
 							}
 						}
-						else
+						else   // Overlapped in different frames
 						{
-							if(gfrom >= from - mHL/2 && gto <= to + mHL/2)
+							if(gfrom >= from && gto <= to)  // Newly identified ORF embedded in published gene
 							{
-								if(gene[j].type[h] == 1 || gene[j].type[h] == 2 || RANDOMIZE)
-								{
-                                    out= 0;
-									if(gfrom < from) out += from - gfrom;
-									if(gto > to) out += gto - to;
-
-                                    hss[o[i]].gsuper += gto - gfrom + 1 - out;
-
-									if(hss[o[i]].gsuper * 2 > gto - gfrom + 1) k= 4;  // Embedded in published
-									else k= 7;
-								}
+								if(gene[j].type[h] == 1 || gene[j].type[h] == 2 || RANDOMIZE) k= 4;  // Embedded in published
 								else k= 7;	// Replacing published
                                 hss[o[i]].type= k;
                                 j= ncds;
@@ -2462,11 +2451,11 @@ void process_hss(int from_hss, int to_hss, int ncds)
                                         to= hss[o[j]].start_pos;
                                         }
 	
-					if(to > gfrom + mHL/2 - 1 && from < gto - mHL/2 + 1)  // Two newly predicted genes are overlapping
+					if(to >= gfrom && from <= gto)  // Two newly identified ORFs are overlapping
 					{
 						if(hss[o[i]].frame != hss[o[j]].frame)
 						{
-							if(gfrom >= from - mHL/2 && gto <= to + mHL/2)
+							if(gfrom >= from && gto <= to)  // Reference ORF is embedded in higher-scoring ORF
 							{
                                 k= 9;
                                 hss[o[i]].type= k;
@@ -2480,7 +2469,19 @@ void process_hss(int from_hss, int to_hss, int ncds)
                                 hss[o[i]].type= k;
 							}
 						}
-						else hss[o[i]].type= 1;
+//						else
+//						{
+//							if(hss[o[i]].strand == 'D')
+//							{
+//								if(gfrom < from) hss[o[j]].type= hss[o[i]].type;
+//								else             hss[o[i]].type= hss[o[j]].type;
+//							}
+//							else
+//							{
+//								if(gto > to) hss[o[j]].type= hss[o[i]].type;
+//								else         hss[o[i]].type= hss[o[j]].type;
+//							}
+//						}
 					}
 				}
 			}
@@ -3170,24 +3171,24 @@ void characterize_published_genes(int ncds, int tot_Ghits, double nuc[], long by
 			{
 				if(hss[i].type != 5)
 				{
-					if(!(hss[i].top < from + mHL/2 - 1 || hss[i].fromp > to - mHL/2 + 1))  // if CDS is superimposed to hit
+					if(hss[i].fromp <= to && hss[i].top >= from)  // if CDS is superimposed to hit
 					{
 						if(hss[i].frame == gene[j].frame[h])	// same frame overlapped
 						{
-							if(hss[i].fromp >= from - mHL/2 && hss[i].top <= to + mHL/2)  // hit embedded
+							if(hss[i].fromp >= from - mHL / 2 && hss[i].top <= to + mHL / 2)  // hit embedded
 							{
 							lr= (float)(hss[i].top - hss[i].fromp + 1) / (float)(to - from + 1);
 								if(gene[j].type[h] != 2)
 									gene[j].type[h]= k= 1;
-                                if(lr < 1.0 / LEN_RATIO) hss[i].type= 2;
-                                else                     hss[i].type= 1;
+//                                if(lr < 1.0 / LEN_RATIO) hss[i].type= 2;
+//                                else                     hss[i].type= 1;
 							}
 							else    // hit overlapped
 							{
 							lr= (float)(hss[i].top - hss[i].fromp + 1) / (float)(to - from + 1);
                                 gene[j].type[h]= k= 2;
-                                if(lr > LEN_RATIO) hss[i].type= 3;
-                                else               hss[i].type= 1;
+//                                if(lr > LEN_RATIO) hss[i].type= 3;
+//                                else               hss[i].type= 1;
 								if(gene[j].strand == 'D')
 								{
 									if(from > hss[i].fromp && to < hss[i].top)
@@ -3237,8 +3238,8 @@ void characterize_published_genes(int ncds, int tot_Ghits, double nuc[], long by
 							if(hss[i].top > to) out += hss[i].top - to;
                             hss[i].hsuper += hss[i].top - hss[i].fromp + 1 - out;
                             out= hss[i].top - hss[i].fromp + 1 - hss[i].hsuper;
-							if(out > mHL) hss[i].type= 6;
-							else          hss[i].type= 4;
+//							if(out > mHL) hss[i].type= 6;
+//							else          hss[i].type= 4;
 						}
 					}
 				}
@@ -3326,7 +3327,7 @@ void write_published_exon(int j, int h, int k, int from, int to, int s1, int s2,
 void define_characterizations()
 {
     strcpy(Prediction[0],"Not-superimp");
-    strcpy(Prediction[1],"Identical to annotated");
+    strcpy(Prediction[1],"Similar to annotated");
     strcpy(Prediction[2],"Part of annotated");	// Same strand and frame than annotated
     strcpy(Prediction[3],"Extending annotated");
     strcpy(Prediction[4],"Embedded in annotated");  // Different frame or strand than annotated
