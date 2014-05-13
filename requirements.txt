@@ -6,7 +6,7 @@ lib/setproctitle-1.1.6.tar.gz
 lib/lockfile-0.9.1.tar.gz
 lib/python-daemon-1.5.5.tar.gz
 lib/numpy-1.6.1.tar.gz
-lib/biopython-1.60.tar.gz
+lib/biopython-1.63.tar.gz
 
 -e pynpact/
 -e taskqueue/

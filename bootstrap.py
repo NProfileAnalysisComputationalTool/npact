@@ -1,9 +1,8 @@
 #!/usr/bin/env python
 
 from optparse import OptionParser
-import glob
 import os
-import sys
+import urllib
 import subprocess
 import shutil
 import logging
@@ -64,6 +63,25 @@ def init_virtualenv():
         logging.critical("Failed installing libraries from requirements.txt")
         exit(ret)
 
+def fetch_biopython_dtds():
+    """
+Bio.Entrez uses NCBI's DTD files to parse XML files returned by NCBI Entrez.
+Though most of NCBI's DTD files are included in the Biopython distribution,
+sometimes you may find that a particular DTD file is missing. While we can
+access the DTD file through the internet, the parser is much faster if the
+required DTD files are available locally.
+
+"""
+    target = os.path.join(vedir, 'local/lib/python2.7/site-packages/Bio/Entrez/DTDs/')
+    
+    for url in ['http://eutils.ncbi.nlm.nih.gov/eutils/dtd/20060628/esearch.dtd',
+                'http://eutils.ncbi.nlm.nih.gov/eutils/dtd/20060131/esummary-v1.dtd']:
+        filename = url.split('/')[-1]
+        urllib.urlretrieve(url, target + filename)
+    
+    
+    
+        
 def create_aux_directories():
     if not os.path.exists('webroot'):
         os.makedirs('webroot')
@@ -100,6 +118,7 @@ if __name__ == '__main__':
         cleanup_existing()
         kill_daemons()
         init_virtualenv()
+        fetch_biopython_dtds()
         create_aux_directories()
         build_pynpact()
         print "Successfully finished bootstrap.py"
