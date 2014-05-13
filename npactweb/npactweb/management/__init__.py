@@ -34,3 +34,11 @@ def report_file_size():
                                  stdout=subprocess.PIPE,
                                  stderr=subprocess.PIPE)
     return proc.communicate()
+
+def clear_library():
+    logger.debug("Deleting %d from %s",
+                 len(path(library_root()).files()), library_root())
+    for f in path(library_root()).files():
+        f.unlink()
+    for d in path(library_root()).dirs():
+        d.rmtree()

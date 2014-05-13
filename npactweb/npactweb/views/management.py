@@ -55,6 +55,8 @@ def handle_post(request):
         messages.info(request, "Killed {0} processes".format(count))
     elif action == 'cleanup':
         cleanup(request)
+    elif action == 'clear-library':
+        clear_library(request)
 
     messages.info(request, "Handled {0}".format(action))
 
@@ -89,3 +91,11 @@ def cleanup(request):
             messages.error(request, stderr)
     except Exception,e:
         messages.error(request, 'Error finding file size' % e)
+
+
+def clear_library(request):
+    try:
+        management.clear_library()
+    except Exception,e:
+        messages.error(request, "Error clearing library: %s" % e)
+        
