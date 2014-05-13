@@ -31,7 +31,8 @@ class TooManyResponsesException(Exception):
 class EntrezSession(object):
     #db = 'genome'
     #http://www.ncbi.nlm.nih.gov/About/news/17Nov2011.html
-    db = 'nucleotide'
+    #db = 'nucleotide'
+    db = 'nuccore'
     WebEnv = None
     QueryKey = None
     lib_path = None
@@ -92,7 +93,9 @@ class EntrezSession(object):
                 summary.get('Caption'))
             if not base:
                 logger.warning("Couldn't find a filename in the summary. Id: %s", id)
-                base = ''.join(random.choice(string.ascii_uppercase + string.digits) for x in range(16))
+                base = ''.join(
+                    random.choice(string.ascii_uppercase + string.digits)
+                    for x in range(16))
 
             filename =  os.path.join(self.lib_path, base + ".gbk")
 
@@ -107,7 +110,8 @@ class EntrezSession(object):
         if not os.path.exists(filename):
             #or datetime.datetime.fromtimestamp(os.path.getmtime(filename)) < update_date:
             #file should be downloaded.
-            net_handle = Bio.Entrez.efetch(db=self.db, id=id, rettype='gb', retmode='text')
+            net_handle = Bio.Entrez.efetch(
+                db=self.db, id=id, rettype='gbwithparts', retmode='text')
             logger.debug("Streaming handle to %r.", filename)
             with util.mkstemp_overwrite(filename, logger=logger) as f:
                 bytes = util.stream_to_file(net_handle, f)
