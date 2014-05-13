@@ -1,4 +1,4 @@
-/*  -*- c-file-stwyle:"linux" c-basic-offset:4 tab-width:8 -*-  */
+/*  -*- c-file-style:"linux" c-basic-offset:4 tab-width:8 -*-  */
 #include <stdlib.h>
 #include <math.h>
 #include <stdio.h>
