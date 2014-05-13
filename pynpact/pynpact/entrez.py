@@ -71,7 +71,7 @@ class EntrezSession(object):
                                                              retmax=20,
                                                              webenv=self.WebEnv,
                                                              query_key=self.QueryKey))
- 
+
     def summarize(self):
         if not self.summaries:
             self._summarize()
@@ -99,7 +99,7 @@ class EntrezSession(object):
 
             filename =  os.path.join(self.lib_path, base + ".gbk")
 
-        
+
         # if os.path.exists(filename):
         #     date = (summary.get('UpdateDate') or
         #             summary.get('Update_Date') or
@@ -154,9 +154,9 @@ class CachedEntrezSession(EntrezSession):
         if not self.summaries:
             ENTREZ_CACHE[self.term] = super(CachedEntrezSession, self).summarize()
         return self.summaries
-        
-        
-    
+
+
+
 
 # [{'Status': 'Completed',
 #   'Comment': '  ',

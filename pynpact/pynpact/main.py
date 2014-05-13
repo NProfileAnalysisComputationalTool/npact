@@ -49,7 +49,7 @@ class GenBankProcessor(object ):
     gbkfile     = None
     force       = False
     logger      = logger #logger is for internal debugging purposes
-    statuslog   = None   #logger for printing external messages to end users 
+    statuslog   = None   #logger for printing external messages to end users
     outputdir   = None
     cleanup     = True
     config      = None
@@ -65,7 +65,7 @@ class GenBankProcessor(object ):
         #will be piped onto the webpage.
         self.statuslog = logging.getLogger('pynpact.statuslog')
         self.statuslog.setLevel(logging.DEBUG)
-        
+
         sh = logging.StreamHandler()
         sh.setFormatter(logging.Formatter('%(message)s'))
         self.statuslog.addHandler(sh)
@@ -73,7 +73,7 @@ class GenBankProcessor(object ):
         if self.config and self.config.get('force'):
             self.statuslog.debug("Forcing recalculation")
             self.force = self.config.get('force')
-        
+
         self.parse(gbkfile)
 
     def parse(self, gbkfile):
@@ -155,7 +155,7 @@ class GenBankProcessor(object ):
             cmd = [binfile("extract"), self.gbkfile,
                    config['GeneDescriptorSkip1'], config['GeneDescriptorKey1'],
                    config['GeneDescriptorSkip2'], config['GeneDescriptorKey2']]
-            return capproc.capturedCall(cmd, 
+            return capproc.capturedCall(cmd,
                                         stdout=out, stderr=sys.stderr,
                                         logger=self.logger, check=True)
         filename = self.derivative_filename(".%s.genes" % hash)
@@ -176,7 +176,7 @@ class GenBankProcessor(object ):
             progargs = [binfile("nprofile"), '-b', ''.join(config["nucleotides"]),
                         self.gbkfile, 1, config['length'],
                         config['window_size'], config['step'], config['period']]
-            return capproc.capturedCall(progargs, 
+            return capproc.capturedCall(progargs,
                                         stdout=out, stderr=sys.stderr,
                                         logger=self.logger, check=True)
 

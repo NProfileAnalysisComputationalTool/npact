@@ -171,7 +171,6 @@ def efetch(req, id):
     session = entrez.EntrezSession(library_root())
     abspath = session.fetch_id(id)
     path = getrelpath(abspath)
-    
     try:
         prepare.try_parse(abspath)
     except prepare.InvalidGBKException, e:

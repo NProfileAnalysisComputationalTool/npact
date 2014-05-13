@@ -13,7 +13,7 @@ import threading
 
 def capturedCall(cmd, check=False, **kwargs):
     """
-    Call capturedPopen and wait for to exit. 
+    Call capturedPopen and wait for to exit.
 
     See capturedPopen for more documentation.
 
@@ -83,11 +83,11 @@ def capturedPopen(cmd, stdin=None, stdout=None, stderr=None,
 
     if not isinstance(cmd,str):
         cmd = [str(e) for e in cmd]
-        
+
     if logger and log_command:
         #if we are logging, record the command we're running,
         #trying to strip out passwords.
-        logger.debug("Running cmd: %s", 
+        logger.debug("Running cmd: %s",
                      cmd if isinstance(cmd, str) else subprocess.list2cmdline(cmd))
     if cd:
         #subprocess does this already with the 'cwd' arg,
@@ -105,7 +105,7 @@ def capturedPopen(cmd, stdin=None, stdout=None, stderr=None,
     def out(arg):
         #figure out what to pass to the stdout stream
         if arg            : return arg #specified: use that
-        elif arg is False : 
+        elif arg is False :
             fd = os.open(os.devnull, os.O_WRONLY)
             close_in_parent.append(fd)
             return fd
@@ -131,7 +131,7 @@ def capturedPopen(cmd, stdin=None, stdout=None, stderr=None,
             lname = "%s.%s" % (p.cmdname, name)
             if logger is logging:
                 sublog = logging.getLogger(lname)
-            else: 
+            else:
                 sublog = logging.getLogger('%s.%s' % (logger.name,lname))
             if filter:
                 try:

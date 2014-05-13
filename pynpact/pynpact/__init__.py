@@ -19,5 +19,3 @@ def binfile(name) :
 
 
 DATAPATH=resource_filename(__name__, 'data')
-
-
