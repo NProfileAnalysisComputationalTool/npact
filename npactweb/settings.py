@@ -54,7 +54,7 @@ USE_L10N = False
 
 # Absolute filesystem path to the directory that will hold user-uploaded files.
 # Example: "/home/media/media.lawrence.com/media/"
-MEDIA_ROOT = ppath('uploads',True)
+MEDIA_ROOT = ppath('uploads', True)
 
 TQ_DIR = ppath('taskqueue', True)
 import taskqueue
@@ -76,8 +76,8 @@ PRODUCTION_MEDIA_URL = '/npact/assets/'
 #GLOBAL_MEDIA_DIRS=(str(ppath('www')),)
 
 from npactweb.mediabundles import MEDIA_BUNDLES
+GENERATED_MEDIA_DIR = ppath('_generated_media', create=True)
 
-GENERATED_MEDIA_DIR = ppath('_generated_media',create=True)
 GENERATED_MEDIA_NAMES_FILE = path(__file__).dirname() / '_generated_media_names.py'
 
 
@@ -121,10 +121,11 @@ TEMPLATE_CONTEXT_PROCESSORS = (
 
 ROOT_URLCONF = 'npactweb.urls'
 
-#since we use the django.template.loaders.app_directories.Loader it automatically looks for apps' templates directory.
+#since we use the django.template.loaders.app_directories.Loader it
+#automatically looks for apps' templates directory.
 TEMPLATE_DIRS = ()
 
-SESSION_ENGINE="django.contrib.sessions.backends.file"
+SESSION_ENGINE = "django.contrib.sessions.backends.file"
 
 INSTALLED_APPS = (
     #'django.contrib.auth',
@@ -140,7 +141,7 @@ INSTALLED_APPS = (
 
 DATABASES = {}
 
-MESSAGE_STORAGE='django.contrib.messages.storage.cookie.CookieStorage'
+MESSAGE_STORAGE = 'django.contrib.messages.storage.cookie.CookieStorage'
 
 #this will be passed to logging.dictConfig (or something equivalent)
 LOGGING = {
