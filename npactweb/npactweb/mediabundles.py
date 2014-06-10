@@ -20,5 +20,6 @@ MEDIA_BUNDLES= (
      'qtip2/jquery.qtip-2.1.min.js'),
 
     ('processing.js',
+     'js/kinetic-v5.1.0.min.js',
      'js/processing.js')
     )
