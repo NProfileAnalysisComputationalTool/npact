@@ -7,7 +7,7 @@
 # http://stackoverflow.com/questions/527237/unhandled-exception-in-flup
 import os
 
-os.environ['DJANGO_SETTINGS_MODULE'] = 'settings'  # or whatever
+os.environ['DJANGO_SETTINGS_MODULE'] = 'settings'
 
 from flup.server.fcgi import WSGIServer
 from django.core.handlers.wsgi import WSGIHandler
