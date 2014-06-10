@@ -1,3 +1,4 @@
+
 # About
 
 NPACT is the N-Profile Analysis and Computation Tool. It is a way to
@@ -189,23 +190,7 @@ be done on the websites management panel.
 ## npactweb/
 
 This is the code for the website. It is built on top of
-[Django](http://djangoproject.com/).
-
-* `npactweb/settings.py` is the configuration for this django
-  website. Tells what modules and applications to load; configures
-  where paths for different content are.
-* `npactweb/npactweb/static/` holds the static images, CSS, and
-  javascript used on the website.
-* `npactweb/npactweb/templates/` holds the templates that generate
-  html on the website. Go here to change text on the site, rearrange
-  blocks, or add new content.
-* `npactweb/npactweb/urls.py` controls the web sites url space; django
-  uses this to dispatch incoming requests to views.
-* `npactweb/npactweb/views/` holds the code that gets run on an
-  incoming request.
-* `npactweb/cleanup.py` used to clean out old uploaded files so they
-  don't take too much space on the server.
-* `npactweb/django.fcgi` is the entry point for fcgi webservers.
+[Django](http://djangoproject.com/). See `README.md` in that folder.
 
 
 # Contributing
