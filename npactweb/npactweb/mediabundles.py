@@ -9,7 +9,7 @@ MEDIA_BUNDLES= (
      'css/basic.css',
      'css/custom-theme/jquery-ui-1.10.4.custom.css',
      'css/style.css',
-     'qtip2/jquery.qtip.css'),
+     'qtip2/jquery.qtip-2.1.min.css'),
 
     ('print.css',
      'css/print.css'),
@@ -17,7 +17,7 @@ MEDIA_BUNDLES= (
     ('jquery.js',
      'js/jquery-1.10.2.js',
      'js/jquery-ui-1.10.4.custom.min.js',
-     'qtip2/jquery.qtip.js'),
+     'qtip2/jquery.qtip-2.1.min.js'),
 
     ('processing.js',
      'js/processing.js')
