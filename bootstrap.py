@@ -47,7 +47,7 @@ def init_virtualenv():
     ret = subprocess.call(["python", "virtualenv.py",
                            "--extra-search-dir=%s" % virtualenv_support_dir,
                            "--prompt=(npact)",
-                          "-p", "python2.6",
+#                          "-p", "python2.6",
                            vedir],
                           cwd=pwd)
     if ret:
