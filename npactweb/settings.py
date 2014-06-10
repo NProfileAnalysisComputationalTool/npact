@@ -58,7 +58,7 @@ MEDIA_ROOT = ppath('uploads',True)
 TQ_DIR = ppath('taskqueue', True)
 import taskqueue
 taskqueue.BASE_DIR = TQ_DIR
-    
+
 
 # how many days should we keep uploaded files and products that
 # haven't been accessed before we delete them.
@@ -80,10 +80,10 @@ MEDIA_BUNDLES= (
     'css/style.css',
     'qtip2/jquery.qtip.css',
     ),
-     
+
     ('print.css',
      'css/print.css'),
- 
+
     ('jquery.js',
      'js/jquery-1.8.3.js',
      'js/jquery-ui-1.9.2.custom.min.js',
@@ -111,12 +111,12 @@ TEMPLATE_LOADERS = (
 MIDDLEWARE_CLASSES = (
      # Media middleware has to come first
     'mediagenerator.middleware.MediaMiddleware',
-   
+
     'django.middleware.common.CommonMiddleware',
     'django.contrib.sessions.middleware.SessionMiddleware',
     'django.middleware.csrf.CsrfViewMiddleware',
     'django.contrib.auth.middleware.AuthenticationMiddleware',
-    'django.contrib.auth.middleware.RemoteUserMiddleware',    
+    'django.contrib.auth.middleware.RemoteUserMiddleware',
     'django.contrib.messages.middleware.MessageMiddleware',
     'npactweb.middleware.RedirectExceptionHandler',
 )
@@ -148,7 +148,7 @@ INSTALLED_APPS = (
     'django.contrib.sessions',
     #'django.contrib.sites',
     'django.contrib.messages',
-    
+
     'mediagenerator',
     'npactweb'
     #'django.contrib.staticfiles',
