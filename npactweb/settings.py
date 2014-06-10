@@ -72,27 +72,8 @@ DEV_MEDIA_URL = '/npact/devassets/'
 PRODUCTION_MEDIA_URL = '/npact/assets/'
 #GLOBAL_MEDIA_DIRS=(str(ppath('www')),)
 
+from npactweb.mediabundles import MEDIA_BUNDLES
 
-MEDIA_BUNDLES= (
-    ('main.css',
-    'css/basic.css',
-    'css/custom-theme/jquery-ui-1.10.4.custom.css',
-    'css/style.css',
-    'qtip2/jquery.qtip.css',
-    ),
-
-    ('print.css',
-     'css/print.css'),
-
-    ('jquery.js',
-     'js/jquery-1.10.2.js',
-     'js/jquery-ui-1.10.4.custom.min.js',
-     'qtip2/jquery.qtip.js'
-     ),
-     ('processing.js',
-      'js/processing.js',
-     ),
-    )
 GENERATED_MEDIA_DIR = ppath('_generated_media',create=True)
 GENERATED_MEDIA_NAMES_FILE = path(__file__).dirname() / '_generated_media_names.py'
 
