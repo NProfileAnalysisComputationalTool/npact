@@ -147,7 +147,25 @@ angular.module('npact')
       return make(stage, opts);
     };
   })
-  .directive('npactGraph', function(STATIC_BASE_URL, $q, $log, Grapher){
+  .factory('WidthChecker', function($q, $log, $interval){
+    return function(element, frequency){
+      var hasWidth = $q.defer(),
+	  d1 = new Date(),
+	  widthChecker;
+      
+      function checkForWidth(){
+	var w = element.width();
+	$log.log('T[', new Date() - d1, '] width:', w);
+	if(w > 0){
+	  $interval.cancel(widthChecker);
+	  hasWidth.resolve(w);
+	}
+      }      
+      widthChecker = $interval(checkForWidth, frequency || 100);
+      return hasWidth.promise;
+    };
+  })
+  .directive('npactGraph', function($log, Grapher, WidthChecker){
 
     var defaultGraphOpts = {
       leftPadding: 80,
@@ -167,28 +185,23 @@ angular.module('npact')
       link:function(scope, element, attrs){
 	// our graph object
 	var g;
-
 	// width takes a minute to get sorted, we might be waiting on jquery
-	function findWidth(){ return element.width(); };
-	var stopWatchingWidth = scope.$watch(findWidth, function(newval){
-	  if(!newval) return;
-	  $log.log('width changed:', newval);
-	  if(newval > 0) {
+	WidthChecker(element)
+	  .then(function(w){
 	    var opts = angular.extend({}, defaultGraphOpts, attrs, {
 	      element: element[0],
-	      width: newval,
+	      width: w,
 	      height: element.height(),
 	      data: scope.data,
 	      range: scope.range
 	    });
+	    // convert `string`s to `int`s
 	    angular.forEach(defaultGraphOpts, function(val, key){
 	      opts[key] = parseInt(opts[key]);
 	    });
 	    g = Grapher(opts);
-	    stopWatchingWidth();
-	  }
-	});
-
+	  });
+	
 	scope.$watch('data', function(newval, oldval){
 	  if(!newval) return;
 	  $log.log('data changed:', newval);
