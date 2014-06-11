@@ -1,10 +1,8 @@
+# NPactweb
 
-# About
 This is the code for the website.
 
-# Important files:
-
-(in this folder)
+## Important files:
 
 * `settings.py` is the configuration for this django
   website. Tells what modules and applications to load; configures
@@ -27,3 +25,16 @@ This is the code for the website.
   don't take too much space on the server.
 
 * `django.fcgi` is the entry point for fcgi webservers.
+
+* `npactweb/mediabundles.py` controls loading static assets
+
+* `npactweb/static/bower_components` - third party javascript
+  libraries installed via [bower][], to be used in the final
+  application
+
+* `node_modules/` third party javascript libaries installed via
+  [npm][], to be used during development for build / testing tools
+
+
+[bower]: http://bower.io/
+[npm]: https://www.npmjs.org/
