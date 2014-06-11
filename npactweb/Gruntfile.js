@@ -11,8 +11,7 @@ module.exports = function(grunt){
     },
     html2js: {
       options:{
-	singleModule:true,
-	rename: function(n){ return n.replace('../', '/'); }
+	singleModule:true
       },
       main: {
 	src: ['npactweb/static/js/**/*.html'],
