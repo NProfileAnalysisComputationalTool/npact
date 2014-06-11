@@ -6,6 +6,7 @@ padding:0;
 body {
 background:#fff url(../images/bg.jpg) repeat-x;
 text-align:center;
+padding:0 20px;
 }
 
 a {
@@ -58,7 +59,7 @@ font-size: 1px;
 width: 181px;
 height: 40px;
 top:0;
-left: 590px;
+left: 60%;
 position: absolute;
 /*\*/overflow: hidden;
 font-size: 14px;/**/
@@ -97,13 +98,13 @@ list-style:none;
 
 
 #content {
-background:#FFF url(../images/bg_priNav.jpg) repeat-x;
+border-left:solid 1px #CCC;
 float:right;
+padding-top:10px;
 position:relative;
-width:516px;
+width:77%;
 z-index:5;
 min-height: 376px;
-padding-top: 2px;
 }
 
 #content h2 { margin:12px 0 15px 8px; }
@@ -197,19 +198,22 @@ width:195px;
 #header {
 height:41px;
 margin:0 auto;
+padding-left:25px;
 position:relative;
 text-align:left;
-width:772px;
+max-width:1300px;
+width:99%;
 }
 
 #mainContainer {
-background:#fff url(../images/bg_mainContainer.gif) 253px 0 repeat-y; 
-
+background:#fff url(../images/bg_priNav.jpg) repeat-x;
+max-width:1300px;
+min-width:800px;
 margin:0 auto;
-padding:0 2px;
+padding-top:10px;
 position:relative;
 text-align:left;
-width:768px;
+width:100%;
 }
 
 /* \*/* html #mainContainer {
@@ -217,13 +221,11 @@ background-position: 249px 0;
 }/* */
 
 #leftCol {
-background:url(../images/bg_priNav.jpg) repeat-x;
 left:0;
 padding:3px 2px 0;
-position:absolute;
+position:relative;
 top:0;
-width:250px;
-
+width:23%;
 }
 
 #priNav h2,#footer h3 {
@@ -247,7 +249,7 @@ color:#0021a5;
 display:block;
 letter-spacing:1px;
 padding:7px 0 6px 23px;
-width:230px;
+width:88%;
 }
 
 /*\*/* html #priNav li a, * html #priNav #active{
@@ -264,7 +266,7 @@ background-color:#CFD5EE;
 
 #related {
 padding:32px 8px 0;
-width:230px;
+width:90%;
 }
 
 #related h3 {
@@ -293,7 +295,6 @@ float:none;
 #related ul {
 float:left;
 padding:0 0 5px 10px;
-width:228px;
 }
 
 
@@ -313,6 +314,7 @@ width:516px;
 height:100%;
 position:absolute;
 width:98.5%;
+background-size:100%;
 }
 
 dl { margin-bottom:25px;}
@@ -321,7 +323,7 @@ dd { margin-left: 18px; margin-bottom:10px;}
 
 #form-container {background:#E5EAFC;margin-bottom:10px;margin-left:5px;padding:10px;width:94%;}
 #n-config-options {margin-left:8px;width:95%;}
-	#n-config-options td {padding:8px 0px;}
+        #n-config-options td {padding:8px 0px;}
 
 textarea { width: 100%; }
 #content .ui-accordion-content p { margin: 0; }
@@ -336,7 +338,7 @@ textarea { width: 100%; }
 
 .error, ul.errorlist li { color:red; }
 
-ul.messages { border: 1px dotted #444; } 
+ul.messages { border: 1px dotted #444; }
 
 
 button.Start { clear:both; margin: 8px;}
@@ -348,7 +350,7 @@ button.Start { clear:both; margin: 8px;}
 
 #start-over {font-size:14px;font-weight:bold;}
 #start-over a, #start-over a:visited {color:#FF4A00;}
-	
+
 /* ****** For the processing page ****** */
 #progress .onsuccess, #progress .onerror { display:none; }
 #progress .ui-icon { float:left;  margin-right: .5em;}
@@ -372,10 +374,10 @@ button.Start { clear:both; margin: 8px;}
 #graphicalresults a {font-weight: bold;}
 
 .ui-state-highlight { margin-top:10px; padding:10px; width:94%; }
-	.ui-state-highlight p {color:#000;}
-	
-	.ui-state-highlight li a {font-weight:bold;}
-		#files li {color:#000;}
-		#files li:hover {color:#C60;}
+        .ui-state-highlight p {color:#000;}
+
+        .ui-state-highlight li a {font-weight:bold;}
+                #files li {color:#000;}
+                #files li:hover {color:#C60;}
 
 #tryagain {padding:8px;}
