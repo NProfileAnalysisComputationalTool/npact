@@ -60,6 +60,11 @@ describe('Graphs', function(){
 	labelY:20
       });
     });
+
+    it('can align rectangles', function(){
+      var pos = GC.alignRectangles({x:0, y:0, w:100, h:100}, {w:10, h:10});
+      expect(pos).toEqual({x: 45, y: 45 });
+    });
     
   });
 

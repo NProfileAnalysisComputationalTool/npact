@@ -9,6 +9,13 @@ angular.module('npact')
 	  // how frequently to draw an Y-axis label
 	  labelY: opts.profileHeight / 5
 	};
+      },
+      // return a top left x/y position that aligns
+      // the centers of the two rectangles
+      alignRectangles: function(rect, toAlign){
+	// get the top left coordinate of the `toAlign` rect
+	return {x: rect.x + (rect.w/2) - (toAlign.w/2),
+		y: rect.y + (rect.h/2) - (toAlign.h/2)};
       }
     };
   })
@@ -73,18 +80,19 @@ angular.module('npact')
 	text: opts.axisTitle	
       });
       // center it in the space left of the axes
-      var tw = title.getHeight(), // hasn't been rotated yet, so swap H & W
-	  th = title.getWidth(),
-	  // define the space we want to center inside
-	  tpx = 0,
-	  tpy = m.y,
-	  tpw = opts.leftPadding - opts.headerLabelPadding,
-	  tph = opts.profileHeight,
-	  // geometry to find the title x/y that aligns the center of
-	  // both rectangles
-	  tx = tpx + (tpw/2) - (tw/2),
-	  ty = tpy + (tph/2) + (th/2);
-      title.position({x:tx, y:ty});
+      var pos = GraphingCalculator.alignRectangles(
+	// define the space we want to center inside
+	{x:0, y:m.y,
+	 w: opts.leftPadding - opts.headerLabelPadding,
+	 h: opts.profileHeight
+	},
+	// bounding box of the text, pre-rotated so need to swap W and H
+	{w: title.getHeight(), h: title.getWidth()});
+
+      // translate to the bottom-left of the new rectangle, so after we rotate
+      // we'll be centered
+      pos.y += title.getWidth();
+      title.position(pos);
       
       layer.add(title);      
       
