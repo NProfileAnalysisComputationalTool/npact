@@ -22,3 +22,6 @@ npact_patterns = \
                      )
 
 urlpatterns = patterns('', ('^npact/', include(npact_patterns)))
+
+from django.contrib.staticfiles.urls import staticfiles_urlpatterns
+urlpatterns += staticfiles_urlpatterns()

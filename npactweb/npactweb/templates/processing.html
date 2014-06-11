@@ -1,5 +1,6 @@
 {% extends "base.html" %}
 {% load media %}
+{% load static %}
 {% block title %}N-PACT - N-Profile Analysis Computational Tool{% endblock %}
 
 {% block addScript %}
@@ -48,6 +49,9 @@
           </ul>
       </div>
 
+      <div ng-app="npact">
+	<div npact-graph-page ></div>
+      </div>
     </div>
   </div>
 
@@ -78,6 +82,9 @@
     jQuery(document).ready( function(){
       progress.init("{{ statusurl }}");
     });
+
+    angular.module('npact').constant('STATIC_BASE_URL', '{{STATIC_URL}}');
   </script>
 </div>
+{{STATIC_URL}}
 {%endblock content %}

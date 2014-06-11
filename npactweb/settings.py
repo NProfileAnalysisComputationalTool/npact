@@ -4,12 +4,13 @@ TEMPLATE_DEBUG = DEBUG
 import os
 from path import path
 
-webroot=(path(__file__).dirname() / "../webroot").realpath()
-if not webroot.exists():
-    raise Exception("Couldn't find webroot at %s" % webroot)
+WEBROOT = (path(__file__).dirname() / "../webroot").realpath()
+if not WEBROOT.exists():
+    raise Exception("Couldn't find webroot at %s" % WEBROOT)
+
 
 def ppath(rel, create=False):
-    abspath = (webroot / rel).realpath()
+    abspath = (WEBROOT / rel).realpath()
     if abspath.exists():
         return abspath
     elif create:
@@ -64,6 +65,8 @@ taskqueue.BASE_DIR = TQ_DIR
 # haven't been accessed before we delete them.
 MEDIA_RETAIN_FOR=7
 ATIME_DEFAULT = 30
+
+STATIC_URL = '/static/'
 
 ######## django-mediagenerator settings
 
@@ -131,12 +134,8 @@ INSTALLED_APPS = (
     'django.contrib.messages',
 
     'mediagenerator',
-    'npactweb'
-    #'django.contrib.staticfiles',
-    # Uncomment the next line to enable the admin:
-    # 'django.contrib.admin',
-    # Uncomment the next line to enable admin documentation:
-    # 'django.contrib.admindocs',
+    'npactweb',
+    'django.contrib.staticfiles'
 )
 
 DATABASES = {}

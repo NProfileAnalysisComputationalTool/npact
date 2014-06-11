@@ -22,5 +22,8 @@ MEDIA_BUNDLES = (
 
     ('processing.js',
      'bower_components/kineticjs/kinetic.min.js',
-     'js/processing.js')
+     'js/processing.js',
+     'bower_components/angular/angular.js',
+     'js/app.js',
+     'js/graphs/page.js')
     )
