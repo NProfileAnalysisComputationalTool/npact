@@ -35,6 +35,11 @@ This is the code for the website.
 * `node_modules/` third party javascript libaries installed via
   [npm][], to be used during development for build / testing tools
 
-
 [bower]: http://bower.io/
 [npm]: https://www.npmjs.org/
+
+## Graphing
+
+Graphs are drawn as data is received, using [kineticjs][]
+
+[kineticjs]: http://kineticjs.com/docs/

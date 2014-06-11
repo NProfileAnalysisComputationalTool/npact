@@ -25,5 +25,6 @@ MEDIA_BUNDLES = (
      'js/processing.js',
      'bower_components/angular/angular.js',
      'js/app.js',
-     'js/graphs/page.js')
+     'js/graphs/page.js',
+     'js/graphs/graph.js')
     )
