@@ -4,22 +4,23 @@
 # The format for this file is described at
 # http://www.allbuttonspressed.com/projects/django-mediagenerator#media-bundles
 
-MEDIA_BUNDLES= (
+MEDIA_BUNDLES = (
     ('main.css',
      'css/basic.css',
      'css/custom-theme/jquery-ui-1.10.4.custom.css',
      'css/style.css',
-     'qtip2/jquery.qtip-2.1.min.css'),
+     'bower_components/qtip2/jquery.qtip.css'),
 
     ('print.css',
      'css/print.css'),
 
     ('jquery.js',
-     'js/jquery-1.10.2.js',
+     'bower_components/jquery/jquery.min.js',
+     # customized to only load UI elements we want
      'js/jquery-ui-1.10.4.custom.min.js',
-     'qtip2/jquery.qtip-2.1.min.js'),
+     'bower_components/qtip2/jquery.qtip.min.js'),
 
     ('processing.js',
-     'js/kinetic-v5.1.0.min.js',
+     'bower_components/kineticjs/kinetic.min.js',
      'js/processing.js')
     )
