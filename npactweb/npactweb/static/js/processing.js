@@ -78,14 +78,15 @@ var progress = {
 
     onerror: function(data){
         console.log('Error', data);
-        if(progress.interval)
-            clearTimeout(progress.interval);
 
-        setTimeout(function() { progress.updateStatusDisplay(jQuery.parseJSON(data.responseText)); }, 0);
-        $('#computationrunning').slideToggle()
-            .after(function () {
-                $('.onerror').slideToggle();
-            });
+      setTimeout(function() {
+	progress.updateStatusDisplay(jQuery.parseJSON(data.responseText));
+      }, 0);
+
+      $('#computationrunning').slideToggle()
+        .after(function () {
+          $('.onerror').slideToggle();
+        });
     },
 
     onsuccess: function(data){
@@ -101,8 +102,7 @@ var progress = {
 
     processResults: function(data) {
         console.log('finished: ', data.download_url);
-        if(progress.interval)
-            clearTimeout(progress.interval);
+
         $('#downloadlink').attr('href', data.download_url);
         $('#title').html('N-PACT Is Finished');
         $('#progressreport').fadeOut(100);
