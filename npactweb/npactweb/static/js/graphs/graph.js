@@ -2,6 +2,55 @@ angular.module('npact')
   .factory('GraphingCalculator', function(K, $log){
     return {
       chart:function(opts){
+
+	var yStops = [100, 80, 60, 40, 20, 0],
+	    yAxisTicks = yStops.length - 1,
+	    // the line graph, excluding tick marks and axis labels
+	    g = {
+	      x: opts.leftPadding,
+	      y: opts.stageHeight - opts.profileHeight
+		- opts.axisLabelFontsize // x-axis labels
+		- opts.profileTicks, // tick marks
+	      h: opts.profileHeight,
+	      w: opts.stageWidth - opts.leftPadding
+		- opts.profileTicks	  
+	    },
+	    yAxisTickSpacing = g.h / yAxisTicks,
+	    yAxisTickX = g.x - opts.profileTicks,
+	    yticks = yStops.map(function(lbl, n){
+		var y = g.y + n*yAxisTickSpacing;
+		return {
+		  x: yAxisTickX, y: parseInt(y),
+		  x2: g.x, y2: parseInt(y)
+		};
+	    }),
+	    // space between the label and the tick
+	    yAxisLabelRightPadding = opts.profileTicks*2,
+	    yAxisLabelWidth = opts.leftPadding - yAxisLabelRightPadding,
+	    ylabels = yStops.map(function(lbl, n){
+		// center on the tick
+		var y = yticks[n].y - (opts.axisLabelFontsize/2);
+		return {
+		  x: 0, y: parseInt(y),
+		  width: yAxisLabelWidth,
+		  text: lbl
+		};
+	    }),
+	    // box to center the title inside of
+	    ytitle={
+	      x: 0, y: g.y, w: yAxisLabelWidth, h: g.h
+	    }
+	    ;
+
+	return {
+	  graph:g,
+	  yaxis:{
+	    ticks: yticks,
+	    labels: ylabels,
+	    titleBox: ytitle
+	    }
+	};
+	
 	return {
 	  // the top of the graph
 	  // need to leave some room at the bottom
@@ -51,28 +100,33 @@ angular.module('npact')
       });
     }
 
+    function drawTick(t){
+      return new K.Line({
+	x: 0, y: 0,
+	points: [t.x, t.y, t.x2, t.y2],
+	stroke:'black'
+      });
+    }
+    
     function drawYAxis(layer, opts){
 
       var m = GraphingCalculator.chart(opts);
 
-      // draw labels at the right spacing
-      var yLabels = [100, 80, 60, 40, 20, 0],
-	  y = m.y;
+      m.yaxis.ticks
+	.map(drawTick)
+	.map(function(t){ layer.add(t); });
 
+      // draw labels at the right spacing
       var defaultTextOpts = {
-	  align: 'right', x: 0, 
+	  align: 'right',
 	  fontSize: opts.axisLabelFontsize,
-	  width: opts.leftPadding,
 	  fill:'black'
       };
-
-      yLabels.map(function(lbl){
-	var txtOpts = angular.extend({
-	  y: y, text:lbl
-	}, defaultTextOpts);
+      
+      m.yaxis.labels.map(function(lbl){
+	var txtOpts = angular.extend({}, lbl, defaultTextOpts);
 	var txt = new K.Text(txtOpts);
-	y += m.labelY;
-	layer.add(txt);
+	layer.add(txt);	
       });
 
       // the title
@@ -86,10 +140,7 @@ angular.module('npact')
       // center it in the space left of the axes
       var pos = GraphingCalculator.alignRectangles(
 	// define the space we want to center inside
-	{x:0, y:m.y,
-	 w: opts.leftPadding - opts.headerLabelPadding,
-	 h: opts.profileHeight
-	},
+	m.yaxis.titleBox,
 	// bounding box of the text, pre-rotated so need to swap W and H
 	{w: title.getHeight(), h: title.getWidth()});
 
@@ -112,7 +163,6 @@ angular.module('npact')
       // TODO: return something more useful here and change the
       // rendering of the left labels as we get data
       drawLabels(layer, opts);
-
       drawYAxis(layer, opts);
 
       return { layer: layer };
@@ -122,17 +172,19 @@ angular.module('npact')
 
       var m = GraphingCalculator.chart(opts);
 
+      // graph layer, translates origin to graph
       var layer = new K.Layer({
-	width: opts.stageWidth - opts.leftPadding,
-	height: opts.stageHeight - m.y,
-	x: opts.leftPadding,
-	y: m.y
+	width: m.graph.w,
+	height: m.graph.h,
+	x: m.graph.x,
+	y: m.graph.y
       });
 
+      // frame around the graph
       var frame = new K.Rect({
-	x: opts.profileTicks, y:0,
-	width: layer.getWidth() - 2*opts.profileTicks, 
-	height: opts.profileHeight,
+	x: 0, y:0,
+	width: m.graph.w, 
+	height: m.graph.h,
 	stroke: 'black'
       });
       layer.add(frame);
