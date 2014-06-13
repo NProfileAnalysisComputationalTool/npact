@@ -187,6 +187,56 @@ angular.module('npact')
       return { layer: layer };
     }
 
+    function drawProfile(layer, opts){
+      var profile = opts.data.profile,
+	  start = opts.range[0],
+	  end = opts.range[1],
+	  // total length of profile to draw
+	  length = end - start,
+	  m = GraphingCalculator.chart(opts),
+	  lines = ['r', 'g', 'b'],
+	  colors = {
+	    r: opts.graphRedColor,
+	    g: opts.graphGreenColor,
+	    b: opts.graphBlueColor
+	  }
+      ;
+      $log.log(start, end, length, m.graph.w / length);
+      var frame = new K.Group({
+	x:0, y:0,
+	height:100, width:length,
+	scaleX: m.graph.w / length
+      });
+      layer.add(frame);
+
+      var dataToDraw = _(profile)
+	    .filter(function(g){
+	      return g.coordinate >= start
+		&& g.coordinate <= end;
+	    })
+	    .reduce(function(acc, g){
+	      lines.map(function(x){
+		acc[x].push(g.coordinate);
+		acc[x].push(100 - g[x]);
+	      });
+	      return acc;
+	    }, {r:[], g:[], b:[]});
+      $log.log(dataToDraw);
+      lines.map(function(x){
+	var l = new K.Line({
+	  points:dataToDraw[x],
+	  stroke:colors[x],
+	  strokeWidth:1,
+	  strokeScaleEnabled: false
+	});
+	frame.add(l);
+      });
+      $log.log(frame);
+    }
+    function drawXAxis(layer, opts){
+      
+    }
+
     function make(stage, opts){
 
       // how much gene-space are we going to show
@@ -205,15 +255,15 @@ angular.module('npact')
       stage.batchDraw();
 
       return {
-	redraw:function(data){
-	  $log.log('redraw', arguments);
+	redraw:function(newOpts){
+	  drawProfile(chartChrome.layer, opts);
+	  // drawXAxis(?, opts);
 	  stage.batchDraw();
 	}
       };
     }
     
     return function(opts){
-      $log.log('new graph', opts);
       var stage = new K.Stage({
 	container:opts.element,
 	height: opts.height,
@@ -258,29 +308,31 @@ angular.module('npact')
 	range:'='
       },
       link:function(scope, element, attrs){
-	// our graph object
-	var g;
+
 	// width takes a minute to get sorted, we might be waiting on jquery
-	WidthChecker(element)
+	var p = WidthChecker(element)
 	  .then(function(w){
 	    var opts = angular.extend({}, defaultGraphOpts, attrs, {
 	      element: element[0],
 	      width: w,
-	      height: element.height(),
 	      data: scope.data,
-	      range: scope.range
+	      range: scope.range,
+	      height: element.height()
 	    });
 	    // convert `string`s to `int`s
 	    angular.forEach(defaultGraphOpts, function(val, key){
 	      opts[key] = parseInt(opts[key]);
 	    });
-	    g = Grapher(opts);
+	    return Grapher(opts);
 	  });
 	
-	scope.$watch('data', function(newval, oldval){
+	scope.$watch('data.profile', function(newval, oldval){
 	  if(!newval) return;
-	  $log.log('data changed:', newval);
-	  if(g) g.redraw(newval);
+
+	  // when we have a graph ready, redraw it.
+	  p.then(function(g){
+	    g.redraw();
+	  });
 	});
       }
     };

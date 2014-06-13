@@ -17,7 +17,7 @@
   <div id="results" style="display:none;">
     <h3>Results </h3>
     <div>
-
+      <div ng-app="npact"> <div npact-graph-page ></div> </div>
       <h4>Downloads</h4>
 
       <div id="graphicalresults" class="ui-state-highlight ui-corner-all onsuccess">
@@ -47,10 +47,6 @@
             <li><a id="reconfigurelink" href="{{ reconfigure_url }}">Reconfigure it</a> and try again.</li>
             <li><a href="{% url start %}">Start Over</a></li>
           </ul>
-      </div>
-
-      <div ng-app="npact">
-	<div npact-graph-page ></div>
       </div>
     </div>
   </div>

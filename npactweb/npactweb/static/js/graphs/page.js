@@ -9,7 +9,7 @@ angular.module('npact')
 	scope.d = {};
 
 	$http.get(STATIC_BASE_URL+'js/nprofile.json').then(function(res){
-	  scope.d.profile = res;
+	  scope.d.profile = res.data;
 	});
       }
     };
