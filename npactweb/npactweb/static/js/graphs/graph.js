@@ -87,7 +87,7 @@ angular.module('npact')
 	  align: 'right', x: 0, 
 	  fontSize: opts.headerLabelFontsize,
 	  width: opts.leftPadding - opts.headerLabelPadding,
-	  fill:'black'
+	  fill:opts.headerLabelFontcolor
       };
       var y = 0;
       labels.map(function(lbl){
@@ -99,28 +99,23 @@ angular.module('npact')
 	layer.add(txt);
       });
     }
-
-    function drawTick(t){
-      return new K.Line({
-	x: 0, y: 0,
-	points: [t.x, t.y, t.x2, t.y2],
-	stroke:'black'
-      });
-    }
     
     function drawYAxis(layer, opts){
 
       var m = GraphingCalculator.chart(opts);
 
+      var tickOpts = {x: 0, y:0, stroke: opts.borderColor};
       m.yaxis.ticks
-	.map(drawTick)
-	.map(function(t){ layer.add(t); });
+	.map(function(t){
+	  tickOpts.points = [t.x, t.y, t.x2, t.y2];
+	  layer.add(new K.Line(tickOpts));
+	});
 
       // draw labels at the right spacing
       var defaultTextOpts = {
 	  align: 'right',
 	  fontSize: opts.axisLabelFontsize,
-	  fill:'black'
+	  fill:opts.axisFontcolor
       };
       
       m.yaxis.labels.map(function(lbl){
@@ -133,7 +128,7 @@ angular.module('npact')
       var title = new K.Text({
 	y:0, x:0, // reposition this below
 	rotation:-90,
-	fill:'black',
+	fill:opts.axisFontcolor,
 	fontSize: opts.axisTitleFontsize,
 	text: opts.axisTitle	
       });
@@ -185,7 +180,7 @@ angular.module('npact')
 	x: 0, y:0,
 	width: m.graph.w, 
 	height: m.graph.h,
-	stroke: 'black'
+	stroke: opts.borderColor
       });
       layer.add(frame);
 
