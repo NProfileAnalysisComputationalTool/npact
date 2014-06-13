@@ -54,10 +54,16 @@ describe('Graphs', function(){
       GC = GraphingCalculator;
     }));
     it('calculates chart measurements', function(){
-      var m = GC.chart({stageHeight:150, profileHeight:100, axisLabelFontsize:10});
+      var m = GC.chart({
+	stageHeight:150,
+	profileHeight:100,
+	axisLabelFontsize:10,
+	profileTicks:5
+      });
       expect(m).toEqual({
-	y:40,
-	labelY:20
+	y:35,
+	tickY:20,
+	labelY:15
       });
     });
 

@@ -4,10 +4,14 @@ angular.module('npact')
       chart:function(opts){
 	return {
 	  // the top of the graph
-	  // need to leave some room at the bottom for the x-axis
-	  y: opts.stageHeight - opts.profileHeight - opts.axisLabelFontsize,
+	  // need to leave some room at the bottom
+	  y: opts.stageHeight - opts.profileHeight
+	    - opts.axisLabelFontsize // a-axis labels
+	    - opts.profileTicks, // tick marks
 	  // how frequently to draw an Y-axis label
-	  labelY: opts.profileHeight / 5
+	  tickY: opts.profileHeight / 5,
+	  // account for font size
+	  labelY: (opts.profileHeight / 5)
 	};
       },
       // return a top left x/y position that aligns
@@ -111,24 +115,48 @@ angular.module('npact')
 
       drawYAxis(layer, opts);
 
-      return {
-	layer: layer
-      };
+      return { layer: layer };
     }
     
+    function createChartChrome(opts){
+
+      var m = GraphingCalculator.chart(opts);
+
+      var layer = new K.Layer({
+	width: opts.stageWidth - opts.leftPadding,
+	height: opts.stageHeight - m.y,
+	x: opts.leftPadding,
+	y: m.y
+      });
+
+      var frame = new K.Rect({
+	x: opts.profileTicks, y:0,
+	width: layer.getWidth() - 2*opts.profileTicks, 
+	height: opts.profileHeight,
+	stroke: 'black'
+      });
+      layer.add(frame);
+
+      return { layer: layer };
+    }
+
     function make(stage, opts){
 
       // how much gene-space are we going to show
       var gLength = opts.range[1] - opts.range[0];
       opts.stageHeight = stage.getHeight();
-
+      opts.stageWidth = stage.getWidth();
       // setup Y axis and static left area
       
       var leftArea = createLeftArea(opts);
       stage.add(leftArea.layer);
-      stage.batchDraw();
-      // setup X axis
+
+      // setup chart lines and background
+      var chartChrome = createChartChrome(opts);
+      stage.add(chartChrome.layer);
       
+      stage.batchDraw();
+
       return {
 	redraw:function(data){
 	  $log.log('redraw', arguments);
@@ -173,7 +201,7 @@ angular.module('npact')
       hitsHeight:15, cdsHeight:15, orfHeight:30,
       headerLabelPadding: 10, headerLabelFontsize:10,
       axisLabelFontsize: 10, axisTitleFontsize:14,
-      width:600, height:200
+      width:600, height:200, profileTicks:5
     };
     
     return {
