@@ -62,12 +62,13 @@
 
     function xaxis(opts){
       var m = chart(opts),
-	  start = opts.range[0],
-	  end = opts.range[1],
-	  length = end - start,
+	  length = opts.range[1] - opts.range[0],
 	  // get even stops; look for one lower order of magnitude
 	  // than our length 
 	  interval = Math.pow(10, Math.floor(Math.log(length) / Math.log(10)) - 1),
+	  // want to capture some margin
+	  start = Math.max(opts.range[0] - interval,0),
+	  end = opts.range[1]+interval,
 	  // want to be start/end INCLUSIVE so pad the end
 	  stops = _.range(start, end+interval, interval),
 	  xAxisTicks = stops.length,
@@ -92,8 +93,8 @@
       ;
 
       return {
-	start: start,
-	end: end,
+	start: Math.max(start - interval,0),
+	end: end + interval,
 	// total length of profile to draw
 	length: length,
 	x: m.graph.x,

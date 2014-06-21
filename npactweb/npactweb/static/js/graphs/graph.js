@@ -102,21 +102,41 @@ angular.module('npact')
       var m = GraphingCalculator.chart(opts);
 
       // graph layer, translates origin to graph
-      var layer = new K.Layer({
+      var layer = new K.Group({
 	x: m.graph.x,
-	y: m.graph.y
+	y: m.graph.y,
+	draggable:true,
+	dragBoundFunc:function(pos, evt){
+	  $log.log('dragging', pos);
+	  // TODO: stop if we reach gene-space 0
+	  return {x: pos.x, y: this.y() };
+	}
       });
 
+      layer.on('mouseover', function() {
+        document.body.style.cursor = 'pointer';
+      });
+      layer.on('mouseout', function() {
+        document.body.style.cursor = 'default';
+      });
       // frame around the graph
       var frame = new K.Rect({
-	x: 0, y:0,
+	x: m.graph.x,
+	y: m.graph.y,
 	width: m.graph.w, 
 	height: m.graph.h,
 	stroke: opts.borderColor
       });
-      layer.add(frame);
+      var frameLayer = new K.Layer({
+	clip: {x: m.graph.x-1,
+	y: m.graph.y-1,
+	width: m.graph.w+2, 
+	height: 1000}
+      });
+      frameLayer.add(frame, layer);
+      
 
-      return { layer: layer };
+      return { layer: layer, frame: frameLayer };
     }
 
     function drawProfile(layer, opts){
@@ -162,22 +182,14 @@ angular.module('npact')
     }
     function drawXAxis(layer, opts){
       var profile = opts.data.profile,
+	  m = GraphingCalculator.chart(opts),
 	  xaxis = GraphingCalculator.xaxis(opts)
       ;
 
-      var frame = new K.Layer({
-	x: xaxis.x, y: xaxis.y,
+      var frame = new K.Group({
+	x: 0, y: m.graph.h,
 	width: xaxis.length,
 	scaleX: xaxis.scaleX
-      });
-      layer.add(frame);
-
-      
-      var origin = new K.Circle({
-	radius: xaxis.interval,
-	fill: 'red',
-	stroke: 'black',
-	strokeWidth: 5
       });
       layer.add(frame);
 
@@ -207,14 +219,20 @@ angular.module('npact')
 
       // setup chart lines and background
       var chartChrome = createChartChrome(opts);
-      stage.add(chartChrome.layer);
+      stage.add(chartChrome.frame);
+      // need a shape that can be clicked on to allow dragging the entire canvas
+      var r = new K.Rect({
+	x:0, y:0,
+	width:1000, height:1000	
+      });
+      chartChrome.layer.add(r);
       
       stage.batchDraw();
 
       return {
 	redraw:function(newOpts){
 	  drawProfile(chartChrome.layer, opts);
-	  drawXAxis(stage, opts);
+	  drawXAxis(chartChrome.layer, opts);
 	  stage.batchDraw();
 	}
       };
