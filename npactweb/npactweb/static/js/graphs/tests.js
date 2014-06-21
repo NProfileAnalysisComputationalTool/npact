@@ -53,11 +53,13 @@ describe('Graphs', function(){
       stageHeight:150,
       stageWidth:255,
       leftPadding: 50,
+      rightPadding: 5,
       profileHeight:100,      
       axisLabelFontsize:10,
       axisTitleFontsize: 20,
       axisTitle: '% GC',
-      profileTicks:5
+      profileTicks:5,
+      range:[0,100]
     };
     beforeEach(inject(function(GraphingCalculator){
       GC = GraphingCalculator;
@@ -66,57 +68,76 @@ describe('Graphs', function(){
       var m = GC.chart(opts);
       expect(m.graph).toEqual({
 	x: 50,
-	y: 35,
+	y: 30,
 	h: 100,
 	w: 200
       });
     });
     it('calculates y-axis ticks', function(){
       var m = GC.chart(opts);
-      expect(m.yaxis.ticks).toEqual([
-	{x:45, y:35, x2:50, y2:35},
-	{x:45, y:55, x2:50, y2:55},
-	{x:45, y:75, x2:50, y2:75},
-	{x:45, y:95, x2:50, y2:95},
-	{x:45, y:115, x2:50, y2:115},
-	{x:45, y:135, x2:50, y2:135}	
-      ]);
+      expect(m.yaxis.ticks).toEqual(
+	[ 
+	  {x: 45, y: 30, x2: 50, y2: 30},
+	  {x: 45, y: 50, x2: 50, y2: 50},
+	  {x: 45, y: 70, x2: 50, y2: 70},
+	  {x: 45, y: 90, x2: 50, y2: 90},
+	  {x: 45, y: 110, x2: 50, y2: 110},
+	  {x: 45, y: 130, x2: 50, y2: 130} 
+	]);
     });
     
     it('calculates y-axis labels', function(){
       var m = GC.chart(opts);
       expect(m.yaxis.labels).toEqual([
-	{x:0, width: 40, y:30, text:100},
-	{x:0, width: 40, y:50, text:80},
-	{x:0, width: 40, y:70, text:60},
-	{x:0, width: 40, y:90, text:40},
-	{x:0, width: 40, y:110, text:20},
-	{x:0, width: 40, y:130, text:0}	
+	{x: 0, y: 25, width: 40, text: 100},
+	{x: 0, y: 45, width: 40, text: 80},
+	{x: 0, y: 65, width: 40, text: 60},
+	{x: 0, y: 85, width: 40, text: 40},
+	{x: 0, y: 105, width: 40, text: 20},
+	{x: 0, y: 125, width: 40, text: 0} 
       ]);
     });
 
     it('calculates y-axis title', function(){
       var m = GC.chart(opts);
       expect(m.yaxis.titleBox).toEqual(
-	{x:0, y:35, w:40, h:100}
+	{x: 0, y: 30, w: 40, h: 100}
       );
     });
 
-    it('calculates x-axis ticks', function(){
-      var m = GC.chart(opts);
-      expect(m.yaxis.ticks).toEqual([
-	{x:45, y:35, x2:50, y2:35},
-	{x:45, y:55, x2:50, y2:55},
-	{x:45, y:75, x2:50, y2:75},
-	{x:45, y:95, x2:50, y2:95},
-	{x:45, y:115, x2:50, y2:115},
-	{x:45, y:135, x2:50, y2:135}	
-      ]);
+    it('calculates x-axis', function(){
+      
+      var ax = GC.xaxis(opts);
+      expect(ax).toEqual({
+	start: 0, end: 100,
+	length: 100,
+	x: 50, y: 135, scaleX: 2
+      });
     });
     
+    it('calculates x-axis ticks', function(){
+
+      var ax = GC.xaxis(opts);
+      expect(ax.ticks).toEqual([
+	{x: 0, y: 0, x2: 0, y2: 5},
+	{x: 10, y: 0, x2: 10, y2: 5},
+	{x: 20, y: 0, x2: 20, y2: 5},
+	{x: 30, y: 0, x2: 30, y2: 5},
+	{x: 40, y: 0, x2: 40, y2: 5},
+	{x: 50, y: 0, x2: 50, y2: 5},
+	{x: 60, y: 0, x2: 60, y2: 5},
+	{x: 70, y: 0, x2: 70, y2: 5},
+	{x: 80, y: 0, x2: 80, y2: 5},
+	{x: 90, y: 0, x2: 90, y2: 5},
+	{x: 100, y: 0, x2: 100, y2: 5} 
+      ]);
+    });
+
     it('can align rectangles', function(){
-      var pos = GC.alignRectangles({x:0, y:0, w:100, h:100}, {w:10, h:10});
-      expect(pos).toEqual({x: 45, y: 45 });
+      var pos = GC.alignRectangles(
+	{x: 0, y: 0, w: 100, h: 100}, 
+	{w: 10, h: 10});
+      expect(pos).toEqual({x: 45, y: 45});
     });
     
   });

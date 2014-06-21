@@ -27,5 +27,6 @@ MEDIA_BUNDLES = (
      'bower_components/lodash/dist/lodash.min.js',
      'js/app.js',
      'js/graphs/page.js',
+     'js/graphs/calculator.js',
      'js/graphs/graph.js')
     )

@@ -17,6 +17,6 @@ module.exports = function(config){
     browsers: ['PhantomJS'],
     reporters: ['spec'],
     colors:true,
-    singleRun: true
+    singleRun: false
   });
 };

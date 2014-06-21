@@ -1,80 +1,5 @@
 angular.module('npact')
-  .factory('GraphingCalculator', function(K, $log){
-    return {
-      chart:function(opts){
-
-	var yStops = [100, 80, 60, 40, 20, 0],
-	    yAxisTicks = yStops.length - 1,
-	    // the line graph, excluding tick marks and axis labels
-	    g = {
-	      x: opts.leftPadding,
-	      y: opts.stageHeight - opts.profileHeight
-		- opts.axisLabelFontsize // x-axis labels
-		- opts.profileTicks, // tick marks
-	      h: opts.profileHeight,
-	      w: opts.stageWidth - opts.leftPadding
-		- opts.profileTicks	  
-	    },
-	    yAxisTickSpacing = g.h / yAxisTicks,
-	    yAxisTickX = g.x - opts.profileTicks,
-	    yticks = yStops.map(function(lbl, n){
-		var y = g.y + n*yAxisTickSpacing;
-		return {
-		  x: yAxisTickX, y: parseInt(y),
-		  x2: g.x, y2: parseInt(y)
-		};
-	    }),
-	    // space between the label and the tick
-	    yAxisLabelRightPadding = opts.profileTicks*2,
-	    yAxisLabelWidth = opts.leftPadding - yAxisLabelRightPadding,
-	    ylabels = yStops.map(function(lbl, n){
-		// center on the tick
-		var y = yticks[n].y - (opts.axisLabelFontsize/2);
-		return {
-		  x: 0, y: parseInt(y),
-		  width: yAxisLabelWidth,
-		  text: lbl
-		};
-	    }),
-	    // box to center the title inside of
-	    ytitle={
-	      x: 0, y: g.y, w: yAxisLabelWidth, h: g.h
-	    }
-	    ;
-
-	return {
-	  graph:g,
-	  yaxis:{
-	    ticks: yticks,
-	    labels: ylabels,
-	    titleBox: ytitle
-	    }
-	};
-	
-	return {
-	  // the top of the graph
-	  // need to leave some room at the bottom
-	  y: opts.stageHeight - opts.profileHeight
-	    - opts.axisLabelFontsize // a-axis labels
-	    - opts.profileTicks, // tick marks
-	  // how frequently to draw an Y-axis label
-	  tickY: opts.profileHeight / 5,
-	  // account for font size
-	  labelY: (opts.profileHeight / 5)
-	};
-      },
-      // return a top left x/y position that aligns
-      // the centers of the two rectangles
-      alignRectangles: function(rect, toAlign){
-	// get the top left coordinate of the `toAlign` rect
-	return {x: rect.x + (rect.w/2) - (toAlign.w/2),
-		y: rect.y + (rect.h/2) - (toAlign.h/2)};
-      }
-    };
-  })
-
   .factory('Grapher', function($log, GraphingCalculator, K){
-
     function drawLabels(layer, opts){
       // from top to bottom
       var labels = [
@@ -99,30 +24,39 @@ angular.module('npact')
 	layer.add(txt);
       });
     }
-    
-    function drawYAxis(layer, opts){
 
-      var m = GraphingCalculator.chart(opts);
-
-      var tickOpts = {x: 0, y:0, stroke: opts.borderColor};
-      m.yaxis.ticks
+    function drawAxisTicks(layer, ticks, opts){
+      var tickOpts = {x: 0, y:0, 
+		      stroke: opts.borderColor,
+		      strokeScaleEnabled: false};
+      ticks
 	.map(function(t){
 	  tickOpts.points = [t.x, t.y, t.x2, t.y2];
 	  layer.add(new K.Line(tickOpts));
 	});
+    }
 
+    function drawAxisLabels(layer, labels, opts, textOpts){
       // draw labels at the right spacing
       var defaultTextOpts = {
-	  align: 'right',
 	  fontSize: opts.axisLabelFontsize,
 	  fill:opts.axisFontcolor
       };
       
-      m.yaxis.labels.map(function(lbl){
-	var txtOpts = angular.extend({}, lbl, defaultTextOpts);
+      return labels.map(function(lbl){
+	var txtOpts = angular.extend({}, lbl, defaultTextOpts, textOpts);
 	var txt = new K.Text(txtOpts);
 	layer.add(txt);	
+	return txt;
       });
+    }
+    
+    function drawYAxis(layer, opts){
+
+      var m = GraphingCalculator.chart(opts);
+      drawAxisTicks(layer, m.yaxis.ticks, opts);
+      // draw labels at the right aligned
+      drawAxisLabels(layer, m.yaxis.labels, opts, {align:'right'});
 
       // the title
       var title = new K.Text({
@@ -169,8 +103,6 @@ angular.module('npact')
 
       // graph layer, translates origin to graph
       var layer = new K.Layer({
-	width: m.graph.w,
-	height: m.graph.h,
 	x: m.graph.x,
 	y: m.graph.y
       });
@@ -189,11 +121,8 @@ angular.module('npact')
 
     function drawProfile(layer, opts){
       var profile = opts.data.profile,
-	  start = opts.range[0],
-	  end = opts.range[1],
-	  // total length of profile to draw
-	  length = end - start,
 	  m = GraphingCalculator.chart(opts),
+	  xaxis = GraphingCalculator.xaxis(opts),
 	  lines = ['r', 'g', 'b'],
 	  colors = {
 	    r: opts.graphRedColor,
@@ -201,18 +130,18 @@ angular.module('npact')
 	    b: opts.graphBlueColor
 	  }
       ;
-      $log.log(start, end, length, m.graph.w / length);
+
       var frame = new K.Group({
-	x:0, y:0,
-	height:100, width:length,
-	scaleX: m.graph.w / length
+	x: 0, y: 0,
+	height: 100, width: xaxis.length,
+	scaleX: xaxis.scaleX
       });
       layer.add(frame);
 
       var dataToDraw = _(profile)
 	    .filter(function(g){
-	      return g.coordinate >= start
-		&& g.coordinate <= end;
+	      return g.coordinate >= xaxis.start
+		&& g.coordinate <= xaxis.end;
 	    })
 	    .reduce(function(acc, g){
 	      lines.map(function(x){
@@ -221,7 +150,6 @@ angular.module('npact')
 	      });
 	      return acc;
 	    }, {r:[], g:[], b:[]});
-      $log.log(dataToDraw);
       lines.map(function(x){
 	var l = new K.Line({
 	  points:dataToDraw[x],
@@ -231,10 +159,39 @@ angular.module('npact')
 	});
 	frame.add(l);
       });
-      $log.log(frame);
     }
     function drawXAxis(layer, opts){
+      var profile = opts.data.profile,
+	  xaxis = GraphingCalculator.xaxis(opts)
+      ;
+
+      var frame = new K.Layer({
+	x: xaxis.x, y: xaxis.y,
+	width: xaxis.length,
+	scaleX: xaxis.scaleX
+      });
+      layer.add(frame);
+
       
+      var origin = new K.Circle({
+	radius: xaxis.interval,
+	fill: 'red',
+	stroke: 'black',
+	strokeWidth: 5
+      });
+      layer.add(frame);
+
+      // draw ticks
+      drawAxisTicks(frame, xaxis.ticks, opts);
+      drawAxisLabels(frame, xaxis.labels, opts)
+	.map(function(txt){
+	  // center on the tick marks, at this point we know how wide
+	  // this text is
+	  var w = txt.getWidth() / xaxis.scaleX,
+	      x = txt.x();
+	  txt.x(x - w/2);
+	});
+
     }
 
     function make(stage, opts){
@@ -257,7 +214,7 @@ angular.module('npact')
       return {
 	redraw:function(newOpts){
 	  drawProfile(chartChrome.layer, opts);
-	  // drawXAxis(?, opts);
+	  drawXAxis(stage, opts);
 	  stage.batchDraw();
 	}
       };
@@ -293,7 +250,7 @@ angular.module('npact')
   .directive('npactGraph', function($log, Grapher, WidthChecker){
 
     var defaultGraphOpts = {
-      leftPadding: 80,
+      leftPadding: 80, rightPadding:20,
       profileHeight: 100,
       hitsHeight:15, cdsHeight:15, orfHeight:30,
       headerLabelPadding: 10, headerLabelFontsize:10,
