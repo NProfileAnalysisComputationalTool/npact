@@ -304,11 +304,8 @@ def results(request, path):
                        "delete old results periodically to save space on"
                        " the server. Please try running the analysis again.")
 
-    return_url = get_return_url(request)
-
     return render_to_response('results.html',
-                              {'download_link': download_link,
-                               'return_url': return_url},
+                              {'download_link': download_link},
                               context_instance=RequestContext(request))
 
 
