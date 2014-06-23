@@ -24,37 +24,37 @@ from npactweb.middleware import RedirectException
 
 from taskqueue import client, NoSuchTaskError
 
-
-
 # Get an instance of a logger
 logger = logging.getLogger(__name__)
 
 
-
-
 def get_raw_url(request, path):
-    #return request.build_absolute_uri(reverse('raw', path))
+    # return request.build_absolute_uri(reverse('raw', path))
     if path.startswith('/'):
         path = getrelpath(path)
     return reverse('raw', args=[path])
 
 
 def get_ti(size):
-    return forms.TextInput(attrs={'size':size})
+    return forms.TextInput(attrs={'size': size})
+
 
 class ConfigForm(forms.Form):
     first_page_title = forms.CharField(widget=get_ti(40))
     following_page_title = forms.CharField(required=False, widget=get_ti(40))
-    length=forms.IntegerField(required=True, min_value=0,
-                              widget=get_ti(8))
-    nucleotides=forms.MultipleChoiceField(choices=[(i,i) for i in ['a','c','g','t']],
-                                          widget=forms.CheckboxSelectMultiple())
-    skip_prediction=forms.BooleanField(required=False)
-    significance=forms.ChoiceField(choices=prepare.significance_levels, required=False,
-                                   label="Prediction Significance")
-    start_base=forms.IntegerField()
-    end_base=forms.IntegerField()
-    alternate_colors=forms.BooleanField(required=False, label="Alternative colors")
+    length = forms.IntegerField(required=True, min_value=0,
+                                widget=get_ti(8))
+    nucleotides = forms.MultipleChoiceField(
+        choices=[(i, i) for i in ['a', 'c', 'g', 't']],
+        widget=forms.CheckboxSelectMultiple())
+    skip_prediction = forms.BooleanField(required=False)
+    significance = forms.ChoiceField(
+        choices=prepare.significance_levels, required=False,
+        label="Prediction Significance")
+    start_base = forms.IntegerField()
+    end_base = forms.IntegerField()
+    alternate_colors = forms.BooleanField(
+        required=False, label="Alternative colors")
     email = forms.EmailField(required=False)
 
     def clean(self):
@@ -62,12 +62,14 @@ class ConfigForm(forms.Form):
         start = cleaned_data.get('start_base')
         end = cleaned_data.get('end_base')
         if start and end and start > end:
-            raise forms.ValidationError("End page must be greater than or equal to start page.")
+            raise forms.ValidationError(
+                "End page must be greater than or equal to start page.")
         return cleaned_data
+
 
 def get_display_items(request, config):
     yield ('Filename', config['basename'])
-    for key in ['date','length','description']:
+    for key in ['date', 'length', 'description']:
         if config.get(key):
             yield key, config.get(key)
 
@@ -82,25 +84,28 @@ def config(request, path):
         form = ConfigForm(request.POST)
         if form.is_valid():
             logger.info("Got clean post, running.")
-            url = reverse('run', args=[path]) + "?" + urlencode(form.cleaned_data, True)
+            url = reverse('run', args=[path]) + \
+                  "?" + urlencode(form.cleaned_data, True)
             return HttpResponseRedirect(url)
     else:
         form = ConfigForm(initial=config)
 
-    for key,field in form.fields.items():
+    for key, field in form.fields.items():
         if key in prepare.CONFIG_HELP_TEXT:
             field.help_text = prepare.CONFIG_HELP_TEXT[key]
         elif settings.DEBUG:
             logger.error("Help text missing for config form field: %r", key)
 
-    return render_to_response('config.html',
-                              {'form':form, 'parse_data':config,
-                               'def_list_items': get_display_items(request,config)},
-                               context_instance=RequestContext(request))
+    return render_to_response(
+        'config.html', {'form': form, 'parse_data': config,
+                        'def_list_items': get_display_items(request, config)},
+        context_instance=RequestContext(request))
 
-#Variables, mostly for debugging, that aren't exposed anywhere but
-#that if present in the request should be added to the config
+
+# Variables, mostly for debugging, that aren't exposed anywhere but
+# that if present in the request should be added to the config
 MAGIC_PARAMS = ['raiseerror', 'force']
+
 
 def build_config(path, request):
     "Tries to build the config dictionary for the given path"
@@ -112,7 +117,8 @@ def build_config(path, request):
         messages.error(request, str(e))
         raise RedirectException(reverse('start'))
     except:
-        logger.exception("Error parsing gbk: %r", getabspath(path, raise_on_missing=False))
+        logger.exception(
+            "Error parsing gbk: %r", getabspath(path, raise_on_missing=False))
         messages.error(request,
                        "There was a problem loading file '%s', "
                        "please try again or try a different record." % path)
@@ -121,11 +127,11 @@ def build_config(path, request):
     cf = ConfigForm(request.REQUEST)
     for f in cf.visible_fields():
         try:
-            v=f.field.clean(f.field.to_python(f.data))
+            v = f.field.clean(f.field.to_python(f.data))
             if v:
                 logger.debug("Including %r:%r from request.", f.name, v)
                 config[f.name] = v
-        except forms.ValidationError, ve:
+        except forms.ValidationError:
             pass
         except:
             logger.exception("Error with %r", f.name)
@@ -152,6 +158,7 @@ def urlencode_config(config, exclude=None):
         keys = set(keys) - set(exclude)
     return urlencode(util.reducedict(config, keys), True)
 
+
 def run_frame(request, path):
     """This is the main processing page. However, that page is just
     frame in which ajax requests spur the actual processing"""
@@ -161,28 +168,28 @@ def run_frame(request, path):
     email = request.GET.get('email')
 
     if email:
-        results_link = reverse('run', args=[path]) + '?' + urlencode_config(config, exclude=['email'])
+        results_link = reverse('run', args=[path]) + \
+                       '?' + urlencode_config(config, exclude=['email'])
         results_link = request.build_absolute_uri(results_link)
-        
-        
+
         # the config dictionary at the end of the process is what is
         # returned by the above job, will be passed as the first
         # argument to the function called by client.after: send_email
         email_jobid = client.after(jobid, send_email, [results_link, email])
         logger.debug("Schedule email to %r with jobid: %s", email, email_jobid)
 
+    # TODO: wait a tiny amount here to see if the job is already done?
 
-    
-    #TODO: we could wait a tiny amount of time here to see if the job is already done.
-
-    full_path = reverse('runstatus',args=[jobid])
-    reconfigure_url = reverse('config', args=[path]) + "?" + urlencode_config(config)
+    full_path = reverse('runstatus', args=[jobid])
+    reconfigure_url = reverse('config', args=[path]) \
+                      + "?" + urlencode_config(config)
     return render_to_response('processing.html',
                               {'statusurl': full_path,
                                'reconfigure_url': reconfigure_url,
                                'email': email,
                                },
                               context_instance=RequestContext(request))
+
 
 def run_status(request, jobid):
     config = None
@@ -200,7 +207,7 @@ def run_status(request, jobid):
         logger.exception("Error getting job status. %r", jobid)
 
     if status != 200:
-        #something has already gone wrong.
+        # something has already gone wrong.
         return HttpResponse(json.dumps(result), status=status)
 
     if not ready:
@@ -211,7 +218,7 @@ def run_status(request, jobid):
         except NoSuchTaskError:
             result['message'] = 'Unknown task identifier. Please retry.'
             status = 500
-        except Exception,e:
+        except Exception:
             result['message'] = 'Fatal error.'
             status = 500
             logger.exception("Error getting job result. %r", jobid)
@@ -290,7 +297,7 @@ def results(request, path):
     download_link = None
     try:
         getabspath(path)
-        download_link=get_raw_url(request, path)
+        download_link = get_raw_url(request, path)
     except IOError:
         messages.error(request,
                        "We're sorry but that file no longer exists. We "
@@ -306,24 +313,23 @@ def results(request, path):
 
 
 def kickstart(request, path, config):
-
-    #TODO: Some logic here to see if they're already running a job and
-    #propose cancelling it
-
+    # TODO: See if they're already running a job and propose cancelling it
     jobid = client.enqueue(main.process_all, [getabspath(path), config])
     return jobid
 
+
 def send_email(config, results_link, email_address):
-    #config is the result of running the process, needs to be first parameter
+    # config is the result of running the process, needs to be first parameter
     try:
         logger.debug("Task completed; sending email to %r", email_address)
         from django.core.mail import EmailMultiAlternatives
-        subject = 'NPACT results ready for "{0}"'.format(config['first_page_title'])
+        subject = 'NPACT results ready for "{0}"'.format(
+            config['first_page_title'])
         plaintext = get_template('email-results.txt')
-        htmly     = get_template('email-results.html')
+        htmly = get_template('email-results.html')
 
-        d = Context({ 'keep_days': settings.ATIME_DEFAULT,
-                      'results_link': results_link})
+        d = Context({'keep_days': settings.ATIME_DEFAULT,
+                     'results_link': results_link})
 
         text_content = plaintext.render(d)
         html_content = htmly.render(d)
@@ -332,4 +338,4 @@ def send_email(config, results_link, email_address):
         msg.send(fail_silently=False)
         logger.debug("Finished sending email.")
     except:
-        logger.exception("Failed sending email to %r", to_address)
+        logger.exception("Failed sending email to %r", email_address)
