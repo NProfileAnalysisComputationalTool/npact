@@ -113,6 +113,7 @@
 	end: end,
 	// total length of profile to draw
 	length: length,
+	interval: interval,
 	x: m.graph.x,
 	y: m.graph.y + m.graph.h,
 	scaleX: scaleX,

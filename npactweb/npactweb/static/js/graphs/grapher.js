@@ -144,15 +144,28 @@ angular.module('npact')
     };
 
     GP.genomeGroup = function(){
-      var g = new K.Group({
-	id:'genome',
-	x: this.m.graph.x,
-	draggable: true,
-	dragBoundFunc:function(pos, evt){
-	  // TODO: stop if we reach limits of gene-space	  
-	  return {x: pos.x, y: this.y() };
-	}
-      });
+      var m = this.m, xaxis = this.xaxis, range = this.opts.range,
+	  g = new K.Group({
+	    id:'genome',
+	    x: this.m.graph.x,
+	    draggable: true,
+	    dragBoundFunc:function(pos, evt){
+	      // stop dragging if we reach limits of gene-space
+
+	      // how far have we dragged, in gene space
+	      var genesDragged = parseInt((m.graph.x - pos.x)/xaxis.scaleX),
+		  margin = parseInt(xaxis.length*0.01),
+		  tooFarLeft = range[0] + genesDragged <= xaxis.start - margin,
+		  tooFarRight = range[1] + genesDragged >= xaxis.end + margin
+	      ;
+
+	      if(tooFarLeft || tooFarRight){
+		return {x: this.x(), y: this.y()};
+	      }else {
+		return {x: pos.x, y: this.y() };
+	      }
+	    }
+	  });
       g.on('mouseover', function() {
         document.body.style.cursor = 'pointer';
       });
