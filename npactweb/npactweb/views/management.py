@@ -26,7 +26,8 @@ def view(request):
         return HttpResponseRedirect(reverse('management'))
     daemon_status = 'running' if tqdaemon.status() else 'stopped'
     return render_to_response('management.html',
-                              {'settings': settings},
+                              {'settings': settings,
+                               'daemon_status': daemon_status},
                               context_instance=RequestContext(request))
 
 
