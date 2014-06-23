@@ -84,8 +84,8 @@ def config(request, path):
         form = ConfigForm(request.POST)
         if form.is_valid():
             logger.info("Got clean post, running.")
-            url = reverse('run', args=[path]) + \
-                  "?" + urlencode(form.cleaned_data, True)
+            url = reverse('run', args=[path]) \
+                  + "?" + urlencode(form.cleaned_data, True)
             return HttpResponseRedirect(url)
     else:
         form = ConfigForm(initial=config)
@@ -168,8 +168,8 @@ def run_frame(request, path):
     email = request.GET.get('email')
 
     if email:
-        results_link = reverse('run', args=[path]) + \
-                       '?' + urlencode_config(config, exclude=['email'])
+        results_link = reverse('run', args=[path]) \
+                       + '?' + urlencode_config(config, exclude=['email'])
         results_link = request.build_absolute_uri(results_link)
 
         # the config dictionary at the end of the process is what is
@@ -201,7 +201,7 @@ def run_status(request, jobid):
     except NoSuchTaskError:
         result['message'] = 'Unknown task identifier. Please retry.'
         status = 500
-    except Exception,e:
+    except Exception:
         result['message'] = 'Fatal error.'
         status = 500
         logger.exception("Error getting job status. %r", jobid)

@@ -4,7 +4,7 @@
 # The format for this file is described at
 # http://www.allbuttonspressed.com/projects/django-mediagenerator#media-bundles
 
-MEDIA_BUNDLES= (
+MEDIA_BUNDLES = (
     ('main.css',
      'css/basic.css',
      'css/custom-theme/jquery-ui-1.10.4.custom.css',
