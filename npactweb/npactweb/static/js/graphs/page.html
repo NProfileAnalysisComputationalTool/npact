@@ -1,7 +1,8 @@
 <div>
   <h2>{{title}}</h2>
   <!-- TODO: put this in a loop -->
-  <div npact-graph style="height:200px;border:1px solid blue;"
+  <div ng-repeat="range in ranges"
+       npact-graph style="height:200px;border:1px solid blue;"
        data="d" range="range"
        headers="[{id:'orfs', title:'Newly Identified ORFs', lineType:'extract'},
 		{id:'cds', title:'Input file CDS', lineType:'extract'},

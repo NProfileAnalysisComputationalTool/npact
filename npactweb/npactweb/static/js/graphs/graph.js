@@ -68,7 +68,6 @@ angular.module('npact')
 	
 	scope.$watch('data.profile', function(newval, oldval){
 	  if(!newval) return;
-
 	  // when we have a graph ready, redraw it.
 	  p.then(function(g){
 	    g.redraw();

@@ -4,7 +4,7 @@ angular.module('npact')
     function addMany(container, children){
       return container.add.apply(container, children);
     }
-    
+
     function Grapher(opts){
       $log.log('new Grapher:', opts);
       this.opts = opts;
@@ -130,7 +130,6 @@ angular.module('npact')
     };
 
     GP.leftLayer = function(){
-      
       var opts = this.opts,
 	  layer = new K.Layer({
 	    width: opts.leftPadding,
@@ -152,7 +151,6 @@ angular.module('npact')
 	  min = mgx - (xaxis.start - margin - range[0])*xaxis.scaleX,
 	  max = mgx - (xaxis.end + margin - range[1])*xaxis.scaleX,
 	  g = new K.Group({
-	    id:'genome',
 	    x: this.m.graph.x,
 	    draggable: true,
 	    dragBoundFunc:function(pos, evt){
@@ -173,7 +171,7 @@ angular.module('npact')
       // need a shape that can be clicked on to allow dragging the
       // entire canvas
       g.add(new K.Rect({width:1000, height:1000}));
-      return g;
+      return this._genomeGroup = g;
     };
 
     GP.chartLayer = function(){
@@ -262,9 +260,7 @@ angular.module('npact')
     };
     
     GP.redraw = function(){
-      $log.log('redraw');
-      var genomeGroup = this.stage.find('#genome');
-      genomeGroup.add(this.xAxisGroup(), this.profileGroup());
+      this._genomeGroup.add(this.xAxisGroup(), this.profileGroup());
       this.stage.batchDraw();
     };
     return Grapher;
