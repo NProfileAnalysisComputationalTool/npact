@@ -145,24 +145,22 @@ angular.module('npact')
 
     GP.genomeGroup = function(){
       var m = this.m, xaxis = this.xaxis, range = this.opts.range,
+	  mgx = m.graph.x,
+	  margin = xaxis.length*0.01,
+	  // algrebra to figure out the relative pixel differences to check
+	  // in the drag handler
+	  min = mgx - (xaxis.start - margin - range[0])*xaxis.scaleX,
+	  max = mgx - (xaxis.end + margin - range[1])*xaxis.scaleX,
 	  g = new K.Group({
 	    id:'genome',
 	    x: this.m.graph.x,
 	    draggable: true,
 	    dragBoundFunc:function(pos, evt){
-	      // stop dragging if we reach limits of gene-space
-
-	      // how far have we dragged, in gene space
-	      var genesDragged = parseInt((m.graph.x - pos.x)/xaxis.scaleX),
-		  margin = parseInt(xaxis.length*0.01),
-		  tooFarLeft = range[0] + genesDragged <= xaxis.start - margin,
-		  tooFarRight = range[1] + genesDragged >= xaxis.end + margin
-	      ;
-
-	      if(tooFarLeft || tooFarRight){
-		return {x: this.x(), y: this.y()};
+	      // stop dragging at the limits of this graph
+	      if(min <= pos.x || max >= pos.x){
+		return {x: this.x(), y: 0};
 	      }else {
-		return {x: pos.x, y: this.y() };
+		return {x: pos.x, y: 0 };
 	      }
 	    }
 	  });
