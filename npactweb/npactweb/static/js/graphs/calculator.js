@@ -43,6 +43,7 @@
 
       return {
 	graph:g,
+	// TODO: return xaxis here
 	yaxis:{
 	  ticks: yticks,
 	  labels: ylabels,
@@ -64,7 +65,7 @@
       var m = chart(opts),
 	  length = opts.range[1] - opts.range[0],
 	  // get even stops; look for one lower order of magnitude
-	  // than our length 
+	  // than our length - TODO: to many stops for lower ranges
 	  interval = Math.pow(10, Math.floor(Math.log(length) / Math.log(10)) - 1),
 	  // want to capture some margin
 	  start = Math.max(opts.range[0] - interval,0),
@@ -101,7 +102,9 @@
 	y: m.graph.y + m.graph.h,
 	scaleX: scaleX,
 	ticks: ticks,
-	labels:labels
+	labels:labels,
+	minDragX: m.graph.x - parseInt(interval*scaleX),
+	maxDragX: m.graph.x - parseInt(interval*scaleX)
       };
     }
     return {

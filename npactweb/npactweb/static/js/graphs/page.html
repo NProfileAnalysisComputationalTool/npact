@@ -1,21 +1,12 @@
 <div>
   <h2>{{title}}</h2>
   <!-- TODO: put this in a loop -->
-  <div npact-graph style="height:200px; border:1px solid blue;"
+  <div npact-graph style="height:200px;border:1px solid blue;"
        data="d" range="range"
-       left-padding="120" right-padding="25"
-       hits-height="15" cds-height="30" orf-height="30"
-       header-label-padding="10"
-       header-label-fontcolor="#444",
-       header-label-fontsize="11"
-       axis-label-fontsize="11"
-       axis-fontcolor="#444",
-       axis-title-fontsize="20"
-       axis-title="% GC"
-       border-color="#444"
-       profile-height="100" profile-ticks="5"
-       graph-red-color="red"
-       graph-blue-color="blue"
-       graph-green-color="green"
+       headers="[{id:'orfs', title:'Newly Identified ORFs', lineType:'extract'},
+		{id:'cds', title:'Input file CDS', lineType:'extract'},
+		{id:'hits', title:'Hits', lineType:'hits'} ]"
+       axis-title="'% GC'"
+       colorblind-friendly-colors="false"
        ></div>
 </div>
