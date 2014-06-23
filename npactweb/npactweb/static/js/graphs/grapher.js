@@ -196,7 +196,8 @@ angular.module('npact')
 	  g = new K.Group({
 	    x: 0, y: m.graph.h + m.graph.y,
 	    width: xaxis.length,
-	    scaleX: xaxis.scaleX
+	    scaleX: xaxis.scaleX,
+	    offsetX: this.opts.range[0]
 	  });
 
       addMany(g, this.drawAxisTicks(xaxis.ticks));
@@ -221,7 +222,8 @@ angular.module('npact')
 	  g = new K.Group({
 	    x: 0, y:m.graph.y,
 	    height:opts.profileHeight, width:xaxis.length,
-	    scaleX: xaxis.scaleX
+	    scaleX: xaxis.scaleX,
+	    offsetX: this.opts.range[0]
 	  }),
 	  dataToDraw = _(this.opts.data.profile)
       	    .filter(function(g){

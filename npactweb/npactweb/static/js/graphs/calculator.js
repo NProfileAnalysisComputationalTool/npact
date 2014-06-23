@@ -1,6 +1,24 @@
 (function(){
 
   function GraphingCalculator(K, $log){
+
+    var log10 = Math.log(10);
+    
+    function stops(a,b){
+      var length = b - a,
+	  // get even stops; look for one lower order of magnitude
+	  // than our length - TODO: to many stops for lower ranges
+	  interval = Math.pow(10, Math.round(Math.log(length) / log10) - 1),
+	  // want to capture some margin
+	  start = Math.max(a - interval,0),
+	  end = b+interval;
+      // want to be start/end INCLUSIVE so pad the end
+      return {
+	interval: interval,
+	stops: _.range(start, end+interval, interval)
+      };
+    }
+    
     function chart(opts){
       var yStops = [100, 80, 60, 40, 20, 0],
 	  yAxisTicks = yStops.length - 1,
@@ -63,18 +81,15 @@
 
     function xaxis(opts){
       var m = chart(opts),
+	  s = stops(opts.range[0], opts.range[1]),
 	  length = opts.range[1] - opts.range[0],
-	  // get even stops; look for one lower order of magnitude
-	  // than our length - TODO: to many stops for lower ranges
-	  interval = Math.pow(10, Math.floor(Math.log(length) / Math.log(10)) - 1),
+	  interval = s.interval, ss = s.stops,
 	  // want to capture some margin
-	  start = Math.max(opts.range[0] - interval,0),
-	  end = opts.range[1]+interval,
-	  // want to be start/end INCLUSIVE so pad the end
-	  stops = _.range(start, end+interval, interval),
-	  xAxisTicks = stops.length,
+	  start = ss[0],
+	  end = _.last(ss),
+	  xAxisTicks = ss.length,
 	  xAxisTickY = m.graph.y + m.graph.h,
-	  ticks = stops.map(function(lbl, n){
+	  ticks = ss.map(function(lbl, n){
 	    var x = parseInt(start + n*interval);
 	    return {
 	      x: x, y: 0,
@@ -84,7 +99,7 @@
 	  scaleX = m.graph.w / length,
 	  // blow the text back up, we don't want it scaled
 	  labelScaleX = 1/scaleX,
-	  labels = stops.map(function(lbl, n){
+	  labels = ss.map(function(lbl, n){
 	    return {
 	      x: ticks[n].x, y: opts.profileTicks,
 	      text: lbl,
@@ -94,23 +109,22 @@
       ;
 
       return {
-	start: Math.max(start - interval,0),
-	end: end + interval,
+	start: start,
+	end: end,
 	// total length of profile to draw
 	length: length,
 	x: m.graph.x,
 	y: m.graph.y + m.graph.h,
 	scaleX: scaleX,
 	ticks: ticks,
-	labels:labels,
-	minDragX: m.graph.x - parseInt(interval*scaleX),
-	maxDragX: m.graph.x - parseInt(interval*scaleX)
+	labels:labels
       };
     }
     return {
       chart:chart,
       xaxis:xaxis,
-      alignRectangles:alignRectangles
+      alignRectangles:alignRectangles,
+      stops:stops
     };
   }
 

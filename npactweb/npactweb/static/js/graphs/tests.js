@@ -105,16 +105,6 @@ describe('Graphs', function(){
       );
     });
 
-    it('calculates x-axis', function(){
-      
-      var ax = GC.xaxis(opts);
-      expect(ax).toEqual({
-	start: 0, end: 100,
-	length: 100,
-	x: 50, y: 135, scaleX: 2
-      });
-    });
-    
     it('calculates x-axis ticks', function(){
 
       var ax = GC.xaxis(opts);
@@ -129,7 +119,9 @@ describe('Graphs', function(){
 	{x: 70, y: 0, x2: 70, y2: 5},
 	{x: 80, y: 0, x2: 80, y2: 5},
 	{x: 90, y: 0, x2: 90, y2: 5},
-	{x: 100, y: 0, x2: 100, y2: 5} 
+	{x: 100, y: 0, x2: 100, y2: 5},
+	{x: 110, y: 0, x2: 110, y2: 5}
+	
       ]);
     });
 
@@ -138,6 +130,23 @@ describe('Graphs', function(){
 	{x: 0, y: 0, w: 100, h: 100}, 
 	{w: 10, h: 10});
       expect(pos).toEqual({x: 45, y: 45});
+    });
+
+    it('calculates stops for axes', function(){
+      expect(GC.stops(0,10000)).toEqual({
+	interval:1000,
+	stops:[0, 1000, 2000, 3000, 4000, 5000, 6000, 7000, 8000, 9000, 10000, 11000]
+      });
+
+      expect(GC.stops(0,1000)).toEqual({
+	interval:100,
+	stops: [0, 100, 200, 300, 400, 500, 600, 700, 800, 900, 1000, 1100]
+      });
+      
+      expect(GC.stops(1000,2000)).toEqual({
+	interval:100,
+	stops: [900, 1000, 1100, 1200, 1300, 1400, 1500, 1600, 1700, 1800, 1900, 2000, 2100]
+      });
     });
     
   });
