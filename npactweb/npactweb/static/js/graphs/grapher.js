@@ -6,7 +6,7 @@ angular.module('npact')
     }
 
     function Grapher(opts){
-      $log.log('new Grapher:', opts);
+      $log.log('new Grapher:', opts.range);
       this.opts = opts;
       this.stage = new K.Stage({
 	container:opts.element,
@@ -29,7 +29,6 @@ angular.module('npact')
       
       this.m = GraphingCalculator.chart(opts);
       this.xaxis = GraphingCalculator.xaxis(opts);
-      $log.log('chart measurements:', this.m, this.xaxis);
       this.stage.add(this.leftLayer(), this.chartLayer());
       this.stage.batchDraw();
 
@@ -118,7 +117,7 @@ angular.module('npact')
 	// define the space we want to center inside
 	m.yaxis.titleBox,
 	// bounding box of the text, pre-rotated so need to swap W and H
-	{w: title.getHeight(), h: title.getWidth()});
+	{width: title.getHeight(), height: title.getWidth()});
 
       // translate to the bottom-left of the new rectangle, so after we rotate
       // we'll be centered
@@ -262,6 +261,110 @@ angular.module('npact')
     GP.redraw = function(){
       this._genomeGroup.add(this.xAxisGroup(), this.profileGroup());
       this.stage.batchDraw();
+    };
+
+    GP.cdsGroup = function(cds){
+      var xaxis = this.xaxis, opts = this.opts,
+	  colors = this.colors,
+	  g = new K.Group({
+	    x: 0, y: 0,
+	    scaleX: xaxis.scaleX,
+	    offsetX: this.opts.range[0]
+	  }),
+	  colorNames = 'rgb',
+	  // TODO: lookup where this should live in the header space
+	  y = 30,
+	  ahHalfHeight = opts.headerArrowHeight/2,
+	  compY = y + opts.headerArrowHeight,
+	  ahw = opts.headerArrowWidth/xaxis.scaleX,
+	  textOpts = {
+	    fontSize: opts.headerArrowFontsize,
+	    fill:opts.axisFontcolor,
+	    scaleX:1/xaxis.scaleX,
+	    strokeScaleEnabled: false
+	  },
+	  arrowOpts = {
+	    x: 0, y:0,
+	    closed: true,
+	    strokeWidth:1,
+	    strokeScaleEnabled: false
+	  },
+	  
+	  arrows = _(cds)
+	    .filter(function(x){
+	      return x.start >= xaxis.start
+		&& x.end <= xaxis.end;
+	    }).forEach(function(x){
+	      // color determined by `x.end - 1 % 3`
+	      var isComplement = x.complement == 0,	      
+		  c = colors[colorNames[(x.end - 1) % 3]],
+		  baseY = isComplement ? y + opts.headerArrowHeight : y,
+		  arrowPointY = baseY + ahHalfHeight,
+		  arrowMaxY = baseY + opts.headerArrowHeight,
+		  shape = isComplement
+		    ? [
+		      x.start, arrowPointY,
+		      x.start + ahw, baseY,
+		      x.end, baseY,
+		      x.end, arrowMaxY,
+		      x.start + ahw, arrowMaxY,
+		      x.start, arrowPointY
+		    ] : [
+		      x.start, baseY,
+		      x.end - ahw, baseY,
+		      x.end, arrowPointY,
+		      x.end - ahw, arrowMaxY,
+		      x.start, arrowMaxY,
+		      x.start, y
+		    ],
+		  arrowBounds = isComplement
+		    ? {
+		      x: x.start+ahw, y: baseY,
+		      width: x.end-x.start-ahw, height: opts.headerArrowHeight
+		    } : {
+		      x: x.start, y: baseY,
+		      width: x.end-x.start-ahw, height: opts.headerArrowHeight
+		    },
+		  line = new K.Line(angular.extend({
+		    name: x.name,
+		    points: shape,
+		    stroke:c
+		  }, arrowOpts)),
+		  // render the name, too
+		  lbl = new K.Text(angular.extend({
+		    text: x.name
+		  }, textOpts)),
+		  // need a dummy group for clipping, `Text` doesn't
+		  // support clip directly
+		  lblGroup = new K.Group({clip:arrowBounds});
+		  ;
+	      
+	      lblGroup.add(lbl);
+	      g.add(line, lblGroup);
+	      // now that lbl is on the canvas, we can see what it's
+	      // height/width is
+	      var pos = GraphingCalculator.alignRectangles(
+		arrowBounds,
+		{
+		  // convert to gene space
+		  width:lbl.getWidth()/ xaxis.scaleX,
+		  height:lbl.getHeight()
+		});
+	      pos.x = Math.max(pos.x, arrowBounds.x+1);
+	      lbl.position(pos);
+	    });
+
+      g.on('click', function(evt){
+	$log.log('click', evt,  evt.target);
+	// TODO: pull up a popup with information about the arrow,
+	// position based on evt.clientX/Y
+      });
+      return g;
+    };
+    
+    GP.drawCDS = function(cds){
+      $log.log(this.opts.range, 'drawCDS');
+      this._genomeGroup.add(this.cdsGroup(cds));
     };
     return Grapher;
   });

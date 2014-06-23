@@ -101,7 +101,7 @@ describe('Graphs', function(){
     it('calculates y-axis title', function(){
       var m = GC.chart(opts);
       expect(m.yaxis.titleBox).toEqual(
-	{x: 0, y: 30, w: 40, h: 100}
+	{x: 0, y: 30, width: 40, height: 100}
       );
     });
 
@@ -127,8 +127,8 @@ describe('Graphs', function(){
 
     it('can align rectangles', function(){
       var pos = GC.alignRectangles(
-	{x: 0, y: 0, w: 100, h: 100}, 
-	{w: 10, h: 10});
+	{x: 0, y: 0, width: 100, height: 100}, 
+	{width: 10, height: 10});
       expect(pos).toEqual({x: 45, y: 45});
     });
 

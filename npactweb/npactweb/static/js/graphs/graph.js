@@ -21,18 +21,23 @@ angular.module('npact')
     // TODO: determine me dynamically
     leftPadding:120,
 
-    rightPadding:25,
-    headerSizes:{'extract':30, 'hits':15},
-    profileHeight:100,
-    profileTicks:5,
-    headerLabelPadding:10,
-    
-    headerLabelFontcolor:"#444",
-    headerLabelFontsize:11,
     axisLabelFontsize:11,
     axisFontcolor:"#444",
     axisTitleFontsize:20,
     borderColor:"#444",
+    rightPadding:25,    
+    profileHeight:100,
+    profileTicks:5,
+
+    // header labels and arrows
+    headerSizes:{'extract':30, 'hits':15},    
+    headerLabelPadding:10,    
+    headerLabelFontcolor:"#444",
+    headerLabelFontsize:11,
+    headerArrowHeight:12,
+    headerArrowWidth:6,
+    headerArrowFontsize:9,
+    
     // profile line colors
     graphRedColor:"red",
     graphBlueColor:"blue",
@@ -71,6 +76,14 @@ angular.module('npact')
 	  // when we have a graph ready, redraw it.
 	  p.then(function(g){
 	    g.redraw();
+	  });
+	});
+
+	scope.$watch('data.cds', function(newval, oldval){
+	  if(!newval) return;
+	  // when we have a graph ready, redraw it.
+	  p.then(function(g){
+	    g.drawCDS(newval);
 	  });
 	});
       }

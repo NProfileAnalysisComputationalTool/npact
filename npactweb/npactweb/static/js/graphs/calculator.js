@@ -55,7 +55,7 @@
 	  }),
 	  // box to center the title inside of
 	  ytitle={
-	    x: 0, y: g.y, w: yAxisLabelWidth, h: g.h
+	    x: 0, y: g.y, width: yAxisLabelWidth, height: g.h
 	  }
       ;
 
@@ -75,8 +75,8 @@
     // the centers of the two rectangles
     function alignRectangles(rect, toAlign){
       // get the top left coordinate of the `toAlign` rect
-      return {x: rect.x + (rect.w/2) - (toAlign.w/2),
-	      y: rect.y + (rect.h/2) - (toAlign.h/2)};
+      return {x: rect.x + (rect.width/2) - (toAlign.width/2),
+	      y: rect.y + (rect.height/2) - (toAlign.height/2)};
     }
 
     function xaxis(opts){

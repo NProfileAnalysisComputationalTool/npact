@@ -17,6 +17,9 @@ angular.module('npact')
 	$http.get(STATIC_BASE_URL+'js/nprofile.json').then(function(res){
 	  scope.d.profile = res.data;
 	});
+	$http.get(STATIC_BASE_URL+'js/extract.json').then(function(res){
+	  scope.d.cds = res.data;
+	});
       }
     };
   });
