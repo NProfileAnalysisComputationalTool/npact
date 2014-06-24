@@ -1,4 +1,3 @@
-
 PROC_TITLE = 'npact-taskqueue-daemon'
 
 LISTEN_ADDRESS = ('127.0.0.1', 57129)
@@ -19,11 +18,10 @@ def setup_logger(verbose):
     tq_logger.setLevel(logging.DEBUG if verbose else logging.WARNING)
     handler = logging.StreamHandler()
     handler.setLevel(logging.DEBUG)
-    handler.setFormatter(logging.Formatter("%(asctime)s %(processName)s/%(name)s "
-                                           "%(levelname)-8s %(message)s",
-                                           datefmt='%H:%M:%S'))
+    handler.setFormatter(logging.Formatter(
+        "%(asctime)s %(processName)s/%(name)s %(levelname)-8s %(message)s",
+        datefmt='%H:%M:%S'))
     tq_logger.addHandler(handler)
     mp_logger = multiprocessing.get_logger()
     mp_logger.addHandler(handler)
     mp_logger.setLevel(logging.INFO)
-

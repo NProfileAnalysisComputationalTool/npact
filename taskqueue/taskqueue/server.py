@@ -1,6 +1,8 @@
 #!/usr/bin/env python
 """
-This module listens on a TCP socket (specified by taskqueue.LISTEN_ADDRESS) and runs a worker pool.
+This module listens on a TCP socket and runs a worker pool.
+
+The socket adress is specified by ``taskqueue.LISTEN_ADDRESS``.
 
 Tasks (a python callable and arguments) can be enqueued into the pool
 which returns an alphanumeric id to calling connection. That id can
@@ -23,17 +25,22 @@ import taskqueue
 
 log = logging.getLogger(__name__)
 
+
 class Manager(SyncManager):
     pass
+
 
 method_to_typeid = {
     'get_task': 'AsyncResult'
 }
 
+
 def start_everything():
     try:
         the_server = Server()
-        Manager.register('the_server', callable=lambda: the_server, method_to_typeid=method_to_typeid)
+        Manager.register(
+            'the_server',
+            callable=lambda: the_server, method_to_typeid=method_to_typeid)
         log.info("Opening a socket at %s", taskqueue.LISTEN_ADDRESS)
         manager = Manager(taskqueue.LISTEN_ADDRESS, authkey=taskqueue.AUTH_KEY)
         manager.get_server().serve_forever()
@@ -46,28 +53,26 @@ class Server(object):
     tasks = None
     work_dir = None
     manager = None
+
     def __init__(self, **kwargs):
         self.__dict__.update(kwargs)
         if not self.work_dir:
-            #storage for tasks in progress/log info.
+            # storage for tasks in progress/log info.
             self.work_dir = os.path.join(taskqueue.BASE_DIR, 'queue')
         if not os.path.exists(self.work_dir):
             os.makedirs(self.work_dir)
         self.tasks = dict()
         self.pool = multiprocessing.Pool()
 
-
     def ready(self, tid):
         log.debug("Checking on status of %s", tid)
         promise = self.get_task(tid)
         return promise.ready()
 
-
     def result(self, tid):
         log.debug("Checking on result of %s", tid)
         promise = self.get_task(tid)
         return promise.get(0.05)
-
 
     def log_output(self, tid, position=0):
         log.debug("Retrieving log output for %s from pos:%s", tid, position)
@@ -81,7 +86,7 @@ class Server(object):
     def log_tail(self, tid, line_count=1):
         log.debug("Retrieving %d log lines for %s", line_count, tid)
 
-        #make sure we have the running task (raises exception if missing)
+        # make sure we have the running task (raises exception if missing)
         task = self.get_task(tid)
 
         path = os.path.join(self.work_dir, tid + '.stderr')
@@ -90,7 +95,8 @@ class Server(object):
         try:
             with open(path, 'rb') as f:
                 try:
-                    f.seek(- (line_count + 1) * 120, 2) # 2 is from end
+                    # 2 is from end
+                    f.seek(- (line_count + 1) * 120, 2)
                 except:
                     f.seek(0)
                 lines = collections.deque(maxlen=line_count)
@@ -131,8 +137,10 @@ class Server(object):
                 raise taskqueue.NoSuchTaskError()
 
     def pickle_task(self, task):
-        "Writes the task definition to a file via pickle in case of server restart"
-        with tempfile.NamedTemporaryFile(delete=False, dir=self.work_dir, prefix='tq-', suffix='.todo') as f:
+        "Writes the task def to a file via pickle in case of server restart"
+        with tempfile.NamedTemporaryFile(
+                delete=False, dir=self.work_dir,
+                prefix='tq-', suffix='.todo') as f:
             log.info("tempfile: %r", f.name)
             cPickle.dump(task, f, cPickle.HIGHEST_PROTOCOL)
             return f.name
@@ -146,28 +154,28 @@ class Server(object):
         return self._enqueue(tid, path, task)
 
 
-
 def async_wrapper(tid, task_path, fn, args, kwargs):
-    """Wrapper function around executing a task to ensure env setup and teardown.
+    """Wrapper func around executing a task; ensures env setup and teardown.
 
     * This is run inside a pool process via the pool apply_async above.
     * Ensures the job 'todo' file is marked finished
     * sets up logging to a file for this task
     """
-    task_base,task_ext = os.path.splitext(task_path)
+    task_base, task_ext = os.path.splitext(task_path)
 
     ### Logging setup:
     ### In this proc all logging should go to a file named after the task
 
     root_logger = logging.root
-    #blow away any other handlers from previous uses of this process.
+    # blow away any other handlers from previous uses of this process.
     root_logger.handlers = []
 
     log_path = task_base + ".log"
     file_handler = logging.FileHandler(log_path, mode='a')
-    file_handler.setFormatter(logging.Formatter('%(asctime)s %(name)-10s'
-                                                ' %(levelname)-8s %(message)s',
-                                                datefmt='%Y%m%d %H:%M:%S'))
+    file_handler.setFormatter(
+        logging.Formatter(
+            '%(asctime)s %(name)-10s %(levelname)-8s %(message)s',
+            datefmt='%Y%m%d %H:%M:%S'))
 
     root_logger.setLevel(logging.DEBUG)
     root_logger.addHandler(file_handler)
@@ -177,8 +185,10 @@ def async_wrapper(tid, task_path, fn, args, kwargs):
     with open(stderrlog, 'w') as f:
         sys.stderr = f
         try:
-            if args is None:   args = []
-            if kwargs is None: kwargs = {}
+            if args is None:
+                args = []
+            if kwargs is None:
+                kwargs = {}
             rc = fn(*args, **kwargs)
             log.info("Finished %r", tid)
         finally:
