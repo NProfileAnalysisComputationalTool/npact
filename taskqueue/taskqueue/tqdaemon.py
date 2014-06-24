@@ -23,6 +23,7 @@ def get_pidfile():
     return pidlockfile.PIDLockFile(
         os.path.join(taskqueue.BASE_DIR, 'tqdaemon.pid'))
 
+
 def status():
     "Check whether daemon is already running. return pid or False"
     plf = get_pidfile()
@@ -31,14 +32,17 @@ def status():
         return pid
     return False
 
+
 def check_for_process(pid):
     if pid:
         try:
-            os.kill(pid, 0) #no-op signal, only indicates whether it could be sent
+            # no-op signal, only indicates whether it could be sent
+            os.kill(pid, 0)
             return True
         except OSError:
             get_pidfile().break_lock()
             return False
+
 
 def stop():
     "Kill a running daemon instance"
@@ -62,6 +66,7 @@ def stop():
             return OPERATION_FAILED
     return OPERATION_SUCCESSFUL
 
+
 def restart():
     "Restart a daemon process"
     if status():
@@ -70,9 +75,12 @@ def restart():
             return kill_status
     return daemonize()
 
+
 def kill(sig=signal.SIGKILL):
     uid = os.getuid()
-    proc = subprocess.Popen(['ps', 'x', '-U', str(uid), '-o', 'pid,command'], stdout=subprocess.PIPE)
+    proc = subprocess.Popen(
+        ['ps', 'x', '-U', str(uid), '-o', 'pid,command'],
+        stdout=subprocess.PIPE)
     lines = proc.stdout.readlines()[1:]
     logger.debug("Searching %d processes for this user.", len(lines))
     killed = 0
@@ -80,24 +88,23 @@ def kill(sig=signal.SIGKILL):
         l = l.strip()
         m = re.match('(\\d+) (npact-.*)', l)
         if m:
-            pid,name = m.groups()
+            pid, name = m.groups()
             logger.warning("Killing proc %s %r", pid, name)
             try:
                 os.kill(int(pid), sig)
-                killed +=1
+                killed += 1
             except:
                 logger.exception("Error killing %s %r", pid, name)
     return killed
-
 
 
 def daemonize():
     "Start a daemonized taskqueue"
     import daemon
 
-    ##Before daemonizing figure out which handlers we want to keep.
-    ##We only want to keep handlers for this library that aren't going
-    ##to stderr or stdout
+    # Before daemonizing figure out which handlers we want to keep.
+    # We only want to keep handlers for this library that aren't going
+    # to stderr or stdout
     other_handlers = set(logging._handlerList)
     fds = []
     l = logger
@@ -110,11 +117,10 @@ def daemonize():
                 other_handlers.discard(h)
         l = l.propagate and l.parent
 
-    ## Kill of any other loggers
+    # Kill of any other loggers
     logging.raiseExceptions = False
     logger.debug("Killing other loggers")
     logging.shutdown(list(other_handlers))
-    #logger.debug("Remaining loggers: %r:%r", fds, logging._handlerList)
 
     pidfile = get_pidfile()
     check_for_process(pidfile.read_pid())
@@ -124,13 +130,15 @@ def daemonize():
     else:
         logger.debug("Daemonizing, pidfile: %r", pidfile.path)
     try:
-        with daemon.DaemonContext(pidfile=pidfile, files_preserve=fds, detach_process=True):
+        with daemon.DaemonContext(
+                pidfile=pidfile, files_preserve=fds, detach_process=True):
             logging.raiseExceptions = True
             try:
                 import setproctitle
                 import taskqueue
                 setproctitle.setproctitle(taskqueue.PROC_TITLE)
-                logger.debug("Successfully setproctitle: %r", taskqueue.PROC_TITLE)
+                logger.debug(
+                    "Successfully setproctitle: %r", taskqueue.PROC_TITLE)
             except:
                 logger.exception("Couldn't setproctitle.")
                 pass
@@ -145,6 +153,7 @@ def daemonize():
 def start():
     "alias for daemonize"
     return daemonize()
+
 
 def run():
     "Start the server in the foreground instead of as a daemon"
