@@ -46,6 +46,13 @@ angular.module('npact')
     graphBlueColorblind:"rgb(204, 121, 167)",
     graphGreenColorblind:"rgb(0, 114, 178)"
   })
+  .directive('npactExtract', function(STATIC_BASE_URL, $log){
+    return {
+      restrict: 'A',
+      scope: { extract:'=npactExtract'},
+      templateUrl:STATIC_BASE_URL+'js/graphs/extract.html'
+    };
+  })
   .directive('npactGraph', function($log, Grapher, WidthChecker, GraphSettings){
 
     

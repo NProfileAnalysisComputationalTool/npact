@@ -1,5 +1,5 @@
 angular.module('npact')
-  .factory('Grapher', function(K, $log, GraphingCalculator){
+  .factory('Grapher', function(K, $log, GraphingCalculator, $rootScope, $compile){
 
     function addMany(container, children){
       return container.add.apply(container, children);
@@ -8,6 +8,7 @@ angular.module('npact')
     function Grapher(opts){
       $log.log('new Grapher:', opts.range);
       this.opts = opts;
+      this.$element = jQuery(opts.element);
       this.stage = new K.Stage({
 	container:opts.element,
 	height: opts.height,
@@ -327,12 +328,13 @@ angular.module('npact')
 		      width: x.end-x.start-ahw, height: opts.headerArrowHeight
 		    },
 		  line = new K.Line(angular.extend({
-		    name: x.name,
+		    extract: x,
 		    points: shape,
 		    stroke:c
 		  }, arrowOpts)),
 		  // render the name, too
 		  lbl = new K.Text(angular.extend({
+		    extract: x,
 		    text: x.name
 		  }, textOpts)),
 		  // need a dummy group for clipping, `Text` doesn't
@@ -353,12 +355,24 @@ angular.module('npact')
 		});
 	      pos.x = Math.max(pos.x, arrowBounds.x+1);
 	      lbl.position(pos);
-	    });
+	    }),
+	  $el = this.$element;
 
+      
       g.on('click', function(evt){
-	$log.log('click', evt,  evt.target);
-	// TODO: pull up a popup with information about the arrow,
-	// position based on evt.clientX/Y
+	var scope = $rootScope.$new(),
+	    tpl = '<div npact-extract="extract"></div>';
+	scope.extract = evt.target.getAttrs().extract;
+	$el.qtip({	  
+	  content: {text: $compile(tpl)(scope)},
+	  position:{
+	    my: scope.extract.complement == 0 ? 'top center' : 'bottom center',
+	    target:[evt.evt.pageX, evt.evt.pageY]
+	  },
+	  show: {event:'tooltip.npact'},
+	  hide: {event:'tooltip.npact'}
+	});
+	$el.trigger('tooltip.npact');
       });
       return g;
     };

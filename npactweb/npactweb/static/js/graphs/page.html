@@ -2,6 +2,7 @@
   <h2>{{title}}</h2>
   <!-- TODO: put this in a loop -->
   <div ng-repeat="range in ranges"
+       id="graph{{$index}}"
        npact-graph style="height:200px;border:1px solid blue;"
        data="d" range="range"
        headers="[{id:'orfs', title:'Newly Identified ORFs', lineType:'extract'},

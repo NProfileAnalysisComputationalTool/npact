@@ -25,6 +25,7 @@ MEDIA_BUNDLES = (
      'js/processing.js',
      'bower_components/angular/angular.js',
      'bower_components/lodash/dist/lodash.min.js',
+     'bower_components/qtip2/jquery.qtip.min.js',
      'js/app.js',
      'js/graphs/page.js',
      'js/graphs/calculator.js',
