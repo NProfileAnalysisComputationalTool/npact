@@ -9,7 +9,7 @@ npact_patterns = \
                      url(r'^about$' , direct_to_template, {'template': 'about.html'}, name='about'),
                      url(r'^downloads$' , direct_to_template, {'template': 'downloads.html'}, name='downloads'),
                      url(r'^efetch/(\d+)' , 'start.efetch', name="efetch"),
-                     url(r'^library' , 'library'),
+#                     url(r'^library' , 'library'),
                      url(r'^config/(.+\.gbk?)', 'run.config', name="config"),
                      url(r'^run/(.+\.gbk?)' , 'run.run_frame', name="run"),
 
