@@ -3,7 +3,6 @@ import logging
 import os
 import os.path
 import json
-from datetime import datetime
 
 from django import forms
 from django.conf import settings
@@ -17,7 +16,6 @@ from django.template.loader import get_template
 
 from pynpact import prepare, util
 from pynpact import main
-from pynpact.softtimeout import Timeout
 
 from npactweb import assert_clean_path, getabspath, getrelpath
 from npactweb.middleware import RedirectException
