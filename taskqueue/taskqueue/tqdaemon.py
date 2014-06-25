@@ -102,6 +102,12 @@ def daemonize():
     "Start a daemonized taskqueue"
     import daemon
 
+    try:
+        # make tqdaemon a bit nicer than whatever parent launched us.
+        os.nice(4)
+    except:
+        pass
+
     # Before daemonizing figure out which handlers we want to keep.
     # We only want to keep handlers for this library that aren't going
     # to stderr or stdout
