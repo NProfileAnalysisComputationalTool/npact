@@ -20,7 +20,10 @@ Manager.register('the_server')
 def ensure_daemon():
     """Check to see if daemon is running, attempt to start it if not.
 
-    Timing reported this at ~50 us; shouldn't be bad to keep in main path
+    Timing reported this at ~50 us if the daemon was already running;
+    shouldn't be bad to keep in main path. If the daemon wasn't
+    running waiting for it to start is a good thing.
+
     """
     if not tqdaemon.status():
         log.info("Attempting to start missing tqdaemon.")
