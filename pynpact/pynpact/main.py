@@ -343,7 +343,7 @@ period_of_frame       Number of frames.
                 if config.get('alternate_colors'):
                     cmd.append("-C")
 
-                #add the rest of the required args
+                # add the rest of the required args
                 cmd += [config['start_base'],
                         config['bp_per_page'],
                         #TODO: move these into config
