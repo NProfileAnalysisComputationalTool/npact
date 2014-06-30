@@ -47,6 +47,34 @@ def hashdict(dict_):
     return h.hexdigest()
 
 
+class Hasher(object):
+    def __init__(self):
+        self.state = hashlib.sha1()
+
+    def hashdict(self, dict_):
+        for k in sorted(dict_.keys()):
+            val = dict_.get(k)
+            if val is not None:
+                self.state.update(k)
+                self.state.update(str(val))
+        return self
+
+    def hashfiletime(self, filename):
+        self.state.update(str(os.path.getmtime(filename)))
+        return self
+
+    def hashlist(self, lst):
+        for item in lst:
+            self.state.update(str(item))
+        return self
+
+    def hash(self, str_):
+        self.state.update(str_)
+        return self
+
+    def hexdigest(self):
+        return self.state.hexdigest()
+
 def ensure_dir(dir, logger=None):
     if not os.path.exists(dir):
         try:
