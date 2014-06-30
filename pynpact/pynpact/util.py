@@ -1,7 +1,7 @@
-import os, os.path
+import os
+import os.path
 import logging
 import time
-import errno
 import hashlib
 import tempfile
 from contextlib import contextmanager
@@ -12,38 +12,39 @@ def reducehashdict(dict, keys):
     """pull the given keys out of the dictionary, return the reduced
     dictionary and the sha1 hash of that set of key values.
     """
-    outdict= {}
+    outdict = {}
     h = hashlib.sha1()
-    #We go through in sorted order to ensure stability of the ordering
-    #between runs.
+    # We go through in sorted order to ensure stability of the
+    # ordering between runs.
     for k in sorted(keys):
         val = dict.get(k)
         if val is not None:
             h.update(k)
             h.update(str(val))
-            outdict[k]=val
+            outdict[k] = val
 
     if len(outdict):
-        return outdict,h.hexdigest()
+        return outdict, h.hexdigest()
     else:
-        return outdict,None
+        return outdict, None
 
-def reducedict(dict, keys):
+
+def reducedict(dict_, keys):
     out = {}
     for k in keys:
-        if dict.has_key(k):
-            out[k] = dict[k]
+        if k in dict_:
+            out[k] = dict_[k]
     return out
 
-def hashdict(dict):
+
+def hashdict(dict_):
     h = hashlib.sha1()
-    for k in sorted(dict.keys()):
-        val = dict.get(k)
+    for k in sorted(dict_.keys()):
+        val = dict_.get(k)
         if val is not None:
             h.update(k)
             h.update(str(val))
     return h.hexdigest()
-
 
 
 def ensure_dir(dir, logger=None):
@@ -65,18 +66,18 @@ def ensure_dir(dir, logger=None):
                 raise
 
 
-def withDir(dir, fn, *args,**kwargs):
+def withDir(dir, fn, *args, **kwargs):
     olddir = os.getcwd()
     try:
         os.chdir(dir)
-        return fn(*args,**kwargs)
+        return fn(*args, **kwargs)
     finally:
         os.chdir(olddir)
 
 
 def pprint_bytes(bytes):
     suffix = 'B'
-    bytes= float(bytes)
+    bytes = float(bytes)
     if bytes >= 1024:
         bytes = bytes / 1024
         suffix = 'KB'
@@ -89,8 +90,7 @@ def pprint_bytes(bytes):
     if bytes >= 1024:
         bytes = bytes / 1024
         suffix = 'TB'
-    return '%.2f%s' % (bytes,suffix)
-
+    return '%.2f%s' % (bytes, suffix)
 
 
 def which(program):
@@ -109,23 +109,23 @@ def which(program):
 
     return None
 
+
 def stream_to_handle(stream, handle, bufsize=8192):
-    bytes=0
+    bytes = 0
     while True:
         buf = stream.read(bufsize)
-        if buf == "":  break #EOF
+        if buf == "": break  # EOF
         bytes += len(buf)
         handle.write(buf)
     return bytes
 
+
 def stream_to_file(stream, path, bufsize=8192):
-    if hasattr(path,'write'):
+    if hasattr(path, 'write'):
         return stream_to_handle(stream, path, bufsize)
     else:
         with open(path, "wb") as h:
             return stream_to_handle(stream, h, bufsize)
-
-
 
 
 @contextmanager
@@ -156,9 +156,9 @@ with mkstemp_overwrite('foobar.txt') as f:
         mtime1 = os.path.getmtime(destination)
     kwargs.setdefault('dir', os.path.dirname(destination))
 
-    (fd,path) = tempfile.mkstemp(**kwargs)
+    (fd, path) = tempfile.mkstemp(**kwargs)
     try:
-        filelike = os.fdopen(fd,'wb')
+        filelike = os.fdopen(fd, 'wb')
         yield filelike
         filelike.close()
 
@@ -166,8 +166,9 @@ with mkstemp_overwrite('foobar.txt') as f:
             mtime2 = os.path.getmtime(destination)
 
         if mtime1 != mtime2 and logger:
-            logger.warning("Potential conflict on %r, overwrite: %s; ts1:%s, ts2:%s",
-                               destination, conflict_overwrite, mtime1, mtime2)
+            logger.warning(
+                "Potential conflict on %r, overwrite: %s; ts1:%s, ts2:%s",
+                destination, conflict_overwrite, mtime1, mtime2)
 
         if conflict_overwrite or mtime1 == mtime2:
             #TODO: permissions?
@@ -181,10 +182,12 @@ with mkstemp_overwrite('foobar.txt') as f:
 
 def is_outofdate(filename, *dependencies):
     """Return true if the file is missing or not newer than all of its dependencies."""
-    if not os.path.exists(filename): return True
+    if not os.path.exists(filename):
+        return True
 
     mtime = os.path.getmtime(filename)
     return any(os.path.getmtime(d) > mtime for d in dependencies if d)
+
 
 def derivative_filename(base, part, replace_ext=True, outputdir=None):
     """Build the filename of a derivative product of the original
@@ -202,13 +205,15 @@ def derivative_filename(base, part, replace_ext=True, outputdir=None):
 
     return os.path.join(outputdir, filename + part)
 
+
 def safe_produce_new(outfilename, func, force=False, dependencies=[], **kwargs):
     logger = kwargs.get('logger')
     if force or is_outofdate(outfilename, *dependencies):
         if logger:
-            logger.debug("Regenerating, checked:%d force:%r", len(dependencies), force)
+            logger.debug(
+                "Regenerating, checked:%d force:%r", len(dependencies), force)
 
-        with mkstemp_overwrite(outfilename,**kwargs) as f:
+        with mkstemp_overwrite(outfilename, **kwargs) as f:
             func(f)
     return outfilename
 

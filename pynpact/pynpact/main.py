@@ -1,6 +1,7 @@
 #!/usr/bin/env python
 import logging
-import os, os.path
+import os
+import os.path
 import tempfile
 import shutil
 import sys
@@ -27,10 +28,11 @@ logger = logging.getLogger('pynpact')
 #### create new output.
 
 
-class GenBankProcessor(object ):
+class GenBankProcessor(object):
     """Manipulate Genebank files in the pynpact project.
 
-    Genbank files are documented at: http://www.ncbi.nlm.nih.gov/Sitemap/samplerecord.html
+    Genbank files are documented at:
+    http://www.ncbi.nlm.nih.gov/Sitemap/samplerecord.html
 
     Takes GenBankProcessor(<gbkfile>, **kwargs)
 
@@ -44,25 +46,24 @@ class GenBankProcessor(object ):
      * cleanup: (default: False) Should the temporary files (not
        intermediate products) be deleted in case of errors
 
-"""
+    """
     #
     gbkfile     = None
     force       = False
-    logger      = logger #logger is for internal debugging purposes
-    statuslog   = None   #logger for printing external messages to end users
+    logger      = logger  # logger is for internal debugging purposes
+    statuslog   = None    # logger for printing external messages to end users
     outputdir   = None
     cleanup     = True
     config      = None
 
-
-    def __init__(self, gbkfile = None, **kwargs):
+    def __init__(self, gbkfile=None, **kwargs):
         self.__dict__.update(kwargs)
 
         if self.config and self.config.get('raiseerror'):
             raise Exception("You asked me to.")
 
-        #we want this to just print raw messages to stderr; they
-        #will be piped onto the webpage.
+        # we want this to just print raw messages to stderr; they will
+        # be piped onto the webpage.
         self.statuslog = logging.getLogger('pynpact.statuslog')
         self.statuslog.setLevel(logging.DEBUG)
 
@@ -77,11 +78,12 @@ class GenBankProcessor(object ):
         self.parse(gbkfile)
 
     def parse(self, gbkfile):
-        """Open up a GenBank file, trying to get the sequence record off of it."""
+        """Open up a GenBank file, pull basic info out."""
 
         self.gbkfile = gbkfile
         if not os.path.exists(gbkfile):
-            raise Exception("Asked to parse nonexistant genebank file: %r", gbkfile)
+            raise Exception(
+                "Asked to parse nonexistant genebank file: %r", gbkfile)
 
         if self.config is None:
             self.config = prepare.default_config(self.gbkfile)
@@ -106,15 +108,21 @@ class GenBankProcessor(object ):
         return outfilename
 
     def mkstemp_overwrite(self, destination, **kwargs):
-        "wrapper for util.mkstemp_overwrite; provides default dir, logger, cleanup args"
+        """Wrapper for util.mkstemp_overwrite
+
+        provides default dir, logger, cleanup args
+        """
         kwargs.setdefault('dir', self.outputdir)
         kwargs.setdefault('logger', self.logger)
         kwargs.setdefault('cleanup', self.cleanup)
         return util.mkstemp_overwrite(destination, **kwargs)
 
     def safe_produce_new(self, filename, func, **kwargs):
-        """A wrapper for util.safe_produce_new (create a new file in a
-        multiprocess safe way) setting class defaults
+        """Wrapper for util.safe_produce_new
+
+        safe_produce_new creates a new file in a multiprocess safe
+        way. This wrapper sets defaults based on the class variables.
+
         """
         kwargs.setdefault('dir', self.outputdir)
         kwargs.setdefault('logger', self.logger)
@@ -124,7 +132,9 @@ class GenBankProcessor(object ):
 
     @contextmanager
     def mkdtemp(self, ignore_errors=True, **kwargs):
-        """A wrapper for tempfile.mkdtemp, sets defaults based on class variables"""
+        """A wrapper for tempfile.mkdtemp
+
+        This wrapper sets defaults based on the class values."""
         kwargs.setdefault('dir', self.outputdir)
         path = tempfile.mkdtemp(**kwargs)
         try:
@@ -138,20 +148,22 @@ class GenBankProcessor(object ):
 
     def seqrec(self):
         if self._seqrec is None:
-            self._seqrec = prepare.open_parse_seq_rec(self.gbkfile, do_features=True)
+            self._seqrec = prepare.open_parse_seq_rec(
+                self.gbkfile, do_features=True)
         return self._seqrec
-
 
     def run_extract(self):
         """Go through the genbank record pulling out gene names and locations
         $ extract MYCGE.gbk 0 gene 0 locus_tag > MYCGE.genes
         """
-        config,hash = util.reducehashdict(self.config,
-                                          ['GeneDescriptorKey1', 'GeneDescriptorKey2',
-                                           'GeneDescriptorSkip1', 'GeneDescriptorSkip2',
-                                           ])
+        config, hash = util.reducehashdict(
+            self.config,
+            ['GeneDescriptorKey1', 'GeneDescriptorKey2',
+             'GeneDescriptorSkip1', 'GeneDescriptorSkip2'])
+
         def _extract(out):
-            self.statuslog.debug("Extracting genes in %s.", os.path.basename(self.gbkfile))
+            self.statuslog.debug(
+                "Extracting genes in %s.", os.path.basename(self.gbkfile))
             cmd = [binfile("extract"), self.gbkfile,
                    config['GeneDescriptorSkip1'], config['GeneDescriptorKey1'],
                    config['GeneDescriptorSkip2'], config['GeneDescriptorKey2']]
@@ -168,22 +180,25 @@ class GenBankProcessor(object ):
 
         $ CG MYCGE.gbk 1 580074 201 51 3 > MYCGE.CG200
         """
-        config,hash = util.reducehashdict(self.config,
-                                          ['nucleotides', 'length','window_size','step','period'])
+        config, hash = util.reducehashdict(
+            self.config,
+            ['nucleotides', 'length', 'window_size', 'step', 'period'])
         outfilename = self.derivative_filename(".%s.nprofile" % hash)
+
         def _nprofile(out):
             self.statuslog.info("Calculating n-profile.")
-            progargs = [binfile("nprofile"), '-b', ''.join(config["nucleotides"]),
-                        self.gbkfile, 1, config['length'],
-                        config['window_size'], config['step'], config['period']]
+            progargs = [
+                binfile("nprofile"), '-b', ''.join(config["nucleotides"]),
+                self.gbkfile, 1, config['length'],
+                config['window_size'], config['step'], config['period']]
             return capproc.capturedCall(progargs,
                                         stdout=out, stderr=sys.stderr,
                                         logger=self.logger, check=True)
 
-        self.safe_produce_new(outfilename, _nprofile, dependencies=[self.gbkfile])
+        self.safe_produce_new(
+            outfilename, _nprofile, dependencies=[self.gbkfile])
         self.config['File_list_of_nucleotides_in_200bp windows'] = outfilename
         return outfilename
-
 
     def acgt_gamma(self):
         "Identifying ORFs with significant 3-base periodicities."
@@ -192,27 +207,29 @@ class GenBankProcessor(object ):
             return
 
         assert os.path.exists(DATAPATH), \
-               "Missing pynpact/data for acgt_gamma prediction. Expected at " + DATAPATH
+            "Missing pynpact/data for acgt_gamma prediction. " \
+            "Expected at " + DATAPATH
 
-        config,hash = util.reducehashdict(self.config,
-                                          ['significance', 'GeneDescriptorSkip1'])
+        config, hash = util.reducehashdict(
+            self.config, ['significance', 'GeneDescriptorSkip1'])
 
-        #TODO: acgt actually takes the string of characters to skip, not the length.
+        # TODO: acgt actually takes the string of characters to skip,
+        # not the length.
         outdir = self.derivative_filename('.{0}.predict'.format(hash))
         if self.force or util.is_outofdate(outdir, self.gbkfile, DATAPATH):
             cmd = [binfile("acgt_gamma"), "-q", self.gbkfile]
-            if config.has_key('significance'):
+            if 'significance' in config:
                 cmd.append(config['significance'])
-
 
             with self.mkdtemp() as dtemp:
                 self.statuslog.info("Identifying ORFs with 3-base compositional periodicity with significance: %s.",
                                     self.config.get('significance'))
                 self.logger.debug("Starting prediction program in %s", dtemp)
-                capproc.capturedCall(cmd, cwd=dtemp, check=True,
-                                     env={'BASE_DIR_THRESHOLD_TABLES': DATAPATH},
-                                     stderr=sys.stderr,
-                                     logger=self.logger)
+                capproc.capturedCall(
+                    cmd, cwd=dtemp, check=True,
+                    env={'BASE_DIR_THRESHOLD_TABLES': DATAPATH},
+                    stderr=sys.stderr,
+                    logger=self.logger)
                 #TODO, while deleting this is inconsistent (small
                 #window): files will be deleted out of outdir before
                 #the directory is deleted and the rename comes a
@@ -225,9 +242,10 @@ class GenBankProcessor(object ):
                 os.rename(dtemp, outdir)
 
         self.logger.debug("Adding prediction filenames to config dict.")
-        #strip 4 characters off here b/c that's how acgt_gamma does it
-        #at about lines 262-270
-        j = lambda ext: os.path.join(outdir, os.path.basename(self.gbkfile)[:-4] + ext)
+        # strip 4 characters off here b/c that's how acgt_gamma does
+        # it at about lines 262-270
+        j = lambda ext: os.path.join(
+            outdir, os.path.basename(self.gbkfile)[:-4] + ext)
         self.config['File_of_new_CDSs'] = j(".newcds")
         self.config['File_of_published_rejected_CDSs'] = j(".modified")
         self.config['File_of_G+C_coding_potential_regions'] = j('.profiles')
@@ -265,7 +283,6 @@ class GenBankProcessor(object ):
     def write_allplots_def(self, config, page_num, stream):
         "Writes out an Allplots.def for a single run through of allplots."
 
-
     def run_Allplots(self):
         """Actually invoke Allplots, once for each page we're generating.
 
@@ -281,7 +298,7 @@ x-tics                Number of subdivisions.
 period_of_frame       Number of frames.
 
 """
-        #figure out hashed filename of ps output.
+        # figure out hashed filename of ps output.
         hashkeys = set(
             self.AP_file_keys + [
             'first_page_title', 'following_page_title',
@@ -289,38 +306,40 @@ period_of_frame       Number of frames.
             'nucleotides', 'alternate_colors']
             )
 
-        #this hash is used down below for the final combined pages file
-        config,hash = util.reducehashdict(self.config, hashkeys)
-        #get the list of filenames this step depends on.
+        # this hash is used down below for the final combined pages file
+        config, hash = util.reducehashdict(self.config, hashkeys)
+        # get the list of filenames this step depends on.
         dependencies = map(config.get, self.AP_file_keys)
 
         page_count = math.ceil(float(config['end_base'] - config['start_base'])
                                / config['bp_per_page'])
 
-        #build the individual ps page files.
+        # build the individual ps page files.
         filenames = []
 
-        #page number offset
+        # page number offset
         page_num = 1
 
-        #the hash of individual pages shouldn't depend on the
-        #end_base, so leave that out.  We keep updating the start_base
-        #in *this* config (different than the general one).
+        # the hash of individual pages shouldn't depend on the
+        # end_base, so leave that out.  We keep updating the
+        # start_base in *this* config (different than the general
+        # one).
         pconfkeys = hashkeys.difference(set(["end_base"]))
 
         while (config['start_base'] < config['end_base']):
             if (config['start_base'] + config['bp_per_page']) >= config['end_base']:
-                #we're on the last page: include end_base for hash
-                #generation as the end_base might abridge the page's
-                #output
+                # we're on the last page: include end_base for hash
+                # generation as the end_base might abridge the page's
+                # output
                 pconfkeys = hashkeys
 
-            pconfig,phash = util.reducehashdict(config, pconfkeys)
+            pconfig, phash = util.reducehashdict(config, pconfkeys)
             def _ap(psout):
-                self.statuslog.info("Generating %d pages of graphical output: %2d%%",
-                                    page_count, round(100.0 * page_num / page_count))
+                self.statuslog.info(
+                    "Generating %d pages of graphical output: %2d%%",
+                    page_count, round(100.0 * page_num / page_count))
 
-                cmd = [binfile("Allplots"), "-q", "--stdin",]
+                cmd = [binfile("Allplots"), "-q", "--stdin"]
                 if config.get('alternate_colors'):
                     cmd.append("-C")
 
@@ -328,8 +347,8 @@ period_of_frame       Number of frames.
                 cmd += [config['start_base'],
                         config['bp_per_page'],
                         #TODO: move these into config
-                        5,    #lines on a page
-                        1000, #Number of subdivisions
+                        5,     # lines on a page
+                        1000,  # Number of subdivisions
                         config['period'],
                         config['end_base']]
 
@@ -362,16 +381,15 @@ period_of_frame       Number of frames.
 
 
         def combine_ps_files(psout):
-            #While combining, insert the special markers so that
-            #it will appear correctly as many pages.
+            # While combining, insert the special markers so that
+            # it will appear correctly as many pages.
             self.statuslog.info("Combining pages into output.")
-            first = True
             psout.write("%!PS-Adobe-2.0\n\n")
             psout.write("%%Pages: {0}\n\n".format(len(filenames)))
             idx = 1
             for psf in filenames:
                 psout.write("%%Page: {0}\n".format(idx))
-                with open(psf,'r') as infile:
+                with open(psf, 'r') as infile:
                     infile.readline()
                     infile.readline()
                     psout.write(infile.readline())
@@ -379,30 +397,34 @@ period_of_frame       Number of frames.
                         psout.write(l)
                 idx += 1
 
-        combined_ps_name = self.derivative_filename("%s.ps" %(hash,))
+        combined_ps_name = self.derivative_filename("%s.ps" % (hash,))
         self.config['combined_ps_name'] = combined_ps_name
-        return self.safe_produce_new(combined_ps_name, combine_ps_files, dependencies=filenames)
+        return self.safe_produce_new(
+            combined_ps_name, combine_ps_files, dependencies=filenames)
 
     def run_ps2pdf(self):
         ps2pdf = util.which('ps2pdf')
         if ps2pdf:
-            config,hash= util.reducehashdict(self.config, ['combined_ps_name'])
+            config, hash= util.reducehashdict(
+                self.config, ['combined_ps_name'])
             pdf_filename = self.derivative_filename(".%s.pdf" % hash)
             def _ps2pdf(out):
                 self.statuslog.info("Converting to PDF")
                 cmd = [ps2pdf, config['combined_ps_name'], '-']
-                capproc.capturedCall(cmd, stdout=out, logger=self.logger, check=True)
+                capproc.capturedCall(
+                    cmd, stdout=out, logger=self.logger, check=True)
                 self.statuslog.info("Finished PDF conversion")
 
-            self.safe_produce_new(pdf_filename, _ps2pdf, dependencies=[self.gbkfile])
+            self.safe_produce_new(
+                pdf_filename, _ps2pdf, dependencies=[self.gbkfile])
             self.config['pdf_filename'] = pdf_filename
             return pdf_filename
         else:
             self.logger.warn("Skipping ps2pdf translation, program not found.")
             return self.config['combined_ps_name']
 
-
-    RUN_FNS=['run_extract','run_nprofile','acgt_gamma','run_Allplots','run_ps2pdf']
+    RUN_FNS = ['run_extract', 'run_nprofile',
+               'acgt_gamma', 'run_Allplots', 'run_ps2pdf']
 
     def process(self):
         val = None
@@ -423,7 +445,7 @@ if __name__ == '__main__':
                       help="Show more verbose log messages.")
     parser.add_option("-f", "--force", action="store_true", dest="force",
                       help="Force recomputation of intermediate products")
-    (options,args) = parser.parse_args()
+    (options, args) = parser.parse_args()
 
     if len(args) != 1:
         parser.print_help()

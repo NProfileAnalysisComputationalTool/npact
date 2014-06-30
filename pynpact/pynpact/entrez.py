@@ -15,18 +15,20 @@ MAX_TO_SUMMARIZE = 10
 
 logger = logging.getLogger(__name__)
 
+
 class TooManyResponsesException(Exception):
-    term=None
-    summaries=None
-    count=None
-    WebEnv=None
-    QueryKey=None
-    def __init__(self,term=None,count=None,Webenv=None,QueryKey=None):
-        term=self.term
-        summaries=self.summaries
-        count=self.count
-        WebEnv=self.WebEnv
-        QueryKey=self.QueryKey
+    term = None
+    summaries = None
+    count = None
+    WebEnv = None
+    QueryKey = None
+
+    def __init__(self, term=None, count=None, Webenv=None, QueryKey=None):
+        self.term = term
+        self.count = count
+        self.WebEnv = Webenv
+        self.QueryKey = QueryKey
+
 
 class EntrezSession(object):
     #db = 'genome'
@@ -53,7 +55,9 @@ class EntrezSession(object):
 
     @util.log_time(logger)
     def search(self, term):
-        logger.info("Starting Entrez query for %r, session=%s", term, self.has_session())
+        logger.info(
+            "Starting Entrez query for %r, session=%s",
+            term, self.has_session())
         resp = Bio.Entrez.read(Bio.Entrez.esearch(db=self.db, term=term,
                                                   usehistory=True,
                                                   query_key=self.QueryKey,
@@ -67,10 +71,9 @@ class EntrezSession(object):
     @util.log_time(logger)
     def _summarize(self):
         logger.info("Summarizing from %s, %s", self.WebEnv, self.QueryKey)
-        self.summaries = Bio.Entrez.read(Bio.Entrez.esummary(db=self.db,
-                                                             retmax=20,
-                                                             webenv=self.WebEnv,
-                                                             query_key=self.QueryKey))
+        self.summaries = Bio.Entrez.read(
+            Bio.Entrez.esummary(
+                db=self.db, retmax=20, webenv=self.WebEnv, query_key=self.QueryKey))
 
     def summarize(self):
         if not self.summaries:
@@ -82,7 +85,7 @@ class EntrezSession(object):
         if not summary:
             if self.result_count == 1:
                 summary = self.summarize()[0]
-            else :
+            else:
                 raise TooManyResponsesException()
         id = summary['Id']
         logger.info("Starting fetch of Id: %s", id)
@@ -92,13 +95,13 @@ class EntrezSession(object):
                 summary.get('Assembly_Accession') or
                 summary.get('Caption'))
             if not base:
-                logger.warning("Couldn't find a filename in the summary. Id: %s", id)
+                logger.warning(
+                    "Couldn't find a filename in the summary. Id: %s", id)
                 base = ''.join(
                     random.choice(string.ascii_uppercase + string.digits)
                     for x in range(16))
 
-            filename =  os.path.join(self.lib_path, base + ".gbk")
-
+            filename = os.path.join(self.lib_path, base + ".gbk")
 
         # if os.path.exists(filename):
         #     date = (summary.get('UpdateDate') or
@@ -106,10 +109,9 @@ class EntrezSession(object):
         #             summary.get('CreateDate') or
         #             summary.get('Create_Date'))
 
-
         if not os.path.exists(filename):
-            #or datetime.datetime.fromtimestamp(os.path.getmtime(filename)) < update_date:
-            #file should be downloaded.
+            # or datetime.datetime.fromtimestamp(os.path.getmtime(filename)) < update_date:
+            # file should be downloaded.
             net_handle = Bio.Entrez.efetch(
                 db=self.db, id=id, rettype='gbwithparts', retmode='text')
             logger.debug("Streaming handle to %r.", filename)
@@ -139,7 +141,7 @@ class EntrezSession(object):
         return fmt.format(self.db,self.QueryKey,self.WebEnv)
 
 
-ENTREZ_CACHE={}
+ENTREZ_CACHE = {}
 class CachedEntrezSession(EntrezSession):
     def search(self, term):
         self.term = term
@@ -148,7 +150,7 @@ class CachedEntrezSession(EntrezSession):
             logger.debug('CachedEntrezSession hit for %s', term)
             self.result_count = len(self.summaries)
         else:
-            result = super(CachedEntrezSession, self).search(term)
+            super(CachedEntrezSession, self).search(term)
 
     def summarize(self):
         if not self.summaries:
