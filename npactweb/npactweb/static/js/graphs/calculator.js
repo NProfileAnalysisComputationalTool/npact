@@ -7,7 +7,7 @@
     function stops(a,b){
       var length = b - a,
 	  // get even stops; look for one lower order of magnitude
-	  // than our length - TODO: to many stops for lower ranges
+	  // than our length - TODO: too many stops for lower ranges
 	  interval = Math.pow(10, Math.round(Math.log(length) / log10) - 1),
 	  // want to capture some margin
 	  start = Math.max(a - interval,0),
@@ -102,6 +102,7 @@
 	  labels = ss.map(function(lbl, n){
 	    return {
 	      x: ticks[n].x, y: opts.profileTicks,
+	      coord: ticks[n].x,
 	      text: lbl,
 	      scaleX: labelScaleX
 	    };

@@ -8,6 +8,7 @@ angular.module('npact')
     function Grapher(opts){
       $log.log('new Grapher:', opts.range);
       this.opts = opts;
+      this.zoomLevel = 1;
       this.$element = jQuery(opts.element);
       this.stage = new K.Stage({
 	container:opts.element,
@@ -30,10 +31,13 @@ angular.module('npact')
       
       this.m = GraphingCalculator.chart(opts);
       this.xaxis = GraphingCalculator.xaxis(opts);
+      this.dragBounds = {};
+      this.baseOffsetX = 0;
+      this.resetDragBounds(this.xaxis.scaleX);
       this.stage.add(this.leftLayer(), this.chartLayer());
       this.stage.batchDraw();
 
-      
+//      this.onDblClick = _.bind(this.onDblClick, this);
     }
     var GP = Grapher.prototype;
     
@@ -142,36 +146,132 @@ angular.module('npact')
       return layer;
     };
 
-    GP.genomeGroup = function(){
+    GP.resetDragBounds = function(scaleX){
       var m = this.m, xaxis = this.xaxis, range = this.opts.range,
 	  mgx = m.graph.x,
-	  margin = xaxis.length*0.01,
+	  margin = parseInt(xaxis.length*0.01),
+	  min_gn = range[0] - margin,
+	  max_gn = range[1] + margin,
 	  // algrebra to figure out the relative pixel differences to check
 	  // in the drag handler
-	  min = mgx - (xaxis.start - margin - range[0])*xaxis.scaleX,
-	  max = mgx - (xaxis.end + margin - range[1])*xaxis.scaleX,
+	  bounds = {
+	    max: parseInt(mgx - (xaxis.start - margin - range[0])*scaleX),
+	    // should be smaller at highed zoom levels
+	    min: parseInt(mgx - (xaxis.end + margin - range[1])*scaleX),
+	    min_px: parseInt((xaxis.start - margin - range[0])*scaleX),
+	    max_px: parseInt((xaxis.end - range[1] + margin)*scaleX),
+	    scaleX: scaleX
+	  };
+      $log.log('changing drag bounds', xaxis.start, xaxis.end, range, _.clone(this.dragBounds), bounds);
+      return angular.extend(this.dragBounds, bounds);
+    };
+
+    function clamp(lower, value, upper){
+      if(value <= lower) return lower;
+      if(value >= upper) return upper;
+      return value;
+    }
+    
+    GP.genomeGroup = function(){
+      var dragBounds = this.dragBounds,
+	  self = this,
+	  gx = this.m.graph.x,	  
+	  dragRes = {x: gx, y:0},
 	  g = new K.Group({
-	    x: this.m.graph.x,
+	    x: gx,
 	    draggable: true,
 	    dragBoundFunc:function(pos, evt){
-	      // stop dragging at the limits of this graph
-	      if(min <= pos.x || max >= pos.x){
-		return {x: this.x(), y: 0};
-	      }else {
-		return {x: pos.x, y: 0 };
+	      // pos is the distance dragged, except `pos.x` always
+	      // starts at `gx`. Something due to container coordinate
+	      // system vs stage coordinate system. `pos.y` is not
+	      // similarly affected.
+	      var nextOffset = self.baseOffsetX - (pos.x - gx)
+	      ;
+	      //$log.log('dragging', dragBounds, nextOffset, nextOffset / dragBounds.scaleX);
+	      // change position via offsetX
+	      if(evt && evt.shiftKey){
+		this.offsetX(nextOffset);
+	      }else{
+		this.offsetX(clamp(dragBounds.min_px, nextOffset, dragBounds.max_px));
 	      }
+	      
+	      // never change position via this return value
+	      return dragRes;
 	    }
 	  });
+      // remember where we are at the start/end of a drag, so dragging can
+      // match our "scroll"
+      g.on('dragstart dragend', function(obj){
+	self.baseOffsetX = this.offsetX();
+	$log.log('baseOffsetX:', self.baseOffsetX);
+      });
+      
       g.on('mouseover', function() {
         document.body.style.cursor = 'pointer';
       });
       g.on('mouseout', function() {
         document.body.style.cursor = 'default';
       });
+      g.on('dblclick', _.bind(this.onDblClick, this));
       // need a shape that can be clicked on to allow dragging the
       // entire canvas
-      g.add(new K.Rect({width:1000, height:1000}));
+      // TODO: make this width always match the group width, in genespace
+      g.add(new K.Rect({width:100000, height:1000}));
       return this._genomeGroup = g;
+    };
+
+    GP.onDblClick = function(evt){
+      var z = this.zoomLevel;
+      $log.log('onDblClick', evt.evt.layerX - this.m.graph.x);
+      if(evt.evt.shiftKey){
+	// can't zoom out more
+	if(z == 1) return;
+	this.zoomLevel--;
+      }else{
+	this.zoomLevel++;
+      }
+
+      var scaleX = this.xaxis.scaleX * this.zoomLevel,
+	  // `layerX` is in stage coords, convert to group coords and offset
+	  centerOn_px = (evt.evt.layerX - this.m.graph.x) + this.baseOffsetX,
+	  // where in gene coords we should focus on
+	  centerOn_gn = (centerOn_px / this.xaxis.scaleX) + this.opts.range[0],
+	  newVisibleLength_gn = this.xaxis.length / this.zoomLevel,
+	  newOffset_gn = centerOn_gn - (newVisibleLength_gn/2),
+	  newOffset_px = newOffset_gn * scaleX,
+	  textScaleX = 1/scaleX,
+	  xAxisGroup = this._xAxisGroup,
+	  xAxisLabels = xAxisGroup.find('Text'),
+	  cdsGroup = this._cdsGroup,
+	  cdsLabels = cdsGroup.find('Text'),
+	  baseOffsetX = this.baseOffsetX
+      ;
+      // redraw axis with new scale factor
+      xAxisGroup.scaleX(scaleX);
+      // update labels
+      xAxisLabels.map(function(txt){
+	txt.scaleX(textScaleX);
+	centerXLabel(txt, scaleX);
+      });
+      
+      // rescale extracts
+      cdsGroup.scaleX(scaleX);
+      // update labels
+      cdsLabels.map(function(txt){
+	txt.scaleX(textScaleX);
+	centerExtractLabel(txt, scaleX);
+      });
+      
+      // rescale profiles
+      this._profileGroup.scaleX(scaleX);
+      // reset drag bounds
+      this.resetDragBounds(scaleX);
+      // reset baseOffsetX
+      this._genomeGroup.offsetX((this.baseOffsetX = newOffset_px));
+      // TODO: center on the clicked coordinates
+
+      
+      this.stage.batchDraw();
     };
 
     GP.chartLayer = function(){
@@ -198,6 +298,15 @@ angular.module('npact')
       return l;
     };
 
+    function centerXLabel(txt, scaleX){
+      // center on the tick marks, at this point we know how wide
+      // this text is
+      var w = txt.getWidth() / scaleX,
+	  x = txt.getAttr('coord'),
+	  newX = x - w/2;
+      txt.x(newX);
+    };
+    
     GP.xAxisGroup = function(){
       var profile = this.opts.data.profile,
 	  m = this.m,
@@ -213,15 +322,12 @@ angular.module('npact')
       var labels = this.drawAxisLabels(xaxis.labels);
       addMany(g, labels);
 
-      labels .map(function(txt){
-	  // center on the tick marks, at this point we know how wide
-	  // this text is
-	  var w = txt.getWidth() / xaxis.scaleX,
-	      x = txt.x();
-	  txt.x(x - w/2);
-	});
+      // call `centerXLabel(txt, xaxis.scaleX)`
+      labels.map(function(txt){
+	centerXLabel(txt, xaxis.scaleX);
+      });
 
-      return g;
+      return this._xAxisGroup = g;
     };
 
     GP.profileGroup = function(){
@@ -256,7 +362,7 @@ angular.module('npact')
       ;
       addMany(g, profiles);
 
-      return g;
+      return this._profileGroup = g;
     };
     
     GP.redraw = function(){
@@ -264,6 +370,21 @@ angular.module('npact')
       this.stage.batchDraw();
     };
 
+    function centerExtractLabel(txt, scaleX){
+      // now that lbl is on the canvas, we can see what it's
+      // height/width is
+      var arrowBounds = txt.getAttr('arrowBounds'),
+	  pos = GraphingCalculator.alignRectangles(
+	    arrowBounds,
+	    {
+	      // convert to gene space
+	      width:txt.getWidth()/ scaleX,
+	      height:txt.getHeight()
+	    });
+      pos.x = Math.max(pos.x, arrowBounds.x+1);
+      txt.position(pos);
+    }
+    
     GP.cdsGroup = function(cds){
       var xaxis = this.xaxis, opts = this.opts,
 	  colors = this.colors,
@@ -335,6 +456,7 @@ angular.module('npact')
 		  // render the name, too
 		  lbl = new K.Text(angular.extend({
 		    extract: x,
+		    arrowBounds: arrowBounds,
 		    text: x.name
 		  }, textOpts)),
 		  // need a dummy group for clipping, `Text` doesn't
@@ -346,19 +468,13 @@ angular.module('npact')
 	      g.add(line, lblGroup);
 	      // now that lbl is on the canvas, we can see what it's
 	      // height/width is
-	      var pos = GraphingCalculator.alignRectangles(
-		arrowBounds,
-		{
-		  // convert to gene space
-		  width:lbl.getWidth()/ xaxis.scaleX,
-		  height:lbl.getHeight()
-		});
-	      pos.x = Math.max(pos.x, arrowBounds.x+1);
-	      lbl.position(pos);
+	      centerExtractLabel(lbl, xaxis.scaleX);
 	    }),
 	  $el = this.$element;
 
-      
+      // TODO: move tooltip control to the `npactGraph`, just throw an
+      // event or callback here with the extract, let `npactGraph`
+      // handle this stuff
       g.on('click', function(evt){
 	var scope = $rootScope.$new(),
 	    tpl = '<div npact-extract="extract"></div>';
@@ -374,7 +490,7 @@ angular.module('npact')
 	});
 	$el.trigger('tooltip.npact');
       });
-      return g;
+      return this._cdsGroup = g;
     };
     
     GP.drawCDS = function(cds){

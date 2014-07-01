@@ -73,7 +73,8 @@ angular.module('npact')
 	    var opts = angular.extend({
 	      element: element[0],
 	      width: w,
-	      height: element.height()
+	      height: element.height(),
+	      onDblClick: function(evt){$log.log('dblclick', evt);}
 	    }, GraphSettings, scope);
 	    return new Grapher(opts);
 	  });
