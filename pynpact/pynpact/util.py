@@ -258,7 +258,51 @@ def log_time(logger=logging, level=logging.INFO):
     return decorator
 
 
-# Copright (c) 2011  Accelerated Data Works
+class Task(object):
+    """Small object to hold state for a function call to happen later.
+
+    The point of this is to be a pickable closure looking thing.
+
+    E.g.
+
+        def adder(a,b):
+            return a + b
+
+        Task(adder, 1, 2)() == 3
+    """
+    func = None
+    args = None
+    kwargs = None
+
+    def __init__(self, func, *args, **kwargs):
+        self.func = func
+        self.args = args
+        self.kwargs = kwargs
+
+    def __call__(self):
+        return self.func(*self.args, **self.kwargs)
+
+
+def delay(fn):
+    """Create a Task out of the target function(and arguments)
+
+    I.e. make the target function serializable.
+
+    E.g.
+
+       delay(sum)([1, 2])
+
+    results in a callable Task object that can be serialized.
+
+       delay(sum)([1, 2])() == 3
+    """
+    @wraps(fn)
+    def wrapper(*args, **kwargs):
+        return Task(fn, *args, **kwargs)
+    return wrapper
+
+
+# Copright (c) 2011,2012,2013,2014  Accelerated Data Works
 # All rights reserved.
 
 # Redistribution and use in source and binary forms, with or without

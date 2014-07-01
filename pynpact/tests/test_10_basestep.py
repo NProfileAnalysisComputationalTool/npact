@@ -3,23 +3,6 @@ import pytest
 from pynpact import steps
 
 
-def test_Task():
-    def sum_(a, b):
-        return a + b
-    assert 3 == steps.Task(sum_, 1, 2)()
-    assert 5 == steps.Task(sum_, b=2, a=3)()
-    assert type(repr(steps.Task)) == str
-
-
-def test_delay():
-    def sum_(a,b):
-        return a+b
-
-    assert hasattr(steps.delay(sum_)(1,2), '__call__')
-    assert 3 == steps.delay(sum_)(1,2)()
-    assert 3 == steps.delay(sum_)(a=1, b=2)()
-
-
 @pytest.fixture()
 def bs(tmpdir):
     d = {'basename': 'foobar.gbk'}

@@ -152,53 +152,6 @@ class GenBankProcessor(object):
                 self.gbkfile, do_features=True)
         return self._seqrec
 
-    def run_extract(self):
-        """Go through the genbank record pulling out gene names and locations
-        $ extract MYCGE.gbk 0 gene 0 locus_tag > MYCGE.genes
-        """
-        config, hash = util.reducehashdict(
-            self.config,
-            ['GeneDescriptorKey1', 'GeneDescriptorKey2',
-             'GeneDescriptorSkip1', 'GeneDescriptorSkip2'])
-
-        def _extract(out):
-            self.statuslog.debug(
-                "Extracting genes in %s.", os.path.basename(self.gbkfile))
-            cmd = [binfile("extract"), self.gbkfile,
-                   config['GeneDescriptorSkip1'], config['GeneDescriptorKey1'],
-                   config['GeneDescriptorSkip2'], config['GeneDescriptorKey2']]
-            return capproc.capturedCall(cmd,
-                                        stdout=out, stderr=sys.stderr,
-                                        logger=self.logger, check=True)
-        filename = self.derivative_filename(".%s.genes" % hash)
-        self.safe_produce_new(filename, _extract, dependencies=[self.gbkfile])
-        self.config['File_of_published_accepted_CDSs'] = filename
-        return filename
-
-    def run_nprofile(self):
-        """Do the CG ratio calculations.
-
-        $ CG MYCGE.gbk 1 580074 201 51 3 > MYCGE.CG200
-        """
-        config, hash = util.reducehashdict(
-            self.config,
-            ['nucleotides', 'length', 'window_size', 'step', 'period'])
-        outfilename = self.derivative_filename(".%s.nprofile" % hash)
-
-        def _nprofile(out):
-            self.statuslog.info("Calculating n-profile.")
-            progargs = [
-                binfile("nprofile"), '-b', ''.join(config["nucleotides"]),
-                self.gbkfile, 1, config['length'],
-                config['window_size'], config['step'], config['period']]
-            return capproc.capturedCall(progargs,
-                                        stdout=out, stderr=sys.stderr,
-                                        logger=self.logger, check=True)
-
-        self.safe_produce_new(
-            outfilename, _nprofile, dependencies=[self.gbkfile])
-        self.config['File_list_of_nucleotides_in_200bp windows'] = outfilename
-        return outfilename
 
     def acgt_gamma(self):
         "Identifying ORFs with significant 3-base periodicities."

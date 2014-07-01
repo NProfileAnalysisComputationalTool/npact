@@ -112,10 +112,12 @@ def try_parse(abs_path, force=False):
             logger.debug("Cache hit for %s", abs_path)
             return cache_line[1]
 
-    data = {'basename': os.path.basename(abs_path),
-            'mtime': mtime,
-            'filesize': util.pprint_bytes(os.path.getsize(abs_path)),
-            }
+    data = {
+        'filename': abs_path,
+        'basename': os.path.basename(abs_path),
+        'mtime': mtime,
+        'filesize': util.pprint_bytes(os.path.getsize(abs_path)),
+    }
     gbrec = None
     try:
         gbrec = open_parse_seq_rec(abs_path)

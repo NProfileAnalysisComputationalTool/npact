@@ -148,7 +148,7 @@ class CombinePsFilesStep(BaseStep):
     def enqueue(self):
         psnames = AllplotsStep.fromstep(self).enqueue()
         combined_ps_name = self.derive_filename(
-            self.config['base_file'],
+            self.config['filename'],
             Hasher.hashlist(psnames).hexdigest(),
             'ps')
         self.executor.enqueue(

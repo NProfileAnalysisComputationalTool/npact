@@ -4,13 +4,12 @@
         """
 from __future__ import absolute_import
 import logging
-import os.path
 import sys
 
-from pynpact.steps import BaseStep, delay
+from pynpact.steps import BaseStep
 from pynpact import binfile
 from pynpact import capproc
-from pynpact.util import Hasher, reducedict, mkstemp_overwrite
+from pynpact.util import Hasher, reducedict, mkstemp_overwrite, delay
 
 
 logger = logging.getLogger('pynpact.steps.nprofile')
@@ -19,30 +18,30 @@ statuslog = logging.getLogger('pynpact.statuslog')
 
 BIN = binfile('nprofile')
 
-KEYS = ['nucleotides', 'length', 'window_size', 'step', 'period', 'base_file']
+KEYS = ['nucleotides', 'length', 'window_size', 'step', 'period', 'filename']
 
 
 class NprofileStep(BaseStep):
     def enqueue(self):
         config = reducedict(self.config, KEYS)
-        base_file = config['base_file']
         h = Hasher()
         h.hashdict(config)
         h.hashfiletime(BIN)
-        h.hashfiletime(base_file)
+        h.hashfiletime(config['filename'])
         hash = h.hexdigest()
-        filename = self.derive_filename(base_file, hash, 'nprofile')
+        target = self.derive_filename(hash, 'nprofile')
         self.executor.enqueue(
-            delay(_nprofile)(base_file, filename, config),
-            id=filename)
-        return filename
+            delay(_nprofile)(config, target),
+            id=target)
+        return target
 
 
-def _nprofile(base_file, target_file, config):
+def _nprofile(config, target_file):
     statuslog.info("Calculating n-profile.")
+    filename = config['filename']
     cmd = [
         BIN, '-b', ''.join(config["nucleotides"]),
-        base_file, 1, config['length'],
+        filename, 1, config['length'],
         config['window_size'], config['step'], config['period']]
     with mkstemp_overwrite(target_file) as out:
         capproc.capturedCall(

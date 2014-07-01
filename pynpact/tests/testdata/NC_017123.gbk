@@ -1,0 +1,175 @@
+LOCUS       NC_017123               3204 bp    DNA     circular CON 08-JUN-2013
+DEFINITION  Acetobacter pasteurianus IFO 3283-07 plasmid pAPA07-040, complete
+            sequence.
+ACCESSION   NC_017123
+VERSION     NC_017123.1  GI:384055284
+DBLINK      Project: 158381
+            BioProject: PRJNA158381
+KEYWORDS    .
+SOURCE      Acetobacter pasteurianus IFO 3283-07
+  ORGANISM  Acetobacter pasteurianus IFO 3283-07
+            Bacteria; Proteobacteria; Alphaproteobacteria; Rhodospirillales;
+            Acetobacteraceae; Acetobacter.
+REFERENCE   1  (bases 1 to 3204)
+  AUTHORS   Azuma,Y., Hosoyama,A., Matsutani,M., Furuya,N., Horikawa,H.,
+            Harada,T., Hirakawa,H., Kuhara,S., Matsushita,K., Fujita,N. and
+            Shirai,M.
+  TITLE     Whole-genome analyses reveal genetic instability of Acetobacter
+            pasteurianus
+  JOURNAL   Nucleic Acids Res. 37 (17), 5768-5783 (2009)
+   PUBMED   19638423
+REFERENCE   2  (bases 1 to 3204)
+  CONSRTM   NCBI Genome Project
+  TITLE     Direct Submission
+  JOURNAL   Submitted (05-APR-2012) National Center for Biotechnology
+            Information, NIH, Bethesda, MD 20894, USA
+REFERENCE   3  (bases 1 to 3204)
+  AUTHORS   Azuma,Y. and Hosoyama,A.
+  CONSRTM   Acetobacter pasteurianus genome sequencing consortium
+  TITLE     Direct Submission
+  JOURNAL   Submitted (06-APR-2009) Contact:Yoshinao Azuma Yamaguchi University
+            School of Medicine, Department of Microbiology and Immunology;
+            Minami-Kogushi 1-1-1, Ube, Yamaguchi 755-8505, Japan URL
+            :http://www.bio.nite.go.jp/dogan/Top
+COMMENT     PROVISIONAL REFSEQ: This record has not yet been subject to final
+            NCBI review. The reference sequence is identical to AP011139.
+            This work was done by Acetobacter pasteurianus genome sequencing
+            consortium including Department of Microbiology and Immunology,
+            Yamaguchi University School of Medicine, National Institute of
+            Technology and Evaluation, Genetic Resources Technology, Faculty of
+            Agriculture, Kyushu University, Department of Biological Chemistry,
+            Faculty of Agriculture, Yamaguchi University and Mizkan Group
+            Corporation Central Research Institute.
+            COMPLETENESS: full length.
+FEATURES             Location/Qualifiers
+     source          1..3204
+                     /organism="Acetobacter pasteurianus IFO 3283-07"
+                     /mol_type="genomic DNA"
+                     /strain="IFO 3283"
+                     /sub_strain="IFO 3283-07"
+                     /db_xref="NBRC:105187"
+                     /db_xref="taxon:634454"
+                     /plasmid="pAPA07-040"
+                     /note="strain coidentity: IFO 3283 = NBRC 3283"
+     gene            complement(116..562)
+                     /locus_tag="APA07_44160"
+                     /db_xref="GeneID:12076292"
+     CDS             complement(116..562)
+                     /locus_tag="APA07_44160"
+                     /codon_start=1
+                     /transl_table=11
+                     /product="hypothetical protein"
+                     /protein_id="YP_005488546.1"
+                     /db_xref="GI:384055285"
+                     /db_xref="GeneID:12076292"
+                     /translation="MASFRIETHIANLRQLEKPSTEQRILILLYDKTDRTPKEERDLK
+                     ALIRSEKAQEAVKEAKAKASEAKARSSKIAKRERDAKDKERTHNLIQSAGLLILAGLV
+                     DSKTGNPTWDKGELLGALASMAKAEINDTKRQEWKEKGDALLAGEK"
+     misc_feature    complement(122..328)
+                     /locus_tag="APA07_44160"
+                     /note="Conjugal transfer protein TraD; Region: TraD;
+                     pfam06412"
+                     /db_xref="CDD:219012"
+     gene            744..2195
+                     /gene="mobA/L"
+                     /locus_tag="APA07_44170"
+                     /db_xref="GeneID:12076290"
+     CDS             744..2195
+                     /gene="mobA/L"
+                     /locus_tag="APA07_44170"
+                     /codon_start=1
+                     /transl_table=11
+                     /product="mobilization protein MobA/MobL"
+                     /protein_id="YP_005488547.1"
+                     /db_xref="GI:384055286"
+                     /db_xref="GeneID:12076290"
+                     /translation="MAIGRLSMKVGGKGKACAHSNYIERQGKYAHRLETGERLVATGS
+                     GNMPEWAQSSSQFWKAADEHERANGTTYREMEIALPRELDDKQKEKLVREWVKQEIGQ
+                     QHAYTWAIHSPKASDGGEQPHVHLMFSERVMDGHERGPEQFFKRYNSKTPEKGGAKKA
+                     NTGKHPLERKEELKDLRHRWEVLCNRHLRAAECRERVSLKPNNEIRQGEPEPKMLPSE
+                     WQRGTGKADIIAFREARKEQVEARHDVRLSVRPTEQMEAELIHLAYRKKVDQEKAQVT
+                     AEAARQAEATRRADEERQALIAKLPAMEKAVIAEIEDETNRRLRTDGEFQALQNEREQ
+                     HEEARQEAEANADKAERDETAAAQEAQDLAKKHTIQTRLHRSGFKTFMPLAEAEQFRD
+                     DCKTYKEAERTRQTSLAEKVEQIDQKLKEIRQRILDKARKELDGLYKKLASIREAMKA
+                     AKEARVVQEKAQKKAQTPASQEDQAVRKRGRGR"
+     misc_feature    873..1337
+                     /gene="mobA/L"
+                     /locus_tag="APA07_44170"
+                     /note="MobA/MobL family; Region: MobA_MobL; pfam03389"
+                     /db_xref="CDD:217529"
+     gene            2317..3006
+                     /locus_tag="APA07_44180"
+                     /db_xref="GeneID:12076291"
+     CDS             2317..3006
+                     /locus_tag="APA07_44180"
+                     /codon_start=1
+                     /transl_table=11
+                     /product="hypothetical protein"
+                     /protein_id="YP_005488548.1"
+                     /db_xref="GI:384055287"
+                     /db_xref="GeneID:12076291"
+                     /translation="MEGLTRLWVPLQAEDGRRSRETPVTFVKNRVPALSHAQNAIPRD
+                     KLKSLFKSGVEAALMTGELPSRNHGWKSVFDKFIDLMGPDGSWFPSHAKVAEKAGVSE
+                     RTAWAAINALESIGLIRVEARYLYDPEKGKTVRTSNLYEVVVTKAQRAIAILAAAARK
+                     AKEAAKRQWAIASRSSMAEWGRRVIHHLPATAAEDPQLNIFKRGNQAEPSRNWSHNEW
+                     IEYCQTGNQTT"
+     misc_feature    2527..2670
+                     /locus_tag="APA07_44180"
+                     /note="Helix-turn-helix domain; Region: HTH_36; pfam13730"
+                     /db_xref="CDD:222348"
+ORIGIN      
+        1 caaattgcgc tacagatagt ttgatagtct tccgaagttc cagagagagg cagcagaaac
+       61 tcttttactt tcgcttctcc accagcctgc ctgaaaatta cataaactga atccatcatt
+      121 tttctccggc taataacgca tcaccttttt ctttccactc ctgccttttg gtgtcgttta
+      181 tttcggcttt tgccatagaa gccaaagccc ccagaagttc gcctttgtcc catgttggat
+      241 tgccggtctt actatcgacc agaccggcca gaataagcag gccagcagac tggatgaggt
+      301 tatgcgttct ttccttgtcc ttggcgtctc tttctctctt ggcgattttc gatgatctgg
+      361 cctttgcttc ggatgctttg gctttagcct cttttacggc ttcctgcgct ttttccgacc
+      421 ggatgagtgc cttgaggtct ctttcctctt ttggcgttct gtcagtcttg tcatagagca
+      481 agatcaggat gcgctgttct gtcgatggct tctcaagctg tcgaaggtta gcgatatgcg
+      541 tttcaatccg aaaagaggcc ataggttttc atccaaacat aaaacgatta tccggcttta
+      601 tagcataaaa atggtagcaa atagacgaga gccaaattat ccttccttgt aggaaggcgc
+      661 gcttagacgt ttctcataaa tgagaaacag cacgttaggg gtaaacccct taaaaccccg
+      721 ttttaacttc aaaggattgt ggtgtggcga ttggtcgttt gtcgatgaag gttggaggca
+      781 agggcaaagc ctgcgcccac tccaactaca tcgaacgcca aggcaaatat gcccatcgcc
+      841 tagaaactgg tgaacgactg gttgcgaccg gcagcggcaa catgccggaa tgggcgcaat
+      901 cctcatcaca gttctggaag gcagcggatg agcatgaacg ggcgaatggc accacatacc
+      961 gcgaaatgga aatagccctg ccgcgtgaac tggatgacaa gcagaaggag aagctggtca
+     1021 gggagtgggt gaagcaggaa atcggccagc agcacgccta cacatgggcc attcattctc
+     1081 ccaaggcgag tgacggcgga gagcagcctc atgtgcatct gatgttttca gaacgggtca
+     1141 tggacggtca tgaacgcggg ccggaacagt tcttcaaacg ctacaacagc aagacgccag
+     1201 agaaaggcgg agccaagaag gccaacaccg gcaagcatcc tttggagcgg aaagaagaac
+     1261 tgaaagacct gcggcatcgc tgggaggttc tctgtaaccg gcacctcaga gcagcagagt
+     1321 gtcgggagcg cgtcagcctg aaaccgaata acgagatcag gcagggtgaa ccggaaccga
+     1381 agatgttgcc gagcgaatgg cagcgcggca ccggcaaggc cgacatcatt gctttccggg
+     1441 aggcccgaaa agagcaggtc gaggcccgcc atgacgtgcg tttgtcggtc aggccaacgg
+     1501 agcaaatgga agctgaactg attcacctgg cctaccggaa gaaagttgac caggagaaag
+     1561 cccaggttac ggcagaggcc gccagacagg ccgaagcgac ccgccgcgca gacgaggaaa
+     1621 ggcaagccct tatcgccaag ctgccagcga tggagaaggc cgtcattgcc gagattgagg
+     1681 acgagacaaa caggcggctc aggacggacg gtgagtttca ggcactccaa aatgagcgtg
+     1741 agcagcatga ggaggctcgt caggaggcag aggccaatgc tgacaaggca gagcgtgatg
+     1801 agacagcagc agctcaggaa gcgcaggatt tagctaagaa gcacacgata cagacccggc
+     1861 ttcatagatc tggcttcaag accttcatgc ccttggccga ggccgagcag ttccgtgacg
+     1921 actgcaagac ctacaaggag gccgaacgga cgcggcagac ctctcttgcc gagaaagtcg
+     1981 agcagatcga ccagaagctg aaagagattc gccagcggat tctggacaag gcccggaagg
+     2041 aactggacgg tctttacaag aaacttgcat ccattcggga agccatgaag gcggccaagg
+     2101 aagcccgtgt agtccaagaa aaagcccaga aaaaagccca gacgccagcc agtcaggaag
+     2161 atcaggctgt cagaaaacga gggcgagggc ggtgaagggg ttgcctttgg agtaaatcca
+     2221 gaagaatctc tgccccagaa acggcgaagg cccggtgatt gcaacaccga gccttcagca
+     2281 agtccgatta gaacacacct aagcggaccg cctttcgtgg aaggattaac ccgactttgg
+     2341 gttccccttc aagcggaaga tggtcggcga agcagagaaa cgccagtgac ctttgtaaaa
+     2401 aaccgagttc ccgccctctc ccatgctcaa aatgcaattc cacgggataa gctgaaatcc
+     2461 ttgtttaagt caggggttga agccgcgctg atgactggcg aactgccaag tcggaatcat
+     2521 ggctggaagt cagtattcga taagttcatc gacctgatgg ggccggatgg ctcgtggttt
+     2581 ccatcacatg cgaaagtggc agagaaagcc ggagtgtctg aacggacagc atgggccgcg
+     2641 atcaatgcgc ttgagagtat cggccttatc cgtgtggaag cccgctacct atacgaccca
+     2701 gagaagggta agacggtcag aaccagcaat ctctatgagg ttgtggtgac caaggcgcag
+     2761 agagccatag cgatccttgc tgccgctgct cgtaaggcca aggaagcggc taagaggcaa
+     2821 tgggcaatag ccagccggtc aagcatggcc gagtggggca ggagagttat ccaccaccta
+     2881 cccgcaacgg ctgcggagga cccccaatta aatatattta aaaggggaaa tcaggccgaa
+     2941 ccatcccgaa actggagcca taacgagtgg attgagtatt gccagacagg caatcaaacc
+     3001 acctaaccgc aacggcatcg acctaaccgc aacgacaaaa aggcattgaa ggggagcaga
+     3061 cgggagaggt ctgtccacct aaccgcaacg gcattgcggt taggtcaaaa aggtatccat
+     3121 ttttgccact gatcgcgtgt cactacgacc tgtcgagatt cattgataat ggcaacgaca
+     3181 gtcgccggcg cgggaagccc atac
+//
