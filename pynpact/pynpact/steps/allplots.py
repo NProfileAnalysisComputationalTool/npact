@@ -5,10 +5,10 @@ import sys
 import math
 from subprocess import PIPE
 
-from pynpact.steps import BaseStep, delay, extract, nprofile
+from pynpact.steps import BaseStep, extract, nprofile
 from pynpact import binfile
 from pynpact import capproc
-from pynpact.util import Hasher, reducedict, mkstemp_overwrite, which
+from pynpact.util import Hasher, reducedict, mkstemp_overwrite, which, delay
 
 
 logger = logging.getLogger('pynpact.steps.allplots')
@@ -49,12 +49,12 @@ class AllplotsStep(BaseStep):
         # configuration
         promises = []
         if self.config.get('run_extract'):
-            filename = extract.ExtractStep.fromstep(self).run()
+            filename = extract.ExtractStep.fromstep(self).enqueue()
             self.config['File_of_published_accepted_CDSs'] = filename
             promises.append(filename)
 
-        filename = nprofile.NprofileStep.fromstep(self).run()
-        config['File_list_of_nucleotides_in_200bp windows'] = filename
+        filename = nprofile.NprofileStep.fromstep(self).enqueue()
+        self.config['File_list_of_nucleotides_in_200bp windows'] = filename
         promises.append(filename)
         return promises
 
@@ -80,8 +80,7 @@ class AllplotsStep(BaseStep):
             else:
                 config['end_base'] = end_base
             h = Hasher().hashfiletime(BIN).hashdict(config)
-            psname = self.derive_filename(
-                config['basename'], h.hexdigest(), 'ps')
+            psname = self.derive_filename(h.hexdigest(), 'ps')
             task = delay(_ap)(psname, config, page_num, page_count)
             filenames.append(
                 self.executor.enqueue(task, id=psname, after=promises))
@@ -138,10 +137,10 @@ def write_allplots_def(out, pconfig, page_num):
     # Title of following pages
     wl(pconfig['following_page_title'].format(page_num))
     # write the rest of the filenames that allplots might read from
-    for k in AllplotsStep.file_keys:
-        f = pconfig.get(k)
-        wl(f)
-        wl(pconfig.get(f, "None"))
+    for k in FILE_KEYS:
+        # allplots doesn't like blank lines so make sure there is at
+        # least a dummy value on every line.
+        wl(pconfig.get(k, "None"))
 
 
 class CombinePsFilesStep(BaseStep):

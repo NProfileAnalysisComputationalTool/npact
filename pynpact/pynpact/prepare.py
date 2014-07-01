@@ -128,6 +128,7 @@ def try_parse(abs_path, force=False):
         data['id'] = gbrec.id
         data['date'] = gbrec.annotations.get('date')
         data['description'] = gbrec.description
+        data['run_extract'] = True
         logger.debug("Pulled all data from the seqrec.")
     except InvalidGBKException:
         raise
