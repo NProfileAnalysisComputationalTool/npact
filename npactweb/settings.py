@@ -113,8 +113,8 @@ TEMPLATE_CONTEXT_PROCESSORS = (
     "django.contrib.messages.context_processors.messages",
     #addons
     "npactweb.context_processors.resolvermatch",
-
-     )
+    "npactweb.context_processors.addgetrelpath"
+)
 
 ROOT_URLCONF = 'npactweb.urls'
 

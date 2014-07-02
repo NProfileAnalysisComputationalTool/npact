@@ -1,6 +1,7 @@
 """Add context processors for template processing"""
 
 from django.core.urlresolvers import resolve
+from npactweb import getrelpath
 
 
 def resolvermatch(request):
@@ -22,3 +23,7 @@ def resolvermatch(request):
     See https://docs.djangoproject.com/en/1.3/topics/http/urls/#django.core.urlresolvers.ResolverMatch
     """
     return {'resolved': resolve(request.path)}
+
+
+def addgetrelpath(request):
+    return {'getrelpath': lambda p: p and getrelpath(p)}
