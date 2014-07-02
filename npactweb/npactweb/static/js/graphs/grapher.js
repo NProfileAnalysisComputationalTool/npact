@@ -31,9 +31,7 @@ angular.module('npact')
       
       this.m = GraphingCalculator.chart(opts);
       this.xaxis = GraphingCalculator.xaxis(opts);
-      this.dragBounds = {};
       this.baseOffsetX = 0;
-      this.resetDragBounds(this.xaxis.scaleX);
       this.stage.add(this.leftLayer(), this.chartLayer());
       this.stage.batchDraw();
 
@@ -146,35 +144,14 @@ angular.module('npact')
       return layer;
     };
 
-    GP.resetDragBounds = function(scaleX){
-      var m = this.m, xaxis = this.xaxis, range = this.opts.range,
-	  mgx = m.graph.x,
-	  margin = parseInt(xaxis.length*0.01),
-	  min_gn = range[0] - margin,
-	  max_gn = range[1] + margin,
-	  // algrebra to figure out the relative pixel differences to check
-	  // in the drag handler
-	  bounds = {
-	    max: parseInt(mgx - (xaxis.start - margin - range[0])*scaleX),
-	    // should be smaller at highed zoom levels
-	    min: parseInt(mgx - (xaxis.end + margin - range[1])*scaleX),
-	    min_px: parseInt((xaxis.start - margin - range[0])*scaleX),
-	    max_px: parseInt((xaxis.end - range[1] + margin)*scaleX),
-	    scaleX: scaleX
-	  };
-      $log.log('changing drag bounds', xaxis.start, xaxis.end, range, _.clone(this.dragBounds), bounds);
-      return angular.extend(this.dragBounds, bounds);
-    };
-
     function clamp(lower, value, upper){
       if(value <= lower) return lower;
-      if(value >= upper) return upper;
+      if(upper && value >= upper) return upper;
       return value;
     }
     
     GP.genomeGroup = function(){
-      var dragBounds = this.dragBounds,
-	  self = this,
+      var self = this,
 	  gx = this.m.graph.x,	  
 	  dragRes = {x: gx, y:0},
 	  g = new K.Group({
@@ -185,16 +162,9 @@ angular.module('npact')
 	      // starts at `gx`. Something due to container coordinate
 	      // system vs stage coordinate system. `pos.y` is not
 	      // similarly affected.
-	      var nextOffset = self.baseOffsetX - (pos.x - gx)
-	      ;
-	      //$log.log('dragging', dragBounds, nextOffset, nextOffset / dragBounds.scaleX);
+	      var nextOffset = self.baseOffsetX - (pos.x - gx);
 	      // change position via offsetX
-	      if(evt && evt.shiftKey){
-		this.offsetX(nextOffset);
-	      }else{
-		this.offsetX(clamp(dragBounds.min_px, nextOffset, dragBounds.max_px));
-	      }
-	      
+	      this.offsetX(nextOffset);
 	      // never change position via this return value
 	      return dragRes;
 	    }
@@ -203,7 +173,7 @@ angular.module('npact')
       // match our "scroll"
       g.on('dragstart dragend', function(obj){
 	self.baseOffsetX = this.offsetX();
-	$log.log('baseOffsetX:', self.baseOffsetX);
+	$log.log('baseOffsetX:', self.baseOffsetX, self.baseOffsetX/(self.zoomLevel * self.xaxis.scaleX) + self.opts.range[0]);
       });
       
       g.on('mouseover', function() {
@@ -216,36 +186,41 @@ angular.module('npact')
       // need a shape that can be clicked on to allow dragging the
       // entire canvas
       // TODO: make this width always match the group width, in genespace
-      g.add(new K.Rect({width:100000, height:1000}));
+      g.add(new K.Rect({x: -100000, width:1000000, height:1000}));
       return this._genomeGroup = g;
     };
 
     GP.onDblClick = function(evt){
-      var z = this.zoomLevel;
+      var oldZoom = this.zoomLevel;
       $log.log('onDblClick', evt.evt.layerX - this.m.graph.x);
       if(evt.evt.shiftKey){
 	// can't zoom out more
-	if(z == 1) return;
+	if(oldZoom == 1) return;
 	this.zoomLevel--;
       }else{
 	this.zoomLevel++;
       }
+      
+      var zoom = GraphingCalculator.zoom({
+	oldZoom: oldZoom,
+	zoom:this.zoomLevel,
+	offsetX: this.baseOffsetX,
+	baseScaleX: this.xaxis.scaleX,
+	start_gn: this.opts.range[0],
+	length_gn: this.xaxis.length,
+	// `layerX` is in stage coords, convert to graph coords
+	centerOn_px: evt.evt.layerX - this.m.graph.x
+      }),
 
-      var scaleX = this.xaxis.scaleX * this.zoomLevel,
-	  // `layerX` is in stage coords, convert to group coords and offset
-	  centerOn_px = (evt.evt.layerX - this.m.graph.x) + this.baseOffsetX,
-	  // where in gene coords we should focus on
-	  centerOn_gn = (centerOn_px / this.xaxis.scaleX) + this.opts.range[0],
-	  newVisibleLength_gn = this.xaxis.length / this.zoomLevel,
-	  newOffset_gn = centerOn_gn - (newVisibleLength_gn/2),
-	  newOffset_px = newOffset_gn * scaleX,
-	  textScaleX = 1/scaleX,
 	  xAxisGroup = this._xAxisGroup,
 	  xAxisLabels = xAxisGroup.find('Text'),
 	  cdsGroup = this._cdsGroup,
 	  cdsLabels = cdsGroup.find('Text'),
-	  baseOffsetX = this.baseOffsetX
+	  scaleX = zoom.scaleX,
+	  textScaleX = zoom.textScaleX
       ;
+
+
       // redraw axis with new scale factor
       xAxisGroup.scaleX(scaleX);
       // update labels
@@ -264,12 +239,10 @@ angular.module('npact')
       
       // rescale profiles
       this._profileGroup.scaleX(scaleX);
-      // reset drag bounds
-      this.resetDragBounds(scaleX);
-      // reset baseOffsetX
-      this._genomeGroup.offsetX((this.baseOffsetX = newOffset_px));
-      // TODO: center on the clicked coordinates
+      // reset baseOffsetX, center on clicked spot
+      this._genomeGroup.offsetX((this.baseOffsetX = zoom.offsetX));
 
+      // TODO: resize the dragging Rect
       
       this.stage.batchDraw();
     };
