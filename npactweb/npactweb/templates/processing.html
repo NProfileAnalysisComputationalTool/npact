@@ -76,7 +76,13 @@
 
   <script type="text/javascript">
     jQuery(document).ready( function(){
-      progress.init("{{ statusurl }}");
+        progress.init({status_base: {{status_base}},
+                       results: {
+                           {% for k in results._fields %}
+                           '{{k}}': '{% getrelpath(getattr(results, k))%}',
+                           {% endfor %}
+                       }
+                      });
     });
   </script>
 </div>

@@ -28,6 +28,13 @@ logger = logging.getLogger(__name__)
 
 def get_raw_url(request, path):
     # return request.build_absolute_uri(reverse('raw', path))
+    # TODO: DEPRECATE in favor of get_result_link
+    if path.startswith('/'):
+        path = getrelpath(path)
+    return reverse('raw', args=[path])
+
+
+def get_result_link(path):
     if path.startswith('/'):
         path = getrelpath(path)
     return reverse('raw', args=[path])
@@ -158,38 +165,82 @@ def urlencode_config(config, exclude=None):
 
 
 def run_frame(request, path):
-    """This is the main processing page. However, that page is just
-    frame in which ajax requests spur the actual processing"""
+    """This is the main processing page.
+
+    Rather this is the frame of the main processing page, a lot of the
+    detail is done in javascript on the client.
+
+    In here we kickstart the computation and serve down set of jobids
+    for the client to work with.
+
+    """
     assert_clean_path(path, request)
-    config = build_config(path, request)
-    jobid = kickstart(request, path, config)
     email = request.GET.get('email')
 
+    config = build_config(path, request)
+    results = kickstart(request, path, config)
+    #results._make(v and getrelpath(v) for v in results)
+
+    reconfigure_url = reverse('config', args=[path])
+    reconfigure_url += "?" + urlencode_config(config)
+    return render_to_response(
+        'processing.html',
+        {'status_base': reverse('runstatus', args=['']),
+         'reconfigure_url': reconfigure_url,
+         'email': email},
+        context_instance=RequestContext(request))
+
+
+def kickstart(request, path, config):
+    email = request.GET.get('email')
     if email:
-        results_link = reverse('run', args=[path]) \
-                       + '?' + urlencode_config(config, exclude=['email'])
-        results_link = request.build_absolute_uri(results_link)
+        config['pdf_output'] = True
 
-        # the config dictionary at the end of the process is what is
-        # returned by the above job, will be passed as the first
-        # argument to the function called by client.after: send_email
-        email_jobid = client.after(jobid, send_email, [results_link, email])
-        logger.debug("Schedule email to %r with jobid: %s", email, email_jobid)
+    results = main.process(config, executor=client.get_server())
+    if email:
+        target_file = results.pdf_filename or results.combined_ps_name
+        assert target_file, \
+            "Configured for email but didn't get emailable file."
+        # The direcect download link for the PS or PDF file.
+        result_link = request.build_absolute_uri(
+            get_result_link(target_file))
+        # build path back to run screen.
+        run_link = reverse('run', args=[path])
+        run_link += '?' + urlencode_config(config, exclude=['email'])
+        run_link = request.build_absolute_uri(run_link)
 
-    # TODO: wait a tiny amount here to see if the job is already done?
+        task = util.Task(send_email, email, config, run_link, result_link)
+        eid = client.enqueue(task, after=[target_file])
+        logger.info("Scheduled email to %r with jobid: %s", email, eid)
+    return results
 
-    full_path = reverse('runstatus', args=[jobid])
-    reconfigure_url = reverse('config', args=[path]) \
-                      + "?" + urlencode_config(config)
-    return render_to_response('processing.html',
-                              {'statusurl': full_path,
-                               'reconfigure_url': reconfigure_url,
-                               'email': email,
-                               },
-                              context_instance=RequestContext(request))
+
+def send_email(email_address, config, run_link, result_link):
+    # config is the result of running the process, needs to be first parameter
+    try:
+        logger.debug("Task completed; sending email to %r", email_address)
+        from django.core.mail import EmailMultiAlternatives
+        subject = 'NPACT results ready for "{0}"'.format(
+            config['first_page_title'])
+        plaintext = get_template('email-results.txt')
+        htmly = get_template('email-results.html')
+
+        d = Context({'keep_days': settings.ATIME_DEFAULT,
+                     'result_link': result_link,
+                     'run_link': run_link})
+
+        text_content = plaintext.render(d)
+        html_content = htmly.render(d)
+        msg = EmailMultiAlternatives(subject, text_content, to=[email_address])
+        msg.attach_alternative(html_content, "text/html")
+        msg.send(fail_silently=False)
+        logger.debug("Finished sending email.")
+    except:
+        logger.exception("Failed sending email to %r", email_address)
 
 
 def run_status(request, jobid):
+    "This checks on the status of jobid"
     config = None
     result = {}
     status = 200
@@ -234,33 +285,3 @@ def run_status(request, jobid):
                                for v in os.listdir(ago)]
 
     return HttpResponse(json.dumps(result), status=status)
-
-
-
-def kickstart(request, path, config):
-    # TODO: See if they're already running a job and propose cancelling it
-    jobid = client.enqueue(main.process_all, [getabspath(path), config])
-    return jobid
-
-
-def send_email(config, results_link, email_address):
-    # config is the result of running the process, needs to be first parameter
-    try:
-        logger.debug("Task completed; sending email to %r", email_address)
-        from django.core.mail import EmailMultiAlternatives
-        subject = 'NPACT results ready for "{0}"'.format(
-            config['first_page_title'])
-        plaintext = get_template('email-results.txt')
-        htmly = get_template('email-results.html')
-
-        d = Context({'keep_days': settings.ATIME_DEFAULT,
-                     'results_link': results_link})
-
-        text_content = plaintext.render(d)
-        html_content = htmly.render(d)
-        msg = EmailMultiAlternatives(subject, text_content, to=[email_address])
-        msg.attach_alternative(html_content, "text/html")
-        msg.send(fail_silently=False)
-        logger.debug("Finished sending email.")
-    except:
-        logger.exception("Failed sending email to %r", email_address)
