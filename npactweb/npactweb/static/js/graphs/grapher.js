@@ -172,6 +172,7 @@ angular.module('npact')
       // remember where we are at the start/end of a drag, so dragging can
       // match our "scroll"
       g.on('dragstart dragend', function(obj){
+	self.$element.trigger('tooltipHide.npact');
 	self.baseOffsetX = this.offsetX();
 	$log.log('baseOffsetX:', self.baseOffsetX, self.baseOffsetX/(self.zoomLevel * self.xaxis.scaleX) + self.opts.range[0]);
       });
@@ -191,6 +192,7 @@ angular.module('npact')
     };
 
     GP.onDblClick = function(evt){
+      this.$element.trigger('tooltipHide.npact');
       var oldZoom = this.zoomLevel;
       $log.log('onDblClick', evt.evt.layerX - this.m.graph.x);
       if(evt.evt.shiftKey){
@@ -458,10 +460,10 @@ angular.module('npact')
 	    my: scope.extract.complement == 0 ? 'top center' : 'bottom center',
 	    target:[evt.evt.pageX, evt.evt.pageY]
 	  },
-	  show: {event:'tooltip.npact'},
-	  hide: {event:'tooltip.npact'}
+	  show: {event:'tooltipShow.npact'},
+	  hide: {event:'tooltipHide.npact'}
 	});
-	$el.trigger('tooltip.npact');
+	$el.trigger('tooltipShow.npact');
       });
       return this._cdsGroup = g;
     };
