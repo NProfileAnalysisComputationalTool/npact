@@ -148,7 +148,54 @@ describe('Graphs', function(){
 	stops: [900, 1000, 1100, 1200, 1300, 1400, 1500, 1600, 1700, 1800, 1900, 2000, 2100]
       });
     });
-    
+
+
+    describe('can zoom', function(){
+
+      var input;
+
+      beforeEach(function(){
+	input = {
+	  oldZoom: 1,
+	  zoom:2,
+	  baseScaleX: 1, // px/gn
+	  start_gn: 0,
+	  length_gn: 100,
+	  offsetX:0,
+	  centerOn_px: 50
+	};
+      });
+     
+      it('after panning left', function(){
+	input.offsetX = 20;
+	input.centerOn_px = 20; // graph coords
+	expect(GC.zoom(input)).toEqual({
+	  scaleX:2,
+	  offsetX:60,
+	  textScaleX:1/2
+	});
+      });
+
+      it('after panning right', function(){
+	input.offsetX = -20;
+	input.centerOn_px = 20; // graph coords
+	expect(GC.zoom(input)).toEqual({
+	  scaleX:2,
+	  offsetX:-20,
+	  textScaleX:1/2
+	});
+      });
+
+      it('with no panning', function(){
+	input.centerOn_px = 20;
+	expect(GC.zoom(input)).toEqual({
+	  scaleX:2,
+	  offsetX:20,
+	  textScaleX:1/2
+	});
+      });
+      
+    });
   });
 
 });
