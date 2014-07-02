@@ -19,6 +19,7 @@ def apstep(gbkconfig, tmpdir, executor):
 def test_apstep(apstep):
     assert apstep
 
+
 def test_write_allplotsdef(gbkconfig):
     buf = StringIO.StringIO()
     allplots.write_allplots_def(buf, gbkconfig, 1)
