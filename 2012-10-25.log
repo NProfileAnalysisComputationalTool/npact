@@ -1,7 +1,0 @@
-2012-10-25 10:41:44,034 16917 140735079042240 npactweb INFO Starting the main npact site.
-2012-10-25 10:41:44,335 16918 140735079042240 npactweb INFO Starting the main npact site.
-2012-10-25 10:42:15,538 16918 4318302208 npactweb.views.start INFO Checking Uploaded file NC_002928.gbk
-2012-10-25 10:42:15,626 16918 4318302208 npactweb.views.start INFO Saving uploaded file to 'up-NC_002928.gbk-o9imk7.gbk'
-2012-10-25 10:42:15,862 16918 4318302208 npactweb.views.start INFO Form is valid; action is u'run'
-2012-10-25 10:42:15,878 16918 4318302208 pynpact.prepare INFO Parsing genbank file (features:False): path('/Users/luciano/npact/webroot/uploads/up-NC_002928.gbk-o9imk7.gbk')
-2012-10-25 10:42:16,287 16918 4318302208 pynpact.prepare DEBUG Pulled all data from the seqrec.
