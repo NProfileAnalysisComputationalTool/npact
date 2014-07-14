@@ -25,17 +25,3 @@ def setup_logger(verbose):
     mp_logger = multiprocessing.get_logger()
     mp_logger.addHandler(handler)
     mp_logger.setLevel(logging.INFO)
-
-
-class TQlambda(object):
-    func = None
-    args = None
-    kwargs = None
-
-    def __init__(self, func, *args, **kwargs):
-        self.func = func
-        self.args = args
-        self.kwargs = kwargs
-
-    def __call__(self):
-        return self.func(*self.args, **self.kwargs)

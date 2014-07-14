@@ -151,7 +151,7 @@ def daemonize():
 
             import taskqueue.server
             logger.info("Daemonized context")
-            taskqueue.server.start_everything()
+            taskqueue.server.start_ServerManager()
     finally:
         logger.warning("Exiting (hopefully intentionally)")
 
