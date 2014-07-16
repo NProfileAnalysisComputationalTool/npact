@@ -83,7 +83,7 @@ class AllplotsStep(BaseStep):
             psname = self.derive_filename(h.hexdigest(), 'ps')
             task = delay(_ap)(psname, config, page_num, page_count)
             filenames.append(
-                self.executor.enqueue(task, id=psname, after=promises))
+                self.executor.enqueue(task, tid=psname, after=promises))
             page_num += 1
             start_base += bp_per_page
 
@@ -152,7 +152,7 @@ class CombinePsFilesStep(BaseStep):
             'ps')
         self.executor.enqueue(
             delay(_combine_ps_files)(combined_ps_name, psnames),
-            id=combined_ps_name,
+            tid=combined_ps_name,
             after=psnames)
 
 
@@ -184,7 +184,7 @@ def Ps2PdfStep(BaseStep):
             pdf_filename = self.replace_ext(combined_ps_name, 'pdf')
             self.executor.enqueue(
                 delay(_ps2pdf)(combined_ps_name, pdf_filename),
-                id=pdf_filename,
+                tid=pdf_filename,
                 after=combined_ps_name)
             return pdf_filename
         else:

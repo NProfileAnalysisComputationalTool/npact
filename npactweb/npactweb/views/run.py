@@ -195,7 +195,7 @@ def kickstart(request, path, config):
     email = request.GET.get('email')
     if email:
         config['pdf_output'] = True
-
+    client.ensure_daemon()
     results = main.process(config, executor=client.get_server())
     if email:
         target_file = results.pdf_filename or results.combined_ps_name

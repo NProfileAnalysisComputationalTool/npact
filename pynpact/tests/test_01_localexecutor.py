@@ -13,7 +13,7 @@ def test_InlineExecutor(executor):
     tid = executor.enqueue(delay(sum)([1, 2, 3]))
     assert 6 == executor.result(tid)
 
-    tid = executor.enqueue(delay(sum)([1, 2, 3]), id="12414214", after=[tid])
+    tid = executor.enqueue(delay(sum)([1, 2, 3]), tid="12414214", after=[tid])
     assert "12414214" == tid
     assert 6 == executor.result(tid)
 

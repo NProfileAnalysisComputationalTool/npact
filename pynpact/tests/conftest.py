@@ -24,18 +24,18 @@ class InlineExecutor(object):
     def __init__(self):
         self.tasks = {}
 
-    def enqueue(self, callable, id=None, after=None):
-        if id is None:
-            id = randomid()
+    def enqueue(self, callable, tid=None, after=None):
+        if tid is None:
+            tid = randomid()
 
         if after is not None:
             for aid in after:
                 assert aid in self.tasks, \
                     "The InlineExecutor can't be after a task that doesn't exist yet"
 
-        if id not in self.tasks:
-            self.tasks[id] = callable()
-        return id
+        if tid not in self.tasks:
+            self.tasks[tid] = callable()
+        return tid
 
     def result(self, tid):
         return self.tasks[tid]

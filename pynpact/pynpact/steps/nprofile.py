@@ -32,7 +32,7 @@ class NprofileStep(BaseStep):
         target = self.derive_filename(hash, 'nprofile')
         self.executor.enqueue(
             delay(_nprofile)(config, target),
-            id=target)
+            tid=target)
         return target
 
 

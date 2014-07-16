@@ -76,12 +76,12 @@ def log_tail(tid, line_count=1):
         return server.log_tail(tid, line_count)
 
 
-def enqueue(fn, args=None, kwargs=None):
+def enqueue(fn, tid=None, after=None):
     """Enqueue the function in the task queue and return an identifier
     that can be used to check status or get the result later.
     """
     with server_call() as server:
-        return server.enqueue(fn, args, kwargs)
+        return server.enqueue(fn, tid=tid, after=after)
 
 
 def result(tid):
@@ -98,22 +98,22 @@ def get_task(tid):
         return server.get_task(tid)
 
 
-def perform(fn, args=None, kwargs=None):
+def perform(fn):
     "Do the given task synchronously in the separate daemon process."
-    return get_task(enqueue(fn, args, kwargs)).get()
+    return get_task(enqueue(fn)).get()
 
 
-def after(tid, fn, additional_args=None, kwargs=None):
-    "enqueue new task that will wait on this task and then call the fn"
-    return enqueue(_after, [tid, fn, additional_args, kwargs])
+# def after(tid, fn, additional_args=None, kwargs=None):
+#     "enqueue new task that will wait on this task and then call the fn"
+#     return enqueue(_after, [tid, fn, additional_args, kwargs])
 
 
-def _after(tid, fn, additional_args=None, kwargs=None):
-    "helper function for after"
-    task = get_task(tid)
-    task_result = task.get()
-    if additional_args is None:
-        additional_args = []
-    if kwargs is None:
-        kwargs = {}
-    return fn(task_result, *additional_args, **kwargs)
+# def _after(tid, fn, additional_args=None, kwargs=None):
+#     "helper function for after"
+#     task = get_task(tid)
+#     task_result = task.get()
+#     if additional_args is None:
+#         additional_args = []
+#     if kwargs is None:
+#         kwargs = {}
+#     return fn(task_result, *additional_args, **kwargs)

@@ -33,7 +33,7 @@ class ExtractStep(BaseStep):
         target_file = self.derive_filename(hash, 'genes')
         return self.executor.enqueue(
             delay(_extract)(gbkfile, target_file, config),
-            id=target_file)
+            tid=target_file)
 
 
 def get_hash(config):
