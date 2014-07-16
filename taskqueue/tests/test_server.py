@@ -1,91 +1,12 @@
 import pytest
+import taskqueue
 from taskqueue import server, NoSuchTaskError
 from taskqueue.server import Task, Server, async_wrapper
 import cPickle
 import tempfile
 import glob
 import sys
-
-from mock import patch, MagicMock
-
-
-@pytest.fixture()
-def anontask():
-    return Task(func=str)
-
-
-@pytest.fixture()
-def idtask():
-    return Task(func=str, tid="Asdf")
-
-
-def test_Task(anontask):
-    assert repr(anontask)
-    anontask.tid = "Asdf"
-    assert repr(anontask)
-    assert '' is anontask.run()
-
-
-def test_task_picklability(tmpdir, anontask):
-    fooname = tmpdir.join('foo')
-    with fooname.open('wb') as tf:
-        cPickle.dump(anontask, tf)
-    with fooname.open('rb') as tf:
-        task2 = cPickle.load(tf)
-    assert '' == task2.run()
-
-
-def test_repeated_pickling(tmpdir):
-    "Pickling a task should be a noop when the file exists"
-    tid = "Asdf"
-    Task(str, tid=tid).pickle(str(tmpdir))
-    Task(str, tid=tid).pickle(str(tmpdir))
-    assert 1 == len(tmpdir.listdir())
-
-
-def test_randomid_pickling(tmpdir, anontask):
-    anontask.pickle(str(tmpdir))
-    assert 1 == len(tmpdir.listdir())
-    assert anontask.tid
-
-
-def test_randomid_pickling_collision(tmpdir, anontask, patcher):
-    patcher.patch('taskqueue.server.randomid',
-                  MagicMock(side_effect=['asdf', 'fdas']))
-    tmpdir.join('asdf').open('w')
-    tid = anontask.pickle(str(tmpdir))
-    assert 'fdas' == tid
-    assert 'fdas' == anontask.tid
-
-
-def test_task_pickle_unpickle_anon(tmpdir, anontask):
-    tid = anontask.pickle(str(tmpdir))
-    tsk = Task.unpickle(tid, str(tmpdir))
-    assert 1 == len(tmpdir.listdir())
-    assert tid == tsk.tid
-    assert '' == tsk.run()
-
-
-def test_task_pickle_unpickle_id(tmpdir, idtask):
-    tid = idtask.pickle(str(tmpdir))
-    tsk = Task.unpickle(tid, str(tmpdir))
-    assert 1 == len(tmpdir.listdir())
-    assert tid == tsk.tid
-    assert '' == tsk.run()
-
-
-def test_unpickle_missing(tmpdir):
-    with pytest.raises(NoSuchTaskError):
-        Task.unpickle('asdf', str(tmpdir))
-
-
-def test_pickle_with_badid(tmpdir, anontask):
-    anontask.tid = "/tmp/foobar"
-    anontask.pickle(str(tmpdir))
-    assert 1 == len(tmpdir.listdir())
-    assert tmpdir.listdir()[0].isfile()
-    utsk = Task.unpickle(anontask.tid, str(tmpdir))
-    assert utsk.tid == anontask.tid
+import logging
 
 
 def test_server_workdir(patcher, tmpdir):
@@ -97,8 +18,14 @@ def test_server_workdir(patcher, tmpdir):
 
 
 @pytest.fixture()
-def aserver(tmpdir):
-    return Server(work_dir=str(tmpdir))
+def idtask(magmock):
+    magmock.tid = 'Asdf'
+    return magmock
+
+
+@pytest.fixture()
+def aserver(tmpdir, magmock):
+    return Server(work_dir=str(tmpdir), pool=magmock)
 
 
 def test_instantiation(aserver):
@@ -106,35 +33,45 @@ def test_instantiation(aserver):
     assert aserver
 
 
-def test_async_wrapper(tmpdir, idtask):
-    stderr = sys.stderr
-    assert '' == async_wrapper(idtask, str(tmpdir))
-    assert 1 == len(glob.glob(str(tmpdir.join('*.stderr'))))
-    assert stderr is sys.stderr
-
-
 def test__enqueue(aserver, idtask):
-    async_res = aserver._enqueue(idtask)
+    aserver._enqueue(idtask)
     assert aserver.tasks[idtask.tid]
-    assert '' == async_res.get()
-    assert 1 == len(aserver.tasks)
+    assert aserver.pool.apply_async.called
+    assert aserver.get_task(idtask.tid)
 
 
-def test_already__enqueue(aserver, idtask):
-    o = object()
-    aserver.tasks[idtask.tid] = o
-    p = aserver._enqueue(idtask)
-    assert o is p
-    assert 1 == len(aserver.tasks)
-
-
-def test_enqueue(aserver, tmpdir):
+def test_enqueue(aserver, tmpdir, patcher):
+    patcher.patch_object(aserver, '_enqueue')
     tid = aserver.enqueue(str, tid='asdf')
     assert 'asdf' is tid
     assert 1 == len(tmpdir.listdir())
-    assert '' is aserver.result(tid)
+    assert aserver._enqueue.called
+
+
+def test_enqueued_already(aserver, patcher):
+    patcher.patch_object(aserver, '_enqueue')
+    aserver.tasks['asdf'] = object()
+    assert 'asdf' == aserver.enqueue(str, tid='asdf')
+    assert not aserver._enqueue.called
 
 
 def test_enqueue_after_missing(aserver):
     with pytest.raises(NoSuchTaskError):
         aserver.enqueue(str, after=['asdf'])
+
+
+@pytest.fixture()
+def aRunningServer(request, patcher):
+    patcher.patch('taskqueue.client.ENSURE_DAEMON', False)
+
+    sm = taskqueue.get_ServerManager(make_server=True)
+    logging.info("Opening a socket at %s", sm.address)
+    sm.start()
+    request.addfinalizer(sm.shutdown)
+    return sm.Server()
+
+
+def test_enqueue_after(aRunningServer, tmpdir):
+    tid1 = aRunningServer.enqueue(str)
+    tid2 = aRunningServer.enqueue(str, after=[tid1])
+    assert '' == aRunningServer.get_task(tid2).get(1)

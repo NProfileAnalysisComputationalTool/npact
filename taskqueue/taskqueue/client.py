@@ -1,20 +1,15 @@
 import logging
 from contextlib import contextmanager
 import multiprocessing
-from multiprocessing.managers import RemoteError, SyncManager
+from multiprocessing.managers import RemoteError
 import time
 
-
-import taskqueue
+from taskqueue import get_ServerManager
 from taskqueue import tqdaemon
 
 log = logging.getLogger(__name__)
 
-
-class Manager(SyncManager):
-    pass
-
-Manager.register('the_server')
+ENSURE_DAEMON = False
 
 
 def ensure_daemon():
@@ -33,6 +28,15 @@ def ensure_daemon():
         time.sleep(0.1)
 
 
+def get_server():
+    if ENSURE_DAEMON:
+        ensure_daemon()
+
+    manager = get_ServerManager()
+    manager.connect()
+    return manager.Server()
+
+
 @contextmanager
 def server_call():
     """Connect to the server and return that object.
@@ -41,11 +45,13 @@ def server_call():
     was restarted it still works and that we don't build up any stale
     data. Connection is ~40ms so not too bad.
     """
-    ensure_daemon()
-    manager = Manager(taskqueue.LISTEN_ADDRESS, authkey=taskqueue.AUTH_KEY)
-    manager.connect()
     try:
-        yield manager.the_server()
+        s = get_server()
+    except:
+        log.exception("Error connecting to server")
+        raise
+    try:
+        yield s
     except RemoteError:
         log.exception("Error in remote process")
         raise

@@ -19,6 +19,7 @@ SET_USER_FAILED = 4
 
 logger = logging.getLogger('taskqueue.daemon')
 
+
 def get_pidfile():
     return pidlockfile.PIDLockFile(
         os.path.join(taskqueue.BASE_DIR, 'tqdaemon.pid'))
@@ -151,7 +152,8 @@ def daemonize():
 
             import taskqueue.server
             logger.info("Daemonized context")
-            taskqueue.server.start_ServerManager()
+            sm = taskqueue.get_ServerManager(make_server=True)
+            sm.get_server().serve_forever()
     finally:
         logger.warning("Exiting (hopefully intentionally)")
 
@@ -165,4 +167,4 @@ def run():
     "Start the server in the foreground instead of as a daemon"
     import taskqueue.server
     logger.info("Running in foreground forever")
-    taskqueue.server.start_everything()
+    taskqueue.get_ServerManager(make_server=True).get_server().serve_forever()
