@@ -208,6 +208,12 @@ with mkstemp_overwrite('foobar.txt') as f:
             os.remove(path)
 
 
+def replace_ext(base, newext):
+    if newext[0] == '.':
+        newext = newext[1:]
+    return os.path.splitext(base)[0] + '.' + newext
+
+
 def is_outofdate(filename, *dependencies):
     """Return true if the file is missing or not newer than all of its dependencies."""
     if not os.path.exists(filename):

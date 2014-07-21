@@ -6,9 +6,10 @@ from __future__ import absolute_import
 import logging
 import sys
 
-from pynpact.steps import BaseStep
+
+from pynpact.steps import derive_filename
 from pynpact import binfile
-from pynpact import capproc
+from pynpact import capproc, parsing
 from pynpact.util import Hasher, reducedict, mkstemp_overwrite, delay
 
 
@@ -21,19 +22,23 @@ BIN = binfile('nprofile')
 KEYS = ['nucleotides', 'length', 'window_size', 'step', 'period', 'filename']
 
 
-class NprofileStep(BaseStep):
-    def enqueue(self):
-        config = reducedict(self.config, KEYS)
-        h = Hasher()
-        h.hashdict(config)
-        h.hashfiletime(BIN)
-        h.hashfiletime(config['filename'])
-        hash = h.hexdigest()
-        target = self.derive_filename(hash, 'nprofile')
-        self.executor.enqueue(
-            delay(_nprofile)(config, target),
-            tid=target)
-        return target
+def plan(config):
+    if 'nprofile' in config:
+        return
+    config['nprofile'] = True
+
+    parsing.length(config)
+    config = reducedict(config, KEYS)
+    h = Hasher()
+    h.hashdict(config)
+    h.hashfiletime(BIN)
+    h.hashfiletime(config['filename'])
+    hash = h.hexdigest()
+    target = derive_filename(config, hash, 'nprofile')
+    yield (
+        delay(_nprofile)(config, target),
+        target,
+        None)
 
 
 def _nprofile(config, target_file):

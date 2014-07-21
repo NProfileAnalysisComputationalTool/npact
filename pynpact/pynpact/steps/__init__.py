@@ -11,17 +11,17 @@ class BaseStep(object):
 
     def derive_filename(self, hash, newext):
         "Build target filename based on identifying pieces"
-        if newext[0] == '.':
-            newext = newext[1:]
-        base = os.path.splitext(self.config['basename'])[0]
-        filename = '%s-%s.%s' % (base, hash, newext)
-        return os.path.join(self.outputdir, filename)
-
-    def replace_ext(self, base, newext):
-        if newext[0] == '.':
-            newext = newext[1:]
-        return os.path.splitext(base)[0] + '.' + newext
+        return derive_filename(self.config, hash, newext)
 
     @classmethod
     def fromstep(klass, thisstep):
         return klass(thisstep.config, thisstep.outputdir, thisstep.executor)
+
+
+def derive_filename(config, hash, newext):
+    "Build target filename based on identifying pieces"
+    if newext[0] == '.':
+        newext = newext[1:]
+    base = os.path.splitext(config['basename'])[0]
+    filename = '%s-%s.%s' % (base, hash, newext)
+    return os.path.join(config['outputdir'], filename)

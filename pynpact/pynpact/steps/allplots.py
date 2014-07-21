@@ -5,10 +5,11 @@ import sys
 import math
 from subprocess import PIPE
 
-from pynpact.steps import BaseStep, extract, nprofile
+from pynpact.steps import BaseStep, extract, nprofile, derive_filename
 from pynpact import binfile
 from pynpact import capproc
-from pynpact.util import Hasher, reducedict, mkstemp_overwrite, which, delay
+from pynpact.util import \
+    Hasher, reducedict, mkstemp_overwrite, which, delay, replace_ext
 
 
 logger = logging.getLogger('pynpact.steps.allplots')
@@ -43,51 +44,53 @@ FILE_KEYS = ['File_of_unbiased_CDSs',
              'File_list_of_nucleotides_in_100bp windows']
 
 
-class AllplotsStep(BaseStep):
-    def dependencies(self):
-        # If extract is to be run, kick it off while we have all the
-        # configuration
-        promises = []
-        if self.config.get('run_extract'):
-            filename = extract.ExtractStep.fromstep(self).enqueue()
-            self.config['File_of_published_accepted_CDSs'] = filename
-            promises.append(filename)
+def plan(config):
+    # unless extract is already disabled.
+    if 'allplots' in config:
+        return
+    config['allplots'] = True
+    if which('ps2pdf'):
+        [(yield s) for s in convert_ps_to_pdf(config)]
+    else:
+        [(yield s) for s in combine_ps_files(config)]
 
-        filename = nprofile.NprofileStep.fromstep(self).enqueue()
-        self.config['File_list_of_nucleotides_in_200bp windows'] = filename
-        promises.append(filename)
-        return promises
 
-    def enqueue(self):
-        h = Hasher()
-        promises = self.dependencies()
+def allplots(config):
+    try:
+        after = [(yield s) for s in extract.plan(config)]
+    except:
+        after = []
+    after.extend((yield s) for s in nprofile.plan(config))
+    after.extend((yield s) for s in acgt_gamma.plan(config))
 
-        # Strip down to the config for this task only
-        config = reducedict(self.config, KEYS + FILE_KEYS)
+    parsing.length(config)
 
-        bp_per_page = config['bp_per_page']
-        start_base = config.pop('start_base')
-        end_base = config.pop('end_base')
+    h = Hasher()
+    # Strip down to the config for this task only
+    config = reducedict(config, KEYS + FILE_KEYS)
 
-        page_count = math.ceil(float(end_base - start_base) / bp_per_page)
-        page_num = 1  # page number offset
-        filenames = []
-        # per-page loop
-        while start_base < end_base:
-            config['start_base'] = start_base
-            if start_base + bp_per_page < end_base:
-                config['end_base'] = start_base + bp_per_page
-            else:
-                config['end_base'] = end_base
-            h = Hasher().hashfiletime(BIN).hashdict(config)
-            psname = self.derive_filename(h.hexdigest(), 'ps')
-            task = delay(_ap)(psname, config, page_num, page_count)
-            filenames.append(
-                self.executor.enqueue(task, tid=psname, after=promises))
-            page_num += 1
-            start_base += bp_per_page
+    bp_per_page = config['bp_per_page']
+    start_base = config.pop('start_base')
+    end_base = config.pop('end_base')
 
-        return filenames
+    page_count = math.ceil(float(end_base - start_base) / bp_per_page)
+    page_num = 1  # page number offset
+    filenames = []
+    # per-page loop
+    while start_base < end_base:
+        config['start_base'] = start_base
+        if start_base + bp_per_page < end_base:
+            config['end_base'] = start_base + bp_per_page
+        else:
+            config['end_base'] = end_base
+        h = Hasher().hashfiletime(BIN).hashdict(config)
+        psname = derive_filename(config, h.hexdigest(), 'ps')
+        yield (delay(_ap)(psname, config, page_num, page_count),
+               psname,
+               after)
+        page_num += 1
+        start_base += bp_per_page
+    config['psnames'] = filenames
 
 
 def _ap(psname, pconfig, page_num, page_count):
@@ -143,17 +146,18 @@ def write_allplots_def(out, pconfig, page_num):
         wl(pconfig.get(k, "None"))
 
 
-class CombinePsFilesStep(BaseStep):
-    def enqueue(self):
-        psnames = AllplotsStep.fromstep(self).enqueue()
-        combined_ps_name = self.derive_filename(
-            self.config['filename'],
-            Hasher.hashlist(psnames).hexdigest(),
-            'ps')
-        self.executor.enqueue(
-            delay(_combine_ps_files)(combined_ps_name, psnames),
-            tid=combined_ps_name,
-            after=psnames)
+def combine_ps_files(config):
+    [(yield s) for s in allplots(config)]
+
+    psnames = config['psnames']
+    combined_ps_name = derive_filename(
+        config, Hasher.hashlist(psnames).hexdigest(), 'ps')
+    config['combined_ps_name'] = combined_ps_name
+    yield (
+        delay(_combine_ps_files)(combined_ps_name, psnames),
+        combined_ps_name,
+        psnames
+    )
 
 
 def _combine_ps_files(combined_ps_name, psnames):
@@ -176,27 +180,20 @@ def _combine_ps_files(combined_ps_name, psnames):
     return combined_ps_name
 
 
-def Ps2PdfStep(BaseStep):
-    def enqueue(self):
-        combined_ps_name = CombinePsFilesStep.fromstep(self).enqueue()
-        ps2pdf = which('ps2pdf')
-        if ps2pdf:
-            pdf_filename = self.replace_ext(combined_ps_name, 'pdf')
-            self.executor.enqueue(
-                delay(_ps2pdf)(combined_ps_name, pdf_filename),
-                tid=pdf_filename,
-                after=combined_ps_name)
-            return pdf_filename
-        else:
-            logger.warn("Skipping ps2pdf translation, program not found.")
-            return combined_ps_name
+def convert_ps_to_pdf(config):
+    [(yield s) for s in combine_ps_files(config)]
+    combined_ps_name = config['combined_ps_name']
+    pdf_filename = replace_ext(combined_ps_name, 'pdf')
+    config['pdf_filename'] = pdf_filename
+    yield (delay(_ps2pdf)(combined_ps_name, pdf_filename),
+           pdf_filename,
+           [combined_ps_name])
 
 
 def _ps2pdf(ps_filename, pdf_filename):
-    ps2pdf = which('ps2pdf')
     with mkstemp_overwrite(pdf_filename) as out:
         statuslog.info("Converting to PDF")
-        cmd = [ps2pdf, ps_filename, '-']
+        cmd = ['ps2pdf', ps_filename, '-']
         capproc.capturedCall(
             cmd, stdout=out, logger=logger, check=True)
         statuslog.info("Finished PDF conversion")

@@ -7,9 +7,9 @@ import logging
 import os.path
 import sys
 
-from pynpact.steps import BaseStep
+from pynpact.steps import derive_filename
 from pynpact import binfile
-from pynpact import capproc
+from pynpact import capproc, parsing
 from pynpact.util import Hasher, reducedict, mkstemp_overwrite, delay
 
 
@@ -23,17 +23,17 @@ KEYS = ['GeneDescriptorKey1', 'GeneDescriptorKey2',
         'filename']
 
 
-class ExtractStep(BaseStep):
-    def enqueue(self):
-        """Go through the genbank record pulling out gene names and locations
-        $ extract MYCGE.gbk 0 gene 0 locus_tag > MYCGE.genes
-        """
-        config, hash = get_hash(self.config)
-        gbkfile = config['filename']
-        target_file = self.derive_filename(hash, 'genes')
-        return self.executor.enqueue(
-            delay(_extract)(gbkfile, target_file, config),
-            tid=target_file)
+def plan(config):
+    if parsing.isgbk(config):
+        config, hash = get_hash(config)
+        target_file = derive_filename(config, hash, 'genes')
+        yield (
+            delay(_extract)(config['filename'], target_file, config),
+            target_file,
+            None
+        )
+    else:
+        raise InvalidGBKException()
 
 
 def get_hash(config):
