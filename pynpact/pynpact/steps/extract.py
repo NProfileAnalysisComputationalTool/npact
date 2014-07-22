@@ -24,16 +24,16 @@ KEYS = ['GeneDescriptorKey1', 'GeneDescriptorKey2',
 OUTPUTKEY = 'File_of_published_accepted_CDSs'
 
 
-def plan(config):
+def plan(config, executor):
     if parsing.isgbk(config):
         rconfig, hash = get_hash(config)
         target_file = parsing.derive_filename(config, hash, 'genes')
-        yield (
+        executor.enqueue(
             delay(_extract)(config['filename'], target_file, rconfig),
-            target_file,
-            None
+            tid=target_file
         )
         config[OUTPUTKEY] = target_file
+        return target_file
     else:
         raise InvalidGBKException()
 

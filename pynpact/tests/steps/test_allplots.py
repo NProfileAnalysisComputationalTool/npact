@@ -19,13 +19,13 @@ def test_write_allplotsdef(gbkconfig):
     assert 26 == len(lines)
 
 
-def test_plan_allplots(gbkconfig, plan_processor):
-    config = plan_processor(allplots.allplots, gbkconfig)
-    assert len(config['psnames']) > 0
-    assert config['psnames'][0] is not None
+def test_plan_allplots(gbkconfig, executor):
+    allplots.allplots(gbkconfig, executor)
+    assert len(gbkconfig['psnames']) > 0
+    assert gbkconfig['psnames'][0] is not None
 
 
+def test_combine_ps(gbkconfig, executor):
+    allplots.combine_ps_files(gbkconfig, executor)
+    assert gbkconfig['combined_ps_name']
 
-def test_combine_ps(gbkconfig, plan_processor):
-    config = plan_processor(allplots.combine_ps_files, gbkconfig)
-    assert config['combined_ps_name']

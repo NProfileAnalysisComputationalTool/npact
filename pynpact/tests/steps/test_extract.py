@@ -9,10 +9,10 @@ def test_binfile_exists():
     assert os.path.exists(extract.BIN)
 
 
-def test_plan(gbkconfig, plan_processor):
-    config = plan_processor(extract.plan, gbkconfig)
+def test_plan(gbkconfig, executor):
+    extract.plan(gbkconfig, executor)
 
-    filename = config[extract.OUTPUTKEY]
+    filename = gbkconfig[extract.OUTPUTKEY]
     assert filename
     p = py.path.local(filename)
     assert p.exists()

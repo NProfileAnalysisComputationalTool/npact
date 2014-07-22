@@ -21,7 +21,8 @@ BIN = binfile('nprofile')
 KEYS = ['nucleotides', 'length', 'window_size', 'step', 'period', 'filename']
 OUTPUTKEY = 'File_list_of_nucleotides_in_200bp windows'
 
-def plan(config):
+
+def plan(config, executor):
     if 'nprofile' in config:
         return
     config['nprofile'] = True
@@ -34,11 +35,11 @@ def plan(config):
     h.hashfiletime(config['filename'])
     hash = h.hexdigest()
     target = parsing.derive_filename(config, hash, 'nprofile')
-    yield (
+    executor.enqueue(
         delay(_nprofile)(rconfig, target),
-        target,
-        None)
+        tid=target)
     config[OUTPUTKEY] = target
+    return target
 
 
 def _nprofile(config, target_file):

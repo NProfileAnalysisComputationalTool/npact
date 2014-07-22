@@ -37,8 +37,7 @@ def resolve_verb(verb):
            'nprofile': nprofile,
            'allplots': allplots,
            'acgt_gamma': acgt_gamma}[verb]
-    assert hasattr(mod, 'plan')
-    return mod
+    return mod.plan
 
 
 def process(verb, filename, config=None, executor=None, outputdir=None):
@@ -46,18 +45,6 @@ def process(verb, filename, config=None, executor=None, outputdir=None):
     if config is None:
         config = parsing.initial(filename, outputdir=outputdir)
     assert executor
-    return _process(resolve_verb(verb).plan)
-
-
-def _process(planner, config, executor):
-    stepgenerator = planner(config)
-    try:
-        val = stepgenerator.next()
-        while True:
-            func, tid, after = val
-            executor.enqueue(func, tid, after)
-            val = stepgenerator.send(tid)
-    except StopIteration:
-        pass
-
+    planner = resolve_verb(verb)
+    planner(config, executor)
     return config

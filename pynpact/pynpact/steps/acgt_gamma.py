@@ -3,6 +3,5 @@ import logging
 log = logging.getLogger(__name__)
 
 
-def plan(config):
-    return
-    yield
+def plan(config, executor):
+    return None

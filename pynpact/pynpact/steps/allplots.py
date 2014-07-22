@@ -44,25 +44,25 @@ FILE_KEYS = ['File_of_unbiased_CDSs',
              'File_list_of_nucleotides_in_100bp windows']
 
 
-def plan(config):
+def plan(config, executor):
     # unless extract is already disabled.
     if 'allplots' in config:
         return
     config['allplots'] = True
     if which('ps2pdf'):
-        [(yield s) for s in convert_ps_to_pdf(config)]
+        convert_ps_to_pdf(config, executor)
     else:
-        [(yield s) for s in combine_ps_files(config)]
+        combine_ps_files(config, executor)
 
 
-def allplots(config):
+def allplots(config, executor):
+    after = []
     try:
-        after = [(yield s) for s in extract.plan(config)]
+        after.append(extract.plan(config, executor))
     except:
-        after = []
-    # must have the list comprehension in there for this to pare correctly
-    after.extend([(yield s) for s in nprofile.plan(config)])
-    after.extend([(yield s) for s in acgt_gamma.plan(config)])
+        pass
+    after.append(nprofile.plan(config, executor))
+    #after.append(acgt_gamma.plan(config, executor))
 
     parsing.length(config)
     parsing.first_page_title(config)
@@ -90,14 +90,15 @@ def allplots(config):
         h = Hasher().hashfiletime(BIN).hashdict(rconfig)
         psname = parsing.derive_filename(config, h.hexdigest(), 'ps')
         filenames.append(psname)
-        yield (delay(_ap)(psname, rconfig, page_num, page_count),
-               psname,
-               after)
+        executor.enqueue(delay(_ap)(psname, rconfig, page_num, page_count),
+                         tid=psname,
+                         after=after)
         page_num += 1
         start_base += bp_per_page
 
     # Finally set the output filenames into the master config dict
     config['psnames'] = filenames
+    return filenames
 
 
 def _ap(psname, pconfig, page_num, page_count):
@@ -153,18 +154,18 @@ def write_allplots_def(out, pconfig, page_num):
         wl(pconfig.get(k, "None"))
 
 
-def combine_ps_files(config):
-    [(yield s) for s in allplots(config)]
-    psnames = config['psnames']
-    logger.debug('psnames: %s', psnames )
+def combine_ps_files(config, executor):
+    psnames = allplots(config, executor)
+    logger.debug('psnames: %s', psnames)
     combined_ps_name = parsing.derive_filename(
-        config, Hasher.hashlist(psnames).hexdigest(), 'ps')
+        config, Hasher().hashlist(psnames).hexdigest(), 'ps')
     config['combined_ps_name'] = combined_ps_name
-    yield (
+    executor.enqueue(
         delay(_combine_ps_files)(combined_ps_name, psnames),
-        combined_ps_name,
-        psnames
+        tid=combined_ps_name,
+        after=psnames
     )
+    return combined_ps_name
 
 
 def _combine_ps_files(combined_ps_name, psnames):
@@ -187,14 +188,15 @@ def _combine_ps_files(combined_ps_name, psnames):
     return combined_ps_name
 
 
-def convert_ps_to_pdf(config):
-    [(yield s) for s in combine_ps_files(config)]
+def convert_ps_to_pdf(config, executor):
+    combined_ps_name = combine_ps_files(config, executor)
     combined_ps_name = config['combined_ps_name']
     pdf_filename = replace_ext(combined_ps_name, 'pdf')
     config['pdf_filename'] = pdf_filename
-    yield (delay(_ps2pdf)(combined_ps_name, pdf_filename),
-           pdf_filename,
-           [combined_ps_name])
+    executor.enqueue(delay(_ps2pdf)(combined_ps_name, pdf_filename),
+                     tid=pdf_filename,
+                     after=[combined_ps_name])
+    return pdf_filename
 
 
 def _ps2pdf(ps_filename, pdf_filename):
