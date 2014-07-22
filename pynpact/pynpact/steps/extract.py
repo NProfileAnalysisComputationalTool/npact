@@ -21,6 +21,8 @@ KEYS = ['GeneDescriptorKey1', 'GeneDescriptorKey2',
         'GeneDescriptorSkip1', 'GeneDescriptorSkip2',
         'filename']
 
+OUTPUTKEY = 'File_of_published_accepted_CDSs'
+
 
 def plan(config):
     if parsing.isgbk(config):
@@ -31,7 +33,7 @@ def plan(config):
             target_file,
             None
         )
-        config['File_of_published_accepted_CDSs'] = target_file
+        config[OUTPUTKEY] = target_file
     else:
         raise InvalidGBKException()
 

@@ -12,7 +12,7 @@ def test_binfile_exists():
 def test_plan(gbkconfig, plan_processor):
     config = plan_processor(extract.plan, gbkconfig)
 
-    filename = config['File_of_published_accepted_CDSs']
+    filename = config[extract.OUTPUTKEY]
     assert filename
     p = py.path.local(filename)
     assert p.exists()

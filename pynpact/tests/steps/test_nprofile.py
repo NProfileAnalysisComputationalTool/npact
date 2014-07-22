@@ -12,7 +12,7 @@ def test_binfile_exists():
 def test_plan(gbkconfig, plan_processor):
     "Test that the enqueue runs and returns"
     config = plan_processor(nprofile.plan, gbkconfig)
-    filename = config['File_list_of_nucleotides_in_200bp windows']
+    filename = config[nprofile.OUTPUTKEY]
     assert filename
     p = py.path.local(filename)
     assert p.exists()

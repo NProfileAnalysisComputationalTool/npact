@@ -19,7 +19,7 @@ statuslog = logging.getLogger('pynpact.statuslog')
 BIN = binfile('nprofile')
 
 KEYS = ['nucleotides', 'length', 'window_size', 'step', 'period', 'filename']
-
+OUTPUTKEY = 'File_list_of_nucleotides_in_200bp windows'
 
 def plan(config):
     if 'nprofile' in config:
@@ -38,7 +38,7 @@ def plan(config):
         delay(_nprofile)(rconfig, target),
         target,
         None)
-    config['File_list_of_nucleotides_in_200bp windows'] = target
+    config[OUTPUTKEY] = target
 
 
 def _nprofile(config, target_file):
