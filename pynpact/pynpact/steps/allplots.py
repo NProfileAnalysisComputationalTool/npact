@@ -64,32 +64,36 @@ def allplots(config):
     after.extend((yield s) for s in acgt_gamma.plan(config))
 
     parsing.length(config)
+    parsing.first_page_title(config)
+    parsing.end_base(config)
 
     h = Hasher()
     # Strip down to the config for this task only
-    config = reducedict(config, KEYS + FILE_KEYS)
+    rconfig = reducedict(config, KEYS + FILE_KEYS)
 
-    bp_per_page = config['bp_per_page']
-    start_base = config.pop('start_base')
-    end_base = config.pop('end_base')
+    bp_per_page = rconfig['bp_per_page']
+    start_base = rconfig.pop('start_base')
+    end_base = rconfig.pop('end_base')
 
     page_count = math.ceil(float(end_base - start_base) / bp_per_page)
     page_num = 1  # page number offset
     filenames = []
     # per-page loop
     while start_base < end_base:
-        config['start_base'] = start_base
+        rconfig['start_base'] = start_base
         if start_base + bp_per_page < end_base:
-            config['end_base'] = start_base + bp_per_page
+            rconfig['end_base'] = start_base + bp_per_page
         else:
-            config['end_base'] = end_base
-        h = Hasher().hashfiletime(BIN).hashdict(config)
-        psname = derive_filename(config, h.hexdigest(), 'ps')
-        yield (delay(_ap)(psname, config, page_num, page_count),
+            rconfig['end_base'] = end_base
+        h = Hasher().hashfiletime(BIN).hashdict(rconfig)
+        psname = derive_filename(rconfig, h.hexdigest(), 'ps')
+        yield (delay(_ap)(psname, rconfig, page_num, page_count),
                psname,
                after)
         page_num += 1
         start_base += bp_per_page
+
+    #Finally set the output filenames into the master config dict
     config['psnames'] = filenames
 
 

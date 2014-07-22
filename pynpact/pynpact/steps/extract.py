@@ -8,7 +8,7 @@ import os.path
 import sys
 
 from pynpact.steps import derive_filename
-from pynpact import binfile
+from pynpact import binfile, InvalidGBKException
 from pynpact import capproc, parsing
 from pynpact.util import Hasher, reducedict, mkstemp_overwrite, delay
 
