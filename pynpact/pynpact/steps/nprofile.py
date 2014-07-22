@@ -7,7 +7,6 @@ import logging
 import sys
 
 
-from pynpact.steps import derive_filename
 from pynpact import binfile
 from pynpact import capproc, parsing
 from pynpact.util import Hasher, reducedict, mkstemp_overwrite, delay
@@ -28,17 +27,18 @@ def plan(config):
     config['nprofile'] = True
 
     parsing.length(config)
-    config = reducedict(config, KEYS)
+    rconfig = reducedict(config, KEYS)
     h = Hasher()
-    h.hashdict(config)
+    h.hashdict(rconfig)
     h.hashfiletime(BIN)
     h.hashfiletime(config['filename'])
     hash = h.hexdigest()
-    target = derive_filename(config, hash, 'nprofile')
+    target = parsing.derive_filename(config, hash, 'nprofile')
     yield (
-        delay(_nprofile)(config, target),
+        delay(_nprofile)(rconfig, target),
         target,
         None)
+    config['File_list_of_nucleotides_in_200bp windows'] = target
 
 
 def _nprofile(config, target_file):

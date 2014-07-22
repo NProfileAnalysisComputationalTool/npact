@@ -16,15 +16,6 @@ import util
 logger = logging.getLogger(__name__)
 
 
-class InvalidGBKException(Exception):
-    """Indicates an invalid GBK file
-
-    This class should only ever contain messages that are safe to
-    present to the user.
-
-    """
-    pass
-
 
 def reduce_genbank(gbkfile):
     """An attempt to create a version of the gbk file that has all the

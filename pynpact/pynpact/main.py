@@ -18,27 +18,39 @@ import util
 
 logger = logging.getLogger('pynpact')
 
-Results = namedtuple('Results', [
-    'File_of_published_accepted_CDSs',
-    'File_list_of_nucleotides_in_200bp_windows',
-    'File_of_new_CDSs',
-    'File_of_published_rejected_CDSs'
-    'File_of_GC_coding_potential_regions',
-    'acgt_gamma_output'
-    'combined_ps_name', 'pdf_filename'])
+# Results = namedtuple('Results', [
+#     'File_of_published_accepted_CDSs',
+#     'File_list_of_nucleotides_in_200bp_windows',
+#     'File_of_new_CDSs',
+#     'File_of_published_rejected_CDSs'
+#     'File_of_GC_coding_potential_regions',
+#     'acgt_gamma_output'
+#     'combined_ps_name', 'pdf_filename'])
 
-from pynpact import steps
+
+from pynpact.steps import extract, allplots, acgt_gamma, nprofile
+
+
+def resolve_verb(verb):
+    "Convert the verb into something that has the plan function"
+    mod = {'extract': extract,
+           'nprofile': nprofile,
+           'allplots': allplots,
+           'acgt_gamma': acgt_gamma}[verb]
+    assert hasattr(mod, 'plan')
+    return mod
 
 
 def process(verb, filename, config=None, executor=None, outputdir=None):
 
     if config is None:
-        config = parsing.initial(filename)
-    if outputdir is None:
-        outputdir = os.path.dirname(os.path.realpath(filename))
+        config = parsing.initial(filename, outputdir=outputdir)
     assert executor
+    return _process(resolve_verb(verb).plan)
 
-    stepgenerator = getattr(steps, verb).plan(config)
+
+def _process(planner, config, executor):
+    stepgenerator = planner(config)
     try:
         val = stepgenerator.next()
         while True:

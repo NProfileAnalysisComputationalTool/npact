@@ -5,9 +5,9 @@ import sys
 import math
 from subprocess import PIPE
 
-from pynpact.steps import BaseStep, extract, nprofile, derive_filename
+from pynpact.steps import extract, nprofile, acgt_gamma
 from pynpact import binfile
-from pynpact import capproc
+from pynpact import capproc, parsing
 from pynpact.util import \
     Hasher, reducedict, mkstemp_overwrite, which, delay, replace_ext
 
@@ -60,8 +60,9 @@ def allplots(config):
         after = [(yield s) for s in extract.plan(config)]
     except:
         after = []
-    after.extend((yield s) for s in nprofile.plan(config))
-    after.extend((yield s) for s in acgt_gamma.plan(config))
+    # must have the list comprehension in there for this to pare correctly
+    after.extend([(yield s) for s in nprofile.plan(config)])
+    after.extend([(yield s) for s in acgt_gamma.plan(config)])
 
     parsing.length(config)
     parsing.first_page_title(config)
@@ -76,6 +77,7 @@ def allplots(config):
     end_base = rconfig.pop('end_base')
 
     page_count = math.ceil(float(end_base - start_base) / bp_per_page)
+    logger.info("Generating %d pages of allplots", page_count)
     page_num = 1  # page number offset
     filenames = []
     # per-page loop
@@ -86,14 +88,15 @@ def allplots(config):
         else:
             rconfig['end_base'] = end_base
         h = Hasher().hashfiletime(BIN).hashdict(rconfig)
-        psname = derive_filename(rconfig, h.hexdigest(), 'ps')
+        psname = parsing.derive_filename(config, h.hexdigest(), 'ps')
+        filenames.append(psname)
         yield (delay(_ap)(psname, rconfig, page_num, page_count),
                psname,
                after)
         page_num += 1
         start_base += bp_per_page
 
-    #Finally set the output filenames into the master config dict
+    # Finally set the output filenames into the master config dict
     config['psnames'] = filenames
 
 
@@ -152,9 +155,9 @@ def write_allplots_def(out, pconfig, page_num):
 
 def combine_ps_files(config):
     [(yield s) for s in allplots(config)]
-
     psnames = config['psnames']
-    combined_ps_name = derive_filename(
+    logger.debug('psnames: %s', psnames )
+    combined_ps_name = parsing.derive_filename(
         config, Hasher.hashlist(psnames).hexdigest(), 'ps')
     config['combined_ps_name'] = combined_ps_name
     yield (

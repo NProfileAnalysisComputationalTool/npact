@@ -26,3 +26,13 @@ def binfile(name):
 
 
 DATAPATH = resource_filename(__name__, 'data')
+
+
+class InvalidGBKException(Exception):
+    """Indicates an invalid GBK file
+
+    This class should only ever contain messages that are safe to
+    present to the user.
+
+    """
+    pass

@@ -9,18 +9,10 @@ def test_binfile_exists():
     assert os.path.exists(extract.BIN)
 
 
-@pytest.fixture()
-def exstep(gbkconfig, tmpdir, executor):
-    return extract.ExtractStep(
-        config=gbkconfig, outputdir=str(tmpdir), executor=executor)
+def test_plan(gbkconfig, plan_processor):
+    config = plan_processor(extract.plan, gbkconfig)
 
-
-def test_exstep(exstep):
-    assert exstep
-
-
-def test_enqueue(exstep):
-    filename = exstep.enqueue()
+    filename = config['File_of_published_accepted_CDSs']
     assert filename
     p = py.path.local(filename)
     assert p.exists()

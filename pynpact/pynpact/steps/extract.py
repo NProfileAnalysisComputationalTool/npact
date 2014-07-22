@@ -7,7 +7,6 @@ import logging
 import os.path
 import sys
 
-from pynpact.steps import derive_filename
 from pynpact import binfile, InvalidGBKException
 from pynpact import capproc, parsing
 from pynpact.util import Hasher, reducedict, mkstemp_overwrite, delay
@@ -25,13 +24,14 @@ KEYS = ['GeneDescriptorKey1', 'GeneDescriptorKey2',
 
 def plan(config):
     if parsing.isgbk(config):
-        config, hash = get_hash(config)
-        target_file = derive_filename(config, hash, 'genes')
+        rconfig, hash = get_hash(config)
+        target_file = parsing.derive_filename(config, hash, 'genes')
         yield (
-            delay(_extract)(config['filename'], target_file, config),
+            delay(_extract)(config['filename'], target_file, rconfig),
             target_file,
             None
         )
+        config['File_of_published_accepted_CDSs'] = target_file
     else:
         raise InvalidGBKException()
 
