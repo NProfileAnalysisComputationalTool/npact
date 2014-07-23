@@ -57,8 +57,12 @@ class Task(object):
                 log.info("Task %r erred, aborting", tid)
                 raise
 
-        log.debug("Task running.")
-        return self.func()
+        log.debug("Task running: %s", tid)
+        rc = self.func()
+        log.debug("Finished %r", task.tid)
+        return rc
+
+
 
     def pickle(self, work_dir):
         "Writes the task def to a file via pickle in case of server restart"
@@ -113,13 +117,13 @@ def async_wrapper(task, work_dir):
     * sets up logging to a file for this task
     """
     work_dir = path(work_dir)
-
+    base = work_dir / sanitize_id(task.tid)
     # Logging setup:
     # In this proc all logging should go to a file named after the task
     root_logger = logging.root
     # blow away any other handlers from previous uses of this process.
     root_logger.handlers = []
-    log_path = work_dir / (task.tid + '.log')
+    log_path = base + '.log'
     file_handler = logging.FileHandler(log_path, mode='a')
     file_handler.setFormatter(
         logging.Formatter(
@@ -129,13 +133,11 @@ def async_wrapper(task, work_dir):
     root_logger.setLevel(logging.DEBUG)
     root_logger.addHandler(file_handler)
 
-    stderrlog = work_dir / (sanitize_id(task.tid) + '.stderr')
+    stderrlog = base + '.stderr'
     oldstderr = sys.stderr
     try:
         with open(stderrlog, 'w') as f:
             sys.stderr = f
-            rc = task.run()
-            log.info("Finished %r", task.tid)
-            return rc
+            return task.run()
     finally:
         sys.stderr = oldstderr
