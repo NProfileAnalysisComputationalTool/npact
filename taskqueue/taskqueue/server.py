@@ -19,6 +19,7 @@ import sys
 from path import path
 
 import taskqueue
+from taskqueue import NoSuchTaskError
 from taskqueue.task import Task, async_wrapper
 
 
@@ -63,46 +64,47 @@ class Server(object):
         promise = self.get_task(tid)
         return promise.ready()
 
-    def result(self, tid):
+    def result(self, tid, timeout=0.01):
         log.debug("Checking on result of %s", tid)
         promise = self.get_task(tid)
-        return promise.get(0.01)
+        return promise.get(timeout)
 
-    def log_output(self, tid, position=0):
-        log.debug("Retrieving log output for %s from pos:%s", tid, position)
-        path = os.path.join(self.work_dir, tid + '.log')
-        with open(path, 'rb') as f:
-            f.seek(position)
-            buf = f.read()
-        log.debug("Read %d bytes from log.", len(buf))
-        return buf
+    ## TODO: these need to use sanitize_id or a stored log path for the task
+    # def log_output(self, tid, position=0):
+    #     log.debug("Retrieving log output for %s from pos:%s", tid, position)
+    #     pth = os.path.join(self.work_dir, tid + '.log')
+    #     with open(pth, 'rb') as f:
+    #         f.seek(position)
+    #         buf = f.read()
+    #     log.debug("Read %d bytes from log.", len(buf))
+    #     return buf
 
-    def log_tail(self, tid, line_count=1):
-        log.debug("Retrieving %d log lines for %s", line_count, tid)
+    # def log_tail(self, tid, line_count=1):
+    #     log.debug("Retrieving %d log lines for %s", line_count, tid)
 
-        # make sure we have the running task (raises exception if missing)
-        self.get_task(tid)
+    #     # make sure we have the running task (raises exception if missing)
+    #     self.get_task(tid)
 
-        path = os.path.join(self.work_dir, tid + '.stderr')
-        if not os.path.exists(path):
-            return ["Queued\n"]
-        try:
-            with open(path, 'rb') as f:
-                try:
-                    # 2 is from end
-                    f.seek(- (line_count + 1) * 120, 2)
-                except:
-                    f.seek(0)
-                lines = collections.deque(maxlen=line_count)
-                while True:
-                    line = f.readline()
-                    if line == '':
-                        return list(lines)
-                    elif line != '\n':
-                        lines.append(line)
-        except:
-            log.exception("Error reading lines from %r", path)
-            raise
+    #     pth = os.path.join(self.work_dir, tid + '.stderr')
+    #     if not os.path.exists(pth):
+    #         return ["Queued\n"]
+    #     try:
+    #         with open(pth, 'rb') as f:
+    #             try:
+    #                 # 2 is from end
+    #                 f.seek(- (line_count + 1) * 120, 2)
+    #             except:
+    #                 f.seek(0)
+    #             lines = collections.deque(maxlen=line_count)
+    #             while True:
+    #                 line = f.readline()
+    #                 if line == '':
+    #                     return list(lines)
+    #                 elif line != '\n':
+    #                     lines.append(line)
+    #     except:
+    #         log.exception("Error reading lines from %r", pth)
+    #         raise
 
     def _enqueue(self, task):
         log.info('Enqueuing %r', task)
@@ -112,8 +114,12 @@ class Server(object):
         return promise
 
     def enqueue(self, fn, tid=None, after=None):
-        if tid and tid in self.tasks:
-            return tid
+        if tid:
+            try:
+                self.get_task(tid)
+                return tid
+            except NoSuchTaskError:
+                pass
         if after:
             # check that all tasks specified exist or raise the
             # exception now if one of them doesn't. an effect this

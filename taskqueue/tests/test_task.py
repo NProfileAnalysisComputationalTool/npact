@@ -80,13 +80,13 @@ def test_unpickle_missing(tmpdir):
         Task.unpickle('asdf', str(tmpdir))
 
 
-def test_pickle_with_badid(tmpdir, anontask):
-    anontask.tid = "/tmp/foobar"
-    anontask.pickle(str(tmpdir))
+def test_pickle_with_badid(tmpdir):
+    tsk = Task(str, tid="/tmp/foobar")
+    tsk.pickle(str(tmpdir))
     assert 1 == len(tmpdir.listdir())
     assert tmpdir.listdir()[0].isfile()
-    utsk = Task.unpickle(anontask.tid, str(tmpdir))
-    assert utsk.tid == anontask.tid
+    utsk = Task.unpickle(tsk.tid, str(tmpdir))
+    assert utsk.tid == tsk.tid
 
 
 def test_async_wrapper(tmpdir, idtask):

@@ -6,17 +6,19 @@ import os.path
 import string
 import random
 
-
+from multiprocessing.managers import RemoteError
+from multiprocessing import TimeoutError
 from path import path
 
 from taskqueue import NoSuchTaskError
-from taskqueue.client import get_task
+from taskqueue.client import get_server
 
 log = logging.getLogger(__name__)
 
 
 def sanitize_id(tid):
-    return tid.replace(os.path.sep, '==')
+    assert isinstance(tid, basestring)
+    return tid.replace(os.path.sep, '_')
 
 
 def randomid():
@@ -31,7 +33,7 @@ class Task(object):
     path = None
 
     def __repr__(self):
-        return "#<Task(func=%r, tid=%r)>" % (self.func, self.tid)
+        return "#<Task(tid=%r)>" % (self.tid)
 
     def __init__(self, func, tid=None, after=None):
         self.func = func
@@ -40,8 +42,22 @@ class Task(object):
 
     def run(self):
         if self.after:
-            for tid in self.after:
-                get_task(tid).wait()
+            log.debug("Waiting on %d tasks.", len(self.after))
+            server = get_server()
+            tid = None
+            try:
+                while self.after:
+                    tid = self.after.pop()
+                    try:
+                        server.get_task(tid).wait(1)
+                    except TimeoutError:
+                        self.after.append(tid)
+                        log.debug("Task %r not ready")
+            except RemoteError:
+                log.info("Task %r erred, aborting", tid)
+                raise
+
+        log.debug("Task running.")
         return self.func()
 
     def pickle(self, work_dir):
@@ -113,7 +129,7 @@ def async_wrapper(task, work_dir):
     root_logger.setLevel(logging.DEBUG)
     root_logger.addHandler(file_handler)
 
-    stderrlog = work_dir / (task.tid + '.stderr')
+    stderrlog = work_dir / (sanitize_id(task.tid) + '.stderr')
     oldstderr = sys.stderr
     try:
         with open(stderrlog, 'w') as f:

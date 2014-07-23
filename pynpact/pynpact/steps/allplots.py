@@ -50,9 +50,9 @@ def plan(config, executor):
         return
     config['allplots'] = True
     if which('ps2pdf'):
-        convert_ps_to_pdf(config, executor)
+        return convert_ps_to_pdf(config, executor)
     else:
-        combine_ps_files(config, executor)
+        return combine_ps_files(config, executor)
 
 
 def allplots(config, executor):
@@ -62,7 +62,7 @@ def allplots(config, executor):
     except:
         pass
     after.append(nprofile.plan(config, executor))
-    #after.append(acgt_gamma.plan(config, executor))
+    after.append(acgt_gamma.plan(config, executor))
 
     parsing.length(config)
     parsing.first_page_title(config)
@@ -156,7 +156,6 @@ def write_allplots_def(out, pconfig, page_num):
 
 def combine_ps_files(config, executor):
     psnames = allplots(config, executor)
-    logger.debug('psnames: %s', psnames)
     combined_ps_name = parsing.derive_filename(
         config, Hasher().hashlist(psnames).hexdigest(), 'ps')
     config['combined_ps_name'] = combined_ps_name

@@ -58,11 +58,13 @@ def instantiateit():
     from taskqueue.server import Server
     return Server()
 
-
-def get_ServerManager(address=None, make_server=False):
+# TODO: better name for logger param
+def get_ServerManager(address=None, make_server=False, logger=False):
     if address is None:
         address = LISTEN_ADDRESS
     sm = ServerManager(address=address, authkey=AUTH_KEY)
+    if logger:
+        setup_logger(True)
     if make_server:
         method_to_typeid = {
             'get_task': 'AsyncResult'
