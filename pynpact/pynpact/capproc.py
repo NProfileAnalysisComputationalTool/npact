@@ -32,6 +32,21 @@ def check(cmd, **kwargs):
     return 0 == capturedCall(cmd, **kwargs)
 
 
+def calledProcessError(rc, cmdname):
+    """Build a :py:class:`~subprocess.CalledProcessError` that can be unpickled
+
+       The CalledProcessError has a bug such that it can't be
+       UNpickled.  http://bugs.python.org/issue1692335#msg133581 by
+       setting the `args` attribute we workaround that and allow this
+       code to be used inside a multiprocessing.Pool
+
+    """
+    args = (rc, cmdname)
+    cpe = subprocess.CalledProcessError(*args)
+    cpe.args = args
+    return cpe
+
+
 def capturedCall(cmd, check=False, **kwargs):
     """Call capturedPopen and wait for to exit.
 
@@ -40,8 +55,8 @@ def capturedCall(cmd, check=False, **kwargs):
     Additional Args:
 
     * check (default False): If true then it will check the return
-      code of the process and raise a subprocess.CalledProcessError if
-      it is non-zero.
+      code of the process and raise a
+      :py:class:`~subprocess.CalledProcessError` if it is non-zero.
 
     """
     p = capturedPopen(cmd, **kwargs)
@@ -56,14 +71,7 @@ def capturedCall(cmd, check=False, **kwargs):
     rc = p.wait()
 
     if check and rc != 0:
-        # So the CalledProcessError has a bug such that it can't be
-        # UNpickled.  http://bugs.python.org/issue1692335#msg133581 by
-        # setting the 'args' attribute we workaround that and allow
-        # this code to be used inside a multiprocessing.Pool
-        args = (rc, p.cmdname)
-        cpe = subprocess.CalledProcessError(*args)
-        cpe.args = args
-        raise cpe
+        raise calledProcessError(rc, p.cmdname)
     return rc
 
 
@@ -282,7 +290,7 @@ def ensure_popen_exits(popen, check=True, timeout=0.4, timeout_count=2,
         # Did it exit abnormally?
         if check and popen.returncode != 0:
             cmdname = getattr(popen, 'cmdname', '<unknown>')
-            raise subprocess.CalledProcessError(popen.returncode, cmdname)
+            raise calledProcessError(popen.returncode, cmdname)
 
 
 def terminate_process(popen, logger=None, msglevel=logging.FATAL):
