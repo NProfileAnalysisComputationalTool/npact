@@ -7,10 +7,9 @@ import shutil
 import sys
 from optparse import OptionParser
 from contextlib import contextmanager
-import math
 from path import path as pathlib
 from subprocess import PIPE
-from pynpact import parsing
+from pynpact import parsing, executors
 from __init__ import binfile, DATAPATH
 import capproc
 import prepare
@@ -39,29 +38,47 @@ def process(verb, filename, config=None, executor=None, outputdir=None):
     return config
 
 
-def run_cmdline(gbkfile):
+@contextmanager
+def getexecutor(name):
     sm = None
+    name = name.lower()
     try:
-        from taskqueue import get_ServerManager
-        sm = get_ServerManager(make_server=True, logger=True)
-        logging.info("Opening a socket at %s", sm.address)
-        sm.start()
-        executor = sm.Server()
-        config = process('allplots', gbkfile, executor=executor)
-        jid = config['pdf_filename']
-        logging.info("Work scheduled, waiting")
-        executor.get_task(jid).wait()
-        logging.info("Finished processing %r", gbkfile)
-        logging.info("See output at %r", jid)
+        if name == 'server':
+            from taskqueue import get_ServerManager
+            sm = get_ServerManager(make_server=True, logger=True)
+            logging.info("Opening a socket at %s", sm.address)
+            sm.start()
+            e = sm.Server()
+        elif name == 'inline':
+            e = executors.InlineExecutor()
+        elif name == 'daemon':
+            from taskqueue import client
+            e = client.get_server()
+        yield e
     finally:
         if sm:
             sm.shutdown()
 
 
+def run_cmdline(gbkfile, executorName):
+    with getexecutor(executorName) as executor:
+        config = process('allplots', gbkfile, executor=executor)
+        jid = config.get('pdf_filename') or config.get('combined_ps_name')
+        if not pathlib(jid).exists():
+            logging.info("Work scheduled, waiting")
+            output = executor.result(jid, timeout=None)
+            logging.info("Finished processing %r", gbkfile)
+        else:
+            output = jid
+        logging.info("See output at %r", output)
+
+
 if __name__ == '__main__':
     parser = OptionParser("""%prog <genebank file>""")
-    parser.add_option("-v", "--verbose", action="store_true", dest="verbose",
+    parser.add_option('-v', '--verbose', action='store_true', dest='verbose',
                       help="Show more verbose log messages.")
+    parser.add_option('-e', '--executor', action='store', dest='executor',
+                      default='Server')
     (options, args) = parser.parse_args()
 
     if len(args) != 1:
@@ -75,4 +92,4 @@ if __name__ == '__main__':
         format="%(asctime)s %(name)-10s %(levelname)-8s %(message)s",
         datefmt='%H:%M:%S')
 
-    run_cmdline(gbkfile)
+    run_cmdline(gbkfile, options.executor)

@@ -10,10 +10,11 @@ from multiprocessing.managers import RemoteError
 from multiprocessing import TimeoutError
 from path import path
 
-from taskqueue import NoSuchTaskError
-from taskqueue.client import get_server
+from taskqueue import NoSuchTaskError, memoize_noarg
 
 log = logging.getLogger(__name__)
+
+TIMEOUT = 5
 
 
 def sanitize_id(tid):
@@ -25,6 +26,12 @@ def randomid():
     length = 16
     return ''.join(
         random.choice(string.lowercase) for i in range(length))
+
+
+@memoize_noarg
+def get_server():
+    from taskqueue.client import get_server
+    return get_server()
 
 
 class Task(object):
@@ -49,7 +56,7 @@ class Task(object):
                 while self.after:
                     tid = self.after.pop()
                     try:
-                        server.get_task(tid).wait(1)
+                        server.wait(tid, TIMEOUT)
                     except TimeoutError:
                         self.after.append(tid)
                         log.debug("Task %r not ready")
@@ -57,12 +64,10 @@ class Task(object):
                 log.info("Task %r erred, aborting", tid)
                 raise
 
-        log.debug("Task running: %s", tid)
+        log.debug("Task running: %s", self.tid)
         rc = self.func()
-        log.debug("Finished %r", task.tid)
+        log.debug("Finished %r", self.tid)
         return rc
-
-
 
     def pickle(self, work_dir):
         "Writes the task def to a file via pickle in case of server restart"
@@ -104,6 +109,7 @@ class Task(object):
         path = os.path.join(work_dir, sanitize_id(tid))
         if not os.path.exists(path):
             raise NoSuchTaskError()
+        log.debug("Unpickling task from %r", path)
         with open(path, 'r') as f:
             func = cPickle.load(f)
         return klass(func=func, tid=tid)

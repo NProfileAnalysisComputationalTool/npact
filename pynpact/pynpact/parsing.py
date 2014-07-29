@@ -2,6 +2,7 @@ from __future__ import absolute_import
 import os.path
 import logging
 from Bio import SeqIO
+from path import path
 
 from pynpact import genbank
 
@@ -104,7 +105,10 @@ def derive_filename(config, hash, newext):
     "Build target filename based on identifying pieces"
     if newext[0] == '.':
         newext = newext[1:]
-    basename = os.path.basename(config['filename'])
-    base = os.path.splitext(basename)[0]
-    filename = '%s-%s.%s' % (base, hash, newext)
-    return os.path.join(config['outputdir'], filename)
+    filename = path(config['filename'])
+    if 'outputdir' in config:
+        outputdir = path(config['outputdir'])
+    else:
+        outputdir = filename.dirname()
+    newfilename = '%s-%s.%s' % (filename.namebase, hash, newext)
+    return outputdir / newfilename

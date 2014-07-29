@@ -116,7 +116,7 @@ class EntrezSession(object):
             net_handle = Bio.Entrez.efetch(
                 db=self.db, id=id, rettype='gbwithparts', retmode='text')
             logger.debug("Streaming handle to %r.", filename)
-            with util.mkstemp_overwrite(filename, logger=logger) as f:
+            with util.mkstemp_rename(filename) as f:
                 bytes = util.stream_to_file(net_handle, f)
                 logger.info(
                     "Saved %s to %s.", util.pprint_bytes(bytes), filename)

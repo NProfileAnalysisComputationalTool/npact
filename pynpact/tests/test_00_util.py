@@ -42,18 +42,18 @@ def test_Hasher():
     d = h.hexdigest()
 
 
-def test_mkstemp_overwrite(tmpdir):
+def test_mkstemp_rename(tmpdir):
     filename = tmpdir.join('file')
-    with util.mkstemp_overwrite(str(filename)) as out:
+    with util.mkstemp_rename(str(filename)) as out:
         out.write('foo')
         assert len(tmpdir.listdir()) == 1
         assert not filename.exists()
     assert filename.exists()
 
 
-def test_mkstemp_overwrite2(tmpdir):
+def test_mkstemp_rename2(tmpdir):
     filename = tmpdir.join('file')
-    with util.mkstemp_overwrite(str(filename), dir=str(tmpdir)) as out:
+    with util.mkstemp_rename(str(filename), dir=str(tmpdir)) as out:
         out.write('foo')
         out.flush()
         assert len(tmpdir.listdir()) == 1

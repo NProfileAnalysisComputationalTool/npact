@@ -9,10 +9,10 @@ from pynpact.steps import extract, nprofile, acgt_gamma
 from pynpact import binfile
 from pynpact import capproc, parsing
 from pynpact.util import \
-    Hasher, reducedict, mkstemp_overwrite, which, delay, replace_ext
+    Hasher, reducedict, mkstemp_rename, which, delay, replace_ext
 
 
-logger = logging.getLogger('pynpact.steps.allplots')
+log = logging.getLogger('pynpact.steps.allplots')
 statuslog = logging.getLogger('pynpact.statuslog')
 
 
@@ -77,9 +77,10 @@ def allplots(config, executor):
     end_base = rconfig.pop('end_base')
 
     page_count = math.ceil(float(end_base - start_base) / bp_per_page)
-    logger.info("Generating %d pages of allplots", page_count)
+    log.info("Generating %d pages of allplots", page_count)
     page_num = 1  # page number offset
     filenames = []
+    waiton = []
     # per-page loop
     while start_base < end_base:
         rconfig['start_base'] = start_base
@@ -90,18 +91,22 @@ def allplots(config, executor):
         h = Hasher().hashfiletime(BIN).hashdict(rconfig)
         psname = parsing.derive_filename(config, h.hexdigest(), 'ps')
         filenames.append(psname)
-        executor.enqueue(delay(_ap)(psname, rconfig, page_num, page_count),
-                         tid=psname,
-                         after=after)
+        if not psname.exists():
+            executor.enqueue(delay(_ap)(psname, rconfig, page_num, page_count),
+                             tid=psname,
+                             after=after)
+            waiton.append(psname)
         page_num += 1
         start_base += bp_per_page
 
     # Finally set the output filenames into the master config dict
     config['psnames'] = filenames
-    return filenames
+    return waiton
 
 
 def _ap(psname, pconfig, page_num, page_count):
+    if psname.exists():
+        return psname
     statuslog.info(
         "Generating %d pages of graphical output: %2d%%",
         page_count, round(100.0 * page_num / page_count))
@@ -119,10 +124,10 @@ def _ap(psname, pconfig, page_num, page_count):
             pconfig['period'],
             pconfig['end_base']]
 
-    with mkstemp_overwrite(psname) as out:
+    with mkstemp_rename(psname) as out:
         with capproc.guardPopen(
                 cmd, stdin=PIPE, stdout=out, stderr=False,
-                logger=logger) as ap:
+                logger=log) as ap:
             # write the allplots.def file information through stdin.
             write_allplots_def(ap.stdin, pconfig, page_num)
             ap.stdin.close()
@@ -155,23 +160,28 @@ def write_allplots_def(out, pconfig, page_num):
 
 
 def combine_ps_files(config, executor):
-    psnames = allplots(config, executor)
+    after = allplots(config, executor)
+    psnames = config['psnames']
+    log.debug("Going to combine %d postscript files", len(psnames))
     combined_ps_name = parsing.derive_filename(
         config, Hasher().hashlist(psnames).hexdigest(), 'ps')
     config['combined_ps_name'] = combined_ps_name
+    if combined_ps_name.exists():
+        return None
     executor.enqueue(
         delay(_combine_ps_files)(combined_ps_name, psnames),
-        tid=combined_ps_name,
-        after=psnames
-    )
-    return combined_ps_name
+        tid=combined_ps_name, after=after)
+    return [combined_ps_name]
 
 
 def _combine_ps_files(combined_ps_name, psnames):
     # While combining, insert the special markers so that
     # it will appear correctly as many pages.
+    if combined_ps_name.exists():
+        return combined_ps_name
     statuslog.info("Combining pages into output.")
-    with mkstemp_overwrite(combined_ps_name) as psout:
+    log.debug("Combining %d ps files into %r", len(psnames), combined_ps_name)
+    with mkstemp_rename(combined_ps_name) as psout:
         psout.write("%!PS-Adobe-2.0\n\n")
         psout.write("%%Pages: {0}\n\n".format(len(psnames)))
         idx = 1
@@ -188,21 +198,25 @@ def _combine_ps_files(combined_ps_name, psnames):
 
 
 def convert_ps_to_pdf(config, executor):
-    combined_ps_name = combine_ps_files(config, executor)
+    after = combine_ps_files(config, executor)
     combined_ps_name = config['combined_ps_name']
     pdf_filename = replace_ext(combined_ps_name, 'pdf')
     config['pdf_filename'] = pdf_filename
+    if pdf_filename.exists():
+        return None
     executor.enqueue(delay(_ps2pdf)(combined_ps_name, pdf_filename),
                      tid=pdf_filename,
-                     after=[combined_ps_name])
+                     after=after)
     return pdf_filename
 
 
 def _ps2pdf(ps_filename, pdf_filename):
-    with mkstemp_overwrite(pdf_filename) as out:
+    if pdf_filename.exists():
+        return pdf_filename
+    with mkstemp_rename(pdf_filename) as out:
         statuslog.info("Converting to PDF")
         cmd = ['ps2pdf', ps_filename, '-']
         capproc.capturedCall(
-            cmd, stdout=out, logger=logger, check=True)
+            cmd, stdout=out, logger=log, check=True)
         statuslog.info("Finished PDF conversion")
     return pdf_filename

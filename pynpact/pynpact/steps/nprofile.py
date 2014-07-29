@@ -9,7 +9,7 @@ import sys
 
 from pynpact import binfile
 from pynpact import capproc, parsing
-from pynpact.util import Hasher, reducedict, mkstemp_overwrite, delay
+from pynpact.util import Hasher, reducedict, mkstemp_rename, delay
 
 
 logger = logging.getLogger('pynpact.steps.nprofile')
@@ -35,6 +35,9 @@ def plan(config, executor):
     h.hashfiletime(config['filename'])
     hash = h.hexdigest()
     target = parsing.derive_filename(config, hash, 'nprofile')
+    config[OUTPUTKEY] = target
+    if target.exists():
+        return None
     executor.enqueue(
         delay(_nprofile)(rconfig, target),
         tid=target)
@@ -43,13 +46,15 @@ def plan(config, executor):
 
 
 def _nprofile(config, target_file):
+    if target_file.exists():
+        return target_file
     statuslog.info("Calculating n-profile.")
     filename = config['filename']
     cmd = [
         BIN, '-b', ''.join(config["nucleotides"]),
         filename, 1, config['length'],
         config['window_size'], config['step'], config['period']]
-    with mkstemp_overwrite(target_file) as out:
+    with mkstemp_rename(target_file) as out:
         capproc.capturedCall(
             cmd, stdout=out, stderr=sys.stderr,
             logger=logger, check=True)

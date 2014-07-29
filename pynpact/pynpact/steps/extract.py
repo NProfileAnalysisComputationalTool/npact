@@ -9,7 +9,7 @@ import sys
 
 from pynpact import binfile, InvalidGBKException
 from pynpact import capproc, parsing
-from pynpact.util import Hasher, reducedict, mkstemp_overwrite, delay
+from pynpact.util import Hasher, reducedict, mkstemp_rename, delay
 
 
 logger = logging.getLogger('pynpact.steps.extract')
@@ -28,11 +28,13 @@ def plan(config, executor):
     if parsing.isgbk(config):
         rconfig, hash = get_hash(config)
         target_file = parsing.derive_filename(config, hash, 'genes')
+        config[OUTPUTKEY] = target_file
+        if target_file.exists():
+            return None
         executor.enqueue(
             delay(_extract)(config['filename'], target_file, rconfig),
             tid=target_file
         )
-        config[OUTPUTKEY] = target_file
         return target_file
     else:
         raise InvalidGBKException()
@@ -48,7 +50,9 @@ def get_hash(config):
 
 
 def _extract(gbkfile, target_file, config):
-    with mkstemp_overwrite(target_file) as out:
+    if target_file.exists():
+        return target_file
+    with mkstemp_rename(target_file) as out:
         statuslog.debug(
             "Extracting genes in %s.", os.path.basename(gbkfile))
         cmd = [BIN, gbkfile,

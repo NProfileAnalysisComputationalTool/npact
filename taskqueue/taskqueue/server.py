@@ -56,6 +56,9 @@ class Server(object):
             self._enqueue(task)
         return self.tasks[tid]
 
+    def wait(self, tid, timeout=None):
+        return self.get_task(tid).wait(timeout)
+
     def task_count(self):
         return len(self.tasks)
 
@@ -115,12 +118,10 @@ class Server(object):
 
     def enqueue(self, fn, tid=None, after=None):
         if tid:
-            try:
-                self.get_task(tid)
+            if tid in self.tasks:
                 return tid
-            except NoSuchTaskError:
-                pass
         if after:
+            after = filter(None, after)
             # check that all tasks specified exist or raise the
             # exception now if one of them doesn't. an effect this
             # enforces is that everything must be queued into the pool
