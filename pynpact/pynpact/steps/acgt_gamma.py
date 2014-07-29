@@ -3,8 +3,8 @@ import sys
 import logging
 from pynpact import capproc, parsing
 from pynpact import binfile, DATAPATH
-from pynpact.util import \
-    Hasher, reducedict, delay, mkdtemp_rename
+from pynpact.util import Hasher, reducedict, mkdtemp_rename
+from pynpact.steps import producer, enqueue
 
 
 log = logging.getLogger(__name__)
@@ -40,35 +40,23 @@ def plan(config, executor):
     config['File_of_G+C_coding_potential_regions'] = j('.profiles')
     config[OUTPUTKEY] = outdir
 
-    if outdir.exists():
-        return None
-    executor.enqueue(delay(_acgt_gamma)(rconfig, outdir),
-                     tid=outdir)
-    return outdir
+    return enqueue(_acgt_gamma, executor, rconfig, outdir)
 
 
-def _acgt_gamma(config, target_dir):
-    if os.path.exists(target_dir):
-        # all timestamps are hashed in at this point, if anything
-        # changes it has a new name. Hence if this dir exists we're
-        # already done.
-        return target_dir
-
+@producer(tmpmanager=mkdtemp_rename)
+def _acgt_gamma(config, dtemp):
     cmd = [BIN, "-q", config['filename']]
     if 'significance' in config:
         cmd.append(config['significance'])
 
-    with mkdtemp_rename(target_dir) as dtemp:
-        statuslog.info(
-            "Identifying ORFs with 3-base compositional periodicity "
-            "with significance: %s.", config.get('significance'))
-        log.debug("Starting prediction program in %s", dtemp)
-        # TODO: acgt actually takes the string of characters to skip,
-        # not the length.
-        capproc.capturedCall(
-            cmd, cwd=dtemp, check=True,
-            env={'BASE_DIR_THRESHOLD_TABLES': DATAPATH},
-            stderr=sys.stderr,
-            logger=log)
-        log.debug("Renaming from %s to %s", dtemp, target_dir)
-    return target_dir
+    statuslog.info(
+        "Identifying ORFs with 3-base compositional periodicity "
+        "with significance: %s.", config.get('significance'))
+    log.debug("Starting prediction program in %s", dtemp)
+    # TODO: acgt actually takes the string of characters to skip,
+    # not the length.
+    capproc.capturedCall(
+        cmd, cwd=dtemp, check=True,
+        env={'BASE_DIR_THRESHOLD_TABLES': DATAPATH},
+        stderr=sys.stderr,
+        logger=log)

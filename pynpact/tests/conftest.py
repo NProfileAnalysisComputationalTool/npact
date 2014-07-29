@@ -66,7 +66,7 @@ TESTFNA = "testdata/NC_017123.fna"
 
 @pytest.fixture()
 def executor():
-    return executor.InlineExecutor()
+    return executors.InlineExecutor()
 
 
 

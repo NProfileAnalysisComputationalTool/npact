@@ -9,7 +9,8 @@ import sys
 
 from pynpact import binfile, InvalidGBKException
 from pynpact import capproc, parsing
-from pynpact.util import Hasher, reducedict, mkstemp_rename, delay
+from pynpact.util import Hasher, reducedict
+from pynpact.steps import producer, enqueue
 
 
 logger = logging.getLogger('pynpact.steps.extract')
@@ -29,13 +30,7 @@ def plan(config, executor):
         rconfig, hash = get_hash(config)
         target_file = parsing.derive_filename(config, hash, 'genes')
         config[OUTPUTKEY] = target_file
-        if target_file.exists():
-            return None
-        executor.enqueue(
-            delay(_extract)(config['filename'], target_file, rconfig),
-            tid=target_file
-        )
-        return target_file
+        return enqueue(_extract, executor, rconfig, target_file)
     else:
         raise InvalidGBKException()
 
@@ -49,15 +44,13 @@ def get_hash(config):
     return config, h.hexdigest()
 
 
-def _extract(gbkfile, target_file, config):
-    if target_file.exists():
-        return target_file
-    with mkstemp_rename(target_file) as out:
-        statuslog.debug(
-            "Extracting genes in %s.", os.path.basename(gbkfile))
-        cmd = [BIN, gbkfile,
-               config['GeneDescriptorSkip1'], config['GeneDescriptorKey1'],
-               config['GeneDescriptorSkip2'], config['GeneDescriptorKey2']]
-        capproc.capturedCall(
-            cmd, check=True, logger=logger, stdout=out, stderr=sys.stderr)
-    return target_file
+@producer()
+def _extract(config, out):
+    gbkfile = config['filename']
+    statuslog.debug(
+        "Extracting genes in %s.", os.path.basename(gbkfile))
+    cmd = [BIN, gbkfile,
+           config['GeneDescriptorSkip1'], config['GeneDescriptorKey1'],
+           config['GeneDescriptorSkip2'], config['GeneDescriptorKey2']]
+    capproc.capturedCall(
+        cmd, check=True, logger=logger, stdout=out, stderr=sys.stderr)
