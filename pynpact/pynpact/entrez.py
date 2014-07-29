@@ -110,14 +110,16 @@ class EntrezSession(object):
         #             summary.get('Create_Date'))
 
         if not os.path.exists(filename):
-            # or datetime.datetime.fromtimestamp(os.path.getmtime(filename)) < update_date:
+            # or datetime.datetime.fromtimestamp(
+            #       os.path.getmtime(filename)) < update_date:
             # file should be downloaded.
             net_handle = Bio.Entrez.efetch(
                 db=self.db, id=id, rettype='gbwithparts', retmode='text')
             logger.debug("Streaming handle to %r.", filename)
             with util.mkstemp_overwrite(filename, logger=logger) as f:
                 bytes = util.stream_to_file(net_handle, f)
-                logger.info("Saved %s to %s.", util.pprint_bytes(bytes), filename)
+                logger.info(
+                    "Saved %s to %s.", util.pprint_bytes(bytes), filename)
         else:
             logger.debug("Using already present file %r", filename)
         return filename
@@ -130,7 +132,7 @@ class EntrezSession(object):
         else:
             return None
 
-    def to_url(self,term):
+    def to_url(self, term):
         """Convert the query we've done to a url that will load ncbi's site."""
         fmt = "http://www.ncbi.nlm.nih.gov/sites/entrez?db={0}&term={1}"
         return fmt.format(self.db,term)
