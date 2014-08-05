@@ -1,4 +1,45 @@
 angular.module('npact')
+  // the `GraphDealer` hands out graph data and processes events
+  .service('GraphDealer', function($log){
+
+    var opts = {
+      basesPerGraph:10000,
+      colorBlindFriendly:false,
+      page:0
+    };
+
+    return {
+      opts:opts,
+      setColors:function(colorBlindFriendly){
+	$log.log('setColors', arguments);
+	// TODO: instruct graphs to redraw themselves with the right colors
+	opts.colorBlindFriendly = colorBlindFriendly;
+      },
+      setZoom:function(basesPerGraph){
+	$log.log('setZoom', arguments);
+	// TODO: repartition data into groups of `basesPerGraph`
+	// TODO: redraw graphs with new data
+	// TODO: update pages
+	opts.basesPerGraph = basesPerGraph;
+      },
+      hasNextPage: function(){
+	return true; // TODO: calculate a "max pages" based on zoom and data
+      },
+      nextPage: function(){
+	$log.log('nextPage', arguments);
+	// TODO: repartition data
+	// TODO: redraw graphs
+	opts.page++;
+      },
+      hasPreviousPage: function(){ return opts.page > 0;},
+      previousPage: function(){
+	$log.log('previousPage', arguments);
+	// TODO: repartition data
+	// TODO: redraw graphs
+	opts.page--;
+      }
+    };
+  })
   .directive('npactGraphPage', function(STATIC_BASE_URL, $http){
     return {
       restrict:'A',

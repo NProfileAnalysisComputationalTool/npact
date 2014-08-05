@@ -6,14 +6,20 @@
     <li>Double click on a graph to zoom into that point</li>
   </ul>
 
-  <label>Zoom:</label>
+  <label>Zoom: <input type="number" ng-model="basesPerGraph" 
+		      ng-change="changeZoom(basesPerGraph)"/> bases per graph</label> 
   <br/>
-  <label>Color-blind friendly:</label> <input type="checkbox" />
+  <label>Color-blind friendly: <input type="checkbox" ng-model="colorBlindFriendly"
+				      ng-change="GraphDealer.setColors(colorBlindFriendly)" /></label>
   <br/>
 
   <div>
-  <button style="float:left;">Previous Page</button>
-  <button style="float:right;">Next Page</button>
+  <button style="float:left;" ng-disabled="!GraphDealer.hasPreviousPage()"
+	  ng-click="GraphDealer.previousPage()">
+    Previous Page</button>
+  <button style="float:right;" ng-disabled="!GraphDealer.hasNextPage()"
+	  ng-click="GraphDealer.nextPage()">
+    Next Page</button>
   <div style="clear:both;" ></div>
   </div>
 </div>
