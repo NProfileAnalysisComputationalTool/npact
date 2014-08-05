@@ -22,6 +22,15 @@ angular.module('npact')
 	// TODO: update pages
 	opts.basesPerGraph = basesPerGraph;
       },
+      zoomTo: function(){
+	// TODO: figure out a good API for this
+      },
+      panTo: function(oldStartBase, newStartBase){
+	// TODO: find the graph with the old start base
+	// TODO: recalculate graph start/ends
+	// TODO: repartition data
+	// TODO: redraw graphs with new data
+      },
       hasNextPage: function(){
 	return true; // TODO: calculate a "max pages" based on zoom and data
       },

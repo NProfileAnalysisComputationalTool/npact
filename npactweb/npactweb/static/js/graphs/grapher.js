@@ -1,5 +1,5 @@
 angular.module('npact')
-  .factory('Grapher', function(K, $log, GraphingCalculator, $rootScope, $compile){
+  .factory('Grapher', function(K, $log, GraphingCalculator, $rootScope, $compile, GraphDealer){
 
     function addMany(container, children){
       return container.add.apply(container, children);
@@ -176,6 +176,13 @@ angular.module('npact')
 	self.baseOffsetX = this.offsetX();
 	$log.log('baseOffsetX:', self.baseOffsetX, self.baseOffsetX/(self.zoomLevel * self.xaxis.scaleX) + self.opts.range[0]);
       });
+
+      g.on('dragend', function(evt){
+	// TODO: tell the graph dealer
+	var oldStartBase = self.opts.range[0],
+	    newStartBase = (this.offsetX() / self.xaxis.scaleX) + oldStartBase;
+	GraphDealer.panTo(oldStartBase, newStartBase);
+      });
       
       g.on('mouseover', function() {
         document.body.style.cursor = 'pointer';
@@ -192,9 +199,11 @@ angular.module('npact')
     };
 
     GP.onDblClick = function(evt){
+      // TODO: tell the GraphDealer about the zoom
       this.$element.trigger('tooltipHide.npact');
       var oldZoom = this.zoomLevel;
       $log.log('onDblClick', evt.evt.layerX - this.m.graph.x);
+      
       if(evt.evt.shiftKey){
 	// can't zoom out more
 	if(oldZoom == 1) return;

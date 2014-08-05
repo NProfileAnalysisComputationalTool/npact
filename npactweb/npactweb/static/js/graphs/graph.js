@@ -53,7 +53,7 @@ angular.module('npact')
       templateUrl:STATIC_BASE_URL+'js/graphs/extract.html'
     };
   })
-  .directive('npactGraph', function($log, Grapher, WidthChecker, GraphSettings){
+  .directive('npactGraph', function($log, Grapher, WidthChecker, GraphSettings, GraphDealer){
 
     
     return {
