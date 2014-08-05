@@ -15,7 +15,7 @@
     </style>
     {%block addScript %}{%endblock %}
   </head>
-  <body>
+  <body ng-app="npact">
     <div id="header">
       <h1 id="dept"><a href="{% url start %}">N-Profile Analysis Computational Tool</a></h1>
       <h2 id="uf"><a href="http://www.ufl.edu/">University of Florida<span></span></a></h2>
@@ -61,6 +61,8 @@
             <li><a href="#">Eric Hernandez (Programmer)</a></li>
           </ul>
           {% include "_includes/search.html" %}
+        {%block sidebar %}
+        {%endblock sidebar %}
         </div>
       </div>
       <div id="footer">

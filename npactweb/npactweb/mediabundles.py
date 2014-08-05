@@ -30,5 +30,6 @@ MEDIA_BUNDLES = (
      'js/graphs/page.js',
      'js/graphs/calculator.js',
      'js/graphs/grapher.js',
-     'js/graphs/graph.js')
+     'js/graphs/graph.js',
+     'js/graphs/config.js')
     )

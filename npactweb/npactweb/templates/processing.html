@@ -17,7 +17,9 @@
   <div id="results" style="display:none;">
     <h3>Results </h3>
     <div>
-      <div ng-app="npact"> <div npact-graph-page ></div> </div>
+      <div> 
+	<div npact-graph-page ></div> 
+      </div>
       <h4>Downloads</h4>
 
       <div id="graphicalresults" class="ui-state-highlight ui-corner-all onsuccess">
@@ -84,3 +86,7 @@
 </div>
 
 {%endblock content %}
+
+{%block sidebar %}
+<div npact-graph-config ></div> 
+{%endblock sidebar %}
