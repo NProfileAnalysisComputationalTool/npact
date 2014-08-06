@@ -5,8 +5,13 @@ angular.module('npact')
     var opts = {
       basesPerGraph:10000,
       colorBlindFriendly:false,
-      page:0
+      page:0,
+      graphsPerPage:5
     };
+
+    // TODO: make graph specification objects, two-way bind them
+    // through `npactGraphPage` into `npactGraph`, make a
+    // `npactGraph.redraw` to draw from scratch.
 
     return {
       opts:opts,
