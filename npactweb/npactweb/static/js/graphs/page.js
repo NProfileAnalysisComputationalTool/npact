@@ -68,6 +68,32 @@ angular.module('npact')
 	  return makeGraphSpec(base + n*opts.basesPerGraph);
 	});
     }
+
+
+    function loadProfileData(profile){
+      hasProfileData = true;
+      opts.profile = profile;
+      var start = profile[0],
+	  end = _.last(profile);
+
+      opts.startBase = start.coordinate;
+      opts.endBase = end.coordinate;
+      opts.length = opts.endBase - opts.startBase;
+      // find a sensible zoom level
+      var basesPerGraph = opts.length / opts.graphsPerPage;
+      // if we're really short, reset out bases per graph
+      if (basesPerGraph < opts.basesPerGraph) {
+	opts.basesPerGraph = Utils.orderOfMagnitude(basesPerGraph);
+      }
+    }
+
+    var hasProfileData = false,
+	_onProfileData = $q.defer(),
+	onProfileData = _onProfileData.promise;
+
+    onProfileData.then(loadProfileData).then(rebuildGraphs);
+
+
    
     function attachProfileData(graphSpecs){     
       // assumes the profile is ordered by coordinate from low to high      
@@ -76,30 +102,28 @@ angular.module('npact')
       // reset the profiles
       graphSpecs.forEach(function(gs){ gs.profile = []; });
 
-      if (opts.profile == null) throw 'Need profile data';
+      return onProfileData.then(function(profile){
+	if (profile == null) throw 'Need profile data';
 
-      var profile = opts.profile,
-	  len = profile.length;
+	// search for the index in our profile where we would insert `c`
+	// and have it still be sorted
+	function sortedIdx(c){
+	  return _.sortedIndex(profile, {'coordinate': c}, 'coordinate');
+	}
 
-      // search for the index in our profile where we would insert `c`
-      // and have it still be sorted
-      function sortedIdx(c){
-	return _.sortedIndex(profile, {'coordinate': c}, 'coordinate');
-      }
-      
-      graphSpecs.forEach(function(gs){
-	var startIdx = Math.max(0, sortedIdx(gs.startBase)),	    
-	    endIdx = Math.min(sortedIdx(gs.endBase)+1, len);
+	graphSpecs.forEach(function(gs){
+	  var startIdx = Math.max(0, sortedIdx(gs.startBase) - 1),
+	      endIdx = Math.min(sortedIdx(gs.endBase) + 1, profile.length);
 
-	// shallow copy
-	gs.profile = profile.slice(startIdx, endIdx);
-	$log.log('Matched', gs.range, 'to', [startIdx, endIdx],
-		 [profile[startIdx].coordinate,
-		  profile[endIdx].coordinate]);
+	  // shallow copy
+	  gs.profile = profile.slice(startIdx, endIdx);
+	  $log.log('Matched', gs.range, 'to', [startIdx, endIdx],
+		   [profile[startIdx].coordinate,
+		    profile[endIdx].coordinate]);
+	});
+
+	return graphSpecs;
       });
-
-      // return as a promise
-      return $q.when(graphSpecs);
     }
 
     function attachExtractData(name, graphSpecs){
@@ -184,37 +208,28 @@ angular.module('npact')
     return {
       opts:opts,
       setProfile:function(profile){
-	$log.log('setProfile', profile.length, profile[0],
-		 _.last(profile));
-	opts.profile = profile;
-	window.profile = profile;
-	var start = profile[0],
-	    end = _.last(profile);
-
-	opts.startBase = start.coordinate;
-	opts.endBase = end.coordinate;
-	opts.length = opts.endBase - opts.startBase;
-	// find a sensible zoom level
-	var basesPerGraph = opts.length / opts.graphsPerPage;
-	// if we're really short, reset out bases per graph
-	if (basesPerGraph < opts.basesPerGraph) {
-	  opts.basesPerGraph = Utils.orderOfMagnitude(basesPerGraph);
-	}
-
-	return rebuildGraphs();
+	$log.log('setProfile', profile.length);
+	_onProfileData.resolve(profile);
       },
 
       setExtract:function(name, data){
 	$log.log('setExtract', name,  data.length);
+	// save it for later
 	opts.extracts[name] = data;
-	// TODO: coordinate with `setProfile` better; race condition here
-	// TODO: maybe a simpler way to add extracts to existing graphs?
-	return rebuildGraphs();
+	// if we've got profile data already, rebuild
+	if(hasProfileData){
+	  // TODO: maybe a simpler way to add extracts to existing
+	  // graphs?
+	  rebuildGraphs();
+	}
+	// if we're still waiting on profile data, then when it hits
+	// this extract will be processed.
+
+
 
       },
       setColors:function(colorBlindFriendly){
 	$log.log('setColors', arguments);
-
 	opts.colorBlindFriendly = colorBlindFriendly;
 	// TODO: lighter change here; see if we can update colors
 	// in-place without a full rebuild
