@@ -19,15 +19,7 @@ angular.module('npact')
       opts.stageHeight = this.stage.getHeight();
       opts.stageWidth = this.stage.getWidth();
 
-      this.colors = opts.colorblindFriendlyColors ? {
-	r: opts.graphRedColorblind,
-	g: opts.graphGreenColorblind,
-	b: opts.graphBlueColorblind
-      } : {
-	r: opts.graphRedColor,
-	g: opts.graphGreenColor,
-	b: opts.graphBlueColor
-      };
+      this.colors = opts.colors;
       
       this.m = GraphingCalculator.chart(opts);
       this.xaxis = GraphingCalculator.xaxis(opts);
@@ -178,9 +170,10 @@ angular.module('npact')
       });
 
       g.on('dragend', function(evt){
-	// TODO: tell the graph dealer
+
 	var oldStartBase = self.opts.range[0],
 	    newStartBase = (this.offsetX() / self.xaxis.scaleX) + oldStartBase;
+	// tell the graph dealer
 	GraphDealer.panTo(oldStartBase, newStartBase);
       });
       
@@ -324,10 +317,6 @@ angular.module('npact')
 	    offsetX: this.opts.range[0]
 	  }),
 	  dataToDraw = _(this.opts.profile)
-      	    .filter(function(g){
-	      return g.coordinate >= xaxis.start
-		&& g.coordinate <= xaxis.end;
-	    })
 	    .reduce(function(acc, g){
 	      lines.map(function(x){
 		acc[x].push(g.coordinate);
@@ -396,10 +385,7 @@ angular.module('npact')
 	  },
 	  
 	  arrows = _(cds)
-	    .filter(function(x){
-	      return x.start >= xaxis.start
-		&& x.end <= xaxis.end;
-	    }).forEach(function(x){
+	    .forEach(function(x){
 	      // color determined by `x.end - 1 % 3`
 	      var isComplement = x.complement == 0,
 		  colorCoord = isComplement ? x.start : x.end,

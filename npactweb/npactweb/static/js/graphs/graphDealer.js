@@ -34,14 +34,14 @@
 	
       },
       lineColors = {
-	graphRedColor: "red",
-	graphBlueColor: "blue",
-	graphGreenColor: "green"
+	r: "red",
+	g: "blue",
+	b: "green"
       },
       colorBlindLineColors = {
-	graphRedColor: "rgb(213, 94, 0)",
-	graphBlueColor: "rgb(204, 121, 167)",
-	graphGreenColor: "rgb(0, 114, 178)"
+	r: "rgb(213, 94, 0)",
+	g: "rgb(204, 121, 167)",
+	b: "rgb(0, 114, 178)"
       };
   
   // the `GraphDealer` hands out graph data and processes events
@@ -56,12 +56,12 @@
 	    endBase: endBase,
 	    extracts: {},
 	    profile: [],
-	    headers: []
+	    headers: [],
+	    colors: opts.colorBlindFriendly ? colorBlindLineColors : lineColors
 	  };
       return angular.extend(
 	spec,
-	graphSpecDefaults,
-	opts.colorBlindFriendly ? colorBlindLineColors : lineColors
+	graphSpecDefaults
       );
     }
     
