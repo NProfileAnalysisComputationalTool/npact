@@ -18,36 +18,6 @@ describe('Graphs', function(){
     return el;
   }
 
-  // These are useless right now, delete this if it's still commented out
-  // as of 2014-07-01
-  
-  // describe('npactGraphPage', function(){
-  //   var testProfile = {};
-  //   it('can render', function(){
-  //     $httpBackend.expectGET('../npactweb/static/js/nprofile.json')
-  // 	.respond(200, testProfile);
-  //     make('<div npact-graph-page>');
-  //   });
-  // });
-
-  // describe('npactGraph', function(){
-  //   it('can render', function(){
-  //     make('<div npact-graph>');
-  //   });
-  // });
-
-  // describe('Grapher', function(){
-  //   var g;
-  //   beforeEach(inject(function(Grapher){
-  //     var el = angular.element('<div>');
-  //     g = Grapher({element:el, width:600, height:200});
-  //   }));
-
-  //   it('can create', function(){
-  //     g.redraw();
-  //   });
-  // });
-
   describe('GraphingCalculator', function(){
     var GC, opts = {
       stageHeight:150,
