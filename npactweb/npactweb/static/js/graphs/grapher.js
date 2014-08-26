@@ -19,7 +19,6 @@ angular.module('npact')
       this.colors = opts.colors;
       this.m = opts.chart;
       this.xaxis = opts.xaxis;
-      this.baseOffsetX = 0;
       this.stage.add(this.leftLayer(), this.chartLayer());
       this.stage.batchDraw();
 
@@ -150,7 +149,7 @@ angular.module('npact')
 	      // starts at `gx`. Something due to container coordinate
 	      // system vs stage coordinate system. `pos.y` is not
 	      // similarly affected.
-	      var nextOffset = self.baseOffsetX - (pos.x - gx);
+	      var nextOffset = - (pos.x - gx);
 	      // change position via offsetX
 	      this.offsetX(nextOffset);
 	      // never change position via this return value
@@ -161,8 +160,6 @@ angular.module('npact')
       // match our "scroll"
       g.on('dragstart dragend', function(obj){
 	self.$element.trigger('tooltipHide.npact');
-	self.baseOffsetX = this.offsetX();
-	$log.log('baseOffsetX:', self.baseOffsetX, self.baseOffsetX/(self.zoomLevel * self.xaxis.scaleX) + self.opts.range[0]);
       });
 
       g.on('dragend', function(evt){
@@ -204,7 +201,7 @@ angular.module('npact')
       var zoom = GraphingCalculator.zoom({
 	oldZoom: oldZoom,
 	zoom:this.zoomLevel,
-	offsetX: this.baseOffsetX,
+	offsetX: 0,
 	baseScaleX: this.xaxis.scaleX,
 	start_gn: this.opts.range[0],
 	length_gn: this.xaxis.length,
@@ -240,9 +237,7 @@ angular.module('npact')
       // rescale profiles
       this._profileGroup.scaleX(scaleX);
       // reset baseOffsetX, center on clicked spot
-      this._genomeGroup.offsetX((this.baseOffsetX = zoom.offsetX));
-
-      // TODO: resize the dragging Rect
+      this._genomeGroup.offsetX(zoom.offsetX);
 
       this.stage.batchDraw();
     };
