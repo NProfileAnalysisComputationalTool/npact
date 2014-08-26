@@ -1,13 +1,14 @@
 (function(){
 
   var opts = {
-    basesPerGraph:10000,
-    colorBlindFriendly:false,
-    page:0,
-    graphsPerPage:5,
+    basesPerGraph: 10000,
+    colorBlindFriendly: false,
+    page: 0,
+    graphsPerPage: 5,
     length: 0,
-    profile:null,
-    extracts:{}
+    profile: null,
+    extracts: {},
+    graphSpecs: []
   },
       graphSpecDefaults = {
 	// TODO: determine me dynamically
@@ -28,7 +29,8 @@
 	headerLabelFontsize: 11,
 	headerArrowHeight: 12,
 	headerArrowWidth: 6,
-	headerArrowFontsize: 9
+	headerArrowFontsize: 9,
+	axisTitle: '% GC'
 	
       },
       lineColors = {
@@ -43,7 +45,7 @@
       };
   
   // the `GraphDealer` hands out graph data and processes events
-  function GraphDealer($log, Utils, $q){
+  function GraphDealer($log, Utils, $q, $rootScope){
 
 
     function makeGraphSpec(startBase){      
@@ -53,7 +55,8 @@
 	    startBase: startBase,
 	    endBase: endBase,
 	    extracts: {},
-	    profile: []
+	    profile: [],
+	    headers: []
 	  };
       return angular.extend(
 	spec,
@@ -122,11 +125,8 @@
 	  var startIdx = Math.max(0, sortedIdx(gs.startBase) - 1),
 	      endIdx = Math.min(sortedIdx(gs.endBase) + 1, profile.length - 1);
 
-	  // shallow copy
+	  // shallow copy of the relevant data
 	  gs.profile = profile.slice(startIdx, endIdx);
-	  $log.log('Matched', gs.range, 'to', [startIdx, endIdx],
-		   [profile[startIdx].coordinate,
-		    profile[endIdx].coordinate]);
 	});
 
 	return graphSpecs;
@@ -135,7 +135,10 @@
 
     function attachExtractData(name, graphSpecs){
       // reset the extracts
-      graphSpecs.forEach(function(gs){ gs.extracts[name] = []; });
+      graphSpecs.forEach(function(gs){
+	gs.extracts[name] = [];
+	gs.headers.push({title: name, lineType:'extract'});
+      });
 
       // TODO: use _.sortedIndex to binary search and array.slice to
       // make shallow copies onto the graph specs
@@ -189,6 +192,7 @@
     function redraw(graphSpecs){
       // TODO: tell everyone to redraw
       $log.log('I should redraw', graphSpecs);
+      $rootScope.graphSpecs = graphSpecs;
       return graphSpecs;
     }
 
@@ -219,7 +223,7 @@
 	return onProfileData;
       },
 
-      setExtract:function(name, data){
+      addExtract:function(name, data){
 	$log.log('setExtract', name,  data.length);
 	// save it for later
 	opts.extracts[name] = data;

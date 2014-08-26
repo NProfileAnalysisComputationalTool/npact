@@ -1,13 +1,8 @@
 <div>
   <h2>{{title}}</h2>
-  <div ng-repeat="range in ranges"
-       id="graph{{$index}}"
-       npact-graph style="height:200px;border:1px solid blue;"
-       data="d" range="range"
-       headers="[{id:'orfs', title:'Newly Identified ORFs', lineType:'extract'},
-		{id:'cds', title:'Input file CDS', lineType:'extract'},
-		{id:'hits', title:'Hits', lineType:'hits'} ]"
-       axis-title="'% GC'"
-       colorblind-friendly-colors="false"
+  <div ng-repeat="spec in graphSpecs"
+       id="graph_{{$index}}"
+       npact-graph="spec"
+       style="height:200px;"
        ></div>
 </div>

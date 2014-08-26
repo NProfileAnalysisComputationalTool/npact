@@ -323,7 +323,7 @@ angular.module('npact')
 	    scaleX: xaxis.scaleX,
 	    offsetX: this.opts.range[0]
 	  }),
-	  dataToDraw = _(this.opts.data.profile)
+	  dataToDraw = _(this.opts.profile)
       	    .filter(function(g){
 	      return g.coordinate >= xaxis.start
 		&& g.coordinate <= xaxis.end;

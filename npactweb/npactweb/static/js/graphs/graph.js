@@ -1,100 +1,81 @@
-angular.module('npact')
-  .factory('WidthChecker', function($q, $log, $interval){
-    return function(element, frequency){
-      var hasWidth = $q.defer(),
-	  d1 = new Date(),
-	  widthChecker;
+(function(){
+  function WidthChecker($q, $log, $interval){
+    /**
+     * polls for when the element has a width
+     *
+     * @returns {Promise} the width of the element
+     */
+    function pollForWidth(element, frequency){
+      var d = $q.defer(),
+	  p = d.promise,
+	  t1 = new Date(),
+	  task = $interval(checkForWidth, frequency || 100);
+      // stop polling once we've found a value
+      p.then(function(){$interval.cancel(task);});
+      return p;
       
       function checkForWidth(){
 	var w = element.width();
-	$log.log('T[', new Date() - d1, '] width:', w);
+	// indicate progress via the promise
+	d.notify(new Date() - t1);
 	if(w > 0){
-	  $interval.cancel(widthChecker);
-	  hasWidth.resolve(w);
+	  d.resolve(w);
 	}
-      }      
-      widthChecker = $interval(checkForWidth, frequency || 100);
-      return hasWidth.promise;
+      }
     };
-  })
-  .constant('GraphSettings', {
-    // TODO: determine me dynamically
-    leftPadding:120,
 
-    axisLabelFontsize:11,
-    axisFontcolor:"#444",
-    axisTitleFontsize:20,
-    borderColor:"#444",
-    rightPadding:25,    
-    profileHeight:100,
-    profileTicks:5,
+    return pollForWidth;
+  }
 
-    // header labels and arrows
-    headerSizes:{'extract':30, 'hits':15},    
-    headerLabelPadding:10,    
-    headerLabelFontcolor:"#444",
-    headerLabelFontsize:11,
-    headerArrowHeight:12,
-    headerArrowWidth:6,
-    headerArrowFontsize:9,
-    
-    // profile line colors
-    graphRedColor:"red",
-    graphBlueColor:"blue",
-    graphGreenColor:"green",
-    graphRedColorblind:"rgb(213, 94, 0)",
-    graphBlueColorblind:"rgb(204, 121, 167)",
-    graphGreenColorblind:"rgb(0, 114, 178)"
-  })
-  .directive('npactExtract', function(STATIC_BASE_URL, $log){
-    return {
-      restrict: 'A',
-      scope: { extract:'=npactExtract'},
-      templateUrl:STATIC_BASE_URL+'js/graphs/extract.html'
-    };
-  })
-  .directive('npactGraph', function($log, Grapher, WidthChecker, GraphSettings, GraphDealer){
-
-    
+  function NpactGraph(WidthChecker, $log, Grapher){
     return {
       restrict: 'A',
       scope:{
-	data:'=',
-	range:'=',
-	headers:'=',
-	colorblindFriendlyColors:'=',
-	axisTitle:'='
+	spec: '=npactGraph'
       },
-      link:function(scope, element, attrs){
+      link: function($scope, $element, $attrs){
+	var onOpts = WidthChecker($element).then(graphOpts);
+	$scope.$watch('spec', onSpec);
 
-	// width takes a minute to get sorted, we might be waiting on jquery
-	var p = WidthChecker(element)
-	  .then(function(w){
-	    var opts = angular.extend({
-	      element: element[0],
-	      width: w,
-	      height: element.height(),
-	      onDblClick: function(evt){$log.log('dblclick', evt);}
-	    }, GraphSettings, scope);
-	    return new Grapher(opts);
-	  });
+	function graphOpts(width){
+	  return {
+	    element: $element[0],
+	    width: width,
+	    height: $element.height()
+	  };
+	}
+
+	// TODO: watch for changes in width
+	// http://stackoverflow.com/questions/23044338/window-resize-directive
 	
-	scope.$watch('data.profile', function(newval, oldval){
+	function onSpec(newval, oldval){
 	  if(!newval) return;
-	  // when we have a graph ready, redraw it.
-	  p.then(function(g){
-	    g.redraw();
-	  });
-	});
+	  onOpts.then(_.partial(redraw, newval));
+	}
 
-	scope.$watch('data.cds', function(newval, oldval){
-	  if(!newval) return;
-	  // when we have a graph ready, redraw it.
-	  p.then(function(g){
-	    g.drawCDS(newval);
+	function redraw(spec, opts){
+	  var g = new Grapher(angular.extend({}, spec, opts));
+	  // TODO: make redraw handle extracts
+	  g.redraw();
+	  _.forOwn(spec.extracts, function(value, key){
+	    g.drawCDS(value);
 	  });
-	});
+
+	}
       }
     };
-  })
-;
+  }
+
+  // register everything with angular
+  angular.module('npact')
+    .factory('WidthChecker', WidthChecker)
+    .directive('npactGraph', NpactGraph)
+    .directive('npactExtract', function(STATIC_BASE_URL){
+      return {
+	restrict: 'A',
+	scope: { extract:'=npactExtract'},
+	templateUrl:STATIC_BASE_URL+'js/graphs/extract.html'
+      };
+    })
+  ;
+}());
