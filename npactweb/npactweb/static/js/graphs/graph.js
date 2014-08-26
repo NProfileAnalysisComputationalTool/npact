@@ -7,8 +7,7 @@
       },
       link: function($scope, $element, $attrs){
 	var opts = {
-	  element: $element[0],
-	  height: $element.height()
+	  element: $element[0]
 	};
 	$scope.$watch('spec', onSpec);
 	

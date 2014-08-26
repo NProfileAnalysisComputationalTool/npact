@@ -1,27 +1,30 @@
 (function(){
 
   var graphSpecDefaults = {
-	// TODO: determine me dynamically
-	leftPadding: 120,
-	
-	axisLabelFontsize: 11,
-	axisFontcolor: "#444",
-	axisTitleFontsize: 20,
-	borderColor: "#444",
-	rightPadding: 25,    
-	profileHeight: 100,
-	profileTicks: 5,
-	
-	// header labels and arrows
-	headerSizes:{'extract': 30, 'hits': 15},
-	headerLabelPadding: 10,    
-	headerLabelFontcolor: "#444",
-	headerLabelFontsize: 11,
-	headerArrowHeight: 12,
-	headerArrowWidth: 6,
-	headerArrowFontsize: 9,
-	axisTitle: '% GC'
-	
+    // TODO: determine me dynamically
+    leftPadding: 120,
+
+    axisLabelFontsize: 11,
+    axisFontcolor: "#444",
+    axisTitleFontsize: 20,
+    borderColor: "#444",
+    rightPadding: 25,
+    // TODO: reduce duplication between here and `page.html`
+    height: 200,
+    profileHeight: 100,
+    profileTicks: 5,
+
+
+    // header labels and arrows
+    headerSizes:{'extract': 30, 'hits': 15},
+    headerLabelPadding: 10,
+    headerLabelFontcolor: "#444",
+    headerLabelFontsize: 11,
+    headerArrowHeight: 12,
+    headerArrowWidth: 6,
+    headerArrowFontsize: 9,
+    axisTitle: '% GC'
+
       },
       lineColors = {
 	r: "red",
@@ -33,9 +36,9 @@
 	g: "rgb(204, 121, 167)",
 	b: "rgb(0, 114, 178)"
       };
-  
+
   // the `GraphDealer` hands out graph data and processes events
-  function GraphDealer($log, Utils, $q, $rootScope){
+  function GraphDealer($log, Utils, $q, $rootScope, GraphingCalculator){
 
     var hasProfileData = false,
 	_onProfileData = $q.defer(),
@@ -130,7 +133,7 @@
 	  // TODO: reduce duplication between here and
 	  // `GraphingCalculator.stops`
 	  stopInterval = Utils.orderOfMagnitude(opts.basesPerGraph, -1),
-	  spec = {
+	  spec = angular.extend({
 	    range: [startBase, endBase],
 	    // get some margin in here
 	    startBase: startBase - stopInterval,
@@ -140,8 +143,11 @@
 	    headers: [],
 	    width: width,
 	    colors: opts.colorBlindFriendly ? colorBlindLineColors : lineColors
-	  };
-      return angular.extend(spec, graphSpecDefaults);
+	  }, graphSpecDefaults);
+
+      spec.chart = GraphingCalculator.chart(spec);
+      spec.xaxis = GraphingCalculator.xaxis(spec);
+      return spec;
     }
     
     function makeGraphSpecs(width){

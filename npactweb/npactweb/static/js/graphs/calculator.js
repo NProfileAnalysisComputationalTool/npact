@@ -9,11 +9,11 @@
 	// the line graph, excluding tick marks and axis labels
 	g = {
 	  x: opts.leftPadding,
-	  y: opts.stageHeight - opts.profileHeight
+	  y: opts.height - opts.profileHeight
 	    - opts.axisLabelFontsize // x-axis labels
 	    - 2*opts.profileTicks, // tick marks
 	  h: opts.profileHeight,
-	  w: opts.stageWidth - opts.leftPadding
+	  w: opts.width - opts.leftPadding
 	    - opts.rightPadding
 	},
 	yAxisTickSpacing = g.h / yAxisTicks,

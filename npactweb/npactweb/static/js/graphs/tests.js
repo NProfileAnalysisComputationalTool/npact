@@ -58,8 +58,8 @@ describe('Graphs', function(){
   
   describe('GraphingCalculator', function(){
     var GC, opts = {
-      stageHeight:150,
-      stageWidth:255,
+      height:150,
+      width:255,
       leftPadding: 50,
       rightPadding: 5,
       profileHeight:100,      

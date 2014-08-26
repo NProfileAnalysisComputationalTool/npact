@@ -42,7 +42,7 @@
       // stop polling once we've found a value
       p.then(function(){$interval.cancel(task);});
       return p;
-      
+
       function checkForWidth(){
 	var w = element.width();
 	// indicate progress via the promise
@@ -53,7 +53,6 @@
       }
     };
 
-    
     /**
      * Loop over the list from back to front, asyncronously
      * 

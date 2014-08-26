@@ -15,14 +15,10 @@ angular.module('npact')
 	height: opts.height,
 	width: opts.width
       });
-      // TODO: height should be dynamic
-      opts.stageHeight = this.stage.getHeight();
-      opts.stageWidth = this.stage.getWidth();
 
       this.colors = opts.colors;
-      
-      this.m = GraphingCalculator.chart(opts);
-      this.xaxis = GraphingCalculator.xaxis(opts);
+      this.m = opts.chart;
+      this.xaxis = opts.xaxis;
       this.baseOffsetX = 0;
       this.stage.add(this.leftLayer(), this.chartLayer());
       this.stage.batchDraw();
@@ -128,7 +124,7 @@ angular.module('npact')
 	  layer = new K.Layer({
 	    width: opts.leftPadding,
 	    x:0, y:0,
-	    height: opts.stageHeight
+	    height: opts.height
 	  });
 
       layer.add(this.headerGroup(), this.yAxisGroup());
