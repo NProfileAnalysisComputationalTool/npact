@@ -19,8 +19,41 @@
   var STOP_ITERATING = {};
 
   
-  function Utils($q, $timeout, $log){
+  function Utils($q, $timeout, $log, $interval){
+    // public interface
+    return {
+      STOP_ITERATING: STOP_ITERATING,
+      orderOfMagnitude: orderOfMagnitude,
+      forEachAsync: forEachAsync,
+      widthAvailable: widthAvailable
+    };
 
+    /**
+     * polls for when the element has a width
+     *
+     * @param {Element} element - what element to scan
+     * @returns {Promise} - the width of the element
+     */
+    function widthAvailable(element){
+      var d = $q.defer(),
+	  p = d.promise,
+	  t1 = new Date(),
+	  task = $interval(checkForWidth, 100);
+      // stop polling once we've found a value
+      p.then(function(){$interval.cancel(task);});
+      return p;
+      
+      function checkForWidth(){
+	var w = element.width();
+	// indicate progress via the promise
+	d.notify(new Date() - t1);
+	if(w > 0){
+	  d.resolve(w);
+	}
+      }
+    };
+
+    
     /**
      * Loop over the list from back to front, asyncronously
      * 
@@ -80,12 +113,6 @@
 	$timeout(iterate, opts.delay, false);
 	return p;
     }
-    
-    return {
-      STOP_ITERATING: STOP_ITERATING,
-      orderOfMagnitude: orderOfMagnitude,
-      forEachAsync: forEachAsync
-    };
   }
 
   angular.module('npact')

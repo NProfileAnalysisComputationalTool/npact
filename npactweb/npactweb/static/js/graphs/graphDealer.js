@@ -1,16 +1,6 @@
 (function(){
 
-  var opts = {
-    basesPerGraph: 10000,
-    colorBlindFriendly: false,
-    page: 0,
-    graphsPerPage: 5,
-    length: 0,
-    profile: null,
-    extracts: {},
-    graphSpecs: []
-  },
-      graphSpecDefaults = {
+  var graphSpecDefaults = {
 	// TODO: determine me dynamically
 	leftPadding: 120,
 	
@@ -47,8 +37,95 @@
   // the `GraphDealer` hands out graph data and processes events
   function GraphDealer($log, Utils, $q, $rootScope){
 
+    var hasProfileData = false,
+	_onProfileData = $q.defer(),
+	onProfileData = _onProfileData.promise,
+	_onWidth = $q.defer(),
+	onWidth = _onWidth.promise,
+	pendingRedraws = 0,
+	opts = {
+	  basesPerGraph: 10000,
+	  colorBlindFriendly: false,
+	  page: 0,
+	  graphsPerPage: 5,
+	  length: 0,
+	  profile: null,
+	  extracts: {},
+	  graphSpecs: []
+	};
 
-    function makeGraphSpec(startBase){      
+    // once we have data, load it and rebuild the graphs
+    onProfileData.then(loadProfileData).then(rebuildGraphs);
+
+
+    // public interface
+    return {
+      opts:opts,
+      setProfile:function(profile){
+	$log.log('setProfile', profile.length);
+	_onProfileData.resolve(profile);
+	return onProfileData;
+      },
+
+      addExtract:function(name, data){
+	$log.log('setExtract', name,  data.length);
+	// save it for later
+	opts.extracts[name] = data;
+	// if we've got profile data already, rebuild
+	if(hasProfileData){
+	  // TODO: maybe a simpler way to add extracts to existing
+	  // graphs?
+	  rebuildGraphs();
+	}
+	// if we're still waiting on profile data, then when it hits
+	// this extract will be processed.
+      },
+
+      setColors:function(colorBlindFriendly){
+	$log.log('setColors', arguments);
+	opts.colorBlindFriendly = colorBlindFriendly;
+	// TODO: lighter change here; see if we can update colors
+	// in-place without a full rebuild
+	rebuildGraphs();
+      },
+      setZoom:function(basesPerGraph){
+	$log.log('setZoom', arguments);
+	opts.basesPerGraph = basesPerGraph;
+	rebuildGraphs();
+      },
+      zoomTo: function(){
+	// TODO: figure out a good API for this
+      },
+      panTo: function(oldStartBase, newStartBase){
+	// TODO: find the graph with the old start base
+	// TODO: recalculate graph start/ends
+	// TODO: repartition data
+	// TODO: redraw graphs with new data
+      },
+      hasNextPage: function(){
+	return opts.page < maxPages();
+      },
+      nextPage: function(){
+	$log.log('nextPage', arguments);
+	opts.page++;
+	rebuildGraphs();
+      },
+      hasPreviousPage: function(){ return opts.page > 0;},
+      previousPage: function(){
+	$log.log('previousPage', arguments);
+	opts.page--;
+	rebuildGraphs();
+      },
+      setWidth: function(w){
+	$log.log('setting graph width to', w);
+	// let folks know it's ready
+	_onWidth.resolve(w);
+
+	// TODO: handle changing this after the fact
+      }
+    };
+
+    function makeGraphSpec(startBase, width){      
       var endBase = startBase + opts.basesPerGraph,
 	  // TODO: reduce duplication between here and
 	  // `GraphingCalculator.stops`
@@ -61,19 +138,17 @@
 	    extracts: {},
 	    profile: [],
 	    headers: [],
+	    width: width,
 	    colors: opts.colorBlindFriendly ? colorBlindLineColors : lineColors
 	  };
-      return angular.extend(
-	spec,
-	graphSpecDefaults
-      );
+      return angular.extend(spec, graphSpecDefaults);
     }
     
-    function makeGraphSpecs(){
+    function makeGraphSpecs(width){
       var base = opts.page * opts.basesPerGraph * opts.graphsPerPage;
       return _.range(0, opts.graphsPerPage)
 	.map(function(n){
-	  return makeGraphSpec(base + n*opts.basesPerGraph);
+	  return makeGraphSpec(base + n*opts.basesPerGraph, width);
 	});
     }
 
@@ -95,13 +170,6 @@
       }
       return profile; // enable chaining
     }
-
-    var hasProfileData = false,
-	_onProfileData = $q.defer(),
-	onProfileData = _onProfileData.promise;
-
-    // once we have data, load it and rebuild the graphs
-    onProfileData.then(loadProfileData).then(rebuildGraphs);
 
     /**
      * distribute profile data to the graph specs
@@ -176,11 +244,9 @@
       return Math.ceil(opts.length / opts.basesPerGraph*opts.graphsPerPage);
     }
 
-    var	pendingRedraws = 0;
-
+    
     function redrawRequest(){
       pendingRedraws++;
-
       return function(graphSpecs){
 	pendingRedraws--;
 	if(pendingRedraws == 0){
@@ -202,7 +268,8 @@
 
     function rebuildGraphs(){
       var t1 = new Date();
-      return attachProfileData(makeGraphSpecs())
+      return onWidth.then(makeGraphSpecs)
+	.then(attachProfileData)
 	.then(attachAllExtracts)
 	.then(function(graphSpecs){
 	  return opts.graphSpecs = graphSpecs;
@@ -215,68 +282,7 @@
 	  $log.log('failed to rebuild, resetting state', arguments);
 	  pendingRedraws = 0;
 	});
-
     }
-
-    // public interface
-    return {
-      opts:opts,
-      setProfile:function(profile){
-	$log.log('setProfile', profile.length);
-	_onProfileData.resolve(profile);
-	return onProfileData;
-      },
-
-      addExtract:function(name, data){
-	$log.log('setExtract', name,  data.length);
-	// save it for later
-	opts.extracts[name] = data;
-	// if we've got profile data already, rebuild
-	if(hasProfileData){
-	  // TODO: maybe a simpler way to add extracts to existing
-	  // graphs?
-	  rebuildGraphs();
-	}
-	// if we're still waiting on profile data, then when it hits
-	// this extract will be processed.
-      },
-
-      setColors:function(colorBlindFriendly){
-	$log.log('setColors', arguments);
-	opts.colorBlindFriendly = colorBlindFriendly;
-	// TODO: lighter change here; see if we can update colors
-	// in-place without a full rebuild
-	rebuildGraphs();
-      },
-      setZoom:function(basesPerGraph){
-	$log.log('setZoom', arguments);
-	opts.basesPerGraph = basesPerGraph;
-	rebuildGraphs();
-      },
-      zoomTo: function(){
-	// TODO: figure out a good API for this
-      },
-      panTo: function(oldStartBase, newStartBase){
-	// TODO: find the graph with the old start base
-	// TODO: recalculate graph start/ends
-	// TODO: repartition data
-	// TODO: redraw graphs with new data
-      },
-      hasNextPage: function(){
-	return opts.page < maxPages();
-      },
-      nextPage: function(){
-	$log.log('nextPage', arguments);
-	opts.page++;
-	rebuildGraphs();
-      },
-      hasPreviousPage: function(){ return opts.page > 0;},
-      previousPage: function(){
-	$log.log('previousPage', arguments);
-	opts.page--;
-	rebuildGraphs();
-      }
-    };
   }
 
   angular.module('npact')
