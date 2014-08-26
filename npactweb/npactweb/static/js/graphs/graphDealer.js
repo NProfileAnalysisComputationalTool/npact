@@ -265,10 +265,16 @@
       };
     }
 
+    /**
+     * tell the world to redraw everything
+     */
     function redraw(graphSpecs){
-      // TODO: tell everyone to redraw
-      $log.log('I should redraw', graphSpecs);
       $rootScope.graphSpecs = graphSpecs;
+
+      $rootScope.range = [
+	_.min(graphSpecs, function(gs){return gs.range[0];}).range[0],
+	_.max(graphSpecs, function(gs){return gs.range[1];}).range[1],
+      ];
       return graphSpecs;
     }
 

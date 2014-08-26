@@ -13,6 +13,7 @@
 				      ng-change="GraphDealer.setColors(colorBlindFriendly)" /></label>
   <br/>
 
+  Showing bases {{range[0]}} - {{range[1]}}
   <div>
   <button style="float:left;" ng-disabled="!GraphDealer.hasPreviousPage()"
 	  ng-click="GraphDealer.previousPage()">
@@ -20,6 +21,6 @@
   <button style="float:right;" ng-disabled="!GraphDealer.hasNextPage()"
 	  ng-click="GraphDealer.nextPage()">
     Next Page</button>
-  <div style="clear:both;" ></div>
+  <div style="clear:both;" >  </div>
   </div>
 </div>
