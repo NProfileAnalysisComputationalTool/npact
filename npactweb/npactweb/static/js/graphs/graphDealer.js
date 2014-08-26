@@ -50,10 +50,14 @@
 
     function makeGraphSpec(startBase){      
       var endBase = startBase + opts.basesPerGraph,
+	  // TODO: reduce duplication between here and
+	  // `GraphingCalculator.stops`
+	  stopInterval = Utils.orderOfMagnitude(opts.basesPerGraph, -1),
 	  spec = {
 	    range: [startBase, endBase],
-	    startBase: startBase,
-	    endBase: endBase,
+	    // get some margin in here
+	    startBase: startBase - stopInterval,
+	    endBase: endBase + stopInterval,
 	    extracts: {},
 	    profile: [],
 	    headers: [],
