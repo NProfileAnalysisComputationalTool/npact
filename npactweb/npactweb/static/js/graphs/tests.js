@@ -157,6 +157,13 @@ describe('Graphs', function(){
       });
     });
 
+    it('calculates stops for offset axes', function(){
+      expect(GC.stops(50,10050)).toEqual({
+	interval:1000,
+	stops:[0, 1000, 2000, 3000, 4000, 5000, 6000, 7000, 8000, 9000, 10000, 11000]
+      });
+    });
+
 
     describe('can zoom', function(){
 

@@ -73,18 +73,32 @@
 
   function GraphingCalculator(K, Utils){
 
+    // public interface
+    return {
+      chart:chartMetrics,
+      xaxis:xaxis,
+      alignRectangles:alignRectangles,
+      stops:stops,
+      zoom:zoom
+    };
+
     function stops(a,b){
       var length = b - a,
 	  // get even stops; look for one lower order of magnitude
 	  // than our length - TODO: too many stops for lower ranges
 	  interval = Utils.orderOfMagnitude(length, -1),
-	  // want to capture some margin
-	  start = Math.max(a - interval,0),
-	  end = b+interval;
-      // want to be start/end INCLUSIVE so pad the end
+	  // want to get ticks aligned on `interval`. a and b might
+	  // have weird offsets
+	  start = Math.floor(a/interval)*interval,
+	  end = Math.floor(b/interval)*interval;
+
       return {
 	interval: interval,
-	stops: _.range(start, end+interval, interval)
+	// capture some margin
+	stops: _.range(
+	  Math.max(0, start - interval),
+	  // want to be start/end INCLUSIVE so pad the end
+	  end + 2*interval, interval)
       };
     }
 
@@ -220,14 +234,6 @@
 	offsetX: offset_apx,
 	textScaleX: 1/scaleX
       };
-    };
-
-    return {
-      chart:chartMetrics,
-      xaxis:xaxis,
-      alignRectangles:alignRectangles,
-      stops:stops,
-      zoom:zoom
     };
   }
 

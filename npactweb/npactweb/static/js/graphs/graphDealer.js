@@ -50,6 +50,7 @@
 	  basesPerGraph: 10000,
 	  colorBlindFriendly: false,
 	  page: 0,
+	  offset: 0,
 	  graphsPerPage: 5,
 	  length: 0,
 	  profile: null,
@@ -99,12 +100,7 @@
       zoomTo: function(){
 	// TODO: figure out a good API for this
       },
-      panTo: function(oldStartBase, newStartBase){
-	// TODO: find the graph with the old start base
-	// TODO: recalculate graph start/ends
-	// TODO: repartition data
-	// TODO: redraw graphs with new data
-      },
+      panTo: panTo,
       hasNextPage: function(){
 	return opts.page < maxPages();
       },
@@ -128,6 +124,20 @@
       }
     };
 
+
+    /**
+     * pan all the graphs
+     *
+     * @param {Number} oldStartBase - the start of the pan, in gene space
+     * @param {Number} newStartBase - the end of the pan, in gene space
+     */
+    function panTo(oldStartBase, newStartBase){
+      $log.log('panTo', arguments);
+      var offset = Math.floor(newStartBase - oldStartBase);
+      opts.offset += offset;
+      rebuildGraphs();
+    }
+
     function makeGraphSpec(startBase, width){
       var endBase = startBase + opts.basesPerGraph,
 	  spec = angular.extend({
@@ -148,7 +158,8 @@
     }
 
     function makeGraphSpecs(width){
-      var base = opts.page * opts.basesPerGraph * opts.graphsPerPage;
+      var base = opts.page * opts.basesPerGraph * opts.graphsPerPage
+	    + opts.offset;
       return _.range(0, opts.graphsPerPage)
 	.map(function(n){
 	  return makeGraphSpec(base + n*opts.basesPerGraph, width);
