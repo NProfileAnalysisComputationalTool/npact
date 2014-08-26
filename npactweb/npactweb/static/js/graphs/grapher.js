@@ -292,8 +292,7 @@ angular.module('npact')
     };
     
     GP.xAxisGroup = function(){
-      var profile = this.opts.data.profile,
-	  m = this.m,
+      var m = this.m,
 	  xaxis = this.xaxis,
 	  g = new K.Group({
 	    x: 0, y: m.graph.h + m.graph.y,

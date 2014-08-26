@@ -1,31 +1,229 @@
 angular.module('npact')
   // the `GraphDealer` hands out graph data and processes events
-  .service('GraphDealer', function($log){
+  .factory('GraphDealer', function($log, Utils, $q){
 
     var opts = {
       basesPerGraph:10000,
       colorBlindFriendly:false,
       page:0,
-      graphsPerPage:5
-    };
+      graphsPerPage:5,
+      length: 0,
+      profile:null,
+      extracts:{}
+    },
+	graphSpecDefaults = {
+	  // TODO: determine me dynamically
+	  leftPadding: 120,
+	  
+	  axisLabelFontsize: 11,
+	  axisFontcolor: "#444",
+	  axisTitleFontsize: 20,
+	  borderColor: "#444",
+	  rightPadding: 25,    
+	  profileHeight: 100,
+	  profileTicks: 5,
+	  
+	  // header labels and arrows
+	  headerSizes:{'extract': 30, 'hits': 15},
+	  headerLabelPadding: 10,    
+	  headerLabelFontcolor: "#444",
+	  headerLabelFontsize: 11,
+	  headerArrowHeight: 12,
+	  headerArrowWidth: 6,
+	  headerArrowFontsize: 9
+	  
+	},
+	lineColors = {
+	  graphRedColor: "red",
+	  graphBlueColor: "blue",
+	  graphGreenColor: "green"
+	},
+	colorBlindLineColors = {
+	  graphRedColor: "rgb(213, 94, 0)",
+	  graphBlueColor: "rgb(204, 121, 167)",
+	  graphGreenColor: "rgb(0, 114, 178)"
+	};
+   
+    function makeGraphSpec(startBase){      
+      var endBase = startBase + opts.basesPerGraph,
+	  spec = {
+	    range: [startBase, endBase],
+	    startBase: startBase,
+	    endBase: endBase,
+	    extracts: {},
+	    profile: []
+	  };
+      $log.log('new graph spec', spec.range);
+      return angular.extend(
+	spec,
+	graphSpecDefaults,
+	opts.colorBlindFriendly ? colorBlindLineColors : lineColors
+      );
+    }
+    
+    function makeGraphSpecs(){
+      var base = opts.page * opts.basesPerGraph * opts.graphsPerPage;
+      return _.range(0, opts.graphsPerPage)
+	.map(function(n){
+	  return makeGraphSpec(base + n*opts.basesPerGraph);
+	});
+    }
+   
+    function attachProfileData(graphSpecs){     
+      // assumes the profile is ordered by coordinate from low to high      
+      // eg `[{coordinate: 0}, {coordinate: 10}]`
 
-    // TODO: make graph specification objects, two-way bind them
-    // through `npactGraphPage` into `npactGraph`, make a
-    // `npactGraph.redraw` to draw from scratch.
+      // reset the profiles
+      graphSpecs.forEach(function(gs){ gs.profile = []; });
 
+      if (opts.profile == null) throw 'Need profile data';
+
+      var profile = opts.profile,
+	  len = profile.length;
+
+      // search for the index in our profile where we would insert `c`
+      // and have it still be sorted
+      function sortedIdx(c){
+	return _.sortedIndex(profile, {'coordinate': c}, 'coordinate');
+      }
+      
+      graphSpecs.forEach(function(gs){
+	var startIdx = Math.max(0, sortedIdx(gs.startBase)),	    
+	    endIdx = Math.min(sortedIdx(gs.endBase)+1, len);
+
+	// shallow copy
+	gs.profile = profile.slice(startIdx, endIdx);
+	$log.log('Matched', gs.range, 'to', [startIdx, endIdx],
+		 [profile[startIdx].coordinate,
+		  profile[endIdx].coordinate]);
+      });
+
+      // return as a promise
+      return $q.when(graphSpecs);
+    }
+
+    function attachExtractData(name, graphSpecs){
+      // reset the extracts
+      graphSpecs.forEach(function(gs){ gs.extracts[name] = []; });
+
+      // TODO: use _.sortedIndex to binary search and array.slice to
+      // make shallow copies onto the graph specs
+      return Utils.forEachReverseAsync(opts.extracts[name], function(dataPoint){
+	graphSpecs.forEach(function(gs){
+	  // extract starts in this range?
+	  var startsInRange = dataPoint.start >= gs.startBase
+		&& dataPoint.start <= gs.endBase,
+	      // extract ends in this range?
+	      endsInRange = dataPoint.end >= gs.startBase
+		&& dataPoint.end <= gs.endBase;
+	  if(startsInRange || endsInRange){
+	    gs.extracts[name].push(dataPoint);
+	  }
+	});
+      })
+      // promise resolves as the graphspecs
+	.then(function(){ return graphSpecs;});
+    }
+
+    function attachAllExtracts(graphSpecs){
+      var promises = [];
+      // iterate over the named extracts
+      _.forOwn(opts.extracts, function(value, key, obj){
+	promises.push(attachExtractData(key, graphSpecs));
+      });
+      return $q.all(promises).then(function(){ return graphSpecs;});
+    }
+
+    function maxPages(){
+      return Math.ceil(opts.length / opts.basesPerGraph*opts.graphsPerPage);
+    }
+
+    var	pendingRedraws = 0;
+
+    function redrawRequest(){
+      pendingRedraws++;
+
+      return function(graphSpecs){
+	pendingRedraws--;
+	if(pendingRedraws == 0){
+	  return redraw(graphSpecs);
+	}else{
+	  $log.log('skipping redraw, still have pending work');
+	}
+
+	return graphSpecs;
+      };
+    }
+
+    function redraw(graphSpecs){
+      // TODO: tell everyone to redraw
+      $log.log('I should redraw', graphSpecs);
+      return graphSpecs;
+    }
+
+    function rebuildGraphs(){
+      var t1 = new Date();
+      return attachProfileData(makeGraphSpecs())
+	.then(attachAllExtracts)
+	.then(function(graphSpecs){
+	  return opts.graphSpecs = graphSpecs;
+	})
+	.then(redrawRequest())
+	.then(function(graphSpecs){
+	  $log.log('rebuild:', new Date() - t1, 'ms');
+	  return graphSpecs;
+	}).catch(function(){
+	  $log.log('failed to rebuild, resetting state', arguments);
+	  pendingRedraws = 0;
+	});
+
+    }
+
+
+    
     return {
       opts:opts,
+      setProfile:function(profile){
+	$log.log('setProfile', profile.length, profile[0],
+		 _.last(profile));
+	opts.profile = profile;
+	window.profile = profile;
+	var start = profile[0],
+	    end = _.last(profile);
+
+	opts.startBase = start.coordinate;
+	opts.endBase = end.coordinate;
+	opts.length = opts.endBase - opts.startBase;
+	// find a sensible zoom level
+	var basesPerGraph = opts.length / opts.graphsPerPage;
+	// if we're really short, reset out bases per graph
+	if (basesPerGraph < opts.basesPerGraph) {
+	  opts.basesPerGraph = Utils.orderOfMagnitude(basesPerGraph);
+	}
+
+	return rebuildGraphs();
+      },
+
+      setExtract:function(name, data){
+	$log.log('setExtract', name,  data.length);
+	opts.extracts[name] = data;
+	// TODO: coordinate with `setProfile` better; race condition here
+	// TODO: maybe a simpler way to add extracts to existing graphs?
+	return rebuildGraphs();
+
+      },
       setColors:function(colorBlindFriendly){
 	$log.log('setColors', arguments);
-	// TODO: instruct graphs to redraw themselves with the right colors
+
 	opts.colorBlindFriendly = colorBlindFriendly;
+	// TODO: lighter change here; see if we can update colors
+	// in-place without a full rebuild
+	rebuildGraphs();
       },
       setZoom:function(basesPerGraph){
 	$log.log('setZoom', arguments);
-	// TODO: repartition data into groups of `basesPerGraph`
-	// TODO: redraw graphs with new data
-	// TODO: update pages
 	opts.basesPerGraph = basesPerGraph;
+	rebuildGraphs();
       },
       zoomTo: function(){
 	// TODO: figure out a good API for this
@@ -37,24 +235,22 @@ angular.module('npact')
 	// TODO: redraw graphs with new data
       },
       hasNextPage: function(){
-	return true; // TODO: calculate a "max pages" based on zoom and data
+	return opts.page < maxPages();
       },
       nextPage: function(){
 	$log.log('nextPage', arguments);
-	// TODO: repartition data
-	// TODO: redraw graphs
 	opts.page++;
+	rebuildGraphs();
       },
       hasPreviousPage: function(){ return opts.page > 0;},
       previousPage: function(){
 	$log.log('previousPage', arguments);
-	// TODO: repartition data
-	// TODO: redraw graphs
 	opts.page--;
+	rebuildGraphs();
       }
     };
   })
-  .directive('npactGraphPage', function(STATIC_BASE_URL, $http){
+  .directive('npactGraphPage', function(STATIC_BASE_URL, $http, GraphDealer){
     return {
       restrict:'A',
       templateUrl:STATIC_BASE_URL+'js/graphs/page.html',
@@ -71,9 +267,11 @@ angular.module('npact')
 
 	$http.get(STATIC_BASE_URL+'js/nprofile.json').then(function(res){
 	  scope.d.profile = res.data;
+	  GraphDealer.setProfile(res.data);
 	});
 	$http.get(STATIC_BASE_URL+'js/extract.json').then(function(res){
 	  scope.d.cds = res.data;
+	  GraphDealer.setExtract('Input file CDS', res.data);
 	});
       }
     };

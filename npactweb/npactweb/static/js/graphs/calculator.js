@@ -1,14 +1,84 @@
 (function(){
 
-  function GraphingCalculator(K, $log){
-
-    var log10 = Math.log(10);
+  function Utils($q, $timeout, $log){
+    var log10 = Math.log(10);    
+    var STOP_ITERATING = {};
     
+    return {
+      STOP_ITERATING: STOP_ITERATING,
+      orderOfMagnitude: function(x, exponent){
+	return Math.pow(10, Math.round(Math.log(x) / log10) + (exponent || 0));
+      },
+
+      /**
+       * Loop over the list from back to front, asyncronously
+       * 
+       * stop iteration early with `throw Utils.STOP_ITERATING`
+       * 
+       * @returns {Promise} when the iteration is complete
+       */
+      forEachReverseAsync: function(list, fn){
+	var d = $q.defer(),
+	    p = d.promise;
+
+	if(list === null){
+	  d.reject();
+	  return p;
+	}
+
+	var idx = list.length-1,
+	    opts = {batchSize:512, delay: 0},
+	    batches = 0,
+	    t1 = new Date();
+
+	p.then(function(){
+	  $log.log('iterated over', list.length, 'items in', new Date() - t1, 'ms');
+	});
+
+	function iterate(){
+	  var t1 = new Date();
+	  try{
+	    for(var c = opts.batchSize; idx >= 0 && c >= 0; idx--, c--){
+	      fn(list[idx]);
+	    }
+	  }catch(e){
+	    if(e === STOP_ITERATING){
+	      idx = -1;
+	    }else{
+	      d.reject(e);
+	    }
+	  }
+	  var elapsed = new Date() - t1;
+	  batches++;
+	  if(idx >= 0){
+	    d.notify({batches:batches, idx:idx,
+		      elapsed:elapsed,
+		      batchSize:opts.batchSize});
+	    // if the loop was very fast, double the batch size, if slow, halve it
+	    opts.batchSize = (elapsed < 10)
+	      ? opts.batchSize << 1
+	      : opts.batchSize >> 1;
+	    // queue the next batch
+	    $timeout(iterate, opts.delay, false);
+	  }else{
+	    d.resolve(batches);
+	  }
+	}
+	// start it off soon
+	$timeout(iterate, opts.delay, false);
+	return p;
+      }
+    };
+  }
+
+  function GraphingCalculator(K, $log, Utils){
+
+   
     function stops(a,b){
       var length = b - a,
 	  // get even stops; look for one lower order of magnitude
 	  // than our length - TODO: too many stops for lower ranges
-	  interval = Math.pow(10, Math.round(Math.log(length) / log10) - 1),
+	  interval = Utils.orderOfMagnitude(length, -1),
 	  // want to capture some margin
 	  start = Math.max(a - interval,0),
 	  end = b+interval;
@@ -221,6 +291,7 @@
 
   angular.module('npact')
     .factory('GraphingCalculator', GraphingCalculator)
+    .factory('Utils', Utils)
   ;
 
 }());
