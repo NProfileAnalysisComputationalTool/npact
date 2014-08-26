@@ -26,9 +26,9 @@ angular.module('npact')
 //      this.onDblClick = _.bind(this.onDblClick, this);
     }
     var GP = Grapher.prototype;
-    
+
     GP.drawAxisTicks = function(ticks){
-      var tickOpts = {x: 0, y:0, 
+      var tickOpts = {x: 0, y:0,
 		      stroke: this.opts.borderColor,
 		      strokeScaleEnabled: false};
       return ticks
@@ -67,7 +67,7 @@ angular.module('npact')
 	// * loop over K.Text objects, set width to leftPadding
 
 	defaultTextOpts = {
-	  align: 'right', x: 0, 
+	  align: 'right', x: 0,
 	  fontSize: opts.headerLabelFontsize,
 	  width: opts.leftPadding - opts.headerLabelPadding,
 	  fill:opts.headerLabelFontcolor
@@ -101,7 +101,7 @@ angular.module('npact')
 	rotation:-90,
 	fill:opts.axisFontcolor,
 	fontSize: opts.axisTitleFontsize,
-	text: opts.axisTitle	
+	text: opts.axisTitle
       });
       // center it in the space left of the axes
       var pos = GraphingCalculator.alignRectangles(
@@ -114,7 +114,7 @@ angular.module('npact')
       // we'll be centered
       pos.y += title.getWidth();
       title.position(pos);
-      
+
       g.add(title);
       return g;
     };
@@ -128,7 +128,7 @@ angular.module('npact')
 	  });
 
       layer.add(this.headerGroup(), this.yAxisGroup());
-      
+
       return layer;
     };
 
@@ -137,10 +137,10 @@ angular.module('npact')
       if(upper && value >= upper) return upper;
       return value;
     }
-    
+
     GP.genomeGroup = function(){
       var self = this,
-	  gx = this.m.graph.x,	  
+	  gx = this.m.graph.x,
 	  dragRes = {x: gx, y:0},
 	  g = new K.Group({
 	    x: gx,
@@ -172,7 +172,7 @@ angular.module('npact')
 	// tell the graph dealer
 	GraphDealer.panTo(oldStartBase, newStartBase);
       });
-      
+
       g.on('mouseover', function() {
         document.body.style.cursor = 'pointer';
       });
@@ -192,7 +192,7 @@ angular.module('npact')
       this.$element.trigger('tooltipHide.npact');
       var oldZoom = this.zoomLevel;
       $log.log('onDblClick', evt.evt.layerX - this.m.graph.x);
-      
+
       if(evt.evt.shiftKey){
 	// can't zoom out more
 	if(oldZoom == 1) return;
@@ -200,7 +200,7 @@ angular.module('npact')
       }else{
 	this.zoomLevel++;
       }
-      
+
       var zoom = GraphingCalculator.zoom({
 	oldZoom: oldZoom,
 	zoom:this.zoomLevel,
@@ -228,7 +228,7 @@ angular.module('npact')
 	txt.scaleX(textScaleX);
 	centerXLabel(txt, scaleX);
       });
-      
+
       // rescale extracts
       cdsGroup.scaleX(scaleX);
       // update labels
@@ -236,14 +236,14 @@ angular.module('npact')
 	txt.scaleX(textScaleX);
 	centerExtractLabel(txt, scaleX);
       });
-      
+
       // rescale profiles
       this._profileGroup.scaleX(scaleX);
       // reset baseOffsetX, center on clicked spot
       this._genomeGroup.offsetX((this.baseOffsetX = zoom.offsetX));
 
       // TODO: resize the dragging Rect
-      
+
       this.stage.batchDraw();
     };
 
@@ -262,11 +262,11 @@ angular.module('npact')
 	  border = new K.Rect({
 	    x: m.graph.x,
 	    y: m.graph.y,
-	    width: m.graph.w, 
+	    width: m.graph.w,
 	    height: m.graph.h,
 	    stroke: opts.borderColor
 	  });
-      
+
       l.add(border, this.genomeGroup());
       return l;
     };
@@ -279,7 +279,7 @@ angular.module('npact')
 	  newX = x - w/2;
       txt.x(newX);
     };
-    
+
     GP.xAxisGroup = function(){
       var m = this.m,
 	  xaxis = this.xaxis,
@@ -332,7 +332,7 @@ angular.module('npact')
 
       return this._profileGroup = g;
     };
-    
+
     GP.redraw = function(){
       this._genomeGroup.add(this.xAxisGroup(), this.profileGroup());
       this.stage.batchDraw();
@@ -352,7 +352,7 @@ angular.module('npact')
       pos.x = Math.max(pos.x, arrowBounds.x+1);
       txt.position(pos);
     }
-    
+
     GP.cdsGroup = function(cds){
       var xaxis = this.xaxis, opts = this.opts,
 	  colors = this.colors,
@@ -379,7 +379,7 @@ angular.module('npact')
 	    strokeWidth:1,
 	    strokeScaleEnabled: false
 	  },
-	  
+
 	  arrows = _(cds)
 	    .forEach(function(x){
 	      // color determined by `x.end - 1 % 3`
@@ -428,7 +428,7 @@ angular.module('npact')
 		  // support clip directly
 		  lblGroup = new K.Group({clip:arrowBounds});
 		  ;
-	      
+
 	      lblGroup.add(lbl);
 	      g.add(line, lblGroup);
 	      // now that lbl is on the canvas, we can see what it's
@@ -444,7 +444,7 @@ angular.module('npact')
 	var scope = $rootScope.$new(),
 	    tpl = '<div npact-extract="extract"></div>';
 	scope.extract = evt.target.getAttrs().extract;
-	$el.qtip({	  
+	$el.qtip({
 	  content: {text: $compile(tpl)(scope)},
 	  position:{
 	    my: scope.extract.complement == 0 ? 'top center' : 'bottom center',
@@ -457,7 +457,7 @@ angular.module('npact')
       });
       return this._cdsGroup = g;
     };
-    
+
     GP.drawCDS = function(cds){
       $log.log(this.opts.range, 'drawCDS');
       this._genomeGroup.add(this.cdsGroup(cds));

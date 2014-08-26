@@ -128,7 +128,7 @@
       }
     };
 
-    function makeGraphSpec(startBase, width){      
+    function makeGraphSpec(startBase, width){
       var endBase = startBase + opts.basesPerGraph,
 	  // TODO: reduce duplication between here and
 	  // `GraphingCalculator.stops`
@@ -149,7 +149,7 @@
       spec.xaxis = GraphingCalculator.xaxis(spec);
       return spec;
     }
-    
+
     function makeGraphSpecs(width){
       var base = opts.page * opts.basesPerGraph * opts.graphsPerPage;
       return _.range(0, opts.graphsPerPage)
@@ -183,8 +183,8 @@
      * @param {Array} graphSpecs - list of graph specifications
      * @returns {Promise} list of modified graph specifications
      */
-    function attachProfileData(graphSpecs){     
-      // assumes the profile is ordered by coordinate from low to high      
+    function attachProfileData(graphSpecs){
+      // assumes the profile is ordered by coordinate from low to high
       // eg `[{coordinate: 0}, {coordinate: 10}]`
 
       // reset the profiles
@@ -250,7 +250,7 @@
       return Math.ceil(opts.length / opts.basesPerGraph*opts.graphsPerPage);
     }
 
-    
+
     function redrawRequest(){
       pendingRedraws++;
       return function(graphSpecs){

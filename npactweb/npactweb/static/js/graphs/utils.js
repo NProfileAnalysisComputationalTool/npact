@@ -18,7 +18,7 @@
   // sigil value for quitting forEachAsync
   var STOP_ITERATING = {};
 
-  
+
   function Utils($q, $timeout, $log, $interval){
     // public interface
     return {
@@ -55,9 +55,9 @@
 
     /**
      * Loop over the list from back to front, asyncronously
-     * 
+     *
      * stop iteration early with `throw Utils.STOP_ITERATING`
-     * 
+     *
      * @returns {Promise} when the iteration is complete
      */
     function forEachAsync(list, fn){
@@ -117,5 +117,5 @@
   angular.module('npact')
     .factory('Utils', Utils)
   ;
-  
+
 }())

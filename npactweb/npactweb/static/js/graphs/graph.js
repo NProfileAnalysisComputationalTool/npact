@@ -10,7 +10,7 @@
 	  element: $element[0]
 	};
 	$scope.$watch('spec', onSpec);
-	
+
 	function onSpec(spec, oldval){
 	  if(!spec) return;
 	  var g = new Grapher(angular.extend({}, spec, opts));

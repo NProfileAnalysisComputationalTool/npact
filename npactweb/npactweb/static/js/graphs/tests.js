@@ -53,16 +53,16 @@ describe('Graphs', function(){
     it('calculates order of magnitude with positive offsets', function(){
       expect(U.orderOfMagnitude(1012, 1)).toBe(10000);
     });
-    
+
   });
-  
+
   describe('GraphingCalculator', function(){
     var GC, opts = {
       height:150,
       width:255,
       leftPadding: 50,
       rightPadding: 5,
-      profileHeight:100,      
+      profileHeight:100,
       axisLabelFontsize:10,
       axisTitleFontsize: 20,
       axisTitle: '% GC',
@@ -84,16 +84,16 @@ describe('Graphs', function(){
     it('calculates y-axis ticks', function(){
       var m = GC.chart(opts);
       expect(m.yaxis.ticks).toEqual(
-	[ 
+	[
 	  {x: 45, y: 30, x2: 50, y2: 30},
 	  {x: 45, y: 50, x2: 50, y2: 50},
 	  {x: 45, y: 70, x2: 50, y2: 70},
 	  {x: 45, y: 90, x2: 50, y2: 90},
 	  {x: 45, y: 110, x2: 50, y2: 110},
-	  {x: 45, y: 130, x2: 50, y2: 130} 
+	  {x: 45, y: 130, x2: 50, y2: 130}
 	]);
     });
-    
+
     it('calculates y-axis labels', function(){
       var m = GC.chart(opts);
       expect(m.yaxis.labels).toEqual([
@@ -102,7 +102,7 @@ describe('Graphs', function(){
 	{x: 0, y: 65, width: 40, text: 60},
 	{x: 0, y: 85, width: 40, text: 40},
 	{x: 0, y: 105, width: 40, text: 20},
-	{x: 0, y: 125, width: 40, text: 0} 
+	{x: 0, y: 125, width: 40, text: 0}
       ]);
     });
 
@@ -129,13 +129,13 @@ describe('Graphs', function(){
 	{x: 90, y: 0, x2: 90, y2: 5},
 	{x: 100, y: 0, x2: 100, y2: 5},
 	{x: 110, y: 0, x2: 110, y2: 5}
-	
+
       ]);
     });
 
     it('can align rectangles', function(){
       var pos = GC.alignRectangles(
-	{x: 0, y: 0, width: 100, height: 100}, 
+	{x: 0, y: 0, width: 100, height: 100},
 	{width: 10, height: 10});
       expect(pos).toEqual({x: 45, y: 45});
     });
@@ -150,7 +150,7 @@ describe('Graphs', function(){
 	interval:100,
 	stops: [0, 100, 200, 300, 400, 500, 600, 700, 800, 900, 1000, 1100]
       });
-      
+
       expect(GC.stops(1000,2000)).toEqual({
 	interval:100,
 	stops: [900, 1000, 1100, 1200, 1300, 1400, 1500, 1600, 1700, 1800, 1900, 2000, 2100]
@@ -173,7 +173,7 @@ describe('Graphs', function(){
 	  centerOn_px: 50
 	};
       });
-     
+
       it('after panning left', function(){
 	input.offsetX = 20;
 	input.centerOn_px = 20; // graph coords
@@ -202,7 +202,7 @@ describe('Graphs', function(){
 	  textScaleX:1/2
 	});
       });
-      
+
     });
   });
 

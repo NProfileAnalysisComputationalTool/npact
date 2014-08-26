@@ -28,7 +28,7 @@
 	  x: 0, y: g.y, width: yAxisLabelWidth, height: g.h
 	}
     ;
-    
+
     return {
       graph:g,
       // TODO: return xaxis here
@@ -46,7 +46,7 @@
 	x2: g.x, y2: parseInt(y)
       };
     }
-    
+
     function makeYLabel(lbl, n){
       // center on the tick
       var y = yticks[n].y - (opts.axisLabelFontsize/2);
@@ -54,7 +54,7 @@
 	x: 0, y: parseInt(y),
 	width: yAxisLabelWidth,
 	text: lbl
-      }; 
+      };
     }
   }
 
@@ -70,9 +70,9 @@
     return {x: rect.x + (rect.width/2) - (toAlign.width/2),
 	    y: rect.y + (rect.height/2) - (toAlign.height/2)};
   }
-  
+
   function GraphingCalculator(K, Utils){
-   
+
     function stops(a,b){
       var length = b - a,
 	  // get even stops; look for one lower order of magnitude
@@ -237,4 +237,3 @@
   ;
 
 }());
-
