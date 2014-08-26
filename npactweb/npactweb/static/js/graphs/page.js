@@ -85,6 +85,7 @@ angular.module('npact')
       if (basesPerGraph < opts.basesPerGraph) {
 	opts.basesPerGraph = Utils.orderOfMagnitude(basesPerGraph);
       }
+      return profile; // enable chaining
     }
 
     var hasProfileData = false,
@@ -113,7 +114,7 @@ angular.module('npact')
 
 	graphSpecs.forEach(function(gs){
 	  var startIdx = Math.max(0, sortedIdx(gs.startBase) - 1),
-	      endIdx = Math.min(sortedIdx(gs.endBase) + 1, profile.length);
+	      endIdx = Math.min(sortedIdx(gs.endBase) + 1, profile.length - 1);
 
 	  // shallow copy
 	  gs.profile = profile.slice(startIdx, endIdx);
@@ -210,6 +211,7 @@ angular.module('npact')
       setProfile:function(profile){
 	$log.log('setProfile', profile.length);
 	_onProfileData.resolve(profile);
+	return onProfileData;
       },
 
       setExtract:function(name, data){

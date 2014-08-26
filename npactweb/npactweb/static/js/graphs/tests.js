@@ -18,6 +18,24 @@ describe('Graphs', function(){
     return el;
   }
 
+  describe('GraphDealer', function(){
+    var GD;
+
+    beforeEach(inject(function(GraphDealer){
+      GD = GraphDealer;
+    }));
+
+    it('adjusts basesPerGraph based on profile data', function(){
+      var p = [{coordinate:0}, {coordinate:5000}];
+      expect(GD.opts.basesPerGraph).toBe(10000);
+      expect(GD.opts.length).toBe(0);
+      GD.setProfile(p);
+      $scope.$apply(); // process promises
+      expect(GD.opts.length).toBe(5000);
+      expect(GD.opts.basesPerGraph).toBe(1000);
+    });
+  });
+
   describe('Utils', function(){
     var U;
 
