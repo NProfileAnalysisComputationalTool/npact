@@ -6,7 +6,6 @@ angular.module('npact')
     }
 
     function Grapher(opts){
-      $log.log('new Grapher:', opts.range);
       this.opts = opts;
       this.$element = jQuery(opts.element);
       this.stage = new K.Stage({
@@ -20,8 +19,6 @@ angular.module('npact')
       this.xaxis = opts.xaxis;
       this.stage.add(this.leftLayer(), this.chartLayer());
       this.stage.batchDraw();
-
-//      this.onDblClick = _.bind(this.onDblClick, this);
     }
     var GP = Grapher.prototype;
 
@@ -178,8 +175,9 @@ angular.module('npact')
       g.on('dblclick', _.bind(this.onDblClick, this));
       // need a shape that can be clicked on to allow dragging the
       // entire canvas
-      // TODO: make this width always match the group width, in genespace
-      g.add(new K.Rect({x: -100000, width:1000000, height:1000}));
+      g.add(new K.Rect({x: 0, y:this.m.graph.y,
+			width:this.m.graph.w,
+			height:this.m.graph.h}));
       return this._genomeGroup = g;
     };
 
@@ -408,7 +406,6 @@ angular.module('npact')
     };
 
     GP.drawCDS = function(cds){
-      $log.log(this.opts.range, 'drawCDS');
       this._genomeGroup.add(this.cdsGroup(cds));
     };
     return Grapher;
