@@ -150,91 +150,44 @@
       }
     }
 
-    function zoom(obj){
-      // zoom while retaining our position, so if you zoom in on gene
-      // 2000, after the zoom the mouse cursor is still on 2000, but
-      // the rest of the graph has shifted. Treats the genes as a
-      // number line.
 
-      // s = initial start of the gene space we're showing
-      // L = the low end of the visible graph
-      // H = the high end of the visible graph
-      // Z = where the user is zooming into
-      // o = offset (not shown in the diagrams), how much the user has
-      //     scrolled. Represented as the space between `s` and `L`
+    /**
+     * determine new offset and basesPerGraph for a zoom, retaining
+     * relative position
+     *
+     * so if you zoom in on gene 2000, after the zoom the mouse cursor
+     * is still on 2000, but the rest of the graph has shifted. Treats
+     * the genes as a number line.
+     *
+     * @param {Number} startBase - low end of the graph that we're zooming on
+     * (gene space)
+     * @param {Number} zoomPct - where we're zooming to, as a percent of
+     * the graph
+     * @param {Number} basesPerGraph - how many bases per graph,
+     * indicates current zoom level
+     * @param {Number} offset - the current offset for the graphs
+     * (gene space)
+     * @param {Boolean} zoomingOut - true for zooming out, false for
+     * zooming in
+     * @returns {Object} new offset and basesPerGraph such that we remain focused on the selected gene
+     */
+    function zoom(startBase, zoomPct, basesPerGraph, offset, zoomingOut){
+      //
+      // O = offset from L such that Z is positionally at the same
+      // point on the screen
+      // LH = distance between L and H, a measure of how zoomed in we are
+      //
+      // all units are in gene space
 
-      // -------------------------------------
-      //               BEFORE
-      // -------------------------------------
-      //       s        Z                H # no pan (zero offset)
-      //    s  L        Z                H # panned left (positive offset)
-      //       L   s    Z                H # panned right (negative offset)
-      // -------------------------------------
+      var zoomToBase = startBase + Math.floor(zoomPct*basesPerGraph),
+	  row = Math.floor((startBase - offset)/basesPerGraph),
+	  zoomFactor = zoomingOut ? 2 : 0.5,
+	  new_basesPerGraph = basesPerGraph * zoomFactor,
+	  new_startBase = zoomToBase - Math.floor(new_basesPerGraph * zoomPct),
+	  new_offset = new_startBase - (row*new_basesPerGraph);
 
-      // after the zoom, we want Z still in the same spot on the
-      // screen, with everything else shifting. Offset increases
-
-      // -------------------------------------
-      //               AFTER
-      // -------------------------------------
-      //    s  L        Z                H # no pan
-      //  s    L        Z                H # panned left
-      //       L s      Z                H # panned right
-      // -------------------------------------
-
-      // some algebra (LZ means length between L and Z):
-      // o = L - s
-      // LZ = LH * LZ_pct
-      // ZH = LH * (1-LZ_pct)
-      // L = LH - (1-LZ_pct)*Z
-      // Z = LG * LZ_pct
-
-      // we deal with 3 coordinate systems:
-      //  * gene space (gn suffix)
-      //  * before-zoom graph space (bpx suffix)
-      //  * after-zoom graph space (apx suffix)
-
-      // some aliases
-      var zoomLevel = obj.zoom,
-	  baseScaleX = obj.baseScaleX,
-	  s_gn = obj.start_gn,
-	  // -------------------------------------
-	  // calculate some pre-zoom values
-	  oldScaleX = baseScaleX*obj.oldZoom,
-	  oldLength_gn = obj.length_gn / obj.oldZoom,
-	  oldLength_bpx = oldLength_gn * oldScaleX,
-
-      	  // new scale factor
-	  scaleX = baseScaleX * zoomLevel,
-	  // where theaccount for offset
-	  Z_bpx = obj.centerOn_px + obj.offsetX,
-	  // convert graph space to gene space
-	  Z_gn = (Z_bpx / oldScaleX) + s_gn,
-	  // length of new visible area
-	  LH_gn = obj.length_gn / zoomLevel,
-
-	  // -------------------------------------
-	  // find the pre-zoom length of LZ, as a percentage of LH,
-	  // using graph coordinates
-	  LZ_bpx = obj.centerOn_px,
-	  LH_bpx = oldLength_bpx,
-	  LZ_pct = LZ_bpx / LH_bpx,
-
-	  // -------------------------------------
-	  // based on Z_gn, LH_gn and LZ_pct, find the new offset
-	  LZ_gn = LH_gn * LZ_pct,
-	  L_gn = Z_gn - LZ_gn,
-	  offset_gn = L_gn - s_gn,
-	  // convert gene space to graph space
-	  offset_apx = offset_gn * scaleX
-	  ;
-
-      return {
-	scaleX : scaleX,
-	offsetX: offset_apx,
-	textScaleX: 1/scaleX
-      };
-    };
+      return {offset: new_offset, basesPerGraph: new_basesPerGraph};
+    }
   }
 
 

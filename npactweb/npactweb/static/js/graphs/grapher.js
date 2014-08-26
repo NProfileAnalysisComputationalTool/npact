@@ -8,7 +8,6 @@ angular.module('npact')
     function Grapher(opts){
       $log.log('new Grapher:', opts.range);
       this.opts = opts;
-      this.zoomLevel = 1;
       this.$element = jQuery(opts.element);
       this.stage = new K.Stage({
 	container:opts.element,
@@ -185,61 +184,16 @@ angular.module('npact')
     };
 
     GP.onDblClick = function(evt){
-      // TODO: tell the GraphDealer about the zoom
+      // tell the GraphDealer, they'll sort it out
       this.$element.trigger('tooltipHide.npact');
-      var oldZoom = this.zoomLevel;
-      $log.log('onDblClick', evt.evt.layerX - this.m.graph.x);
 
-      if(evt.evt.shiftKey){
-	// can't zoom out more
-	if(oldZoom == 1) return;
-	this.zoomLevel--;
-      }else{
-	this.zoomLevel++;
-      }
-
-      var zoom = GraphingCalculator.zoom({
-	oldZoom: oldZoom,
-	zoom:this.zoomLevel,
-	offsetX: 0,
-	baseScaleX: this.xaxis.scaleX,
-	start_gn: this.opts.range[0],
-	length_gn: this.xaxis.length,
-	// `layerX` is in stage coords, convert to graph coords
-	centerOn_px: evt.evt.layerX - this.m.graph.x
-      }),
-
-	  xAxisGroup = this._xAxisGroup,
-	  xAxisLabels = xAxisGroup.find('Text'),
-	  cdsGroup = this._cdsGroup,
-	  cdsLabels = cdsGroup.find('Text'),
-	  scaleX = zoom.scaleX,
-	  textScaleX = zoom.textScaleX
+      var zoomOn_px = evt.evt.layerX - this.m.graph.x,
+	  zoomOn_pct = zoomOn_px / this.m.graph.w,
+	  start_gn = this.opts.startBase,
+	  zoomingOut = evt.evt.shiftKey
       ;
 
-
-      // redraw axis with new scale factor
-      xAxisGroup.scaleX(scaleX);
-      // update labels
-      xAxisLabels.map(function(txt){
-	txt.scaleX(textScaleX);
-	centerXLabel(txt, scaleX);
-      });
-
-      // rescale extracts
-      cdsGroup.scaleX(scaleX);
-      // update labels
-      cdsLabels.map(function(txt){
-	txt.scaleX(textScaleX);
-	centerExtractLabel(txt, scaleX);
-      });
-
-      // rescale profiles
-      this._profileGroup.scaleX(scaleX);
-      // reset baseOffsetX, center on clicked spot
-      this._genomeGroup.offsetX(zoom.offsetX);
-
-      this.stage.batchDraw();
+      GraphDealer.zoomTo(start_gn, zoomOn_pct, zoomingOut);
     };
 
     GP.chartLayer = function(){

@@ -97,9 +97,7 @@
 	opts.basesPerGraph = basesPerGraph;
 	rebuildGraphs();
       },
-      zoomTo: function(){
-	// TODO: figure out a good API for this
-      },
+      zoomTo: zoomTo,
       panTo: panTo,
       hasNextPage: function(){
 	return opts.page < maxPages();
@@ -124,6 +122,13 @@
       }
     };
 
+    function zoomTo(startBase, zoomPct, zoomingOut){
+      // TODO: make this a options object
+      var res = GraphingCalculator.zoom(startBase, zoomPct, opts.basesPerGraph, opts.offset, zoomingOut);
+      opts.offset = res.offset;
+      opts.basesPerGraph = res.basesPerGraph;
+      rebuildGraphs();
+    }
 
     /**
      * pan all the graphs
@@ -132,9 +137,9 @@
      * @param {Number} newStartBase - the end of the pan, in gene space
      */
     function panTo(oldStartBase, newStartBase){
-      $log.log('panTo', arguments);
       var offset = Math.floor(newStartBase - oldStartBase);
       opts.offset += offset;
+      $log.log('panTo', opts.offset);
       rebuildGraphs();
     }
 
@@ -204,7 +209,6 @@
       // TODO: reduce duplication between here and
       // `GraphingCalculator.stops`
       return onProfileData.then(function(profile){
-	if (profile == null) throw 'Need profile data';
 
 	graphSpecs.forEach(function(gs){
 	  var startIdx = sortedIdx(gs.startBase - margin) - 1,

@@ -4,6 +4,7 @@ angular.module('npact')
       restrict: 'A',
       templateUrl:STATIC_BASE_URL+'js/graphs/config.html',
       link:function($scope, $element, $attrs){
+	// TODO: don't copy this value here
 	$scope.basesPerGraph = GraphDealer.opts.basesPerGraph;
 	$scope.changeZoom = _.debounce(GraphDealer.setZoom, 500);
 	$scope.GraphDealer = GraphDealer;

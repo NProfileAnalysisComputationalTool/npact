@@ -164,52 +164,22 @@ describe('Graphs', function(){
       });
     });
 
+    function expectZoom(args, offset, basesPerGraph){
+      expect(GC.zoom.apply(null, args))
+	.toEqual({offset: offset,
+		  basesPerGraph: basesPerGraph});
+    }
 
-    describe('can zoom', function(){
+    it('can zoom on the first row', function(){
+      expectZoom([0, 0.5, 10000, 0], 2500, 5000);
+      expectZoom([0, 0.1, 10000, 0], 500, 5000);
+      expectZoom([900, 0.1, 10000, 0], 1400, 5000);
+      expectZoom([0, 0.9, 10000, 0], 4500, 5000);
+    });
 
-      var input;
-
-      beforeEach(function(){
-	input = {
-	  oldZoom: 1,
-	  zoom:2,
-	  baseScaleX: 1, // px/gn
-	  start_gn: 0,
-	  length_gn: 100,
-	  offsetX:0,
-	  centerOn_px: 50
-	};
-      });
-
-      it('after panning left', function(){
-	input.offsetX = 20;
-	input.centerOn_px = 20; // graph coords
-	expect(GC.zoom(input)).toEqual({
-	  scaleX:2,
-	  offsetX:60,
-	  textScaleX:1/2
-	});
-      });
-
-      it('after panning right', function(){
-	input.offsetX = -20;
-	input.centerOn_px = 20; // graph coords
-	expect(GC.zoom(input)).toEqual({
-	  scaleX:2,
-	  offsetX:-20,
-	  textScaleX:1/2
-	});
-      });
-
-      it('with no panning', function(){
-	input.centerOn_px = 20;
-	expect(GC.zoom(input)).toEqual({
-	  scaleX:2,
-	  offsetX:20,
-	  textScaleX:1/2
-	});
-      });
-
+    it('can zoom on the higher rows', function(){
+      expectZoom([10000, 0.5, 10000, 0], 7500, 5000);
+      expectZoom([20000, 0.5, 10000, 0], 12500, 5000);
     });
   });
 
