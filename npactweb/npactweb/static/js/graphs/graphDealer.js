@@ -130,14 +130,11 @@
 
     function makeGraphSpec(startBase, width){
       var endBase = startBase + opts.basesPerGraph,
-	  // TODO: reduce duplication between here and
-	  // `GraphingCalculator.stops`
-	  stopInterval = Utils.orderOfMagnitude(opts.basesPerGraph, -1),
 	  spec = angular.extend({
 	    range: [startBase, endBase],
 	    // get some margin in here
-	    startBase: startBase - stopInterval,
-	    endBase: endBase + stopInterval,
+	    startBase: startBase,
+	    endBase: endBase,
 	    extracts: {},
 	    profile: [],
 	    headers: [],
@@ -190,24 +187,31 @@
       // reset the profiles
       graphSpecs.forEach(function(gs){ gs.profile = []; });
 
+      // want to grab data a little out of range so we can scroll a
+      // little bit
+      var margin = Utils.orderOfMagnitude(opts.basesPerGraph, -1);
+      // TODO: reduce duplication between here and
+      // `GraphingCalculator.stops`
       return onProfileData.then(function(profile){
 	if (profile == null) throw 'Need profile data';
+
+	graphSpecs.forEach(function(gs){
+	  var startIdx = sortedIdx(gs.startBase - margin) - 1,
+	      endIdx = sortedIdx(gs.endBase + margin) + 1;
+
+	  // shallow copy of the relevant data, guarding against
+	  // out-of-bounds indexes
+	  gs.profile = profile.slice(Math.max(startIdx,0),
+				     Math.min(endIdx, profile.length - 1));
+	});
+
+	return graphSpecs;
 
 	// search for the index in our profile where we would insert `c`
 	// and have it still be sorted
 	function sortedIdx(c){
 	  return _.sortedIndex(profile, {'coordinate': c}, 'coordinate');
 	}
-
-	graphSpecs.forEach(function(gs){
-	  var startIdx = Math.max(0, sortedIdx(gs.startBase) - 1),
-	      endIdx = Math.min(sortedIdx(gs.endBase) + 1, profile.length - 1);
-
-	  // shallow copy of the relevant data
-	  gs.profile = profile.slice(startIdx, endIdx);
-	});
-
-	return graphSpecs;
       });
     }
 
@@ -272,8 +276,8 @@
       $rootScope.graphSpecs = graphSpecs;
 
       $rootScope.range = [
-	_.min(graphSpecs, function(gs){return gs.range[0];}).range[0],
-	_.max(graphSpecs, function(gs){return gs.range[1];}).range[1],
+	_(graphSpecs).pluck('startBase').min().value(),
+	_(graphSpecs).pluck('endBase').max().value()
       ];
       return graphSpecs;
     }
