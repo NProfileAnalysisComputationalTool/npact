@@ -18,6 +18,26 @@ describe('Graphs', function(){
     return el;
   }
 
+  describe('Utils', function(){
+    var U;
+
+    beforeEach(inject(function(Utils){
+      U = Utils;
+    }));
+
+    it('calculates order of magnitude', function(){
+      expect(U.orderOfMagnitude(1012)).toBe(1000);
+      expect(U.orderOfMagnitude(1012, -1)).toBe(100);
+    });
+    it('calculates order of magnitude with negative offsets', function(){
+      expect(U.orderOfMagnitude(1012, -1)).toBe(100);
+    });
+    it('calculates order of magnitude with positive offsets', function(){
+      expect(U.orderOfMagnitude(1012, 1)).toBe(10000);
+    });
+    
+  });
+  
   describe('GraphingCalculator', function(){
     var GC, opts = {
       stageHeight:150,

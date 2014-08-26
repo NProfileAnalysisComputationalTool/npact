@@ -108,7 +108,7 @@ angular.module('npact')
 
       // TODO: use _.sortedIndex to binary search and array.slice to
       // make shallow copies onto the graph specs
-      return Utils.forEachReverseAsync(opts.extracts[name], function(dataPoint){
+      return Utils.forEachAsync(opts.extracts[name], function(dataPoint){
 	graphSpecs.forEach(function(gs){
 	  // extract starts in this range?
 	  var startsInRange = dataPoint.start >= gs.startBase
