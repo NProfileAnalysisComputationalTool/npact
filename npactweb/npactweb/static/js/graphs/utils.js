@@ -114,8 +114,56 @@
     }
   }
 
+  /**
+   * parses the Extract format
+   *
+   * The grammar is roughly:
+   *   <extract>    = <name> <address>
+   *   <address>    = <complement> | <range>
+   *   <complement> = complement(<range>)
+   *   <range>      = <base>..<base>
+   *   <base>       = any integer
+   */
+  function ExtractParser(){
+    var re = /([^ ]+) (complement\()?(\d+)\.\.(\d+)/,
+	// some indexes for where our regex groups will show
+	NAME = 1, COMP = 2, START = 3, END = 4;
+
+    return {
+      parse:parse
+    };
+
+    /**
+     * parses many lines
+     *
+     * @param {string} text - multi-line text
+     * @returns {array} extract objects
+     */
+    function parse(text){
+      var lines = text.split('\n');
+      return lines.map(parseLine);
+    }
+
+    /**
+     * parses one line
+     *
+     * @param {string} line - single extract like
+     * @returns {array} extract objects
+     */
+    function parseLine(line){
+      var parts = re.exec(line);
+      return {
+	start: parseInt(parts[START]),
+	end: parseInt(parts[END]),
+	complement: parts[COMP] ? 1 : 0,
+	name: parts[NAME]
+      };
+    }
+  }
+
   angular.module('npact')
     .factory('Utils', Utils)
+    .factory('ExtractParser', ExtractParser)
   ;
 
 }())

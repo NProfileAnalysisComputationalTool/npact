@@ -183,4 +183,35 @@ describe('Graphs', function(){
     });
   });
 
+  describe('ExtractParser', function(){
+    var EXTRACT = ['H-51*G complement(57104..57904)',
+		   'H-53*A complement(58013..59380)',
+		   'H-64-C 71945..72100',
+		   'G-125-G 88111..88275',
+		   'G-124*t 88544..88906',
+		   'H-102-C 112734..112931',
+		   'H-103*a 112864..113175',
+		   'H-115-a complement(129294..129599)',
+		   'H-116-G complement(131053..131163)']
+	  .join('\n'),
+	EP, result;
+
+    beforeEach(inject(function(ExtractParser){
+      EP = ExtractParser;
+      result = EP.parse(EXTRACT);
+    }));
+
+    it('can parse many', function(){
+      expect(result.length).toBe(9);
+    });
+
+    it('can parse a line', function(){
+      expect(result[2])
+	.toEqual({name: 'H-64-C', start: 71945, end: 72100, complement:0});
+    });
+    it('can parse a complement', function(){
+      expect(result[0])
+	.toEqual({name: 'H-51*G', start: 57104, end: 57904, complement:1});
+    });
+  });
 });
