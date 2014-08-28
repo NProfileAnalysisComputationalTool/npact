@@ -77,12 +77,12 @@
 
 
   <script type="text/javascript">
-    jQuery(document).ready( function(){
-        progress.init('{{statusurl}}');
-    });
-    angular.module('npact').constant('config',  JSON.parse('{{config_json}}'));
-    angular.module('npact').constant('STATUS_BASE_URL', '{{status_base}}');
-    angular.module('npact').constant('STATIC_BASE_URL', '{{STATIC_URL}}');
+    angular.module('npact')
+      .constant('STATUS_BASE_URL', '{{status_base}}')
+      .constant('KICKSTART_BASE_URL', '{{kickstart_base}}')
+      .constant('FETCH_URL', '{{fetch_base}}')
+      .constant('ACGT_GAMMA_FILE_LIST_URL', '{{acgt_gamma_base}}')
+      .constant('STATIC_BASE_URL', '{{STATIC_URL}}');
   </script>
 </div>
 

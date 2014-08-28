@@ -175,28 +175,29 @@ def run_frame(request, path):
 
     """
     assert_clean_path(path, request)
-    email = request.GET.get('email')
 
-    config = build_config(path, request)
-    results = kickstart(request, path, config)
-    #results._make(v and getrelpath(v) for v in results)
-
-    reconfigure_url = reverse('config', args=[path])
-    reconfigure_url += "?" + urlencode_config(config)
     return render_to_response(
         'processing.html',
         {'status_base': reverse('runstatus', args=['']),
-         'reconfigure_url': reconfigure_url,
-         'email': email},
+         'kickstart_base': reverse('kickstart', args=[path]),
+         'fetch_base': reverse('raw', args=['']),
+         'acgt_gamma_base': reverse('acgt_gamma_file_list', args=[''])},
         context_instance=RequestContext(request))
 
 
-def kickstart(request, path, config):
+def kickstart(request, path):
+    assert_clean_path(path, request)
+    config = build_config(path, request)
+
+    # at the moment we always want PDF
+    config['pdf_output'] = True
+
+    reconfigure_url = reverse('config', args=[path])
+    reconfigure_url += "?" + urlencode_config(config)
+
     email = request.GET.get('email')
-    if email:
-        config['pdf_output'] = True
     client.ensure_daemon()
-    results = main.process(config, executor=client.get_server())
+    config = main.process('allplots', config, executor=client.get_server())
     if email:
         target_file = results.pdf_filename or results.combined_ps_name
         assert target_file, \
@@ -212,7 +213,15 @@ def kickstart(request, path, config):
         task = util.Task(send_email, email, config, run_link, result_link)
         eid = client.enqueue(task, after=[target_file])
         logger.info("Scheduled email to %r with jobid: %s", email, eid)
-    return results
+
+    output = {}
+    for k, v in config.iteritems():
+        if v.startswith(settings.MEDIA_ROOT):
+            v = v[len(settings.MEDIA_ROOT):]
+            v.lstrip("/")
+        output[k] = v
+
+    return HttpResponse(json.dumps(output), content_type="application/json")
 
 
 def send_email(email_address, config, run_link, result_link):
@@ -241,47 +250,24 @@ def send_email(email_address, config, run_link, result_link):
 
 def run_status(request, jobid):
     "This checks on the status of jobid"
-    config = None
-    result = {}
+    result = {'tid': jobid}
     status = 200
-
     try:
-        ready = client.ready(jobid)
+        result['ready'] = client.ready(jobid)
     except NoSuchTaskError:
-        result['message'] = 'Unknown task identifier. Please retry.'
-        status = 500
+        result['message'] = 'Unknown task identifier.'
+        status = 404
     except Exception:
         result['message'] = 'Fatal error.'
         status = 500
         logger.exception("Error getting job status. %r", jobid)
 
-    if status != 200:
-        # something has already gone wrong.
-        return HttpResponse(json.dumps(result), status=status)
+    return HttpResponse(json.dumps(result),
+                        status=status, content_type="application/json")
 
-    if not ready:
-        result['steps'] = client.log_tail(jobid, 1)
-    else:
-        try:
-            config = client.result(jobid)
-        except NoSuchTaskError:
-            result['message'] = 'Unknown task identifier. Please retry.'
-            status = 500
-        except Exception:
-            result['message'] = 'Fatal error.'
-            status = 500
-            logger.exception("Error getting job result. %r", jobid)
 
-    if config:
-        pdf_url = get_raw_url(request,
-                              getrelpath(config.get('pdf_filename') or
-                                         config.get('combined_ps_name')))
-        result['next'] = 'results'
-        result['download_url'] = pdf_url
-
-        ago = config.get('acgt_gamma_output')
-        if ago:
-            result['files'] = [get_raw_url(request, os.path.join(ago, v))
-                               for v in os.listdir(ago)]
-
-    return HttpResponse(json.dumps(result), status=status)
+def acgt_gamma_file_list(request, acgt_gamma_output):
+    acgt_gamma_output = getabspath(acgt_gamma_output)
+    files = map(getrelpath, acgt_gamma_output.listdir())
+    return HttpResponse(json.dumps(files),
+                        status=200, content_type="application/json")

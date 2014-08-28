@@ -30,7 +30,13 @@ def plan(config, executor):
         rconfig, hash = get_hash(config)
         target_file = parsing.derive_filename(config, hash, 'genes')
         config[OUTPUTKEY] = target_file
-        return enqueue(_extract, executor, rconfig, target_file)
+
+        # TODO: Also produce a JSON version of this file.
+        #config['Input file CDS'] = target_file + '.json'
+        #enqueue(extract_as_json, executor, config, config['Input File CDS'])
+        jobs = enqueue(_extract, executor, rconfig, target_file)
+
+        return jobs
     else:
         raise InvalidGBKException()
 

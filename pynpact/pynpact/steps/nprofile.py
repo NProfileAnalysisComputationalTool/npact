@@ -5,8 +5,9 @@
 from __future__ import absolute_import
 import logging
 import sys
+import json
 
-
+from path import path
 from pynpact import binfile
 from pynpact import capproc, parsing
 from pynpact.util import Hasher, reducedict
@@ -21,6 +22,7 @@ BIN = binfile('nprofile')
 
 KEYS = ['nucleotides', 'length', 'window_size', 'step', 'period', 'filename']
 OUTPUTKEY = 'File_list_of_nucleotides_in_200bp windows'
+JSONOUTPUTKEY = 'nprofileData'
 
 
 def plan(config, executor):
@@ -37,7 +39,11 @@ def plan(config, executor):
     hash = h.hexdigest()
     target = parsing.derive_filename(config, hash, 'nprofile')
     config[OUTPUTKEY] = target
-    return enqueue(_nprofile, executor, rconfig, target)
+    config[JSONOUTPUTKEY] = target + '.json'
+    jobs = enqueue(_nprofile, executor, rconfig, target)
+    enqueue(_nprofile_to_json, executor, {OUTPUTKEY: target},
+            config[JSONOUTPUTKEY], after=[target])
+    return jobs
 
 
 @producer()
@@ -49,3 +55,20 @@ def _nprofile(config, out):
     capproc.capturedCall(
         cmd, stdout=out, stderr=sys.stderr,
         logger=logger, check=True)
+
+
+def parse_nprofile(ifile):
+    # Read the file in and split the fields on space
+    nprofile_lines = [l.split() for l in path(ifile).lines(retain=False)]
+    # convert the strings to numbers
+    data = [(int(c), float(x), float(y), float(z))
+            for (c, x, y, z) in nprofile_lines]
+    return data
+
+
+@producer
+def _nprofile_to_json(config, out):
+    keys = ['coordinate', 'r', 'g', 'b']
+    data = parse_nprofile(config[OUTPUTKEY])
+    data = [dict(zip(keys, d)) for d in data]
+    json.dump(data, out)

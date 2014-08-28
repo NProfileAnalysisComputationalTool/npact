@@ -29,9 +29,7 @@ def resolve_verb(verb):
     return mod.plan
 
 
-def process(verb, filename, config=None, executor=None, outputdir=None):
-    if config is None:
-        config = parsing.initial(filename, outputdir=outputdir)
+def process(verb, config, executor=None, outputdir=None):
     assert executor
     planner = resolve_verb(verb)
     planner(config, executor)
@@ -61,8 +59,9 @@ def getexecutor(name):
 
 
 def run_cmdline(gbkfile, executorName):
+    config = parsing.initial(gbkfile)
     with getexecutor(executorName) as executor:
-        config = process('allplots', gbkfile, executor=executor)
+        config = process('allplots', config, executor=executor)
         jid = config.get('pdf_filename') or config.get('combined_ps_name')
         if not pathlib(jid).exists():
             logging.info("Work scheduled, waiting")

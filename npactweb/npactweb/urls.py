@@ -11,13 +11,14 @@ npact_patterns = \
              url(r'^downloads$', direct_to_template,
                  {'template': 'downloads.html'}, name='downloads'),
              url(r'^efetch/(\d+)', 'start.efetch', name="efetch"),
-             url(r'^config/(.+\.gbk?)', 'run.config', name="config"),
-             url(r'^run/(.+\.gbk?)', 'run.run_frame', name="run"),
-             url(r'^runstatus/(.+)', 'run.run_status', name='runstatus'),
+             url(r'^config/(.+)', 'run.config', name="config"),
+             url(r'^run/(.+)', 'run.run_frame', name="run"),
+             url(r'^runstatus/(.*)', 'run.run_status', name='runstatus'),
+             url(r'^kickstart/(.*)', 'run.kickstart', name='kickstart'),
+             url(r'^acgt_gamma_file_list/(.*)', 'run.acgt_gamma_file_list', name='acgt_gamma_file_list'),
              url(r'^(run|config)^', 'view_none'),
              url(r'^raw/(?P<path>.*)$', 'static_serve_wrapper', name='raw'),
-             url(r'^management', 'management.view', name='management'),
-    )
+             url(r'^management', 'management.view', name='management'))
 
 urlpatterns = patterns('', ('^npact/', include(npact_patterns)))
 

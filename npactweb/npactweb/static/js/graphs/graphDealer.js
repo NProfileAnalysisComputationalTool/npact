@@ -85,7 +85,8 @@
 	return onProfileData;
       },
 
-      addExtract:function(name, data){
+      addExtract:function(opts){
+        var name = opts.name, data = opts.data;
 	$log.log('setExtract', name,  data.length);
 	// save it for later
 	opts.extracts[name] = data;
