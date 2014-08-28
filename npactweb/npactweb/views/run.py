@@ -3,7 +3,6 @@ import logging
 import os
 import os.path
 import json
-from datetime import datetime
 
 from django import forms
 from django.conf import settings
@@ -17,44 +16,50 @@ from django.template.loader import get_template
 
 from pynpact import prepare, util
 from pynpact import main
-from pynpact.softtimeout import Timeout
 
 from npactweb import assert_clean_path, getabspath, getrelpath
 from npactweb.middleware import RedirectException
 
 from taskqueue import client, NoSuchTaskError
 
-
-
 # Get an instance of a logger
 logger = logging.getLogger(__name__)
 
 
-
-
 def get_raw_url(request, path):
-    #return request.build_absolute_uri(reverse('raw', path))
+    # return request.build_absolute_uri(reverse('raw', path))
+    # TODO: DEPRECATE in favor of get_result_link
+    if path.startswith('/'):
+        path = getrelpath(path)
+    return reverse('raw', args=[path])
+
+
+def get_result_link(path):
     if path.startswith('/'):
         path = getrelpath(path)
     return reverse('raw', args=[path])
 
 
 def get_ti(size):
-    return forms.TextInput(attrs={'size':size})
+    return forms.TextInput(attrs={'size': size})
+
 
 class ConfigForm(forms.Form):
     first_page_title = forms.CharField(widget=get_ti(40))
     following_page_title = forms.CharField(required=False, widget=get_ti(40))
-    length=forms.IntegerField(required=True, min_value=0,
-                              widget=get_ti(8))
-    nucleotides=forms.MultipleChoiceField(choices=[(i,i) for i in ['a','c','g','t']],
-                                          widget=forms.CheckboxSelectMultiple())
-    skip_prediction=forms.BooleanField(required=False)
-    significance=forms.ChoiceField(choices=prepare.significance_levels, required=False,
-                                   label="Prediction Significance")
-    start_base=forms.IntegerField()
-    end_base=forms.IntegerField()
-    alternate_colors=forms.BooleanField(required=False, label="Alternative colors")
+    length = forms.IntegerField(required=True, min_value=0,
+                                widget=get_ti(8))
+    nucleotides = forms.MultipleChoiceField(
+        choices=[(i, i) for i in ['a', 'c', 'g', 't']],
+        widget=forms.CheckboxSelectMultiple())
+    skip_prediction = forms.BooleanField(required=False)
+    significance = forms.ChoiceField(
+        choices=prepare.significance_levels, required=False,
+        label="Prediction Significance")
+    start_base = forms.IntegerField()
+    end_base = forms.IntegerField()
+    alternate_colors = forms.BooleanField(
+        required=False, label="Alternative colors")
     email = forms.EmailField(required=False)
 
     def clean(self):
@@ -62,12 +67,14 @@ class ConfigForm(forms.Form):
         start = cleaned_data.get('start_base')
         end = cleaned_data.get('end_base')
         if start and end and start > end:
-            raise forms.ValidationError("End page must be greater than or equal to start page.")
+            raise forms.ValidationError(
+                "End page must be greater than or equal to start page.")
         return cleaned_data
+
 
 def get_display_items(request, config):
     yield ('Filename', config['basename'])
-    for key in ['date','length','description']:
+    for key in ['date', 'length', 'description']:
         if config.get(key):
             yield key, config.get(key)
 
@@ -82,25 +89,28 @@ def config(request, path):
         form = ConfigForm(request.POST)
         if form.is_valid():
             logger.info("Got clean post, running.")
-            url = reverse('run', args=[path]) + "?" + urlencode(form.cleaned_data, True)
+            url = reverse('run', args=[path]) \
+                  + "?" + urlencode(form.cleaned_data, True)
             return HttpResponseRedirect(url)
     else:
         form = ConfigForm(initial=config)
 
-    for key,field in form.fields.items():
+    for key, field in form.fields.items():
         if key in prepare.CONFIG_HELP_TEXT:
             field.help_text = prepare.CONFIG_HELP_TEXT[key]
         elif settings.DEBUG:
             logger.error("Help text missing for config form field: %r", key)
 
-    return render_to_response('config.html',
-                              {'form':form, 'parse_data':config,
-                               'def_list_items': get_display_items(request,config)},
-                               context_instance=RequestContext(request))
+    return render_to_response(
+        'config.html', {'form': form, 'parse_data': config,
+                        'def_list_items': get_display_items(request, config)},
+        context_instance=RequestContext(request))
 
-#Variables, mostly for debugging, that aren't exposed anywhere but
-#that if present in the request should be added to the config
+
+# Variables, mostly for debugging, that aren't exposed anywhere but
+# that if present in the request should be added to the config
 MAGIC_PARAMS = ['raiseerror', 'force']
+
 
 def build_config(path, request):
     "Tries to build the config dictionary for the given path"
@@ -112,7 +122,8 @@ def build_config(path, request):
         messages.error(request, str(e))
         raise RedirectException(reverse('start'))
     except:
-        logger.exception("Error parsing gbk: %r", getabspath(path, raise_on_missing=False))
+        logger.exception(
+            "Error parsing gbk: %r", getabspath(path, raise_on_missing=False))
         messages.error(request,
                        "There was a problem loading file '%s', "
                        "please try again or try a different record." % path)
@@ -121,11 +132,11 @@ def build_config(path, request):
     cf = ConfigForm(request.REQUEST)
     for f in cf.visible_fields():
         try:
-            v=f.field.clean(f.field.to_python(f.data))
+            v = f.field.clean(f.field.to_python(f.data))
             if v:
                 logger.debug("Including %r:%r from request.", f.name, v)
                 config[f.name] = v
-        except forms.ValidationError, ve:
+        except forms.ValidationError:
             pass
         except:
             logger.exception("Error with %r", f.name)
@@ -152,39 +163,84 @@ def urlencode_config(config, exclude=None):
         keys = set(keys) - set(exclude)
     return urlencode(util.reducedict(config, keys), True)
 
+
 def run_frame(request, path):
-    """This is the main processing page. However, that page is just
-    frame in which ajax requests spur the actual processing"""
+    """This is the main processing page.
+
+    Rather this is the frame of the main processing page, a lot of the
+    detail is done in javascript on the client.
+
+    In here we kickstart the computation and serve down set of jobids
+    for the client to work with.
+
+    """
     assert_clean_path(path, request)
-    config = build_config(path, request)
-    jobid = kickstart(request, path, config)
     email = request.GET.get('email')
 
+    config = build_config(path, request)
+    results = kickstart(request, path, config)
+    #results._make(v and getrelpath(v) for v in results)
+
+    reconfigure_url = reverse('config', args=[path])
+    reconfigure_url += "?" + urlencode_config(config)
+    return render_to_response(
+        'processing.html',
+        {'status_base': reverse('runstatus', args=['']),
+         'reconfigure_url': reconfigure_url,
+         'email': email},
+        context_instance=RequestContext(request))
+
+
+def kickstart(request, path, config):
+    email = request.GET.get('email')
     if email:
-        results_link = reverse('run', args=[path]) + '?' + urlencode_config(config, exclude=['email'])
-        results_link = request.build_absolute_uri(results_link)
-        
-        
-        # the config dictionary at the end of the process is what is
-        # returned by the above job, will be passed as the first
-        # argument to the function called by client.after: send_email
-        email_jobid = client.after(jobid, send_email, [results_link, email])
-        logger.debug("Schedule email to %r with jobid: %s", email, email_jobid)
+        config['pdf_output'] = True
+    client.ensure_daemon()
+    results = main.process(config, executor=client.get_server())
+    if email:
+        target_file = results.pdf_filename or results.combined_ps_name
+        assert target_file, \
+            "Configured for email but didn't get emailable file."
+        # The direcect download link for the PS or PDF file.
+        result_link = request.build_absolute_uri(
+            get_result_link(target_file))
+        # build path back to run screen.
+        run_link = reverse('run', args=[path])
+        run_link += '?' + urlencode_config(config, exclude=['email'])
+        run_link = request.build_absolute_uri(run_link)
+
+        task = util.Task(send_email, email, config, run_link, result_link)
+        eid = client.enqueue(task, after=[target_file])
+        logger.info("Scheduled email to %r with jobid: %s", email, eid)
+    return results
 
 
-    
-    #TODO: we could wait a tiny amount of time here to see if the job is already done.
+def send_email(email_address, config, run_link, result_link):
+    # config is the result of running the process, needs to be first parameter
+    try:
+        logger.debug("Task completed; sending email to %r", email_address)
+        from django.core.mail import EmailMultiAlternatives
+        subject = 'NPACT results ready for "{0}"'.format(
+            config['first_page_title'])
+        plaintext = get_template('email-results.txt')
+        htmly = get_template('email-results.html')
 
-    full_path = reverse('runstatus',args=[jobid])
-    reconfigure_url = reverse('config', args=[path]) + "?" + urlencode_config(config)
-    return render_to_response('processing.html',
-                              {'statusurl': full_path,
-                               'reconfigure_url': reconfigure_url,
-                               'email': email,
-                               },
-                              context_instance=RequestContext(request))
+        d = Context({'keep_days': settings.ATIME_DEFAULT,
+                     'result_link': result_link,
+                     'run_link': run_link})
+
+        text_content = plaintext.render(d)
+        html_content = htmly.render(d)
+        msg = EmailMultiAlternatives(subject, text_content, to=[email_address])
+        msg.attach_alternative(html_content, "text/html")
+        msg.send(fail_silently=False)
+        logger.debug("Finished sending email.")
+    except:
+        logger.exception("Failed sending email to %r", email_address)
+
 
 def run_status(request, jobid):
+    "This checks on the status of jobid"
     config = None
     result = {}
     status = 200
@@ -194,13 +250,13 @@ def run_status(request, jobid):
     except NoSuchTaskError:
         result['message'] = 'Unknown task identifier. Please retry.'
         status = 500
-    except Exception,e:
+    except Exception:
         result['message'] = 'Fatal error.'
         status = 500
         logger.exception("Error getting job status. %r", jobid)
 
     if status != 200:
-        #something has already gone wrong.
+        # something has already gone wrong.
         return HttpResponse(json.dumps(result), status=status)
 
     if not ready:
@@ -211,7 +267,7 @@ def run_status(request, jobid):
         except NoSuchTaskError:
             result['message'] = 'Unknown task identifier. Please retry.'
             status = 500
-        except Exception,e:
+        except Exception:
             result['message'] = 'Fatal error.'
             status = 500
             logger.exception("Error getting job result. %r", jobid)
@@ -229,107 +285,3 @@ def run_status(request, jobid):
                                for v in os.listdir(ago)]
 
     return HttpResponse(json.dumps(result), status=status)
-
-
-### This isn't used anymore (in favor of runstatus). Not deleted yet
-### in case we want to try to keep this branch as a fallback path in
-### case the processing daemon isn't running.
-# def run_step(request, path):
-#     """Invoked via ajax, runs part of the process with a softtimeout until finished."""
-#     assert_clean_path(path, request)
-#     gbp,config,result = None,None,None
-#     status=200
-
-#     try:
-#         config = request.session.get(path)
-#         #the frame is supposed to ensure this is in session.
-#         if not config:
-#             return HttpResponse('Session Timeout, please try again.', status=500)
-#         gbp = main.GenBankProcessor(getabspath(path), config=config, timeout=4)
-#     except:
-#         logger.exception("Error setting up run_step")
-#         return HttpResponse('ERROR', status=500)
-
-#     try:
-#         pspath = gbp.process()
-#         logger.debug("Finished processing.")
-#         pspath = getrelpath(pspath)
-#         #url = reverse('results', args=[psname]) + encode_config(config, path=path)
-#         result = {'next':'results',
-#                   'download_url': get_raw_url(request, pspath),
-#                   'steps': gbp.timer.steps}
-
-#     except Timeout, pt:
-#         result = {'next':'process',
-#                   'steps': pt.steps,
-#                   }
-#     except:
-#         logger.exception("Error in run_step")
-#         result = {'next':'ERROR', 'steps': gbp.timer.steps}
-#         status=500
-
-#     try:
-#         ago = config.get('acgt_gamma_output')
-#         if ago:
-#             result['files'] = [get_raw_url(request, os.path.join(ago,v))
-#                                for v in os.listdir(ago)]
-#         # files = set([get_raw_url(request, v)
-#         #              for (k,v) in config.items()
-#         #              if v and (k in gbp.AP_file_keys)])
-
-#     except:
-#         logger.exception("Error building file list.")
-
-#     return HttpResponse(json.dumps(result), status=status)
-
-
-def results(request, path):
-    """Serve a results page."""
-    assert_clean_path(path, request)
-
-    download_link = None
-    try:
-        getabspath(path)
-        download_link=get_raw_url(request, path)
-    except IOError:
-        messages.error(request,
-                       "We're sorry but that file no longer exists. We "
-                       "delete old results periodically to save space on"
-                       " the server. Please try running the analysis again.")
-
-    return_url = get_return_url(request)
-
-    return render_to_response('results.html',
-                              {'download_link': download_link,
-                               'return_url': return_url},
-                              context_instance=RequestContext(request))
-
-
-def kickstart(request, path, config):
-
-    #TODO: Some logic here to see if they're already running a job and
-    #propose cancelling it
-
-    jobid = client.enqueue(main.process_all, [getabspath(path), config])
-    return jobid
-
-def send_email(config, results_link, email_address):
-    #config is the result of running the process, needs to be first parameter
-    try:
-        logger.debug("Task completed; sending email to %r", email_address)
-        from django.core.mail import EmailMultiAlternatives
-        subject = 'NPACT results ready for "{0}"'.format(config['first_page_title'])
-        plaintext = get_template('email-results.txt')
-        htmly     = get_template('email-results.html')
-
-        d = Context({ 'keep_days': settings.ATIME_DEFAULT,
-                      'results_link': results_link})
-
-        text_content = plaintext.render(d)
-        html_content = htmly.render(d)
-        msg = EmailMultiAlternatives(subject, text_content, to=[email_address])
-        msg.attach_alternative(html_content, "text/html")
-        msg.send(fail_silently=False)
-        logger.debug("Finished sending email.")
-    except:
-        logger.exception("Failed sending email to %r", to_address)

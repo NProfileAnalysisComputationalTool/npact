@@ -1,9 +1,11 @@
 import time
 
+
 class Timeout(Exception):
     "Exception raised by SoftTimer to indicate computation has taken too long."
     def __init__(self, **args):
         self.__dict__.update(args)
+
 
 class SoftTimer(object):
     """This class keeps track of how long it has been around and a

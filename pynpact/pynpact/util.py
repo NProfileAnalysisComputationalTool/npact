@@ -1,50 +1,81 @@
-import os, os.path
+import errno
+import os
+import os.path
 import logging
 import time
-import errno
 import hashlib
 import tempfile
 from contextlib import contextmanager
 from functools import wraps
+from path import path as pathlib
 
 
 def reducehashdict(dict, keys):
     """pull the given keys out of the dictionary, return the reduced
     dictionary and the sha1 hash of that set of key values.
     """
-    outdict= {}
+    outdict = {}
     h = hashlib.sha1()
-    #We go through in sorted order to ensure stability of the ordering
-    #between runs.
+    # We go through in sorted order to ensure stability of the
+    # ordering between runs.
     for k in sorted(keys):
         val = dict.get(k)
         if val is not None:
             h.update(k)
             h.update(str(val))
-            outdict[k]=val
+            outdict[k] = val
 
     if len(outdict):
-        return outdict,h.hexdigest()
+        return outdict, h.hexdigest()
     else:
-        return outdict,None
+        return outdict, None
 
-def reducedict(dict, keys):
+
+def reducedict(dict_, keys):
     out = {}
     for k in keys:
-        if dict.has_key(k):
-            out[k] = dict[k]
+        if k in dict_:
+            out[k] = dict_[k]
     return out
 
-def hashdict(dict):
+
+def hashdict(dict_):
     h = hashlib.sha1()
-    for k in sorted(dict.keys()):
-        val = dict.get(k)
+    for k in sorted(dict_.keys()):
+        val = dict_.get(k)
         if val is not None:
             h.update(k)
             h.update(str(val))
     return h.hexdigest()
 
 
+class Hasher(object):
+    def __init__(self):
+        self.state = hashlib.sha1()
+
+    def hashdict(self, dict_):
+        for k in sorted(dict_.keys()):
+            val = dict_.get(k)
+            if val is not None:
+                self.state.update(k)
+                self.state.update(str(val))
+        return self
+
+    def hashfiletime(self, filename):
+        self.state.update(str(os.path.getmtime(filename)))
+        return self
+
+    def hashlist(self, lst):
+        for item in lst:
+            self.state.update(str(item))
+        return self
+
+    def hash(self, str_):
+        self.state.update(str_)
+        return self
+
+    def hexdigest(self):
+        return self.state.hexdigest()
 
 def ensure_dir(dir, logger=None):
     if not os.path.exists(dir):
@@ -59,24 +90,25 @@ def ensure_dir(dir, logger=None):
             #os.stat, but I can do so from the command line python
             #just fine.
             if os.path.exists(dir):
-                if logger: logger.debug("Erred, already exists: e.errno: %s",e.errno)
+                if logger:
+                    logger.debug("Erred, already exists: e.errno: %s", e.errno)
                 return
             else:
                 raise
 
 
-def withDir(dir, fn, *args,**kwargs):
+def withDir(dir, fn, *args, **kwargs):
     olddir = os.getcwd()
     try:
         os.chdir(dir)
-        return fn(*args,**kwargs)
+        return fn(*args, **kwargs)
     finally:
         os.chdir(olddir)
 
 
 def pprint_bytes(bytes):
     suffix = 'B'
-    bytes= float(bytes)
+    bytes = float(bytes)
     if bytes >= 1024:
         bytes = bytes / 1024
         suffix = 'KB'
@@ -89,8 +121,7 @@ def pprint_bytes(bytes):
     if bytes >= 1024:
         bytes = bytes / 1024
         suffix = 'TB'
-    return '%.2f%s' % (bytes,suffix)
-
+    return '%.2f%s' % (bytes, suffix)
 
 
 def which(program):
@@ -109,82 +140,91 @@ def which(program):
 
     return None
 
+
 def stream_to_handle(stream, handle, bufsize=8192):
-    bytes=0
+    bytes = 0
     while True:
         buf = stream.read(bufsize)
-        if buf == "":  break #EOF
+        if buf == "": break  # EOF
         bytes += len(buf)
         handle.write(buf)
     return bytes
 
+
 def stream_to_file(stream, path, bufsize=8192):
-    if hasattr(path,'write'):
+    if hasattr(path, 'write'):
         return stream_to_handle(stream, path, bufsize)
     else:
         with open(path, "wb") as h:
             return stream_to_handle(stream, h, bufsize)
 
 
-
-
 @contextmanager
-def mkstemp_overwrite(destination, conflict_overwrite=True, logger=None,
-                      cleanup=True, **kwargs):
+def mkstemp_rename(destination, **kwargs):
     """For writing to a temporary file and then move it ontop of a
     (possibly) existing file only when finished.  This enables us to
     perform long running operations on a file that other people might
-    be using and let everyone else see a consistent version
+    be using and let everyone else see a consistent version.
 
- * conflict_overwrite=True: whether or not to overwrite the file if
-   it's been modified in the intermediate time.
- * logger=None: if provided log information to it.
- * cleanup=True: ensure the tempfile is delete when we exit the
-   function (e.g. an error or conflict)
- * other args are passed to tempfile.mkstemp
+    * other args are passed to tempfile.mkstemp
 
-Example:
-with mkstemp_overwrite('foobar.txt') as f:
-   #long time intensive processing
-   f.write('stuff\n')
+    Example::
 
+        with mkstemp_rename('foobar.txt') as f:
+            f.write('stuff\n')
 
     """
-
-    mtime1 = mtime2 = None
-    if os.path.exists(destination):
-        mtime1 = os.path.getmtime(destination)
     kwargs.setdefault('dir', os.path.dirname(destination))
 
-    (fd,path) = tempfile.mkstemp(**kwargs)
+    (fd, path) = tempfile.mkstemp(**kwargs)
+    path = pathlib(path)
     try:
-        filelike = os.fdopen(fd,'wb')
+        filelike = os.fdopen(fd, 'wb')
         yield filelike
         filelike.close()
-
-        if os.path.exists(destination):
-            mtime2 = os.path.getmtime(destination)
-
-        if mtime1 != mtime2 and logger:
-            logger.warning("Potential conflict on %r, overwrite: %s; ts1:%s, ts2:%s",
-                               destination, conflict_overwrite, mtime1, mtime2)
-
-        if conflict_overwrite or mtime1 == mtime2:
-            #TODO: permissions?
-            os.rename(path, destination)
+        path.rename(destination)
     finally:
-        if cleanup and os.path.exists(path):
-            if logger:
-                logger.info("Cleaning up leftover tempfile %r", path)
-            os.remove(path)
+        path.remove_p()
+
+
+@contextmanager
+def mkdtemp_rename(destination, **kwargs):
+    """A wrapper for tempfile.mkdtemp that always cleans up.
+
+    This wrapper sets defaults based on the class values."""
+    dest = pathlib(destination).normpath()
+    kwargs.setdefault('dir', dest.parent)
+    tmppath = pathlib(tempfile.mkdtemp(**kwargs))
+    try:
+        yield tmppath
+        try:
+            tmppath.rename(dest)
+        except OSError as e:
+            if e.errno == errno.EEXIST:
+                # I don't think we'll ever get here.
+                dest.rmtree_p()
+                tmppath.rename(dest)
+            else:
+                raise
+    finally:
+        tmppath.rmtree_p()
+
+
+def replace_ext(base, newext):
+    base = pathlib(base)
+    if newext[0] == '.':
+        newext = newext[1:]
+    return base.stripext() + '.' + newext
 
 
 def is_outofdate(filename, *dependencies):
     """Return true if the file is missing or not newer than all of its dependencies."""
-    if not os.path.exists(filename): return True
+    if not os.path.exists(filename):
+        return True
 
     mtime = os.path.getmtime(filename)
     return any(os.path.getmtime(d) > mtime for d in dependencies if d)
+
 
 def derivative_filename(base, part, replace_ext=True, outputdir=None):
     """Build the filename of a derivative product of the original
@@ -202,13 +242,15 @@ def derivative_filename(base, part, replace_ext=True, outputdir=None):
 
     return os.path.join(outputdir, filename + part)
 
+
 def safe_produce_new(outfilename, func, force=False, dependencies=[], **kwargs):
     logger = kwargs.get('logger')
     if force or is_outofdate(outfilename, *dependencies):
         if logger:
-            logger.debug("Regenerating, checked:%d force:%r", len(dependencies), force)
+            logger.debug(
+                "Regenerating, checked:%d force:%r", len(dependencies), force)
 
-        with mkstemp_overwrite(outfilename,**kwargs) as f:
+        with mkstemp_rename(outfilename, **kwargs) as f:
             func(f)
     return outfilename
 
@@ -225,7 +267,51 @@ def log_time(logger=logging, level=logging.INFO):
     return decorator
 
 
-# Copright (c) 2011  Accelerated Data Works
+class Task(object):
+    """Small object to hold state for a function call to happen later.
+
+    The point of this is to be a pickable closure looking thing.
+
+    E.g.
+
+        def adder(a,b):
+            return a + b
+
+        Task(adder, 1, 2)() == 3
+    """
+    func = None
+    args = None
+    kwargs = None
+
+    def __init__(self, func, *args, **kwargs):
+        self.func = func
+        self.args = args
+        self.kwargs = kwargs
+
+    def __call__(self):
+        return self.func(*self.args, **self.kwargs)
+
+
+def delay(fn):
+    """Create a Task out of the target function(and arguments)
+
+    I.e. make the target function serializable.
+
+    E.g.
+
+       delay(sum)([1, 2])
+
+    results in a callable Task object that can be serialized.
+
+       delay(sum)([1, 2])() == 3
+    """
+    @wraps(fn)
+    def wrapper(*args, **kwargs):
+        return Task(fn, *args, **kwargs)
+    return wrapper
+
+
+# Copright (c) 2011,2012,2013,2014  Accelerated Data Works
 # All rights reserved.
 
 # Redistribution and use in source and binary forms, with or without

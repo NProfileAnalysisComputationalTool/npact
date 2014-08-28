@@ -41,9 +41,11 @@ def cleanup_existing():
         logging.info("Removing existing virtual environment")
         shutil.rmtree(vedir)
 
+
 def init_virtualenv():
     logging.info("Creating virtualenvironment")
-    virtualenv_support_dir = os.path.abspath(os.path.join(pwd, "lib", "virtualenv_support"))
+    virtualenv_support_dir = os.path.abspath(
+        os.path.join(pwd, "lib", "virtualenv_support"))
     ret = subprocess.call(["python", "virtualenv.py",
                            "--extra-search-dir=%s" % virtualenv_support_dir,
                            "--prompt=(npact)",
@@ -55,15 +57,15 @@ def init_virtualenv():
         exit(ret)
 
     logging.debug("Installing libraries")
-    ret = subprocess.call([os.path.join(vedir, 'bin', 'pip'), "install",
-                           "--index-url=''",
-                           "--requirement",os.path.join(pwd,"requirements.txt")],
-                          cwd=pwd)
+    cmd = [os.path.join(vedir, 'bin', 'pip'), "install",
+           "--index-url=''",
+           "--requirement", os.path.join(pwd, "requirements.txt")]
+    ret = subprocess.call(cmd, cwd=pwd)
     if ret:
         logging.critical("Failed installing libraries from requirements.txt")
         exit(ret)
 
-        
+
 def create_aux_directories():
     if not os.path.exists('webroot'):
         os.makedirs('webroot')
