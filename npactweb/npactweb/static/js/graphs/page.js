@@ -12,13 +12,15 @@ angular.module('npact')
     };
   })
 
-  .controller('npactGraphPageCtrl', function($scope, KICKSTART_BASE_URL, GraphDealer, $window, Fetcher, npactConstants) {
+  .controller('npactGraphPageCtrl', function($scope, GraphDealer, Fetcher, npactConstants) {
 
     $scope.miscFiles = [];
     $scope.graphHeight = npactConstants.graphSpecDefaults.height;
 
-    Fetcher.rawFile(KICKSTART_BASE_URL + $window.location.search)
+    // start it up
+    Fetcher.kickstart()
       .then(function(config) {
+	// got config, request the first round of results
         $scope.title = config.first_page_title;
         Fetcher.nprofile(config).then(GraphDealer.setProfile);
         Fetcher.inputFileCds(config)
@@ -44,7 +46,7 @@ angular.module('npact')
       });
   })
 
-  .service('Fetcher', function(StatusPoller, $http, FETCH_URL, ACGT_GAMMA_FILE_LIST_URL) {
+  .service('Fetcher', function(StatusPoller, $http, FETCH_URL, ACGT_GAMMA_FILE_LIST_URL, KICKSTART_BASE_URL, $window) {
 
     /**
      * download contents from any url
@@ -62,7 +64,9 @@ angular.module('npact')
 
     this.rawFile = rawFile;
     this.fetchFile = fetchFile;
-
+    this.kickstart = function(){
+      return rawFile(KICKSTART_BASE_URL + $window.location.search);
+    };
     this.nprofile = function(config) {
       return StatusPoller.start(config['nprofileData'])
         .then(fetchFile);
