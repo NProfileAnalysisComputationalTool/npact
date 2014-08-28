@@ -12,31 +12,29 @@ angular.module('npact')
     };
   })
 
-  .controller('npactGraphPageCtrl', function($scope, $http, KICKSTART_BASE_URL, GraphDealer, $window, Fetcher, ExtractParser, npactConstants) {
+  .controller('npactGraphPageCtrl', function($scope, KICKSTART_BASE_URL, GraphDealer, $window, Fetcher, npactConstants) {
 
     $scope.miscFiles = [];
     $scope.graphHeight = npactConstants.graphSpecDefaults.height;
 
-    $http.get(KICKSTART_BASE_URL + $window.location.search)
+    Fetcher.rawFile(KICKSTART_BASE_URL + $window.location.search)
       .then(function(config) {
         $scope.title = config.first_page_title;
         Fetcher.nprofile(config).then(GraphDealer.setProfile);
         Fetcher.inputFileCds(config)
-          .then(ExtractParser.parse)
           .then(function(data) {
             GraphDealer.addExtract({name: 'Input file CDS', data: data});
           });
 
         Fetcher.acgtGammaFileList(config).then(function(fileList) {
           $scope.miscFiles.push.apply($scope.miscFiles, fileList);
-          Fetcher.rawFile(config['File_of_new_CDSs'])
-            .then(ExtractParser.parse)
+          Fetcher.fetchFile(config['File_of_new_CDSs'])
             .then(function(data) {
               GraphDealer.addExtract({name: 'Newly Identified ORFs', data: data});
             });
 
           //TODO: Hits line: config['File_of_G+C_coding_potential_regions']
-          // Fetcher.rawFile(config['File_of_G+C_coding_potential_regions'])
+          // Fetcher.fetchFile(config['File_of_G+C_coding_potential_regions'])
           //   .then(hitsParser)
           //   .then(function(data) {
           //     //TODO: GraphDealer.addHits
@@ -46,33 +44,33 @@ angular.module('npact')
       });
   })
 
-  .service('Fetcher', function(StatusPoller, $http, GraphDealer, FETCH_URL, ACGT_GAMMA_FILE_LIST_URL) {
-    function rawFile(path) {
-      var url = FETCH_URL + path;
+  .service('Fetcher', function(StatusPoller, $http, FETCH_URL, ACGT_GAMMA_FILE_LIST_URL) {
+    function rawFile(url) {
       return $http.get(url)
         .then(function(res) {
           return res.data;
         });
     };
+
+    function fetchFile(path){
+      return rawFile(FETCH_URL + path);
+    }
     this.rawFile = rawFile;
+    this.fetchFile = fetchFile;
 
     this.nprofile = function(config) {
       return StatusPoller.start(config['nprofileData'])
-        .then(rawFile);
+        .then(fetchFile);
     };
     this.inputFileCds = function(config) {
       return StatusPoller.start(config['Input file CDS'])
-        .then(rawFile);
+        .then(fetchFile);
     };
 
     this.acgtGammaFileList = function(config) {
       return StatusPoller.start(config['acgt_gamma_output'])
-        .then(function(x) {
-          var url = ACGT_GAMMA_FILE_LIST_URL + config['acgt_gamma_output'];
-          return $http.get(url)
-            .then(function(res) {
-              return res.data;
-            });
+        .then(function(path) {
+          return rawFile(ACGT_GAMMA_FILE_LIST_URL + path);
         });
     };
   })

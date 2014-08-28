@@ -45,7 +45,7 @@
   }
 
   // the `GraphDealer` hands out graph data and processes events
-  function GraphDealer($log, Utils, $q, $rootScope, GraphingCalculator, npactConstants){
+  function GraphDealer($log, Utils, $q, $rootScope, GraphingCalculator, npactConstants, ExtractParser){
 
     var hasProfileData = false,
 	_onProfileData = $q.defer(),
@@ -86,8 +86,8 @@
       },
 
       addExtract:function(opts){
-        var name = opts.name, data = opts.data;
-	$log.log('setExtract', name,  data.length);
+        var name = opts.name, data = ExtractParser.parse(opts.data);
+	$log.log('addExtract', name,  data.length);
 	// save it for later
 	opts.extracts[name] = data;
 	// if we've got profile data already, rebuild
