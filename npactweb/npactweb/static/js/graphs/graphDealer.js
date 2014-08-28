@@ -15,13 +15,11 @@
 	borderColor: "#444",
 	rightPadding: 25,
 	height: 200,
-	// TODO: determine me dynamically
-	profileHeight: 100,
 	profileTicks: 5,
 
 
 	// header labels and arrows
-	headerSizes:{'extract': 30, 'hits': 15},
+	headerY: 5,
 	headerLabelPadding: 10,
 	headerLabelFontcolor: "#444",
 	headerLabelFontsize: 11,
@@ -40,7 +38,9 @@
 	r: "rgb(213, 94, 0)",
 	g: "rgb(204, 121, 167)",
 	b: "rgb(0, 114, 178)"
-      }
+      },
+      // how much vertical space to leave for different kinds of headers
+      headerSizes:{'extract': 30, 'hits': 15}
     };
   }
 
@@ -156,8 +156,6 @@
     function makeGraphSpec(startBase, width){
       var endBase = startBase + opts.basesPerGraph,
 	  spec = angular.extend({
-	    range: [startBase, endBase],
-	    // get some margin in here
 	    startBase: startBase,
 	    endBase: endBase,
 	    extracts: {},
@@ -166,11 +164,17 @@
 	    width: width,
 	    colors: opts.colorBlindFriendly
 	      ? npactConstants.colorBlindLineColors
-	      : npactConstants.lineColors
+	      : npactConstants.lineColors,
+
+	    // how much space should be taken by the line graph alone
+	    get profileHeight(){
+	      // TODO: reduce duplication between here and GraphingCalculator
+	      return this.height - this.headerY - this.axisLabelFontsize
+		- 2*this.profileTicks;
+	    },
+	    get range() {return [this.startBase, this.endBase];}
 	  }, npactConstants.graphSpecDefaults);
 
-      spec.chart = GraphingCalculator.chart(spec);
-      spec.xaxis = GraphingCalculator.xaxis(spec);
       return spec;
     }
 
@@ -244,9 +248,18 @@
 
     function attachExtractData(name, graphSpecs){
       // reset the extracts
+      var headerHeight = npactConstants.headerSizes['extract'];
+
       graphSpecs.forEach(function(gs){
 	gs.extracts[name] = [];
-	gs.headers.push({title: name, lineType:'extract'});
+	gs.headers.push({
+	  text: name,
+	  lineType:'extract',
+	  y: gs.headerY,
+	  height: headerHeight
+	});
+	// increment where the next header will start
+	gs.headerY += headerHeight;
       });
 
       // TODO: use _.sortedIndex to binary search and array.slice to
@@ -296,6 +309,10 @@
      */
     function redraw(graphSpecs){
       $rootScope.graphSpecs = graphSpecs;
+      graphSpecs.forEach(function(spec){
+	spec.chart = GraphingCalculator.chart(spec);
+	spec.xaxis = GraphingCalculator.xaxis(spec);
+      });
 
       opts.visible = {
 	startBase : _(graphSpecs).pluck('startBase').min().value(),

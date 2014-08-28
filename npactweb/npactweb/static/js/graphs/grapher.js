@@ -50,11 +50,6 @@ angular.module('npact')
 	// from top to bottom
       var opts = this.opts,
 	  g = new K.Group(),
-	  labels = opts.headers.map(function(hdr){
-	    return {
-	      text:hdr.title,
-	      height:opts.headerSizes[hdr.lineType]};
-	  }),
 	// TODO: derive opts.leftPadding
 	// * add all labels
 	// * loop over K.Text objects, find max width
@@ -67,18 +62,15 @@ angular.module('npact')
 	  width: opts.leftPadding - opts.headerLabelPadding,
 	  fill:opts.headerLabelFontcolor
 	},
-	  y = 0,
-	  lbls =  labels.map(function(lbl){
-	    var txtOpts = angular.extend({
-	      y: y
-	    }, defaultTextOpts, lbl);
-	    var txt = new K.Text(txtOpts);
-	    y += parseInt(lbl.height);
-	    return txt;
-	  });
+	  lbls =  opts.headers.map(makeLabel);
 
       addMany(g, lbls);
       return g;
+
+      function makeLabel(header){
+	var txtOpts = angular.extend({}, defaultTextOpts, header);
+	return new K.Text(txtOpts);
+      }
     };
 
     GP.yAxisGroup = function(){
@@ -300,17 +292,17 @@ angular.module('npact')
       txt.position(pos);
     }
 
-    GP.cdsGroup = function(cds){
+    GP.cdsGroup = function(cds, name){
       var xaxis = this.xaxis, opts = this.opts,
 	  colors = this.colors,
+	  header = _.find(opts.headers, {text:name}, name),
 	  g = new K.Group({
 	    x: 0, y: 0,
 	    scaleX: xaxis.scaleX,
 	    offsetX: this.opts.startBase
 	  }),
 	  colorNames = 'rgb',
-	  // TODO: lookup where this should live in the header space
-	  y = 30,
+	  y = header.y,
 	  ahHalfHeight = opts.headerArrowHeight/2,
 	  compY = y + opts.headerArrowHeight,
 	  ahw = opts.headerArrowWidth/xaxis.scaleX,
@@ -405,8 +397,8 @@ angular.module('npact')
       return this._cdsGroup = g;
     };
 
-    GP.drawCDS = function(cds){
-      this._genomeGroup.add(this.cdsGroup(cds));
+    GP.drawCDS = function(cds, name){
+      this._genomeGroup.add(this.cdsGroup(cds, name));
     };
     return Grapher;
   });

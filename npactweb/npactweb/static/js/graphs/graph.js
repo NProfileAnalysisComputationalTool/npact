@@ -18,7 +18,7 @@
 	  // TODO: make redraw handle extracts
 	  g.redraw();
 	  _.forOwn(spec.extracts, function(value, key){
-	    g.drawCDS(value);
+	    g.drawCDS(value, key);
 	  });
 	}
       }
