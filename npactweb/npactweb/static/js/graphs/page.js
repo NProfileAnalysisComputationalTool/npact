@@ -1,27 +1,28 @@
 angular.module('npact')
-  .directive('npactGraphPage', function(STATIC_BASE_URL, GraphDealer, Utils, npactConstants) {
+  .directive('npactGraphPage', function(STATIC_BASE_URL, Utils, GraphDealer) {
     return {
       restrict: 'A',
       templateUrl: STATIC_BASE_URL + 'js/graphs/page.html',
       controller: 'npactGraphPageCtrl',
       link: function($scope, $element, $attrs) {
-        $scope.graphHeight = npactConstants.graphSpecDefaults.height;
-        // TODO: watch for changes in width
-        // http://stackoverflow.com/questions/23044338/window-resize-directive
+	// TODO: watch for changes in width
+	// http://stackoverflow.com/questions/23044338/window-resize-directive
         Utils.widthAvailable($element).then(GraphDealer.setWidth);
       }
     };
   })
 
-  .controller('npactGraphPageCtrl', function($scope, $http, KICKSTART_BASE_URL, STATUS_BASE_URL, GraphDealer, StatusPoller, $window) {
-    function extractParser(data){ return data; }
+  .controller('npactGraphPageCtrl', function($scope, $http, KICKSTART_BASE_URL, GraphDealer, $window, Fetcher, ExtractParser, npactConstants) {
+
     $scope.miscFiles = [];
+    $scope.graphHeight = npactConstants.graphSpecDefaults.height;
+
     $http.get(KICKSTART_BASE_URL + $window.location.search)
       .then(function(config) {
         $scope.title = config.first_page_title;
         Fetcher.nprofile(config).then(GraphDealer.setProfile);
         Fetcher.inputFileCds(config)
-          .then(extractParser)
+          .then(ExtractParser.parse)
           .then(function(data) {
             GraphDealer.addExtract({name: 'Input file CDS', data: data});
           });
@@ -29,7 +30,7 @@ angular.module('npact')
         Fetcher.acgtGammaFileList(config).then(function(fileList) {
           $scope.miscFiles.push.apply($scope.miscFiles, fileList);
           Fetcher.rawFile(config['File_of_new_CDSs'])
-            .then(extractParser)
+            .then(ExtractParser.parse)
             .then(function(data) {
               GraphDealer.addExtract({name: 'Newly Identified ORFs', data: data});
             });
@@ -77,7 +78,7 @@ angular.module('npact')
   })
 
 
-  .service('StatusPoller', function(STATUS_BASE_URL, $q, $http) {
+  .service('StatusPoller', function(STATUS_BASE_URL, $q, $http, $timeout) {
     var POLLTIME = 2500;
 
     function poller(tid, deferred) {
