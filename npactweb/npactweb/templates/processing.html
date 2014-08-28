@@ -78,15 +78,10 @@
 
   <script type="text/javascript">
     jQuery(document).ready( function(){
-        progress.init({status_base: {{status_base}},
-                       results: {
-                           {% for k in results._fields %}
-                           '{{k}}': '{% getrelpath(getattr(results, k))%}',
-                           {% endfor %}
-                       }
-                      });
+        progress.init('{{statusurl}}');
     });
-
+    angular.module('npact').constant('config',  JSON.parse('{{config_json}}'));
+    angular.module('npact').constant('STATUS_BASE_URL', '{{status_base}}');
     angular.module('npact').constant('STATIC_BASE_URL', '{{STATIC_URL}}');
   </script>
 </div>
