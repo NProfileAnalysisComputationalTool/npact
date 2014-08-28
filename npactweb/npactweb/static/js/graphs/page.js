@@ -45,16 +45,21 @@ angular.module('npact')
   })
 
   .service('Fetcher', function(StatusPoller, $http, FETCH_URL, ACGT_GAMMA_FILE_LIST_URL) {
+
+    /**
+     * download contents from any url
+     */
     function rawFile(url) {
-      return $http.get(url)
-        .then(function(res) {
-          return res.data;
-        });
+      return $http.get(url).then(function(res) { return res.data; });
     };
 
+    /**
+     * download contents from a "fetch" path
+     */
     function fetchFile(path){
       return rawFile(FETCH_URL + path);
     }
+
     this.rawFile = rawFile;
     this.fetchFile = fetchFile;
 
