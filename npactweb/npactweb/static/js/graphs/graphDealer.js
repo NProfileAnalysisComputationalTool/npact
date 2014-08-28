@@ -86,18 +86,22 @@
       },
 
       addExtract:function(opts){
-        var name = opts.name, data = ExtractParser.parse(opts.data);
-	$log.log('addExtract', name,  data.length);
-	// save it for later
-	opts.extracts[name] = data;
-	// if we've got profile data already, rebuild
-	if(hasProfileData){
-	  // TODO: maybe a simpler way to add extracts to existing
-	  // graphs?
-	  rebuildGraphs();
-	}
-	// if we're still waiting on profile data, then when it hits
-	// this extract will be processed.
+        var name = opts.name;
+	$log.log('addExtract', name);
+
+	return ExtractParser.parseAsync(opts.data)
+	  .then(function(data){
+	    // save it for later
+	    opts.extracts[name] = data;
+	    // if we've got profile data already, rebuild
+	    if(hasProfileData){
+	      // TODO: maybe a simpler way to add extracts to existing
+	      // graphs?
+	      rebuildGraphs();
+	    }
+	    // if we're still waiting on profile data, then when it hits
+	    // this extract will be processed.
+	  });
       },
 
       setColors:function(colorBlindFriendly){

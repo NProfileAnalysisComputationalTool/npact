@@ -83,7 +83,7 @@
 	  var t1 = new Date();
 	  try{
 	    for(var c = opts.batchSize; idx < len && c >= 0; idx++, c--){
-	      fn(list[idx]);
+	      fn(list[idx], idx);
 	    }
 	  }catch(e){
 	    if(e === STOP_ITERATING){
@@ -124,14 +124,34 @@
    *   <range>      = <base>..<base>
    *   <base>       = any integer
    */
-  function ExtractParser(){
+  function ExtractParser(Utils, $q){
     var re = /([^ ]+) (complement\()?(\d+)\.\.(\d+)/,
 	// some indexes for where our regex groups will show
 	NAME = 1, COMP = 2, START = 3, END = 4;
 
     return {
-      parse:parse
+      parse:parse,
+      parseAsync: parseAsync
     };
+
+    /**
+     * parses many lines asynchronously
+     *
+     * @param {string} text - multi-line text
+     * @returns {Promise} for array extract objects
+     */
+    function parseAsync(text){
+      if (!_.isString(text)) return $q.when(text);
+
+      var results = [];
+      // async loop, gathering results
+      return Utils.forEachAsync(
+	text.split('\n'),
+	function(line, idx){
+	  results[idx] = parseLine(line);
+	})
+	.then(function(){ return results; });
+    }
 
     /**
      * parses many lines
@@ -140,7 +160,7 @@
      * @returns {array} extract objects
      */
     function parse(text){
-      if (_.isObject(text)) return text;
+      if (!_.isString(text)) return text;
       var lines = text.split('\n');
       return lines.map(parseLine);
     }
