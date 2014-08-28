@@ -1,11 +1,11 @@
 angular.module('npact')
-  .directive('npactGraphPage', function(STATIC_BASE_URL, $http, GraphDealer, Utils){
+  .directive('npactGraphPage', function(STATIC_BASE_URL, $http, GraphDealer, Utils, npactConstants){
     return {
       restrict:'A',
       templateUrl:STATIC_BASE_URL+'js/graphs/page.html',
       link:function($scope, $element, $attrs){
 	$scope.title = 'Moorella thermoacetica Y72, whole genome shotgun sequence';
-
+	$scope.graphHeight = npactConstants.graphSpecDefaults.height;
 	// TODO: watch for changes in width
 	// http://stackoverflow.com/questions/23044338/window-resize-directive
 	Utils.widthAvailable($element).then(GraphDealer.setWidth);

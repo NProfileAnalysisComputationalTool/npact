@@ -1,44 +1,50 @@
 (function(){
 
-  var graphSpecDefaults = {
-    // TODO: determine me dynamically
-    leftPadding: 120,
+  /**
+   * creates a bunch of constants
+   */
+  function npactConstants(){
+    return {
+      graphSpecDefaults: {
+	// TODO: determine me dynamically
+	leftPadding: 120,
 
-    axisLabelFontsize: 11,
-    axisFontcolor: "#444",
-    axisTitleFontsize: 20,
-    borderColor: "#444",
-    rightPadding: 25,
-    // TODO: reduce duplication between here and `page.html`
-    height: 200,
-    profileHeight: 100,
-    profileTicks: 5,
+	axisLabelFontsize: 11,
+	axisFontcolor: "#444",
+	axisTitleFontsize: 20,
+	borderColor: "#444",
+	rightPadding: 25,
+	height: 200,
+	profileHeight: 100,
+	profileTicks: 5,
 
 
-    // header labels and arrows
-    headerSizes:{'extract': 30, 'hits': 15},
-    headerLabelPadding: 10,
-    headerLabelFontcolor: "#444",
-    headerLabelFontsize: 11,
-    headerArrowHeight: 12,
-    headerArrowWidth: 6,
-    headerArrowFontsize: 9,
-    axisTitle: '% GC'
+	// header labels and arrows
+	headerSizes:{'extract': 30, 'hits': 15},
+	headerLabelPadding: 10,
+	headerLabelFontcolor: "#444",
+	headerLabelFontsize: 11,
+	headerArrowHeight: 12,
+	headerArrowWidth: 6,
+	headerArrowFontsize: 9,
+	axisTitle: '% GC'
 
       },
-      lineColors = {
+      lineColors : {
 	r: "red",
 	g: "blue",
 	b: "green"
       },
-      colorBlindLineColors = {
+      colorBlindLineColors : {
 	r: "rgb(213, 94, 0)",
 	g: "rgb(204, 121, 167)",
 	b: "rgb(0, 114, 178)"
-      };
+      }
+    };
+  }
 
   // the `GraphDealer` hands out graph data and processes events
-  function GraphDealer($log, Utils, $q, $rootScope, GraphingCalculator){
+  function GraphDealer($log, Utils, $q, $rootScope, GraphingCalculator, npactConstants){
 
     var hasProfileData = false,
 	_onProfileData = $q.defer(),
@@ -155,8 +161,10 @@
 	    profile: [],
 	    headers: [],
 	    width: width,
-	    colors: opts.colorBlindFriendly ? colorBlindLineColors : lineColors
-	  }, graphSpecDefaults);
+	    colors: opts.colorBlindFriendly
+	      ? npactConstants.colorBlindLineColors
+	      : npactConstants.lineColors
+	  }, npactConstants.graphSpecDefaults);
 
       spec.chart = GraphingCalculator.chart(spec);
       spec.xaxis = GraphingCalculator.xaxis(spec);
@@ -318,5 +326,6 @@
   }
 
   angular.module('npact')
+    .constant('npactConstants', npactConstants())
     .factory('GraphDealer', GraphDealer);
 }());
