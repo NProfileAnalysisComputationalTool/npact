@@ -213,5 +213,9 @@ describe('Graphs', function(){
       expect(result[0])
 	.toEqual({name: 'H-51*G', start: 57104, end: 57904, complement:1});
     });
+
+    it('double parsing is a NOOP', function(){
+      expect(EP.parse(result)).toEqual(result);
+    });
   });
 });

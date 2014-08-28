@@ -140,6 +140,7 @@
      * @returns {array} extract objects
      */
     function parse(text){
+      if (_.isObject(text)) return text;
       var lines = text.split('\n');
       return lines.map(parseLine);
     }
