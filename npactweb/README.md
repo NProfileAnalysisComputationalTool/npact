@@ -43,3 +43,8 @@ This is the code for the website.
 Graphs are drawn as data is received, using [kineticjs][]
 
 [kineticjs]: http://kineticjs.com/docs/
+
+### Popups
+
+Rendered using `qtip2` as the `npactExtract` directive, based on
+kinetic mouse click events.

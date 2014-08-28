@@ -55,7 +55,12 @@
 	  length: 0,
 	  profile: null,
 	  extracts: {},
-	  graphSpecs: []
+	  graphSpecs: [],
+	  get maxPages (){
+	    return Math.ceil(this.length / this.basesPerGraph*this.graphsPerPage);
+	  },
+	  get hasPreviousPage(){ return this.page > 0; },
+	  get hasNextPage(){ return this.page < this.maxPages; }
 	};
 
     // once we have data, load it and rebuild the graphs
@@ -99,15 +104,11 @@
       },
       zoomTo: zoomTo,
       panTo: panTo,
-      hasNextPage: function(){
-	return opts.page < maxPages();
-      },
       nextPage: function(){
 	$log.log('nextPage', arguments);
 	opts.page++;
 	rebuildGraphs();
       },
-      hasPreviousPage: function(){ return opts.page > 0;},
       previousPage: function(){
 	$log.log('previousPage', arguments);
 	opts.page--;
@@ -290,10 +291,10 @@
     function redraw(graphSpecs){
       $rootScope.graphSpecs = graphSpecs;
 
-      $rootScope.range = [
-	_(graphSpecs).pluck('startBase').min().value(),
-	_(graphSpecs).pluck('endBase').max().value()
-      ];
+      opts.visible = {
+	startBase : _(graphSpecs).pluck('startBase').min().value(),
+	endBase : _(graphSpecs).pluck('endBase').max().value()
+      };
       return graphSpecs;
     }
 

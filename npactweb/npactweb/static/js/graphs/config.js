@@ -1,13 +1,21 @@
-angular.module('npact')
-  .directive('npactGraphConfig', function(STATIC_BASE_URL, GraphDealer, $log){
+(function(){
+  function npactGraphConfig(STATIC_BASE_URL, GraphDealer, $log){
     return {
       restrict: 'A',
       templateUrl:STATIC_BASE_URL+'js/graphs/config.html',
+      controller: function(){
+	this.nextPage = _.debounce(GraphDealer.nextPage, 250);
+	this.previousPage = _.debounce(GraphDealer.previousPage, 250);
+	this.setZoom = _.debounce(GraphDealer.setZoom, 500);
+	this.setColors = _.debounce(GraphDealer.setColors, 250);
+      },
+      controllerAs: 'ctrl',
       link:function($scope, $element, $attrs){
-	// TODO: don't copy this value here
-	$scope.basesPerGraph = GraphDealer.opts.basesPerGraph;
-	$scope.changeZoom = _.debounce(GraphDealer.setZoom, 500);
-	$scope.GraphDealer = GraphDealer;
+	$scope.graphConfig = GraphDealer.opts;
       }
     };
-  });
+  }
+
+  angular.module('npact')
+    .directive('npactGraphConfig', npactGraphConfig);
+}());

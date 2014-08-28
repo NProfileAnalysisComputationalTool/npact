@@ -6,20 +6,27 @@
     <li>Double click on a graph to zoom into that point</li>
   </ul>
 
-  <label>Zoom: <input type="number" ng-model="basesPerGraph" 
-		      ng-change="changeZoom(basesPerGraph)"/> bases per graph</label> 
+  <label>Zoom:
+    <input type="number"
+	   ng-model="graphConfig.basesPerGraph"
+	   ng-change="ctrl.setZoom(graphConfig.basesPerGraph)"/> bases per graph
+  </label>
   <br/>
-  <label>Color-blind friendly: <input type="checkbox" ng-model="colorBlindFriendly"
-				      ng-change="GraphDealer.setColors(colorBlindFriendly)" /></label>
+  <label>Color-blind friendly:
+    <input type="checkbox"
+	   ng-model="graphConfig.colorBlindFriendly"
+	   ng-change="ctrl.setColors(graphConfig.colorBlindFriendly)" /></label>
   <br/>
 
-  Showing bases {{range[0]}} - {{range[1]}}
+  <div ng-show="graphConfig.visible">
+    Showing bases {{graphConfig.visible.startBase}} - {{graphConfig.visible.endBase}}
+  </div>
   <div>
-  <button style="float:left;" ng-disabled="!GraphDealer.hasPreviousPage()"
-	  ng-click="GraphDealer.previousPage()">
+  <button style="float:left;" ng-disabled="!graphConfig.hasPreviousPage"
+	  ng-click="ctrl.previousPage()">
     Previous Page</button>
-  <button style="float:right;" ng-disabled="!GraphDealer.hasNextPage()"
-	  ng-click="GraphDealer.nextPage()">
+  <button style="float:right;" ng-disabled="!graphConfig.hasNextPage"
+	  ng-click="ctrl.nextPage()">
     Next Page</button>
   <div style="clear:both;" >  </div>
   </div>
