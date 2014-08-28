@@ -82,23 +82,23 @@ angular.module('npact')
     var POLLTIME = 2500;
 
     function poller(tid, deferred) {
+      // remember our arguments
+      var pollAgain = _.partial(poller, tid, deferred);
+
       $http.get(STATUS_BASE_URL + tid)
         .then(function(res) {
-          if(res.ready)
-            deferred.resolve(tid);
-          else
-            $timeout(poller, POLLTIME);
+          if(res.ready) { deferred.resolve(tid); }
+          else { $timeout(pollAgain, POLLTIME); }
         })
-        .catch(function(err) {
-          deferred.reject(err);
-        });
+        .catch(deferred.reject);
+
+      return deferred.promise;
     }
 
     this.start = function(tid) {
-      var deferred = $q.defer();
       if(!tid || !tid.length == 0)
-        deferred.reject(new Error("Invalid task id"));
-      poller(tid, deferred);
-      return deferred.promise;
+	return $q.reject(new Error("Invalid task id"));
+
+      return poller(tid, $q.defer());
     };
   });
