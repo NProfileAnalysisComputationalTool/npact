@@ -306,7 +306,7 @@ angular.module('npact')
 	  g = new K.Group({
 	    x: 0, y: 0,
 	    scaleX: xaxis.scaleX,
-	    offsetX: this.opts.range[0]
+	    offsetX: this.opts.startBase
 	  }),
 	  colorNames = 'rgb',
 	  // TODO: lookup where this should live in the header space

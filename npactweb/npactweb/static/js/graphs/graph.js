@@ -1,11 +1,11 @@
 (function(){
-  function NpactGraph($log, Grapher){
+  function npactGraph($log, Grapher){
     return {
       restrict: 'A',
       scope:{
 	spec: '=npactGraph'
       },
-      link: function($scope, $element, $attrs){
+      controller: function($scope, $element, $attrs){
 	var opts = {
 	  element: $element[0]
 	};
@@ -13,6 +13,7 @@
 
 	function onSpec(spec, oldval){
 	  if(!spec) return;
+	  // TODO: clean up a pre-existing graph?
 	  var g = new Grapher(angular.extend({}, spec, opts));
 	  // TODO: make redraw handle extracts
 	  g.redraw();
@@ -26,7 +27,7 @@
 
   // register everything with angular
   angular.module('npact')
-    .directive('npactGraph', NpactGraph)
+    .directive('npactGraph', npactGraph)
     .directive('npactExtract', function(STATIC_BASE_URL){
       return {
 	restrict: 'A',

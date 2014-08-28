@@ -15,6 +15,7 @@
 	borderColor: "#444",
 	rightPadding: 25,
 	height: 200,
+	// TODO: determine me dynamically
 	profileHeight: 100,
 	profileTicks: 5,
 
@@ -58,7 +59,9 @@
 	  page: 0,
 	  offset: 0,
 	  graphsPerPage: 5,
-	  length: 0,
+	  startBase: 0,
+	  endBase: 0,
+	  get length(){ return this.endBase - this.startBase; },
 	  profile: null,
 	  extracts: {},
 	  graphSpecs: [],
@@ -189,7 +192,7 @@
 
       opts.startBase = start.coordinate;
       opts.endBase = end.coordinate;
-      opts.length = opts.endBase - opts.startBase;
+
       // find a sensible zoom level
       var basesPerGraph = opts.length / opts.graphsPerPage;
       // if we're really short, reset out bases per graph
@@ -273,11 +276,6 @@
       });
       return $q.all(promises).then(function(){ return graphSpecs;});
     }
-
-    function maxPages(){
-      return Math.ceil(opts.length / opts.basesPerGraph*opts.graphsPerPage);
-    }
-
 
     function redrawRequest(){
       pendingRedraws++;
