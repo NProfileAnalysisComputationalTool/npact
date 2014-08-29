@@ -42,7 +42,7 @@ def plan(config, executor):
     config[JSONOUTPUTKEY] = target + '.json'
     jobs = enqueue(_nprofile, executor, rconfig, target)
     enqueue(_nprofile_to_json, executor, {OUTPUTKEY: target},
-            config[JSONOUTPUTKEY], after=[target])
+            config[JSONOUTPUTKEY], after=jobs)
     return jobs
 
 
@@ -66,7 +66,7 @@ def parse_nprofile(ifile):
     return data
 
 
-@producer
+@producer()
 def _nprofile_to_json(config, out):
     keys = ['coordinate', 'r', 'g', 'b']
     data = parse_nprofile(config[OUTPUTKEY])

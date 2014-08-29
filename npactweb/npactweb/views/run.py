@@ -216,9 +216,9 @@ def kickstart(request, path):
 
     output = {}
     for k, v in config.iteritems():
-        if v.startswith(settings.MEDIA_ROOT):
+        if isinstance(v, basestring) and v.startswith(settings.MEDIA_ROOT):
             v = v[len(settings.MEDIA_ROOT):]
-            v.lstrip("/")
+            v = v.lstrip("/")
         output[k] = v
 
     return HttpResponse(json.dumps(output), content_type="application/json")
