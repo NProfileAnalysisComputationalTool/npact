@@ -114,33 +114,27 @@
     }
   }
 
-  /**
-   * parses the Extract format
-   *
-   * The grammar is roughly:
-   *   <extract>    = <name> <address>
-   *   <address>    = <complement> | <range>
-   *   <complement> = complement(<range>)
-   *   <range>      = <base>..<base>
-   *   <base>       = any integer
-   */
-  function ExtractParser(Utils, $q){
-    var re = /([^ ]+) (complement\()?(\d+)\.\.(\d+)/,
-	// some indexes for where our regex groups will show
-	NAME = 1, COMP = 2, START = 3, END = 4;
-
-    return {
-      parse:parse,
-      parseAsync: parseAsync
+  function LineParser(Utils, $q){
+    /**
+     * parses many lines
+     *
+     * @param {string} text - multi-line text
+     * @param {function} parseLine - callback to parse a line
+     * @returns {array} extract objects
+     */
+    this.parse = function(text, parseLine){
+      if (!_.isString(text)) return text;
+      var lines = text.split('\n');
+      return lines.map(parseLine);
     };
-
     /**
      * parses many lines asynchronously
      *
      * @param {string} text - multi-line text
-     * @returns {Promise} for array extract objects
+     * @param {function} parseLine - callback to parse a line
+     * @returns {Promise} for array of parsed objects
      */
-    function parseAsync(text){
+    this.parseAsync = function(text, parseLine){
       if (!_.isString(text)) return $q.when(text);
 
       var results = [];
@@ -151,40 +145,76 @@
 	  results[idx] = parseLine(line);
 	})
 	.then(function(){ return results; });
-    }
-
-    /**
-     * parses many lines
-     *
-     * @param {string} text - multi-line text
-     * @returns {array} extract objects
-     */
-    function parse(text){
-      if (!_.isString(text)) return text;
-      var lines = text.split('\n');
-      return lines.map(parseLine);
-    }
-
-    /**
-     * parses one line
-     *
-     * @param {string} line - single extract like
-     * @returns {array} extract objects
-     */
-    function parseLine(line){
-      var parts = re.exec(line);
-      return {
-	start: parseInt(parts[START]),
-	end: parseInt(parts[END]),
-	complement: parts[COMP] ? 1 : 0,
-	name: parts[NAME]
-      };
-    }
+    };
   }
+
+  function MakeParserService(parseLineFn){
+    return function(LineParser){
+      this.parse = _.partialRight(LineParser.parse, parseLineFn);
+      this.parseAsync =  _.partialRight(LineParser.parseAsync, parseLineFn);
+    };
+  }
+
+  /**
+   * Extract format
+   *
+   * The grammar is roughly:
+   *   <extract>    = <name> <address>
+   *   <address>    = <complement> | <range>
+   *   <complement> = complement(<range>)
+   *   <range>      = <base>..<base>
+   *   <base>       = any integer
+   */
+  var EXTRACT_REGEX = /([^ ]+) (complement\()?(\d+)\.\.(\d+)/,
+      // some indexes for where our regex groups will show
+      NAME = 1, COMP = 2, START = 3, END = 4;
+
+  /**
+   * parses one line as an extract
+   *
+   * @param {string} line - single extract line
+   * @returns {Object} extract
+   */
+  function parseExtract(line){
+    var parts = EXTRACT_REGEX.exec(line);
+    return {
+      start: parseInt(parts[START]),
+      end: parseInt(parts[END]),
+      complement: parts[COMP] ? 1 : 0,
+      name: parts[NAME]
+    };
+  }
+
+  /**
+   * parses one line as an hit
+   *
+   * COLORING INDICATES THE COLOR OF THE GENOME PHASE (0,1, OR 2) OF
+   * THE THIRD CODON POSITIONS OF GENES, IN INTERNAL COORDINATES. IF A
+   * GENE IS ENCODED IN THE DIRECT STRAND, ITS THIRD CODON POSITIONS
+   * ARE IN THE SAME PHASE AS THE SECOND COORDINATE. E.G., dnaN
+   * 1460..2668, WILL HAVE COLOR CORRESPONDING TO (2668 – 1) % 3 = 0
+   * (RED)). INSTEAD, IF IT IS ENCODED ON THE COMPLEMENTARY STRAND, IT
+   * WILL HAVE COLOR CORRESPONDING TO THE POSITION INDICATED BY THE
+   * FIRST COORDINATE. E.G., radA complement(23561..24766) HAS COLOR
+   * (23561 – 1) % 3 = 1 (GREEN). ONE IS SUBTRACTED FROM POSITION TO
+   * TRANSLATE OUTPUT/INPUT COORDINATES INTO INTERNAL COORDINATES.
+   *
+   * @param {string} line - single extract line
+   * @returns {Object} hit
+   */
+  function parseHit(line){
+    var res = parseExtract(line),
+	phaseCoordinate = res.complement ? res.start : res.end;
+    res.phase = (phaseCoordinate - 1) % 3;
+    return res;
+  }
+
 
   angular.module('npact')
     .factory('Utils', Utils)
-    .factory('ExtractParser', ExtractParser)
+    .service('LineParser', LineParser)
+    .service('ExtractParser', MakeParserService(parseExtract))
+    .service('HitsParser', MakeParserService(parseHit))
   ;
 
 }())
