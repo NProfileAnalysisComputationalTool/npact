@@ -5,8 +5,8 @@ angular.module('npact')
       templateUrl: STATIC_BASE_URL + 'js/graphs/page.html',
       controller: 'npactGraphPageCtrl',
       link: function($scope, $element, $attrs) {
-	// TODO: watch for changes in width
-	// http://stackoverflow.com/questions/23044338/window-resize-directive
+        // TODO: watch for changes in width
+        // http://stackoverflow.com/questions/23044338/window-resize-directive
         Utils.widthAvailable($element).then(GraphDealer.setWidth);
       }
     };
@@ -20,7 +20,7 @@ angular.module('npact')
     // start it up
     Fetcher.kickstart()
       .then(function(config) {
-	// got config, request the first round of results
+        // got config, request the first round of results
         $scope.title = config.first_page_title;
         Fetcher.nprofile(config).then(GraphDealer.setProfile);
         Fetcher.inputFileCds(config)
@@ -104,7 +104,7 @@ angular.module('npact')
 
     this.start = function(tid) {
       if(!tid || !tid.length == 0)
-	return $q.reject(new Error("Invalid task id"));
+        return $q.reject(new Error("Invalid task id"));
 
       return poller(tid, $q.defer());
     };

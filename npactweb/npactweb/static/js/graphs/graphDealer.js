@@ -1,76 +1,69 @@
-(function(){
+angular.module('npact')
+  .constant('npactConstants', {
+    graphSpecDefaults: {
+      // TODO: determine me dynamically
+      leftPadding: 120,
 
-  /**
-   * creates a bunch of constants
-   */
-  function npactConstants(){
-    return {
-      graphSpecDefaults: {
-	// TODO: determine me dynamically
-	leftPadding: 120,
-
-	axisLabelFontsize: 11,
-	axisFontcolor: "#444",
-	axisTitleFontsize: 20,
-	borderColor: "#444",
-	rightPadding: 25,
-	height: 200,
-	profileTicks: 5,
+      axisLabelFontsize: 11,
+      axisFontcolor: "#444",
+      axisTitleFontsize: 20,
+      borderColor: "#444",
+      rightPadding: 25,
+      height: 200,
+      profileTicks: 5,
 
 
-	// header labels and arrows
-	headerY: 5,
-	headerLabelPadding: 10,
-	headerLabelFontcolor: "#444",
-	headerLabelFontsize: 11,
-	headerArrowHeight: 12,
-	headerArrowWidth: 6,
-	headerArrowFontsize: 9,
-	axisTitle: '% GC'
+      // header labels and arrows
+      headerY: 5,
+      headerLabelPadding: 10,
+      headerLabelFontcolor: "#444",
+      headerLabelFontsize: 11,
+      headerArrowHeight: 12,
+      headerArrowWidth: 6,
+      headerArrowFontsize: 9,
+      axisTitle: '% GC'
 
-      },
-      lineColors : {
-	r: "red",
-	g: "blue",
-	b: "green"
-      },
-      colorBlindLineColors : {
-	r: "rgb(213, 94, 0)",
-	g: "rgb(204, 121, 167)",
-	b: "rgb(0, 114, 178)"
-      },
-      // how much vertical space to leave for different kinds of headers
-      headerSizes:{'extract': 30, 'hits': 15}
-    };
-  }
+    },
+    lineColors : {
+      r: "red",
+      g: "blue",
+      b: "green"
+    },
+    colorBlindLineColors : {
+      r: "rgb(213, 94, 0)",
+      g: "rgb(204, 121, 167)",
+      b: "rgb(0, 114, 178)"
+    },
+    // how much vertical space to leave for different kinds of headers
+    headerSizes:{'extract': 30, 'hits': 15}
+  })
 
-  // the `GraphDealer` hands out graph data and processes events
-  function GraphDealer($log, Utils, $q, $rootScope, GraphingCalculator, npactConstants, ExtractParser){
-
+  .factory('GraphDealer', function($log, Utils, $q, $rootScope, GraphingCalculator, npactConstants, ExtractParser) {
+    // the `GraphDealer` hands out graph data and processes events
     var hasProfileData = false,
-	_onProfileData = $q.defer(),
-	onProfileData = _onProfileData.promise,
-	_onWidth = $q.defer(),
-	onWidth = _onWidth.promise,
-	pendingRedraws = 0,
-	opts = {
-	  basesPerGraph: 10000,
-	  colorBlindFriendly: false,
-	  page: 0,
-	  offset: 0,
-	  graphsPerPage: 5,
-	  startBase: 0,
-	  endBase: 0,
-	  get length(){ return this.endBase - this.startBase; },
-	  profile: null,
-	  extracts: {},
-	  graphSpecs: [],
-	  get maxPages (){
-	    return Math.ceil(this.length / this.basesPerGraph*this.graphsPerPage);
-	  },
-	  get hasPreviousPage(){ return this.page > 0; },
-	  get hasNextPage(){ return this.page < this.maxPages; }
-	};
+        _onProfileData = $q.defer(),
+        onProfileData = _onProfileData.promise,
+        _onWidth = $q.defer(),
+        onWidth = _onWidth.promise,
+        pendingRedraws = 0,
+        opts = {
+          basesPerGraph: 10000,
+          colorBlindFriendly: false,
+          page: 0,
+          offset: 0,
+          graphsPerPage: 5,
+          startBase: 0,
+          endBase: 0,
+          get length(){ return this.endBase - this.startBase; },
+          profile: null,
+          extracts: {},
+          graphSpecs: [],
+          get maxPages (){
+            return Math.ceil(this.length / this.basesPerGraph*this.graphsPerPage);
+          },
+          get hasPreviousPage(){ return this.page > 0; },
+          get hasNextPage(){ return this.page < this.maxPages; }
+        };
 
     // once we have data, load it and rebuild the graphs
     onProfileData.then(loadProfileData).then(rebuildGraphs);
@@ -80,60 +73,60 @@
     return {
       opts:opts,
       setProfile:function(profile){
-	$log.log('setProfile', profile.length);
-	_onProfileData.resolve(profile);
-	return onProfileData;
+        $log.log('setProfile', profile.length);
+        _onProfileData.resolve(profile);
+        return onProfileData;
       },
 
       addExtract:function(opts){
         var name = opts.name;
-	$log.log('addExtract', name);
+        $log.log('addExtract', name);
 
-	return ExtractParser.parseAsync(opts.data)
-	  .then(function(data){
-	    // save it for later
-	    opts.extracts[name] = data;
-	    // if we've got profile data already, rebuild
-	    if(hasProfileData){
-	      // TODO: maybe a simpler way to add extracts to existing
-	      // graphs?
-	      rebuildGraphs();
-	    }
-	    // if we're still waiting on profile data, then when it hits
-	    // this extract will be processed.
-	  });
+        return ExtractParser.parseAsync(opts.data)
+          .then(function(data){
+            // save it for later
+            opts.extracts[name] = data;
+            // if we've got profile data already, rebuild
+            if(hasProfileData){
+              // TODO: maybe a simpler way to add extracts to existing
+              // graphs?
+              rebuildGraphs();
+            }
+            // if we're still waiting on profile data, then when it hits
+            // this extract will be processed.
+          });
       },
 
       setColors:function(colorBlindFriendly){
-	$log.log('setColors', arguments);
-	opts.colorBlindFriendly = colorBlindFriendly;
-	// TODO: lighter change here; see if we can update colors
-	// in-place without a full rebuild
-	rebuildGraphs();
+        $log.log('setColors', arguments);
+        opts.colorBlindFriendly = colorBlindFriendly;
+        // TODO: lighter change here; see if we can update colors
+        // in-place without a full rebuild
+        rebuildGraphs();
       },
       setZoom:function(basesPerGraph){
-	$log.log('setZoom', arguments);
-	opts.basesPerGraph = basesPerGraph;
-	rebuildGraphs();
+        $log.log('setZoom', arguments);
+        opts.basesPerGraph = basesPerGraph;
+        rebuildGraphs();
       },
       zoomTo: zoomTo,
       panTo: panTo,
       nextPage: function(){
-	$log.log('nextPage', arguments);
-	opts.page++;
-	rebuildGraphs();
+        $log.log('nextPage', arguments);
+        opts.page++;
+        rebuildGraphs();
       },
       previousPage: function(){
-	$log.log('previousPage', arguments);
-	opts.page--;
-	rebuildGraphs();
+        $log.log('previousPage', arguments);
+        opts.page--;
+        rebuildGraphs();
       },
       setWidth: function(w){
-	$log.log('setting graph width to', w);
-	// let folks know it's ready
-	_onWidth.resolve(w);
+        $log.log('setting graph width to', w);
+        // let folks know it's ready
+        _onWidth.resolve(w);
 
-	// TODO: handle changing this after the fact
+        // TODO: handle changing this after the fact
       }
     };
 
@@ -160,36 +153,36 @@
 
     function makeGraphSpec(startBase, width){
       var endBase = startBase + opts.basesPerGraph,
-	  spec = angular.extend({
-	    startBase: startBase,
-	    endBase: endBase,
-	    extracts: {},
-	    profile: [],
-	    headers: [],
-	    width: width,
-	    colors: opts.colorBlindFriendly
-	      ? npactConstants.colorBlindLineColors
-	      : npactConstants.lineColors,
+          spec = angular.extend({
+            startBase: startBase,
+            endBase: endBase,
+            extracts: {},
+            profile: [],
+            headers: [],
+            width: width,
+            colors: opts.colorBlindFriendly
+              ? npactConstants.colorBlindLineColors
+              : npactConstants.lineColors,
 
-	    // how much space should be taken by the line graph alone
-	    get profileHeight(){
-	      // TODO: reduce duplication between here and GraphingCalculator
-	      return this.height - this.headerY - this.axisLabelFontsize
-		- 2*this.profileTicks;
-	    },
-	    get range() {return [this.startBase, this.endBase];}
-	  }, npactConstants.graphSpecDefaults);
+            // how much space should be taken by the line graph alone
+            get profileHeight(){
+              // TODO: reduce duplication between here and GraphingCalculator
+              return this.height - this.headerY - this.axisLabelFontsize
+                - 2*this.profileTicks;
+            },
+            get range() {return [this.startBase, this.endBase];}
+          }, npactConstants.graphSpecDefaults);
 
       return spec;
     }
 
     function makeGraphSpecs(width){
       var base = opts.page * opts.basesPerGraph * opts.graphsPerPage
-	    + opts.offset;
+            + opts.offset;
       return _.range(0, opts.graphsPerPage)
-	.map(function(n){
-	  return makeGraphSpec(base + n*opts.basesPerGraph, width);
-	});
+        .map(function(n){
+          return makeGraphSpec(base + n*opts.basesPerGraph, width);
+        });
     }
 
 
@@ -197,7 +190,7 @@
       hasProfileData = true;
       opts.profile = profile;
       var start = profile[0],
-	  end = _.last(profile);
+          end = _.last(profile);
 
       opts.startBase = start.coordinate;
       opts.endBase = end.coordinate;
@@ -206,7 +199,7 @@
       var basesPerGraph = opts.length / opts.graphsPerPage;
       // if we're really short, reset out bases per graph
       if (basesPerGraph < opts.basesPerGraph) {
-	opts.basesPerGraph = Utils.orderOfMagnitude(basesPerGraph);
+        opts.basesPerGraph = Utils.orderOfMagnitude(basesPerGraph);
       }
       return profile; // enable chaining
     }
@@ -231,23 +224,23 @@
       // `GraphingCalculator.stops`
       return onProfileData.then(function(profile){
 
-	graphSpecs.forEach(function(gs){
-	  var startIdx = sortedIdx(gs.startBase - margin) - 1,
-	      endIdx = sortedIdx(gs.endBase + margin) + 1;
+        graphSpecs.forEach(function(gs){
+          var startIdx = sortedIdx(gs.startBase - margin) - 1,
+              endIdx = sortedIdx(gs.endBase + margin) + 1;
 
-	  // shallow copy of the relevant data, guarding against
-	  // out-of-bounds indexes
-	  gs.profile = profile.slice(Math.max(startIdx,0),
-				     Math.min(endIdx, profile.length - 1));
-	});
+          // shallow copy of the relevant data, guarding against
+          // out-of-bounds indexes
+          gs.profile = profile.slice(Math.max(startIdx,0),
+                                     Math.min(endIdx, profile.length - 1));
+        });
 
-	return graphSpecs;
+        return graphSpecs;
 
-	// search for the index in our profile where we would insert `c`
-	// and have it still be sorted
-	function sortedIdx(c){
-	  return _.sortedIndex(profile, {'coordinate': c}, 'coordinate');
-	}
+        // search for the index in our profile where we would insert `c`
+        // and have it still be sorted
+        function sortedIdx(c){
+          return _.sortedIndex(profile, {'coordinate': c}, 'coordinate');
+        }
       });
     }
 
@@ -256,41 +249,41 @@
       var headerHeight = npactConstants.headerSizes['extract'];
 
       graphSpecs.forEach(function(gs){
-	gs.extracts[name] = [];
-	gs.headers.push({
-	  text: name,
-	  lineType:'extract',
-	  y: gs.headerY,
-	  height: headerHeight
-	});
-	// increment where the next header will start
-	gs.headerY += headerHeight;
+        gs.extracts[name] = [];
+        gs.headers.push({
+          text: name,
+          lineType:'extract',
+          y: gs.headerY,
+          height: headerHeight
+        });
+        // increment where the next header will start
+        gs.headerY += headerHeight;
       });
 
       // TODO: use _.sortedIndex to binary search and array.slice to
       // make shallow copies onto the graph specs
       return Utils.forEachAsync(opts.extracts[name], function(dataPoint){
-	graphSpecs.forEach(function(gs){
-	  // extract starts in this range?
-	  var startsInRange = dataPoint.start >= gs.startBase
-		&& dataPoint.start <= gs.endBase,
-	      // extract ends in this range?
-	      endsInRange = dataPoint.end >= gs.startBase
-		&& dataPoint.end <= gs.endBase;
-	  if(startsInRange || endsInRange){
-	    gs.extracts[name].push(dataPoint);
-	  }
-	});
+        graphSpecs.forEach(function(gs){
+          // extract starts in this range?
+          var startsInRange = dataPoint.start >= gs.startBase
+                && dataPoint.start <= gs.endBase,
+              // extract ends in this range?
+              endsInRange = dataPoint.end >= gs.startBase
+                && dataPoint.end <= gs.endBase;
+          if(startsInRange || endsInRange){
+            gs.extracts[name].push(dataPoint);
+          }
+        });
       })
       // promise resolves as the graphspecs
-	.then(function(){ return graphSpecs;});
+        .then(function(){ return graphSpecs;});
     }
 
     function attachAllExtracts(graphSpecs){
       var promises = [];
       // iterate over the named extracts
       _.forOwn(opts.extracts, function(value, key, obj){
-	promises.push(attachExtractData(key, graphSpecs));
+        promises.push(attachExtractData(key, graphSpecs));
       });
       return $q.all(promises).then(function(){ return graphSpecs;});
     }
@@ -298,14 +291,14 @@
     function redrawRequest(){
       pendingRedraws++;
       return function(graphSpecs){
-	pendingRedraws--;
-	if(pendingRedraws == 0){
-	  return redraw(graphSpecs);
-	}else{
-	  $log.log('skipping redraw, still have pending work');
-	}
+        pendingRedraws--;
+        if(pendingRedraws == 0){
+          return redraw(graphSpecs);
+        }else{
+          $log.log('skipping redraw, still have pending work');
+        }
 
-	return graphSpecs;
+        return graphSpecs;
       };
     }
 
@@ -315,13 +308,13 @@
     function redraw(graphSpecs){
       $rootScope.graphSpecs = graphSpecs;
       graphSpecs.forEach(function(spec){
-	spec.chart = GraphingCalculator.chart(spec);
-	spec.xaxis = GraphingCalculator.xaxis(spec);
+        spec.chart = GraphingCalculator.chart(spec);
+        spec.xaxis = GraphingCalculator.xaxis(spec);
       });
 
       opts.visible = {
-	startBase : _(graphSpecs).pluck('startBase').min().value(),
-	endBase : _(graphSpecs).pluck('endBase').max().value()
+        startBase : _(graphSpecs).pluck('startBase').min().value(),
+        endBase : _(graphSpecs).pluck('endBase').max().value()
       };
       return graphSpecs;
     }
@@ -329,23 +322,18 @@
     function rebuildGraphs(){
       var t1 = new Date();
       return onWidth.then(makeGraphSpecs)
-	.then(attachProfileData)
-	.then(attachAllExtracts)
-	.then(function(graphSpecs){
-	  return opts.graphSpecs = graphSpecs;
-	})
-	.then(redrawRequest())
-	.then(function(graphSpecs){
-	  $log.log('rebuild:', new Date() - t1, 'ms');
-	  return graphSpecs;
-	}).catch(function(){
-	  $log.log('failed to rebuild, resetting state', arguments);
-	  pendingRedraws = 0;
-	});
+        .then(attachProfileData)
+        .then(attachAllExtracts)
+        .then(function(graphSpecs){
+          return opts.graphSpecs = graphSpecs;
+        })
+        .then(redrawRequest())
+        .then(function(graphSpecs){
+          $log.log('rebuild:', new Date() - t1, 'ms');
+          return graphSpecs;
+        }).catch(function(){
+          $log.log('failed to rebuild, resetting state', arguments);
+          pendingRedraws = 0;
+        });
     }
-  }
-
-  angular.module('npact')
-    .constant('npactConstants', npactConstants())
-    .factory('GraphDealer', GraphDealer);
-}());
+  });

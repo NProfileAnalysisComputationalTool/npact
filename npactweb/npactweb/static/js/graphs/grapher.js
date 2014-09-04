@@ -9,9 +9,9 @@ angular.module('npact')
       this.opts = opts;
       this.$element = jQuery(opts.element);
       this.stage = new K.Stage({
-	container:opts.element,
-	height: opts.height,
-	width: opts.width
+        container:opts.element,
+        height: opts.height,
+        width: opts.width
       });
 
       this.colors = opts.colors;
@@ -24,78 +24,78 @@ angular.module('npact')
 
     GP.drawAxisTicks = function(ticks){
       var tickOpts = {x: 0, y:0,
-		      stroke: this.opts.borderColor,
-		      strokeScaleEnabled: false};
+                      stroke: this.opts.borderColor,
+                      strokeScaleEnabled: false};
       return ticks
-	.map(function(t){
-	  tickOpts.points = [t.x, t.y, t.x2, t.y2];
-	  return new K.Line(tickOpts);
-	});
+        .map(function(t){
+          tickOpts.points = [t.x, t.y, t.x2, t.y2];
+          return new K.Line(tickOpts);
+        });
     };
 
     GP.drawAxisLabels = function(labels, textOpts){
       // draw labels at the right spacing
       var defaultTextOpts = {
-	fontSize: this.opts.axisLabelFontsize,
-	fill:this.opts.axisFontcolor
+        fontSize: this.opts.axisLabelFontsize,
+        fill:this.opts.axisFontcolor
       };
 
       return labels.map(function(lbl){
-	var txtOpts = angular.extend({}, lbl, defaultTextOpts, textOpts);
-	return new K.Text(txtOpts);
+        var txtOpts = angular.extend({}, lbl, defaultTextOpts, textOpts);
+        return new K.Text(txtOpts);
       });
     };
 
     GP.headerGroup = function(){
-	// from top to bottom
+      // from top to bottom
       var opts = this.opts,
-	  g = new K.Group(),
-	// TODO: derive opts.leftPadding
-	// * add all labels
-	// * loop over K.Text objects, find max width
-	// * leftPadding = maxWidth + headerLabelPadding
-	// * loop over K.Text objects, set width to leftPadding
+          g = new K.Group(),
+          // TODO: derive opts.leftPadding
+          // * add all labels
+          // * loop over K.Text objects, find max width
+          // * leftPadding = maxWidth + headerLabelPadding
+          // * loop over K.Text objects, set width to leftPadding
 
-	defaultTextOpts = {
-	  align: 'right', x: 0,
-	  fontSize: opts.headerLabelFontsize,
-	  width: opts.leftPadding - opts.headerLabelPadding,
-	  fill:opts.headerLabelFontcolor
-	},
-	  lbls =  opts.headers.map(makeLabel);
+          defaultTextOpts = {
+            align: 'right', x: 0,
+            fontSize: opts.headerLabelFontsize,
+            width: opts.leftPadding - opts.headerLabelPadding,
+            fill:opts.headerLabelFontcolor
+          },
+          lbls =  opts.headers.map(makeLabel);
 
       addMany(g, lbls);
       return g;
 
       function makeLabel(header){
-	var txtOpts = angular.extend({}, defaultTextOpts, header);
-	return new K.Text(txtOpts);
+        var txtOpts = angular.extend({}, defaultTextOpts, header);
+        return new K.Text(txtOpts);
       }
     };
 
     GP.yAxisGroup = function(){
       var g = new K.Group(),
-	  opts = this.opts,
-	  m = this.m;
+          opts = this.opts,
+          m = this.m;
 
       addMany(g, this.drawAxisTicks(m.yaxis.ticks));
-      	    // draw labels at the right aligned
+      // draw labels at the right aligned
       addMany(g, this.drawAxisLabels(m.yaxis.labels, {align:'right'}));
 
       // the title
       var title = new K.Text({
-	y:0, x:0, // reposition this below
-	rotation:-90,
-	fill:opts.axisFontcolor,
-	fontSize: opts.axisTitleFontsize,
-	text: opts.axisTitle
+        y:0, x:0, // reposition this below
+        rotation:-90,
+        fill:opts.axisFontcolor,
+        fontSize: opts.axisTitleFontsize,
+        text: opts.axisTitle
       });
       // center it in the space left of the axes
       var pos = GraphingCalculator.alignRectangles(
-	// define the space we want to center inside
-	m.yaxis.titleBox,
-	// bounding box of the text, pre-rotated so need to swap W and H
-	{width: title.getHeight(), height: title.getWidth()});
+        // define the space we want to center inside
+        m.yaxis.titleBox,
+        // bounding box of the text, pre-rotated so need to swap W and H
+        {width: title.getHeight(), height: title.getWidth()});
 
       // translate to the bottom-left of the new rectangle, so after we rotate
       // we'll be centered
@@ -108,11 +108,11 @@ angular.module('npact')
 
     GP.leftLayer = function(){
       var opts = this.opts,
-	  layer = new K.Layer({
-	    width: opts.leftPadding,
-	    x:0, y:0,
-	    height: opts.height
-	  });
+          layer = new K.Layer({
+            width: opts.leftPadding,
+            x:0, y:0,
+            height: opts.height
+          });
 
       layer.add(this.headerGroup(), this.yAxisGroup());
 
@@ -127,35 +127,35 @@ angular.module('npact')
 
     GP.genomeGroup = function(){
       var self = this,
-	  gx = this.m.graph.x,
-	  dragRes = {x: gx, y:0},
-	  g = new K.Group({
-	    x: gx,
-	    draggable: true,
-	    dragBoundFunc:function(pos, evt){
-	      // pos is the distance dragged, except `pos.x` always
-	      // starts at `gx`. Something due to container coordinate
-	      // system vs stage coordinate system. `pos.y` is not
-	      // similarly affected.
-	      var nextOffset = - (pos.x - gx);
-	      // change position via offsetX
-	      this.offsetX(nextOffset);
-	      // never change position via this return value
-	      return dragRes;
-	    }
-	  });
+          gx = this.m.graph.x,
+          dragRes = {x: gx, y:0},
+          g = new K.Group({
+            x: gx,
+            draggable: true,
+            dragBoundFunc:function(pos, evt){
+              // pos is the distance dragged, except `pos.x` always
+              // starts at `gx`. Something due to container coordinate
+              // system vs stage coordinate system. `pos.y` is not
+              // similarly affected.
+              var nextOffset = - (pos.x - gx);
+              // change position via offsetX
+              this.offsetX(nextOffset);
+              // never change position via this return value
+              return dragRes;
+            }
+          });
       // remember where we are at the start/end of a drag, so dragging can
       // match our "scroll"
       g.on('dragstart dragend', function(obj){
-	self.$element.trigger('tooltipHide.npact');
+        self.$element.trigger('tooltipHide.npact');
       });
 
       g.on('dragend', function(evt){
 
-	var oldStartBase = self.opts.range[0],
-	    newStartBase = (this.offsetX() / self.xaxis.scaleX) + oldStartBase;
-	// tell the graph dealer
-	GraphDealer.panTo(oldStartBase, newStartBase);
+        var oldStartBase = self.opts.range[0],
+            newStartBase = (this.offsetX() / self.xaxis.scaleX) + oldStartBase;
+        // tell the graph dealer
+        GraphDealer.panTo(oldStartBase, newStartBase);
       });
 
       g.on('mouseover', function() {
@@ -168,8 +168,8 @@ angular.module('npact')
       // need a shape that can be clicked on to allow dragging the
       // entire canvas
       g.add(new K.Rect({x: 0, y:this.m.graph.y,
-			width:this.m.graph.w,
-			height:this.m.graph.h}));
+                        width:this.m.graph.w,
+                        height:this.m.graph.h}));
       return this._genomeGroup = g;
     };
 
@@ -178,9 +178,9 @@ angular.module('npact')
       this.$element.trigger('tooltipHide.npact');
 
       var zoomOn_px = evt.evt.layerX - this.m.graph.x,
-	  zoomOn_pct = zoomOn_px / this.m.graph.w,
-	  start_gn = this.opts.startBase,
-	  zoomingOut = evt.evt.shiftKey
+          zoomOn_pct = zoomOn_px / this.m.graph.w,
+          start_gn = this.opts.startBase,
+          zoomingOut = evt.evt.shiftKey
       ;
 
       GraphDealer.zoomTo(start_gn, zoomOn_pct, zoomingOut);
@@ -188,23 +188,23 @@ angular.module('npact')
 
     GP.chartLayer = function(){
       var m = this.m,
-	  xaxis = this.xaxis,
-	  opts = this.opts,
-	  l = new K.Layer({
-	    clip:{
-	      x: m.graph.x-1, y:0,
-	      width:m.graph.w+2,
-	      height:1000
-	    }
-	  }),
-	  // frame around the graph
-	  border = new K.Rect({
-	    x: m.graph.x,
-	    y: m.graph.y,
-	    width: m.graph.w,
-	    height: m.graph.h,
-	    stroke: opts.borderColor
-	  });
+          xaxis = this.xaxis,
+          opts = this.opts,
+          l = new K.Layer({
+            clip:{
+              x: m.graph.x-1, y:0,
+              width:m.graph.w+2,
+              height:1000
+            }
+          }),
+          // frame around the graph
+          border = new K.Rect({
+            x: m.graph.x,
+            y: m.graph.y,
+            width: m.graph.w,
+            height: m.graph.h,
+            stroke: opts.borderColor
+          });
 
       l.add(border, this.genomeGroup());
       return l;
@@ -214,20 +214,20 @@ angular.module('npact')
       // center on the tick marks, at this point we know how wide
       // this text is
       var w = txt.getWidth() / scaleX,
-	  x = txt.getAttr('coord'),
-	  newX = x - w/2;
+          x = txt.getAttr('coord'),
+          newX = x - w/2;
       txt.x(newX);
     };
 
     GP.xAxisGroup = function(){
       var m = this.m,
-	  xaxis = this.xaxis,
-	  g = new K.Group({
-	    x: 0, y: m.graph.h + m.graph.y,
-	    width: xaxis.length,
-	    scaleX: xaxis.scaleX,
-	    offsetX: this.opts.range[0]
-	  });
+          xaxis = this.xaxis,
+          g = new K.Group({
+            x: 0, y: m.graph.h + m.graph.y,
+            width: xaxis.length,
+            scaleX: xaxis.scaleX,
+            offsetX: this.opts.range[0]
+          });
 
       addMany(g, this.drawAxisTicks(xaxis.ticks));
       var labels = this.drawAxisLabels(xaxis.labels);
@@ -235,7 +235,7 @@ angular.module('npact')
 
       // call `centerXLabel(txt, xaxis.scaleX)`
       labels.map(function(txt){
-	centerXLabel(txt, xaxis.scaleX);
+        centerXLabel(txt, xaxis.scaleX);
       });
 
       return this._xAxisGroup = g;
@@ -243,29 +243,29 @@ angular.module('npact')
 
     GP.profileGroup = function(){
       var m = this.m, opts = this.opts, xaxis = this.xaxis,
-	  colors = this.colors,
-	  lines = _.keys(colors),
-	  g = new K.Group({
-	    x: 0, y:m.graph.y,
-	    height:opts.profileHeight, width:xaxis.length,
-	    scaleX: xaxis.scaleX,
-	    offsetX: this.opts.range[0]
-	  }),
-	  dataToDraw = _(this.opts.profile)
-	    .reduce(function(acc, g){
-	      lines.map(function(x){
-		acc[x].push(g.coordinate);
-		acc[x].push(100 - g[x]);
-	      });
-	      return acc;
-	    }, {r:[], g:[], b:[]}),
-	  profiles = lines.map(function(x){
-	    return new K.Line({
-	      points:dataToDraw[x],
-	      stroke:colors[x],
-	      strokeWidth:1,
-	      strokeScaleEnabled: false
-	    });})
+          colors = this.colors,
+          lines = _.keys(colors),
+          g = new K.Group({
+            x: 0, y:m.graph.y,
+            height:opts.profileHeight, width:xaxis.length,
+            scaleX: xaxis.scaleX,
+            offsetX: this.opts.range[0]
+          }),
+          dataToDraw = _(this.opts.profile)
+            .reduce(function(acc, g){
+              lines.map(function(x){
+                acc[x].push(g.coordinate);
+                acc[x].push(100 - g[x]);
+              });
+              return acc;
+            }, {r:[], g:[], b:[]}),
+          profiles = lines.map(function(x){
+            return new K.Line({
+              points:dataToDraw[x],
+              stroke:colors[x],
+              strokeWidth:1,
+              strokeScaleEnabled: false
+            });})
       ;
       addMany(g, profiles);
 
@@ -281,118 +281,118 @@ angular.module('npact')
       // now that lbl is on the canvas, we can see what it's
       // height/width is
       var arrowBounds = txt.getAttr('arrowBounds'),
-	  pos = GraphingCalculator.alignRectangles(
-	    arrowBounds,
-	    {
-	      // convert to gene space
-	      width:txt.getWidth()/ scaleX,
-	      height:txt.getHeight()
-	    });
+          pos = GraphingCalculator.alignRectangles(
+            arrowBounds,
+            {
+              // convert to gene space
+              width:txt.getWidth()/ scaleX,
+              height:txt.getHeight()
+            });
       pos.x = Math.max(pos.x, arrowBounds.x+1);
       txt.position(pos);
     }
 
     GP.cdsGroup = function(cds, name){
       var xaxis = this.xaxis, opts = this.opts,
-	  colors = this.colors,
-	  header = _.find(opts.headers, {text:name}, name),
-	  g = new K.Group({
-	    x: 0, y: 0,
-	    scaleX: xaxis.scaleX,
-	    offsetX: this.opts.startBase
-	  }),
-	  colorNames = 'rgb',
-	  y = header.y,
-	  ahHalfHeight = opts.headerArrowHeight/2,
-	  compY = y + opts.headerArrowHeight,
-	  ahw = opts.headerArrowWidth/xaxis.scaleX,
-	  textOpts = {
-	    fontSize: opts.headerArrowFontsize,
-	    fill:opts.axisFontcolor,
-	    scaleX:1/xaxis.scaleX,
-	    strokeScaleEnabled: false
-	  },
-	  arrowOpts = {
-	    x: 0, y:0,
-	    closed: true,
-	    strokeWidth:1,
-	    strokeScaleEnabled: false
-	  },
+          colors = this.colors,
+          header = _.find(opts.headers, {text:name}, name),
+          g = new K.Group({
+            x: 0, y: 0,
+            scaleX: xaxis.scaleX,
+            offsetX: this.opts.startBase
+          }),
+          colorNames = 'rgb',
+          y = header.y,
+          ahHalfHeight = opts.headerArrowHeight/2,
+          compY = y + opts.headerArrowHeight,
+          ahw = opts.headerArrowWidth/xaxis.scaleX,
+          textOpts = {
+            fontSize: opts.headerArrowFontsize,
+            fill:opts.axisFontcolor,
+            scaleX:1/xaxis.scaleX,
+            strokeScaleEnabled: false
+          },
+          arrowOpts = {
+            x: 0, y:0,
+            closed: true,
+            strokeWidth:1,
+            strokeScaleEnabled: false
+          },
 
-	  arrows = _(cds)
-	    .forEach(function(x){
-	      // color determined by `x.end - 1 % 3`
-	      var isComplement = x.complement == 0,
-		  colorCoord = isComplement ? x.start : x.end,
-		  c = colors[colorNames[(colorCoord - 1) % 3]],
-		  baseY = isComplement ? y + opts.headerArrowHeight : y,
-		  arrowPointY = baseY + ahHalfHeight,
-		  arrowMaxY = baseY + opts.headerArrowHeight,
-		  shape = isComplement
-		    ? [
-		      x.start, arrowPointY,
-		      x.start + ahw, baseY,
-		      x.end, baseY,
-		      x.end, arrowMaxY,
-		      x.start + ahw, arrowMaxY,
-		      x.start, arrowPointY
-		    ] : [
-		      x.start, baseY,
-		      x.end - ahw, baseY,
-		      x.end, arrowPointY,
-		      x.end - ahw, arrowMaxY,
-		      x.start, arrowMaxY,
-		      x.start, y
-		    ],
-		  arrowBounds = isComplement
-		    ? {
-		      x: x.start+ahw, y: baseY,
-		      width: x.end-x.start-ahw, height: opts.headerArrowHeight
-		    } : {
-		      x: x.start, y: baseY,
-		      width: x.end-x.start-ahw, height: opts.headerArrowHeight
-		    },
-		  line = new K.Line(angular.extend({
-		    extract: x,
-		    points: shape,
-		    stroke:c
-		  }, arrowOpts)),
-		  // render the name, too
-		  lbl = new K.Text(angular.extend({
-		    extract: x,
-		    arrowBounds: arrowBounds,
-		    text: x.name
-		  }, textOpts)),
-		  // need a dummy group for clipping, `Text` doesn't
-		  // support clip directly
-		  lblGroup = new K.Group({clip:arrowBounds});
-		  ;
+          arrows = _(cds)
+            .forEach(function(x){
+              // color determined by `x.end - 1 % 3`
+              var isComplement = x.complement == 0,
+                  colorCoord = isComplement ? x.start : x.end,
+                  c = colors[colorNames[(colorCoord - 1) % 3]],
+                  baseY = isComplement ? y + opts.headerArrowHeight : y,
+                  arrowPointY = baseY + ahHalfHeight,
+                  arrowMaxY = baseY + opts.headerArrowHeight,
+                  shape = isComplement
+                    ? [
+                      x.start, arrowPointY,
+                      x.start + ahw, baseY,
+                      x.end, baseY,
+                      x.end, arrowMaxY,
+                      x.start + ahw, arrowMaxY,
+                      x.start, arrowPointY
+                    ] : [
+                      x.start, baseY,
+                      x.end - ahw, baseY,
+                      x.end, arrowPointY,
+                      x.end - ahw, arrowMaxY,
+                      x.start, arrowMaxY,
+                      x.start, y
+                    ],
+                  arrowBounds = isComplement
+                    ? {
+                      x: x.start+ahw, y: baseY,
+                      width: x.end-x.start-ahw, height: opts.headerArrowHeight
+                    } : {
+                      x: x.start, y: baseY,
+                      width: x.end-x.start-ahw, height: opts.headerArrowHeight
+                    },
+                  line = new K.Line(angular.extend({
+                    extract: x,
+                    points: shape,
+                    stroke:c
+                  }, arrowOpts)),
+                  // render the name, too
+                  lbl = new K.Text(angular.extend({
+                    extract: x,
+                    arrowBounds: arrowBounds,
+                    text: x.name
+                  }, textOpts)),
+                  // need a dummy group for clipping, `Text` doesn't
+                  // support clip directly
+                  lblGroup = new K.Group({clip:arrowBounds});
+              ;
 
-	      lblGroup.add(lbl);
-	      g.add(line, lblGroup);
-	      // now that lbl is on the canvas, we can see what it's
-	      // height/width is
-	      centerExtractLabel(lbl, xaxis.scaleX);
-	    }),
-	  $el = this.$element;
+              lblGroup.add(lbl);
+              g.add(line, lblGroup);
+              // now that lbl is on the canvas, we can see what it's
+              // height/width is
+              centerExtractLabel(lbl, xaxis.scaleX);
+            }),
+          $el = this.$element;
 
       // TODO: move tooltip control to the `npactGraph`, just throw an
       // event or callback here with the extract, let `npactGraph`
       // handle this stuff
       g.on('click', function(evt){
-	var scope = $rootScope.$new(),
-	    tpl = '<div npact-extract="extract"></div>';
-	scope.extract = evt.target.getAttrs().extract;
-	$el.qtip({
-	  content: {text: $compile(tpl)(scope)},
-	  position:{
-	    my: scope.extract.complement == 0 ? 'top center' : 'bottom center',
-	    target:[evt.evt.pageX, evt.evt.pageY]
-	  },
-	  show: {event:'tooltipShow.npact'},
-	  hide: {event:'tooltipHide.npact'}
-	});
-	$el.trigger('tooltipShow.npact');
+        var scope = $rootScope.$new(),
+            tpl = '<div npact-extract="extract"></div>';
+        scope.extract = evt.target.getAttrs().extract;
+        $el.qtip({
+          content: {text: $compile(tpl)(scope)},
+          position:{
+            my: scope.extract.complement == 0 ? 'top center' : 'bottom center',
+            target:[evt.evt.pageX, evt.evt.pageY]
+          },
+          show: {event:'tooltipShow.npact'},
+          hide: {event:'tooltipHide.npact'}
+        });
+        $el.trigger('tooltipShow.npact');
       });
       return this._cdsGroup = g;
     };

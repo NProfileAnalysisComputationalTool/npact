@@ -1,25 +1,8 @@
-(function(){
-
-  var log10 = Math.log(10);
-
-  /**
-   * find the nearest order of magnitude to `x`
-   *
-   * orderOfMagnitude(1012) => 1000
-   * orderOfMagnitude(1012, -1) => 100
-   *
-   * @param {Number} x
-   * @param {Number} [exponent] shift the result by this many digits
-   */
-  function orderOfMagnitude(x, exponent){
-    return Math.pow(10, Math.round(Math.log(x) / log10) + (exponent || 0));
-  }
-
-  // sigil value for quitting forEachAsync
-  var STOP_ITERATING = {};
-
-
-  function Utils($q, $timeout, $log, $interval){
+angular.module('npact')
+  .factory('Utils', function($q, $timeout, $log, $interval) {
+    // sigil value for quitting forEachAsync
+    var STOP_ITERATING = {},
+        log10 = Math.log(10);
     // public interface
     return {
       STOP_ITERATING: STOP_ITERATING,
@@ -29,6 +12,20 @@
     };
 
     /**
+     * find the nearest order of magnitude to `x`
+     *
+     * orderOfMagnitude(1012) => 1000
+     * orderOfMagnitude(1012, -1) => 100
+     *
+     * @param {Number} x
+     * @param {Number} [exponent] shift the result by this many digits
+     */
+    function orderOfMagnitude(x, exponent){
+      return Math.pow(10, Math.round(Math.log(x) / log10) + (exponent || 0));
+    }
+
+
+    /**
      * polls for when the element has a width
      *
      * @param {Element} element - what element to scan
@@ -36,20 +33,20 @@
      */
     function widthAvailable(element){
       var d = $q.defer(),
-	  p = d.promise,
-	  t1 = new Date(),
-	  task = $interval(checkForWidth, 100);
+          p = d.promise,
+          t1 = new Date(),
+          task = $interval(checkForWidth, 100);
       // stop polling once we've found a value
       p.then(function(){$interval.cancel(task);});
       return p;
 
       function checkForWidth(){
-	var w = element.width();
-	// indicate progress via the promise
-	d.notify(new Date() - t1);
-	if(w > 0){
-	  d.resolve(w);
-	}
+        var w = element.width();
+        // indicate progress via the promise
+        d.notify(new Date() - t1);
+        if(w > 0){
+          d.resolve(w);
+        }
       }
     };
 
@@ -61,60 +58,59 @@
      * @returns {Promise} when the iteration is complete
      */
     function forEachAsync(list, fn){
-	var d = $q.defer(),
-	    p = d.promise;
+      var d = $q.defer(),
+          p = d.promise;
 
-	if(list === null){
-	  d.reject();
-	  return p;
-	}
+      if(list === null){
+        d.reject();
+        return p;
+      }
 
-	var idx = 0,
-	    opts = {batchSize:512, delay: 0},
-	    batches = 0,
-	    len = list.length,
-	    t1 = new Date();
+      var idx = 0,
+          opts = {batchSize:512, delay: 0},
+          batches = 0,
+          len = list.length,
+          t1 = new Date();
 
-	p.then(function(){
-	  $log.log('iterated over', len, 'items in', new Date() - t1, 'ms');
-	});
+      p.then(function(){
+        $log.log('iterated over', len, 'items in', new Date() - t1, 'ms');
+      });
 
-	function iterate(){
-	  var t1 = new Date();
-	  try{
-	    for(var c = opts.batchSize; idx < len && c >= 0; idx++, c--){
-	      fn(list[idx], idx);
-	    }
-	  }catch(e){
-	    if(e === STOP_ITERATING){
-	      idx = len;
-	    }else{
-	      d.reject(e);
-	    }
-	  }
-	  var elapsed = new Date() - t1;
-	  batches++;
-	  if(idx === len){
-	    d.notify({batches:batches, idx:idx,
-		      elapsed:elapsed,
-		      batchSize:opts.batchSize});
-	    // if the loop was very fast, double the batch size, if slow, halve it
-	    opts.batchSize = (elapsed < 10)
-	      ? opts.batchSize << 1
-	      : opts.batchSize >> 1;
-	    // queue the next batch
-	    $timeout(iterate, opts.delay, false);
-	  }else{
-	    d.resolve(batches);
-	  }
-	}
-	// start it off soon
-	$timeout(iterate, opts.delay, false);
-	return p;
+      function iterate(){
+        var t1 = new Date();
+        try{
+          for(var c = opts.batchSize; idx < len && c >= 0; idx++, c--){
+            fn(list[idx], idx);
+          }
+        }catch(e){
+          if(e === STOP_ITERATING){
+            idx = len;
+          }else{
+            d.reject(e);
+          }
+        }
+        var elapsed = new Date() - t1;
+        batches++;
+        if(idx === len){
+          d.notify({batches:batches, idx:idx,
+                    elapsed:elapsed,
+                    batchSize:opts.batchSize});
+          // if the loop was very fast, double the batch size, if slow, halve it
+          opts.batchSize = (elapsed < 10)
+            ? opts.batchSize << 1
+            : opts.batchSize >> 1;
+          // queue the next batch
+          $timeout(iterate, opts.delay, false);
+        }else{
+          d.resolve(batches);
+        }
+      }
+      // start it off soon
+      $timeout(iterate, opts.delay, false);
+      return p;
     }
-  }
-
-  function LineParser(Utils, $q){
+  })
+  .service('LineParser', function(Utils, $q) {
     /**
      * parses many lines
      *
@@ -140,81 +136,82 @@
       var results = [];
       // async loop, gathering results
       return Utils.forEachAsync(
-	text.split('\n'),
-	function(line, idx){
-	  results[idx] = parseLine(line);
-	})
-	.then(function(){ return results; });
+        text.split('\n'),
+        function(line, idx){
+          results[idx] = parseLine(line);
+        })
+        .then(function(){ return results; });
     };
-  }
-
-  function MakeParserService(parseLineFn){
-    return function(LineParser){
-      this.parse = _.partialRight(LineParser.parse, parseLineFn);
-      this.parseAsync =  _.partialRight(LineParser.parseAsync, parseLineFn);
+  })
+// creates parsers, suitable for returning from factory declarations
+  .service('ParserFactory', function(LineParser){
+    this.create = function(parseLineFn) {
+      return {
+        parseLine: parseLineFn,
+        parse: _.partialRight(LineParser.parse, parseLineFn),
+        parseAsync:  _.partialRight(LineParser.parseAsync, parseLineFn)
+      };
     };
-  }
+  })
+  .factory('ExtractParser', function(ParserFactory){
 
-  /**
-   * Extract format
-   *
-   * The grammar is roughly:
-   *   <extract>    = <name> <address>
-   *   <address>    = <complement> | <range>
-   *   <complement> = complement(<range>)
-   *   <range>      = <base>..<base>
-   *   <base>       = any integer
-   */
-  var EXTRACT_REGEX = /([^ ]+) (complement\()?(\d+)\.\.(\d+)/,
-      // some indexes for where our regex groups will show
-      NAME = 1, COMP = 2, START = 3, END = 4;
+    /**
+     * Extract format
+     *
+     * The grammar is roughly:
+     *   <extract>    = <name> <address>
+     *   <address>    = <complement> | <range>
+     *   <complement> = complement(<range>)
+     *   <range>      = <base>..<base>
+     *   <base>       = any integer
+     */
+    var EXTRACT_REGEX = /([^ ]+) (complement\()?(\d+)\.\.(\d+)/,
+        // some indexes for where our regex groups will show
+        NAME = 1, COMP = 2, START = 3, END = 4;
 
-  /**
-   * parses one line as an extract
-   *
-   * @param {string} line - single extract line
-   * @returns {Object} extract
-   */
-  function parseExtract(line){
-    var parts = EXTRACT_REGEX.exec(line);
-    return {
-      start: parseInt(parts[START]),
-      end: parseInt(parts[END]),
-      complement: parts[COMP] ? 1 : 0,
-      name: parts[NAME]
-    };
-  }
+    /**
+     * parses one line as an extract
+     *
+     * @param {string} line - single extract line
+     * @returns {Object} extract
+     */
+    function parseExtract(line){
+      var parts = EXTRACT_REGEX.exec(line);
+      return {
+        start: parseInt(parts[START]),
+        end: parseInt(parts[END]),
+        complement: parts[COMP] ? 1 : 0,
+        name: parts[NAME]
+      };
+    }
 
-  /**
-   * parses one line as an hit
-   *
-   * COLORING INDICATES THE COLOR OF THE GENOME PHASE (0,1, OR 2) OF
-   * THE THIRD CODON POSITIONS OF GENES, IN INTERNAL COORDINATES. IF A
-   * GENE IS ENCODED IN THE DIRECT STRAND, ITS THIRD CODON POSITIONS
-   * ARE IN THE SAME PHASE AS THE SECOND COORDINATE. E.G., dnaN
-   * 1460..2668, WILL HAVE COLOR CORRESPONDING TO (2668 – 1) % 3 = 0
-   * (RED)). INSTEAD, IF IT IS ENCODED ON THE COMPLEMENTARY STRAND, IT
-   * WILL HAVE COLOR CORRESPONDING TO THE POSITION INDICATED BY THE
-   * FIRST COORDINATE. E.G., radA complement(23561..24766) HAS COLOR
-   * (23561 – 1) % 3 = 1 (GREEN). ONE IS SUBTRACTED FROM POSITION TO
-   * TRANSLATE OUTPUT/INPUT COORDINATES INTO INTERNAL COORDINATES.
-   *
-   * @param {string} line - single extract line
-   * @returns {Object} hit
-   */
-  function parseHit(line){
-    var res = parseExtract(line),
-	phaseCoordinate = res.complement ? res.start : res.end;
-    res.phase = (phaseCoordinate - 1) % 3;
-    return res;
-  }
+    return ParserFactory.create(parseExtract);
+  })
+  .factory('HitsParser', function(ParserFactory, ExtractParser) {
+    /**
+     * parses one line as an hit
+     *
+     * COLORING INDICATES THE COLOR OF THE GENOME PHASE (0,1, OR 2) OF
+     * THE THIRD CODON POSITIONS OF GENES, IN INTERNAL COORDINATES. IF A
+     * GENE IS ENCODED IN THE DIRECT STRAND, ITS THIRD CODON POSITIONS
+     * ARE IN THE SAME PHASE AS THE SECOND COORDINATE. E.G., dnaN
+     * 1460..2668, WILL HAVE COLOR CORRESPONDING TO (2668 – 1) % 3 = 0
+     * (RED)). INSTEAD, IF IT IS ENCODED ON THE COMPLEMENTARY STRAND, IT
+     * WILL HAVE COLOR CORRESPONDING TO THE POSITION INDICATED BY THE
+     * FIRST COORDINATE. E.G., radA complement(23561..24766) HAS COLOR
+     * (23561 – 1) % 3 = 1 (GREEN). ONE IS SUBTRACTED FROM POSITION TO
+     * TRANSLATE OUTPUT/INPUT COORDINATES INTO INTERNAL COORDINATES.
+     *
+     * @param {string} line - single extract line
+     * @returns {Object} hit
+     */
+    function parseHit(line){
+      var res = ExtractParser.parseLine(line),
+          phaseCoordinate = res.complement ? res.start : res.end;
+      res.phase = (phaseCoordinate - 1) % 3;
+      return res;
+    }
 
-
-  angular.module('npact')
-    .factory('Utils', Utils)
-    .service('LineParser', LineParser)
-    .service('ExtractParser', MakeParserService(parseExtract))
-    .service('HitsParser', MakeParserService(parseHit))
-  ;
-
-}())
+    return ParserFactory.create(parseHit);
+  })
+;
