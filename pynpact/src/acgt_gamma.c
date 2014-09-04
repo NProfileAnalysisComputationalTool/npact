@@ -2517,7 +2517,7 @@ void write_results(int from_hss, int to_hss, int ncds, int genome_size, long byt
     output4= get_out_file(".altcds", "w");
     output5= get_out_file(".repetitive", "w");
     output6= get_out_file(".modified", "w");
-//    logmsg(10, "Writing ORF results.\n");
+    logmsg(10, "Writing ORF results.\n");
 
 // fprintf(output6, "List of predicted ORFs modifying previous annotation.\n");
 
@@ -2565,7 +2565,6 @@ genome= ORF + 3 * MAX_ORF_SIZE;
 
 	for(i= 0; i < to_hss; ++i)
 	{
-if(!(i %10))    logmsg(10, "Processing ORF results %d%%\n", i / to_hss * 100);
         k= hss[o[i]].type;
         G= hss[o[i]].G;
         strcpy(Pg, hss[o[i]].pstring);
