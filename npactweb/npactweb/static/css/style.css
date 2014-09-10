@@ -352,15 +352,12 @@ button.Start { clear:both; margin: 8px;}
 #start-over a, #start-over a:visited {color:#FF4A00;}
 
 /* ****** For the processing page ****** */
-#progress .onsuccess, #progress .onerror { display:none; }
 #progress .ui-icon { float:left;  margin-right: .5em;}
+#progress h3 { color:#0021A5;margin-left:4px; }
 #progress h3 + div { padding-left: 16px; }
-#progress h4 { margin-top: 6px; }
+#progress h4 { margin-top: 6px; color:#FF4A00; }
 
-#timer { margin: 10px 0; }
-#steps { max-height: 200px; overflow:auto; }
-#steps li {margin:3px 0 3px 20px;}
-#currentstepdesc { font-weight:bold; }
+
 .spinner { height: 24px; width=24px; float:left;}
 
 #content .ui-state-error { font-size: 1.2em; }
@@ -368,8 +365,6 @@ button.Start { clear:both; margin: 8px;}
 
 
 /* ****** For the Results page ****** */
-#results h3 {color:#0021A5;margin-left:4px;}
-#results h4 {color:#FF4A00;margin-left:14px;}
 #graphicalresults {border:none;}
 #graphicalresults a {font-weight: bold;}
 

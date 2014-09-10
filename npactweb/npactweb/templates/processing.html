@@ -10,71 +10,9 @@
 {% endblock addScript %}
 
 {% block content %}
-<h2 id="title">N-PACT Is Running</h2>
 
 <div id="progress" class="contentPadding">
-
-  <div id="results" style="display:none;">
-    <h3>Results </h3>
-    <div>
-      <div>
-        <div npact-graph-page ></div>
-      </div>
-      <h4>Downloads</h4>
-
-      <div id="graphicalresults" class="ui-state-highlight ui-corner-all onsuccess">
-        <div class="ui-icon ui-icon-info"></div>
-        <p>
-          The graph is now ready <a id="downloadlink" href="#" target="_blank">Click Here to view</a>.
-        </p>
-      </div>
-      <div id="predictionresults" class="ui-state-highlight ui-corner-all">
-        <div class="ui-icon ui-icon-info"></div>
-        <p>
-          The prediction results are now ready:
-          <ul id="files" />
-        </p>
-      </div>
-
-      {% if email %}
-      <div id="emailsent" class="onsuccess">
-        <h4>Email results</h4>
-        <p>A link to this results page was sent to <tt>{{email}}</tt>.</p>
-      </div>
-      {% endif %}
-
-      <div id="tryagain" class="onsuccess">
-          <h4>Not what you expected?</h4>
-          <ul>
-            <li><a id="reconfigurelink" href="{{ reconfigure_url }}">Reconfigure it</a> and try again.</li>
-            <li><a href="{% url start %}">Start Over</a></li>
-          </ul>
-      </div>
-    </div>
-  </div>
-
-
-
-  <div id="progressreport">
-    <h3 > Status </h3>
-    <div id="computationerred" class="ui-state-error ui-corner-all onerror">
-      <p>
-        <span class="ui-icon ui-icon-alert"></span>
-        There was an error. You can click refresh to try again,
-        <a href="{{ reconfigure_url }}">reconfigure this report</a>,
-        or return to the <a href="{% url start %}">start</a>.
-      </p>
-    </div>
-
-    <div id="computationrunning" class="ui-state-highlight">
-      <img src="{% media_url "images/spinner.gif" %}" class="spinner"/>
-      <p id="currentstep">N-PACT is: <span id="currentstepdesc">Initializing</span></p>
-    </div>
-    {% if email %}
-    <p>An email link to the results will be sent to <tt>{{email}}</tt>. You may leave this page at any time and return via that link.</p>
-    {% endif %}
-  </div>
-
+  <div npact-graph-page ></div>
 
   <script type="text/javascript">
     angular.module('npact')

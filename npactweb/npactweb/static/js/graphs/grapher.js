@@ -2,7 +2,9 @@ angular.module('npact')
   .factory('Grapher', function(K, $log, GraphingCalculator, $rootScope, $compile, GraphDealer){
 
     function addMany(container, children){
-      return container.add.apply(container, children);
+      if(children && children.length) {
+        return container.add.apply(container, children);
+      }
     }
 
     function Grapher(opts){

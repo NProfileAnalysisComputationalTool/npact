@@ -194,7 +194,7 @@ def kickstart(request, path):
 
     reconfigure_url = reverse('config', args=[path])
     reconfigure_url += "?" + urlencode_config(config)
-
+    config['reconfigure_url'] = reconfigure_url
     email = request.GET.get('email')
     client.ensure_daemon()
     config = main.process('allplots', config, executor=client.get_server())
@@ -214,14 +214,20 @@ def kickstart(request, path):
         eid = client.enqueue(task, after=[target_file])
         logger.info("Scheduled email to %r with jobid: %s", email, eid)
 
+    return HttpResponse(
+        json.dumps(sanitize_config_for_client(config)),
+        content_type="application/json")
+
+
+def sanitize_config_for_client(config):
     output = {}
     for k, v in config.iteritems():
         if isinstance(v, basestring) and v.startswith(settings.MEDIA_ROOT):
             v = v[len(settings.MEDIA_ROOT):]
             v = v.lstrip("/")
         output[k] = v
-
-    return HttpResponse(json.dumps(output), content_type="application/json")
+    del output['psnames']
+    return output
 
 
 def send_email(email_address, config, run_link, result_link):
@@ -253,7 +259,7 @@ def run_status(request, jobid):
     result = {'tid': jobid}
     status = 200
     try:
-        result['ready'] = client.ready(jobid)
+        result['ready'] = client.ready(getabspath(jobid, raise_on_missing=False))
     except NoSuchTaskError:
         result['message'] = 'Unknown task identifier.'
         status = 404

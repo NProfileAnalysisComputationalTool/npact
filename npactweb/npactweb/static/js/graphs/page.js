@@ -12,36 +12,43 @@ angular.module('npact')
     };
   })
 
-  .controller('npactGraphPageCtrl', function($scope, GraphDealer, Fetcher, npactConstants) {
+  .controller('npactGraphPageCtrl', function($scope, GraphDealer, Fetcher, npactConstants, $q, $log) {
 
     $scope.miscFiles = [];
     $scope.graphHeight = npactConstants.graphSpecDefaults.height;
-
+    $scope.status = 'Initializing';
     // start it up
     Fetcher.kickstart()
       .then(function(config) {
+        $log.log('Kickstart successful:', config);
+        $scope.status = 'Running';
+        $scope.config = config;
         // got config, request the first round of results
         $scope.title = config.first_page_title;
-        Fetcher.nprofile(config).then(GraphDealer.setProfile);
-        Fetcher.inputFileCds(config)
+        var nprofile = Fetcher.nprofile(config).then(GraphDealer.setProfile);
+        var inputFileCds = Fetcher.inputFileCds(config)
           .then(function(data) {
             GraphDealer.addExtract({name: 'Input file CDS', data: data});
           });
 
-        Fetcher.acgtGammaFileList(config).then(function(fileList) {
-          $scope.miscFiles.push.apply($scope.miscFiles, fileList);
-          Fetcher.fetchFile(config['File_of_new_CDSs'])
-            .then(function(data) {
-              GraphDealer.addExtract({name: 'Newly Identified ORFs', data: data});
-            });
+        var extraFileList = Fetcher.acgtGammaFileList(config)
+              .then(function(fileList) {
+                $scope.miscFiles.push.apply($scope.miscFiles, fileList);
+                Fetcher.fetchFile(config['File_of_new_CDSs'])
+                  .then(function(data) {
+                    GraphDealer.addExtract({name: 'Newly Identified ORFs', data: data});
+                  });
 
-          //TODO: Hits line: config['File_of_G+C_coding_potential_regions']
-          // Fetcher.fetchFile(config['File_of_G+C_coding_potential_regions'])
-          //   .then(hitsParser)
-          //   .then(function(data) {
-          //     //TODO: GraphDealer.addHits
-          //     //GraphDealer.addHits({name: 'Hits', data: data});
-          //   });
+                //TODO: Hits line: config['File_of_G+C_coding_potential_regions']
+                // Fetcher.fetchFile(config['File_of_G+C_coding_potential_regions'])
+                //   .then(hitsParser)
+                //   .then(function(data) {
+                //     //TODO: GraphDealer.addHits
+                //     //GraphDealer.addHits({name: 'Hits', data: data});
+                //   });
+              });
+        $q.all([nprofile, inputFileCds, extraFileList]).then(function() {
+          $scope.status = 'Finished';
         });
       });
   })
@@ -72,7 +79,7 @@ angular.module('npact')
         .then(fetchFile);
     };
     this.inputFileCds = function(config) {
-      return StatusPoller.start(config['Input file CDS'])
+      return StatusPoller.start(config['File_of_published_accepted_CDSs'])
         .then(fetchFile);
     };
 
@@ -94,7 +101,7 @@ angular.module('npact')
 
       $http.get(STATUS_BASE_URL + tid)
         .then(function(res) {
-          if(res.ready) { deferred.resolve(tid); }
+          if(res.data.ready) { deferred.resolve(tid); }
           else { $timeout(pollAgain, POLLTIME); }
         })
         .catch(deferred.reject);
@@ -103,7 +110,7 @@ angular.module('npact')
     }
 
     this.start = function(tid) {
-      if(!tid || !tid.length == 0)
+      if(!tid || tid.length == 0)
         return $q.reject(new Error("Invalid task id"));
 
       return poller(tid, $q.defer());
