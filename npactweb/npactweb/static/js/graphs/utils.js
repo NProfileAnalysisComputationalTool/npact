@@ -73,7 +73,8 @@ angular.module('npact')
           t1 = new Date();
 
       p.then(function(){
-        $log.log('iterated over', len, 'items in', new Date() - t1, 'ms');
+        $log.log('iterated over', len,
+                 'items in', new Date() - t1, 'ms, batchcount: ', batches);
       });
 
       function iterate(){
@@ -91,14 +92,15 @@ angular.module('npact')
         }
         var elapsed = new Date() - t1;
         batches++;
-        if(idx === len){
-          d.notify({batches:batches, idx:idx,
+        if(idx < len){
+          d.notify({batches:batches, idx:idx, len:len,
                     elapsed:elapsed,
                     batchSize:opts.batchSize});
           // if the loop was very fast, double the batch size, if slow, halve it
-          opts.batchSize = (elapsed < 10)
-            ? opts.batchSize << 1
-            : opts.batchSize >> 1;
+          var goalms = 10,
+              rowsPerms = opts.batchSize / elapsed;
+
+          opts.batchSize = rowsPerms * goalms;
           // queue the next batch
           $timeout(iterate, opts.delay, false);
         }else{
@@ -138,7 +140,9 @@ angular.module('npact')
       return Utils.forEachAsync(
         text.split('\n'),
         function(line, idx){
-          results[idx] = parseLine(line);
+          if(line && line.length > 0) {
+            results[idx] = parseLine(line);
+          }
         })
         .then(function(){ return results; });
     };
