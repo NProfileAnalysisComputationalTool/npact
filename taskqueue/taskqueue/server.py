@@ -47,7 +47,7 @@ class Server(object):
         if self.pool is None:
             # can use pool=False to disable
             self.pool = multiprocessing.Pool()
-        log.info("Finished initializing server")
+        log.info("Finished initializing server, work_dir: %s", self.work_dir)
 
     def get_task(self, tid):
         if tid not in self.tasks:

@@ -117,6 +117,7 @@ def build_config(path, request):
     assert_clean_path(path, request)
 
     try:
+        # TODO: switch to parsing.initial(getabspath(path))
         config = prepare.default_config(getabspath(path))
     except prepare.InvalidGBKException, e:
         messages.error(request, str(e))
@@ -259,7 +260,8 @@ def run_status(request, jobid):
     result = {'tid': jobid}
     status = 200
     try:
-        result['ready'] = client.ready(getabspath(jobid, raise_on_missing=False))
+        abspath = getabspath(jobid, raise_on_missing=False)
+        result['ready'] = os.path.exists(abspath) or client.ready(abspath)
     except NoSuchTaskError:
         result['message'] = 'Unknown task identifier.'
         status = 404

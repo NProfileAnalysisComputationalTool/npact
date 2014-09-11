@@ -27,16 +27,12 @@ OUTPUTKEY = 'File_of_published_accepted_CDSs'
 
 def plan(config, executor):
     if parsing.isgbk(config):
+        logger.debug(
+            "GBK file, extracting known gene names %s", config['filename'])
         rconfig, hash = get_hash(config)
         target_file = parsing.derive_filename(config, hash, 'genes')
         config[OUTPUTKEY] = target_file
-
-        # TODO: Also produce a JSON version of this file.
-        #config['Input file CDS'] = target_file + '.json'
-        #enqueue(extract_as_json, executor, config, config['Input File CDS'])
-        jobs = enqueue(_extract, executor, rconfig, target_file)
-
-        return jobs
+        return enqueue(_extract, executor, rconfig, target_file)
     else:
         raise InvalidGBKException()
 

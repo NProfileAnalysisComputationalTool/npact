@@ -14,12 +14,9 @@ def enqueue(func, executor, config, target, after=None):
     id list.
 
     """
-    if target.exists():
-        return []
-    else:
-        return [
-            executor.enqueue(
-                delay(func)(config, target), tid=target, after=after)]
+    return [
+        executor.enqueue(
+            delay(func)(config, target), tid=target, after=after)]
 
 
 def producer(tmpmanager=mkstemp_rename):
