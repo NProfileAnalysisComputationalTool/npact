@@ -38,14 +38,10 @@ angular.module('npact')
                   .then(function(data) {
                     GraphDealer.addExtract({name: 'Newly Identified ORFs', data: data});
                   });
-
-                //TODO: Hits line: config['File_of_G+C_coding_potential_regions']
-                // Fetcher.fetchFile(config['File_of_G+C_coding_potential_regions'])
-                //   .then(hitsParser)
-                //   .then(function(data) {
-                //     //TODO: GraphDealer.addHits
-                //     //GraphDealer.addHits({name: 'Hits', data: data});
-                //   });
+                Fetcher.fetchFile(config['File_of_G+C_coding_potential_regions'])
+                  .then(function(data) {
+                    GraphDealer.addHits({name: 'Hits', data: data});
+                  });
               });
         $q.all([nprofile, inputFileCds, extraFileList]).then(function() {
           $scope.status = 'Finished';

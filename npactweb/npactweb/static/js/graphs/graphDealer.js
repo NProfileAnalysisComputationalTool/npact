@@ -99,6 +99,10 @@ angular.module('npact')
             $log.log('failed to parse', name, arguments);
           });
       },
+      addHits: function(exopts) {
+        // TODO: graph a hits line.
+        $log.log("got hits data: ", exopts);
+      },
 
       setColors:function(colorBlindFriendly){
         $log.log('setColors', arguments);
