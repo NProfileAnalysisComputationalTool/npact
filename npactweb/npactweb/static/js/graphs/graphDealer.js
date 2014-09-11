@@ -78,12 +78,13 @@ angular.module('npact')
         return onProfileData;
       },
 
-      addExtract:function(opts){
-        var name = opts.name;
-        $log.log('addExtract', name);
+      addExtract:function(exopts){
+        var name = exopts.name;
+        $log.log('addExtract:', name);
 
-        return ExtractParser.parseAsync(opts.data)
+        return ExtractParser.parseAsync(exopts.data)
           .then(function(data){
+            $log.log('parsed extract for', name, hasProfileData);
             // save it for later
             opts.extracts[name] = data;
             // if we've got profile data already, rebuild
@@ -94,6 +95,8 @@ angular.module('npact')
             }
             // if we're still waiting on profile data, then when it hits
             // this extract will be processed.
+          }, function(){
+            $log.log('failed to parse', name, arguments);
           });
       },
 
