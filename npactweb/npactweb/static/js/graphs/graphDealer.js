@@ -5,9 +5,9 @@ angular.module('npact')
       leftPadding: 120,
 
       axisLabelFontsize: 11,
-      axisFontcolor: "#444",
+      axisFontcolor: '#444',
       axisTitleFontsize: 20,
-      borderColor: "#444",
+      borderColor: '#444',
       rightPadding: 25,
       height: 200,
       profileTicks: 5,
@@ -16,7 +16,7 @@ angular.module('npact')
       // header labels and arrows
       headerY: 5,
       headerLabelPadding: 10,
-      headerLabelFontcolor: "#444",
+      headerLabelFontcolor: '#444',
       headerLabelFontsize: 11,
       headerArrowHeight: 12,
       headerArrowWidth: 6,
@@ -25,20 +25,21 @@ angular.module('npact')
 
     },
     lineColors : {
-      r: "red",
-      g: "blue",
-      b: "green"
+      r: 'red',
+      g: 'blue',
+      b: 'green'
     },
     colorBlindLineColors : {
-      r: "rgb(213, 94, 0)",
-      g: "rgb(204, 121, 167)",
-      b: "rgb(0, 114, 178)"
+      r: 'rgb(213, 94, 0)',
+      g: 'rgb(204, 121, 167)',
+      b: 'rgb(0, 114, 178)'
     },
     // how much vertical space to leave for different kinds of headers
     headerSizes:{'extracts': 30, 'hits': 20}
   })
 
   .factory('GraphDealer', function($log, Utils, $q, $rootScope, GraphingCalculator, npactConstants, ExtractParser, HitsParser) {
+    'use strict';
     // the `GraphDealer` hands out graph data and processes events
     var hasProfileData = false,
         _onProfileData = $q.defer(),
@@ -171,15 +172,14 @@ angular.module('npact')
             profile: [],
             headers: [],
             width: width,
-            colors: opts.colorBlindFriendly
-              ? npactConstants.colorBlindLineColors
+            colors: opts.colorBlindFriendly ? npactConstants.colorBlindLineColors
               : npactConstants.lineColors,
 
             // how much space should be taken by the line graph alone
             get profileHeight(){
               // TODO: reduce duplication between here and GraphingCalculator
-              return this.height - this.headerY - this.axisLabelFontsize
-                - 2*this.profileTicks;
+              return this.height - this.headerY - this.axisLabelFontsize -
+                2*this.profileTicks;
             },
             get range() {return [this.startBase, this.endBase];}
           }, npactConstants.graphSpecDefaults);
@@ -188,8 +188,8 @@ angular.module('npact')
     }
 
     function makeGraphSpecs(width){
-      var base = opts.page * opts.basesPerGraph * opts.graphsPerPage
-            + opts.offset;
+      var base = opts.page * opts.basesPerGraph * opts.graphsPerPage +
+            opts.offset;
       return _.range(0, opts.graphsPerPage)
         .map(function(n){
           return makeGraphSpec(base + n*opts.basesPerGraph, width);
@@ -302,7 +302,7 @@ angular.module('npact')
       pendingRedraws++;
       return function(graphSpecs){
         pendingRedraws--;
-        if(pendingRedraws == 0){
+        if(pendingRedraws === 0){
           return redraw(graphSpecs);
         }else{
           $log.log('skipping redraw, still have pending work');
@@ -336,7 +336,7 @@ angular.module('npact')
         .then(_.partialRight(attachAllData, 'extracts'))
         .then(_.partialRight(attachAllData, 'hits'))
         .then(function(graphSpecs){
-          return opts.graphSpecs = graphSpecs;
+          return (opts.graphSpecs = graphSpecs);
         })
         .then(redrawRequest())
         .then(function(graphSpecs){
