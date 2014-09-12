@@ -13,11 +13,12 @@ angular.module('npact')
     };
   })
 
-  .controller('npactGraphPageCtrl', function($scope, GraphDealer, Fetcher, npactConstants, $q, $log) {
+  .controller('npactGraphPageCtrl', function($scope, GraphDealer, Fetcher, npactConstants, $q, $log, StatusPoller) {
     'use strict';
     $scope.miscFiles = [];
     $scope.graphHeight = npactConstants.graphSpecDefaults.height;
     $scope.status = 'Initializing';
+    $scope.ready = false;
     // start it up
     Fetcher.kickstart()
       .then(function(config) {
@@ -46,7 +47,13 @@ angular.module('npact')
               });
         $q.all([nprofile, inputFileCds, extraFileList]).then(function() {
           $scope.status = 'Finished';
+          $scope.ready = true;
         });
+
+        StatusPoller.start(config['pdf_filename'])
+          .then(function(pdfFilename) {
+            $scope.miscFiles.push(pdfFilename);
+          });
       });
   })
 

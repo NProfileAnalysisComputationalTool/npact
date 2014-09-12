@@ -8,7 +8,7 @@
       or return to the <a href="/npact/">start</a>.
     </p>
   </div>
-  <div id="progressreport">
+  <div id="progressreport" ng-show="!ready">
     <h3> Status </h3>
     <div id="computationrunning">
       <div  class="ui-state-highlight">
@@ -32,14 +32,8 @@
       </div>
       <h4>Downloads</h4>
 
-      <div id="graphicalresults" class="ui-state-highlight ui-corner-all">
-        <div class="ui-icon ui-icon-info"></div>
-        <p>
-          The graph is now ready <a id="downloadlink" href="#" target="_blank">Click Here to view</a>.
-        </p>
-      </div>
       <div id="predictionresults" class="ui-state-highlight ui-corner-all"
-           ng-show="miscFiles">
+           ng-show="miscFiles.length > 0">
         <div class="ui-icon ui-icon-info"></div>
         <p>
           The prediction results are now ready:
