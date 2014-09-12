@@ -200,6 +200,7 @@ def kickstart(request, path):
     client.ensure_daemon()
     config = main.process('allplots', config, executor=client.get_server())
     if email:
+        raise NotImplementedError()
         target_file = results.pdf_filename or results.combined_ps_name
         assert target_file, \
             "Configured for email but didn't get emailable file."
