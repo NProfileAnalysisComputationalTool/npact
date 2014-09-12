@@ -1,10 +1,11 @@
 angular.module('npact')
   .directive('npactGraphPage', function(STATIC_BASE_URL, Utils, GraphDealer) {
+    'use strict';
     return {
       restrict: 'A',
       templateUrl: STATIC_BASE_URL + 'js/graphs/page.html',
       controller: 'npactGraphPageCtrl',
-      link: function($scope, $element, $attrs) {
+      link: function($scope, $element) {
         // TODO: watch for changes in width
         // http://stackoverflow.com/questions/23044338/window-resize-directive
         Utils.widthAvailable($element).then(GraphDealer.setWidth);
@@ -13,7 +14,7 @@ angular.module('npact')
   })
 
   .controller('npactGraphPageCtrl', function($scope, GraphDealer, Fetcher, npactConstants, $q, $log) {
-
+    'use strict';
     $scope.miscFiles = [];
     $scope.graphHeight = npactConstants.graphSpecDefaults.height;
     $scope.status = 'Initializing';
@@ -50,13 +51,13 @@ angular.module('npact')
   })
 
   .service('Fetcher', function(StatusPoller, $http, FETCH_URL, ACGT_GAMMA_FILE_LIST_URL, KICKSTART_BASE_URL, $window) {
-
+    'use strict';
     /**
      * download contents from any url
      */
     function rawFile(url) {
       return $http.get(url).then(function(res) { return res.data; });
-    };
+    }
 
     /**
      * download contents from a "fetch" path
@@ -89,6 +90,7 @@ angular.module('npact')
 
 
   .service('StatusPoller', function(STATUS_BASE_URL, $q, $http, $timeout) {
+    'use strict';
     var POLLTIME = 2500;
 
     function poller(tid, deferred) {
@@ -106,8 +108,9 @@ angular.module('npact')
     }
 
     this.start = function(tid) {
-      if(!tid || tid.length == 0)
-        return $q.reject(new Error("Invalid task id"));
+      if(!tid || tid.length === 0){
+        return $q.reject(new Error('Invalid task id'));
+      }
 
       return poller(tid, $q.defer());
     };

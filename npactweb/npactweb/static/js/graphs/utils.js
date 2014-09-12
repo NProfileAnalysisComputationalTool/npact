@@ -1,5 +1,6 @@
 angular.module('npact')
   .factory('Utils', function($q, $timeout, $log, $interval) {
+    'use strict';
     // sigil value for quitting forEachAsync
     var STOP_ITERATING = {},
         log10 = Math.log(10);
@@ -48,7 +49,7 @@ angular.module('npact')
           d.resolve(w);
         }
       }
-    };
+    }
 
     /**
      * Loop over the list from back to front, asyncronously
@@ -113,6 +114,7 @@ angular.module('npact')
     }
   })
   .service('LineParser', function(Utils, $q) {
+    'use strict';
     /**
      * parses many lines
      *
@@ -121,7 +123,7 @@ angular.module('npact')
      * @returns {array} extract objects
      */
     this.parse = function(text, parseLine){
-      if (!_.isString(text)) return text;
+      if (!_.isString(text)) { return text; }
       var lines = text.split('\n');
       return lines.map(parseLine);
     };
@@ -133,7 +135,7 @@ angular.module('npact')
      * @returns {Promise} for array of parsed objects
      */
     this.parseAsync = function(text, parseLine){
-      if (!_.isString(text)) return $q.when(text);
+      if (!_.isString(text)) { return $q.when(text); }
 
       var results = [];
       // async loop, gathering results
@@ -149,6 +151,7 @@ angular.module('npact')
   })
 // creates parsers, suitable for returning from factory declarations
   .service('ParserFactory', function(LineParser){
+    'use strict';
     this.create = function(parseLineFn) {
       return {
         parseLine: parseLineFn,
@@ -158,7 +161,7 @@ angular.module('npact')
     };
   })
   .factory('ExtractParser', function(ParserFactory){
-
+    'use strict';
     /**
      * Extract format
      *
@@ -192,6 +195,7 @@ angular.module('npact')
     return ParserFactory.create(parseExtract);
   })
   .factory('HitsParser', function(ParserFactory, ExtractParser) {
+    'use strict';
     /**
      * parses one line as an hit
      *
