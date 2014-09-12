@@ -269,6 +269,13 @@ angular.module('npact')
 
     GP.redraw = function(){
       this._genomeGroup.add(this.xAxisGroup(), this.profileGroup());
+
+      var renderedExtracts = _.mapValues(this.opts.extracts, this.cdsGroup, this);
+      addMany(this._genomeGroup, _.values(renderedExtracts));
+
+      var renderedHits = _.mapValues(this.opts.hits, this.drawHit, this);
+      addMany(this._genomeGroup, _.values(renderedHits));
+
       this.stage.batchDraw();
     };
 
@@ -391,8 +398,53 @@ angular.module('npact')
       return (this._cdsGroup = g);
     };
 
-    GP.drawCDS = function(cds, name){
-      this._genomeGroup.add(this.cdsGroup(cds, name));
+    GP.drawHit = function(hits, name) {
+      var xaxis = this.xaxis, opts = this.opts,
+          startBase = opts.startBase,
+          endBase = opts.endBase,
+          colors = this.colors,
+          colorNames = 'rgb',
+          header = _.find(opts.headers, {text:name}, name),
+          offset = header.height / 4,
+          hitStrokeWidth = offset / 2,
+          guideYOffset = 2,
+          // arrow sticks out ~1%
+          guideArrowXOffset = Math.floor(0.01 * (endBase - startBase)),
+          baseY = header.y + (header.height / 2),
+          g = new K.Group({
+            x: 0, y: 0,
+            scaleX: xaxis.scaleX,
+            offsetX: startBase
+          }),
+          guideLineOpts = {
+            stroke:'#ddd'
+          }
+      ;
+      // draw the guide lines
+      g.add(new K.Line(angular.extend({
+        points: [startBase, baseY + guideYOffset,
+                 endBase, baseY + guideYOffset,
+                 endBase - guideArrowXOffset, header.y + header.height]
+      }, guideLineOpts)));
+      g.add(new K.Line(angular.extend({
+        points: [startBase + guideArrowXOffset, header.y,
+                 startBase, baseY - guideYOffset,
+                 endBase, baseY - guideYOffset]
+      }, guideLineOpts)));
+
+      // draw each hit
+      _(hits).forEach(function(hit) {
+        var y = baseY + (hit.complement ? -offset : offset);
+
+        g.add(
+          new K.Line({
+            points: [hit.start, y, hit.end, y],
+            stroke: colors[colorNames[hit.phase]],
+            strokeWidth: hitStrokeWidth
+          }));
+      });
+
+      return g;
     };
     return Grapher;
   });

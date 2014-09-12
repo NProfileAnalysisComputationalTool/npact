@@ -179,7 +179,7 @@ angular.module('npact')
             get profileHeight(){
               // TODO: reduce duplication between here and GraphingCalculator
               return this.height - this.headerY - this.axisLabelFontsize -
-                2*this.profileTicks;
+                3*this.profileTicks;
             },
             get range() {return [this.startBase, this.endBase];}
           }, npactConstants.graphSpecDefaults);

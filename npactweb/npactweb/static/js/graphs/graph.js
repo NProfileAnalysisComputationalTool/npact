@@ -15,11 +15,7 @@ angular.module('npact')
           if(!spec) return;
           // TODO: clean up a pre-existing graph?
           var g = new Grapher(angular.extend({}, spec, opts));
-          // TODO: make redraw handle extracts
           g.redraw();
-          _.forOwn(spec.extracts, function(value, key){
-            g.drawCDS(value, key);
-          });
         }
       }
     };
