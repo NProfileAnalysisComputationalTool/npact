@@ -35,10 +35,10 @@ angular.module('npact')
       b: "rgb(0, 114, 178)"
     },
     // how much vertical space to leave for different kinds of headers
-    headerSizes:{'extract': 30, 'hits': 15}
+    headerSizes:{'extracts': 30, 'hits': 20}
   })
 
-  .factory('GraphDealer', function($log, Utils, $q, $rootScope, GraphingCalculator, npactConstants, ExtractParser) {
+  .factory('GraphDealer', function($log, Utils, $q, $rootScope, GraphingCalculator, npactConstants, ExtractParser, HitsParser) {
     // the `GraphDealer` hands out graph data and processes events
     var hasProfileData = false,
         _onProfileData = $q.defer(),
@@ -57,6 +57,7 @@ angular.module('npact')
           get length(){ return this.endBase - this.startBase; },
           profile: null,
           extracts: {},
+          hits: {},
           graphSpecs: [],
           get maxPages (){
             return Math.ceil(this.length / this.basesPerGraph*this.graphsPerPage);
@@ -79,29 +80,10 @@ angular.module('npact')
       },
 
       addExtract:function(exopts){
-        var name = exopts.name;
-        $log.log('addExtract:', name);
-
-        return ExtractParser.parseAsync(exopts.data)
-          .then(function(data){
-            $log.log('parsed extract for', name, hasProfileData);
-            // save it for later
-            opts.extracts[name] = data;
-            // if we've got profile data already, rebuild
-            if(hasProfileData){
-              // TODO: maybe a simpler way to add extracts to existing
-              // graphs?
-              rebuildGraphs();
-            }
-            // if we're still waiting on profile data, then when it hits
-            // this extract will be processed.
-          }, function(){
-            $log.log('failed to parse', name, arguments);
-          });
+        return addHeader(opts.extracts, ExtractParser, exopts.name, exopts.data);
       },
       addHits: function(exopts) {
-        // TODO: graph a hits line.
-        $log.log("got hits data: ", exopts);
+        return addHeader(opts.hits, HitsParser, exopts.name, exopts.data);
       },
 
       setColors:function(colorBlindFriendly){
@@ -136,6 +118,27 @@ angular.module('npact')
         // TODO: handle changing this after the fact
       }
     };
+    function addHeader(collection, parser, name, data) {
+        $log.log('addHeader', name);
+
+        return parser.parseAsync(data)
+          .then(function(data){
+            $log.log('parsed ', name, hasProfileData);
+            // save it for later
+            collection[name] = data;
+            // if we've got profile data already, rebuild
+            if(hasProfileData){
+              // TODO: maybe a simpler way to add extracts to existing
+              // graphs?
+              rebuildGraphs();
+            }
+            // if we're still waiting on profile data, then when it hits
+            // this extract will be processed.
+          }, function(){
+            $log.log('failed to parse', name, arguments);
+          });
+
+    }
 
     function zoomTo(startBase, zoomPct, zoomingOut){
       // TODO: make this a options object
@@ -164,6 +167,7 @@ angular.module('npact')
             startBase: startBase,
             endBase: endBase,
             extracts: {},
+            hits: {},
             profile: [],
             headers: [],
             width: width,
@@ -251,15 +255,23 @@ angular.module('npact')
       });
     }
 
-    function attachExtractData(name, graphSpecs){
-      // reset the extracts
-      var headerHeight = npactConstants.headerSizes['extract'];
+    function attachAllData(graphSpecs, key) {
+      var promises = [];
+      // iterate over the named extracts
+      _.forOwn(opts[key], function(data, name){
+        promises.push(attachData(graphSpecs, name, key));
+      });
+      return $q.all(promises).then(function(){ return graphSpecs;});
+    }
+
+    function attachData(graphSpecs, name, key) {
+      var headerHeight = npactConstants.headerSizes[key];
 
       graphSpecs.forEach(function(gs){
-        gs.extracts[name] = [];
+        gs[key][name] = [];
         gs.headers.push({
           text: name,
-          lineType:'extract',
+          lineType:key,
           y: gs.headerY,
           height: headerHeight
         });
@@ -269,30 +281,21 @@ angular.module('npact')
 
       // TODO: use _.sortedIndex to binary search and array.slice to
       // make shallow copies onto the graph specs
-      return Utils.forEachAsync(opts.extracts[name], function(dataPoint){
+      return Utils.forEachAsync(opts[key][name], function(dataPoint){
         graphSpecs.forEach(function(gs){
           // extract starts in this range?
-          var startsInRange = dataPoint.start >= gs.startBase
-                && dataPoint.start <= gs.endBase,
+          var startsInRange = dataPoint.start >= gs.startBase &&
+                dataPoint.start <= gs.endBase,
               // extract ends in this range?
-              endsInRange = dataPoint.end >= gs.startBase
-                && dataPoint.end <= gs.endBase;
+              endsInRange = dataPoint.end >= gs.startBase &&
+                dataPoint.end <= gs.endBase;
           if(startsInRange || endsInRange){
-            gs.extracts[name].push(dataPoint);
+            gs[key][name].push(dataPoint);
           }
         });
       })
       // promise resolves as the graphspecs
         .then(function(){ return graphSpecs;});
-    }
-
-    function attachAllExtracts(graphSpecs){
-      var promises = [];
-      // iterate over the named extracts
-      _.forOwn(opts.extracts, function(value, key, obj){
-        promises.push(attachExtractData(key, graphSpecs));
-      });
-      return $q.all(promises).then(function(){ return graphSpecs;});
     }
 
     function redrawRequest(){
@@ -330,7 +333,8 @@ angular.module('npact')
       var t1 = new Date();
       return onWidth.then(makeGraphSpecs)
         .then(attachProfileData)
-        .then(attachAllExtracts)
+        .then(_.partialRight(attachAllData, 'extracts'))
+        .then(_.partialRight(attachAllData, 'hits'))
         .then(function(graphSpecs){
           return opts.graphSpecs = graphSpecs;
         })
