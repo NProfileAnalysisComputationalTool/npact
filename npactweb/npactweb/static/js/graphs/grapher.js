@@ -1,9 +1,9 @@
 angular.module('npact')
   .factory('Grapher', function(K, $log, GraphingCalculator, $rootScope, $compile, GraphDealer){
-
+    'use strict';
     function addMany(container, children){
       if(children && children.length) {
-        return container.add.apply(container, children);
+        container.add.apply(container, children);
       }
     }
 
@@ -121,12 +121,6 @@ angular.module('npact')
       return layer;
     };
 
-    function clamp(lower, value, upper){
-      if(value <= lower) return lower;
-      if(upper && value >= upper) return upper;
-      return value;
-    }
-
     GP.genomeGroup = function(){
       var self = this,
           gx = this.m.graph.x,
@@ -134,7 +128,7 @@ angular.module('npact')
           g = new K.Group({
             x: gx,
             draggable: true,
-            dragBoundFunc:function(pos, evt){
+            dragBoundFunc:function(pos){
               // pos is the distance dragged, except `pos.x` always
               // starts at `gx`. Something due to container coordinate
               // system vs stage coordinate system. `pos.y` is not
@@ -148,11 +142,11 @@ angular.module('npact')
           });
       // remember where we are at the start/end of a drag, so dragging can
       // match our "scroll"
-      g.on('dragstart dragend', function(obj){
+      g.on('dragstart dragend', function(){
         self.$element.trigger('tooltipHide.npact');
       });
 
-      g.on('dragend', function(evt){
+      g.on('dragend', function(){
 
         var oldStartBase = self.opts.range[0],
             newStartBase = (this.offsetX() / self.xaxis.scaleX) + oldStartBase;
@@ -172,25 +166,24 @@ angular.module('npact')
       g.add(new K.Rect({x: 0, y:this.m.graph.y,
                         width:this.m.graph.w,
                         height:this.m.graph.h}));
-      return this._genomeGroup = g;
+      return (this._genomeGroup = g);
     };
 
     GP.onDblClick = function(evt){
       // tell the GraphDealer, they'll sort it out
       this.$element.trigger('tooltipHide.npact');
 
-      var zoomOn_px = evt.evt.layerX - this.m.graph.x,
-          zoomOn_pct = zoomOn_px / this.m.graph.w,
-          start_gn = this.opts.startBase,
+      var zoomOnPx = evt.evt.layerX - this.m.graph.x,
+          zoomOnPct = zoomOnPx / this.m.graph.w,
+          startGn = this.opts.zoomOnPctstartBase,
           zoomingOut = evt.evt.shiftKey
       ;
 
-      GraphDealer.zoomTo(start_gn, zoomOn_pct, zoomingOut);
+      GraphDealer.zoomTo(startGn, zoomOnPct, zoomingOut);
     };
 
     GP.chartLayer = function(){
       var m = this.m,
-          xaxis = this.xaxis,
           opts = this.opts,
           l = new K.Layer({
             clip:{
@@ -219,7 +212,7 @@ angular.module('npact')
           x = txt.getAttr('coord'),
           newX = x - w/2;
       txt.x(newX);
-    };
+    }
 
     GP.xAxisGroup = function(){
       var m = this.m,
@@ -240,7 +233,7 @@ angular.module('npact')
         centerXLabel(txt, xaxis.scaleX);
       });
 
-      return this._xAxisGroup = g;
+      return (this._xAxisGroup = g);
     };
 
     GP.profileGroup = function(){
@@ -271,7 +264,7 @@ angular.module('npact')
       ;
       addMany(g, profiles);
 
-      return this._profileGroup = g;
+      return (this._profileGroup = g);
     };
 
     GP.redraw = function(){
@@ -306,7 +299,6 @@ angular.module('npact')
           colorNames = 'rgb',
           y = header.y,
           ahHalfHeight = opts.headerArrowHeight/2,
-          compY = y + opts.headerArrowHeight,
           ahw = opts.headerArrowWidth/xaxis.scaleX,
           textOpts = {
             fontSize: opts.headerArrowFontsize,
@@ -320,18 +312,19 @@ angular.module('npact')
             strokeWidth:1,
             strokeScaleEnabled: false
           },
+          $el = this.$element;
 
-          arrows = _(cds)
+          _(cds)
             .forEach(function(x){
               // color determined by `x.end - 1 % 3`
-              var isComplement = x.complement == 0,
+              var isComplement = x.complement === 0,
                   colorCoord = isComplement ? x.start : x.end,
                   c = colors[colorNames[(colorCoord - 1) % 3]],
                   baseY = isComplement ? y + opts.headerArrowHeight : y,
                   arrowPointY = baseY + ahHalfHeight,
                   arrowMaxY = baseY + opts.headerArrowHeight,
-                  shape = isComplement
-                    ? [
+                  shape = isComplement ?
+                    [
                       x.start, arrowPointY,
                       x.start + ahw, baseY,
                       x.end, baseY,
@@ -346,8 +339,8 @@ angular.module('npact')
                       x.start, arrowMaxY,
                       x.start, y
                     ],
-                  arrowBounds = isComplement
-                    ? {
+                  arrowBounds = isComplement ?
+                    {
                       x: x.start+ahw, y: baseY,
                       width: x.end-x.start-ahw, height: opts.headerArrowHeight
                     } : {
@@ -368,15 +361,14 @@ angular.module('npact')
                   // need a dummy group for clipping, `Text` doesn't
                   // support clip directly
                   lblGroup = new K.Group({clip:arrowBounds});
-              ;
 
               lblGroup.add(lbl);
               g.add(line, lblGroup);
               // now that lbl is on the canvas, we can see what it's
               // height/width is
               centerExtractLabel(lbl, xaxis.scaleX);
-            }),
-          $el = this.$element;
+            });
+
 
       // TODO: move tooltip control to the `npactGraph`, just throw an
       // event or callback here with the extract, let `npactGraph`
@@ -388,7 +380,7 @@ angular.module('npact')
         $el.qtip({
           content: {text: $compile(tpl)(scope)},
           position:{
-            my: scope.extract.complement == 0 ? 'top center' : 'bottom center',
+            my: scope.extract.complement === 0 ? 'top center' : 'bottom center',
             target:[evt.evt.pageX, evt.evt.pageY]
           },
           show: {event:'tooltipShow.npact'},
@@ -396,7 +388,7 @@ angular.module('npact')
         });
         $el.trigger('tooltipShow.npact');
       });
-      return this._cdsGroup = g;
+      return (this._cdsGroup = g);
     };
 
     GP.drawCDS = function(cds, name){
