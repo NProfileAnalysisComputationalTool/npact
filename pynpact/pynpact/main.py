@@ -12,7 +12,6 @@ from subprocess import PIPE
 from pynpact import parsing, executors
 from __init__ import binfile, DATAPATH
 import capproc
-import prepare
 import util
 
 logger = logging.getLogger('pynpact')

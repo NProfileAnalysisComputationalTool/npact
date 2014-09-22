@@ -4,7 +4,7 @@ import os.path
 import tempfile
 import urllib2
 
-from pynpact import util, entrez, prepare
+from pynpact import util, entrez, parsing
 
 from django import forms
 from django.conf import settings
@@ -31,7 +31,7 @@ def mksavefile(prefix):
     # we're using tempfile to ensure the file we get is unique and
     # aren't overwriting another.
     fd, abspath = tempfile.mkstemp(
-        dir=settings.MEDIA_ROOT, prefix=prefix, suffix=".gbk")
+        dir=settings.MEDIA_ROOT, prefix=prefix)
     relpath = getrelpath(abspath)
     return (fd, abspath, relpath)
 
@@ -174,10 +174,7 @@ def efetch(req, id):
     abspath = session.fetch_id(id)
     path = getrelpath(abspath)
     try:
-        prepare.try_parse(abspath)
-    except prepare.InvalidGBKException, e:
-        messages.error(req, str(e))
-        return re_search(req)
+        parsing.initial(abspath)
     except:
         messages.error(req,
                        "There was a problem loading file '%s', "

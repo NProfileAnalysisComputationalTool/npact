@@ -14,7 +14,7 @@ from django.utils.http import urlencode
 from django.template import RequestContext, Context
 from django.template.loader import get_template
 
-from pynpact import prepare, util
+from pynpact import parsing, util
 from pynpact import main
 
 from npactweb import assert_clean_path, getabspath, getrelpath
@@ -54,7 +54,7 @@ class ConfigForm(forms.Form):
         widget=forms.CheckboxSelectMultiple())
     skip_prediction = forms.BooleanField(required=False)
     significance = forms.ChoiceField(
-        choices=prepare.significance_levels, required=False,
+        choices=parsing.significance_levels, required=False,
         label="Prediction Significance")
     start_base = forms.IntegerField()
     end_base = forms.IntegerField()
@@ -96,8 +96,8 @@ def config(request, path):
         form = ConfigForm(initial=config)
 
     for key, field in form.fields.items():
-        if key in prepare.CONFIG_HELP_TEXT:
-            field.help_text = prepare.CONFIG_HELP_TEXT[key]
+        if key in parsing.CONFIG_HELP_TEXT:
+            field.help_text = parsing.CONFIG_HELP_TEXT[key]
         elif settings.DEBUG:
             logger.error("Help text missing for config form field: %r", key)
 
@@ -118,10 +118,7 @@ def build_config(path, request):
 
     try:
         # TODO: switch to parsing.initial(getabspath(path))
-        config = prepare.default_config(getabspath(path))
-    except prepare.InvalidGBKException, e:
-        messages.error(request, str(e))
-        raise RedirectException(reverse('start'))
+        config = parsing.initial(getabspath(path))
     except:
         logger.exception(
             "Error parsing gbk: %r", getabspath(path, raise_on_missing=False))
@@ -144,6 +141,11 @@ def build_config(path, request):
     if cf.is_valid():
         logger.debug('updating with %r', cf.cleaned_data)
         config.update(cf.cleaned_data)
+
+    parsing.first_page_title(config)
+    parsing.end_base(config)
+    parsing.isgbk(config)
+    parsing.isfasta(config)
 
     for key in MAGIC_PARAMS:
         if key in request.GET:

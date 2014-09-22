@@ -13,12 +13,13 @@ angular.module('npact')
     };
   })
 
-  .controller('npactGraphPageCtrl', function($scope, GraphDealer, Fetcher, npactConstants, $q, $log, StatusPoller) {
+  .controller('npactGraphPageCtrl', function($scope, GraphDealer, Fetcher, npactConstants, $q, $log, StatusPoller, FETCH_URL) {
     'use strict';
     $scope.miscFiles = [];
     $scope.graphHeight = npactConstants.graphSpecDefaults.height;
     $scope.status = 'Initializing';
     $scope.ready = false;
+    $scope.FETCH_URL = FETCH_URL;
     // start it up
     Fetcher.kickstart()
       .then(function(config) {

@@ -10,7 +10,6 @@ from django.template import RequestContext
 from django.views import static
 from django.contrib import messages
 
-from pynpact import prepare
 from npactweb import library_root
 
 

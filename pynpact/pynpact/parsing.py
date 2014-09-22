@@ -99,6 +99,8 @@ def first_page_title(config):
             pass
         else:
             'Page 1'
+    return config['first_page_title']
+
 
 
 def derive_filename(config, hash, newext):
@@ -112,3 +114,45 @@ def derive_filename(config, hash, newext):
         outputdir = filename.dirname()
     newfilename = '%s-%s.%s' % (filename.namebase, hash, newext)
     return outputdir / newfilename
+
+
+
+CONFIG_HELP_TEXT = {
+    'start_base': "The base pair coordinate at which to start graphing.",
+    'end_base': "The base pair coordinate at which to end graphing.",
+    'length': "The length, in base pairs, of the genome being analyzed.",
+    'first_page_title': "The title of the page containing the beginning of the genome.",
+    'following_page_title': "The title of the pages after the first. Use {0} to get the page number.",
+    'skip_prediction': "Should the acgt_gamma prediction be run? (click here to skip)",
+    'significance': "What should the acgt_gamma prediction consider significant?",
+    'nucleotides': "The bases to count the frequency of on the primary strand.",
+    'alternate_colors': "Modifies graph colors from RGB to an alternative set that should be more easily distinguishable by people with certain color-blindness conditions.",
+    }
+
+significance_levels = ("0.01", "0.001", "0.0001")
+significance_levels = zip(significance_levels, significance_levels)
+
+
+
+
+## playing around with this idea, haven't really gotten it yet
+# class Config(object):
+#     def __init__(self, filename):
+#         self.__dict__ = initial(filename)
+#     def __getitem__(self, key):
+#         if key in self.__dict__:
+#             return self.__dict__[key]
+#         elif key in defaults:
+#             return defaults[key]
+#         elif hasattr(self, key):
+#             val = getattr(self, key)()
+#             self[key] = val
+#             return val
+#         else:
+#             raise KeyError(key)
+#     def __setitem__(self, key, val):
+#         self.__dict__[key] = val
+#     def __contains__(self, key):
+#         return key in self.__dict__
+#     first_page_title = first_page_title
+#     end_base = end_base
