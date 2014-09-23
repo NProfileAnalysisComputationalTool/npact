@@ -50,8 +50,8 @@ def test_randomid_pickling(tmpdir, anontask):
     assert anontask.tid
 
 
-def test_randomid_pickling_collision(tmpdir, anontask, patcher):
-    patcher.patch('taskqueue.task.randomid',
+def test_randomid_pickling_collision(tmpdir, anontask, mocker):
+    mocker.patch('taskqueue.task.randomid',
                   MagicMock(side_effect=['asdf', 'fdas']))
     tmpdir.join('asdf').open('w')
     tid = anontask.pickle(str(tmpdir))

@@ -34,7 +34,7 @@ def test_combine_ps(gbkconfig, executor):
     assert gbkconfig['combined_ps_name'] == psname
 
 
-def test_ps_to_pdf(gbkconfig, null_executor, patcher):
+def test_ps_to_pdf(gbkconfig, null_executor):
     jobs = allplots.convert_ps_to_pdf(gbkconfig, null_executor)
     assert len(jobs) == 1
     pdf_filename = jobs[0]

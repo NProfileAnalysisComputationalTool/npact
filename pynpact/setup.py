@@ -14,4 +14,5 @@ setup(name='pynpact',
           'pynpact': ['data/*', 'bin/*']
       },
       install_requires=["biopython>=1.57"],
+      tests_require=["pytest>=2.4", "mock>=1", "pytest-mock"]
     )

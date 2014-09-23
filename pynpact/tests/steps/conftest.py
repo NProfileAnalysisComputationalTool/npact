@@ -13,7 +13,6 @@ def async_executor(request):
     return sm.Server()
 
 
-
 class NullExecutor(object):
     "An executor that doens't actually execute anything, just keeps track"
     tasks = None
