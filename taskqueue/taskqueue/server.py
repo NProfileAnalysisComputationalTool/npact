@@ -57,7 +57,7 @@ class Server(object):
         return self.tasks[tid]
 
     def wait(self, tid, timeout=None):
-        return self.get_task(tid).wait(timeout)
+        return self.get_task(tid).get(timeout)
 
     def task_count(self):
         return len(self.tasks)

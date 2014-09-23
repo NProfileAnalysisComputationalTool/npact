@@ -6,6 +6,7 @@ import logging
 
 import mock as mocklib
 
+
 def test_server_workdir(mocker, tmpdir):
     mocker.patch('taskqueue.BASE_DIR', str(tmpdir))
     s = Server()
@@ -73,3 +74,23 @@ def test_enqueue_after(aRunningServer):
     tid1 = aRunningServer.enqueue(str)
     tid2 = aRunningServer.enqueue(str, after=[tid1])
     assert '' == aRunningServer.get_task(tid2).get(1)
+
+
+def raiseException():
+    raise Exception("SIGIL")
+
+
+def test_exception(aRunningServer):
+    "Getting the result of a task that raises "
+    tid1 = aRunningServer.enqueue(raiseException)
+    with pytest.raises(Exception) as excinfo:
+        aRunningServer.result(tid1)
+    assert "SIGIL" in str(excinfo)
+
+
+def test_exception_depends(aRunningServer):
+    tid1 = aRunningServer.enqueue(raiseException)
+    tid2 = aRunningServer.enqueue(str, after=[tid1])
+    with pytest.raises(Exception) as excinfo:
+        aRunningServer.result(tid2, timeout=1)
+    assert "SIGIL" in str(excinfo)
