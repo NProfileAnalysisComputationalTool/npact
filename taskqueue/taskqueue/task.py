@@ -60,8 +60,8 @@ class Task(object):
                     except TimeoutError:
                         self.after.append(tid)
                         log.debug("Task %r not ready")
-            except RemoteError:
-                log.info("Task %r erred, aborting", tid)
+            except Exception as e:
+                log.info("Task '%s' erred (%r), aborting", tid, e)
                 raise
 
         log.debug("Task running: %s", self.tid)

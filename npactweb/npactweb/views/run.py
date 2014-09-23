@@ -264,12 +264,23 @@ def run_status(request, jobid):
     status = 200
     try:
         abspath = getabspath(jobid, raise_on_missing=False)
-        result['ready'] = os.path.exists(abspath) or client.ready(abspath)
+        # Task IDs == filenames on disk, if the file exists don't even
+        # bother to check with the server
+        if os.path.exists(abspath):
+            result['ready'] = True
+        elif client.ready(abspath):
+            result['ready'] = True
+            # Ensure the task finished correctly
+            client.result(abspath)
+        else:
+            result['ready'] = False
+
     except NoSuchTaskError:
         result['message'] = 'Unknown task identifier.'
         status = 404
-    except Exception:
+    except Exception as e:
         result['message'] = 'Fatal error.'
+        result['exception'] = str(e)
         status = 500
         logger.exception("Error getting job status. %r", jobid)
 

@@ -32,18 +32,19 @@ def check(cmd, **kwargs):
     return 0 == capturedCall(cmd, **kwargs)
 
 
+class CallProcError(Exception):
+    returncode = None
+    cmd = None
+
+
 def calledProcessError(rc, cmdname):
-    """Build a :py:class:`~subprocess.CalledProcessError` that can be unpickled
+    """Build a CalledProcessError that can be unpickled
 
-       The CalledProcessError has a bug such that it can't be
-       UNpickled.  http://bugs.python.org/issue1692335#msg133581 by
-       setting the `args` attribute we workaround that and allow this
-       code to be used inside a multiprocessing.Pool
-
+    and looks like :py:class:`~subprocess`
     """
-    args = (rc, cmdname)
-    cpe = subprocess.CalledProcessError(*args)
-    cpe.args = args
+    cpe = CallProcError('{0} returned {1}'.format(cmdname, rc))
+    cpe.returncode = rc
+    cpe.cmd = cmdname
     return cpe
 
 
