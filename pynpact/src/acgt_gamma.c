@@ -121,7 +121,7 @@ char	aa_letters[]= AA_LETTERS;
 char	RGB[]= "RGB";
 char	strnd[]= "DC";
 char	start_char[]= " AaGgTtCcWw";
-char	ORF[6*MAX_ORF_SIZE];
+char	ORF[6 * MAX_ORF_SIZE]; 
 char	buff[MAX_LINE];
 char	*organism_name;
 
@@ -863,7 +863,7 @@ int score_orf_table(char *orf, int n, int tot_hss)
         b[j]= threshold[j][i][1];
         }
 
-        if(n <= RND_SHORTER && TABLE_OFFSET_CHAR)
+        if(n <= RND_SHORTER && TABLE_OFFSET_CHAR > 0)
         {
                 for(j= 0; j < 3; ++j)
                 {
@@ -1036,9 +1036,9 @@ double entropy(char *seq, int n)
 
 // End of function entropy()
 
-/**************************/
-/**** Function get_codon() /
-/**************************/
+/***************************/
+/**** Function get_codon() */
+/***************************/
 
 int get_codon(char buff[], int strand)
 {
@@ -1104,7 +1104,8 @@ int mycoplasma_code()
     int     flag= 0;
     char    longstr[512];
 
-	while(fgets(longstr, 510, fp) && strncmp(longstr, "DEFINITION", 10) && !feof(fp));
+	while(fgets(longstr, 510, fp) && strncmp(longstr, "DEFINITION", 10) && !feof(fp))
+	;
 
     if(!strncmp(longstr, "DEFINITION", 10) && 
       (strstr(longstr, "Mycoplasma") || 
@@ -1145,7 +1146,7 @@ long annotation(int *ncds, int *nexons)
                 cds[strlen(cds) - 1]= '\0';
 			}
 
-			if(p=strstr(cds, "join")) p += 5;
+			if((p=strstr(cds, "join"))) p += 5;
 			else if(strstr(cds,"complement")) { p= strchr(cds,'('); ++p; }
 			else p= cds;
 		
@@ -1160,7 +1161,7 @@ long annotation(int *ncds, int *nexons)
             gene[n].len= 0;
             strcpy(gene[n].name, "");
             p= cds;
-			while(p= strchr(p, ',')) { gene[n].num_exons += 1; ++p; }
+			while((p= strchr(p, ','))) { gene[n].num_exons += 1; ++p; }
 		
             gene[n].start= (int *)malloc(gene[n].num_exons*sizeof(int));
             gene[n].end= (int *)malloc(gene[n].num_exons*sizeof(int));
@@ -1250,7 +1251,7 @@ long annotation(int *ncds, int *nexons)
 		}
         if(flag)
         {
-            if(p= strstr(longstr, "/gene="))
+            if((p= strstr(longstr, "/gene=")))
             {
 				p[strlen(p) - 2]= '\0';
                 if(NAME_OFFSET && strstr(p + 7, common_name))
@@ -2505,8 +2506,8 @@ void process_hss(int from_hss, int to_hss, int ncds)
 
 void write_results(int from_hss, int to_hss, int ncds, int genome_size, long bytes_from_origin)
 {
-    int	i, j, k, h, l, m, n, *o, s1, s2, types[11]= { 0 }, from, to, len, out, flag;
-    char	c, Pg[15], name[50];
+    int		i, j, k, h, l, m= 0, n, *o, s1, s2, types[11]= { 0 }, from, to, len, out, flag, range= 3 * MAX_ORF_SIZE, r= 0;
+    char	c, Pg[15], name[50], *orf, *genome;
     double	G, print_len, po;
     FILE	*output1, *output2, *output3, *output4, *output5, *output6, *output7, *output8, *output9, *output10, *output11, *output12;
 
@@ -2554,6 +2555,11 @@ void write_results(int from_hss, int to_hss, int ncds, int genome_size, long byt
 // output2 = *.profiles  ( all hits (hss + G-test ) )
 // output3 = *.verbose   ( detailed features of all annotations and hits )
 // output4 = *.altcds    ( replacing published CDSs and overlapping CDSs )
+										
+fseek(fp, bytes_from_origin, SEEK_SET);
+
+orf= ORF;
+genome= ORF + 3 * MAX_ORF_SIZE;
 
     fprintf(output3,"\nNEW ANNOTATION\n\nORF#\tName\tORF-fm\tORF-to\tORF-len\tStrand\tColor\tHit#\tHIT-fm\tHIT-to\tHIT-len\tEntropy\tScore\tProb\tG-test (Significance)\tSigLen\tPrediction type\n");
 
@@ -2625,61 +2631,52 @@ void write_results(int from_hss, int to_hss, int ncds, int genome_size, long byt
 										fprintf(output9,">%s D %d..%d\n", name, hss[o[i]].start_pos + s1, hss[o[i]].stop2 + s2);
 										fprintf(output10,">%s D %d..%d\n", name, hss[o[i]].start_pos + s1, hss[o[i]].stop2 + s2);
 										
-										fseek(fp, bytes_from_origin, SEEK_SET);
-										
-										m= 1;
-										while(m < hss[o[i]].start_pos + s1)
-										{
-											c= fgetc(fp);
-											if(c >= 'A' && c <= 'Z') c += 'a' - 'A';
-											if (c >= 'a' && c <= 'z') ++m;
-										}
-										
-										m= 0;
-										len= hss[o[i]].stop2 + s2 - hss[o[i]].start_pos - s1 + 1;
-										
-										while(m < len)
+										while(m < (hss[o[i]].stop2 + s2))
 										{
 											c= fgetc(fp);
 											if(c >= 'A' && c <= 'Z') c += 'a' - 'A';
 											if (c >= 'a' && c <= 'z')
-												ORF[m++] = numbers[c - 'a'];
+											{
+											genome[m % range]= c;
+											++m;
+											}
 										}
+										
+										len= hss[o[i]].stop2 + s2 - hss[o[i]].start_pos - s1 + 1;
+										
+									for(j= 0; j < len; ++j)
+										orf[j] = numbers[genome[(hss[o[i]].start_pos + s1 - 1 + j) % range] - 'a'];
 																				
-										print_nucleotides(ORF, len, output9);
-										print_amino_acids(ORF, len - s2 + 1, output10);
+										print_nucleotides(orf, len, output9);
+										print_amino_acids(orf, len - s2 + 1, output10);
 									}
 								}
                                 			if(k == 7 || !flag)
 							{
 				fprintf(output4,"%s %d..%d\n", name, hss[o[i]].start_pos + s1, hss[o[i]].stop2 + s2);
+
 								if(WRITE_ALTERNATIVE_SEQS)
 								{
                                     fprintf(output11,">%s D %d..%d\n", name, hss[o[i]].start_pos + s1, hss[o[i]].stop2 + s2);
                                     fprintf(output12,">%s D %d..%d\n", name, hss[o[i]].start_pos + s1, hss[o[i]].stop2 + s2);
-									fseek(fp, bytes_from_origin, SEEK_SET);
 									
-									m= 1;
-									while(m < hss[o[i]].start_pos + s1)
+									while(m < (hss[o[i]].stop2 + s2))
 									{
-										c= fgetc(fp);
-										if(c >= 'A' && c <= 'Z') c += 'a' - 'A';
-										if (c >= 'a' && c <= 'z') ++m;
-									}
-									
-									m= 0;
-									len = hss[o[i]].stop2 + s2 - hss[o[i]].start_pos - s1 + 1;
-									
-									while(m < len)
-									{
-										c= fgetc(fp);
+									c= fgetc(fp);
 										if(c >= 'A' && c <= 'Z') c += 'a' - 'A';
 										if (c >= 'a' && c <= 'z')
-											ORF[m++] = numbers[c - 'a'];
+										{
+										genome[m % range]= c;
+										++m;
+										}
 									}
+										
+								len= hss[o[i]].stop2 + s2 - hss[o[i]].start_pos - s1 + 1;
+										
+									for(j= 0; j < len; ++j) orf[j] = numbers[genome[(hss[o[i]].start_pos + s1 - 1 + j) % range] - 'a'];
 									
-									print_nucleotides(ORF, len, output11);
-									print_amino_acids(ORF, len - s2 + 1, output12);
+								print_nucleotides(orf, len, output11);
+								print_amino_acids(orf, len - s2 + 1, output12);
 								}
 							}
 						}
@@ -2711,83 +2708,64 @@ void write_results(int from_hss, int to_hss, int ncds, int genome_size, long byt
 										fprintf(output9,">%s C %d..%d\n", name, hss[o[i]].stop1 + s1, hss[o[i]].start_pos + s2);
 										fprintf(output10,">%s C %d..%d\n", name, hss[o[i]].stop1 + s1, hss[o[i]].start_pos + s2);
 										
-										fseek(fp, bytes_from_origin, SEEK_SET);
-										
-										m= 1;
-										while(m < hss[o[i]].stop1 + s1)
+										while(m < (hss[o[i]].start_pos + s2))
 										{
-											c= fgetc(fp);
-											if(c >= 'A' && c <= 'Z') c += 'a' - 'A';
-											if (c >= 'a' && c <= 'z') ++m;
-										}
-										
-										m= 0;
-										len = hss[o[i]].start_pos + s2 - hss[o[i]].stop1 - s1 + 1;
-										
-										while(m < len)
-										{
-											c= fgetc(fp);
+										c= fgetc(fp);
 											if(c >= 'A' && c <= 'Z') c += 'a' - 'A';
 											if (c >= 'a' && c <= 'z')
-												ORF[m++] = numbers[c - 'a'];
+											{
+											genome[m % range]= c;
+											++m;
+											}
 										}
+											
+									len = hss[o[i]].start_pos + s2 - hss[o[i]].stop1 - s1 + 1;
 										
-										for(m= 0; m < len; ++m) 
-											ORF[m]= 3 - ORF[m];
-										
-										for(m= 0; m < len / 2; ++m) 
+										for(j= 0; j < len; ++j) orf[j] = 3 - numbers[genome[(hss[o[i]].stop1 + s1 - 1 + j) % range] - 'a'];
+										for(r= 0; r < len / 2; ++r) 
 										{
-											n= ORF[m]; 
-											ORF[m]= ORF[len - 1 - m];
-											ORF[len - 1 - m]= n;
+											n= orf[r]; 
+											orf[r]= orf[len - 1 - r];
+											orf[len - 1 - r]= n;
 										}
 
-										print_nucleotides(ORF, len, output9);
-										print_amino_acids(ORF, len + s1 - 1, output10);
+										print_nucleotides(orf, len, output9);
+										print_amino_acids(orf, len + s1 - 1, output10);
 
 									}
 								}
                                 			if(k == 7 || !flag)
 							{
 							fprintf(output4,"%s complement(%d..%d)\n", name, hss[o[i]].stop1 + s1, hss[o[i]].start_pos + s2);
+
 								if(WRITE_ALTERNATIVE_SEQS)
 								{
                                     fprintf(output11,">%s C %d..%d\n", name, hss[o[i]].stop1 + s1, hss[o[i]].start_pos + s2);
                                     fprintf(output12,">%s C %d..%d\n", name, hss[o[i]].stop1 + s1, hss[o[i]].start_pos + s2);
-									
-									fseek(fp, bytes_from_origin, SEEK_SET);
-									
-									m= 1;
-									while(m < hss[o[i]].stop1 + s1)
-									{
+
+										while(m < (hss[o[i]].start_pos + s2))
+										{
 										c= fgetc(fp);
-										if(c >= 'A' && c <= 'Z') c += 'a' - 'A';
-										if (c >= 'a' && c <= 'z') ++m;
-									}
-									
-									m= 0;
+											if(c >= 'A' && c <= 'Z') c += 'a' - 'A';
+											if (c >= 'a' && c <= 'z')
+											{
+											genome[m % range]= c;
+											++m;
+											}
+										}
+											
 									len = hss[o[i]].start_pos + s2 - hss[o[i]].stop1 - s1 + 1;
+										
+										for(j= 0; j < len; ++j) orf[j] = 3 - numbers[genome[(hss[o[i]].stop1 + s1 - 1 + j) % range] - 'a'];
+										for(r= 0; r < len / 2; ++r) 
+										{
+											n= orf[r]; 
+											orf[r]= orf[len - 1 - r];
+											orf[len - 1 - r]= n;
+										}
 									
-									while(m < len)
-									{
-										c= fgetc(fp);
-										if(c >= 'A' && c <= 'Z') c += 'a' - 'A';
-										if (c >= 'a' && c <= 'z')
-											ORF[m++] = numbers[c - 'a'];
-									}
-									
-									for(m= 0; m < len; ++m) 
-										ORF[m]= 3 - ORF[m];
-									
-									for(m= 0; m < len / 2; ++m) 
-									{
-										n= ORF[m]; 
-										ORF[m]= ORF[len - 1 - m];
-										ORF[len - 1 - m]= n;
-									}
-									
-									print_nucleotides(ORF, len, output11);
-									print_amino_acids(ORF, len + s1 - 1, output12);
+									print_nucleotides(orf, len, output11);
+									print_amino_acids(orf, len + s1 - 1, output12);
 								}
 							}
 						}
@@ -2813,34 +2791,30 @@ void write_results(int from_hss, int to_hss, int ncds, int genome_size, long byt
 				name[j]= start_char[hss[o[i]].start];
 				name[j + 1]= '\0';
                                 fprintf(output6,"%s %d..%d\n", name, hss[o[i]].start_pos + s1, hss[o[i]].stop2 + s2);
+
 								if(WRITE_MODIFIED_SEQS)
 								{
                                     fprintf(output7,">%s D %d..%d\n", name, hss[o[i]].start_pos + s1, hss[o[i]].stop2 + s2);
                                     fprintf(output8,">%s D %d..%d\n", name, hss[o[i]].start_pos + s1, hss[o[i]].stop2 + s2);
 									
-									fseek(fp, bytes_from_origin, SEEK_SET);
-									
-									m= 1;
-									while(m < hss[o[i]].start_pos + s1)
-									{
-										c= fgetc(fp);
-										if(c >= 'A' && c <= 'Z') c += 'a' - 'A';
-										if (c >= 'a' && c <= 'z') ++m;
-									}
-									
-									m= 0;
-									len = hss[o[i]].stop2 + s2 - hss[o[i]].start_pos - s1 + 1;
-									
-									while(m < len)
+									while(m < (hss[o[i]].stop2 + s2))
 									{
 										c= fgetc(fp);
 										if(c >= 'A' && c <= 'Z') c += 'a' - 'A';
 										if (c >= 'a' && c <= 'z')
-											ORF[m++] = numbers[c - 'a'];
+										{
+										genome[m % range]= c;
+										++m;
+										}
 									}
+										
+									len= hss[o[i]].stop2 + s2 - hss[o[i]].start_pos - s1 + 1;
+										
+									for(j= 0; j < len; ++j)
+										orf[j] = numbers[genome[(hss[o[i]].start_pos + s1 - 1 + j) % range] - 'a'];
 									
-									print_nucleotides(ORF, len, output7);
-									print_amino_acids(ORF, len - s2 + 1, output8);
+									print_nucleotides(orf, len, output7);
+									print_amino_acids(orf, len - s2 + 1, output8);
 								}
 						}
 						else fprintf(output5,"%s %d..%d %d %.4f\n", name, hss[o[i]].fromp + s1, hss[o[i]].stop2 + s2, hss[o[i]].len, hss[o[i]].entropy);
@@ -2856,43 +2830,35 @@ void write_results(int from_hss, int to_hss, int ncds, int genome_size, long byt
 				name[j]= start_char[hss[o[i]].start];
 				name[j + 1]= '\0';
                                 fprintf(output6,"%s complement(%d..%d)\n", name, hss[o[i]].stop1 + s1, hss[o[i]].start_pos + s2);
+
 								if(WRITE_MODIFIED_SEQS)
 								{
                                     fprintf(output7,">%s C %d..%d\n", name, hss[o[i]].stop1 + s1, hss[o[i]].start_pos + s2);
                                     fprintf(output8,">%s C %d..%d\n", name, hss[o[i]].stop1 + s1, hss[o[i]].start_pos + s2);
-									fseek(fp, bytes_from_origin, SEEK_SET);
 									
-									m= 1;
-									while(m < hss[o[i]].stop1 + s1)
+									while(m < (hss[o[i]].start_pos + s2))
 									{
-										c= fgetc(fp);
-										if(c >= 'A' && c <= 'Z') c += 'a' - 'A';
-										if (c >= 'a' && c <= 'z') ++m;
-									}
-									
-									m= 0;
-									len = hss[o[i]].start_pos + s2 - hss[o[i]].stop1 - s1 + 1;
-									
-									while(m < len)
-									{
-										c= fgetc(fp);
+									c= fgetc(fp);
 										if(c >= 'A' && c <= 'Z') c += 'a' - 'A';
 										if (c >= 'a' && c <= 'z')
-											ORF[m++] = numbers[c - 'a'];
+										{
+										genome[m % range]= c;
+										++m;
+										}
 									}
-									
-									for(m= 0; m < len; ++m) 
-										ORF[m]= 3 - ORF[m];
-									
-									for(m= 0; m < len / 2; ++m) 
+											
+									len = hss[o[i]].start_pos + s2 - hss[o[i]].stop1 - s1 + 1;
+										
+									for(j= 0; j < len; ++j) orf[j] = 3 - numbers[genome[(hss[o[i]].stop1 + s1 - 1 + j) % range] - 'a'];
+									for(r= 0; r < len / 2; ++r) 
 									{
-										n= ORF[m]; 
-										ORF[m]= ORF[len - 1 - m];
-										ORF[len - 1 - m]= n;
+										n= orf[r]; 
+										orf[r]= orf[len - 1 - r];
+										orf[len - 1 - r]= n;
 									}
 									
-									print_nucleotides(ORF, len, output7);
-									print_amino_acids(ORF, len + s1 - 1, output8);
+									print_nucleotides(orf, len, output7);
+									print_amino_acids(orf, len + s1 - 1, output8);
 								}
 						}
 						else fprintf(output5,"%s complement(%d..%d) %d %.4f\n", name, hss[o[i]].stop1 + s1, hss[o[i]].top + s2, hss[o[i]].len, hss[o[i]].entropy);
@@ -3367,7 +3333,8 @@ void shuffle(char *seq, int n, int remove_stops)
         j = (int) (r * (double)(i + 1));
         c = seq[i]; seq[i] = seq[j]; seq[j] = c;
         #else
-		while((r = drand48()) >= 1.0);
+		while((r = drand48()) >= 1.0)
+		;
         j = (int)(r * (double)(i + 1));
         c = seq[i]; seq[i] = seq[j]; seq[j] = c;
         #endif
