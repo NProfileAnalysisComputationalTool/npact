@@ -29,7 +29,8 @@ angular.module('npact')
         // got config, request the first round of results
         $scope.title = config.first_page_title;
         var nprofile = Fetcher.nprofile(config).then(GraphDealer.setProfile);
-        var inputFileCds = Fetcher.inputFileCds(config)
+        // Non-gbk files don't have CDSs we can extract.
+        var inputFileCds = config.isgbk && Fetcher.inputFileCds(config)
           .then(function(data) {
             GraphDealer.addExtract({name: 'Input file CDS', data: data});
           });
@@ -46,10 +47,13 @@ angular.module('npact')
                     GraphDealer.addHits({name: 'Hits', data: data});
                   });
               });
-        $q.all([nprofile, inputFileCds, extraFileList]).then(function() {
-          $scope.status = 'Finished';
-          $scope.ready = true;
-        });
+        $q.all([nprofile, inputFileCds, extraFileList])
+          .then(function() {
+            delete $scope.status;
+          })
+          .catch(function(err) {
+            $scope.status = err;
+          });
 
         StatusPoller.start(config['pdf_filename'])
           .then(function(pdfFilename) {
@@ -97,7 +101,7 @@ angular.module('npact')
   })
 
 
-  .service('StatusPoller', function(STATUS_BASE_URL, $q, $http, $timeout) {
+  .service('StatusPoller', function(STATUS_BASE_URL, $q, $http, $timeout, $log) {
     'use strict';
     var POLLTIME = 2500;
 
@@ -110,7 +114,10 @@ angular.module('npact')
           if(res.data.ready) { deferred.resolve(tid); }
           else { $timeout(pollAgain, POLLTIME); }
         })
-        .catch(deferred.reject);
+        .catch(function(err) {
+          $log.error('Error while fetching tid: ', tid, err);
+          deferred.reject(err.data.message);
+        });
 
       return deferred.promise;
     }
