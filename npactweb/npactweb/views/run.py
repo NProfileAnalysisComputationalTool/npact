@@ -201,9 +201,19 @@ def kickstart(request, path):
     email = request.GET.get('email')
     client.ensure_daemon()
     config = main.process('allplots', config, executor=client.get_server())
+
     if email:
-        raise NotImplementedError()
-        target_file = results.pdf_filename or results.combined_ps_name
+        build_email(request, path, config)
+
+    return HttpResponse(
+        json.dumps(sanitize_config_for_client(config)),
+        content_type="application/json")
+
+
+def build_email(request, path, config):
+    try:
+        email = request.GET.get('email')
+        target_file = config['pdf_filename'] or config['combined_ps_name']
         assert target_file, \
             "Configured for email but didn't get emailable file."
         # The direcect download link for the PS or PDF file.
@@ -217,10 +227,8 @@ def kickstart(request, path):
         task = util.Task(send_email, email, config, run_link, result_link)
         eid = client.enqueue(task, after=[target_file])
         logger.info("Scheduled email to %r with jobid: %s", email, eid)
-
-    return HttpResponse(
-        json.dumps(sanitize_config_for_client(config)),
-        content_type="application/json")
+    except:
+        logger.exception("Error scheduling email to send")
 
 
 def sanitize_config_for_client(config):
@@ -237,7 +245,8 @@ def sanitize_config_for_client(config):
 def send_email(email_address, config, run_link, result_link):
     # config is the result of running the process, needs to be first parameter
     try:
-        logger.debug("Task completed; sending email to %r", email_address)
+        logger.debug("Task completed; sending email %r, %r, %r",
+                     email_address, run_link, result_link)
         from django.core.mail import EmailMultiAlternatives
         subject = 'NPACT results ready for "{0}"'.format(
             config['first_page_title'])
@@ -245,7 +254,7 @@ def send_email(email_address, config, run_link, result_link):
         htmly = get_template('email-results.html')
 
         d = Context({'keep_days': settings.ATIME_DEFAULT,
-                     'result_link': result_link,
+                     'results_link': result_link,
                      'run_link': run_link})
 
         text_content = plaintext.render(d)

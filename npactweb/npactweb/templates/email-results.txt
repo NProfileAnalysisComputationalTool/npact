@@ -1,6 +1,6 @@
 Your results are ready at {{ results_link }}.
 
-They will be cached for {{keep_days}} days but may be re-requested after that by clicking the same link above.
+They will be cached for {{keep_days}} days but may be re-requested after that by going to {{ run_link }}.
 
 Cheers,
 N-PACT
