@@ -30,7 +30,7 @@ def cleanup_existing():
     if os.path.exists(vedir):
         try:
             logging.debug("Attempting to shutdown tqdaemon")
-            python = os.path.join(vedir,'bin/python')
+            python = os.path.join(vedir, 'bin/python')
             rc = subprocess.call([python, 'manage.py', 'tqdaemon', 'stop'],
                                  cwd=pwd)
             if rc != 0:
