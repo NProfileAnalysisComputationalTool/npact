@@ -207,47 +207,25 @@ describe('Graphs', function(){
 
     it('can parse a line', function(){
       expect(result[2])
-        .toEqual({name: 'H-64-C', start: 71945, end: 72100, complement:0});
+        .toEqual({
+          name: 'H-64-C',
+          start: 71945, end: 72100,
+          complement:0,
+          phase: (72100 - 1) % 3
+        });
     });
     it('can parse a complement', function(){
       expect(result[0])
-        .toEqual({name: 'H-51*G', start: 57104, end: 57904, complement:1});
+        .toEqual({
+          name: 'H-51*G',
+          start: 57104, end: 57904,
+          complement:1,
+          phase: (57104 - 1) % 3
+        });
     });
 
     it('double parsing is a NOOP', function(){
       expect(EP.parse(result)).toEqual(result);
-    });
-  });
-
-  describe('HitsParser', function(){
-    var HP, result,
-        HITS = ['H 1117..2280',
-                'H complement(2643..3335)',
-                'H complement(3371..4630)',
-                'H complement(5206..6042)',
-                'H complement(6069..8333)',
-                'H 7725..7877',
-                'G complement(8389..8439)',
-                'H complement(8563..8901)',
-                'H complement(9448..10596)',
-                'H 10231..10437']
-          .join('\n');
-    beforeEach(inject(function(HitsParser){
-      HP = HitsParser;
-      result = HP.parse(HITS);
-    }));
-
-    it('can parse many', function(){
-      expect(result.length).toBe(10);
-    });
-
-    it('can parse phase direct strands', function(){
-      expect(result[0].complement).toBe(0);
-      expect(result[0].phase).toBe((2280 - 1) % 3);
-    });
-    it('can parse phase on complement strands', function(){
-      expect(result[2].complement).toBe(1);
-      expect(result[2].phase).toBe((3371 - 1) % 3);
     });
   });
 });

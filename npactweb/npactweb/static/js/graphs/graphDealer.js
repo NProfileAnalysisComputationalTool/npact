@@ -38,7 +38,7 @@ angular.module('npact')
     headerSizes:{'extracts': 30, 'hits': 20}
   })
 
-  .factory('GraphDealer', function($log, Utils, $q, $rootScope, GraphingCalculator, npactConstants, ExtractParser, HitsParser) {
+  .factory('GraphDealer', function($log, Utils, $q, $rootScope, GraphingCalculator, npactConstants, ExtractParser) {
     'use strict';
     // the `GraphDealer` hands out graph data and processes events
     var hasProfileData = false,
@@ -84,7 +84,7 @@ angular.module('npact')
         return addHeader(opts.extracts, ExtractParser, exopts.name, exopts.data);
       },
       addHits: function(exopts) {
-        return addHeader(opts.hits, HitsParser, exopts.name, exopts.data);
+        return addHeader(opts.hits, ExtractParser, exopts.name, exopts.data);
       },
 
       setColors:function(colorBlindFriendly){

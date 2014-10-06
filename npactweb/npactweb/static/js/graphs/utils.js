@@ -179,26 +179,6 @@ angular.module('npact')
     /**
      * parses one line as an extract
      *
-     * @param {string} line - single extract line
-     * @returns {Object} extract
-     */
-    function parseExtract(line){
-      var parts = EXTRACT_REGEX.exec(line);
-      return {
-        start: parseInt(parts[START]),
-        end: parseInt(parts[END]),
-        complement: parts[COMP] ? 1 : 0,
-        name: parts[NAME]
-      };
-    }
-
-    return ParserFactory.create(parseExtract);
-  })
-  .factory('HitsParser', function(ParserFactory, ExtractParser) {
-    'use strict';
-    /**
-     * parses one line as an hit
-     *
      * COLORING INDICATES THE COLOR OF THE GENOME PHASE (0,1, OR 2) OF
      * THE THIRD CODON POSITIONS OF GENES, IN INTERNAL COORDINATES. IF A
      * GENE IS ENCODED IN THE DIRECT STRAND, ITS THIRD CODON POSITIONS
@@ -211,15 +191,21 @@ angular.module('npact')
      * TRANSLATE OUTPUT/INPUT COORDINATES INTO INTERNAL COORDINATES.
      *
      * @param {string} line - single extract line
-     * @returns {Object} hit
+     * @returns {Object} extract
      */
-    function parseHit(line){
-      var res = ExtractParser.parseLine(line),
+    function parseExtract(line){
+      var parts = EXTRACT_REGEX.exec(line),
+          res = {
+            start: parseInt(parts[START]),
+            end: parseInt(parts[END]),
+            complement: parts[COMP] ? 1 : 0,
+            name: parts[NAME]
+          },
           phaseCoordinate = res.complement ? res.start : res.end;
       res.phase = (phaseCoordinate - 1) % 3;
       return res;
     }
 
-    return ParserFactory.create(parseHit);
+    return ParserFactory.create(parseExtract);
   })
 ;

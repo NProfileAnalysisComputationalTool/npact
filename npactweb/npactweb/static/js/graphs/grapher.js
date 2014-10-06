@@ -323,10 +323,8 @@ angular.module('npact')
 
           _(cds)
             .forEach(function(x){
-              // color determined by `x.end - 1 % 3`
               var isComplement = x.complement === 0,
-                  colorCoord = isComplement ? x.start : x.end,
-                  c = colors[colorNames[(colorCoord - 1) % 3]],
+                  c = colors[colorNames[x.phase]],
                   baseY = isComplement ? y + opts.headerArrowHeight : y,
                   arrowPointY = baseY + ahHalfHeight,
                   arrowMaxY = baseY + opts.headerArrowHeight,
