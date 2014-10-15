@@ -175,7 +175,7 @@ angular.module('npact')
 
       var zoomOnPx = evt.evt.layerX - this.m.graph.x,
           zoomOnPct = zoomOnPx / this.m.graph.w,
-          startGn = this.opts.zoomOnPctstartBase,
+          startGn = this.opts.startBase,
           zoomingOut = evt.evt.shiftKey
       ;
 
