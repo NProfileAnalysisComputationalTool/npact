@@ -143,7 +143,8 @@ angular.module('npact')
       // remember where we are at the start/end of a drag, so dragging can
       // match our "scroll"
       g.on('dragstart dragend', function(){
-        self.$element.trigger('tooltipHide.npact');
+        // kill ALL tooltips, not just the ones on this graph
+        jQuery('.qtip').qtip('destroy');
       });
 
       g.on('dragend', function(){
@@ -170,15 +171,14 @@ angular.module('npact')
     };
 
     GP.onDblClick = function(evt){
-      // tell the GraphDealer, they'll sort it out
-      this.$element.trigger('tooltipHide.npact');
+      jQuery('.qtip').qtip('destroy');
 
       var zoomOnPx = evt.evt.layerX - this.m.graph.x,
           zoomOnPct = zoomOnPx / this.m.graph.w,
           startGn = this.opts.startBase,
           zoomingOut = evt.evt.shiftKey
       ;
-
+      // tell the GraphDealer, they'll sort it out
       GraphDealer.zoomTo(startGn, zoomOnPct, zoomingOut);
     };
 
