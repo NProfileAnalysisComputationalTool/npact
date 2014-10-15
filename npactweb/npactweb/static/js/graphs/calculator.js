@@ -1,16 +1,9 @@
 angular.module('npact')
-  .factory('GraphingCalculator', function GraphingCalculator(K, Utils) {
+  .service('GraphingCalculator', function GraphingCalculator(K, Utils) {
+    'use strict';
+    var self = this;
 
-    // public interface
-    return {
-      chart:chartMetrics,
-      xaxis:xaxis,
-      alignRectangles:alignRectangles,
-      stops:stops,
-      zoom:zoom
-    };
-
-    function stops(a,b){
+    self.stops = function(a,b){
       var length = b - a,
           // get even stops; look for one lower order of magnitude
           // than our length - TODO: too many stops for lower ranges
@@ -28,18 +21,35 @@ angular.module('npact')
           // want to be start/end INCLUSIVE so pad the end
           end + 2*interval, interval)
       };
-    }
+    };
 
-    function xaxis(opts){
-      var m = chartMetrics(opts),
-          s = stops(opts.range[0], opts.range[1]),
+    self.xaxis = function(opts){
+
+      var makeTicks = function(lbl, n){
+        var x = parseInt(start + n*interval);
+        return {
+          x: x, y: 0,
+          x2: x, y2: opts.profileTicks
+        };
+      };
+
+      var makeLabels = function(lbl, n){
+        return {
+          x: ticks[n].x, y: opts.profileTicks,
+          coord: ticks[n].x,
+          text: lbl,
+          scaleX: labelScaleX
+        };
+      };
+
+      var m = self.chart(opts),
+          s = self.stops(opts.range[0], opts.range[1]),
           length = opts.range[1] - opts.range[0],
           interval = s.interval,
           ss = s.stops,
           // want to capture some margin
           start = ss[0],
           end = _.last(ss),
-          xAxisTicks = ss.length,
           ticks = ss.map(makeTicks),
           scaleX = m.graph.w / length,
           // blow the text back up, we don't want it scaled
@@ -59,24 +69,7 @@ angular.module('npact')
         ticks: ticks,
         labels:labels
       };
-
-      function makeTicks(lbl, n){
-        var x = parseInt(start + n*interval);
-        return {
-          x: x, y: 0,
-          x2: x, y2: opts.profileTicks
-        };
-      }
-
-      function makeLabels(lbl, n){
-        return {
-          x: ticks[n].x, y: opts.profileTicks,
-          coord: ticks[n].x,
-          text: lbl,
-          scaleX: labelScaleX
-        };
-      }
-    }
+    };
 
 
     /**
@@ -99,7 +92,7 @@ angular.module('npact')
      * zooming in
      * @returns {Object} new offset and basesPerGraph such that we remain focused on the selected gene
      */
-    function zoom(startBase, zoomPct, basesPerGraph, offset, zoomingOut){
+    self.zoom = function(startBase, zoomPct, basesPerGraph, offset, zoomingOut){
       //
       // O = offset from L such that Z is positionally at the same
       // point on the screen
@@ -110,28 +103,27 @@ angular.module('npact')
       var zoomToBase = startBase + Math.floor(zoomPct*basesPerGraph),
           row = Math.floor((startBase - offset)/basesPerGraph),
           zoomFactor = zoomingOut ? 2 : 0.5,
-          new_basesPerGraph = basesPerGraph * zoomFactor,
-          new_startBase = zoomToBase - Math.floor(new_basesPerGraph * zoomPct),
-          new_offset = new_startBase - (row*new_basesPerGraph);
+          newbasesPerGraph = basesPerGraph * zoomFactor,
+          newstartBase = zoomToBase - Math.floor(newbasesPerGraph * zoomPct),
+          newoffset = newstartBase - (row*newbasesPerGraph);
 
-      return {offset: new_offset, basesPerGraph: new_basesPerGraph};
-    }
+      return {offset: newoffset, basesPerGraph: newbasesPerGraph};
+    };
 
     /**
      * calculate measurements about the chart
      */
-    function chartMetrics(opts){
+    self.chart = function(opts){
       var yStops = [100, 80, 60, 40, 20, 0],
           yAxisTicks = yStops.length - 1,
           // the line graph, excluding tick marks and axis labels
           g = {
             x: opts.leftPadding,
-            y: opts.height - opts.profileHeight
-              - opts.axisLabelFontsize // x-axis labels
-              - 2*opts.profileTicks, // tick marks
+            y: opts.height - opts.profileHeight -
+              opts.axisLabelFontsize - // x-axis labels
+              2*opts.profileTicks, // tick marks
             h: opts.profileHeight,
-            w: opts.width - opts.leftPadding
-              - opts.rightPadding
+            w: opts.width - opts.leftPadding - opts.rightPadding
           },
           yAxisTickSpacing = g.h / yAxisTicks,
           yAxisTickX = g.x - opts.profileTicks,
@@ -173,7 +165,7 @@ angular.module('npact')
           text: lbl
         };
       }
-    }
+    };
 
     /**
      * find a position that will align the two rectangles on their center
@@ -182,10 +174,10 @@ angular.module('npact')
      * @param {Object} toAlign - the rectangle you want to move {width,height}
      * @returns {Object} x,y coordinates to shift `toAlign` by, from the top/left
      */
-    function alignRectangles(rect, toAlign){
+    self.alignRectangles = function(rect, toAlign){
       // get the top left coordinate of the `toAlign` rect
       return {x: rect.x + (rect.width/2) - (toAlign.width/2),
               y: rect.y + (rect.height/2) - (toAlign.height/2)};
-    }
+    };
   })
 ;
