@@ -48,3 +48,11 @@ Graphs are drawn as data is received, using [kineticjs][]
 
 Rendered using `qtip2` as the `npactExtract` directive, based on
 kinetic mouse click events.
+
+### Development
+
+We use [grunt][] and [npm][] for build/test tasks. For these to work,
+you need to install [npm][] for your operating system, then run `npm
+install`. From there run `grunt -h` to see the available build tasks.
+
+[grunt]: http://gruntjs.com/
