@@ -19,4 +19,4 @@ uploads
 development-bundle
 webroot
 /npactweb/.tmp/templates.js
-/npactweb/node_modules/grunt-newer/.cache/html2js/main/timestamp
+/npactweb/node_modules
