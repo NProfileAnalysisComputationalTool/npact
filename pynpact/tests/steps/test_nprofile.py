@@ -20,7 +20,7 @@ def test_gbk(gbkconfig, executor):
     assert 59 == len(p.readlines())
 
 
-#@pytest.mark.xfail()
+@pytest.mark.xfail()
 def test_fna(fnaconfig, executor):
     nprofile.plan(fnaconfig, executor)
     filename = fnaconfig[nprofile.OUTPUTKEY]
