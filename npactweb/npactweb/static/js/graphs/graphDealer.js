@@ -127,6 +127,10 @@ angular.module('npact')
           q.resolve(w);
           rebuildGraphs();
         }
+      },
+      showMore: function(){
+        opts.graphsPerPage += 5;
+        rebuildGraphs();
       }
     };
     function addHeader(collection, parser, name, data) {

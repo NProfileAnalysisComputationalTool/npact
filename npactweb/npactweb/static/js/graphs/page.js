@@ -5,6 +5,7 @@ angular.module('npact')
       restrict: 'A',
       templateUrl: STATIC_BASE_URL + 'js/graphs/page.html',
       controller: 'npactGraphPageCtrl',
+      controllerAs: 'ctrl',
       link: function($scope, $element) {
         var getWidth = function(){ return $element.width(); };
 
@@ -29,6 +30,14 @@ angular.module('npact')
     $scope.status = 'Initializing';
     $scope.ready = false;
     $scope.FETCH_URL = FETCH_URL;
+
+    this.addMore = _.debounce(function(){
+      $log.log('scrolling down via infinite scroller');
+      GraphDealer.showMore();
+    }, 250);
+
+
+
     // start it up
     Fetcher.kickstart()
       .then(function(config) {
