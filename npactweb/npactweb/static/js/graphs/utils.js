@@ -1,15 +1,10 @@
 angular.module('npact')
-  .factory('Utils', function($q, $timeout, $log, $interval) {
+  .service('Utils', function($q, $timeout, $log, $interval) {
     'use strict';
     // sigil value for quitting forEachAsync
     var STOP_ITERATING = {},
         log10 = Math.log(10);
-    // public interface
-    return {
-      STOP_ITERATING: STOP_ITERATING,
-      orderOfMagnitude: orderOfMagnitude,
-      forEachAsync: forEachAsync
-    };
+    this.STOP_ITERATING = STOP_ITERATING;
 
     /**
      * find the nearest order of magnitude to `x`
@@ -20,9 +15,9 @@ angular.module('npact')
      * @param {Number} x
      * @param {Number} [exponent] shift the result by this many digits
      */
-    function orderOfMagnitude(x, exponent){
+    this.orderOfMagnitude = function(x, exponent){
       return Math.pow(10, Math.round(Math.log(x) / log10) + (exponent || 0));
-    }
+    };
 
     /**
      * Loop over the list from back to front, asyncronously
@@ -31,7 +26,7 @@ angular.module('npact')
      *
      * @returns {Promise} when the iteration is complete
      */
-    function forEachAsync(list, fn){
+    this.forEachAsync = function(list, fn){
       var d = $q.defer(),
           p = d.promise;
 
@@ -84,7 +79,7 @@ angular.module('npact')
       // start it off soon
       $timeout(iterate, opts.delay, false);
       return p;
-    }
+    };
   })
   .service('LineParser', function(Utils, $q) {
     'use strict';
