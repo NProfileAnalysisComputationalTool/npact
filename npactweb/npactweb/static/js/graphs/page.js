@@ -1,29 +1,15 @@
 angular.module('npact')
-  .directive('npactGraphPage', function(STATIC_BASE_URL, $log, GraphDealer, $window) {
+  .directive('npactGraphPage', function(STATIC_BASE_URL) {
     'use strict';
     return {
       restrict: 'A',
       templateUrl: STATIC_BASE_URL + 'js/graphs/page.html',
       controller: 'npactGraphPageCtrl',
-      controllerAs: 'ctrl',
-      link: function($scope, $element) {
-        var getWidth = function(){ return $element.width(); };
-
-        $scope.$watch(getWidth, function(newValue, oldValue){
-          if (newValue > 0){
-            $log.log('width changed from', oldValue, '->', newValue);
-            GraphDealer.setWidth(newValue);
-          }
-        });
-
-        // check for scope changes on resize
-        angular.element($window)
-          .bind('resize', function () { $scope.$apply(); });
-      }
+      controllerAs: 'ctrl'
     };
   })
 
-  .controller('npactGraphPageCtrl', function($scope, GraphDealer, Fetcher, npactConstants, $q, $log, StatusPoller, FETCH_URL) {
+  .controller('npactGraphPageCtrl', function($scope, GraphDealer, Fetcher, npactConstants, $q, $log, StatusPoller, FETCH_URL, $window, $element) {
     'use strict';
     $scope.miscFiles = [];
     $scope.graphHeight = npactConstants.graphSpecDefaults.height;
@@ -36,7 +22,18 @@ angular.module('npact')
       GraphDealer.showMore();
     }, 250);
 
+    var getWidth = function(){ return $element.width(); };
 
+    $scope.$watch(getWidth, function(newValue, oldValue){
+          if (newValue > 0){
+            $log.log('width changed from', oldValue, '->', newValue);
+            GraphDealer.setWidth(newValue);
+          }
+    });
+
+    // check for scope changes on resize
+    angular.element($window)
+      .bind('resize', function () { $scope.$apply(); });
 
     // start it up
     Fetcher.kickstart()
