@@ -9,7 +9,7 @@ angular.module('npact')
         var getWidth = function(){ return $element.width(); };
 
         $scope.$watch(getWidth, function(newValue, oldValue){
-          if (newValue > 0 && newValue !== oldValue){
+          if (newValue > 0){
             $log.log('width changed from', oldValue, '->', newValue);
             GraphDealer.setWidth(newValue);
           }
