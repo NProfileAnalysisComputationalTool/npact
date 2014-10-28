@@ -8,8 +8,7 @@ angular.module('npact')
     return {
       STOP_ITERATING: STOP_ITERATING,
       orderOfMagnitude: orderOfMagnitude,
-      forEachAsync: forEachAsync,
-      widthAvailable: widthAvailable
+      forEachAsync: forEachAsync
     };
 
     /**
@@ -23,32 +22,6 @@ angular.module('npact')
      */
     function orderOfMagnitude(x, exponent){
       return Math.pow(10, Math.round(Math.log(x) / log10) + (exponent || 0));
-    }
-
-
-    /**
-     * polls for when the element has a width
-     *
-     * @param {Element} element - what element to scan
-     * @returns {Promise} - the width of the element
-     */
-    function widthAvailable(element){
-      var d = $q.defer(),
-          p = d.promise,
-          t1 = new Date(),
-          task = $interval(checkForWidth, 100);
-      // stop polling once we've found a value
-      p.then(function(){$interval.cancel(task);});
-      return p;
-
-      function checkForWidth(){
-        var w = element.width();
-        // indicate progress via the promise
-        d.notify(new Date() - t1);
-        if(w > 0){
-          d.resolve(w);
-        }
-      }
     }
 
     /**
