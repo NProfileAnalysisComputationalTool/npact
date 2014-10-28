@@ -113,10 +113,20 @@ angular.module('npact')
       },
       setWidth: function(w){
         $log.log('setting graph width to', w);
-        // let folks know it's ready
-        _onWidth.resolve(w);
 
-        // TODO: handle changing this after the fact
+        if(_onWidth){
+          // we're waiting for the initial width, let folks know it's
+          // ready
+          _onWidth.resolve(w);
+          _onWidth = null;
+        }else{
+          // setup a new resolved promise, since we don't have to wait
+          // for the value this time
+          var q = $q.defer();
+          onWidth = q.promise;
+          q.resolve(w);
+          rebuildGraphs();
+        }
       }
     };
     function addHeader(collection, parser, name, data) {

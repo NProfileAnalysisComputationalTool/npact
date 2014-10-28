@@ -1,14 +1,23 @@
 angular.module('npact')
-  .directive('npactGraphPage', function(STATIC_BASE_URL, Utils, GraphDealer) {
+  .directive('npactGraphPage', function(STATIC_BASE_URL, $log, GraphDealer, $window) {
     'use strict';
     return {
       restrict: 'A',
       templateUrl: STATIC_BASE_URL + 'js/graphs/page.html',
       controller: 'npactGraphPageCtrl',
       link: function($scope, $element) {
-        // TODO: watch for changes in width
-        // http://stackoverflow.com/questions/23044338/window-resize-directive
-        Utils.widthAvailable($element).then(GraphDealer.setWidth);
+        var getWidth = function(){ return $element.width(); };
+
+        $scope.$watch(getWidth, function(newValue, oldValue){
+          if (newValue > 0 && newValue !== oldValue){
+            $log.log('width changed from', oldValue, '->', newValue);
+            GraphDealer.setWidth(newValue);
+          }
+        });
+
+        // check for scope changes on resize
+        angular.element($window)
+          .bind('resize', function () { $scope.$apply(); });
       }
     };
   })
