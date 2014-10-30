@@ -38,7 +38,7 @@ angular.module('npact')
     headerSizes:{'extracts': 30, 'hits': 20}
   })
 
-  .factory('GraphDealer', function($log, Utils, $q, $rootScope, GraphingCalculator, npactConstants, ExtractParser) {
+  .factory('GraphDealer', function($log, Utils, $q, $rootScope, GraphingCalculator, npactConstants, ExtractParser, ProfileReader) {
     'use strict';
     // the `GraphDealer` hands out graph data and processes events
     var hasProfileData = false,
@@ -68,14 +68,31 @@ angular.module('npact')
         };
 
     // once we have data, load it and rebuild the graphs
-    onProfileData.then(loadProfileData).then(rebuildGraphs);
+    onProfileData.then(rebuildGraphs);
 
 
     // public interface
     return {
       opts:opts,
       setProfile:function(profile){
-        $log.log('setProfile', profile.length);
+        $log.log('setProfile:', profile.length, 'genes');
+        ProfileReader.load(profile);
+        opts.profileSummary = ProfileReader.summary(profile);
+
+        hasProfileData = true;
+        opts.profile = profile;
+
+        // TODO: not need these
+        opts.startBase = opts.profileSummary.startBase;
+        opts.endBase = opts.profileSummary.endBase;
+
+        // find a sensible zoom level
+        var basesPerGraph = opts.profileSummary.length / opts.graphsPerPage;
+        // if we're really short, reset out bases per graph
+        if (basesPerGraph < opts.basesPerGraph) {
+          opts.basesPerGraph = Utils.orderOfMagnitude(basesPerGraph);
+        }
+
         _onProfileData.resolve(profile);
         return onProfileData;
       },
@@ -176,14 +193,12 @@ angular.module('npact')
       rebuildGraphs();
     }
 
-    function makeGraphSpec(startBase, width){
-      var endBase = startBase + opts.basesPerGraph,
-          spec = angular.extend({
-            startBase: startBase,
-            endBase: endBase,
+    function makeGraphSpec(range, width){
+      var spec = angular.extend({
+            startBase: range.startBase,
+            endBase: range.endBase,
             extracts: {},
             hits: {},
-            profile: [],
             headers: [],
             width: width,
             colors: opts.colorBlindFriendly ? npactConstants.colorBlindLineColors
@@ -202,70 +217,20 @@ angular.module('npact')
     }
 
     function makeGraphSpecs(width){
-      var base = opts.page * opts.basesPerGraph * opts.graphsPerPage +
-            opts.offset;
-      return _.range(0, opts.graphsPerPage)
-        .map(function(n){
-          return makeGraphSpec(base + n*opts.basesPerGraph, width);
-        });
-    }
+      return onProfileData.then(function() {
+        var base = opts.page * opts.basesPerGraph * opts.graphsPerPage +
+              opts.offset,
 
+            partitions = ProfileReader.partition({
+              basesPerGraph: opts.basesPerGraph,
+              summary: opts.profileSummary,
+              margin: Utils.orderOfMagnitude(opts.basesPerGraph, -1)
+            });
 
-    function loadProfileData(profile){
-      hasProfileData = true;
-      opts.profile = profile;
-      var start = profile[0],
-          end = _.last(profile);
-
-      opts.startBase = start.coordinate;
-      opts.endBase = end.coordinate;
-
-      // find a sensible zoom level
-      var basesPerGraph = opts.length / opts.graphsPerPage;
-      // if we're really short, reset out bases per graph
-      if (basesPerGraph < opts.basesPerGraph) {
-        opts.basesPerGraph = Utils.orderOfMagnitude(basesPerGraph);
-      }
-      return profile; // enable chaining
-    }
-
-    /**
-     * distribute profile data to the graph specs
-     *
-     * @param {Array} graphSpecs - list of graph specifications
-     * @returns {Promise} list of modified graph specifications
-     */
-    function attachProfileData(graphSpecs){
-      // assumes the profile is ordered by coordinate from low to high
-      // eg `[{coordinate: 0}, {coordinate: 10}]`
-
-      // reset the profiles
-      graphSpecs.forEach(function(gs){ gs.profile = []; });
-
-      // want to grab data a little out of range so we can scroll a
-      // little bit
-      var margin = Utils.orderOfMagnitude(opts.basesPerGraph, -1);
-      // TODO: reduce duplication between here and
-      // `GraphingCalculator.stops`
-      return onProfileData.then(function(profile){
-
-        graphSpecs.forEach(function(gs){
-          var startIdx = sortedIdx(gs.startBase - margin) - 1,
-              endIdx = sortedIdx(gs.endBase + margin) + 1;
-
-          // shallow copy of the relevant data, guarding against
-          // out-of-bounds indexes
-          gs.profile = profile.slice(Math.max(startIdx,0),
-                                     Math.min(endIdx, profile.length - 1));
-        });
-
-        return graphSpecs;
-
-        // search for the index in our profile where we would insert `c`
-        // and have it still be sorted
-        function sortedIdx(c){
-          return _.sortedIndex(profile, {'coordinate': c}, 'coordinate');
-        }
+        return _.take(partitions, opts.graphsPerPage)
+          .map(function(p){
+            return makeGraphSpec(p, width);
+          });
       });
     }
 
@@ -346,7 +311,6 @@ angular.module('npact')
     function rebuildGraphs(){
       var t1 = new Date();
       return onWidth.then(makeGraphSpecs)
-        .then(attachProfileData)
         .then(_.partialRight(attachAllData, 'extracts'))
         .then(_.partialRight(attachAllData, 'hits'))
         .then(function(graphSpecs){

@@ -1,5 +1,5 @@
 angular.module('npact')
-  .factory('Grapher', function(K, $log, GraphingCalculator, $rootScope, $compile, GraphDealer){
+  .factory('Grapher', function(K, $log, GraphingCalculator, $rootScope, $compile, GraphDealer, ProfileReader){
     'use strict';
     function addMany(container, children){
       if(children && children.length) {
@@ -246,7 +246,7 @@ angular.module('npact')
             scaleX: xaxis.scaleX,
             offsetX: this.opts.range[0]
           }),
-          dataToDraw = _(this.opts.profile)
+          dataToDraw = _(ProfileReader.slice(this.opts))
             .reduce(function(acc, g){
               lines.map(function(x){
                 acc[x].push(g.coordinate);
