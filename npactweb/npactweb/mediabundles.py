@@ -28,6 +28,7 @@ MEDIA_BUNDLES = (
      'bower_components/qtip2/jquery.qtip.min.js',
      'js/app.js',
      'js/graphs/utils.js',
+     'js/graphs/readers.js',
      'js/graphs/graphDealer.js',
      'js/graphs/page.js',
      'js/graphs/calculator.js',

@@ -6,6 +6,7 @@ module.exports = function(config){
       'npactweb/static/bower_components/jquery/jquery.min.js',
       'npactweb/static/bower_components/angular/angular.js',
       'npactweb/static/bower_components/angular-mocks/angular-mocks.js',
+      'npactweb/static/bower_components/ngInfiniteScroll/build/ng-infinite-scroll.min.js',
       'npactweb/static/bower_components/kineticjs/kinetic.js',
       'npactweb/static/bower_components/lodash/dist/lodash.js',
       '.tmp/templates.js',
