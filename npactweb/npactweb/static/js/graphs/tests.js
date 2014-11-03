@@ -394,9 +394,10 @@ describe('Graphs', function(){
 
     describe('.loadTrack', function() {
       it('loads', function() {
-        expect(G.tracks).toEqual({});
+        expect(G.tracks).toEqual([]);
+        expect(G.hasTrack('test')).toBe(false);
         G.loadTrack('test', 'extracts');
-        expect(G.tracks).toEqual({test:'extracts'});
+        expect(G.hasTrack('test')).toBe(true);
       });
       it('throws on duplicate', function() {
         G.loadTrack('test', 'extracts');
@@ -426,7 +427,26 @@ describe('Graphs', function(){
             { text: 'test3', lineType: 'hits', y: 65, height: 20 },
           ]});
       });
+
+      it('ignores disabled tracks', function() {
+        G.loadTrack('test', 'extracts');
+        G.loadTrack('test2', 'extracts');
+        G.loadTrack('test3', 'hits');
+        G.toggleTrack('test3');
+        expect(G.headerSpec()).toEqual({
+          headerY: 65,
+          headers: [
+            { text: 'test', lineType: 'extracts', y: 5, height: 30 },
+            { text: 'test2', lineType: 'extracts', y: 35, height: 30 },
+          ]});
+      });
     });
 
+    describe('.toggleTrack', function() {
+      it('throws on bad names', function() {
+        expect(function() { G.toggleTrack('test'); })
+          .toThrow(G.TrackNotFound);
+      });
+    });
   });
 });
