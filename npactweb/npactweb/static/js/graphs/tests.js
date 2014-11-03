@@ -3,13 +3,14 @@ describe('Graphs', function(){
 
   beforeEach(module('npact'));
   beforeEach(module('templates-main'));
-  var ng = {}, $scope, $compile, $q, $httpBackend;
-  beforeEach(inject(function (_$rootScope_, _$compile_, _$q_, _$httpBackend_, _$timeout_) {
+  var ng = {}, $scope, $compile, $q, $httpBackend, Err;
+  beforeEach(inject(function (_$rootScope_, _$compile_, _$q_, _$httpBackend_, _$timeout_, _Err_) {
     $scope = _$rootScope_;
     $compile = _$compile_;
     $q = _$q_;
     $httpBackend = _$httpBackend_;
     ng.$timeout = _$timeout_;
+    Err = _Err_;
   }));
 
   function make(html){
@@ -226,7 +227,7 @@ describe('Graphs', function(){
         expect(P.summary()).toEqual(summary);
       });
       it('throws if no profile found', function(){
-        expect(P.summary).toThrow(P.ProfileNotFound);
+        expect(P.summary).toThrow(Err.ProfileNotFound);
       });
     });
 
@@ -289,7 +290,7 @@ describe('Graphs', function(){
         expect(s).toEqual([{coordinate:200}, {coordinate:250}, {coordinate:300}]);
       });
       it('throws if no profile found', function() {
-        expect(P.slice).toThrow(P.ProfileNotFound);
+        expect(P.slice).toThrow(Err.ProfileNotFound);
       });
     });
 
@@ -325,7 +326,7 @@ describe('Graphs', function(){
         ng.$timeout.flush();
         expect(function() {
           T.load('test', '');
-        }).toThrow(T.TrackAlreadyDefined);
+        }).toThrow(Err.TrackAlreadyDefined);
       });
     });
 
@@ -349,7 +350,7 @@ describe('Graphs', function(){
       it('throws on bad names', function() {
         expect(function() {
           T.slice({name:'test2', startBase:0, endBase:0});
-        }).toThrow(T.TrackNotFound);
+        }).toThrow(Err.TrackNotFound);
       });
       it('returns empty array on no matches', function() {
         T.slice({name:'test', startBase:0, endBase:100})
@@ -379,7 +380,7 @@ describe('Graphs', function(){
         G.loadTrack('test', 'extracts');
         expect(function() {
           G.loadTrack('test', 'whatever');
-        }).toThrow(G.TrackAlreadyDefined);
+        }).toThrow(Err.TrackAlreadyDefined);
       });
     });
 
@@ -421,7 +422,7 @@ describe('Graphs', function(){
     describe('.toggleTrack', function() {
       it('throws on bad names', function() {
         expect(function() { G.toggleTrack('test'); })
-          .toThrow(G.TrackNotFound);
+          .toThrow(Err.TrackNotFound);
       });
     });
   });

@@ -1,9 +1,7 @@
 angular.module('npact')
-  .service('ProfileReader', function($q) {
+  .service('ProfileReader', function($q, Err) {
     'use strict';
     var self = this;
-
-    self.ProfileNotFound = new Error('profile not found');
 
     /**
      * set the current loaded profile, returns the summary
@@ -17,7 +15,7 @@ angular.module('npact')
      * get a shallow copy of the profile for the given range
      */
     this.slice = function(range) {
-      if (!self.profileData) { throw self.ProfileNotFound; }
+      if (!self.profileData) { throw Err.ProfileNotFound; }
 
       var sortedIdx = function(coord) {
         return _.sortedIndex(self.profileData, {coordinate: coord}, 'coordinate');
@@ -39,7 +37,7 @@ angular.module('npact')
      */
     this.summary = function(profile) {
       var p = profile || self.profileData;
-      if (!p) { throw self.ProfileNotFound; }
+      if (!p) { throw Err.ProfileNotFound; }
 
       var start = p[0],
           end = _.last(p);
@@ -70,18 +68,15 @@ angular.module('npact')
       return g;
     };
   })
-  .service('TrackReader', function(ExtractParser, $log, Utils){
+  .service('TrackReader', function(ExtractParser, $log, Utils, Err){
     var self = this;
 
     self.tracks = {};
-    self.TrackAlreadyDefined = new Error('Track with this name already defined, each track name must be unique');
-    self.TrackNotFound = new Error('Track with this name not defined');
-
     /**
      * load the given track name and data
      */
     this.load = function(name, data) {
-      if (_.has(self.tracks, name)) { throw self.TrackAlreadyDefined; }
+      if (_.has(self.tracks, name)) { throw Err.TrackAlreadyDefined; }
       return ExtractParser.parseAsync(data)
         .then(function(data) {
           return (self.tracks[name] = data);
@@ -91,7 +86,7 @@ angular.module('npact')
     };
 
     this.slice = function(opts) {
-      if (!_.has(self.tracks, opts.name)) { throw self.TrackNotFound; }
+      if (!_.has(self.tracks, opts.name)) { throw Err.TrackNotFound; }
       $log.log('TrackReader.slice', opts);
       var minIdx = null, maxIdx, data = self.tracks[opts.name];
       // TODO: use _.sortedIndex to binary search, or some other

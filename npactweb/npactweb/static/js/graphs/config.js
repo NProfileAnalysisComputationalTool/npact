@@ -1,9 +1,7 @@
 angular.module('npact')
-  .service('GraphConfig', function(TrackReader, npactConstants) {
+  .service('GraphConfig', function(Err, npactConstants) {
     var self = this;
     self.tracks = [];
-    self.TrackAlreadyDefined = TrackReader.TrackAlreadyDefined;
-    self.TrackNotFound = TrackReader.TrackNotFound;
 
     var activeTracks = function(){
       return _.filter(self.tracks, {active: true}, 'active');
@@ -20,7 +18,7 @@ angular.module('npact')
      * register a track to be displayed on the graph
      */
     this.loadTrack = function(name, type) {
-      if(self.hasTrack(name)){ throw self.TrackAlreadyDefined; }
+      if(self.hasTrack(name)){ throw Err.TrackAlreadyDefined; }
       self.tracks.push({
         text: name,
         lineType: type,
@@ -55,7 +53,7 @@ angular.module('npact')
      * toggle this track from showing/hiding
      */
     this.toggleTrack = function(name){
-      if(!self.hasTrack(name)){ throw self.TrackNotFound; }
+      if(!self.hasTrack(name)){ throw Err.TrackNotFound; }
       var cfg = _.find(self.tracks, {text:name});
       cfg.active = !cfg.active;
       return cfg;
