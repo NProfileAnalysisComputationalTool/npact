@@ -385,4 +385,48 @@ describe('Graphs', function(){
     });
 
   });
+
+  describe('GraphConfig', function() {
+    var G;
+    beforeEach(inject(function(GraphConfig){
+      G = GraphConfig;
+    }));
+
+    describe('.loadTrack', function() {
+      it('loads', function() {
+        expect(G.tracks).toEqual({});
+        G.loadTrack('test', 'extracts');
+        expect(G.tracks).toEqual({test:'extracts'});
+      });
+      it('throws on duplicate', function() {
+        G.loadTrack('test', 'extracts');
+        expect(function() {
+          G.loadTrack('test', 'whatever');
+        }).toThrow(G.TrackAlreadyDefined);
+      });
+    });
+
+    describe('.headerSpec', function() {
+      it('with one extract', function() {
+        G.loadTrack('test', 'extracts');
+        expect(G.headerSpec()).toEqual({
+          headerY: 35,
+          headers: [ { text: 'test', lineType: 'extracts', y: 5, height: 30 }]
+        });
+      });
+      it('with many', function() {
+        G.loadTrack('test', 'extracts');
+        G.loadTrack('test2', 'extracts');
+        G.loadTrack('test3', 'hits');
+        expect(G.headerSpec()).toEqual({
+          headerY: 85,
+          headers: [
+            { text: 'test', lineType: 'extracts', y: 5, height: 30 },
+            { text: 'test2', lineType: 'extracts', y: 35, height: 30 },
+            { text: 'test3', lineType: 'hits', y: 65, height: 20 },
+          ]});
+      });
+    });
+
+  });
 });
