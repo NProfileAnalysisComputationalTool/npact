@@ -76,25 +76,24 @@ angular.module('npact')
       opts:opts,
       setProfile:function(profile){
         $log.log('setProfile:', profile.length, 'genes');
-        ProfileReader.load(profile);
-        opts.profileSummary = ProfileReader.summary(profile);
+        return ProfileReader.load(profile)
+          .then(function(summary) {
+            opts.profileSummary = summary;
+            hasProfileData = true;
+            opts.profile = profile;
 
-        hasProfileData = true;
-        opts.profile = profile;
+            // TODO: not need these
+            opts.startBase = summary.startBase;
+            opts.endBase = summary.endBase;
 
-        // TODO: not need these
-        opts.startBase = opts.profileSummary.startBase;
-        opts.endBase = opts.profileSummary.endBase;
-
-        // find a sensible zoom level
-        var basesPerGraph = opts.profileSummary.length / opts.graphsPerPage;
-        // if we're really short, reset out bases per graph
-        if (basesPerGraph < opts.basesPerGraph) {
-          opts.basesPerGraph = Utils.orderOfMagnitude(basesPerGraph);
-        }
-
-        _onProfileData.resolve(profile);
-        return onProfileData;
+            // find a sensible zoom level
+            var basesPerGraph = opts.profileSummary.length / opts.graphsPerPage;
+            // if we're really short, reset out bases per graph
+            if (basesPerGraph < opts.basesPerGraph) {
+              opts.basesPerGraph = Utils.orderOfMagnitude(basesPerGraph);
+            }
+            _onProfileData.resolve(profile);
+          });
       },
 
       addExtract:function(exopts){

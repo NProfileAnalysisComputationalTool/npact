@@ -1,15 +1,18 @@
 angular.module('npact')
-  .service('ProfileReader', function() {
+  .service('ProfileReader', function($q) {
     'use strict';
     var self = this;
 
     self.ProfileNotFound = new Error('profile not found');
 
     /**
-     * set the current loaded profile
+     * set the current loaded profile, returns the summary
      */
     this.load = function(profile) {
       self.profileData = profile;
+      var d = $q.defer();
+      d.resolve(self.summary(profile));
+      return d.promise;
     };
 
     /**
@@ -37,8 +40,11 @@ angular.module('npact')
      * Calculate summary stats about a profile
      */
     this.summary = function(profile) {
-      var start = profile[0],
-          end = _.last(profile);
+      var p = profile || self.profileData;
+      if (!p) { throw self.ProfileNotFound; }
+
+      var start = p[0],
+          end = _.last(p);
 
       return {
         startBase: start.coordinate,

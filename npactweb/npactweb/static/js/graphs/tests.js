@@ -236,71 +236,86 @@ describe('Graphs', function(){
       P = ProfileReader;
     }));
 
-    it('extracts the basics', function(){
-      var p = P.summary([
-        {coordinate:150}, {coordinate:200},
-        {coordinate:300}, {coordinate:350}]);
-      expect(p).toEqual({ startBase : 150, endBase : 350, length : 200 });
-    });
+    describe('.summary', function() {
+      var data = [{coordinate: 150}, {coordinate: 200},
+                  {coordinate: 300}, {coordinate: 350}],
+          summary = {startBase: 150, endBase: 350, length: 200};
 
-    it('partitions', function(){
-      var p = P.partition({
-        basesPerGraph: 100,
-        offset: 0,
-        summary: {startBase: 0, endBase: 500}
+      it('handles an arg', function(){
+        expect(P.summary(data)).toEqual(summary);
       });
 
-      expect(p).toEqual([
-        {startBase:0, endBase:100},
-        {startBase:100, endBase:200},
-        {startBase:200, endBase:300},
-        {startBase:300, endBase:400},
-        {startBase:400, endBase:500}
-      ]);
+      it('reads built-in by default ', function(){
+        P.load(data);
+        expect(P.summary()).toEqual(summary);
+      });
+      it('throws if no profile found', function(){
+        expect(P.summary).toThrow(P.ProfileNotFound);
+      });
     });
 
-    it('partitions with an positive offset', function(){
-      var p = P.partition({
-        basesPerGraph: 100,
-        offset: 10,
-        summary: {startBase: 0, endBase: 500}
+    describe('.partition', function() {
+      it('partitions', function(){
+        var p = P.partition({
+          basesPerGraph: 100,
+          offset: 0,
+          summary: {startBase: 0, endBase: 500}
+        });
+
+        expect(p).toEqual([
+          {startBase:0, endBase:100},
+          {startBase:100, endBase:200},
+          {startBase:200, endBase:300},
+          {startBase:300, endBase:400},
+          {startBase:400, endBase:500}
+        ]);
+    });
+
+      it('handles a positive offset', function(){
+        var p = P.partition({
+          basesPerGraph: 100,
+          offset: 10,
+          summary: {startBase: 0, endBase: 500}
+        });
+
+        expect(p).toEqual([
+          {startBase:10, endBase:110},
+          {startBase:110, endBase:210},
+          {startBase:210, endBase:310},
+          {startBase:310, endBase:410},
+          {startBase:410, endBase:500}
+        ]);
       });
 
-      expect(p).toEqual([
-        {startBase:10, endBase:110},
-        {startBase:110, endBase:210},
-        {startBase:210, endBase:310},
-        {startBase:310, endBase:410},
-        {startBase:410, endBase:500}
-      ]);
-    });
+      it('handles margin', function(){
+        var p = P.partition({
+          basesPerGraph: 100,
+          margin: 10,
+          summary: {startBase: 0, endBase: 500}
+        });
 
-    it('partitions with a margin', function(){
-      var p = P.partition({
-        basesPerGraph: 100,
-        margin: 10,
-        summary: {startBase: 0, endBase: 500}
+        expect(p).toEqual([
+          {startBase:0, endBase:110},
+          {startBase:90, endBase:210},
+          {startBase:190, endBase:310},
+          {startBase:290, endBase:410},
+          {startBase:390, endBase:500}
+        ]);
       });
-
-      expect(p).toEqual([
-        {startBase:0, endBase:110},
-        {startBase:90, endBase:210},
-        {startBase:190, endBase:310},
-        {startBase:290, endBase:410},
-        {startBase:390, endBase:500}
-      ]);
     });
 
-    it('throws if we slice without loaded data', function() {
-      expect(P.slice).toThrow(P.ProfileNotFound);
+    describe('.slice',function() {
+      it('slices', function() {
+        P.load([
+          {coordinate:150}, {coordinate:200}, {coordinate:250},
+          {coordinate:300}, {coordinate:350}]);
+        var s = P.slice({startBase:200, endBase:300});
+        expect(s).toEqual([{coordinate:200}, {coordinate:250}, {coordinate:300}]);
+      });
+      it('throws if no profile found', function() {
+        expect(P.slice).toThrow(P.ProfileNotFound);
+      });
     });
 
-    it('slices', function() {
-      P.load([
-        {coordinate:150}, {coordinate:200}, {coordinate:250},
-        {coordinate:300}, {coordinate:350}]);
-      var s = P.slice({startBase:200, endBase:300});
-      expect(s).toEqual([{coordinate:200}, {coordinate:250}, {coordinate:300}]);
-    });
   });
 });
