@@ -1,5 +1,5 @@
 angular.module('npact')
-  .factory('Grapher', function(K, $log, GraphingCalculator, $rootScope, $compile, GraphDealer, ProfileReader){
+  .factory('Grapher', function(K, $log, GraphingCalculator, $rootScope, $compile, GraphDealer, ProfileReader, TrackReader, $q){
     'use strict';
     function addMany(container, children){
       if(children && children.length) {
@@ -268,15 +268,30 @@ angular.module('npact')
     };
 
     GP.redraw = function(){
-      this._genomeGroup.add(this.xAxisGroup(), this.profileGroup());
+      var gg = this._genomeGroup, opts = this.opts, self = this;
+      gg.add(this.xAxisGroup(), this.profileGroup());
+      self.stage.batchDraw();
 
-      var renderedExtracts = _.mapValues(this.opts.extracts, this.cdsGroup, this);
-      addMany(this._genomeGroup, _.values(renderedExtracts));
+      var drawings = _.map(this.opts.headers, function(hdr) {
+        return TrackReader.slice({
+          name: hdr.text,
+          startBase: opts.startBase,
+          endBase: opts.endBase
+        }).then(function(data){
+          switch(hdr.lineType){
+          case 'extracts':
+            return self.cdsGroup(hdr, data);
+          case 'hits':
+            return self.drawHit(hdr, data);
+          default:
+            throw new Error("don't know how to draw " + hdr);
+          }
+        }).then(function(img) { gg.add(img); });
+      });
 
-      var renderedHits = _.mapValues(this.opts.hits, this.drawHit, this);
-      addMany(this._genomeGroup, _.values(renderedHits));
-
-      this.stage.batchDraw();
+      return $q.all(drawings).then(function() {
+        self.stage.batchDraw();
+      });
     };
 
     function centerExtractLabel(txt, scaleX){
@@ -294,10 +309,9 @@ angular.module('npact')
       txt.position(pos);
     }
 
-    GP.cdsGroup = function(cds, name){
+    GP.cdsGroup = function(header, cds){
       var xaxis = this.xaxis, opts = this.opts,
           colors = this.colors,
-          header = _.find(opts.headers, {text:name}, name),
           g = new K.Group({
             x: 0, y: 0,
             scaleX: xaxis.scaleX,
@@ -393,16 +407,15 @@ angular.module('npact')
         });
         $el.trigger('tooltipShow.npact');
       });
-      return (this._cdsGroup = g);
+      return g;
     };
 
-    GP.drawHit = function(hits, name) {
+    GP.drawHit = function(header, hits) {
       var xaxis = this.xaxis, opts = this.opts,
           startBase = opts.startBase,
           endBase = opts.endBase,
           colors = this.colors,
           colorNames = 'rgb',
-          header = _.find(opts.headers, {text:name}, name),
           offset = header.height / 4,
           hitStrokeWidth = offset / 2,
           guideYOffset = 2,

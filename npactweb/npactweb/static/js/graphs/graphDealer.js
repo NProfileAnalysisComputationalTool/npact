@@ -38,7 +38,7 @@ angular.module('npact')
     headerSizes:{'extracts': 30, 'hits': 20}
   })
 
-  .factory('GraphDealer', function($log, Utils, $q, $rootScope, GraphingCalculator, npactConstants, ExtractParser, ProfileReader) {
+  .factory('GraphDealer', function($log, Utils, $q, $rootScope, GraphingCalculator, npactConstants, ExtractParser, ProfileReader, TrackReader) {
     'use strict';
     // the `GraphDealer` hands out graph data and processes events
     var hasProfileData = false,
@@ -70,6 +70,17 @@ angular.module('npact')
     // once we have data, load it and rebuild the graphs
     onProfileData.then(rebuildGraphs);
 
+    var maybeDrawTrack = function(key, name, data) {
+      return TrackReader.load(name, data)
+        .then(function() {
+          opts[key][name] = true;
+          if(hasProfileData){
+            // TODO: maybe a simpler way to add extracts to existing
+            // graphs?
+            rebuildGraphs();
+          }
+        });
+    };
 
     // public interface
     return {
@@ -97,10 +108,10 @@ angular.module('npact')
       },
 
       addExtract:function(exopts){
-        return addHeader(opts.extracts, ExtractParser, exopts.name, exopts.data);
+        return maybeDrawTrack('extracts', exopts.name, exopts.data);
       },
       addHits: function(exopts) {
-        return addHeader(opts.hits, ExtractParser, exopts.name, exopts.data);
+        return maybeDrawTrack('hits', exopts.name, exopts.data);
       },
 
       setColors:function(colorBlindFriendly){
@@ -149,27 +160,6 @@ angular.module('npact')
         rebuildGraphs();
       }
     };
-    function addHeader(collection, parser, name, data) {
-        $log.log('addHeader', name);
-
-        return parser.parseAsync(data)
-          .then(function(data){
-            $log.log('parsed ', name, hasProfileData);
-            // save it for later
-            collection[name] = data;
-            // if we've got profile data already, rebuild
-            if(hasProfileData){
-              // TODO: maybe a simpler way to add extracts to existing
-              // graphs?
-              rebuildGraphs();
-            }
-            // if we're still waiting on profile data, then when it hits
-            // this extract will be processed.
-          }, function(){
-            $log.log('failed to parse', name, arguments);
-          });
-
-    }
 
     function zoomTo(startBase, zoomPct, zoomingOut){
       // TODO: make this a options object
@@ -234,46 +224,21 @@ angular.module('npact')
     }
 
     function attachAllData(graphSpecs, key) {
-      var promises = [];
-      // iterate over the named extracts
-      _.forOwn(opts[key], function(data, name){
-        promises.push(attachData(graphSpecs, name, key));
-      });
-      return $q.all(promises).then(function(){ return graphSpecs;});
-    }
-
-    function attachData(graphSpecs, name, key) {
       var headerHeight = npactConstants.headerSizes[key];
-
-      graphSpecs.forEach(function(gs){
-        gs[key][name] = [];
-        gs.headers.push({
-          text: name,
-          lineType:key,
-          y: gs.headerY,
-          height: headerHeight
+      _.mapValues(opts[key], function(data, name) {
+          $log.log('attachAllData', key, name);
+          graphSpecs.forEach(function(gs){
+            gs.headers.push({
+              text: name,
+              lineType:key,
+              y: gs.headerY,
+              height: headerHeight
+            });
+            // increment where the next header will start
+          gs.headerY += headerHeight;
+          });
         });
-        // increment where the next header will start
-        gs.headerY += headerHeight;
-      });
-
-      // TODO: use _.sortedIndex to binary search and array.slice to
-      // make shallow copies onto the graph specs
-      return Utils.forEachAsync(opts[key][name], function(dataPoint){
-        graphSpecs.forEach(function(gs){
-          // extract starts in this range?
-          var startsInRange = dataPoint.start >= gs.startBase &&
-                dataPoint.start <= gs.endBase,
-              // extract ends in this range?
-              endsInRange = dataPoint.end >= gs.startBase &&
-                dataPoint.end <= gs.endBase;
-          if(startsInRange || endsInRange){
-            gs[key][name].push(dataPoint);
-          }
-        });
-      })
-      // promise resolves as the graphspecs
-        .then(function(){ return graphSpecs;});
+      return $q.when(graphSpecs);
     }
 
     function redrawRequest(){
