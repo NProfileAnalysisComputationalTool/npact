@@ -76,40 +76,16 @@ describe('Graphs', function(){
       var m = GC.chart(opts);
       expect(m.graph).toEqual({
         x: 50,
-        y: 30,
-        h: 100,
+        y: 10,
+        h: 120,
         w: 200
       });
-    });
-    it('calculates y-axis ticks', function(){
-      var m = GC.chart(opts);
-      expect(m.yaxis.ticks).toEqual(
-        [
-          {x: 45, y: 30, x2: 50, y2: 30},
-          {x: 45, y: 50, x2: 50, y2: 50},
-          {x: 45, y: 70, x2: 50, y2: 70},
-          {x: 45, y: 90, x2: 50, y2: 90},
-          {x: 45, y: 110, x2: 50, y2: 110},
-          {x: 45, y: 130, x2: 50, y2: 130}
-        ]);
-    });
-
-    it('calculates y-axis labels', function(){
-      var m = GC.chart(opts);
-      expect(m.yaxis.labels).toEqual([
-        {x: 0, y: 25, width: 40, text: 100},
-        {x: 0, y: 45, width: 40, text: 80},
-        {x: 0, y: 65, width: 40, text: 60},
-        {x: 0, y: 85, width: 40, text: 40},
-        {x: 0, y: 105, width: 40, text: 20},
-        {x: 0, y: 125, width: 40, text: 0}
-      ]);
     });
 
     it('calculates y-axis title', function(){
       var m = GC.chart(opts);
       expect(m.yaxis.titleBox).toEqual(
-        {x: 0, y: 30, width: 40, height: 100}
+        {x: 0, y: 10, width: 40, height: 120}
       );
     });
 
