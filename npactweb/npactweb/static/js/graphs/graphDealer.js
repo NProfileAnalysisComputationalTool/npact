@@ -131,11 +131,7 @@ angular.module('npact')
           _onWidth.resolve(w);
           _onWidth = null;
         }else{
-          // setup a new resolved promise, since we don't have to wait
-          // for the value this time
-          var q = $q.defer();
-          onWidth = q.promise;
-          q.resolve(w);
+          onWidth = $q.when(w);
           rebuildGraphs();
         }
       },
