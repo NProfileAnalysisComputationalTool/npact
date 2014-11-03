@@ -22,6 +22,10 @@
     Showing bases {{graphConfig.visible.startBase}} - {{graphConfig.visible.endBase}}
   </div>
   <h3>Tracks</h3>
-  [Checkboxes for the loaded tracks]
+  <div ng-repeat="t in gc.tracks">
+    <label><input ng-model="t.active" type="checkbox"
+                  ng-change="ctrl.redraw()"
+                  />{{t.text}}</label>
+  </div>
   <h3>Nprofile settings</h3>
 </div>

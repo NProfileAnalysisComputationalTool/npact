@@ -138,7 +138,8 @@ angular.module('npact')
       showMore: function(){
         opts.graphsPerPage += 5;
         rebuildGraphs();
-      }
+      },
+      redraw: rebuildGraphs
     };
 
     function zoomTo(startBase, zoomPct, zoomingOut){
