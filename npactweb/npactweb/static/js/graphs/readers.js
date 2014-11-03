@@ -10,9 +10,7 @@ angular.module('npact')
      */
     this.load = function(profile) {
       self.profileData = profile;
-      var d = $q.defer();
-      d.resolve(self.summary(profile));
-      return d.promise;
+      return $q.when(self.summary(profile));
     };
 
     /**
@@ -70,6 +68,45 @@ angular.module('npact')
         });
       }
       return g;
+    };
+  })
+  .service('TrackReader', function(ExtractParser, $log, Utils){
+    var self = this;
+
+    self.tracks = {};
+    self.TrackAlreadyDefined = new Error('Track with this name already defined, each track name must be unique');
+    self.TrackNotFound = new Error('Track with this name not defined');
+
+    /**
+     * load the given track name and data
+     */
+    this.load = function(name, data) {
+      if (_.has(self.tracks, name)) { throw self.TrackAlreadyDefined; }
+      return ExtractParser.parseAsync(data)
+        .then(function(data) {
+          return (self.tracks[name] = data);
+        }, function() {
+          $log.log('failed to parse data for track', name);
+        });
+    };
+
+    this.slice = function(opts) {
+      if (!_.has(self.tracks, opts.name)) { throw self.TrackNotFound; }
+      $log.log('TrackReader.slice', opts);
+      var slice = [];
+      // TODO: use _.sortedIndex to binary search and array.slice to
+      // make shallow copies onto the graph specs
+      return Utils.forEachAsync(self.tracks[opts.name], function(dataPoint) {
+        // extract starts in this range?
+        var startsInRange = dataPoint.start >= opts.startBase &&
+              dataPoint.start <= opts.endBase,
+            // extract ends in this range?
+            endsInRange = dataPoint.end >= opts.startBase &&
+              dataPoint.end <= opts.endBase;
+        if(startsInRange || endsInRange){
+          slice.push(dataPoint);
+        }
+      }).then(function() { return slice; });
     };
   })
 ;
