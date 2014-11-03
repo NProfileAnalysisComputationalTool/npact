@@ -62,12 +62,12 @@ describe('Graphs', function(){
       width:255,
       leftPadding: 50,
       rightPadding: 5,
-      profileHeight:100,
       axisLabelFontsize:10,
       axisTitleFontsize: 20,
       axisTitle: '% GC',
       profileTicks:5,
-      range:[0,100]
+      range:[0,100],
+      headerY: 5
     };
     beforeEach(inject(function(GraphingCalculator){
       GC = GraphingCalculator;

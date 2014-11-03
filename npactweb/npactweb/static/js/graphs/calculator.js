@@ -116,13 +116,16 @@ angular.module('npact')
     self.chart = function(opts){
       var yStops = [100, 80, 60, 40, 20, 0],
           yAxisTicks = yStops.length - 1,
+          profileHeight = opts.height - opts.headerY - opts.axisLabelFontsize -
+            3*opts.profileTicks,
+
           // the line graph, excluding tick marks and axis labels
           g = {
             x: opts.leftPadding,
-            y: opts.height - opts.profileHeight -
+            y: opts.height - profileHeight -
               opts.axisLabelFontsize - // x-axis labels
               2*opts.profileTicks, // tick marks
-            h: opts.profileHeight,
+            h: profileHeight,
             w: opts.width - opts.leftPadding - opts.rightPadding
           },
           yAxisTickSpacing = g.h / yAxisTicks,

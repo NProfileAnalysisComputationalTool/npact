@@ -38,7 +38,7 @@ angular.module('npact')
     headerSizes:{'extracts': 30, 'hits': 20}
   })
 
-  .factory('GraphDealer', function($log, Utils, $q, $rootScope, GraphingCalculator, npactConstants, ExtractParser, ProfileReader, TrackReader) {
+  .factory('GraphDealer', function($log, Utils, $q, $rootScope, GraphingCalculator, npactConstants, ExtractParser, ProfileReader, TrackReader, GraphConfig) {
     'use strict';
     // the `GraphDealer` hands out graph data and processes events
     var hasProfileData = false,
@@ -67,7 +67,7 @@ angular.module('npact')
     var maybeDrawTrack = function(key, name, data) {
       return TrackReader.load(name, data)
         .then(function() {
-          opts[key][name] = true;
+          GraphConfig.loadTrack(name, key);
           if(hasProfileData){
             // TODO: maybe a simpler way to add extracts to existing
             // graphs?
@@ -167,26 +167,13 @@ angular.module('npact')
     }
 
     function makeGraphSpec(range, width){
-      var spec = angular.extend({
-            startBase: range.startBase,
-            endBase: range.endBase,
-            extracts: {},
-            hits: {},
-            headers: [],
-            width: width,
-            colors: opts.colorBlindFriendly ? npactConstants.colorBlindLineColors
-              : npactConstants.lineColors,
-
-            // how much space should be taken by the line graph alone
-            get profileHeight(){
-              // TODO: reduce duplication between here and GraphingCalculator
-              return this.height - this.headerY - this.axisLabelFontsize -
-                3*this.profileTicks;
-            },
-            get range() {return [this.startBase, this.endBase];}
-          }, npactConstants.graphSpecDefaults);
-
-      return spec;
+      return {
+        startBase: range.startBase,
+        endBase: range.endBase,
+        width: width,
+        colors: opts.colorBlindFriendly ? npactConstants.colorBlindLineColors
+          : npactConstants.lineColors
+      };
     }
 
     function makeGraphSpecs(width){
@@ -202,24 +189,6 @@ angular.module('npact')
             return makeGraphSpec(p, width);
           });
       });
-    }
-
-    function attachAllData(graphSpecs, key) {
-      var headerHeight = npactConstants.headerSizes[key];
-      _.mapValues(opts[key], function(data, name) {
-          $log.log('attachAllData', key, name);
-          graphSpecs.forEach(function(gs){
-            gs.headers.push({
-              text: name,
-              lineType:key,
-              y: gs.headerY,
-              height: headerHeight
-            });
-            // increment where the next header will start
-          gs.headerY += headerHeight;
-          });
-        });
-      return $q.when(graphSpecs);
     }
 
     function redrawRequest(){
@@ -241,10 +210,6 @@ angular.module('npact')
      */
     function redraw(graphSpecs){
       $rootScope.graphSpecs = graphSpecs;
-      graphSpecs.forEach(function(spec){
-        spec.chart = GraphingCalculator.chart(spec);
-        spec.xaxis = GraphingCalculator.xaxis(spec);
-      });
 
       opts.visible = {
         startBase : _(graphSpecs).pluck('startBase').min().value(),
@@ -256,8 +221,6 @@ angular.module('npact')
     function rebuildGraphs(){
       var t1 = new Date();
       return onWidth.then(makeGraphSpecs)
-        .then(_.partialRight(attachAllData, 'extracts'))
-        .then(_.partialRight(attachAllData, 'hits'))
         .then(function(graphSpecs){
           return (opts.graphSpecs = graphSpecs);
         })
