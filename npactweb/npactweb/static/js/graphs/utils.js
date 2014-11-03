@@ -1,5 +1,5 @@
 angular.module('npact')
-  .service('Utils', function($q, $timeout, $log, $interval) {
+  .service('Utils', function($q, $timeout, $log) {
     'use strict';
     // sigil value for quitting forEachAsync
     var STOP_ITERATING = {},
