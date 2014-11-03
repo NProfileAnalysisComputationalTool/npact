@@ -93,10 +93,10 @@ angular.module('npact')
     this.slice = function(opts) {
       if (!_.has(self.tracks, opts.name)) { throw self.TrackNotFound; }
       $log.log('TrackReader.slice', opts);
-      var slice = [];
-      // TODO: use _.sortedIndex to binary search and array.slice to
-      // make shallow copies onto the graph specs
-      return Utils.forEachAsync(self.tracks[opts.name], function(dataPoint) {
+      var minIdx = null, maxIdx, data = self.tracks[opts.name];
+      // TODO: use _.sortedIndex to binary search, or some other
+      // better index structure/algorithm
+      return Utils.forEachAsync(data, function(dataPoint, idx) {
         // extract starts in this range?
         var startsInRange = dataPoint.start >= opts.startBase &&
               dataPoint.start <= opts.endBase,
@@ -104,9 +104,12 @@ angular.module('npact')
             endsInRange = dataPoint.end >= opts.startBase &&
               dataPoint.end <= opts.endBase;
         if(startsInRange || endsInRange){
-          slice.push(dataPoint);
+          if(minIdx === null) { minIdx = idx; }
+          maxIdx = idx;
         }
-      }).then(function() { return slice; });
+      }).then(function() {
+        return minIdx === null ? [] : data.slice(minIdx, maxIdx+1);
+      });
     };
   })
 ;
