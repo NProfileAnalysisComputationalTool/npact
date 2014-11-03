@@ -50,7 +50,6 @@ angular.module('npact')
         opts = {
           basesPerGraph: 10000,
           colorBlindFriendly: false,
-          page: 0,
           offset: 0,
           graphsPerPage: 5,
           startBase: 0,
@@ -59,12 +58,7 @@ angular.module('npact')
           profile: null,
           extracts: {},
           hits: {},
-          graphSpecs: [],
-          get maxPages (){
-            return Math.ceil(this.length / this.basesPerGraph*this.graphsPerPage);
-          },
-          get hasPreviousPage(){ return this.page > 0; },
-          get hasNextPage(){ return this.page < this.maxPages; }
+          graphSpecs: []
         };
 
     // once we have data, load it and rebuild the graphs
@@ -128,16 +122,6 @@ angular.module('npact')
       },
       zoomTo: zoomTo,
       panTo: panTo,
-      nextPage: function(){
-        $log.log('nextPage', arguments);
-        opts.page++;
-        rebuildGraphs();
-      },
-      previousPage: function(){
-        $log.log('previousPage', arguments);
-        opts.page--;
-        rebuildGraphs();
-      },
       setWidth: function(w){
         $log.log('setting graph width to', w);
 
@@ -207,10 +191,7 @@ angular.module('npact')
 
     function makeGraphSpecs(width){
       return onProfileData.then(function() {
-        var base = opts.page * opts.basesPerGraph * opts.graphsPerPage +
-              opts.offset,
-
-            partitions = ProfileReader.partition({
+        var partitions = ProfileReader.partition({
               basesPerGraph: opts.basesPerGraph,
               summary: opts.profileSummary,
               margin: Utils.orderOfMagnitude(opts.basesPerGraph, -1)
