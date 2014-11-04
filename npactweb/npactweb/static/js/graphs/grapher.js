@@ -255,7 +255,10 @@ angular.module('npact')
             scaleX: xaxis.scaleX,
             offsetX: this.opts.startBase
           }),
-          dataToDraw = _(ProfileReader.slice(this.opts))
+          dataToDraw = _(ProfileReader.slice({
+            startBase: this.opts.startBase - this.opts.margin,
+            endBase: this.opts.endBase + this.opts.margin
+          }))
             .reduce(function(acc, g){
               lines.map(function(x){
                 acc[x].push(g.coordinate);
@@ -284,8 +287,8 @@ angular.module('npact')
       var drawings = _.map(this.headerSpec.headers, function(hdr) {
         return TrackReader.slice({
           name: hdr.text,
-          startBase: opts.startBase,
-          endBase: opts.endBase
+          startBase: opts.startBase - opts.margin,
+          endBase: opts.endBase + opts.margin
         }).then(function(data){
           switch(hdr.lineType){
           case 'extracts':

@@ -154,25 +154,22 @@ angular.module('npact')
       rebuildGraphs();
     }
 
-    function makeGraphSpec(range, width){
-      return {
-        startBase: range.startBase,
-        endBase: range.endBase,
-        width: width
-      };
-    }
-
     function makeGraphSpecs(width){
       return onProfileData.then(function() {
         var partitions = ProfileReader.partition({
               basesPerGraph: opts.basesPerGraph,
-              summary: opts.profileSummary,
-              margin: Utils.orderOfMagnitude(opts.basesPerGraph, -1)
+              summary: opts.profileSummary
             });
 
         return _.take(partitions, opts.graphsPerPage)
           .map(function(p){
-            return makeGraphSpec(p, width);
+            return {
+              startBase: p.startBase,
+              endBase: p.endBase,
+              width: width,
+              // TODO: pass margin via GraphConfig
+              margin: Utils.orderOfMagnitude(opts.basesPerGraph, -1)
+            };
           });
       });
     }
