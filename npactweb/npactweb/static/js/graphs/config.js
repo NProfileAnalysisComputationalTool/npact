@@ -1,9 +1,13 @@
 angular.module('npact')
-  .service('GraphConfig', function(Err, npactConstants) {
+  .service('GraphConfig', function(Err, npactConstants, Evt) {
     var self = this;
     self.tracks = [];
     self.colorBlindFriendly = false;
     self.basesPerGraph = 10000;
+    self.width = null;
+    self.profileSummary = null;
+
+
 
     var activeTracks = function(){
       return _.filter(self.tracks, {active: true}, 'active');
@@ -51,14 +55,20 @@ angular.module('npact')
 
     };
 
+
     /**
-     * toggle this track from showing/hiding
+     * analyze a previous version of the config, and return what command
+     * to run in order to refresh the page
      */
-    this.toggleTrack = function(name){
-      if(!self.hasTrack(name)){ throw Err.TrackNotFound; }
-      var cfg = _.find(self.tracks, {text:name});
-      cfg.active = !cfg.active;
-      return cfg;
+    this.refreshCommand = function(oldGraphConfig) {
+      var sameBasesPerGraph = self.basesPerGraph === oldGraphConfig.basesPerGraph,
+          hasProfile = self.profileSummary !== null,
+          hadProfile = oldGraphConfig.profileSummary !== null,
+          newProfile = hasProfile && !hadProfile;
+
+      if(!sameBasesPerGraph || newProfile){ return Evt.REBUILD; }
+      if(hasProfile){ return Evt.REDRAW; }
+      return Evt.NOOP;
     };
   })
   .directive('npactGraphConfig', function npactGraphConfig(STATIC_BASE_URL, GraphDealer, $log, GraphConfig, $rootScope, Evt) {

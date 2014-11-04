@@ -12,7 +12,7 @@ angular.module('npact')
       this.headerSpec = GraphConfig.headerSpec();
       this.graphSpec = angular.extend({}, npactConstants.graphSpecDefaults,
         {
-          width: opts.width,
+          width: GraphConfig.width,
           headerY: this.headerSpec.headerY,
           range: [opts.startBase, opts.endBase]
         });
@@ -21,7 +21,7 @@ angular.module('npact')
       this.stage = new K.Stage({
         container:opts.element,
         height: this.graphSpec.height,
-        width: opts.width
+        width: GraphConfig.width
       });
 
       this.colors = GraphConfig.colorBlindFriendly ?

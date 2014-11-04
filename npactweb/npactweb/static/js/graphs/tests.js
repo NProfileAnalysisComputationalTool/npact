@@ -3,14 +3,15 @@ describe('Graphs', function(){
 
   beforeEach(module('npact'));
   beforeEach(module('templates-main'));
-  var ng = {}, $scope, $compile, $q, $httpBackend, Err;
-  beforeEach(inject(function (_$rootScope_, _$compile_, _$q_, _$httpBackend_, _$timeout_, _Err_) {
+  var ng = {}, $scope, $compile, $q, $httpBackend, Err, Evt;
+  beforeEach(inject(function (_$rootScope_, _$compile_, _$q_, _$httpBackend_, _$timeout_, _Err_, _Evt_) {
     $scope = _$rootScope_;
     $compile = _$compile_;
     $q = _$q_;
     $httpBackend = _$httpBackend_;
     ng.$timeout = _$timeout_;
     Err = _Err_;
+    Evt = _Evt_;
   }));
 
   function make(html){
@@ -18,24 +19,6 @@ describe('Graphs', function(){
     $scope.$digest();
     return el;
   }
-
-  describe('GraphDealer', function(){
-    var GD;
-
-    beforeEach(inject(function(GraphDealer){
-      GD = GraphDealer;
-    }));
-
-    it('adjusts basesPerGraph based on profile data', function(){
-      var p = [{coordinate:0}, {coordinate:5000}];
-      expect(GD.opts.basesPerGraph).toBe(10000);
-      expect(GD.opts.length).toBe(0);
-      GD.setProfile(p);
-      $scope.$apply(); // process promises
-      expect(GD.opts.length).toBe(5000);
-      expect(GD.opts.basesPerGraph).toBe(1000);
-    });
-  });
 
   describe('Utils', function(){
     var U;
@@ -393,7 +376,7 @@ describe('Graphs', function(){
         G.loadTrack('test', 'extracts');
         G.loadTrack('test2', 'extracts');
         G.loadTrack('test3', 'hits');
-        G.toggleTrack('test3');
+        _.find(G.tracks, {text:'test3'}).active = false;
         expect(G.headerSpec()).toEqual({
           headerY: 65,
           headers: [
@@ -403,10 +386,30 @@ describe('Graphs', function(){
       });
     });
 
-    describe('.toggleTrack', function() {
-      it('throws on bad names', function() {
-        expect(function() { G.toggleTrack('test'); })
-          .toThrow(Err.TrackNotFound);
+    describe('.refreshCommand', function() {
+      it('nothing if we have no data', function() {
+        expect(G.refreshCommand(G)).toBe(Evt.NOOP);
+        G.loadTrack('test', 'extracts');
+        expect(G.refreshCommand(G)).toBe(Evt.NOOP);
+      });
+
+      it('rebuild if we get data', function() {
+        G.profileSummary = {};
+        expect(G.refreshCommand({profileSummary:null, basesPerGraph: G.basesPerGraph})).toBe(Evt.REBUILD);
+      });
+
+      it('rebuild if we change zoom', function() {
+        G.profileSummary = {};
+        expect(G.refreshCommand({
+          profileSummary: G.profileSummary,
+          basesPerGraph: G.basesPerGraph + 1
+        }))
+          .toBe(Evt.REBUILD);
+      });
+
+      it('redraws', function() {
+        G.profileSummary = {};
+        expect(G.refreshCommand(G)).toBe(Evt.REDRAW);
       });
     });
   });

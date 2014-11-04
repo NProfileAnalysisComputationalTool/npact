@@ -41,38 +41,14 @@ angular.module('npact')
   .factory('GraphDealer', function($log, Utils, $q, $rootScope, GraphingCalculator, npactConstants, ExtractParser, ProfileReader, TrackReader, GraphConfig) {
     'use strict';
     // the `GraphDealer` hands out graph data and processes events
-    var hasProfileData = false,
-        _onProfileData = $q.defer(),
-        onProfileData = _onProfileData.promise,
-        _onWidth = $q.defer(),
-        onWidth = _onWidth.promise,
-        pendingRedraws = 0,
-        opts = {
+    var opts = {
           offset: 0,
           graphsPerPage: 5,
           startBase: 0,
           endBase: 0,
           get length(){ return this.endBase - this.startBase; },
-          profile: null,
-          extracts: {},
-          hits: {},
           graphSpecs: []
         };
-
-    // once we have data, load it and rebuild the graphs
-    onProfileData.then(rebuildGraphs);
-
-    var maybeDrawTrack = function(key, name, data) {
-      return TrackReader.load(name, data)
-        .then(function() {
-          GraphConfig.loadTrack(name, key);
-          if(hasProfileData){
-            // TODO: maybe a simpler way to add extracts to existing
-            // graphs?
-            rebuildGraphs();
-          }
-        });
-    };
 
     // public interface
     return {
@@ -81,49 +57,26 @@ angular.module('npact')
         $log.log('setProfile:', profile.length, 'genes');
         return ProfileReader.load(profile)
           .then(function(summary) {
-            opts.profileSummary = summary;
-            hasProfileData = true;
-            opts.profile = profile;
-
+            $log.log('setProfile: loaded', summary);
             // TODO: not need these
             opts.startBase = summary.startBase;
             opts.endBase = summary.endBase;
 
             // find a sensible zoom level
-            var basesPerGraph = opts.profileSummary.length / opts.graphsPerPage;
+            var basesPerGraph = summary.length / opts.graphsPerPage;
             // if we're really short, reset out bases per graph
             if (basesPerGraph < GraphConfig.basesPerGraph) {
               GraphConfig.basesPerGraph = Utils.orderOfMagnitude(basesPerGraph);
             }
-            _onProfileData.resolve(profile);
+            GraphConfig.profileSummary = summary;
           });
-      },
-
-      addExtract:function(exopts){
-        return maybeDrawTrack('extracts', exopts.name, exopts.data);
-      },
-      addHits: function(exopts) {
-        return maybeDrawTrack('hits', exopts.name, exopts.data);
       },
 
       zoomTo: zoomTo,
       panTo: panTo,
-      setWidth: function(w){
-        $log.log('setting graph width to', w);
-
-        if(_onWidth){
-          // we're waiting for the initial width, let folks know it's
-          // ready
-          _onWidth.resolve(w);
-          _onWidth = null;
-        }else{
-          onWidth = $q.when(w);
-          rebuildGraphs();
-        }
-      },
       showMore: function(){
         opts.graphsPerPage += 5;
-        rebuildGraphs();
+        //rebuildGraphs();
       },
       rebuildGraphs:rebuildGraphs
     };
@@ -144,70 +97,36 @@ angular.module('npact')
      * @param {Number} newStartBase - the end of the pan, in gene space
      */
     function panTo(oldStartBase, newStartBase){
+      // TODO: move offset into graphconfig
       var offset = Math.floor(newStartBase - oldStartBase);
       opts.offset += offset;
       $log.log('panTo', opts.offset);
       rebuildGraphs();
+      $rootScope.$apply(); // TODO: handle this better; event is
+                           // coming from outside angular
     }
 
     function makeGraphSpecs(width){
-      return onProfileData.then(function() {
-        var partitions = ProfileReader.partition({
-          offset: opts.offset,
-          basesPerGraph: GraphConfig.basesPerGraph
-        });
 
-        return _.take(partitions, opts.graphsPerPage)
-          .map(function(p){
-            return {
-              startBase: p.startBase,
-              endBase: p.endBase,
-              width: width
-            };
-          });
+      var partitions = ProfileReader.partition({
+        offset: opts.offset,
+        basesPerGraph: GraphConfig.basesPerGraph
       });
-    }
 
-    function redrawRequest(){
-      pendingRedraws++;
-      return function(graphSpecs){
-        pendingRedraws--;
-        if(pendingRedraws === 0){
-          return redraw(graphSpecs);
-        }else{
-          $log.log('skipping redraw, still have pending work');
-        }
-
-        return graphSpecs;
-      };
-    }
-
-    /**
-     * tell the world to redraw everything
-     */
-    function redraw(graphSpecs){
-      $rootScope.graphSpecs = graphSpecs;
-
-      opts.visible = {
-        startBase : _(graphSpecs).pluck('startBase').min().value(),
-        endBase : _(graphSpecs).pluck('endBase').max().value()
-      };
-      return graphSpecs;
+      return _.take(partitions, opts.graphsPerPage)
+        .map(function(p){
+          return {
+            startBase: p.startBase,
+            endBase: p.endBase
+          };
+        });
     }
 
     function rebuildGraphs(){
-      var t1 = new Date();
-      return onWidth.then(makeGraphSpecs)
-        .then(function(graphSpecs){
-          return (opts.graphSpecs = graphSpecs);
-        })
-        .then(redrawRequest())
-        .then(function(graphSpecs){
-          $log.log('rebuild:', new Date() - t1, 'ms');
-          return graphSpecs;
-        }).catch(function(){
-          $log.log('failed to rebuild, resetting state', arguments);
-          pendingRedraws = 0;
-        });
+      $rootScope.graphSpecs = opts.graphSpecs = makeGraphSpecs();
+      opts.visible = {
+        startBase : _(opts.graphSpecs).pluck('startBase').min().value(),
+        endBase : _(opts.graphSpecs).pluck('endBase').max().value()
+      };
     }
   });

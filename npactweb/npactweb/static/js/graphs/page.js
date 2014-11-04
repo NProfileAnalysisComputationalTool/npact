@@ -9,7 +9,7 @@ angular.module('npact')
     };
   })
 
-  .controller('npactGraphPageCtrl', function($scope, GraphDealer, Fetcher, npactConstants, $q, $log, StatusPoller, FETCH_URL, $window, $element, GraphConfig, Evt) {
+  .controller('npactGraphPageCtrl', function($scope, GraphDealer, Fetcher, npactConstants, $q, $log, StatusPoller, FETCH_URL, $window, $element, GraphConfig, Evt, TrackReader) {
     'use strict';
     $scope.miscFiles = [];
     $scope.graphHeight = npactConstants.graphSpecDefaults.height;
@@ -26,18 +26,37 @@ angular.module('npact')
     $scope.$watch(getWidth, function(newValue, oldValue){
           if (newValue > 0){
             $log.log('width changed from', oldValue, '->', newValue);
-            GraphDealer.setWidth(newValue);
+            GraphConfig.width = newValue;
           }
     });
 
     var getGraphConfig = function() { return GraphConfig; };
     $scope.$watch(getGraphConfig, function(newValue, oldValue){
-      if(newValue.basesPerGraph !== oldValue.basesPerGraph){
+      var cmd = newValue.refreshCommand(oldValue);
+      $log.log('graph config changed:', cmd);
+      switch(cmd){
+      case Evt.REBUILD:
         GraphDealer.rebuildGraphs();
-      }else{
-        $scope.$broadcast(Evt.REDRAW);
+        break;
+      case Evt.REDRAW:
+        $scope.$broadcast(cmd);
+        break;
       }
+
+
     }, true); // deep-equality
+
+    var addTrack = function(key, name, data) {
+      return TrackReader.load(name, data)
+        .then(function() { GraphConfig.loadTrack(name, key); });
+    },
+        addExtract = function(name, data) {
+          return addTrack('extracts', name, data);
+        },
+        addHits = function(name, data) {
+          return addTrack('hits', name, data);
+        };;
+
 
     // check for scope changes on resize
     angular.element($window)
@@ -54,21 +73,17 @@ angular.module('npact')
         var nprofile = Fetcher.nprofile(config).then(GraphDealer.setProfile);
         // Non-gbk files don't have CDSs we can extract.
         var inputFileCds = config.isgbk && Fetcher.inputFileCds(config)
-          .then(function(data) {
-            GraphDealer.addExtract({name: 'Input file CDS', data: data});
-          });
+              .then(function(data) { return addExtract('Input file CDS', data); });
 
         var extraFileList = Fetcher.acgtGammaFileList(config)
               .then(function(fileList) {
                 $scope.miscFiles.push.apply($scope.miscFiles, fileList);
                 Fetcher.fetchFile(config['File_of_new_CDSs'])
                   .then(function(data) {
-                    GraphDealer.addExtract({name: 'Newly Identified ORFs', data: data});
+                    return addExtract('Newly Identified ORFs', data);
                   });
                 Fetcher.fetchFile(config['File_of_G+C_coding_potential_regions'])
-                  .then(function(data) {
-                    GraphDealer.addHits({name: 'Hits', data: data});
-                  });
+                  .then(function(data) { addHits('Hits', data); });
               });
         $q.all([nprofile, inputFileCds, extraFileList])
           .then(function() {

@@ -6,7 +6,9 @@ angular.module('npact', ['infinite-scroll'])
     ProfileNotFound: new Error('profile not found')
   })
   .value('Evt', {
-    REDRAW:'redraw'
+    REDRAW:'redraw',
+    NOOP:'noop',
+    REBUILD:'rebuild'
   })
 
   .run(function($rootScope, STATIC_BASE_URL) {
