@@ -48,7 +48,6 @@ angular.module('npact')
         onWidth = _onWidth.promise,
         pendingRedraws = 0,
         opts = {
-          basesPerGraph: 10000,
           offset: 0,
           graphsPerPage: 5,
           startBase: 0,
@@ -93,8 +92,8 @@ angular.module('npact')
             // find a sensible zoom level
             var basesPerGraph = opts.profileSummary.length / opts.graphsPerPage;
             // if we're really short, reset out bases per graph
-            if (basesPerGraph < opts.basesPerGraph) {
-              opts.basesPerGraph = Utils.orderOfMagnitude(basesPerGraph);
+            if (basesPerGraph < GraphConfig.basesPerGraph) {
+              GraphConfig.basesPerGraph = Utils.orderOfMagnitude(basesPerGraph);
             }
             _onProfileData.resolve(profile);
           });
@@ -107,11 +106,6 @@ angular.module('npact')
         return maybeDrawTrack('hits', exopts.name, exopts.data);
       },
 
-      setZoom:function(basesPerGraph){
-        $log.log('setZoom', arguments);
-        opts.basesPerGraph = basesPerGraph;
-        rebuildGraphs();
-      },
       zoomTo: zoomTo,
       panTo: panTo,
       setWidth: function(w){
@@ -130,11 +124,13 @@ angular.module('npact')
       showMore: function(){
         opts.graphsPerPage += 5;
         rebuildGraphs();
-      }
+      },
+      rebuildGraphs:rebuildGraphs
     };
 
     function zoomTo(startBase, zoomPct, zoomingOut){
       // TODO: make this a options object
+      throw new Error('Not implemented');
       var res = GraphingCalculator.zoom(startBase, zoomPct, opts.basesPerGraph, opts.offset, zoomingOut);
       opts.offset = res.offset;
       opts.basesPerGraph = res.basesPerGraph;
@@ -157,18 +153,16 @@ angular.module('npact')
     function makeGraphSpecs(width){
       return onProfileData.then(function() {
         var partitions = ProfileReader.partition({
-              basesPerGraph: opts.basesPerGraph,
-              summary: opts.profileSummary
-            });
+          offset: opts.offset,
+          basesPerGraph: GraphConfig.basesPerGraph
+        });
 
         return _.take(partitions, opts.graphsPerPage)
           .map(function(p){
             return {
               startBase: p.startBase,
               endBase: p.endBase,
-              width: width,
-              // TODO: pass margin via GraphConfig
-              margin: Utils.orderOfMagnitude(opts.basesPerGraph, -1)
+              width: width
             };
           });
       });

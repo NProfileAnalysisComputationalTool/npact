@@ -8,14 +8,13 @@
 
   <label>Zoom:
     <input type="number"
-	   ng-model="graphConfig.basesPerGraph"
-	   ng-change="ctrl.setZoom(graphConfig.basesPerGraph)"/> bases per graph
+	   ng-model="gc.basesPerGraph"
+	   ng-change="ctrl.redraw(true)"/> bases per graph
   </label>
   <br/>
   <label>Color-blind friendly:
     <input type="checkbox"
-	   ng-model="gc.colorBlindFriendly"
-	   ng-change="ctrl.redraw()" /></label>
+	   ng-model="gc.colorBlindFriendly" /></label>
   <br/>
 
   <div ng-show="graphConfig.visible">
@@ -23,9 +22,6 @@
   </div>
   <h3>Tracks</h3>
   <div ng-repeat="t in gc.tracks">
-    <label><input ng-model="t.active" type="checkbox"
-                  ng-change="ctrl.redraw()"
-                  />{{t.text}}</label>
+    <label><input ng-model="t.active" type="checkbox" />{{t.text}}</label>
   </div>
-  <h3>Nprofile settings</h3>
 </div>

@@ -3,6 +3,7 @@ angular.module('npact')
     var self = this;
     self.tracks = [];
     self.colorBlindFriendly = false;
+    self.basesPerGraph = 10000;
 
     var activeTracks = function(){
       return _.filter(self.tracks, {active: true}, 'active');
@@ -64,16 +65,10 @@ angular.module('npact')
     return {
       restrict: 'A',
       templateUrl:STATIC_BASE_URL+'js/graphs/config.html',
-      controller: function(){
-        this.setZoom = _.debounce(GraphDealer.setZoom, 500);
-        this.redraw = _.debounce(function(){
-          $rootScope.$broadcast(Evt.REDRAW);
-        }, 100);
-      },
-      controllerAs: 'ctrl',
-      link:function($scope, $element, $attrs){
+      controller: function($scope){
         $scope.graphConfig = GraphDealer.opts;
         $scope.gc = GraphConfig;
-      }
+      },
+      controllerAs: 'ctrl'
     };
   });

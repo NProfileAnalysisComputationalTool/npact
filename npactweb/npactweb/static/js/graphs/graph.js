@@ -6,21 +6,16 @@ angular.module('npact')
         spec: '=npactGraph'
       },
       controller: function($scope, $element, $attrs){
-        var opts = {
-          element: $element[0]
-        };
-        $scope.$watch('spec', onSpec);
+        var opts = { element: $element[0] },
+            redraw = function() {
+              if(!$scope.spec) { return; }
+              // TODO: clean up a pre-existing graph?
+              var g = new Grapher(angular.extend({}, $scope.spec, opts));
+              g.redraw();
+            };
 
-        $scope.$on(Evt.REDRAW, function() {
-          onSpec($scope.spec);
-        });
-
-        function onSpec(spec, oldval){
-          if(!spec) return;
-          // TODO: clean up a pre-existing graph?
-          var g = new Grapher(angular.extend({}, spec, opts));
-          g.redraw();
-        }
+        $scope.$on(Evt.REDRAW, redraw);
+        redraw();
       }
     };
   })

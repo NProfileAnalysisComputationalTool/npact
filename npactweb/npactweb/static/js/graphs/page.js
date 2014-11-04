@@ -9,7 +9,7 @@ angular.module('npact')
     };
   })
 
-  .controller('npactGraphPageCtrl', function($scope, GraphDealer, Fetcher, npactConstants, $q, $log, StatusPoller, FETCH_URL, $window, $element) {
+  .controller('npactGraphPageCtrl', function($scope, GraphDealer, Fetcher, npactConstants, $q, $log, StatusPoller, FETCH_URL, $window, $element, GraphConfig, Evt) {
     'use strict';
     $scope.miscFiles = [];
     $scope.graphHeight = npactConstants.graphSpecDefaults.height;
@@ -23,13 +23,21 @@ angular.module('npact')
     }, 250);
 
     var getWidth = function(){ return $element.width(); };
-
     $scope.$watch(getWidth, function(newValue, oldValue){
           if (newValue > 0){
             $log.log('width changed from', oldValue, '->', newValue);
             GraphDealer.setWidth(newValue);
           }
     });
+
+    var getGraphConfig = function() { return GraphConfig; };
+    $scope.$watch(getGraphConfig, function(newValue, oldValue){
+      if(newValue.basesPerGraph !== oldValue.basesPerGraph){
+        GraphDealer.rebuildGraphs();
+      }else{
+        $scope.$broadcast(Evt.REDRAW);
+      }
+    }, true); // deep-equality
 
     // check for scope changes on resize
     angular.element($window)

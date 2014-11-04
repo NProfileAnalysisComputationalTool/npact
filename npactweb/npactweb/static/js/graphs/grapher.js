@@ -1,5 +1,5 @@
 angular.module('npact')
-  .factory('Grapher', function(K, $log, GraphingCalculator, $rootScope, $compile, GraphDealer, ProfileReader, TrackReader, $q, GraphConfig, npactConstants){
+  .factory('Grapher', function(K, $log, GraphingCalculator, $rootScope, $compile, GraphDealer, ProfileReader, TrackReader, $q, GraphConfig, npactConstants, Utils){
     'use strict';
     function addMany(container, children){
       if(children && children.length) {
@@ -16,6 +16,7 @@ angular.module('npact')
           headerY: this.headerSpec.headerY,
           range: [opts.startBase, opts.endBase]
         });
+      this.opts.margin = Utils.orderOfMagnitude(GraphConfig.basesPerGraph, -1);
       this.$element = jQuery(opts.element);
       this.stage = new K.Stage({
         container:opts.element,
