@@ -2,6 +2,7 @@ angular.module('npact')
   .service('GraphConfig', function(Err, npactConstants) {
     var self = this;
     self.tracks = [];
+    self.colorBlindFriendly = false;
 
     var activeTracks = function(){
       return _.filter(self.tracks, {active: true}, 'active');
@@ -65,7 +66,6 @@ angular.module('npact')
       templateUrl:STATIC_BASE_URL+'js/graphs/config.html',
       controller: function(){
         this.setZoom = _.debounce(GraphDealer.setZoom, 500);
-        this.setColors = _.debounce(GraphDealer.setColors, 250);
         this.redraw = _.debounce(function(){
           $rootScope.$broadcast(Evt.REDRAW);
         }, 100);

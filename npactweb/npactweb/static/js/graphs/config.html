@@ -14,8 +14,8 @@
   <br/>
   <label>Color-blind friendly:
     <input type="checkbox"
-	   ng-model="graphConfig.colorBlindFriendly"
-	   ng-change="ctrl.setColors(graphConfig.colorBlindFriendly)" /></label>
+	   ng-model="gc.colorBlindFriendly"
+	   ng-change="ctrl.redraw()" /></label>
   <br/>
 
   <div ng-show="graphConfig.visible">

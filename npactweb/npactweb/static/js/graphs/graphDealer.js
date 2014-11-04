@@ -49,7 +49,6 @@ angular.module('npact')
         pendingRedraws = 0,
         opts = {
           basesPerGraph: 10000,
-          colorBlindFriendly: false,
           offset: 0,
           graphsPerPage: 5,
           startBase: 0,
@@ -108,13 +107,6 @@ angular.module('npact')
         return maybeDrawTrack('hits', exopts.name, exopts.data);
       },
 
-      setColors:function(colorBlindFriendly){
-        $log.log('setColors', arguments);
-        opts.colorBlindFriendly = colorBlindFriendly;
-        // TODO: lighter change here; see if we can update colors
-        // in-place without a full rebuild
-        rebuildGraphs();
-      },
       setZoom:function(basesPerGraph){
         $log.log('setZoom', arguments);
         opts.basesPerGraph = basesPerGraph;
@@ -166,9 +158,7 @@ angular.module('npact')
       return {
         startBase: range.startBase,
         endBase: range.endBase,
-        width: width,
-        colors: opts.colorBlindFriendly ? npactConstants.colorBlindLineColors
-          : npactConstants.lineColors
+        width: width
       };
     }
 

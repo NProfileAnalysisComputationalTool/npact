@@ -23,7 +23,8 @@ angular.module('npact')
         width: opts.width
       });
 
-      this.colors = opts.colors;
+      this.colors = GraphConfig.colorBlindFriendly ?
+        npactConstants.colorBlindLineColors : npactConstants.lineColors;
       this.m = GraphingCalculator.chart(this.graphSpec);
       this.xaxis = GraphingCalculator.xaxis(this.graphSpec);
       this.stage.add(this.leftLayer(), this.chartLayer());
