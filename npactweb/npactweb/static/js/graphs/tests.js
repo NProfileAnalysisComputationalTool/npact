@@ -263,22 +263,6 @@ describe('Graphs', function(){
           {startBase:410, endBase:500}
         ]);
       });
-
-      it('handles margin', function(){
-        var p = P.partition({
-          basesPerGraph: 100,
-          margin: 10,
-          summary: {startBase: 0, endBase: 500}
-        });
-
-        expect(p).toEqual([
-          {startBase:0, endBase:110},
-          {startBase:90, endBase:210},
-          {startBase:190, endBase:310},
-          {startBase:290, endBase:410},
-          {startBase:390, endBase:500}
-        ]);
-      });
     });
 
     describe('.slice',function() {
