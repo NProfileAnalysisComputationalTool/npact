@@ -5,6 +5,9 @@ angular.module('npact', ['infinite-scroll'])
     TrackNotFound: new Error('track not found'),
     ProfileNotFound: new Error('profile not found')
   })
+  .value('Evt', {
+    REDRAW:'redraw'
+  })
 
   .run(function($rootScope, STATIC_BASE_URL) {
     $rootScope.STATIC_BASE_URL = STATIC_BASE_URL;

@@ -1,5 +1,5 @@
 angular.module('npact')
-  .directive('npactGraph', function npactGraph($log, Grapher){
+  .directive('npactGraph', function npactGraph($log, Grapher, Evt){
     return {
       restrict: 'A',
       scope:{
@@ -10,6 +10,10 @@ angular.module('npact')
           element: $element[0]
         };
         $scope.$watch('spec', onSpec);
+
+        $scope.$on(Evt.REDRAW, function() {
+          onSpec($scope.spec);
+        });
 
         function onSpec(spec, oldval){
           if(!spec) return;

@@ -59,14 +59,16 @@ angular.module('npact')
       return cfg;
     };
   })
-  .directive('npactGraphConfig', function npactGraphConfig(STATIC_BASE_URL, GraphDealer, $log, GraphConfig) {
+  .directive('npactGraphConfig', function npactGraphConfig(STATIC_BASE_URL, GraphDealer, $log, GraphConfig, $rootScope, Evt) {
     return {
       restrict: 'A',
       templateUrl:STATIC_BASE_URL+'js/graphs/config.html',
       controller: function(){
         this.setZoom = _.debounce(GraphDealer.setZoom, 500);
         this.setColors = _.debounce(GraphDealer.setColors, 250);
-        this.redraw = _.debounce(GraphDealer.redraw, 100);
+        this.redraw = _.debounce(function(){
+          $rootScope.$broadcast(Evt.REDRAW);
+        }, 100);
       },
       controllerAs: 'ctrl',
       link:function($scope, $element, $attrs){
