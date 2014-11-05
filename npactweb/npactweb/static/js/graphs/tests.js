@@ -430,6 +430,13 @@ describe('Graphs', function(){
         expect(G.refreshCommand(G)).toBe(Evt.NOOP);
       });
 
+      it('nothing if we have no basesPerGraph', function() {
+        G.loadTrack('test', 'extracts');
+        G.profileSummary = {};
+        G.basesPerGraph = undefined;
+        expect(G.refreshCommand(G)).toBe(Evt.NOOP);
+      });
+
       it('rebuild if we get data', function() {
         G.profileSummary = {};
         expect(G.refreshCommand({profileSummary:null, basesPerGraph: G.basesPerGraph})).toBe(Evt.REBUILD);

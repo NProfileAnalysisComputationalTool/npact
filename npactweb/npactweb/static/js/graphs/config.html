@@ -6,11 +6,18 @@
     <li>Double click on a graph to zoom into that point</li>
     <li>Hold shift and double click on a graph to zoom out</li>
   </ul>
-
-  <label>Zoom:
-    <input type="number"
-	   ng-model="gc.basesPerGraph"/> bases per graph
-  </label>
+  <form name="configForm">
+    <label>Zoom:
+      <input type="number" name="basesPerGraph"
+             min="100" required
+             ng-model-options="{debounce: 1000}"
+	     ng-model="gc.basesPerGraph"/> bases per graph
+    </label>
+    <div class="error" ng-messages="configForm.basesPerGraph.$error">
+      <div ng-message="min">Cannot zoom in that far.</div>
+      <div ng-message="required">Must specify a zoom level</div>
+    </div>
+  </form>
   <br/>
   <label>Color-blind friendly:
     <input type="checkbox"

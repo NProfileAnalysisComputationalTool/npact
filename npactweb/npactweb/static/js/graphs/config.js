@@ -62,12 +62,15 @@ angular.module('npact')
      * to run in order to refresh the page
      */
     this.refreshCommand = function(oldGraphConfig) {
-      var sameBasesPerGraph = self.basesPerGraph === oldGraphConfig.basesPerGraph,
+      var noBasesPerGraph = _.isUndefined(self.basesPerGraph),
+          sameBasesPerGraph = self.basesPerGraph === oldGraphConfig.basesPerGraph,
           sameOffset = self.offset === oldGraphConfig.offset,
           hasProfile = self.profileSummary !== null,
           hadProfile = oldGraphConfig.profileSummary !== null,
           newProfile = hasProfile && !hadProfile;
 
+      // happens with invalid input in config box
+      if(noBasesPerGraph) { return Evt.NOOP;}
       if(!sameBasesPerGraph || newProfile || !sameOffset){ return Evt.REBUILD; }
       if(hasProfile){ return Evt.REDRAW; }
       return Evt.NOOP;
