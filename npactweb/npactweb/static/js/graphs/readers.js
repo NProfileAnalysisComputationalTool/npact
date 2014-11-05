@@ -60,8 +60,8 @@ angular.module('npact')
 
       for(var i = startBase; i < p.endBase; i+= opts.basesPerGraph){
         g.push({
-          startBase: Math.max(i, p.startBase),
-          endBase: Math.min(i + opts.basesPerGraph, p.endBase)
+          startBase: Math.max(i, 0),
+          endBase: i + opts.basesPerGraph
         });
       }
       return g;

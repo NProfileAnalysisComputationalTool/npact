@@ -280,7 +280,7 @@ describe('Graphs', function(){
           {startBase:110, endBase:210},
           {startBase:210, endBase:310},
           {startBase:310, endBase:410},
-          {startBase:410, endBase:500}
+          {startBase:410, endBase:510}
         ]);
       });
     });

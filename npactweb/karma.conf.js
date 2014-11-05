@@ -3,12 +3,13 @@
 module.exports = function(config){
   config.set({
     files:[
-      'npactweb/static/bower_components/jquery/jquery.min.js',
-      'npactweb/static/bower_components/angular/angular.js',
+      'npactweb/static/bower_components/jquery/dist/jquery.min.js',
+      'npactweb/static/bower_components/angular/angular.min.js',
+      'npactweb/static/bower_components/angular-messages/angular-messages.min.js',
       'npactweb/static/bower_components/angular-mocks/angular-mocks.js',
       'npactweb/static/bower_components/ngInfiniteScroll/build/ng-infinite-scroll.min.js',
-      'npactweb/static/bower_components/kineticjs/kinetic.js',
-      'npactweb/static/bower_components/lodash/dist/lodash.js',
+      'npactweb/static/bower_components/kineticjs/kinetic.min.js',
+      'npactweb/static/bower_components/lodash/dist/lodash.min.js',
       '.tmp/templates.js',
       'npactweb/static/js/*.js',
       'npactweb/static/js/**/*.js'
