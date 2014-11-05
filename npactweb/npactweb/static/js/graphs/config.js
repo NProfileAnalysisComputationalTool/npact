@@ -73,14 +73,12 @@ angular.module('npact')
       return Evt.NOOP;
     };
   })
-  .directive('npactGraphConfig', function npactGraphConfig(STATIC_BASE_URL, GraphDealer, $log, GraphConfig, $rootScope, Evt) {
+  .directive('npactGraphConfig', function npactGraphConfig(STATIC_BASE_URL, GraphConfig) {
     return {
       restrict: 'A',
       templateUrl:STATIC_BASE_URL+'js/graphs/config.html',
-      controller: function($scope){
-        $scope.graphConfig = GraphDealer.opts;
+      link: function($scope){
         $scope.gc = GraphConfig;
-      },
-      controllerAs: 'ctrl'
+      }
     };
   });

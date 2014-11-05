@@ -41,13 +41,7 @@ angular.module('npact')
   .factory('GraphDealer', function($log, Utils, $q, $rootScope, GraphingCalculator, npactConstants, ExtractParser, ProfileReader, TrackReader, GraphConfig) {
     'use strict';
     // the `GraphDealer` hands out graph data and processes events
-    var opts = {
-          graphsPerPage: 5,
-          startBase: 0,
-          endBase: 0,
-          get length(){ return this.endBase - this.startBase; },
-          graphSpecs: []
-        };
+    var opts = { graphsPerPage: 5 };
 
     // public interface
     return {
@@ -57,9 +51,6 @@ angular.module('npact')
         return ProfileReader.load(profile)
           .then(function(summary) {
             $log.log('setProfile: loaded', summary);
-            // TODO: not need these
-            opts.startBase = summary.startBase;
-            opts.endBase = summary.endBase;
 
             // find a sensible zoom level
             var basesPerGraph = summary.length / opts.graphsPerPage;
@@ -96,10 +87,6 @@ angular.module('npact')
     }
 
     function rebuildGraphs(){
-      $rootScope.graphSpecs = opts.graphSpecs = makeGraphSpecs();
-      opts.visible = {
-        startBase : _(opts.graphSpecs).pluck('startBase').min().value(),
-        endBase : _(opts.graphSpecs).pluck('endBase').max().value()
-      };
+      $rootScope.graphSpecs = makeGraphSpecs();
     }
   });
