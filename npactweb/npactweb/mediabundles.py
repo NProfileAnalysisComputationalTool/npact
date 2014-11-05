@@ -15,14 +15,14 @@ MEDIA_BUNDLES = (
      'css/print.css'),
 
     ('jquery.js',
-     'bower_components/jquery/jquery.min.js',
+     'bower_components/jquery/dist/jquery.min.js',
      # customized to only load UI elements we want
      'js/jquery-ui-1.10.4.custom.min.js',
      'bower_components/qtip2/jquery.qtip.min.js'),
 
     ('processing.js',
      'bower_components/kineticjs/kinetic.min.js',
-     'bower_components/angular/angular.js',
+     'bower_components/angular/angular.min.js',
      'bower_components/angular-messages/angular-messages.min.js',
      'bower_components/ngInfiniteScroll/build/ng-infinite-scroll.min.js',
      'bower_components/lodash/dist/lodash.min.js',
