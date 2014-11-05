@@ -11,18 +11,32 @@ angular.module('npact')
 
   .controller('npactGraphPageCtrl', function($scope, GraphDealer, Fetcher, npactConstants, $q, $log, StatusPoller, FETCH_URL, $window, $element, GraphConfig, Evt, TrackReader, GraphingCalculator) {
     'use strict';
+    var self = this,
+        getWidth = function(){ return $element.width(); },
+        getGraphConfig = function() { return GraphConfig; },
+        addTrack = function(key, name, data) {
+          return TrackReader.load(name, data)
+            .then(function() { GraphConfig.loadTrack(name, key); });
+        },
+        addExtract = function(name, data) {
+          return addTrack('extracts', name, data);
+        },
+        addHits = function(name, data) {
+          return addTrack('hits', name, data);
+        }
+    ;
+
     $scope.miscFiles = [];
     $scope.graphHeight = npactConstants.graphSpecDefaults.height;
     $scope.status = 'Initializing';
     $scope.ready = false;
     $scope.FETCH_URL = FETCH_URL;
 
-    this.addMore = _.debounce(function(){
+    self.addMore = _.debounce(function(){
       $log.log('scrolling down via infinite scroller');
       GraphDealer.showMore();
     }, 250);
 
-    var getWidth = function(){ return $element.width(); };
     $scope.$watch(getWidth, function(newValue, oldValue){
           if (newValue > 0){
             $log.log('width changed from', oldValue, '->', newValue);
@@ -30,7 +44,6 @@ angular.module('npact')
           }
     });
 
-    var getGraphConfig = function() { return GraphConfig; };
     $scope.$watch(getGraphConfig, function(newValue, oldValue){
       var cmd = newValue.refreshCommand(oldValue);
       $log.log('graph config changed:', cmd);
@@ -52,17 +65,6 @@ angular.module('npact')
       $scope.$apply();
     });
 
-    var addTrack = function(key, name, data) {
-      return TrackReader.load(name, data)
-        .then(function() { GraphConfig.loadTrack(name, key); });
-    },
-        addExtract = function(name, data) {
-          return addTrack('extracts', name, data);
-        },
-        addHits = function(name, data) {
-          return addTrack('hits', name, data);
-        };;
-
     $scope.$on(Evt.ZOOM, function(evt, opts) {
       var res = GraphingCalculator.zoom(angular.extend({}, opts, GraphConfig));
       GraphConfig.offset = res.offset;
@@ -73,8 +75,7 @@ angular.module('npact')
     });
 
     // check for scope changes on resize
-    angular.element($window)
-      .bind('resize', function () { $scope.$apply(); });
+    angular.element($window).bind('resize', function () { $scope.$apply(); });
 
     // start it up
     Fetcher.kickstart()
