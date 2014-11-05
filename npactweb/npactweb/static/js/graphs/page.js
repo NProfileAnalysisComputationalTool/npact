@@ -9,7 +9,7 @@ angular.module('npact')
     };
   })
 
-  .controller('npactGraphPageCtrl', function($scope, Fetcher, npactConstants, $q, $log, StatusPoller, FETCH_URL, $window, $element, GraphConfig, Evt, TrackReader, GraphingCalculator, ProfileReader, Utils) {
+  .controller('npactGraphPageCtrl', function($scope, Fetcher, npactConstants, $q, $log, StatusPoller, FETCH_URL, $window, $element, GraphConfig, Evt, TrackReader, GraphingCalculator, ProfileReader, Utils, Pynpact) {
     'use strict';
     var self = this,
         visibleGraphs = 5,
@@ -29,13 +29,13 @@ angular.module('npact')
             .then(function(data) { return addExtract('Input file CDS', data); });
         },
         addNewCds = function(config) {
-          return Fetcher.fetchFile(config['File_of_new_CDSs'])
+          return Fetcher.fetchFile(config[Pynpact.NEW_CDS])
             .then(function(data) {
               return addExtract('Newly Identified ORFs', data);
             });
         },
         addHits = function(config) {
-          return Fetcher.fetchFile(config['File_of_G+C_coding_potential_regions'])
+          return Fetcher.fetchFile(config[Pynpact.HITS])
             .then(function(data) { addTrack('hits', 'Hits', data); });
         },
         addProfile = function(config) {
@@ -112,13 +112,14 @@ angular.module('npact')
       .then(function(config) {
         $log.log('Kickstart successful:', config);
         $scope.status = 'Running';
-        $scope.config = config;
         // got config, request the first round of results
-        $scope.title = config.first_page_title;
+        $scope.title = config[Pynpact.TITLE];
+        $scope.email = config[Pynpact.EMAIL];
+        $scope.configureUrl = config[Pynpact.CONFIGURE_URL];
         var nprofile = addProfile(config);
 
         // Non-gbk files don't have CDSs we can extract.
-        var inputFileCds = config.isgbk && addInputFileCds(config);
+        var inputFileCds = config[Pynpact.HAS_CDS] && addInputFileCds(config);
 
         var extraFileList = Fetcher.acgtGammaFileList(config)
               .then(function(fileList) {
@@ -130,12 +131,12 @@ angular.module('npact')
           .then(function() { delete $scope.status; })
           .catch(function(err) { $scope.status = err; });
 
-        StatusPoller.start(config['pdf_filename'])
+        StatusPoller.start(config[Pynpact.PDF])
           .then(function(pdfFilename) { $scope.miscFiles.push(pdfFilename); });
       });
   })
 
-  .service('Fetcher', function(StatusPoller, $http, FETCH_URL, ACGT_GAMMA_FILE_LIST_URL, KICKSTART_BASE_URL, $window) {
+  .service('Fetcher', function(StatusPoller, $http, FETCH_URL, ACGT_GAMMA_FILE_LIST_URL, KICKSTART_BASE_URL, $window, Pynpact) {
     'use strict';
     var self = this;
     /**
@@ -163,15 +164,15 @@ angular.module('npact')
     };
 
     self.nprofile = function(config) {
-      return self.pollThenFetch(config['nprofileData']);
+      return self.pollThenFetch(config[Pynpact.NPROFILE]);
     };
 
     self.inputFileCds = function(config) {
-      return self.pollThenFetch(config['File_of_published_accepted_CDSs']);
+      return self.pollThenFetch(config[Pynpact.CDS]);
     };
 
     self.acgtGammaFileList = function(config) {
-      return StatusPoller.start(config['acgt_gamma_output'])
+      return StatusPoller.start(config[Pynpact.ACGT_GAMMA_FILES])
         .then(function(path) {
           return self.rawFile(ACGT_GAMMA_FILE_LIST_URL + path);
         });

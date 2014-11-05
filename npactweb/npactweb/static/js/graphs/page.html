@@ -4,7 +4,7 @@
     <p>
       <span class="ui-icon ui-icon-alert"></span>
       There was an error. You can click refresh to try again,
-      <a href="{{ config.reconfigure_url }}">reconfigure this report</a>,
+      <a href="{{ configureUrl }}">reconfigure this report</a>,
       or return to the <a href="/npact/">start</a>.
     </p>
   </div>
@@ -44,15 +44,15 @@
         </p>
       </div>
 
-      <div ng-if="config.email">
+      <div ng-if="email">
         <h4>Email results</h4>
-        <p>An email link to the results will be sent to <tt>{{config.email}}</tt>. You may leave this page at any time and return via that link.</p>
+        <p>An email link to the results will be sent to <code>{{email}}</code>. You may leave this page at any time and return via that link.</p>
       </div>
 
       <div id="tryagain">
         <h4>Not what you expected?</h4>
         <ul>
-          <li><a id="reconfigurelink" href="{{ config.reconfigure_url }}">Reconfigure it</a> and try again.</li>
+          <li><a id="reconfigurelink" href="{{ configureUrl }}">Reconfigure it</a> and try again.</li>
           <li><a href="/npact/">Start Over</a></li>
         </ul>
       </div>

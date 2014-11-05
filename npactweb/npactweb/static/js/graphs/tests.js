@@ -3,8 +3,8 @@ describe('Graphs', function(){
 
   beforeEach(module('npact'));
   beforeEach(module('templates-main'));
-  var ng = {}, $scope, $compile, $q, $httpBackend, Err, Evt;
-  beforeEach(inject(function (_$rootScope_, _$compile_, _$q_, _$httpBackend_, _$timeout_, _Err_, _Evt_) {
+  var ng = {}, $scope, $compile, $q, $httpBackend, Err, Evt, Pynpact;
+  beforeEach(inject(function (_$rootScope_, _$compile_, _$q_, _$httpBackend_, _$timeout_, _Err_, _Evt_, _Pynpact_) {
     $scope = _$rootScope_;
     $compile = _$compile_;
     $q = _$q_;
@@ -12,14 +12,25 @@ describe('Graphs', function(){
     ng.$timeout = _$timeout_;
     Err = _Err_;
     Evt = _Evt_;
+    Pynpact = _Pynpact_;
   }));
 
-  describe('Evt', function() {
-    it('has unique values', function() {
-      var vals = _.values(Evt);
-      expect(vals.length).toBe(_.uniq(vals).length);
+  beforeEach(function() {
+    this.addMatchers({
+      toHaveUniqueValues: function() {
+        var vals = _.values(this.actual);
+        return vals.length === _.uniq(vals).length;
+      }
     });
   });
+
+  it('Evt has unique values', function() {
+    expect(Evt).toHaveUniqueValues();
+  });
+  it('Pynpact has unique values', function() {
+    expect(Pynpact).toHaveUniqueValues();
+  });
+
 
   function make(html){
     var el = $compile(html)($scope);
