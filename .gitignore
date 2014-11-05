@@ -20,3 +20,4 @@ development-bundle
 webroot
 /npactweb/.tmp/templates.js
 /npactweb/node_modules
+/npactweb/npactweb/static/bower_components
