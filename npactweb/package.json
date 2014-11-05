@@ -12,7 +12,8 @@
     "karma-spec-reporter": "0.0.13",
     "grunt-newer": "~0.7.0",
     "grunt-cli": "~0.1.13",
-    "grunt-contrib-jshint": "~0.10.0"
+    "grunt-contrib-jshint": "~0.10.0",
+    "karma-junit-reporter": "~0.2.2"
   },
   "scripts": {
     "test": "grunt test"

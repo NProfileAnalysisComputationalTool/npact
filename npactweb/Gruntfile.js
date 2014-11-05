@@ -20,8 +20,16 @@ module.exports = function(grunt){
       }
     },
     karma: {
-      unit: {
+      options: {
 	configFile: 'karma.conf.js'
+      },
+      unit: {
+        reporters: 'dots'
+      },
+      jenkins: {
+        reporters: 'junit',
+        outputFile: 'test-results.xml',
+        singleRun: true
       }
     },
     html2js: {
@@ -36,4 +44,7 @@ module.exports = function(grunt){
   });
 
   grunt.registerTask('test', ['newer:html2js:main', 'karma']);
+  grunt.registerTask('jenkins', ['jshint:jenkins',
+                                 'html2js:main',
+                                 'karma:jenkins']);
 };
