@@ -14,6 +14,13 @@ describe('Graphs', function(){
     Evt = _Evt_;
   }));
 
+  describe('Evt', function() {
+    it('has unique values', function() {
+      var vals = _.values(Evt);
+      expect(vals.length).toBe(_.uniq(vals).length);
+    });
+  });
+
   function make(html){
     var el = $compile(html)($scope);
     $scope.$digest();
