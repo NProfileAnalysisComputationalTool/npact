@@ -23,10 +23,7 @@
   <div id="results">
     <h3>Results </h3>
     <div>
-      <div infinite-scroll="ctrl.addMore()"
-           infinite-scroll-disabled="busy"
-           infinite-scroll-distance="2"
-           >
+      <div infinite-scroll="ctrl.addMore()" infinite-scroll-distance="4">
         <div ng-repeat="spec in graphSpecs"
              id="graph_{{$index}}"
              npact-graph="spec"

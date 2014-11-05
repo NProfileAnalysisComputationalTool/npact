@@ -9,9 +9,11 @@ angular.module('npact')
     };
   })
 
-  .controller('npactGraphPageCtrl', function($scope, GraphDealer, Fetcher, npactConstants, $q, $log, StatusPoller, FETCH_URL, $window, $element, GraphConfig, Evt, TrackReader, GraphingCalculator) {
+  .controller('npactGraphPageCtrl', function($scope, Fetcher, npactConstants, $q, $log, StatusPoller, FETCH_URL, $window, $element, GraphConfig, Evt, TrackReader, GraphingCalculator, ProfileReader, Utils) {
     'use strict';
     var self = this,
+        visibleGraphs = 5,
+        graphSpecs = [],
         getWidth = function(){ return $element.width(); },
         getGraphConfig = function() { return GraphConfig; },
         addTrack = function(key, name, data) {
@@ -23,6 +25,15 @@ angular.module('npact')
         },
         addHits = function(name, data) {
           return addTrack('hits', name, data);
+        },
+        configureProfile = function(summary) {
+          // find a sensible zoom level
+          var basesPerGraph = summary.length / visibleGraphs;
+          // if we're really short, reset out bases per graph
+          if (basesPerGraph < GraphConfig.basesPerGraph) {
+            GraphConfig.basesPerGraph = Utils.orderOfMagnitude(basesPerGraph);
+          }
+          GraphConfig.profileSummary = summary;
         }
     ;
 
@@ -33,15 +44,17 @@ angular.module('npact')
     $scope.FETCH_URL = FETCH_URL;
 
     self.addMore = _.debounce(function(){
-      $log.log('scrolling down via infinite scroller');
-      GraphDealer.showMore();
+      if($scope.graphSpecs){
+        $log.log('scrolling down via infinite scroller');
+        Utils.extendByPage(graphSpecs, $scope.graphSpecs, visibleGraphs);
+      }
     }, 250);
 
     $scope.$watch(getWidth, function(newValue, oldValue){
-          if (newValue > 0){
-            $log.log('width changed from', oldValue, '->', newValue);
-            GraphConfig.width = newValue;
-          }
+      if (newValue > 0){
+        $log.log('width changed from', oldValue, '->', newValue);
+        GraphConfig.width = newValue;
+      }
     });
 
     $scope.$watch(getGraphConfig, function(newValue, oldValue){
@@ -49,7 +62,8 @@ angular.module('npact')
       $log.log('graph config changed:', cmd);
       switch(cmd){
       case Evt.REBUILD:
-        GraphDealer.rebuildGraphs();
+        graphSpecs = ProfileReader.partition(GraphConfig);
+        $scope.graphSpecs = _.take(graphSpecs, visibleGraphs);
         break;
       case Evt.REDRAW:
         $scope.$broadcast(cmd);
@@ -85,7 +99,10 @@ angular.module('npact')
         $scope.config = config;
         // got config, request the first round of results
         $scope.title = config.first_page_title;
-        var nprofile = Fetcher.nprofile(config).then(GraphDealer.setProfile);
+        var nprofile = Fetcher.nprofile(config)
+              .then(ProfileReader.load)
+              .then(configureProfile);
+
         // Non-gbk files don't have CDSs we can extract.
         var inputFileCds = config.isgbk && Fetcher.inputFileCds(config)
               .then(function(data) { return addExtract('Input file CDS', data); });
