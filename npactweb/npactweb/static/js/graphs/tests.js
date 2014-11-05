@@ -405,6 +405,11 @@ describe('Graphs', function(){
         expect(G.refreshCommand({profileSummary:null, basesPerGraph: G.basesPerGraph})).toBe(Evt.REBUILD);
       });
 
+      it('rebuild if we pan', function() {
+        G.profileSummary = {};
+        expect(G.refreshCommand({profileSummary:{}, basesPerGraph: G.basesPerGraph, offset:G.offset + 1})).toBe(Evt.REBUILD);
+      });
+
       it('rebuild if we change zoom', function() {
         G.profileSummary = {};
         expect(G.refreshCommand({

@@ -42,9 +42,15 @@ angular.module('npact')
         $scope.$broadcast(cmd);
         break;
       }
-
-
     }, true); // deep-equality
+
+    $scope.$on(Evt.PAN, function(evt, opts) {
+      var offset = Math.floor(opts.newStartBase - opts.oldStartBase);
+      GraphConfig.offset += offset;
+      // TODO: Event originated from outside ng, but why doesn't
+      // `$watch` pick up the `offset` change?
+      $scope.$apply();
+    });
 
     var addTrack = function(key, name, data) {
       return TrackReader.load(name, data)

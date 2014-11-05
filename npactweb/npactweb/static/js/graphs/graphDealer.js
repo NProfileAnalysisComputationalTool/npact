@@ -42,7 +42,6 @@ angular.module('npact')
     'use strict';
     // the `GraphDealer` hands out graph data and processes events
     var opts = {
-          offset: 0,
           graphsPerPage: 5,
           startBase: 0,
           endBase: 0,
@@ -73,7 +72,6 @@ angular.module('npact')
       },
 
       zoomTo: zoomTo,
-      panTo: panTo,
       showMore: function(){
         opts.graphsPerPage += 5;
         //rebuildGraphs();
@@ -90,26 +88,10 @@ angular.module('npact')
       rebuildGraphs();
     }
 
-    /**
-     * pan all the graphs
-     *
-     * @param {Number} oldStartBase - the start of the pan, in gene space
-     * @param {Number} newStartBase - the end of the pan, in gene space
-     */
-    function panTo(oldStartBase, newStartBase){
-      // TODO: move offset into graphconfig
-      var offset = Math.floor(newStartBase - oldStartBase);
-      opts.offset += offset;
-      $log.log('panTo', opts.offset);
-      rebuildGraphs();
-      $rootScope.$apply(); // TODO: handle this better; event is
-                           // coming from outside angular
-    }
-
     function makeGraphSpecs(width){
 
       var partitions = ProfileReader.partition({
-        offset: opts.offset,
+        offset: GraphConfig.offset,
         basesPerGraph: GraphConfig.basesPerGraph
       });
 

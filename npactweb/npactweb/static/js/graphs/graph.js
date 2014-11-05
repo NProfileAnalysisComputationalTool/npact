@@ -10,7 +10,7 @@ angular.module('npact')
             redraw = function() {
               if(!$scope.spec) { return; }
               // TODO: clean up a pre-existing graph?
-              var g = new Grapher(angular.extend({}, $scope.spec, opts));
+              var g = new Grapher(angular.extend({}, $scope.spec, opts), $scope);
               g.redraw();
             };
 

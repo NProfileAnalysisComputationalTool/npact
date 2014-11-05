@@ -8,7 +8,8 @@ angular.module('npact', ['infinite-scroll'])
   .value('Evt', {
     REDRAW:'redraw',
     NOOP:'noop',
-    REBUILD:'rebuild'
+    REBUILD:'rebuild',
+    PAN:'pan'
   })
 
   .run(function($rootScope, STATIC_BASE_URL) {

@@ -6,6 +6,7 @@ angular.module('npact')
     self.basesPerGraph = 10000;
     self.width = null;
     self.profileSummary = null;
+    self.offset = 0; // how much the graph is panned left/right
 
 
 
@@ -62,11 +63,12 @@ angular.module('npact')
      */
     this.refreshCommand = function(oldGraphConfig) {
       var sameBasesPerGraph = self.basesPerGraph === oldGraphConfig.basesPerGraph,
+          sameOffset = self.offset === oldGraphConfig.offset,
           hasProfile = self.profileSummary !== null,
           hadProfile = oldGraphConfig.profileSummary !== null,
           newProfile = hasProfile && !hadProfile;
 
-      if(!sameBasesPerGraph || newProfile){ return Evt.REBUILD; }
+      if(!sameBasesPerGraph || newProfile || !sameOffset){ return Evt.REBUILD; }
       if(hasProfile){ return Evt.REDRAW; }
       return Evt.NOOP;
     };

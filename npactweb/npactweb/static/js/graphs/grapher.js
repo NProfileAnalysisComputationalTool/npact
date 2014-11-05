@@ -1,5 +1,5 @@
 angular.module('npact')
-  .factory('Grapher', function(K, $log, GraphingCalculator, $rootScope, $compile, GraphDealer, ProfileReader, TrackReader, $q, GraphConfig, npactConstants, Utils){
+  .factory('Grapher', function(K, $log, GraphingCalculator, $rootScope, $compile, GraphDealer, ProfileReader, TrackReader, $q, GraphConfig, npactConstants, Utils, Evt){
     'use strict';
     function addMany(container, children){
       if(children && children.length) {
@@ -7,7 +7,8 @@ angular.module('npact')
       }
     }
 
-    function Grapher(opts){
+    function Grapher(opts, $scope){
+      this.$scope = $scope;
       this.opts = opts;
       this.headerSpec = GraphConfig.headerSpec();
       this.graphSpec = angular.extend({}, npactConstants.graphSpecDefaults,
@@ -157,12 +158,12 @@ angular.module('npact')
         jQuery('.qtip').qtip('destroy');
       });
 
-      g.on('dragend', function(){
+      g.on('dragend', function(evt){
 
         var oldStartBase = self.opts.startBase,
             newStartBase = (this.offsetX() / self.xaxis.scaleX) + oldStartBase;
-        // tell the graph dealer
-        GraphDealer.panTo(oldStartBase, newStartBase);
+        // tell the world
+        self.$scope.$emit(Evt.PAN, {oldStartBase: oldStartBase, newStartBase: newStartBase, evt:evt});
       });
 
       g.on('mouseover', function() {
