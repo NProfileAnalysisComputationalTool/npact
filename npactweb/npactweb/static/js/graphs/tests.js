@@ -81,7 +81,7 @@ describe('Graphs', function(){
       axisTitleFontsize: 20,
       axisTitle: '% GC',
       profileTicks:5,
-      range:[0,100],
+      startBase: 0, endBase: 100,
       headerY: 5
     };
     beforeEach(inject(function(GraphingCalculator){

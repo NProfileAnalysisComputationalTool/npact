@@ -1,5 +1,5 @@
 angular.module('npact')
-  .factory('Grapher', function(K, $log, GraphingCalculator, $rootScope, $compile, ProfileReader, TrackReader, $q, GraphConfig, npactConstants, Utils, Evt){
+  .factory('Grapher', function(K, $log, GraphingCalculator, $rootScope, $compile, ProfileReader, TrackReader, $q, Evt){
     'use strict';
     function addMany(container, children){
       if(children && children.length) {
@@ -8,27 +8,16 @@ angular.module('npact')
     }
 
     function Grapher(opts, $scope){
-      this.$scope = $scope;
-      this.opts = opts;
-      this.headerSpec = GraphConfig.headerSpec();
-      this.graphSpec = angular.extend({}, npactConstants.graphSpecDefaults,
-        {
-          width: GraphConfig.width,
-          headerY: this.headerSpec.headerY,
-          range: [opts.startBase, opts.endBase]
-        });
-      this.opts.margin = Utils.orderOfMagnitude(GraphConfig.basesPerGraph, -1);
-      this.$element = jQuery(opts.element);
+      angular.extend(this, opts);
+
+      this.$element = jQuery(this.element);
+
       this.stage = new K.Stage({
-        container:opts.element,
-        height: this.graphSpec.height,
-        width: GraphConfig.width
+        container:this.element,
+        height: this.height,
+        width: this.width
       });
 
-      this.colors = GraphConfig.colorBlindFriendly ?
-        npactConstants.colorBlindLineColors : npactConstants.lineColors;
-      this.m = GraphingCalculator.chart(this.graphSpec);
-      this.xaxis = GraphingCalculator.xaxis(this.graphSpec);
       this.stage.add(this.leftLayer(), this.chartLayer());
       this.stage.batchDraw();
 
@@ -37,7 +26,7 @@ angular.module('npact')
 
     GP.drawAxisTicks = function(ticks){
       var tickOpts = {x: 0, y:0,
-                      stroke: this.graphSpec.borderColor,
+                      stroke: this.borderColor,
                       strokeScaleEnabled: false};
       return ticks
         .map(function(t){
@@ -49,8 +38,8 @@ angular.module('npact')
     GP.drawAxisLabels = function(labels, textOpts){
       // draw labels at the right spacing
       var defaultTextOpts = {
-        fontSize: this.graphSpec.axisLabelFontsize,
-        fill:this.graphSpec.axisFontcolor
+        fontSize: this.axisLabelFontsize,
+        fill:this.axisFontcolor
       };
 
       return labels.map(function(lbl){
@@ -61,8 +50,7 @@ angular.module('npact')
 
     GP.headerGroup = function(){
       // from top to bottom
-      var graphSpec = this.graphSpec,
-          g = new K.Group(),
+      var g = new K.Group(),
           // TODO: derive opts.leftPadding
           // * add all labels
           // * loop over K.Text objects, find max width
@@ -71,9 +59,9 @@ angular.module('npact')
 
           defaultTextOpts = {
             align: 'right', x: 0,
-            fontSize: graphSpec.headerLabelFontsize,
-            width: graphSpec.leftPadding - graphSpec.headerLabelPadding,
-            fill:graphSpec.headerLabelFontcolor
+            fontSize: this.headerLabelFontsize,
+            width: this.leftPadding - this.headerLabelPadding,
+            fill:this.headerLabelFontcolor
           },
           lbls =  this.headerSpec.headers.map(makeLabel);
 
@@ -88,7 +76,6 @@ angular.module('npact')
 
     GP.yAxisGroup = function(){
       var g = new K.Group(),
-          graphSpec = this.graphSpec,
           m = this.m;
 
       addMany(g, this.drawAxisTicks(m.yaxis.ticks));
@@ -99,9 +86,9 @@ angular.module('npact')
       var title = new K.Text({
         y:0, x:0, // reposition this below
         rotation:-90,
-        fill:graphSpec.axisFontcolor,
-        fontSize: graphSpec.axisTitleFontsize,
-        text: graphSpec.axisTitle
+        fill:this.axisFontcolor,
+        fontSize: this.axisTitleFontsize,
+        text: this.axisTitle
       });
       // center it in the space left of the axes
       var pos = GraphingCalculator.alignRectangles(
@@ -120,12 +107,11 @@ angular.module('npact')
     };
 
     GP.leftLayer = function(){
-      var graphSpec = this.graphSpec,
-          layer = new K.Layer({
-            width: graphSpec.leftPadding,
-            x:0, y:0,
-            height: graphSpec.height
-          });
+      var layer = new K.Layer({
+        width: this.leftPadding,
+        x:0, y:0,
+        height: this.height
+      });
 
       layer.add(this.headerGroup(), this.yAxisGroup());
 
@@ -160,7 +146,7 @@ angular.module('npact')
 
       g.on('dragend', function(evt){
 
-        var oldStartBase = self.opts.startBase,
+        var oldStartBase = self.startBase,
             newStartBase = (this.offsetX() / self.xaxis.scaleX) + oldStartBase;
         // tell the world
         self.$scope.$emit(Evt.PAN, {oldStartBase: oldStartBase, newStartBase: newStartBase, evt:evt});
@@ -190,7 +176,7 @@ angular.module('npact')
       this.$scope.$emit(Evt.ZOOM, {
         evt:evt,
         // these keys must match what's expected by `GraphingCalculator.zoom`
-        startBase: this.opts.startBase,
+        startBase: this.startBase,
         zoomOnPct: zoomOnPct,
         zoomingOut: evt.evt.shiftKey
       });
@@ -198,7 +184,6 @@ angular.module('npact')
 
     GP.chartLayer = function(){
       var m = this.m,
-          graphSpec = this.graphSpec,
           l = new K.Layer({
             clip:{
               x: m.graph.x-1, y:0,
@@ -212,7 +197,7 @@ angular.module('npact')
             y: m.graph.y,
             width: m.graph.w,
             height: m.graph.h,
-            stroke: graphSpec.borderColor
+            stroke: this.borderColor
           });
 
       l.add(border, this.genomeGroup());
@@ -235,7 +220,7 @@ angular.module('npact')
             x: 0, y: m.graph.h + m.graph.y,
             width: xaxis.length,
             scaleX: xaxis.scaleX,
-            offsetX: this.opts.startBase
+            offsetX: this.startBase
           });
 
       addMany(g, this.drawAxisTicks(xaxis.ticks));
@@ -258,11 +243,11 @@ angular.module('npact')
             x: 0, y:m.graph.y,
             height: this.headerSpec.profileHeight, width:xaxis.length,
             scaleX: xaxis.scaleX,
-            offsetX: this.opts.startBase
+            offsetX: this.startBase
           }),
           dataToDraw = _(ProfileReader.slice({
-            startBase: this.opts.startBase - this.opts.margin,
-            endBase: this.opts.endBase + this.opts.margin
+            startBase: this.startBase - this.margin,
+            endBase: this.endBase + this.margin
           }))
             .reduce(function(acc, g){
               lines.map(function(x){
@@ -285,15 +270,15 @@ angular.module('npact')
     };
 
     GP.redraw = function(){
-      var gg = this._genomeGroup, opts = this.opts, self = this;
-      gg.add(this.xAxisGroup(), this.profileGroup());
+      var self = this, gg = self._genomeGroup;
+      gg.add(self.xAxisGroup(), self.profileGroup());
       self.stage.batchDraw();
 
-      var drawings = _.map(this.headerSpec.headers, function(hdr) {
+      var drawings = _.map(self.headerSpec.headers, function(hdr) {
         return TrackReader.slice({
           name: hdr.text,
-          startBase: opts.startBase - opts.margin,
-          endBase: opts.endBase + opts.margin
+          startBase: self.startBase - self.margin,
+          endBase: self.endBase + self.margin
         }).then(function(data){
           switch(hdr.lineType){
           case 'extracts':
@@ -327,84 +312,84 @@ angular.module('npact')
     }
 
     GP.cdsGroup = function(header, cds){
-      var xaxis = this.xaxis, opts = this.opts,
-          graphSpec = this.graphSpec,
-          colors = this.colors,
+      var self = this,
+          xaxis = self.xaxis, $el = self.$element,
+          colors = self.colors,
           g = new K.Group({
             x: 0, y: 0,
             scaleX: xaxis.scaleX,
-            offsetX: this.opts.startBase
+            offsetX: self.startBase
           }),
           colorNames = 'rgb',
           y = header.y,
-          ahHalfHeight = graphSpec.headerArrowHeight/2,
-          ahw = graphSpec.headerArrowWidth/xaxis.scaleX,
+          ahHalfHeight = self.headerArrowHeight/2,
+          ahw = self.headerArrowWidth/xaxis.scaleX,
           textOpts = {
-            fontSize: graphSpec.headerArrowFontsize,
-            fill:graphSpec.axisFontcolor,
-            scaleX:1/xaxis.scaleX,
+            fontSize: self.headerArrowFontsize,
+            fill: self.axisFontcolor,
+            scaleX: 1/xaxis.scaleX,
             strokeScaleEnabled: false
           },
           arrowOpts = {
-            x: 0, y:0,
+            x: 0, y: 0,
             closed: true,
-            strokeWidth:1,
+            strokeWidth: 1,
             strokeScaleEnabled: false
-          },
-          $el = this.$element;
+          }
+      ;
 
-          _(cds)
-            .forEach(function(x){
-              var isComplement = x.complement === 1,
-                  c = colors[colorNames[x.phase]],
-                  baseY = isComplement ? y + graphSpec.headerArrowHeight : y,
-                  arrowPointY = baseY + ahHalfHeight,
-                  arrowMaxY = baseY + graphSpec.headerArrowHeight,
-                  shape = isComplement ?
-                    [
-                      x.start, arrowPointY,
-                      x.start + ahw, baseY,
-                      x.end, baseY,
-                      x.end, arrowMaxY,
-                      x.start + ahw, arrowMaxY,
-                      x.start, arrowPointY
-                    ] : [
-                      x.start, baseY,
-                      x.end - ahw, baseY,
-                      x.end, arrowPointY,
-                      x.end - ahw, arrowMaxY,
-                      x.start, arrowMaxY,
-                      x.start, y
-                    ],
-                  arrowBounds = isComplement ?
-                    {
-                      x: x.start+ahw, y: baseY,
-                      width: x.end-x.start-ahw, height: graphSpec.headerArrowHeight
-                    } : {
-                      x: x.start, y: baseY,
-                      width: x.end-x.start-ahw, height: graphSpec.headerArrowHeight
-                    },
-                  line = new K.Line(angular.extend({
-                    extract: x,
-                    points: shape,
-                    stroke:c
-                  }, arrowOpts)),
-                  // render the name, too
-                  lbl = new K.Text(angular.extend({
-                    extract: x,
-                    arrowBounds: arrowBounds,
-                    text: x.name
-                  }, textOpts)),
-                  // need a dummy group for clipping, `Text` doesn't
-                  // support clip directly
-                  lblGroup = new K.Group({clip:arrowBounds});
+      _(cds)
+        .forEach(function(x){
+          var isComplement = x.complement === 1,
+              c = colors[colorNames[x.phase]],
+              baseY = isComplement ? y + self.headerArrowHeight : y,
+              arrowPointY = baseY + ahHalfHeight,
+              arrowMaxY = baseY + self.headerArrowHeight,
+              shape = isComplement ?
+                [
+                  x.start, arrowPointY,
+                  x.start + ahw, baseY,
+                  x.end, baseY,
+                  x.end, arrowMaxY,
+                  x.start + ahw, arrowMaxY,
+                  x.start, arrowPointY
+                ] : [
+                  x.start, baseY,
+                  x.end - ahw, baseY,
+                  x.end, arrowPointY,
+                  x.end - ahw, arrowMaxY,
+                  x.start, arrowMaxY,
+                  x.start, y
+                ],
+              arrowBounds = isComplement ?
+                {
+                  x: x.start+ahw, y: baseY,
+                  width: x.end-x.start-ahw, height: self.headerArrowHeight
+                } : {
+                  x: x.start, y: baseY,
+                  width: x.end-x.start-ahw, height: self.headerArrowHeight
+                },
+              line = new K.Line(angular.extend({
+                extract: x,
+                points: shape,
+                stroke:c
+              }, arrowOpts)),
+              // render the name, too
+              lbl = new K.Text(angular.extend({
+                extract: x,
+                arrowBounds: arrowBounds,
+                text: x.name
+              }, textOpts)),
+              // need a dummy group for clipping, `Text` doesn't
+              // support clip directly
+              lblGroup = new K.Group({clip:arrowBounds});
 
-              lblGroup.add(lbl);
-              g.add(line, lblGroup);
-              // now that lbl is on the canvas, we can see what it's
-              // height/width is
-              centerExtractLabel(lbl, xaxis.scaleX);
-            });
+          lblGroup.add(lbl);
+          g.add(line, lblGroup);
+          // now that lbl is on the canvas, we can see what it's
+          // height/width is
+          centerExtractLabel(lbl, xaxis.scaleX);
+        });
 
 
       // TODO: move tooltip control to the `npactGraph`, just throw an
@@ -429,9 +414,9 @@ angular.module('npact')
     };
 
     GP.drawHit = function(header, hits) {
-      var xaxis = this.xaxis, opts = this.opts,
-          startBase = opts.startBase,
-          endBase = opts.endBase,
+      var xaxis = this.xaxis,
+          startBase = this.startBase,
+          endBase = this.endBase,
           colors = this.colors,
           colorNames = 'rgb',
           offset = header.height / 4,

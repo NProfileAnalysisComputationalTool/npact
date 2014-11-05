@@ -43,8 +43,8 @@ angular.module('npact')
       };
 
       var m = self.chart(opts),
-          s = self.stops(opts.range[0], opts.range[1]),
-          length = opts.range[1] - opts.range[0],
+          s = self.stops(opts.startBase, opts.endBase),
+          length = opts.endBase - opts.startBase,
           interval = s.interval,
           ss = s.stops,
           // want to capture some margin
