@@ -14,6 +14,7 @@ angular.module('npact')
     var self = this,
         visibleGraphs = 5,
         graphSpecs = [],
+        // helper functions
         getWidth = function(){ return $element.width(); },
         getGraphConfig = function() { return GraphConfig; },
         addTrack = function(key, name, data) {
@@ -23,17 +24,32 @@ angular.module('npact')
         addExtract = function(name, data) {
           return addTrack('extracts', name, data);
         },
-        addHits = function(name, data) {
-          return addTrack('hits', name, data);
+        addInputFileCds = function(config) {
+          return Fetcher.inputFileCds(config)
+            .then(function(data) { return addExtract('Input file CDS', data); });
         },
-        configureProfile = function(summary) {
-          // find a sensible zoom level
-          var basesPerGraph = summary.length / visibleGraphs;
-          // if we're really short, reset out bases per graph
-          if (basesPerGraph < GraphConfig.basesPerGraph) {
-            GraphConfig.basesPerGraph = Utils.orderOfMagnitude(basesPerGraph);
-          }
-          GraphConfig.profileSummary = summary;
+        addNewCds = function(config) {
+          return Fetcher.fetchFile(config['File_of_new_CDSs'])
+            .then(function(data) {
+              return addExtract('Newly Identified ORFs', data);
+            });
+        },
+        addHits = function(config) {
+          return Fetcher.fetchFile(config['File_of_G+C_coding_potential_regions'])
+            .then(function(data) { addTrack('hits', 'Hits', data); });
+        },
+        addProfile = function(config) {
+          return Fetcher.nprofile(config)
+            .then(ProfileReader.load)
+            .then(function(summary) {
+              // find a sensible zoom level
+              var basesPerGraph = summary.length / visibleGraphs;
+              // if we're really short, reset out bases per graph
+              if (basesPerGraph < GraphConfig.basesPerGraph) {
+                GraphConfig.basesPerGraph = Utils.orderOfMagnitude(basesPerGraph);
+              }
+              GraphConfig.profileSummary = summary;
+            });
         }
     ;
 
@@ -43,18 +59,8 @@ angular.module('npact')
     $scope.ready = false;
     $scope.FETCH_URL = FETCH_URL;
 
-    self.addMore = _.debounce(function(){
-      if($scope.graphSpecs){
-        $log.log('scrolling down via infinite scroller');
-        Utils.extendByPage(graphSpecs, $scope.graphSpecs, visibleGraphs);
-      }
-    }, 250);
-
     $scope.$watch(getWidth, function(newValue, oldValue){
-      if (newValue > 0){
-        $log.log('width changed from', oldValue, '->', newValue);
-        GraphConfig.width = newValue;
-      }
+      if (newValue > 0){ GraphConfig.width = newValue; }
     });
 
     $scope.$watch(getGraphConfig, function(newValue, oldValue){
@@ -91,6 +97,16 @@ angular.module('npact')
     // check for scope changes on resize
     angular.element($window).bind('resize', function () { $scope.$apply(); });
 
+    /**
+     * add more visible entries to $scope
+     */
+    self.addMore = function(){
+      if($scope.graphSpecs){
+        $log.log('scrolling down via infinite scroller');
+        Utils.extendByPage(graphSpecs, $scope.graphSpecs, visibleGraphs);
+      }
+    };
+
     // start it up
     Fetcher.kickstart()
       .then(function(config) {
@@ -99,73 +115,65 @@ angular.module('npact')
         $scope.config = config;
         // got config, request the first round of results
         $scope.title = config.first_page_title;
-        var nprofile = Fetcher.nprofile(config)
-              .then(ProfileReader.load)
-              .then(configureProfile);
+        var nprofile = addProfile(config);
 
         // Non-gbk files don't have CDSs we can extract.
-        var inputFileCds = config.isgbk && Fetcher.inputFileCds(config)
-              .then(function(data) { return addExtract('Input file CDS', data); });
+        var inputFileCds = config.isgbk && addInputFileCds(config);
 
         var extraFileList = Fetcher.acgtGammaFileList(config)
               .then(function(fileList) {
                 $scope.miscFiles.push.apply($scope.miscFiles, fileList);
-                Fetcher.fetchFile(config['File_of_new_CDSs'])
-                  .then(function(data) {
-                    return addExtract('Newly Identified ORFs', data);
-                  });
-                Fetcher.fetchFile(config['File_of_G+C_coding_potential_regions'])
-                  .then(function(data) { addHits('Hits', data); });
+                addNewCds(config);
+                addHits(config);
               });
         $q.all([nprofile, inputFileCds, extraFileList])
-          .then(function() {
-            delete $scope.status;
-          })
-          .catch(function(err) {
-            $scope.status = err;
-          });
+          .then(function() { delete $scope.status; })
+          .catch(function(err) { $scope.status = err; });
 
         StatusPoller.start(config['pdf_filename'])
-          .then(function(pdfFilename) {
-            $scope.miscFiles.push(pdfFilename);
-          });
+          .then(function(pdfFilename) { $scope.miscFiles.push(pdfFilename); });
       });
   })
 
   .service('Fetcher', function(StatusPoller, $http, FETCH_URL, ACGT_GAMMA_FILE_LIST_URL, KICKSTART_BASE_URL, $window) {
     'use strict';
+    var self = this;
     /**
      * download contents from any url
      */
-    function rawFile(url) {
+    self.rawFile = function(url) {
       return $http.get(url).then(function(res) { return res.data; });
-    }
+    };
 
     /**
      * download contents from a "fetch" path
      */
-    function fetchFile(path){
-      return rawFile(FETCH_URL + path);
-    }
+    self.fetchFile = function(path){ return self.rawFile(FETCH_URL + path); };
 
-    this.rawFile = rawFile;
-    this.fetchFile = fetchFile;
-    this.kickstart = function(){
-      return rawFile(KICKSTART_BASE_URL + $window.location.search);
-    };
-    this.nprofile = function(config) {
-      return StatusPoller.start(config['nprofileData'])
-        .then(fetchFile);
-    };
-    this.inputFileCds = function(config) {
-      return StatusPoller.start(config['File_of_published_accepted_CDSs'])
-        .then(fetchFile);
+
+    /**
+     * poll the server for when `path` is ready, then fetch it
+     */
+    self.pollThenFetch = function(path) {
+      return StatusPoller.start(path).then(self.fetchFile);
     };
 
-    this.acgtGammaFileList = function(config) {
+    self.kickstart = function(){
+      return self.rawFile(KICKSTART_BASE_URL + $window.location.search);
+    };
+
+    self.nprofile = function(config) {
+      return self.pollThenFetch(config['nprofileData']);
+    };
+
+    self.inputFileCds = function(config) {
+      return self.pollThenFetch(config['File_of_published_accepted_CDSs']);
+    };
+
+    self.acgtGammaFileList = function(config) {
       return StatusPoller.start(config['acgt_gamma_output'])
         .then(function(path) {
-          return rawFile(ACGT_GAMMA_FILE_LIST_URL + path);
+          return self.rawFile(ACGT_GAMMA_FILE_LIST_URL + path);
         });
     };
   })
