@@ -80,6 +80,17 @@ angular.module('npact')
       $timeout(iterate, opts.delay, false);
       return p;
     };
+
+    /**
+     * adds a "page" of data from src to dst
+     */
+    this.extendByPage = function(src, dst, pageSize) {
+      // build up a list of splice args
+      var args = src.slice(dst.length, dst.length + pageSize);
+      args.unshift(0);
+      args.unshift(dst.length);
+      dst.splice.apply(dst, args);
+    };
   })
   .service('LineParser', function(Utils, $q) {
     'use strict';

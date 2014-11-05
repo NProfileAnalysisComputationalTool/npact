@@ -34,15 +34,28 @@ describe('Graphs', function(){
       U = Utils;
     }));
 
-    it('calculates order of magnitude', function(){
-      expect(U.orderOfMagnitude(1012)).toBe(1000);
-      expect(U.orderOfMagnitude(1012, -1)).toBe(100);
+    describe('.orderOfMagnitude', function() {
+      it('handles no offset', function(){
+        expect(U.orderOfMagnitude(1012)).toBe(1000);
+        expect(U.orderOfMagnitude(1012, -1)).toBe(100);
+      });
+      it('handles negative offset', function(){
+        expect(U.orderOfMagnitude(1012, -1)).toBe(100);
+      });
+      it('handles positive offset', function(){
+        expect(U.orderOfMagnitude(1012, 1)).toBe(10000);
+      });
     });
-    it('calculates order of magnitude with negative offsets', function(){
-      expect(U.orderOfMagnitude(1012, -1)).toBe(100);
-    });
-    it('calculates order of magnitude with positive offsets', function(){
-      expect(U.orderOfMagnitude(1012, 1)).toBe(10000);
+
+    describe('.extendByPage', function() {
+      it('works', function() {
+        var src = _.range(100),
+            dst = _.take(src, 5);
+        U.extendByPage(src, dst, 5);
+        expect(dst).toEqual(_.range(10));
+        U.extendByPage(src, dst, 5);
+        expect(dst).toEqual(_.range(15));
+      });
     });
 
   });
@@ -63,6 +76,7 @@ describe('Graphs', function(){
     beforeEach(inject(function(GraphingCalculator){
       GC = GraphingCalculator;
     }));
+
     it('calculates graph area', function(){
       var m = GC.chart(opts);
       expect(m.graph).toEqual({
