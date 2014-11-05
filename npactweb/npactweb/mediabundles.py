@@ -9,7 +9,7 @@ MEDIA_BUNDLES = (
      'css/basic.css',
      'css/custom-theme/jquery-ui-1.10.4.custom.css',
      'css/style.css',
-     'bower_components/qtip2/jquery.qtip.css'),
+     'bower_components/qtip2/jquery.qtip.min.css'),
 
     ('print.css',
      'css/print.css'),
