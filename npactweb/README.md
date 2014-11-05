@@ -55,4 +55,12 @@ We use [grunt][] and [npm][] for build/test tasks. For these to work,
 you need to install [npm][] for your operating system, then run `npm
 install`. From there run `grunt -h` to see the available build tasks.
 
+For browser-side libraries, we use [bower][], and only check in the
+thing we need for the application to run, so there's no extra step for
+getting a dev site running. The `bower_components` folder is git
+ignored, so if you install a third party lib, you need to use `git add
+-f` to get it into source control. The `bower.json` still lists all
+dependencies, so if you want to see the library code, you need to
+install [bower][] and run a `bower install`.
+
 [grunt]: http://gruntjs.com/
