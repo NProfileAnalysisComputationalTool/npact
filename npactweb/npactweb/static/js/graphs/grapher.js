@@ -1,5 +1,5 @@
 angular.module('npact')
-  .factory('Grapher', function(K, $log, GraphingCalculator, $rootScope, $compile, GraphDealer, ProfileReader, TrackReader, $q, GraphConfig, npactConstants, Utils, Evt){
+  .factory('Grapher', function(K, $log, GraphingCalculator, $rootScope, $compile, ProfileReader, TrackReader, $q, GraphConfig, npactConstants, Utils, Evt){
     'use strict';
     function addMany(container, children){
       if(children && children.length) {
@@ -185,12 +185,15 @@ angular.module('npact')
       jQuery('.qtip').qtip('destroy');
 
       var zoomOnPx = evt.evt.layerX - this.m.graph.x,
-          zoomOnPct = zoomOnPx / this.m.graph.w,
-          startGn = this.opts.startBase,
-          zoomingOut = evt.evt.shiftKey
-      ;
-      // tell the GraphDealer, they'll sort it out
-      GraphDealer.zoomTo(startGn, zoomOnPct, zoomingOut);
+          zoomOnPct = zoomOnPx / this.m.graph.w;
+      // tell the world
+      this.$scope.$emit(Evt.ZOOM, {
+        evt:evt,
+        // these keys must match what's expected by `GraphingCalculator.zoom`
+        startBase: this.opts.startBase,
+        zoomOnPct: zoomOnPct,
+        zoomingOut: evt.evt.shiftKey
+      });
     };
 
     GP.chartLayer = function(){

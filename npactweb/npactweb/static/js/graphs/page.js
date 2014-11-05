@@ -9,7 +9,7 @@ angular.module('npact')
     };
   })
 
-  .controller('npactGraphPageCtrl', function($scope, GraphDealer, Fetcher, npactConstants, $q, $log, StatusPoller, FETCH_URL, $window, $element, GraphConfig, Evt, TrackReader) {
+  .controller('npactGraphPageCtrl', function($scope, GraphDealer, Fetcher, npactConstants, $q, $log, StatusPoller, FETCH_URL, $window, $element, GraphConfig, Evt, TrackReader, GraphingCalculator) {
     'use strict';
     $scope.miscFiles = [];
     $scope.graphHeight = npactConstants.graphSpecDefaults.height;
@@ -63,6 +63,14 @@ angular.module('npact')
           return addTrack('hits', name, data);
         };;
 
+    $scope.$on(Evt.ZOOM, function(evt, opts) {
+      var res = GraphingCalculator.zoom(angular.extend({}, opts, GraphConfig));
+      GraphConfig.offset = res.offset;
+      GraphConfig.basesPerGraph = res.basesPerGraph;
+      // TODO: Event originated from outside ng, but why doesn't
+      // `$watch` pick up the `offset` change?
+      $scope.$apply();
+    });
 
     // check for scope changes on resize
     angular.element($window)

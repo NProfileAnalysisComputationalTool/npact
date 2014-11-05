@@ -132,7 +132,12 @@ describe('Graphs', function(){
     });
 
     function expectZoom(args, offset, basesPerGraph){
-      expect(GC.zoom.apply(null, args))
+      expect(GC.zoom({startBase: args[0],
+                      zoomOnPct: args[1],
+                      basesPerGraph: args[2],
+                      offset: args[3],
+                      zoomingOut: args[4]
+                     }))
         .toEqual({offset: offset,
                   basesPerGraph: basesPerGraph});
     }

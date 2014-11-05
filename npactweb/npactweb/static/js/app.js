@@ -9,7 +9,8 @@ angular.module('npact', ['infinite-scroll'])
     REDRAW:'redraw',
     NOOP:'noop',
     REBUILD:'rebuild',
-    PAN:'pan'
+    PAN:'pan',
+    ZOOM:'zoom'
   })
 
   .run(function($rootScope, STATIC_BASE_URL) {

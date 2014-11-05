@@ -71,7 +71,6 @@ angular.module('npact')
           });
       },
 
-      zoomTo: zoomTo,
       showMore: function(){
         opts.graphsPerPage += 5;
         //rebuildGraphs();
@@ -79,14 +78,6 @@ angular.module('npact')
       rebuildGraphs:rebuildGraphs
     };
 
-    function zoomTo(startBase, zoomPct, zoomingOut){
-      // TODO: make this a options object
-      throw new Error('Not implemented');
-      var res = GraphingCalculator.zoom(startBase, zoomPct, opts.basesPerGraph, opts.offset, zoomingOut);
-      opts.offset = res.offset;
-      opts.basesPerGraph = res.basesPerGraph;
-      rebuildGraphs();
-    }
 
     function makeGraphSpecs(width){
 

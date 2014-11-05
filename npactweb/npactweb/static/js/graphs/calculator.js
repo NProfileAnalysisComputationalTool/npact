@@ -82,7 +82,7 @@ angular.module('npact')
      *
      * @param {Number} startBase - low end of the graph that we're zooming on
      * (gene space)
-     * @param {Number} zoomPct - where we're zooming to, as a percent of
+     * @param {Number} zoomOnPct - where we're zooming to, as a percent of
      * the graph
      * @param {Number} basesPerGraph - how many bases per graph,
      * indicates current zoom level
@@ -92,7 +92,7 @@ angular.module('npact')
      * zooming in
      * @returns {Object} new offset and basesPerGraph such that we remain focused on the selected gene
      */
-    self.zoom = function(startBase, zoomPct, basesPerGraph, offset, zoomingOut){
+    self.zoom = function(opts){
       //
       // O = offset from L such that Z is positionally at the same
       // point on the screen
@@ -100,11 +100,11 @@ angular.module('npact')
       //
       // all units are in gene space
 
-      var zoomToBase = startBase + Math.floor(zoomPct*basesPerGraph),
-          row = Math.floor((startBase - offset)/basesPerGraph),
-          zoomFactor = zoomingOut ? 2 : 0.5,
-          newbasesPerGraph = basesPerGraph * zoomFactor,
-          newstartBase = zoomToBase - Math.floor(newbasesPerGraph * zoomPct),
+      var zoomToBase = opts.startBase + Math.floor(opts.zoomOnPct*opts.basesPerGraph),
+          row = Math.floor((opts.startBase - opts.offset)/opts.basesPerGraph),
+          zoomFactor = opts.zoomingOut ? 2 : 0.5,
+          newbasesPerGraph = opts.basesPerGraph * zoomFactor,
+          newstartBase = zoomToBase - Math.floor(newbasesPerGraph * opts.zoomOnPct),
           newoffset = newstartBase - (row*newbasesPerGraph);
 
       return {offset: newoffset, basesPerGraph: newbasesPerGraph};
