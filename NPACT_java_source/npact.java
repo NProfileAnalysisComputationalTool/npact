@@ -186,18 +186,24 @@ public class npact {
 				{
 					//Continue execution if the user entered one of the three available prediction significances,
 					//otherwise exit
-					if (Float.parseFloat(args[i]) == 0.01)
-					{
-						calculation.setSignificance("0.01");
+					String sig = args[i];
+					if (sig.equals("0.01") || sig.equals("0.001") || sig.equals("0.0001")) {
+						calculation.setSignificance(sig);
 					}
-					else if (Float.parseFloat(args[i]) == 0.001)
-					{
-						calculation.setSignificance("0.001");
-					}
-					else if (Float.parseFloat(args[i]) == 0.0001)
-					{
-						calculation.setSignificance("0.0001");
-					}
+					
+//	Doesn't seem necessary to convert to float when we need to pass a string anyway... - AR				
+//					if (sig == 0.01)
+//					{
+//						calculation.setSignificance("0.01");
+//					}
+//					else if (sig == 0.001)
+//					{
+//						calculation.setSignificance("0.001");
+//					}
+//					else if (sig == 0.0001)
+//					{
+//						calculation.setSignificance("0.0001");
+//					}
 					else
 					{
 						System.out.println("Invalid significance value entered. Please enter either 0.01, 0.001, or 0.0001");
@@ -252,7 +258,7 @@ public class npact {
 	public static void printHelp()
 	{
 		System.out.println("NPACT Command-line Usage:\n");
-		System.out.println("\tjava -jar NPACT.jar {filename}\n");
+		System.out.println("\tjava -jar NPACT.jar {filename} [options]\n");
 		System.out.println("Optional arguments:\n");
 		System.out.println("\t-firstp\t\tthe title used for the first page of the results file");
 		System.out.println("\t\t\tDefault: Name of the sequence being analyzed\n");
@@ -267,7 +273,7 @@ public class npact {
 		System.out.println("\t\t\tDefault: 0.001\n");
 		System.out.println("\t-sb\t\tthe base from which analysis starts");
 		System.out.println("\t\t\tDefault: 0\n");
-		System.out.println("\t-b\t\tthe base at which analysis ends");
+		System.out.println("\t-eb\t\tthe base at which analysis ends");
 		System.out.println("\t\t\tDefault: last base of the sequence\n");
 		System.out.println("\t-h\t\tprint out the help message for command-line usage\n");
 	}
