@@ -6,7 +6,7 @@ angular.module('npact')
         spec: '=npactGraph'
       },
       controller: function($scope, $element, $attrs){
-        var buildOptions = function(range) {
+        var g = null, buildOptions = function(range) {
           var opts = angular.extend(
             {},
             npactConstants.graphSpecDefaults,
@@ -29,9 +29,9 @@ angular.module('npact')
         },
             redraw = function() {
               if(!$scope.spec) { return; }
-              // TODO: clean up a pre-existing graph?
-              var g = new Grapher(buildOptions($scope.spec));
-              g.redraw();
+              if(g !== null) {g.stage.destroy();}
+              g = new Grapher(buildOptions($scope.spec));
+              g.redraw().then($scope.$emit(Evt.GRAPH_REDRAW_COMPLETE));
             };
 
         $scope.$on(Evt.REDRAW, redraw);

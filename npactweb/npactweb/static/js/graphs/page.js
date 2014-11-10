@@ -12,6 +12,8 @@ angular.module('npact')
   .controller('npactGraphPageCtrl', function($scope, Fetcher, npactConstants, $q, $log, StatusPoller, FETCH_URL, $window, $element, GraphConfig, Evt, TrackReader, GraphingCalculator, ProfileReader, Utils, Pynpact) {
     'use strict';
     var self = this,
+        // some timing / stats counters
+        graphUpdateStart = null, graphsDrawn = 0,
         visibleGraphs = 5,
         graphSpecs = [],
         // helper functions
@@ -66,6 +68,8 @@ angular.module('npact')
     $scope.$watch(getGraphConfig, function(newValue, oldValue){
       var cmd = newValue.refreshCommand(oldValue);
       $log.log('graph config changed:', cmd);
+      graphUpdateStart = new Date();
+      graphsDrawn = 0;
       switch(cmd){
       case Evt.REBUILD:
         graphSpecs = ProfileReader.partition(GraphConfig);
@@ -74,8 +78,15 @@ angular.module('npact')
       case Evt.REDRAW:
         $scope.$broadcast(cmd);
         break;
-      }
+      };
     }, true); // deep-equality
+
+    $scope.$on(Evt.GRAPH_REDRAW_COMPLETE, function(evt) {
+      graphsDrawn++;
+      if(graphsDrawn === $scope.graphSpecs.length){
+        $log.log('graphs done', new Date() - graphUpdateStart, 'ms');
+      }
+    });
 
     $scope.$on(Evt.PAN, function(evt, opts) {
       var offset = Math.floor(opts.newStartBase - opts.oldStartBase);
@@ -103,6 +114,7 @@ angular.module('npact')
     self.addMore = function(){
       if($scope.graphSpecs){
         $log.log('scrolling down via infinite scroller');
+        graphUpdateStart = new Date();
         Utils.extendByPage(graphSpecs, $scope.graphSpecs, visibleGraphs);
       }
     };

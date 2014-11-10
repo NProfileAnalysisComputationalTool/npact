@@ -56,7 +56,8 @@ angular.module('npact')
     NOOP:'noop',
     REBUILD:'rebuild',
     PAN:'pan',
-    ZOOM:'zoom'
+    ZOOM:'zoom',
+    GRAPH_REDRAW_COMPLETE: 'graph redraw complete'
   })
 // these are expected to match strings specified in pynpact
   .constant('Pynpact', {
