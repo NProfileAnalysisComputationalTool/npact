@@ -37,10 +37,19 @@ angular.module('npact')
     // how much vertical space to leave for different kinds of headers
     headerSizes:{'extracts': 30, 'hits': 20}
   })
-  .constant('Err', {
-    TrackAlreadyDefined: new Error('Track with this name already defined, each track name must be unique'),
-    TrackNotFound: new Error('track not found'),
-    ProfileNotFound: new Error('profile not found')
+  .service('Err',function() {
+
+    var self = this,
+        makeError = function(message, name) {
+          self[name] = _.partial(Error, message);
+        };
+
+    _.map({TrackAlreadyDefined:'Track with this name already defined, each track name must be unique',
+           TrackNotFound: 'track not found',
+           ProfileNotFound: 'profile not found'
+          },
+          makeError);
+
   })
   .constant('Evt', {
     REDRAW:'redraw',

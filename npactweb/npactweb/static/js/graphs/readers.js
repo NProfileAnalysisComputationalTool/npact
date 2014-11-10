@@ -15,7 +15,7 @@ angular.module('npact')
      * get a shallow copy of the profile for the given range
      */
     this.slice = function(range) {
-      if (!self.profileData) { throw Err.ProfileNotFound; }
+      if (!self.profileData) { throw new Err.ProfileNotFound(); }
 
       var sortedIdx = function(coord) {
         return _.sortedIndex(self.profileData, {coordinate: coord}, 'coordinate');
@@ -37,7 +37,7 @@ angular.module('npact')
      */
     this.summary = function(profile) {
       var p = profile || self.profileData;
-      if (!p) { throw Err.ProfileNotFound; }
+      if (!p) { throw new Err.ProfileNotFound(); }
 
       var start = p[0],
           end = _.last(p);
@@ -75,7 +75,7 @@ angular.module('npact')
      * load the given track name and data
      */
     this.load = function(name, data) {
-      if (_.has(self.tracks, name)) { throw Err.TrackAlreadyDefined; }
+      if (_.has(self.tracks, name)) { throw new Err.TrackAlreadyDefined(); }
       return ExtractParser.parseAsync(data)
         .then(function(data) {
           return (self.tracks[name] = data);
@@ -85,7 +85,7 @@ angular.module('npact')
     };
 
     this.slice = function(opts) {
-      if (!_.has(self.tracks, opts.name)) { throw Err.TrackNotFound; }
+      if (!_.has(self.tracks, opts.name)) { throw new Err.TrackNotFound(); }
       $log.log('TrackReader.slice', opts);
       var minIdx = null, maxIdx, data = self.tracks[opts.name];
       // TODO: use _.sortedIndex to binary search, or some other

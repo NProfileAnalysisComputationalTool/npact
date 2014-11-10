@@ -1,5 +1,5 @@
 angular.module('npact')
-  .service('GraphConfig', function(Err, npactConstants, Evt) {
+  .service('GraphConfig', function(Err, npactConstants, Evt, $log) {
     var self = this;
     self.tracks = [];
     self.colorBlindFriendly = false;
@@ -25,7 +25,8 @@ angular.module('npact')
      * register a track to be displayed on the graph
      */
     this.loadTrack = function(name, type) {
-      if(self.hasTrack(name)){ throw Err.TrackAlreadyDefined; }
+      if(self.hasTrack(name)){ throw new Err.TrackAlreadyDefined(); }
+      $log.log('loading track', name, type);
       self.tracks.push({
         text: name,
         lineType: type,
