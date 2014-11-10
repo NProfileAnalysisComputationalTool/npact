@@ -27,6 +27,7 @@ MEDIA_BUNDLES = (
      'bower_components/ngInfiniteScroll/build/ng-infinite-scroll.min.js',
      'bower_components/lodash/dist/lodash.min.js',
      'bower_components/qtip2/jquery.qtip.min.js',
+     'bower_components/rtree/dist/rtree.min.js',
      'js/app.js',
      'js/graphs/constants.js',
      'js/graphs/utils.js',

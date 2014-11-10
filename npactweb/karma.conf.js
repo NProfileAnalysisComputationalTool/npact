@@ -1,6 +1,5 @@
-'use strict';
-
 module.exports = function(config){
+  'use strict';
   config.set({
     files:[
       'npactweb/static/bower_components/jquery/dist/jquery.min.js',
@@ -10,6 +9,7 @@ module.exports = function(config){
       'npactweb/static/bower_components/ngInfiniteScroll/build/ng-infinite-scroll.min.js',
       'npactweb/static/bower_components/kineticjs/kinetic.min.js',
       'npactweb/static/bower_components/lodash/dist/lodash.min.js',
+      'npactweb/static/bower_components/rtree/dist/rtree.min.js',
       '.tmp/templates.js',
       'npactweb/static/js/*.js',
       'npactweb/static/js/**/*.js'

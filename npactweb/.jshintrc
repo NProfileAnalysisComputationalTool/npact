@@ -9,7 +9,7 @@
     "jQuery": false,
     "_": false,
     "module": false,
-    "inject": false
-
+    "inject": false,
+    "RTree": false
   }
 }
