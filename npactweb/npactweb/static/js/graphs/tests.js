@@ -349,11 +349,12 @@ describe('Graphs', function(){
       it('slices', function() {
         T.slice({name:'test', startBase:72000, endBase:88600})
           .then(function(slice) {
-            expect(slice).toEqual([
-              {start: 71945, end: 72100, complement: 0, name: 'H-64-C', phase: 0, approximate: false},
-              {start: 88111, end: 88275, complement: 0, name: 'G-125-G', phase: 2, approximate: false},
-              {start: 88544, end: 88906, complement: 0, name: 'G-124*t', phase: 0, approximate: false}
-            ]);
+            expect(slice)
+              .toContain({start: 71945, end: 72100, complement: 0, name: 'H-64-C', phase: 0, approximate: false});
+            expect(slice)
+              .toContain({start: 88544, end: 88906, complement: 0, name: 'G-124*t', phase: 0, approximate: false});
+            expect(slice)
+              .toContain({start: 88111, end: 88275, complement: 0, name: 'G-125-G', phase: 2, approximate: false});
           });
         ng.$timeout.flush();
       });
