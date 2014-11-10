@@ -38,13 +38,8 @@ angular.module('npact')
       var idx = 0,
           opts = {batchSize:512, delay: 0},
           batches = 0,
-          len = list.length,
-          t1 = new Date();
-
-      p.then(function(){
-        $log.log('iterated over', len,
-                 'items in', new Date() - t1, 'ms, batchcount: ', batches);
-      });
+          len = list.length
+      ;
 
       function iterate(){
         var t1 = new Date();
