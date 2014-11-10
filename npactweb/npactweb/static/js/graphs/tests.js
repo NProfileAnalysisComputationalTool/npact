@@ -188,8 +188,8 @@ describe('Graphs', function(){
                    'G-124*t 88544..88906',
                    'H-102-C 112734..112931',
                    'H-103*a 112864..113175',
-                   'H-115-a complement(129294..129599)',
-                   'H-116-G complement(131053..131163)']
+                   'H-115-a complement(129294..>129599)',
+                   'XAR_RS17080 complement(<140014..140226)']
           .join('\n'),
         EP, result;
 
@@ -207,7 +207,7 @@ describe('Graphs', function(){
         .toEqual({
           name: 'H-64-C',
           start: 71945, end: 72100,
-          complement:0,
+          complement:0, approximate: false,
           phase: (72100 - 1) % 3
         });
     });
@@ -216,9 +216,15 @@ describe('Graphs', function(){
         .toEqual({
           name: 'H-51*G',
           start: 57104, end: 57904,
-          complement:1,
+          complement:1, approximate: false,
           phase: (57104 - 1) % 3
         });
+    });
+
+    it('can parse a approximates', function(){
+      expect(result[7].approximate).toBe(true);
+      expect(result[8].approximate).toBe(true);
+
     });
 
     it('double parsing is a NOOP', function(){
@@ -344,9 +350,9 @@ describe('Graphs', function(){
         T.slice({name:'test', startBase:72000, endBase:88600})
           .then(function(slice) {
             expect(slice).toEqual([
-              {start: 71945, end: 72100, complement: 0, name: 'H-64-C', phase: 0},
-              {start: 88111, end: 88275, complement: 0, name: 'G-125-G', phase: 2},
-              {start: 88544, end: 88906, complement: 0, name: 'G-124*t', phase: 0}
+              {start: 71945, end: 72100, complement: 0, name: 'H-64-C', phase: 0, approximate: false},
+              {start: 88111, end: 88275, complement: 0, name: 'G-125-G', phase: 2, approximate: false},
+              {start: 88544, end: 88906, complement: 0, name: 'G-124*t', phase: 0, approximate: false}
             ]);
           });
         ng.$timeout.flush();

@@ -56,7 +56,7 @@ angular.module('npact')
           if(e === STOP_ITERATING){
             idx = len;
           }else{
-            d.reject(e);
+            d.reject({error:e, line: list[idx]});
           }
         }
         var elapsed = new Date() - t1;
@@ -151,9 +151,9 @@ angular.module('npact')
      *   <range>      = <base>..<base>
      *   <base>       = any integer
      */
-    var EXTRACT_REGEX = /([^ ]+) (complement\()?(\d+)\.\.(\d+)/,
+    var EXTRACT_REGEX = /([^ ]+) (complement\()?(<)?(\d+)\.\.(>)?(\d+)/,
         // some indexes for where our regex groups will show
-        NAME = 1, COMP = 2, START = 3, END = 4;
+        NAME = 1, COMP = 2, START_APPROX = 3, START = 4, END_APPROX = 5, END = 6;
 
     /**
      * parses one line as an extract
@@ -178,7 +178,8 @@ angular.module('npact')
             start: parseInt(parts[START]),
             end: parseInt(parts[END]),
             complement: parts[COMP] ? 1 : 0,
-            name: parts[NAME]
+            name: parts[NAME],
+            approximate: (parts[START_APPROX] || parts[END_APPROX]) ? true : false
           },
           phaseCoordinate = res.complement ? res.start : res.end;
       res.phase = (phaseCoordinate - 1) % 3;
