@@ -77,11 +77,10 @@ angular.module('npact')
     this.load = function(name, data) {
       if (_.has(self.tracks, name)) { throw new Err.TrackAlreadyDefined(); }
       return ExtractParser.parseAsync(data)
-        .then(function(data) {
-          return (self.tracks[name] = data);
-        }, function() {
-          $log.log('failed to parse data for track', name);
-        });
+        .then(
+          function(data) { return (self.tracks[name] = data); },
+          function(e) { $log.log('TrackReader.load failed', name, e); throw e; }
+        );
     };
 
     this.slice = function(opts) {
