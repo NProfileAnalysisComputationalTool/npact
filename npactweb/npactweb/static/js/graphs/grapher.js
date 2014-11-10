@@ -19,8 +19,6 @@ angular.module('npact')
       });
 
       this.stage.add(this.leftLayer(), this.chartLayer());
-      this.stage.batchDraw();
-
     }
     var GP = Grapher.prototype;
 
@@ -272,7 +270,6 @@ angular.module('npact')
     GP.redraw = function(){
       var self = this, gg = self._genomeGroup;
       gg.add(self.xAxisGroup(), self.profileGroup());
-      self.stage.batchDraw();
 
       var drawings = _.map(self.headerSpec.headers, function(hdr) {
         return TrackReader.slice({
