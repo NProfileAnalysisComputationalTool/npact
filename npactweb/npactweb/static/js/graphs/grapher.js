@@ -46,35 +46,32 @@ angular.module('npact')
       });
     };
 
-    GP.headerGroup = function(){
-      // from top to bottom
-      var g = new K.Group(),
-          // TODO: derive opts.leftPadding
-          // * add all labels
-          // * loop over K.Text objects, find max width
-          // * leftPadding = maxWidth + headerLabelPadding
-          // * loop over K.Text objects, set width to leftPadding
+    GP.headerGroup = function(g){
 
-          defaultTextOpts = {
-            align: 'right', x: 0,
-            fontSize: this.headerLabelFontsize,
-            width: this.leftPadding - this.headerLabelPadding,
-            fill:this.headerLabelFontcolor
+      // TODO: derive opts.leftPadding
+      // * add all labels
+      // * loop over K.Text objects, find max width
+      // * leftPadding = maxWidth + headerLabelPadding
+      // * loop over K.Text objects, set width to leftPadding
+
+      var defaultTextOpts = {
+        align: 'right', x: 0,
+        fontSize: this.headerLabelFontsize,
+        width: this.leftPadding - this.headerLabelPadding,
+        fill:this.headerLabelFontcolor
+      },
+          makeLabel = function(header) {
+            var txtOpts = angular.extend({}, defaultTextOpts, header);
+            return new K.Text(txtOpts);
           },
           lbls =  this.headerSpec.headers.map(makeLabel);
 
       addMany(g, lbls);
       return g;
-
-      function makeLabel(header){
-        var txtOpts = angular.extend({}, defaultTextOpts, header);
-        return new K.Text(txtOpts);
-      }
     };
 
-    GP.yAxisGroup = function(){
-      var g = new K.Group(),
-          m = this.m;
+    GP.yAxisGroup = function(g){
+      var m = this.m;
 
       addMany(g, this.drawAxisTicks(m.yaxis.ticks));
       // draw labels at the right aligned
@@ -105,13 +102,14 @@ angular.module('npact')
     };
 
     GP.leftLayer = function(){
-      var layer = new K.Layer({
+      var layer = new K.FastLayer({
         width: this.leftPadding,
         x:0, y:0,
         height: this.height
       });
 
-      layer.add(this.headerGroup(), this.yAxisGroup());
+      this.yAxisGroup(layer);
+      this.headerGroup(layer);
 
       return layer;
     };
@@ -289,7 +287,7 @@ angular.module('npact')
       });
 
       return $q.all(drawings).then(function() {
-        self.stage.batchDraw();
+        self.stage.draw();
       });
     };
 
