@@ -9,16 +9,10 @@ angular.module('npact')
     };
   })
 
-  .controller('npactGraphPageCtrl', function($scope, Fetcher, npactConstants, $q, $log, StatusPoller, FETCH_URL, $window, $element, GraphConfig, Evt, TrackReader, GraphingCalculator, ProfileReader, Utils, Pynpact) {
+  .controller('npactGraphPageCtrl', function($scope, Fetcher, $q, $log, StatusPoller, FETCH_URL, $window, $element, GraphConfig, TrackReader, ProfileReader, Pynpact) {
     'use strict';
-    var self = this,
-        // some timing / stats counters
-        graphUpdateStart = null, graphsDrawn = 0,
-        visibleGraphs = 5,
-        graphSpecs = [],
-        // helper functions
-        getWidth = function(){ return $element.width(); },
-        getGraphConfig = function() { return GraphConfig; },
+    // helper functions
+    var getWidth = function(){ return $element.width(); },
         addTrack = function(key, name, data) {
           return TrackReader.load(name, data)
             .then(function() { GraphConfig.loadTrack(name, key); });
@@ -42,21 +36,11 @@ angular.module('npact')
         },
         addProfile = function(config) {
           return Fetcher.nprofile(config)
-            .then(ProfileReader.load)
-            .then(function(summary) {
-              // find a sensible zoom level
-              var basesPerGraph = summary.length / visibleGraphs;
-              // if we're really short, reset out bases per graph
-              if (basesPerGraph < GraphConfig.basesPerGraph) {
-                GraphConfig.basesPerGraph = Utils.orderOfMagnitude(basesPerGraph);
-              }
-              GraphConfig.profileSummary = summary;
-            });
+            .then(ProfileReader.load);
         }
     ;
 
     $scope.miscFiles = [];
-    $scope.graphHeight = npactConstants.graphSpecDefaults.height;
     $scope.status = 'Initializing';
     $scope.ready = false;
     $scope.FETCH_URL = FETCH_URL;
@@ -65,59 +49,8 @@ angular.module('npact')
       if (newValue > 0){ GraphConfig.width = newValue; }
     });
 
-    $scope.$watch(getGraphConfig, function(newValue, oldValue){
-      var cmd = newValue.refreshCommand(oldValue);
-      $log.log('graph config changed:', cmd);
-      graphUpdateStart = new Date();
-      graphsDrawn = 0;
-      switch(cmd){
-      case Evt.REBUILD:
-        graphSpecs = ProfileReader.partition(GraphConfig);
-        $scope.graphSpecs = _.take(graphSpecs, visibleGraphs);
-        break;
-      case Evt.REDRAW:
-        $scope.$broadcast(cmd);
-        break;
-      }
-    }, true); // deep-equality
-
-    $scope.$on(Evt.GRAPH_REDRAW_COMPLETE, function(evt) {
-      graphsDrawn++;
-      if(graphsDrawn === $scope.graphSpecs.length){
-        $log.log('graphs done', new Date() - graphUpdateStart, 'ms');
-      }
-    });
-
-    $scope.$on(Evt.PAN, function(evt, opts) {
-      var offset = Math.floor(opts.newStartBase - opts.oldStartBase);
-      GraphConfig.offset += offset;
-      // TODO: Event originated from outside ng, but why doesn't
-      // `$watch` pick up the `offset` change?
-      $scope.$apply();
-    });
-
-    $scope.$on(Evt.ZOOM, function(evt, opts) {
-      var res = GraphingCalculator.zoom(angular.extend({}, opts, GraphConfig));
-      GraphConfig.offset = res.offset;
-      GraphConfig.basesPerGraph = res.basesPerGraph;
-      // TODO: Event originated from outside ng, but why doesn't
-      // `$watch` pick up the `offset` change?
-      $scope.$apply();
-    });
-
     // check for scope changes on resize
     angular.element($window).bind('resize', function () { $scope.$apply(); });
-
-    /**
-     * add more visible entries to $scope
-     */
-    self.addMore = function(){
-      if($scope.graphSpecs){
-        $log.log('scrolling down via infinite scroller');
-        graphUpdateStart = new Date();
-        Utils.extendByPage(graphSpecs, $scope.graphSpecs, visibleGraphs);
-      }
-    };
 
     // start it up
     Fetcher.kickstart()
