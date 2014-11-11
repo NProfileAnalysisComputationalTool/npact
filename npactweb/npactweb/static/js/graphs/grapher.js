@@ -101,16 +101,31 @@ angular.module('npact')
       return g;
     };
 
+    var leftLayerCache = {};
     GP.leftLayer = function(){
-      var layer = new K.FastLayer({
-        width: this.leftPadding,
-        x:0, y:0,
-        height: this.height
-      });
+      // TODO: find a way to cache this key, or make headerSpec.headers
+      // immutable so it can be the key directly
+      var key = angular.toJson(this.headerSpec.headers),
+          opts = {
+            width: this.leftPadding,
+            x:0, y:0,
+            height: this.height
+          },
+          layer = new K.FastLayer(opts);
 
-      this.yAxisGroup(layer);
-      this.headerGroup(layer);
-
+      if(leftLayerCache[key]){
+        leftLayerCache[key].then(function(image) {
+          layer.add(new K.Image(angular.extend(opts, {image:image})));
+          layer.draw();
+        });
+      }else{
+        this.yAxisGroup(layer);
+        this.headerGroup(layer);
+        leftLayerCache[key] = $q(function(resolve) {
+          $log.log('saving leftLayer image');
+          layer.toImage(angular.extend(opts, {callback:resolve}));
+        });
+      }
       return layer;
     };
 
