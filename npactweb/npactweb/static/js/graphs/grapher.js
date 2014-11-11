@@ -256,6 +256,7 @@ angular.module('npact')
             scaleX: xaxis.scaleX,
             offsetX: this.startBase
           }),
+          // TODO: move the rgb list creation into `ProfileReader`, cache it there
           dataToDraw = _(ProfileReader.slice({
             startBase: this.startBase - this.margin,
             endBase: this.endBase + this.margin

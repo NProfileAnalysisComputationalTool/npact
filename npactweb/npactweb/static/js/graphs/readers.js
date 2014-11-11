@@ -164,7 +164,6 @@ angular.module('npact')
 
     this.slice = function(opts) {
       if (!_.has(self.tracks, opts.name)) { throw new Err.TrackNotFound(); }
-      $log.log('TrackReader.slice', opts);
 
       var data = self.tracks[opts.name],
           min = opts.startBase,

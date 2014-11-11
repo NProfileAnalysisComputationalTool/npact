@@ -16,7 +16,6 @@ angular.module('npact')
               element: $element[0],
               headerSpec: GraphConfig.headerSpec(),
               margin: Utils.orderOfMagnitude(GraphConfig.basesPerGraph, -1),
-              height: npactConstants.graphSpecDefaults.height,
               width: GraphConfig.width,
               colors: GraphConfig.colorBlindFriendly ?
                 npactConstants.colorBlindLineColors : npactConstants.lineColors

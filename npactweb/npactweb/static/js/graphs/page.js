@@ -78,7 +78,7 @@ angular.module('npact')
       case Evt.REDRAW:
         $scope.$broadcast(cmd);
         break;
-      };
+      }
     }, true); // deep-equality
 
     $scope.$on(Evt.GRAPH_REDRAW_COMPLETE, function(evt) {

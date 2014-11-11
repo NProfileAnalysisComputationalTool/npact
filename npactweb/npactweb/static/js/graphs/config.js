@@ -9,7 +9,6 @@ angular.module('npact')
     self.offset = 0; // how much the graph is panned left/right
 
 
-
     var activeTracks = function(){
       return _.filter(self.tracks, {active: true}, 'active');
     };
