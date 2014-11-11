@@ -1,4 +1,16 @@
 angular.module('npact')
+  .directive('npactGraphContainer', function(STATIC_BASE_URL) {
+    return {
+      restrict: 'A',
+      scope: {graphSpecs: '=npactGraphContainer'},
+      templateUrl: STATIC_BASE_URL + 'js/graphs/graph-container.html',
+      controller:function() {
+
+      },
+      controllerAs: 'ctrl'
+    };
+  })
+
   .directive('npactGraph', function npactGraph($log, Grapher, Evt, GraphConfig, Utils, npactConstants, GraphingCalculator){
     return {
       restrict: 'A',

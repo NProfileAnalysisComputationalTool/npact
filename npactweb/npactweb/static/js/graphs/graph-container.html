@@ -1,0 +1,9 @@
+<div>
+  <div infinite-scroll="ctrl.addMore()" infinite-scroll-distance="3">
+    <div ng-repeat="spec in graphSpecs"
+         id="graph_{{$index}}"
+         npact-graph="spec"
+         style="height:{{graphHeight}}px; border-bottom: 1px solid #AAF;"
+         ></div>
+  </div>
+</div>
