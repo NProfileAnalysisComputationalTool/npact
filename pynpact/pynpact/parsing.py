@@ -1,6 +1,7 @@
 from __future__ import absolute_import
 import os.path
 import logging
+import re
 from Bio import SeqIO
 from path import path
 
@@ -48,30 +49,51 @@ def initial(filename, outputdir=None):
     return config
 
 
-def isgbk(config):
-    if 'isgbk' not in config:
+def detect_format(config):
+    if 'format' not in config:
         try:
-            seqrec = genbank.parse_seq_rec(config['filename'])
-            if not config.get('first_page_title'):
-                config['first_page_title'] = seqrec.description
-            config['id'] = seqrec.id
-            config['length'] = len(seqrec)
-            config['isgbk'] = True
-        except Exception as e:
-            log.debug('Error parsing gbk file: %s', e)
-            config['isgbk'] = False
-    return config['isgbk']
+            filename = path(config['filename'])
+            with filename.open('r') as f:
+                header = f.read(5)
+            if filename.ext in ('.gb', '.gbk') or header.startswith('LOCUS'):
+                log.debug("Attempting %s as genbank", filename)
+                seqrec = genbank.parse_seq_rec(config['filename'])
+                config['format'] = 'genbank'
+                config['id'] = seqrec.id
+                config['description'] = seqrec.description
+                seq = str(seqrec.seq)
+            elif filename.ext in ('.fna', '.fasta') or header.startswith('>'):
+                seqrec = SeqIO.read(filename, 'fasta')
+                config['format'] = 'fasta'
+                config['id'] = seqrec.id
+                config['description'] = seqrec.description
+                seq = str(seqrec.seq)
+            else:
+                with filename.open('r') as f:
+                    seq = f.read()
+                seq = re.sub('\s', '', seq)
+                config['format'] = 'raw'
+            seq = seq.upper()
+            config['length'] = len(seq)
+            ddna = derive_filename(config, filename.getmtime(), 'ddna')
+            with ddna.open('w') as f:
+                f.write(seq)
+            config['ddna'] = ddna
+        except:
+            log.exception("Error detecting format")
+            config['format'] = None
+
+
+def isgbk(config):
+    if 'format' not in config:
+        detect_format(config)
+    return config['format'] == 'genbank'
 
 
 def isfasta(config):
-    if 'isfasta' not in config:
-        try:
-            seqrec = SeqIO.read(config['filename'], 'fasta')
-            config['length'] = len(seqrec)
-            config['isfasta'] = True
-        except:
-            config['isfasta'] = False
-    return config['isfasta']
+    if 'format' not in config:
+        detect_format(config)
+    return config['format'] == 'fasta'
 
 
 def length(config):
@@ -95,12 +117,9 @@ def end_base(config):
 
 def first_page_title(config):
     if not config.get('first_page_title'):
-        if isgbk(config):
-            pass
-        else:
-            'Page 1'
+        detect_format(config)
+        config['first_page_title'] = config.get('description', 'Page 1')
     return config['first_page_title']
-
 
 
 def derive_filename(config, hash, newext):

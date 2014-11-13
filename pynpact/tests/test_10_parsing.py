@@ -1,4 +1,5 @@
 import pytest
+from path import path
 
 from pynpact import parsing, genbank
 
@@ -9,6 +10,21 @@ def test_initial(gbkfile):
     assert result['filename'] == gbkfile
     assert 'basename' in result
 
+def detect_format(config):
+    parsing.detect_format(config)
+    assert config['format']
+    ddnafile = path(config['ddna'])
+    assert ddnafile.exists()
+    assert config['length'] == ddnafile.size
+
+def test_detect_gbkformat(gbkconfig):
+    detect_format(gbkconfig)
+
+def test_detect_fnaformat(fnaconfig):
+    detect_format(fnaconfig)
+
+def test_detect_rawformat(rawconfig):
+    detect_format(rawconfig)
 
 def test_genbank(gbkfile):
     seqrec = genbank.parse_seq_rec(gbkfile)

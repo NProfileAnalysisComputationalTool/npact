@@ -14,6 +14,7 @@ def setup_logging():
 
 TESTGBK = "testdata/NC_017123.gbk"
 TESTFNA = "testdata/NC_017123.fna"
+TESTRAW = "testdata/NC_017123.raw"
 
 
 @pytest.fixture()
@@ -43,3 +44,15 @@ def fnafile():
 @pytest.fixture()
 def fnaconfig(fnafile, tmpdir):
     return parsing.initial(fnafile, outputdir=str(tmpdir))
+
+
+@pytest.fixture()
+def rawfile():
+    raw = path(__file__).dirname().joinpath(TESTRAW)
+    assert raw.exists()
+    return str(raw)
+
+
+@pytest.fixture()
+def rawconfig(rawfile, tmpdir):
+    return parsing.initial(rawfile, outputdir=str(tmpdir))
