@@ -126,6 +126,8 @@ def _ap(pconfig, out):
 
 
 def write_allplots_def(out, pconfig, page_num):
+    parsing.first_page_title(pconfig)
+
     def wl(line):
         "helper function for writing a line to the allplots file."
         if line:
