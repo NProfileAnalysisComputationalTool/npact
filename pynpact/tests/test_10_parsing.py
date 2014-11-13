@@ -16,6 +16,7 @@ def detect_format(config):
     ddnafile = path(config['ddna'])
     assert ddnafile.exists()
     assert config['length'] == ddnafile.size
+    assert ddnafile.open('r').read(14) == 'CAAATTGCGCTACA'
 
 def test_detect_gbkformat(gbkconfig):
     detect_format(gbkconfig)
