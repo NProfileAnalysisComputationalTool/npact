@@ -183,4 +183,78 @@ angular.module('npact')
 
     return ParserFactory.create(parseExtract);
   })
+
+  .service('Fetcher', function(StatusPoller, $http, FETCH_URL, ACGT_GAMMA_FILE_LIST_URL, KICKSTART_BASE_URL, $window, Pynpact) {
+    'use strict';
+    var self = this;
+    /**
+     * download contents from any url
+     */
+    self.rawFile = function(url) {
+      return $http.get(url).then(function(res) { return res.data; });
+    };
+
+    /**
+     * download contents from a "fetch" path
+     */
+    self.fetchFile = function(path){ return self.rawFile(FETCH_URL + path); };
+
+
+    /**
+     * poll the server for when `path` is ready, then fetch it
+     */
+    self.pollThenFetch = function(path) {
+      return StatusPoller.start(path).then(self.fetchFile);
+    };
+
+    self.kickstart = function(){
+      return self.rawFile(KICKSTART_BASE_URL + $window.location.search);
+    };
+
+    self.nprofile = function(config) {
+      return self.pollThenFetch(config[Pynpact.NPROFILE]);
+    };
+
+    self.inputFileCds = function(config) {
+      return self.pollThenFetch(config[Pynpact.CDS]);
+    };
+
+    self.acgtGammaFileList = function(config) {
+      return StatusPoller.start(config[Pynpact.ACGT_GAMMA_FILES])
+        .then(function(path) {
+          return self.rawFile(ACGT_GAMMA_FILE_LIST_URL + path);
+        });
+    };
+  })
+
+
+  .service('StatusPoller', function(STATUS_BASE_URL, $q, $http, $timeout, $log) {
+    'use strict';
+    var POLLTIME = 1000;
+
+    function poller(tid, deferred) {
+      // remember our arguments
+      var pollAgain = _.partial(poller, tid, deferred);
+
+      $http.get(STATUS_BASE_URL + tid)
+        .then(function(res) {
+          if(res.data.ready) { deferred.resolve(tid); }
+          else { $timeout(pollAgain, POLLTIME); }
+        })
+        .catch(function(err) {
+          $log.error('Error while fetching tid: ', tid, err);
+          deferred.reject(err.data.message);
+        });
+
+      return deferred.promise;
+    }
+
+    this.start = function(tid) {
+      if(!tid || tid.length === 0){
+        return $q.reject(new Error('Invalid task id'));
+      }
+
+      return poller(tid, $q.defer());
+    };
+  })
 ;
