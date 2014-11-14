@@ -10,7 +10,7 @@ from pynpact import genbank
 log = logging.getLogger(__name__)
 
 defaults = {
-        'nucleotides': ['c', 'g'],
+        'nucleotides': ['C', 'G'],
 
         # keys for extract.c
         'GeneDescriptorKey1': 'gene',

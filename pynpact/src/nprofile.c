@@ -11,7 +11,7 @@
 
 #define ORDER 0
 
-const char usage[]= "\nUsage: [-b bases] input.gbk [start end [window_size step [period_of_frames]]]\nDefaults: start= 1; end= end of genome sequence; window_size= 201; step= 51; period_of_frames= 3.\n";
+const char usage[]= "\nUsage: [-b bases] input.gbk [start end [window_size step [period_of_frames]]]\nDefaults: start=1; end= end of genome sequence; window_size= 201; step= 51; period_of_frames= 3.\n";
 
 
 int mapfile(char* filename, char** addr, size_t* length) {
@@ -48,124 +48,90 @@ int mapfile(char* filename, char** addr, size_t* length) {
    return 0;
 }
 
-void calculateProfile(const char* origin, const size_t length,
+void calculateProfile(const char* origin,
                       const char* bases, const int start, const int end,
                       const int window, const int step, const int period) {
 
    char *box, base;
-   int offset =0 , j, baseidx=0, n=0;
+   int j, idx, n=0, baseidx=0;
    size_t *S;
    double normfactor = 100.0/(double)(window/period);
 
    fprintf(stderr,
            "Calculating [%s]-profile of bases %d-%d with window %d nt, step %d nt and period %d nt.\n",
-           bases, start, end, window, step, period);
+           bases, start+1, end+1, window, step, period);
 
-   box = (char *)calloc(window, sizeof(char));
-   S = (size_t *)calloc(period, sizeof(size_t));
+   box = (char *) calloc(window, sizeof(char));
+   S = (size_t *) calloc(period, sizeof(size_t));
 
-
-   /* skip up till start, but don't move offset passed start. */
-   while (offset < length) {
-      base = origin[offset];
-      if(base >= 'A' && base <= 'Z') base += 'a' - 'A';
-      if(base >= 'a' && base <= 'z') {
-         if(baseidx + 1 == start)
-            break;
-         baseidx++;
+   for(idx=start; idx <= end; idx++) {
+      base = origin[idx];
+      baseidx = idx+1; // this is the 1 based index we use for printing.
+      if(strchr(bases, base)) {
+         if(! box[n % window]) {
+            //if the flag wasn't set, then set it and increase the count.
+            ++S[(idx) % period];
+            box[n % window] = 1;
+         }
       }
-      offset++;
-   }
-
-   for(; offset < length && baseidx < end; offset++) {
-      base = origin[offset];
-      if(base >= 'A' && base <= 'Z') base += 'a' - 'A';
-      if(base >= 'a' && base <= 'z') {
-         ++baseidx;
-         if(strchr(bases, base)) {
-            if(! box[n % window]) {
-               //if the flag wasn't set, then set it and increase the count.
-               ++S[(baseidx-1) % period];
-               box[n % window] = 1;
-            }
+      else {
+         if(box[n % window]) {
+            //if the flag was set, clear it and decrease the count.
+            --S[(idx) % period];
+            box[n % window] = 0;
          }
-         else {
-            if(box[n % window]) {
-               //if the flag was set, clear it and decrease the count.
-               --S[(baseidx-1) % period];
-               box[n % window] = 0;
-            }
+         //unexpected base, print warning.
+         if(! strchr("ACTGU", base))
+            fprintf(stderr, "\nBase %c found at position %d\n", base, baseidx);
+      }
+      ++n;
 
-            //unexpected base, print warning.
-            if(! strchr("actgu", base))
-               fprintf(stderr,"\nBase %c found at position %d\n",base,baseidx);
-         }
-         ++n;
-
-         if(n >= window && ((n-window) % step) == 0 && baseidx < end) {
-            fprintf(stdout, "%8d", baseidx-window/2);
-            for(j=0; j < period; ++j)
-               fprintf(stdout, "%8.1f", normfactor*S[j]);
-            fprintf(stdout,"\n");
-         }
+      if(n >= window && ((n-window) % step) == 0 && idx <= end) {
+         fprintf(stdout, "%8d", baseidx-window/2);
+         for(j=0; j < period; ++j)
+            fprintf(stdout, "%8.1f", normfactor*S[j]);
+         fprintf(stdout,"\n");
       }
    }
    free(box);
    free(S);
-   fprintf(stderr,"Bases %d-%d read (%d nt)\n", start, end, n);
-}
-
-int countBases(const char* origin, const size_t length) {
-   /* how many bases from there */
-   int i, tot=0;
-   for(i=0; i < length; i++)
-      if((origin[i] >= 'a' && origin[i] <= 'z') || (origin[i] >= 'A' && origin[i] <= 'Z'))
-         ++tot;
-   return tot;
+   fprintf(stderr, "Bases %d-%d read (%d nt)\n", start, end, n);
 }
 
 int main(int argc, char *argv[]) {
-   int start=1,end=0,window=201,step=51,period=3,tot=0;
+   int start=0,end=0,window=201,step=51,period=3;
    int i;
    char* mapped_file;
    char* origin;
-   size_t length, olength;
+   size_t length;
    int argi = 1;
    char* filename;
-   char* bases = "cg";
+   char* bases = "CG";
 
+   if(argc < 2) {
+      fprintf(stderr, "ERROR: not enough arguments");
+      fprintf(stderr, usage);
+      exit(1);
+   }
 
    if(strcmp(argv[argi], "-b") == 0) {
       bases = (char*) argv[++argi];
-      for (i = 0; bases[i]; i++)
-         if (bases[i] < 'a')
-            bases[i] = bases[i] + 'a' - 'A';
+      for (i = 0; bases[i]; i++) {
+         if(! strchr("ACGT", bases[i])) {
+            fprintf(stderr, "ERROR: must specify bases as subset of 'ACGT'\n");
+         }
+      }
       argi++;
    }
    filename = argv[argi++];
+   if ( i = mapfile(filename, &origin, &length) )
+      exit(i);
 
-
-   if ( mapfile(filename, &mapped_file, &length) )
-      exit(1);
-
-
-   fprintf(stderr, "Searching for coding sequence in '%s'... ", filename);
-   /* Skip until we see ORIGIN (the line that starts the seq)
-    * If the file doesn't contain ORIGIN this may raise a segfault;
-    * but at that point exiting with error is all we can do anyways.
-    */
-   origin = strstr(mapped_file, "\nORIGIN");
-   /* then save a pointer at the start of the next line */
-   origin = strchr(origin + strlen("\nORIGIN"), '\n') + 1;
-   olength = length - (origin - mapped_file);
-
-   tot = countBases(origin, olength);
-   fprintf(stderr, "Found %d bases.\n", tot);
 
    if(argc > argi)
-      start = atoi(argv[argi++]);
+      start = atoi(argv[argi++]) - 1;
 
-   end = (argc > argi) ? atoi(argv[argi++]) : tot;
+   end = (argc > argi) ? atoi(argv[argi++]) - 1 : length - 1;
 
    if(argc > argi)
       window = atoi(argv[argi++]);
@@ -175,19 +141,16 @@ int main(int argc, char *argv[]) {
       period = atoi(argv[argi++]);
 
 
-   if(end > tot || start < 1 || end <= start) {
-      fprintf(stderr,"ERROR: Sequence must be longer than 0 and shorter than complete sequence (%d nt).\n%s",
-              tot,usage);
+   if(end >= length || start < 0 || end <= start) {
+      fprintf(stderr, "ERROR: Sequence must be longer than 0 and shorter than complete sequence (%zd nt).\n%s",
+              length, usage);
       exit(1);
    }
-
    if(window % period) {
       fprintf(stderr,"ERROR: Window_size must be divisable by period_of_frames\n%s", usage);
       exit(1);
    }
 
-   calculateProfile(origin, olength, bases, start, end, window, step, period);
-
-   munmap(mapped_file, length);
-   exit(0);
+   calculateProfile(origin, bases, start, end, window, step, period);
+   exit(munmap(origin, length));
 }

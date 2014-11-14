@@ -20,7 +20,7 @@ statuslog = logging.getLogger('pynpact.statuslog')
 
 BIN = binfile('nprofile')
 
-KEYS = ['nucleotides', 'length', 'window_size', 'step', 'period', 'filename']
+KEYS = ['nucleotides', 'length', 'window_size', 'step', 'period', 'ddna']
 OUTPUTKEY = 'File_list_of_nucleotides_in_200bp windows'
 JSONOUTPUTKEY = 'nprofileData'
 
@@ -35,7 +35,7 @@ def plan(config, executor):
     h = Hasher()
     h.hashdict(rconfig)
     h.hashfiletime(BIN)
-    h.hashfiletime(config['filename'])
+    h.hashfiletime(config['ddna'])
     hash = h.hexdigest()
     target = parsing.derive_filename(config, hash, 'nprofile')
     config[OUTPUTKEY] = target
@@ -49,8 +49,8 @@ def plan(config, executor):
 @producer()
 def _nprofile(config, out):
     statuslog.info("Calculating n-profile.")
-    cmd = [BIN, '-b', ''.join(config["nucleotides"]),
-           config['filename'], 1, config['length'],
+    cmd = [BIN, '-b', ''.join(config["nucleotides"]).upper(),
+           config['ddna'], 1, config['length'],
            config['window_size'], config['step'], config['period']]
     capproc.capturedCall(
         cmd, stdout=out, stderr=sys.stderr,
