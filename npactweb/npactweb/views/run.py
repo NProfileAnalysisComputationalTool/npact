@@ -142,6 +142,7 @@ def build_config(path, request):
         logger.debug('updating with %r', cf.cleaned_data)
         config.update(cf.cleaned_data)
 
+    parsing.detect_format(config)
     parsing.first_page_title(config)
     parsing.end_base(config)
     parsing.isgbk(config)

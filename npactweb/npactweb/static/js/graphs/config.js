@@ -23,6 +23,7 @@ angular.module('npact')
      * register a track to be displayed on the graph
      */
     this.loadTrack = function(name, type) {
+      //TODO: This needs to replace existing track on name match
       if(self.hasTrack(name)){ throw new Err.TrackAlreadyDefined(); }
       $log.log('loading track', name, type);
       self.tracks.push({
