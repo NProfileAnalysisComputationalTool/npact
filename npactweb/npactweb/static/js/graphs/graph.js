@@ -105,12 +105,12 @@ angular.module('npact')
     };
   })
 
-  .directive('npactGraph', function npactGraph(Grapher, Evt, GraphingCalculator){
+  .directive('npactGraph', function npactGraph(Grapher, Evt, GraphingCalculator) {
     return {
       restrict: 'A',
       scope: { spec: '=npactGraph' },
       require: '^npactGraphContainer',
-      link: function($scope, $element, $attrs, ctrl){
+      link: function($scope, $element, $attrs, ctrl) {
         var g = null,
             buildOptions = function(range) {
               var opts = angular.extend(
@@ -133,11 +133,11 @@ angular.module('npact')
       }
     };
   })
-  .directive('npactExtract', function(STATIC_BASE_URL){
+  .directive('npactExtract', function(STATIC_BASE_URL) {
     return {
       restrict: 'A',
-      scope: { extract:'=npactExtract'},
-      templateUrl:STATIC_BASE_URL+'js/graphs/extract.html'
+      scope: { extract: '=npactExtract'},
+      templateUrl: STATIC_BASE_URL + 'js/graphs/extract.html'
     };
   })
 ;

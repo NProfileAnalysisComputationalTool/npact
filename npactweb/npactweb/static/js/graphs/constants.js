@@ -52,11 +52,11 @@ angular.module('npact')
 
   })
   .constant('Evt', {
-    REDRAW:'redraw',
-    NOOP:'noop',
-    REBUILD:'rebuild',
-    PAN:'pan',
-    ZOOM:'zoom',
+    REDRAW: 'redraw',
+    NOOP: 'noop',
+    REBUILD: 'rebuild',
+    PAN: 'pan',
+    ZOOM: 'zoom',
     GRAPH_REDRAW_COMPLETE: 'graph redraw complete'
   })
 // these are expected to match strings specified in pynpact
