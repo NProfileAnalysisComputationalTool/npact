@@ -111,15 +111,16 @@ angular.module('npact')
       scope: { spec: '=npactGraph' },
       require: '^npactGraphContainer',
       link: function($scope, $element, $attrs, ctrl){
-        var g = null, buildOptions = function(range) {
-          var opts = angular.extend(
-            {}, ctrl.graphOptions, range,
-            {$scope: $scope, element: $element[0]});
+        var g = null,
+            buildOptions = function(range) {
+              var opts = angular.extend(
+                {}, ctrl.graphOptions, range,
+                {$scope: $scope, element: $element[0]});
 
-          opts.m = GraphingCalculator.chart(opts);
-          opts.xaxis = GraphingCalculator.xaxis(opts);
-          return opts;
-        },
+              opts.m = GraphingCalculator.chart(opts);
+              opts.xaxis = GraphingCalculator.xaxis(opts);
+              return opts;
+            },
             redraw = function() {
               if(!$scope.spec) { return; }
               if(g !== null) {g.stage.destroy();}
