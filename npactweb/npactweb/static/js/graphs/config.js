@@ -4,7 +4,6 @@ angular.module('npact')
     self.tracks = [];
     self.colorBlindFriendly = false;
     self.basesPerGraph = 10000;
-    self.width = null;
     self.profileSummary = null;
     self.offset = 0; // how much the graph is panned left/right
 

@@ -9,11 +9,10 @@ angular.module('npact')
     };
   })
 
-  .controller('npactGraphPageCtrl', function($scope, Fetcher, $q, $log, StatusPoller, FETCH_URL, $window, $element, GraphConfig, TrackReader, ProfileReader, Pynpact) {
+  .controller('npactGraphPageCtrl', function($scope, Fetcher, $q, $log, StatusPoller, FETCH_URL, GraphConfig, TrackReader, ProfileReader, Pynpact) {
     'use strict';
     // helper functions
-    var getWidth = function(){ return $element.width(); },
-        addTrack = function(key, name, data) {
+    var addTrack = function(key, name, data) {
           return TrackReader.load(name, data)
             .then(function() { GraphConfig.loadTrack(name, key); });
         },
@@ -44,13 +43,6 @@ angular.module('npact')
     $scope.status = 'Initializing';
     $scope.ready = false;
     $scope.FETCH_URL = FETCH_URL;
-
-    $scope.$watch(getWidth, function(newValue, oldValue){
-      if (newValue > 0){ GraphConfig.width = newValue; }
-    });
-
-    // check for scope changes on resize
-    angular.element($window).bind('resize', function () { $scope.$apply(); });
 
     // start it up
     Fetcher.kickstart()

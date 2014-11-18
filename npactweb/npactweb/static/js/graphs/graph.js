@@ -1,10 +1,10 @@
 angular.module('npact')
 
-  .controller('npactGraphContainerCtrl', function($scope, npactConstants, Utils, GraphConfig, ProfileReader, Evt, $log, GraphingCalculator) {
+  .controller('npactGraphContainerCtrl', function($scope, $element, $window, npactConstants, Utils, GraphConfig, ProfileReader, Evt, $log, GraphingCalculator) {
     var self = this,
-        graphUpdateStart = null, graphsDrawn = 0,
-        visibleGraphs = 5,
-        graphSpecs = [],
+        width = $element.width(),
+        $win = angular.element($window),
+        winHeight = $win.height(),
         getGraphConfig = function() { return GraphConfig; },
         getProfileSummary = function() {
           try {return ProfileReader.summary();} catch(e) { }
@@ -17,7 +17,7 @@ angular.module('npact')
             {
               headerSpec: GraphConfig.headerSpec(),
               margin: Utils.orderOfMagnitude(GraphConfig.basesPerGraph, -1),
-              width: GraphConfig.width,
+              width: width,
               colors: GraphConfig.colorBlindFriendly ?
                 npactConstants.colorBlindLineColors : npactConstants.lineColors
             });
@@ -40,25 +40,23 @@ angular.module('npact')
           // `$watch` pick up the `offset` change?
           $scope.$apply();
         },
-        onGraphRedrawComplete = function(evt) {
-          graphsDrawn++;
-          if(graphsDrawn === $scope.graphSpecs.length){
-            $log.log('graphs done', new Date() - graphUpdateStart, 'ms');
-          }
+        redraw = function() {
+          self.graphOptions = makeGraphOptions();
+          $scope.$broadcast(Evt.REDRAW);
+        },
+        rebuild = function() {
+          self.graphOptions = makeGraphOptions();
+          $scope.graphSpecs = ProfileReader.partition(GraphConfig);
         },
         onGraphConfigChanged = function(newValue, oldValue){
           var cmd = newValue.refreshCommand(oldValue);
           $log.log('graph config changed:', cmd);
-          graphUpdateStart = new Date();
-          graphsDrawn = 0;
-          self.graphOptions = makeGraphOptions();
-          switch(cmd){
+          switch(cmd) {
           case Evt.REBUILD:
-            graphSpecs = ProfileReader.partition(GraphConfig);
-            $scope.graphSpecs = _.take(graphSpecs, visibleGraphs);
+            rebuild();
             break;
           case Evt.REDRAW:
-            $scope.$broadcast(cmd);
+            redraw();
             break;
           }
         },
@@ -74,23 +72,35 @@ angular.module('npact')
           }
         }
     ;
-
-    $scope.graphHeight = npactConstants.graphSpecDefaults.height;
-    /**
-     * add more visible entries to $scope
-     */
-    self.addMore = function(){
-      if($scope.graphSpecs){
-        $log.log('scrolling down via infinite scroller');
-        graphUpdateStart = new Date();
-        Utils.extendByPage(graphSpecs, $scope.graphSpecs, visibleGraphs);
-      }
+    self.visible = function(el) {
+      // The rect.top and rect.bottom are relative to the viewport
+      var slack = 50;
+      var rect = el.getBoundingClientRect();
+      return (rect.top <= 0 && rect.bottom > -slack) ||
+        (rect.top >=0 && rect.top < (winHeight + slack));
     };
+    $scope.graphHeight = npactConstants.graphSpecDefaults.height;
+    $win.on('resize', function() {
+      if($element.width() !== width) {
+        winHeight = $win.height();
+        width = $element.width();
+        redraw();
+      }
+      else if($win.height() !== winHeight) {
+        // if we didnt' redraw completely, the visible height still might
+        // have changed.
+        winHeight = $win.height();
+        $scope.$apply();
+      }
+    });
+    // Window scrolling
+    $win.on('scroll', function() {
+      $scope.$apply();
+    });
 
     // listen for graph events
     $scope.$on(Evt.PAN, onPan);
     $scope.$on(Evt.ZOOM, onZoom);
-    $scope.$on(Evt.GRAPH_REDRAW_COMPLETE, onGraphRedrawComplete);
 
     // watch the environment for changes we care about
     $scope.$watch(getGraphConfig, onGraphConfigChanged, true); // deep-equality
@@ -105,13 +115,14 @@ angular.module('npact')
     };
   })
 
-  .directive('npactGraph', function npactGraph(Grapher, Evt, GraphingCalculator) {
+  .directive('npactGraph', function npactGraph(Grapher, Evt, GraphingCalculator, $log) {
     return {
       restrict: 'A',
       scope: { spec: '=npactGraph' },
       require: '^npactGraphContainer',
       link: function($scope, $element, $attrs, ctrl) {
         var g = null,
+            visible = ctrl.visible,
             buildOptions = function(range) {
               var opts = angular.extend(
                 {}, ctrl.graphOptions, range,
@@ -121,15 +132,23 @@ angular.module('npact')
               opts.xaxis = GraphingCalculator.xaxis(opts);
               return opts;
             },
-            redraw = function() {
-              if(!$scope.spec) { return; }
-              if(g !== null) {g.stage.destroy();}
+            draw = function() {
+              if(g || !$scope.spec || !visible($element[0])) return;
+              var graphUpdateStart = new Date();
               g = new Grapher(buildOptions($scope.spec));
-              g.redraw().then($scope.$emit(Evt.GRAPH_REDRAW_COMPLETE));
+              g.redraw().then(function() {
+                $log.log('Draw of starBase:',
+                         $scope.spec.startBase, 'took',
+                         new Date() - graphUpdateStart, 'ms');
+              });
+            },
+            redraw = function() {
+              if(g !== null) {g.stage.destroy(); g = null;}
+              draw();
             };
-
         $scope.$on(Evt.REDRAW, redraw);
-        redraw();
+        //Just call draw every time
+        $scope.$watch(draw);
       }
     };
   })

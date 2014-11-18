@@ -1,9 +1,8 @@
 <div>
-  <div>
-    <div ng-repeat="spec in graphSpecs"
-         id="graph_{{$index}}"
-         npact-graph="spec"
-         style="height:{{graphHeight}}px; border-bottom: 1px solid #AAF;"
-         ></div>
-  </div>
+  <div ng-repeat="spec in graphSpecs"
+       id="graph_{{$index}}"
+       class="graph"
+       npact-graph="spec"
+       style="height:{{graphHeight}}px; border-bottom: 1px solid #AAF;"
+       ></div>
 </div>
