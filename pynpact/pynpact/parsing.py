@@ -77,7 +77,7 @@ def detect_format(config):
             config['length'] = len(seq)
             ddna = derive_filename(config, filename.getmtime(), 'ddna')
             if not ddna.exists():
-                with mkstemp_rename(ddna, ext='ddna') as f:
+                with mkstemp_rename(ddna) as f:
                     f.write(seq.upper())
             config['ddna'] = ddna
         except:
