@@ -35,7 +35,6 @@ def plan(config, executor):
     h = Hasher()
     h.hashdict(rconfig)
     h.hashfiletime(BIN)
-    h.hashfiletime(config['ddna'])
     hash = h.hexdigest()
     target = parsing.derive_filename(config, hash, 'nprofile')
     config[OUTPUTKEY] = target

@@ -6,6 +6,7 @@ from Bio import SeqIO
 from path import path
 
 from pynpact import genbank
+from pynpact.util import mkstemp_rename
 
 log = logging.getLogger(__name__)
 
@@ -73,11 +74,11 @@ def detect_format(config):
                     seq = f.read()
                 seq = re.sub('\s', '', seq)
                 config['format'] = 'raw'
-            seq = seq.upper()
             config['length'] = len(seq)
             ddna = derive_filename(config, filename.getmtime(), 'ddna')
-            with ddna.open('w') as f:
-                f.write(seq)
+            if not ddna.exists():
+                with mkstemp_rename(ddna, ext='ddna') as f:
+                    f.write(seq.upper())
             config['ddna'] = ddna
         except:
             log.exception("Error detecting format")
