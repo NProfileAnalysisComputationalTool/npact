@@ -200,9 +200,13 @@ def kickstart(request, path):
     config['reconfigure_url'] = reconfigure_url
     email = request.GET.get('email')
     client.ensure_daemon()
-    config = main.process('allplots', config, executor=client.get_server())
+    executor = client.get_server()
+    config = main.process('nprofile', config, executor=executor)
+    config = main.process('extract', config, executor=executor)
+    config = main.process('acgt_gamma', config, executor=executor)
 
     if email:
+        config = main.process('allplots', config, executor=executor)
         build_email(request, path, config)
 
     return HttpResponse(
@@ -238,7 +242,8 @@ def sanitize_config_for_client(config):
             v = v[len(settings.MEDIA_ROOT):]
             v = v.lstrip("/")
         output[k] = v
-    del output['psnames']
+    if 'psnames' in output:
+        del output['psnames']
     return output
 
 
