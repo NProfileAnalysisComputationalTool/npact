@@ -55,14 +55,18 @@ angular.module('npact')
     this.partition = function(opts) {
       var p = opts.summary || self.summary(),
           offset = opts.offset || 0,
-          startBase = p.startBase + offset,
-          g = [];
-
-      for(var i = startBase; i < p.endBase; i+= opts.basesPerGraph){
-        g.push({
-          startBase: Math.max(i, 0),
-          endBase: i + opts.basesPerGraph
-        });
+          startBase = Math.max(p.startBase + offset, 0),
+          endBase = p.endBase,
+          bpg = opts.basesPerGraph,
+          g = new Array(Math.ceil((endBase - startBase) / bpg)),
+          idx = 0;
+      while(startBase < endBase) {
+        g[idx] = {
+          startBase: startBase,
+          endBase: startBase + bpg - 1
+        };
+        idx++;
+        startBase = startBase + bpg;
       }
       return g;
     };

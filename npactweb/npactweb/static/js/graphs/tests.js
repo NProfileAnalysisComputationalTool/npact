@@ -264,13 +264,12 @@ describe('Graphs', function(){
           offset: 0,
           summary: {startBase: 0, endBase: 500}
         });
-
         expect(p).toEqual([
-          {startBase:0, endBase:100},
-          {startBase:100, endBase:200},
-          {startBase:200, endBase:300},
-          {startBase:300, endBase:400},
-          {startBase:400, endBase:500}
+          {startBase:0, endBase:99},
+          {startBase:100, endBase:199},
+          {startBase:200, endBase:299},
+          {startBase:300, endBase:399},
+          {startBase:400, endBase:499}
         ]);
     });
 
@@ -282,11 +281,11 @@ describe('Graphs', function(){
         });
 
         expect(p).toEqual([
-          {startBase:10, endBase:110},
-          {startBase:110, endBase:210},
-          {startBase:210, endBase:310},
-          {startBase:310, endBase:410},
-          {startBase:410, endBase:510}
+          {startBase:10, endBase:109},
+          {startBase:110, endBase:209},
+          {startBase:210, endBase:309},
+          {startBase:310, endBase:409},
+          {startBase:410, endBase:509}
         ]);
       });
     });
