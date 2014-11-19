@@ -1,5 +1,5 @@
 <div>
-  <div ng-repeat="spec in graphSpecs"
+  <div ng-repeat="spec in graphSpecs track by $index"
        id="graph_{{$index}}"
        class="graph"
        npact-graph="spec"

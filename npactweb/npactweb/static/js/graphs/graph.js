@@ -45,8 +45,8 @@ angular.module('npact')
           $scope.$broadcast(Evt.REDRAW);
         },
         rebuild = function() {
-          self.graphOptions = makeGraphOptions();
           $scope.graphSpecs = ProfileReader.partition(GraphConfig);
+          redraw();
         },
         onGraphConfigChanged = function(newValue, oldValue){
           var cmd = newValue.refreshCommand(oldValue);
@@ -70,6 +70,14 @@ angular.module('npact')
             }
             GraphConfig.profileSummary = summary;
           }
+        },
+        onResize = function() {
+          winHeight = $win.height();
+          if($element.width() !== width) {
+            width = $element.width();
+            redraw();
+          }
+          $scope.$apply();
         }
     ;
     self.visible = function(el) {
@@ -79,24 +87,10 @@ angular.module('npact')
       return (rect.top <= 0 && rect.bottom > -slack) ||
         (rect.top >=0 && rect.top < (winHeight + slack));
     };
+
     $scope.graphHeight = npactConstants.graphSpecDefaults.height;
-    $win.on('resize', function() {
-      if($element.width() !== width) {
-        winHeight = $win.height();
-        width = $element.width();
-        redraw();
-      }
-      else if($win.height() !== winHeight) {
-        // if we didnt' redraw completely, the visible height still might
-        // have changed.
-        winHeight = $win.height();
-        $scope.$apply();
-      }
-    });
-    // Window scrolling
-    $win.on('scroll', function() {
-      $scope.$apply();
-    });
+    $win.on('resize', onResize);
+    $win.on('scroll', $scope.$apply.bind($scope));
 
     // listen for graph events
     $scope.$on(Evt.PAN, onPan);
@@ -143,12 +137,16 @@ angular.module('npact')
               });
             },
             redraw = function() {
-              if(g !== null) {g.stage.destroy(); g = null;}
-              draw();
+              if(g !== null) { g.stage.destroy(); g = null; }
+              //Don't need to do anything: `$scope.$watch(draw);`
+              //handles it
             };
         $scope.$on(Evt.REDRAW, redraw);
         //Just call draw every time
         $scope.$watch(draw);
+        $scope.$on('$destroy', function() {
+          if(g) { g.stage.destroy(); }
+        });
       }
     };
   })
