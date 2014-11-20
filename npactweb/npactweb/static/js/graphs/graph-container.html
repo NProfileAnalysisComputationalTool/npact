@@ -2,7 +2,8 @@
   <div ng-repeat="spec in graphSpecs track by $index"
        id="graph_{{$index}}"
        class="graph"
-       npact-graph="spec"
+       npact-graph
+       idx="{{$index}}"
        style="height:{{graphHeight}}px; border-bottom: 1px solid #AAF;"
        ></div>
 </div>

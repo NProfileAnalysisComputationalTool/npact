@@ -1,28 +1,21 @@
 angular.module('npact')
 
   .controller('npactGraphContainerCtrl', function($scope, $element, $window, npactConstants, Utils, GraphConfig, ProfileReader, Evt, $log, GraphingCalculator) {
-    var self = this,
-        width = $element.width(),
-        $win = angular.element($window),
-        winHeight = $win.height(),
+
+    var baseOpts = angular.extend({ width: $element.width() },
+                                  npactConstants.graphSpecDefaults),
         getGraphConfig = function() { return GraphConfig; },
         getProfileSummary = function() {
           try {return ProfileReader.summary();} catch(e) { }
           return null;
         },
-        makeGraphOptions = function() {
-          var opts = angular.extend(
-            {},
-            npactConstants.graphSpecDefaults,
-            {
-              headerSpec: GraphConfig.headerSpec(),
-              margin: Utils.orderOfMagnitude(GraphConfig.basesPerGraph, -1),
-              width: width,
-              colors: GraphConfig.colorBlindFriendly ?
-                npactConstants.colorBlindLineColors : npactConstants.lineColors
-            });
-          opts.headerY = opts.headerSpec.headerY;
-          return opts;
+        updateBaseOptions = function() {
+          baseOpts.headerSpec = GraphConfig.headerSpec();
+          baseOpts.margin = Utils.orderOfMagnitude(GraphConfig.basesPerGraph, -1);
+          baseOpts.colors = GraphConfig.colorBlindFriendly ?
+            npactConstants.colorBlindLineColors : npactConstants.lineColors;
+          baseOpts.headerY = baseOpts.headerSpec.headerY;
+          return baseOpts;
         },
         onPan = function(evt, opts) {
           var offset = Math.floor(opts.newStartBase - opts.oldStartBase);
@@ -41,11 +34,12 @@ angular.module('npact')
           $scope.$apply();
         },
         redraw = function() {
-          self.graphOptions = makeGraphOptions();
+          updateBaseOptions();
           $scope.$broadcast(Evt.REDRAW);
         },
         rebuild = function() {
           $scope.graphSpecs = ProfileReader.partition(GraphConfig);
+          updateVisibility();
           redraw();
         },
         onGraphConfigChanged = function(newValue, oldValue){
@@ -61,7 +55,7 @@ angular.module('npact')
           }
         },
         onProfileSummaryChanged = function(summary, oldSummary) {
-          if(summary){
+          if(summary) {
             // find a sensible zoom level
             var basesPerGraph = summary.length / 5;
             // if we're really short, reset out bases per graph
@@ -70,27 +64,17 @@ angular.module('npact')
             }
             GraphConfig.profileSummary = summary;
           }
-        },
-        onResize = function() {
-          winHeight = $win.height();
-          if($element.width() !== width) {
-            width = $element.width();
-            redraw();
-          }
-          $scope.$apply();
-        }
-    ;
-    self.visible = function(el) {
-      // The rect.top and rect.bottom are relative to the viewport
-      var slack = 50;
-      var rect = el.getBoundingClientRect();
-      return (rect.top <= 0 && rect.bottom > -slack) ||
-        (rect.top >=0 && rect.top < (winHeight + slack));
-    };
+        };
 
-    $scope.graphHeight = npactConstants.graphSpecDefaults.height;
-    $win.on('resize', onResize);
-    $win.on('scroll', $scope.$apply.bind($scope));
+    this.graphOptions = function(idx, element) {
+      range = $scope.graphSpecs[idx];
+      var opts = angular.extend(
+        {$scope: $scope, element: element},
+        baseOpts, range);
+      opts.m = GraphingCalculator.chart(opts);
+      opts.xaxis = GraphingCalculator.xaxis(opts);
+      return opts;
+    };
 
     // listen for graph events
     $scope.$on(Evt.PAN, onPan);
@@ -99,6 +83,40 @@ angular.module('npact')
     // watch the environment for changes we care about
     $scope.$watch(getGraphConfig, onGraphConfigChanged, true); // deep-equality
     $scope.$watchCollection(getProfileSummary, onProfileSummaryChanged);
+
+
+    /***  Scrolling and GRaph Visibility management ***/
+    var $win = angular.element($window),
+        winHeight = $win.height(),
+        graphHeight = npactConstants.graphSpecDefaults.height,
+        topOffset = $element.offset().top,
+        topIdx = 0, bottomIdx = 0,
+        slack = 50, // how many pixels outside of viewport to render
+        updateVisibility = function() {
+              recttop = topOffset - $window.scrollY,
+          topIdx = Math.floor(-(recttop + slack) / graphHeight);
+          bottomIdx = topIdx + Math.ceil((winHeight + slack) / graphHeight);
+        },
+        onScroll = function() {
+          updateVisibility();
+          $scope.$apply();
+        },
+        onResize = function() {
+          winHeight = $win.height();
+          topOffset = $element.offset().top;
+          updateVisibility();
+          if($element.width() !== baseOpts.width) {
+            baseOpts.width = $element.width();
+            redraw();
+          }
+          $scope.$apply();
+        };
+    this.visible = function(idx) {
+      return idx >= topIdx && idx <= bottomIdx;
+    };
+    $scope.graphHeight = graphHeight;
+    $win.on('resize', onResize);
+    $win.on('scroll', onScroll);
   })
   .directive('npactGraphContainer', function(STATIC_BASE_URL) {
     return {
@@ -112,24 +130,16 @@ angular.module('npact')
   .directive('npactGraph', function npactGraph(Grapher, Evt, GraphingCalculator, $log) {
     return {
       restrict: 'A',
-      scope: { spec: '=npactGraph' },
       require: '^npactGraphContainer',
       link: function($scope, $element, $attrs, ctrl) {
         var g = null,
             visible = ctrl.visible,
-            buildOptions = function(range) {
-              var opts = angular.extend(
-                {}, ctrl.graphOptions, range,
-                {$scope: $scope, element: $element[0]});
-
-              opts.m = GraphingCalculator.chart(opts);
-              opts.xaxis = GraphingCalculator.xaxis(opts);
-              return opts;
-            },
+            idx = $attrs.idx,
+            el = $element[0];
             draw = function() {
-              if(g || !$scope.spec || !visible($element[0])) return;
+              if(g || !visible(idx)) return;
               var graphUpdateStart = new Date();
-              g = new Grapher(buildOptions($scope.spec));
+              g = new Grapher(ctrl.graphOptions(idx, el));
               g.redraw().then(function() {
                 $log.log('Draw of starBase:',
                          $scope.spec.startBase, 'took',
