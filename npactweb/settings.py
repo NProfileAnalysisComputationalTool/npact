@@ -66,7 +66,7 @@ taskqueue.BASE_DIR = TQ_DIR
 MEDIA_RETAIN_FOR=7
 ATIME_DEFAULT = 30
 
-STATIC_URL = '/static/'
+STATIC_URL = '/npact/static/'
 
 ######## django-mediagenerator settings
 
