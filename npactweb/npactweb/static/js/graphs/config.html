@@ -9,9 +9,10 @@
   <form name="configForm">
     <label>Zoom:
       <input type="number" name="basesPerGraph"
+             style="width:6em;"
              min="100" required
              ng-model-options="{debounce: 1000}"
-	     ng-model="gc.basesPerGraph"/> bases per graph
+	     ng-model="gc.basesPerGraph"/> bases/graph
     </label>
     <div class="error" ng-messages="configForm.basesPerGraph.$error">
       <div ng-message="min">Cannot zoom in that far.</div>
@@ -19,12 +20,11 @@
     </div>
   </form>
   <br/>
-  <label>Color-blind friendly:
-    <input type="checkbox" ng-model="gc.colorBlindFriendly" /></label>
+  <label><input type="checkbox" ng-model="gc.colorBlindFriendly" /> Color-blind friendly</label>
   <br/>
 
   <h3>Tracks</h3>
   <div ng-repeat="t in gc.tracks">
-    <label><input ng-model="t.active" type="checkbox" />{{t.text}}</label>
+    <label><input ng-model="t.active" type="checkbox" /> {{t.text}}</label>
   </div>
 </div>
