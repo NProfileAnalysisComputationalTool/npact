@@ -9,7 +9,7 @@ angular.module('npact')
       axisTitleFontsize: 20,
       borderColor: '#444',
       rightPadding: 25,
-      height: 200,
+      height: 160,
       profileTicks: 5,
 
 
