@@ -262,7 +262,7 @@ describe('Graphs', function(){
         var p = P.partition({
           basesPerGraph: 100,
           offset: 0,
-          summary: {startBase: 0, endBase: 500}
+          profileSummary: {startBase: 0, endBase: 500}
         });
         expect(p).toEqual([
           {startBase:0, endBase:99},
@@ -277,7 +277,7 @@ describe('Graphs', function(){
         var p = P.partition({
           basesPerGraph: 100,
           offset: 10,
-          summary: {startBase: 0, endBase: 500}
+          profileSummary: {startBase: 0, endBase: 500}
         });
 
         expect(p).toEqual([

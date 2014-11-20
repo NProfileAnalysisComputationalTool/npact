@@ -78,7 +78,7 @@ angular.module('npact')
     $scope.$watchCollection(getProfileSummary, onProfileSummaryChanged);
     $scope.$watch(function() { return GraphConfig.basesPerGraph; }, rebuild);
     $scope.$watch(function() { return GraphConfig.offset; }, rebuild);
-    $scope.$watch(function() { return GraphConfig.headerSpec(); }, redraw, true);
+    $scope.$watch(GraphConfig.headerSpec, redraw, true);
     $scope.$watch(function() { return GraphConfig.colorBlindFriendly; }, redraw);
 
 

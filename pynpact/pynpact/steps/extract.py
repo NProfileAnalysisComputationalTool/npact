@@ -33,8 +33,6 @@ def plan(config, executor):
         target_file = parsing.derive_filename(config, hash, 'genes')
         config[OUTPUTKEY] = target_file
         return enqueue(_extract, executor, rconfig, target_file)
-    else:
-        raise InvalidGBKException()
 
 
 def get_hash(config):
