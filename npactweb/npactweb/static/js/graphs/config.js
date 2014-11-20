@@ -54,26 +54,6 @@ angular.module('npact')
       };
 
     };
-
-
-    /**
-     * analyze a previous version of the config, and return what command
-     * to run in order to refresh the page
-     */
-    this.refreshCommand = function(oldGraphConfig) {
-      var noBasesPerGraph = _.isUndefined(self.basesPerGraph),
-          sameBasesPerGraph = self.basesPerGraph === oldGraphConfig.basesPerGraph,
-          sameOffset = self.offset === oldGraphConfig.offset,
-          hasProfile = self.profileSummary !== null,
-          hadProfile = oldGraphConfig.profileSummary !== null,
-          newProfile = hasProfile && !hadProfile;
-
-      // happens with invalid input in config box
-      if(noBasesPerGraph) { return Evt.NOOP;}
-      if(!sameBasesPerGraph || newProfile || !sameOffset){ return Evt.REBUILD; }
-      if(hasProfile){ return Evt.REDRAW; }
-      return Evt.NOOP;
-    };
   })
   .directive('npactGraphConfig', function npactGraphConfig(STATIC_BASE_URL, GraphConfig) {
     return {

@@ -429,43 +429,5 @@ describe('Graphs', function(){
       });
     });
 
-    describe('.refreshCommand', function() {
-      it('nothing if we have no data', function() {
-        expect(G.refreshCommand(G)).toBe(Evt.NOOP);
-        G.loadTrack('test', 'extracts');
-        expect(G.refreshCommand(G)).toBe(Evt.NOOP);
-      });
-
-      it('nothing if we have no basesPerGraph', function() {
-        G.loadTrack('test', 'extracts');
-        G.profileSummary = {};
-        G.basesPerGraph = undefined;
-        expect(G.refreshCommand(G)).toBe(Evt.NOOP);
-      });
-
-      it('rebuild if we get data', function() {
-        G.profileSummary = {};
-        expect(G.refreshCommand({profileSummary:null, basesPerGraph: G.basesPerGraph})).toBe(Evt.REBUILD);
-      });
-
-      it('rebuild if we pan', function() {
-        G.profileSummary = {};
-        expect(G.refreshCommand({profileSummary:{}, basesPerGraph: G.basesPerGraph, offset:G.offset + 1})).toBe(Evt.REBUILD);
-      });
-
-      it('rebuild if we change zoom', function() {
-        G.profileSummary = {};
-        expect(G.refreshCommand({
-          profileSummary: G.profileSummary,
-          basesPerGraph: G.basesPerGraph + 1
-        }))
-          .toBe(Evt.REBUILD);
-      });
-
-      it('redraws', function() {
-        G.profileSummary = {};
-        expect(G.refreshCommand(G)).toBe(Evt.REDRAW);
-      });
-    });
   });
 });

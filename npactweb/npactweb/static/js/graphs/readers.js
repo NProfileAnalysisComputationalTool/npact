@@ -53,7 +53,7 @@ angular.module('npact')
      * Partition the profile for graphing
      */
     this.partition = function(opts) {
-      var p = opts.summary || self.summary(),
+      var p = opts.profileSummary || self.summary(),
           offset = opts.offset || 0,
           startBase = Math.max(p.startBase + offset, 0),
           endBase = p.endBase,

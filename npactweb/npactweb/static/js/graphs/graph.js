@@ -4,7 +4,6 @@ angular.module('npact')
 
     var baseOpts = angular.extend({ width: $element.width() },
                                   npactConstants.graphSpecDefaults),
-        getGraphConfig = function() { return GraphConfig; },
         getProfileSummary = function() {
           try {return ProfileReader.summary();} catch(e) { }
           return null;
@@ -18,6 +17,7 @@ angular.module('npact')
           return baseOpts;
         },
         onPan = function(evt, opts) {
+          $log.log('Pan event:', opts);
           var offset = Math.floor(opts.newStartBase - opts.oldStartBase);
           GraphConfig.offset += offset;
           // TODO: Event originated from outside ng, but why doesn't
@@ -25,6 +25,7 @@ angular.module('npact')
           $scope.$apply();
         },
         onZoom = function(evt, opts) {
+          $log.log('Zoom event:', opts);
           var zoomOpts = angular.extend({}, opts, GraphConfig),
               res = GraphingCalculator.zoom(zoomOpts);
           GraphConfig.offset = res.offset;
@@ -38,24 +39,15 @@ angular.module('npact')
           $scope.$broadcast(Evt.REDRAW);
         },
         rebuild = function() {
+          if(!GraphConfig.profileSummary) return;
           $scope.graphSpecs = ProfileReader.partition(GraphConfig);
+          $log.log('Partitioned into', $scope.graphSpecs.length, 'rows.');
           updateVisibility();
           redraw();
         },
-        onGraphConfigChanged = function(newValue, oldValue){
-          var cmd = newValue.refreshCommand(oldValue);
-          $log.log('graph config changed:', cmd);
-          switch(cmd) {
-          case Evt.REBUILD:
-            rebuild();
-            break;
-          case Evt.REDRAW:
-            redraw();
-            break;
-          }
-        },
         onProfileSummaryChanged = function(summary, oldSummary) {
           if(summary) {
+            $log.log('Got profile summary', summary);
             // find a sensible zoom level
             var basesPerGraph = summary.length / 5;
             // if we're really short, reset out bases per graph
@@ -63,8 +55,10 @@ angular.module('npact')
               GraphConfig.basesPerGraph = Utils.orderOfMagnitude(basesPerGraph);
             }
             GraphConfig.profileSummary = summary;
+            rebuild();
           }
         };
+
 
     this.graphOptions = function(idx, element) {
       range = $scope.graphSpecs[idx];
@@ -81,8 +75,11 @@ angular.module('npact')
     $scope.$on(Evt.ZOOM, onZoom);
 
     // watch the environment for changes we care about
-    $scope.$watch(getGraphConfig, onGraphConfigChanged, true); // deep-equality
     $scope.$watchCollection(getProfileSummary, onProfileSummaryChanged);
+    $scope.$watch(function() { return GraphConfig.basesPerGraph; }, rebuild);
+    $scope.$watch(function() { return GraphConfig.offset; }, rebuild);
+    $scope.$watch(function() { return GraphConfig.headerSpec(); }, redraw, true);
+    $scope.$watch(function() { return GraphConfig.colorBlindFriendly; }, redraw);
 
 
     /***  Scrolling and GRaph Visibility management ***/
@@ -111,12 +108,16 @@ angular.module('npact')
           }
           $scope.$apply();
         };
+    $scope.graphHeight = graphHeight;
     this.visible = function(idx) {
       return idx >= topIdx && idx <= bottomIdx;
     };
-    $scope.graphHeight = graphHeight;
     $win.on('resize', onResize);
     $win.on('scroll', onScroll);
+    $scope.$on('$destroy', function() {
+      $win.off('resize', onResize);
+      $win.off('scroll', onScroll);
+    });
   })
   .directive('npactGraphContainer', function(STATIC_BASE_URL) {
     return {
