@@ -101,7 +101,6 @@ void calculateProfile(const char* origin,
 int main(int argc, char *argv[]) {
    int start=0,end=0,window=201,step=51,period=3;
    int i;
-   char* mapped_file;
    char* origin;
    size_t length;
    int argi = 1;
