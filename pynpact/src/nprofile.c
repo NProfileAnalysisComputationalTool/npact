@@ -123,7 +123,7 @@ int main(int argc, char *argv[]) {
       argi++;
    }
    filename = argv[argi++];
-   if ( i = mapfile(filename, &origin, &length) )
+   if( (i = mapfile(filename, &origin, &length)) )
       exit(i);
 
 
