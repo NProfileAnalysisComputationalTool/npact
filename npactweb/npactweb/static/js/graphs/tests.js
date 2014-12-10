@@ -234,61 +234,9 @@ describe('Graphs', function(){
 
   describe('ProfileReader', function(){
     var P;
-
     beforeEach(inject(function(ProfileReader){
       P = ProfileReader;
     }));
-
-    describe('.summary', function() {
-      var data = [{coordinate: 150}, {coordinate: 200},
-                  {coordinate: 300}, {coordinate: 350}],
-          summary = {startBase: 150, endBase: 350, length: 200};
-
-      it('handles an arg', function(){
-        expect(P.summary(data)).toEqual(summary);
-      });
-
-      it('reads built-in by default ', function(){
-        P.load(data);
-        expect(P.summary()).toEqual(summary);
-      });
-      it('throws if no profile found', function(){
-        expect(P.summary).toThrow(new Err.ProfileNotFound());
-      });
-    });
-
-    describe('.partition', function() {
-      it('partitions', function(){
-        var p = P.partition({
-          basesPerGraph: 100,
-          offset: 0,
-          profileSummary: {startBase: 0, endBase: 500}
-        });
-        expect(p).toEqual([
-          {startBase:0, endBase:99},
-          {startBase:100, endBase:199},
-          {startBase:200, endBase:299},
-          {startBase:300, endBase:399},
-          {startBase:400, endBase:499}
-        ]);
-    });
-
-      it('handles a positive offset', function(){
-        var p = P.partition({
-          basesPerGraph: 100,
-          offset: 10,
-          profileSummary: {startBase: 0, endBase: 500}
-        });
-
-        expect(p).toEqual([
-          {startBase:10, endBase:109},
-          {startBase:110, endBase:209},
-          {startBase:210, endBase:309},
-          {startBase:310, endBase:409},
-          {startBase:410, endBase:509}
-        ]);
-      });
-    });
 
     describe('.slice',function() {
       it('slices', function() {
@@ -428,6 +376,33 @@ describe('Graphs', function(){
           ]});
       });
     });
+    describe('.partition', function() {
+      beforeEach(function() {
+        angular.extend(G, {startBase: 0, endBase: 500, basesPerGraph: 100, offset: 0});
+      });
+      it('partitions', function(){
+        var p = G.partition();
+        expect(p).toEqual([
+          {startBase:0, endBase:99},
+          {startBase:100, endBase:199},
+          {startBase:200, endBase:299},
+          {startBase:300, endBase:399},
+          {startBase:400, endBase:499}
+        ]);
+      });
 
+      it('handles a positive offset', function(){
+        G.offset = 10;
+        var p = G.partition();
+
+        expect(p).toEqual([
+          {startBase:10, endBase:109},
+          {startBase:110, endBase:209},
+          {startBase:210, endBase:309},
+          {startBase:310, endBase:409},
+          {startBase:410, endBase:509}
+        ]);
+      });
+    });
   });
 });

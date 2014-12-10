@@ -9,7 +9,7 @@ angular.module('npact')
     };
   })
 
-  .controller('npactGraphPageCtrl', function($scope, Fetcher, $q, $log, StatusPoller, FETCH_URL, GraphConfig, Pynpact, KickstartManager, FileManager) {
+  .controller('npactGraphPageCtrl', function($scope, Fetcher, $q, $log, StatusPoller, FETCH_URL, GraphConfig, Pynpact, FileManager, kickstarter) {
     'use strict';
 
     $scope.miscFiles = [];
@@ -17,7 +17,7 @@ angular.module('npact')
     $scope.ready = false;
     $scope.FETCH_URL = FETCH_URL;
 
-    KickstartManager.start().then(function(config) {
+    kickstarter().then(function(config) {
       $scope.status = 'Running';
       // got config, request the first round of results
       $scope.title = config[Pynpact.TITLE];
@@ -32,15 +32,15 @@ angular.module('npact')
       $scope.miscFiles = val;
     }, true);
   })
-
-  .service('KickstartManager', function(KICKSTART_BASE_URL, ProfileReader, TrackReader, $window, $http, $log, NProfiler, PredictionManager, ExtractManager, FileManager) {
-    this.start = function() {
+  .factory('kickstarter', function($q, Err, KICKSTART_BASE_URL, ProfileReader, TrackReader, $window, $http, $log, NProfiler, PredictionManager, ExtractManager, FileManager, GraphConfig) {
+    return function() {
       var url = KICKSTART_BASE_URL + $window.location.search;
       var basePromise = $http.get(url)
-        .then(function(res) {
-          $log.log('Kickstart successful:', res.data);
-          return res.data;
-        });
+            .then(function(res) {
+              $log.log('Kickstart successful:', res.data);
+              angular.extend(GraphConfig, res.data);
+              return res.data;
+            });
       basePromise.then(NProfiler.start);
       basePromise.then(PredictionManager.start);
       basePromise.then(ExtractManager.start);
@@ -48,6 +48,7 @@ angular.module('npact')
       return basePromise;
     };
   })
+
   .service('ExtractManager', function(Fetcher, Pynpact, TrackReader, GraphConfig) {
     this.start = function(config) {
       if(config[Pynpact.HAS_CDS]) {

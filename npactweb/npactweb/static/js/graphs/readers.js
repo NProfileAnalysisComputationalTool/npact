@@ -8,7 +8,6 @@ angular.module('npact')
      */
     this.load = function(profile) {
       self.profileData = profile;
-      return $q.when(self.summary(profile));
     };
 
     /**
@@ -30,45 +29,6 @@ angular.module('npact')
       return self.profileData
         .slice(Math.max(startIdx,0), Math.min(endIdx, minEndIdx));
 
-    };
-
-    /**
-     * Calculate summary stats about a profile
-     */
-    this.summary = function(profile) {
-      var p = profile || self.profileData;
-      if (!p) { throw new Err.ProfileNotFound(); }
-
-      var start = p[0],
-          end = _.last(p);
-
-      return {
-        startBase: start.coordinate,
-        endBase: end.coordinate,
-        length: end.coordinate - start.coordinate
-      };
-    };
-
-    /**
-     * Partition the profile for graphing
-     */
-    this.partition = function(opts) {
-      var p = opts.profileSummary || self.summary(),
-          offset = opts.offset || 0,
-          startBase = Math.max(p.startBase + offset, 0),
-          endBase = p.endBase,
-          bpg = opts.basesPerGraph,
-          g = new Array(Math.ceil((endBase - startBase) / bpg)),
-          idx = 0;
-      while(startBase < endBase) {
-        g[idx] = {
-          startBase: startBase,
-          endBase: startBase + bpg - 1
-        };
-        idx++;
-        startBase = startBase + bpg;
-      }
-      return g;
     };
   })
   .service('TrackReaderRTreeIndex', function(ExtractParser, $log, Utils, Err, $q, $timeout){

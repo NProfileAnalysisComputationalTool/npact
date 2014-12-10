@@ -4,7 +4,6 @@ angular.module('npact')
     self.tracks = [];
     self.colorBlindFriendly = false;
     self.basesPerGraph = 10000;
-    self.profileSummary = null;
     self.offset = 0; // how much the graph is panned left/right
 
 
@@ -53,7 +52,24 @@ angular.module('npact')
         headers: headers,
         headerY: offset
       };
-
+    };
+    this.partition = function() {
+      var idx = 0,
+          offset = self.offset || 0,
+          startBase = Math.max(self.startBase + offset, 0),
+          endBase = self.endBase,
+          bpg = self.basesPerGraph;
+      if(!(startBase >= 0 && endBase >= 0 && bpg >=0)) { return []; }
+      var g = new Array(Math.ceil((endBase - startBase) / bpg));
+      while(startBase < endBase) {
+        g[idx] = {
+          startBase: startBase,
+          endBase: startBase + bpg - 1
+        };
+        idx++;
+        startBase = startBase + bpg;
+      }
+      return g;
     };
   })
   .directive('npactGraphConfig', function npactGraphConfig(STATIC_BASE_URL, GraphConfig) {

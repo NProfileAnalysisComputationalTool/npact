@@ -4,10 +4,6 @@ angular.module('npact')
 
     var baseOpts = angular.extend({ width: $element.width() },
                                   npactConstants.graphSpecDefaults),
-        getProfileSummary = function() {
-          try {return ProfileReader.summary();} catch(e) { }
-          return null;
-        },
         updateBaseOptions = function() {
           baseOpts.headerSpec = GraphConfig.headerSpec();
           baseOpts.margin = Utils.orderOfMagnitude(GraphConfig.basesPerGraph, -1);
@@ -39,8 +35,7 @@ angular.module('npact')
           $scope.$broadcast(Evt.REDRAW);
         },
         rebuild = function() {
-          if(!GraphConfig.profileSummary) return;
-          $scope.graphSpecs = ProfileReader.partition(GraphConfig);
+          $scope.graphSpecs = GraphConfig.partition();
           $log.log('Partitioned into', $scope.graphSpecs.length, 'rows.');
           updateVisibility();
           redraw();
@@ -54,7 +49,6 @@ angular.module('npact')
             if (basesPerGraph < GraphConfig.basesPerGraph) {
               GraphConfig.basesPerGraph = Utils.orderOfMagnitude(basesPerGraph);
             }
-            GraphConfig.profileSummary = summary;
             rebuild();
           }
         };
@@ -75,9 +69,11 @@ angular.module('npact')
     $scope.$on(Evt.ZOOM, onZoom);
 
     // watch the environment for changes we care about
-    $scope.$watchCollection(getProfileSummary, onProfileSummaryChanged);
-    $scope.$watch(function() { return GraphConfig.basesPerGraph; }, rebuild);
-    $scope.$watch(function() { return GraphConfig.offset; }, rebuild);
+    $scope.$watchCollection(function() {
+      return [ GraphConfig.length, GraphConfig.basesPerGraph,
+               GraphConfig.offset, GraphConfig.startBase,
+               GraphConfig.endBase ];
+    }, rebuild);
     $scope.$watch(GraphConfig.headerSpec, redraw, true);
     $scope.$watch(function() { return GraphConfig.colorBlindFriendly; }, redraw);
 
