@@ -145,7 +145,10 @@ angular.module('npact')
               });
             },
             redraw = function() {
-              if(g !== null) { g.stage.destroy(); g = null; }
+              if(g !== null) {
+                g.stage.destroy();
+                g = null;
+              }
               //Don't need to do anything: `$scope.$watch(draw);`
               //handles it
             };
