@@ -16,6 +16,10 @@
     "karma-spec-reporter": "0.0.16",
     "load-grunt-tasks": "~2.0.0"
   },
+  "repository": {
+    "type": "git",
+    "url": "gitolite@git.acceleration.net:npact.git"
+  },
   "scripts": {
     "test": "grunt test"
   },
