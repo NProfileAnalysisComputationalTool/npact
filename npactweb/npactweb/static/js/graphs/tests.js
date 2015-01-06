@@ -4,41 +4,39 @@ describe('Graphs', function(){
   beforeEach(module('npact'));
   beforeEach(module('templates-main'));
 
-  var ng = {}, $scope, $compile, $q, $httpBackend, Err, Evt, Pynpact;
-  beforeEach(inject(function (_$rootScope_, _$compile_, _$q_, _$httpBackend_, _$timeout_, _Err_, _Evt_, _Pynpact_) {
+  var ng = {}, $scope, $compile, $q, $httpBackend, Err;
+  beforeEach(inject(function (_$rootScope_, _$compile_, _$q_, _$httpBackend_, _$timeout_, _Err_) {
     $scope = _$rootScope_;
     $compile = _$compile_;
     $q = _$q_;
     $httpBackend = _$httpBackend_;
     ng.$timeout = _$timeout_;
     Err = _Err_;
-    Evt = _Evt_;
-    Pynpact = _Pynpact_;
   }));
 
-
-  // Setup the custom matcher
-  beforeEach(function() {
-    jasmine.addMatchers({
-      toHaveUniqueValues: function(util, customEqualityTesters) {
-        return {
-          compare: function(actual, expected) {
-            var vals = _.values(actual);
-            return {
-              pass: vals.length === _.uniq(vals).length,
-              message: "Expected the values of " + actual + " to be unique."
-            };
-          }
-        };
-      }
+  describe("Enums", function() {
+    // Setup the custom matcher
+    beforeEach(function() {
+      jasmine.addMatchers({
+        toHaveUniqueValues: function(util, customEqualityTesters) {
+          return {
+            compare: function(actual, expected) {
+              var vals = _.values(actual);
+              return {
+                pass: vals.length === _.uniq(vals).length,
+                message: "Expected the values of " + actual + " to be unique."
+              };
+            }
+          };
+        }
+      });
     });
-  });
-
-  it('Evt has unique values', function() {
-    expect(Evt).toHaveUniqueValues();
-  });
-  it('Pynpact has unique values', function() {
-    expect(Pynpact).toHaveUniqueValues();
+    it('Evt has unique values', inject(function(Evt) {
+      expect(Evt).toHaveUniqueValues();
+    }));
+    it('Pynpact has unique values', inject(function(Pynpact) {
+      expect(Pynpact).toHaveUniqueValues();
+    }));
   });
 
 
