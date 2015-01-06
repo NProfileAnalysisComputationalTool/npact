@@ -256,18 +256,10 @@ angular.module('npact')
             scaleX: xaxis.scaleX,
             offsetX: this.startBase
           }),
-          // TODO: move the rgb list creation into `ProfileReader`, cache it there
-          dataToDraw = _(ProfileReader.slice({
+          dataToDraw = NProfiler.slice({
             startBase: this.startBase - this.margin,
             endBase: this.endBase + this.margin
-          }))
-            .reduce(function(acc, g){
-              lines.map(function(x){
-                acc[x].push(g.coordinate);
-                acc[x].push(100 - g[x]);
-              });
-              return acc;
-            }, {r:[], g:[], b:[]}),
+          }),
           profiles = lines.map(function(x){
             return new K.Line({
               points:dataToDraw[x],

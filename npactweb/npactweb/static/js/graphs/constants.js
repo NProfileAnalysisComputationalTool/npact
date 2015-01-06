@@ -70,7 +70,8 @@ angular.module('npact')
     TITLE: 'first_page_title',
     HAS_CDS: 'isgbk',
     EMAIL: 'email',
-    CONFIGURE_URL: 'configure_url'
+    CONFIGURE_URL: 'configure_url',
+    DDNA: 'ddna'
   })
 
 ;
