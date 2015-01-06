@@ -3,6 +3,7 @@ describe('Graphs', function(){
 
   beforeEach(module('npact'));
   beforeEach(module('templates-main'));
+
   var ng = {}, $scope, $compile, $q, $httpBackend, Err, Evt, Pynpact;
   beforeEach(inject(function (_$rootScope_, _$compile_, _$q_, _$httpBackend_, _$timeout_, _Err_, _Evt_, _Pynpact_) {
     $scope = _$rootScope_;
@@ -15,11 +16,20 @@ describe('Graphs', function(){
     Pynpact = _Pynpact_;
   }));
 
+
+  // Setup the custom matcher
   beforeEach(function() {
-    this.addMatchers({
-      toHaveUniqueValues: function() {
-        var vals = _.values(this.actual);
-        return vals.length === _.uniq(vals).length;
+    jasmine.addMatchers({
+      toHaveUniqueValues: function(util, customEqualityTesters) {
+        return {
+          compare: function(actual, expected) {
+            var vals = _.values(actual);
+            return {
+              pass: vals.length === _.uniq(vals).length,
+              message: "Expected the values of " + actual + " to be unique."
+            };
+          }
+        };
       }
     });
   });
