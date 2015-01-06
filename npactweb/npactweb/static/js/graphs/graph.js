@@ -1,6 +1,6 @@
 angular.module('npact')
 
-  .controller('npactGraphContainerCtrl', function($scope, $element, $window, npactConstants, Utils, GraphConfig, ProfileReader, Evt, $log, GraphingCalculator) {
+  .controller('npactGraphContainerCtrl', function($scope, $element, $window, npactConstants, Utils, GraphConfig, Evt, $log, GraphingCalculator) {
 
     var baseOpts = angular.extend({ width: $element.width() },
                                   npactConstants.graphSpecDefaults),
