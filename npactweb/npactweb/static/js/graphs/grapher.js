@@ -269,19 +269,19 @@ angular.module('npact')
               strokeWidth:1,
               strokeScaleEnabled: false
             });
-          },
-          sliceOpts = { startBase: this.startBaseM,
-                        endBase: this.endBaseM,
-                        onPoint: buildPoint}
+          }
       ;
 
       NProfiler
-        .slice(sliceOpts)
-        .then(function() {
+        .slice({ startBase: this.startBaseM,
+                 endBase: this.endBaseM,
+                 onPoint: buildPoint})
+        .then(function(opts) {
+          if(!g.getLayer()) return;
           g.add(buildLine(rps, colors.r),
                 buildLine(gps, colors.g),
                 buildLine(bps, colors.b));
-          $log.debug('redrawing nprofile slice', sliceOpts);
+          $log.debug('redrawing nprofile slice', opts);
           g.draw();
         });
 
