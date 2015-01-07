@@ -36,9 +36,10 @@ describe('NProfiler', function(){
   });
 
   describe('.slice', function() {
-    beforeEach(function() {
+    beforeEach(inject(function($q) {
       NP.ddna = sampleDdnaFile;
-    });
+      NP.fetching = $q.when(true);
+    }));
     it('should be defined', function() {
       expect(NP.slice).toBeDefined();
     });
