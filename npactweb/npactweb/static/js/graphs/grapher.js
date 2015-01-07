@@ -252,8 +252,10 @@ angular.module('npact')
           colors = this.colors,
           g = new K.Group({
             x: 0, y:m.graph.y,
-            height: this.headerSpec.profileHeight, width:xaxis.length,
+            height: m.graph.h, width:xaxis.length,
             scaleX: xaxis.scaleX,
+            // convert % to px
+            scaleY: m.graph.h / 100,
             offsetX: this.startBase
           }),
           rps=[],gps=[],bps=[],
@@ -271,7 +273,6 @@ angular.module('npact')
             });
           }
       ;
-
       NProfiler
         .slice({ startBase: this.startBaseM,
                  endBase: this.endBaseM,
