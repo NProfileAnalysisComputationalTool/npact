@@ -1,6 +1,7 @@
 angular.module('npact')
 
   .controller('npactGraphContainerCtrl', function($scope, $element, $window, npactConstants, Utils, GraphConfig, Evt, $log, GraphingCalculator) {
+    'use strict';
 
     var baseOpts = angular.extend({ width: $element.width() },
                                   npactConstants.graphSpecDefaults),
@@ -118,6 +119,7 @@ angular.module('npact')
   })
 
   .directive('npactGraph', function npactGraph(Grapher, Evt, GraphingCalculator, $log) {
+    'use strict';
     return {
       restrict: 'A',
       require: '^npactGraphContainer',

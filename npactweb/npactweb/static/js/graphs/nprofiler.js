@@ -1,5 +1,6 @@
 angular.module('npact')
   .service('NProfiler', function(Fetcher, Pynpact, $log, GraphConfig, $q, $timeout) {
+    'use strict';
     var self = this;
     self.start = function(config) {
       $log.log("Starting nprofiler", self);

@@ -33,6 +33,7 @@ angular.module('npact')
     }, true);
   })
   .factory('kickstarter', function($q, Err, KICKSTART_BASE_URL, TrackReader, $window, $http, $log, NProfiler, PredictionManager, ExtractManager, FileManager, GraphConfig) {
+    'use strict';
     return function() {
       var url = KICKSTART_BASE_URL + $window.location.search;
       var basePromise = $http.get(url)
@@ -50,6 +51,7 @@ angular.module('npact')
   })
 
   .service('ExtractManager', function(Fetcher, Pynpact, TrackReader, GraphConfig, $log) {
+    'use strict';
     this.start = function(config) {
       if(config[Pynpact.CDS]) {
         Fetcher.pollThenFetch(config[Pynpact.CDS])
@@ -62,6 +64,7 @@ angular.module('npact')
     };
   })
   .service('PredictionManager', function(Fetcher, StatusPoller, Pynpact, TrackReader, GraphConfig, $log, ACGT_GAMMA_FILE_LIST_URL) {
+    'use strict';
     var self = this;
     self.files = null;
     self.start = function(config) {
@@ -90,6 +93,7 @@ angular.module('npact')
     };
   })
   .service('FileManager', function(PredictionManager, StatusPoller, Pynpact, $log) {
+    'use strict';
     var pdffile = null;
     this.start = function(config) {
       StatusPoller.start(config[Pynpact.PDF])
