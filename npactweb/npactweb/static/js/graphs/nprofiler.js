@@ -4,7 +4,8 @@ angular.module('npact')
     self.start = function(config) {
       $log.log("Starting nprofiler", self);
       self.config = config;
-      return Fetcher.fetchFile(config[Pynpact.DDNA_FILE]).then(function(ddna) {
+
+      return self.fetching = Fetcher.fetchFile(config[Pynpact.DDNA_FILE]).then(function(ddna) {
         $log.debug('Got back a ddna of length: ', ddna.length);
         self.ddna = ddna;
       });
@@ -19,10 +20,6 @@ angular.module('npact')
     };
     self.slice = function(opts) {
       var d = $q.defer();
-      if(!self.ddna) {
-        d.reject("DDNA not yet loaded");
-        return d.promise;
-      }
       if(opts === undefined ||
          opts.startBase === undefined || opts.endBase === undefined ||
          opts.startBase < 0 || opts.startBase > opts.endBase) {
@@ -40,10 +37,12 @@ angular.module('npact')
                  opts.period + ")");
         return d.promise;
       }
-      // slice asynchronously
-      return $timeout(function() {
-        self._slice(opts);
-        return opts;
+      // slice asynchronously once we have the data
+      return self.fetching.then(function() {
+        return $timeout(function() {
+          self._slice(opts);
+          return opts;
+        });
       });
     };
     self._slice = function(opts) {
