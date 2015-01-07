@@ -249,7 +249,6 @@ angular.module('npact')
     GP.profileGroup = function(){
       var m = this.m, xaxis = this.xaxis,
           colors = this.colors,
-          lines = _.keys(colors),
           g = new K.Group({
             x: 0, y:m.graph.y,
             height: this.headerSpec.profileHeight, width:xaxis.length,
@@ -257,24 +256,33 @@ angular.module('npact')
             offsetX: this.startBase
           }),
           rps=[],gps=[],bps=[],
-          dataToDraw = NProfiler.slice({
-            startBase: this.startBase - this.margin,
-            endBase: this.endBase + this.margin,
-            onPoint: function(coord, rv, gv, bv) {
-              rps.push(coord); rps.push(100-rv);
-              gps.push(coord); gps.push(100-gv);
-              bps.push(coord); bps.push(100-bv);
-            }
-          }),
-          profiles = lines.map(function(x){
+          buildPoint = function(coord, rv, gv, bv) {
+            rps.push(coord); rps.push(100-rv);
+            gps.push(coord); gps.push(100-gv);
+            bps.push(coord); bps.push(100-bv);
+          },
+          buildLine = function(points, color) {
             return new K.Line({
-              points:{r:rps, g:gps, b:bps}[x],
-              stroke:colors[x],
+              points:points,
+              stroke:color,
               strokeWidth:1,
               strokeScaleEnabled: false
-            });})
+            });
+          },
+          sliceOpts = { startBase: this.startBase - this.margin,
+                        endBase: this.endBase + this.margin,
+                        onPoint: buildPoint}
       ;
-      addMany(g, profiles);
+
+      NProfiler
+        .slice(sliceOpts)
+        .then(function() {
+          g.add(buildLine(rps, colors.r),
+                buildLine(gps, colors.g),
+                buildLine(bps, colors.b));
+          $log.debug('redrawing nprofile slice', sliceOpts);
+          g.draw();
+        });
 
       return (this._profileGroup = g);
     };
