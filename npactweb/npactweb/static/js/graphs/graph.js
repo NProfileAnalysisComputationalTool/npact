@@ -67,7 +67,7 @@ angular.module('npact')
     $scope.$watch(function() { return GraphConfig.colorBlindFriendly; }, redraw);
 
 
-    /***  Scrolling and GRaph Visibility management ***/
+    /***  Scrolling and Graph Visibility management ***/
     var $win = angular.element($window),
         winHeight = $win.height(),
         borderHeight = 1,
@@ -128,7 +128,7 @@ angular.module('npact')
               var graphUpdateStart = new Date();
               g = new Grapher(ctrl.graphOptions(idx, el));
               g.redraw().then(function() {
-                $log.log('Draw of starBase:',
+                $log.log('Draw of startBase:',
                          $scope.spec.startBase, 'took',
                          new Date() - graphUpdateStart, 'ms');
               });
