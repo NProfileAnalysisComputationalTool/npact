@@ -20,9 +20,7 @@ angular.module('npact')
       headerLabelFontsize: 11,
       headerArrowHeight: 12,
       headerArrowWidth: 6,
-      headerArrowFontsize: 9,
-      axisTitle: '% GC'
-
+      headerArrowFontsize: 9
     },
     lineColors : {
       r: 'red',

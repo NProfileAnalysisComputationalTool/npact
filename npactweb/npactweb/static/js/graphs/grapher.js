@@ -106,7 +106,7 @@ angular.module('npact')
     GP.leftLayer = function(){
       // TODO: find a way to cache this key, or make headerSpec.headers
       // immutable so it can be the key directly
-      var key = angular.toJson(this.headerSpec.headers),
+      var key = angular.toJson(this.headerSpec.headers) + this.axisTitle,
           opts = {
             width: this.leftPadding,
             x:0, y:0,

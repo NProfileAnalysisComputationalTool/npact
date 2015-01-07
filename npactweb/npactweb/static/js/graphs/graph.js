@@ -10,6 +10,7 @@ angular.module('npact')
           baseOpts.colors = GraphConfig.colorBlindFriendly ?
             npactConstants.colorBlindLineColors : npactConstants.lineColors;
           baseOpts.headerY = baseOpts.headerSpec.headerY;
+          baseOpts.axisTitle = GraphConfig.profileTitle();
           return baseOpts;
         },
         onPan = function(evt, opts) {
@@ -72,7 +73,7 @@ angular.module('npact')
     $scope.$watchCollection(function() {
       return [ GraphConfig.length, GraphConfig.basesPerGraph,
                GraphConfig.offset, GraphConfig.startBase,
-               GraphConfig.endBase ];
+               GraphConfig.endBase, GraphConfig.profileTitle() ];
     }, rebuild);
     $scope.$watch(GraphConfig.headerSpec, redraw, true);
     $scope.$watch(function() { return GraphConfig.colorBlindFriendly; }, redraw);
