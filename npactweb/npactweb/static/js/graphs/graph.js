@@ -122,8 +122,8 @@ angular.module('npact')
         var g = null,
             visible = ctrl.visible,
             idx = $attrs.idx,
-            el = $element[0];
-            draw = function() {
+            el = $element[0],
+            draw = _.debounce(function() {
               if(g || !visible(idx)) return;
               var graphUpdateStart = new Date();
               g = new Grapher(ctrl.graphOptions(idx, el));
@@ -132,7 +132,7 @@ angular.module('npact')
                          $scope.spec.startBase, 'took',
                          new Date() - graphUpdateStart, 'ms');
               });
-            },
+            }, 50, {maxWait: 120}),
             redraw = function() {
               if(g !== null) {
                 g.stage.destroy();
