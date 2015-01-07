@@ -49,10 +49,10 @@ angular.module('npact')
     };
   })
 
-  .service('ExtractManager', function(Fetcher, Pynpact, TrackReader, GraphConfig) {
+  .service('ExtractManager', function(Fetcher, Pynpact, TrackReader, GraphConfig, $log) {
     this.start = function(config) {
-      if(config[Pynpact.HAS_CDS]) {
-        Fetcher.inputFileCds(config)
+      if(config[Pynpact.CDS]) {
+        Fetcher.pollThenFetch(config[Pynpact.CDS])
           .then(function(data) {
             var name = 'Input file CDS';
             TrackReader.load(name, data)
@@ -61,7 +61,7 @@ angular.module('npact')
       }
     };
   })
-  .service('PredictionManager', function(Fetcher, Pynpact, TrackReader, GraphConfig, $log) {
+  .service('PredictionManager', function(Fetcher, StatusPoller, Pynpact, TrackReader, GraphConfig, $log, ACGT_GAMMA_FILE_LIST_URL) {
     var self = this;
     self.files = null;
     self.start = function(config) {
@@ -79,10 +79,14 @@ angular.module('npact')
             .then(function() { GraphConfig.loadTrack(name, type); });
 
         });
-      Fetcher.acgtGammaFileList(config).then(function(files) {
-        $log.log('ACGT Gamma Files ready', files);
-        self.files = files;
-      });
+      StatusPoller.start(config[Pynpact.ACGT_GAMMA_FILES])
+        .then(function(path) {
+          return Fetcher.rawFile(ACGT_GAMMA_FILE_LIST_URL + path);
+        })
+        .then(function(files) {
+          $log.log('ACGT Gamma Files ready', files);
+          self.files = files;
+        });
     };
   })
   .service('FileManager', function(PredictionManager, StatusPoller, Pynpact, $log) {

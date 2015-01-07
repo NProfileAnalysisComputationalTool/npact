@@ -184,7 +184,7 @@ angular.module('npact')
     return ParserFactory.create(parseExtract);
   })
 
-  .service('Fetcher', function(StatusPoller, $http, ACGT_GAMMA_FILE_LIST_URL, FETCH_URL, $window, Pynpact) {
+  .service('Fetcher', function(StatusPoller, $http, FETCH_URL) {
     'use strict';
     var self = this;
     /**
@@ -207,20 +207,6 @@ angular.module('npact')
       return StatusPoller.start(path).then(self.fetchFile);
     };
 
-    self.nprofile = function(config) {
-      return self.pollThenFetch(config[Pynpact.NPROFILE]);
-    };
-
-    self.inputFileCds = function(config) {
-      return self.pollThenFetch(config[Pynpact.CDS]);
-    };
-
-    self.acgtGammaFileList = function(config) {
-      return StatusPoller.start(config[Pynpact.ACGT_GAMMA_FILES])
-        .then(function(path) {
-          return self.rawFile(ACGT_GAMMA_FILE_LIST_URL + path);
-        });
-    };
   })
 
 
