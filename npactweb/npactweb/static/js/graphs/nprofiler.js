@@ -44,7 +44,8 @@ angular.module('npact')
       //done by the `slice` function
 
       // get local references to avoid dictionary lookups in the loop
-      var ddna = self.ddna,
+      var t1 = new Date(),
+          ddna = self.ddna,
           end = Math.min(opts.endBase, ddna.length - 1),
           nucl = opts.nucleotides,
           period = opts.period,
@@ -82,6 +83,7 @@ angular.module('npact')
                   normfactor * profile[2]);
         }
       }
+      $log.debug('Slice took ', new Date() - t1);
     };
   })
 ;
