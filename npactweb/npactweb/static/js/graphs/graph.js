@@ -40,18 +40,6 @@ angular.module('npact')
           $log.log('Partitioned into', $scope.graphSpecs.length, 'rows.');
           updateVisibility();
           redraw();
-        },
-        onProfileSummaryChanged = function(summary, oldSummary) {
-          if(summary) {
-            $log.log('Got profile summary', summary);
-            // find a sensible zoom level
-            var basesPerGraph = summary.length / 5;
-            // if we're really short, reset out bases per graph
-            if (basesPerGraph < GraphConfig.basesPerGraph) {
-              GraphConfig.basesPerGraph = Utils.orderOfMagnitude(basesPerGraph);
-            }
-            rebuild();
-          }
         };
 
 
