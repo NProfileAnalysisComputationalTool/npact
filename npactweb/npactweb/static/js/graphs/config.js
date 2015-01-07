@@ -7,6 +7,12 @@ angular.module('npact')
     self.nucleotides = ['C', 'G'];
     self.offset = 0; // how much the graph is panned left/right
 
+    /**
+     * what's the right title for the current nucleotides?
+     */
+    self.profileTitle = function() {
+      return '% ' + self.nucleotides.join('');
+    };
 
     var activeTracks = function(){
       return _.filter(self.tracks, {active: true}, 'active');

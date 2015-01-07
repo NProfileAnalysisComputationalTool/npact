@@ -315,6 +315,13 @@ describe('Graphs', function(){
       G = GraphConfig;
     }));
 
+    it('calculates profile title', function() {
+      G.nucleotides = ['C', 'G'];
+      expect(G.profileTitle()).toBe('% CG');
+      G.nucleotides = ['A', 'C', 'G'];
+      expect(G.profileTitle()).toBe('% ACG');
+    });
+
     describe('.loadTrack', function() {
       it('loads', function() {
         expect(G.tracks).toEqual([]);
