@@ -256,9 +256,15 @@ angular.module('npact')
             scaleX: xaxis.scaleX,
             offsetX: this.startBase
           }),
+          r=[],g=[],b=[],
           dataToDraw = NProfiler.slice({
             startBase: this.startBase - this.margin,
-            endBase: this.endBase + this.margin
+            endBase: this.endBase + this.margin,
+            onPoint: function(coord, rv, gv, bv) {
+              r.push(coord); r.push(rv);
+              g.push(coord); g.push(gv);
+              b.push(coord); b.push(bv);
+            }
           }),
           profiles = lines.map(function(x){
             return new K.Line({

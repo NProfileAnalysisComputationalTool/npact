@@ -4,6 +4,7 @@ angular.module('npact')
     self.tracks = [];
     self.colorBlindFriendly = false;
     self.basesPerGraph = 10000;
+    self.nucleotides = ['C', 'G'];
     self.offset = 0; // how much the graph is panned left/right
 
 

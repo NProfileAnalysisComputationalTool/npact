@@ -1,42 +1,6 @@
 describe('NProfiler', function(){
   'use strict';
 
-  beforeEach(function() {
-    jasmine.addMatchers({
-        toBeCloseToArray: function(util, customEqualityTesters) {
-          return {
-            compare: function(actual, expected, precision) {
-              if (precision !== 0) {
-                precision = precision || 2;
-              }
-              var i;
-              return {
-                pass: _.every(actual, function(v, idx) {
-                  i = idx;
-                  return Math.abs(expected[idx] - v) < (Math.pow(10, -precision) / 2);
-                }),
-                message: 'Index ' + i + ', ' + actual[i] +
-                  ' should be within ' + (Math.pow(10, -precision) / 2) +
-                  ' of ' + expected[i]
-              };
-            }
-          };
-        }
-    });
-  });
-  describe('toBeCloseToArray', function() {
-    it('should be close', function() {
-      expect([1.0, 1.5, 2.0]).toBeCloseToArray([1.001, 1.5, 1.9999]);
-      expect([1.0, 1.5, 2.0]).toBeCloseToArray([1.001, 1.5, 1.6], 0);
-      expect([1.0, 1.5, 2.0]).toBeCloseToArray([1.001, 1.5, 1.96], 1);
-    });
-    it('should not be close', function() {
-      expect([1.0, 1.5, 2.0]).not.toBeCloseToArray([1.001, 1.5, 1.9999], 10);
-      expect([1.0, 1.5, 2.0]).not.toBeCloseToArray([2, 1.5, 1.9], 1);
-    });
-  });
-
-
   beforeEach(module('npact', function($provide) {
     $provide.value('$log', console);
     $provide.service('Fetcher', function($q, $log) {
@@ -77,25 +41,43 @@ describe('NProfiler', function(){
     it('should be defined', function() {
       expect(NP.slice).toBeDefined();
     });
-    it('should return an object with {r,g,b} keys', function() {
-      var data = NP.slice({startBase: 0, endBase: 500});
-      expect(data).toContain('r');
-      expect(data).toContain('g');
-      expect(data).toContain('b');
-    });
-    it('should calculate the nprofile of a section', function() {
+    it('should calculate the nprofile of a section', inject(function($log) {
       // This is using the same parameters as the existing nprofile.c
       // and its output to compare
-      var data = NP.slice({
-        startBase: 0, endBase: 600,
+      var expected = [
+        [101,38.8,41.8,28.4],
+        [152,41.8,40.3,28.4],
+        [203,46.3,40.3,29.9],
+        [254,50.7,38.8,31.3],
+        [305,50.7,40.3,32.8],
+        [356,50.7,38.8,38.8],
+        [407,47.8,38.8,40.3],
+        [458,41.8,38.8,46.3],
+        [509,43.3,31.3,50.7],
+        [560,41.8,28.4,49.3]
+      ];
+      NP.slice({
+        startBase: 0, endBase: 700,
         window: 201, step: 51,
-        bases: ['C', 'G']
+        bases: ['C', 'G'],
+        onPoint: function(coord, r, g, b) {
+          $log.debug('got row: ', coord, r, g, b);
+          var exp = expected.shift();
+          expect(coord).toBe(exp[0]);
+          expect(r).toBeCloseTo(exp[1], 1);
+          expect(g).toBeCloseTo(exp[2], 1);
+          expect(b).toBeCloseTo(exp[3], 1);
+        }
       });
-      expect(data.r).toBeCloseToArray([38.8,41.8,46.3,50.7,50.7,50.7,47.8,41.8,43.3,41.8]);
-      expect(data.g).toBeCloseToArray([41.8,40.3,40.3,38.8,40.3,38.8,38.8,38.8,31.3,28.4]);
-      expect(data.b).toBeCloseToArray([28.4,28.4,29.9,31.3,32.8,38.8,40.3,46.3,50.7,49.3]);
+      expect(expected.length).toBe(0);
+    }));
+    it('Shouldn\'t fail with an end pass the length', function() {
+      var count = 0;
+      NP.slice({startBase: 0, endBase: 50000, onPoint: function() {
+        count++;
+      }});
+      expect(count).toBe(215);
     });
-
   });
 
   var sampleConfig = {

@@ -386,7 +386,8 @@ describe('Graphs', function(){
     });
     describe('.partition', function() {
       beforeEach(function() {
-        angular.extend(G, {startBase: 0, endBase: 500, basesPerGraph: 100, offset: 0});
+        angular.extend(G, {startBase: 0, endBase: 450,
+                           basesPerGraph: 100, offset: 0});
       });
       it('partitions', function(){
         var p = G.partition();
