@@ -1,5 +1,5 @@
 angular.module('npact')
-  .factory('Grapher', function(K, $log, GraphingCalculator, $rootScope, $compile, ProfileReader, TrackReader, $q, Evt){
+  .factory('Grapher', function(K, $log, GraphingCalculator, $rootScope, $compile, NProfiler, TrackReader, $q, Evt){
     'use strict';
     function addMany(container, children){
       if(children && children.length) {
@@ -256,19 +256,19 @@ angular.module('npact')
             scaleX: xaxis.scaleX,
             offsetX: this.startBase
           }),
-          r=[],g=[],b=[],
+          rps=[],gps=[],bps=[],
           dataToDraw = NProfiler.slice({
             startBase: this.startBase - this.margin,
             endBase: this.endBase + this.margin,
             onPoint: function(coord, rv, gv, bv) {
-              r.push(coord); r.push(rv);
-              g.push(coord); g.push(gv);
-              b.push(coord); b.push(bv);
+              rps.push(coord); rps.push(100-rv);
+              gps.push(coord); gps.push(100-gv);
+              bps.push(coord); bps.push(100-bv);
             }
           }),
           profiles = lines.map(function(x){
             return new K.Line({
-              points:dataToDraw[x],
+              points:{r:rps, g:gps, b:bps}[x],
               stroke:colors[x],
               strokeWidth:1,
               strokeScaleEnabled: false

@@ -18,6 +18,10 @@ angular.module('npact')
       };
     };
     self.slice = function(opts) {
+      if(!self.ddna) {
+        return;
+        throw new Error("DDNA not yet loaded");
+      }
       if(opts.startBase === undefined || opts.endBase === undefined ||
          opts.startBase < 0 || opts.startBase > opts.endBase) {
         throw new Error(

@@ -32,7 +32,7 @@ angular.module('npact')
       $scope.miscFiles = val;
     }, true);
   })
-  .factory('kickstarter', function($q, Err, KICKSTART_BASE_URL, ProfileReader, TrackReader, $window, $http, $log, NProfiler, PredictionManager, ExtractManager, FileManager, GraphConfig) {
+  .factory('kickstarter', function($q, Err, KICKSTART_BASE_URL, TrackReader, $window, $http, $log, NProfiler, PredictionManager, ExtractManager, FileManager, GraphConfig) {
     return function() {
       var url = KICKSTART_BASE_URL + $window.location.search;
       var basePromise = $http.get(url)

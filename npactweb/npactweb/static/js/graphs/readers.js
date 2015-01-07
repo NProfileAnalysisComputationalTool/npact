@@ -1,36 +1,5 @@
 angular.module('npact')
-  .service('ProfileReader', function($q, Err) {
-    'use strict';
-    var self = this;
 
-    /**
-     * set the current loaded profile, returns the summary
-     */
-    this.load = function(profile) {
-      self.profileData = profile;
-    };
-
-    /**
-     * get a shallow copy of the profile for the given range
-     */
-    this.slice = function(range) {
-      if (!self.profileData) { throw new Err.ProfileNotFound(); }
-
-      var sortedIdx = function(coord) {
-        return _.sortedIndex(self.profileData, {coordinate: coord}, 'coordinate');
-      },
-          startIdx = sortedIdx(range.startBase),
-          endIdx = sortedIdx(range.endBase) + 1,
-          minEndIdx = self.profileData.length - 1
-          ;
-
-      // shallow copy of the relevant data, guarding against
-      // out-of-bounds indexes
-      return self.profileData
-        .slice(Math.max(startIdx,0), Math.min(endIdx, minEndIdx));
-
-    };
-  })
   .service('TrackReaderRTreeIndex', function(ExtractParser, $log, Utils, Err, $q, $timeout){
     var self = this;
 

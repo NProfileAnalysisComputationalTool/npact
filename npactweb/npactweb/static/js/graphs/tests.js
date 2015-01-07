@@ -240,26 +240,6 @@ describe('Graphs', function(){
     });
   });
 
-  describe('ProfileReader', function(){
-    var P;
-    beforeEach(inject(function(ProfileReader){
-      P = ProfileReader;
-    }));
-
-    describe('.slice',function() {
-      it('slices', function() {
-        P.load([
-          {coordinate:150}, {coordinate:200}, {coordinate:250},
-          {coordinate:300}, {coordinate:350}]);
-        var s = P.slice({startBase:200, endBase:300});
-        expect(s).toEqual([{coordinate:200}, {coordinate:250}, {coordinate:300}]);
-      });
-      it('throws if no profile found', function() {
-        expect(P.slice).toThrow(new Err.ProfileNotFound());
-      });
-    });
-
-  });
 
   describe('TrackReader', function() {
     var T,
