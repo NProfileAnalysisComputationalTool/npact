@@ -1,8 +1,8 @@
 angular.module('npact')
-  .service('NProfiler', function(Fetcher, Pynpact, $log, GraphConfig) {
+  .service('NProfiler', function(Fetcher, Pynpact, $log, GraphConfig, $q) {
     var self = this;
     self.start = function(config) {
-      $log.log("Starting nprofiler");
+      $log.log("Starting nprofiler", self);
       self.config = config;
       return Fetcher.fetchFile(config[Pynpact.DDNA_FILE]).then(function(ddna) {
         $log.debug('Got back a ddna of length: ', ddna.length);
@@ -18,14 +18,16 @@ angular.module('npact')
       };
     };
     self.slice = function(opts) {
+      var d = $q.defer();
       if(!self.ddna) {
-        return;
-        throw new Error("DDNA not yet loaded");
+        d.reject("DDNA not yet loaded");
+        return d.promise;
       }
-      if(opts.startBase === undefined || opts.endBase === undefined ||
+      if(opts === undefined ||
+         opts.startBase === undefined || opts.endBase === undefined ||
          opts.startBase < 0 || opts.startBase > opts.endBase) {
-        throw new Error(
-          "Incomplete/invalid startBase,endBase config for NProfiler.slice");
+        d.reject("Incomplete/invalid startBase,endBase config for NProfiler.slice");
+        return d.promise;
       }
       // The period is hardcoded to 3 (r,g,b) due to assumptions
       // throughout this graph system
@@ -33,11 +35,14 @@ angular.module('npact')
       opts = angular.extend(self.avgParams(), opts);
 
       if(opts.window % opts.period) {
-        throw new Error(
-          "Window size (" + opts.window +
-            ") must be divisable by the period of frames (" + opts.period + ")");
+        d.reject("Window size (" + opts.window +
+                 ") must be divisable by the period of frames (" +
+                 opts.period + ")");
+        return d.promise;
       }
-      return self._slice(opts);
+      // TODO: slice asynchronously
+      d.resolve(self._slice(opts));
+      return d.promise;
     };
     self._slice = function(opts) {
       //This function assumes all the error checking and prep has been

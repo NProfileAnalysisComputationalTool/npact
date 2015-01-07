@@ -78,6 +78,28 @@ describe('NProfiler', function(){
       }});
       expect(count).toBe(215);
     });
+    it('returns a rejected promise when there\'s no ddna', function(done) {
+      NP.ddna = null;
+      var flag = false;
+      NP.slice()
+        .catch(function() { flag = true; })
+        .finally(function() { expect(flag).toBe(true); done(); });
+      $digest();
+    });
+    it('returns a rejected promise when there\'s no start/end base', function(done) {
+      var flag = false;
+      NP.slice()
+        .catch(function() { flag = true; })
+        .finally(function() { expect(flag).toBe(true); done(); });
+      $digest();
+    });
+    it('returns a rejected promise when the window size is invalid', function(done) {
+      var flag = false;
+      NP.slice({startBase:1, endBase:50, window: 50})
+        .catch(function() { flag = true; })
+        .finally(function() { expect(flag).toBe(true); done(); });
+      $digest();
+    });
   });
 
   var sampleConfig = {
