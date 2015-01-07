@@ -1,5 +1,5 @@
 angular.module('npact')
-  .service('NProfiler', function(Fetcher, Pynpact, $log, GraphConfig, $q) {
+  .service('NProfiler', function(Fetcher, Pynpact, $log, GraphConfig, $q, $timeout) {
     var self = this;
     self.start = function(config) {
       $log.log("Starting nprofiler", self);
@@ -40,9 +40,11 @@ angular.module('npact')
                  opts.period + ")");
         return d.promise;
       }
-      // TODO: slice asynchronously
-      d.resolve(self._slice(opts));
-      return d.promise;
+      // slice asynchronously
+      return $timeout(function() {
+        self._slice(opts);
+        return opts;
+      });
     };
     self._slice = function(opts) {
       //This function assumes all the error checking and prep has been

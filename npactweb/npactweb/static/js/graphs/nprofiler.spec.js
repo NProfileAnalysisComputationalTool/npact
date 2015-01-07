@@ -17,11 +17,12 @@ describe('NProfiler', function(){
     });
   }));
 
-  var NP, Pynpact, $digest;
-  beforeEach(inject(function(NProfiler, _Pynpact_, $rootScope) {
+  var NP, Pynpact, $digest, $timeout;
+  beforeEach(inject(function(NProfiler, _Pynpact_, $rootScope, _$timeout_) {
     NP = NProfiler;
     Pynpact = _Pynpact_;
     $digest = $rootScope.$digest;
+    $timeout = _$timeout_;
   }));
 
   describe('start', function() {
@@ -41,7 +42,7 @@ describe('NProfiler', function(){
     it('should be defined', function() {
       expect(NP.slice).toBeDefined();
     });
-    it('should calculate the nprofile of a section', inject(function($log) {
+    it('should calculate the nprofile of a section', function(done) {
       // This is using the same parameters as the existing nprofile.c
       // and its output to compare
       var expected = [
@@ -61,22 +62,25 @@ describe('NProfiler', function(){
         window: 201, step: 51,
         bases: ['C', 'G'],
         onPoint: function(coord, r, g, b) {
-          $log.debug('got row: ', coord, r, g, b);
           var exp = expected.shift();
           expect(coord).toBe(exp[0]);
           expect(r).toBeCloseTo(exp[1], 1);
           expect(g).toBeCloseTo(exp[2], 1);
           expect(b).toBeCloseTo(exp[3], 1);
         }
-      });
-      expect(expected.length).toBe(0);
-    }));
-    it('Shouldn\'t fail with an end pass the length', function() {
+      })
+        .then(function() { expect(expected.length).toBe(0); })
+        .finally(done);
+      $timeout.flush();
+    });
+    it('Shouldn\'t fail with an end pass the length', function(done) {
       var count = 0;
-      NP.slice({startBase: 0, endBase: 50000, onPoint: function() {
-        count++;
-      }});
-      expect(count).toBe(215);
+      NP.slice({startBase: 0, endBase: 50000,
+                onPoint: function() { count++; }})
+        .then(function() {
+          expect(count).toBe(215);
+        }).finally(done);
+      $timeout.flush();
     });
     it('returns a rejected promise when there\'s no ddna', function(done) {
       NP.ddna = null;
@@ -84,21 +88,21 @@ describe('NProfiler', function(){
       NP.slice()
         .catch(function() { flag = true; })
         .finally(function() { expect(flag).toBe(true); done(); });
-      $digest();
+      $timeout.flush();
     });
     it('returns a rejected promise when there\'s no start/end base', function(done) {
       var flag = false;
       NP.slice()
         .catch(function() { flag = true; })
         .finally(function() { expect(flag).toBe(true); done(); });
-      $digest();
+      $timeout.flush();
     });
     it('returns a rejected promise when the window size is invalid', function(done) {
       var flag = false;
       NP.slice({startBase:1, endBase:50, window: 50})
         .catch(function() { flag = true; })
         .finally(function() { expect(flag).toBe(true); done(); });
-      $digest();
+      $timeout.flush();
     });
   });
 
