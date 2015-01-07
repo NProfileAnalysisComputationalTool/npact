@@ -6,7 +6,10 @@ angular.module('npact')
                                   npactConstants.graphSpecDefaults),
         updateBaseOptions = function() {
           baseOpts.headerSpec = GraphConfig.headerSpec();
-          baseOpts.margin = Utils.orderOfMagnitude(GraphConfig.basesPerGraph, -1);
+          // Disabling margin, we're not sure this really is worth it
+          // and it is causing Z-index paint problems at the moment.
+          // baseOpts.margin = Utils.orderOfMagnitude(GraphConfig.basesPerGraph, -1);
+          baseOpts.margin = 0;
           baseOpts.colors = GraphConfig.colorBlindFriendly ?
             npactConstants.colorBlindLineColors : npactConstants.lineColors;
           baseOpts.headerY = baseOpts.headerSpec.headerY;
