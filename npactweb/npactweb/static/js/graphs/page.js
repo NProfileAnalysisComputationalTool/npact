@@ -85,11 +85,6 @@ angular.module('npact')
       });
     };
   })
-  .service('NProfiler', function(ProfileReader, Fetcher) {
-    this.start = function(config) {
-      return Fetcher.nprofile(config).then(ProfileReader.load);
-    };
-  })
   .service('FileManager', function(PredictionManager, StatusPoller, Pynpact, $log) {
     var pdffile = null;
     this.start = function(config) {

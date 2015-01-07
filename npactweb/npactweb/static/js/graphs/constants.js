@@ -71,7 +71,7 @@ angular.module('npact')
     HAS_CDS: 'isgbk',
     EMAIL: 'email',
     CONFIGURE_URL: 'configure_url',
-    DDNA: 'ddna'
+    DDNA_FILE: 'ddna'
   })
 
 ;

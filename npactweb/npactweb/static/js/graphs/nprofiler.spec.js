@@ -36,39 +36,39 @@ describe('NProfiler', function(){
     });
   });
 
+
   beforeEach(module('npact', function($provide) {
-    $provide.service('Fetcher', function($q) {
-      //TODO: does this really need to be a spy?
-      this.fetchFile = jasmine.createSpy('fetchFile').and.callFake(function(path) {
-        it('should call fetchFile with the ddna file path', function() {
-          expect(path).toEqual(sampleConfig.ddna);
-        });
+    $provide.value('$log', console);
+    $provide.service('Fetcher', function($q, $log) {
+      this.fetchFile = function(path) {
+        $log.debug('Fetching ' + path);
+        if(sampleConfig.ddna !== path) {
+          throw new Error("fetchFile called with wrong path");
+        }
         return $q.when(sampleDdnaFile);
-      });
+      };
       this.nprofile = function() {
-        fail('should not call `nprofile`');
+        fail("Shouldn't call nprofile");
       };
     });
   }));
 
-  var NP, Pynpact;
-  beforeEach(inject(function(NProfiler, _Pynpact_, _Fetcher_) {
+  var NP, Pynpact, $digest;
+  beforeEach(inject(function(NProfiler, _Pynpact_, $rootScope) {
     NP = NProfiler;
     Pynpact = _Pynpact_;
+    $digest = $rootScope.$digest;
   }));
 
-  describe('start', function( ) {
+  describe('start', function() {
     it('should fetch the ddna file', function(done) {
       NP.start(sampleConfig).then(function() {
         expect(NP.ddna).toBe(sampleDdnaFile);
         done();
       });
+      $digest();
     });
   });
-
-  describe('.profileConfig', function() {
-
-  })
 
   describe('.slice', function() {
     beforeEach(function() {
