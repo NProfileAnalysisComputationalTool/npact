@@ -27,4 +27,13 @@
   <div ng-repeat="t in gc.tracks">
     <label><input ng-model="t.active" type="checkbox" /> {{t.text}}</label>
   </div>
+
+  <h3>NProfile Options</h3>
+  <div>
+    <label>Which nucleotides to analyze?</label><br/>
+    <select multiple ng-model="gc.nucleotides"
+            style="width:100%; display:block;"
+            ng-options="x for x in ['A', 'C', 'G', 'T']">
+    </select>
+  </div>
 </div>
