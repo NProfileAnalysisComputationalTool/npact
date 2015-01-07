@@ -9,7 +9,8 @@ angular.module('npact')
 
     function Grapher(opts, $scope){
       angular.extend(this, opts);
-
+      this.startBaseM = Math.max(this.startBase - this.margin, 0);
+      this.endBaseM = this.endBase + this.margin;
       this.$element = jQuery(this.element);
 
       this.stage = new K.Stage({
@@ -269,8 +270,8 @@ angular.module('npact')
               strokeScaleEnabled: false
             });
           },
-          sliceOpts = { startBase: this.startBase - this.margin,
-                        endBase: this.endBase + this.margin,
+          sliceOpts = { startBase: this.startBaseM,
+                        endBase: this.endBaseM,
                         onPoint: buildPoint}
       ;
 
@@ -294,8 +295,8 @@ angular.module('npact')
       var drawings = _.map(self.headerSpec.headers, function(hdr) {
         return TrackReader.slice({
           name: hdr.text,
-          startBase: self.startBase - self.margin,
-          endBase: self.endBase + self.margin
+          startBase: self.startBaseM,
+          endBase: self.endBaseM
         }).then(function(data){
           switch(hdr.lineType){
           case 'extracts':
