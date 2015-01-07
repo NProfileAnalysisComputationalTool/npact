@@ -21,3 +21,6 @@ webroot
 /npactweb/.tmp/templates.js
 /npactweb/node_modules
 /npactweb/npactweb/static/bower_components
+/npactweb/jshint.xml
+/npactweb/test-results.xml
+/pytest.xml
