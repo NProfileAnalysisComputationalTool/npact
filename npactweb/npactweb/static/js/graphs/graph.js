@@ -49,10 +49,10 @@ angular.module('npact')
 
 
     this.graphOptions = function(idx, element) {
-      range = $scope.graphSpecs[idx];
-      var opts = angular.extend(
-        {$scope: $scope, element: element},
-        baseOpts, range);
+      var range = $scope.graphSpecs[idx],
+          opts = angular.extend(
+            {$scope: $scope, element: element},
+            baseOpts, range);
       opts.m = GraphingCalculator.chart(opts);
       opts.xaxis = GraphingCalculator.xaxis(opts);
       return opts;
