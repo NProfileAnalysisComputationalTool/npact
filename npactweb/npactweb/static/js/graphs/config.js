@@ -32,11 +32,18 @@ angular.module('npact')
       //TODO: This needs to replace existing track on name match
       if(self.hasTrack(name)){ throw new Err.TrackAlreadyDefined(); }
       $log.log('loading track', name, type);
-      self.tracks.push({
-        text: name,
-        lineType: type,
-        active: true
-      });
+      var newTrack = { text: name, lineType: type, active: true },
+          isHit = function(t) { return t.lineType === 'hits'; },
+          hitIdx = self.tracks.indexOf(_.find(self.tracks, isHit))
+      ;
+
+      // ensure any hits are last, which will display them close to
+      // the graph
+      if(!isHit(newTrack) && hitIdx !== -1){
+        self.tracks.splice(hitIdx, 0, newTrack);
+      }else{
+        self.tracks.push(newTrack);
+      }
     };
 
     /**

@@ -335,6 +335,13 @@ describe('Graphs', function(){
           G.loadTrack('test', 'whatever');
         }).toThrow(new Err.TrackAlreadyDefined());
       });
+      it('keeps "hits" as the last track',function() {
+        G.loadTrack('test', 'extracts');
+        G.loadTrack('testh', 'hits');
+        expect(G.tracks[1].text).toBe('testh');
+        G.loadTrack('test2', 'extracts');
+        expect(G.tracks[2].text).toBe('testh');
+      });
     });
 
     describe('.headerSpec', function() {
