@@ -9,6 +9,7 @@ module.exports = function(config){
       'npactweb/static/bower_components/kineticjs/kinetic.min.js',
       'npactweb/static/bower_components/lodash/dist/lodash.min.js',
       'npactweb/static/bower_components/rtree/dist/rtree.min.js',
+      'npactweb/static/bower_components/ngSticky/sticky.min.js',
       'npactweb/static/js/*.js',
       'npactweb/static/js/**/*.js',
       'npactweb/static/js/**/*.html',
