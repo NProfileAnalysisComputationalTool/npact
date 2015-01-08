@@ -138,20 +138,18 @@ angular.module('npact')
                          new Date() - graphUpdateStart, 'ms');
               });
             }, 50, {maxWait: 120}),
-            redraw = function() {
+            discard = function() {
               if(g !== null) {
-                g.stage.destroy();
+                g.destroy();
                 g = null;
               }
               //Don't need to do anything: `$scope.$watch(draw);`
               //handles it
             };
-        $scope.$on(Evt.REDRAW, redraw);
+        $scope.$on(Evt.REDRAW, discard);
         //Just call draw every time
         $scope.$watch(draw);
-        $scope.$on('$destroy', function() {
-          if(g) { g.stage.destroy(); }
-        });
+        $scope.$on('$destroy', discard);
       }
     };
   })

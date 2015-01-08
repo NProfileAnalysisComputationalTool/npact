@@ -23,6 +23,12 @@ angular.module('npact')
     }
     var GP = Grapher.prototype;
 
+    GP.destroy = function() {
+      if(this.stage) {
+        this.stage.destroy();
+      }
+    };
+
     GP.drawAxisTicks = function(ticks){
       var tickOpts = {x: 0, y:0,
                       stroke: this.borderColor,
