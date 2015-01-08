@@ -43,6 +43,7 @@ angular.module('npact')
           $scope.graphSpecs = GraphConfig.partition();
           $log.log('Partitioned into', $scope.graphSpecs.length, 'rows.');
           updateVisibility();
+          //TODO: this would be the DISCARD event
           redraw();
         };
 
@@ -138,6 +139,9 @@ angular.module('npact')
                          new Date() - graphUpdateStart, 'ms');
               });
             }, 50, {maxWait: 120}),
+            redraw = function() {
+              g.redraw();
+            },
             discard = function() {
               if(g !== null) {
                 g.destroy();
