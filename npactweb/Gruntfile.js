@@ -43,7 +43,7 @@ module.exports = function(grunt){
     }
   });
 
-  grunt.registerTask('test', ['newer:html2js:main', 'karma']);
+  grunt.registerTask('test', ['karma']);
   grunt.registerTask('jenkins', ['jshint:jenkins',
                                  'html2js:main',
                                  'karma:jenkins']);

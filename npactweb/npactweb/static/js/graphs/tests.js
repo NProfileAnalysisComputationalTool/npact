@@ -2,7 +2,7 @@ describe('Graphs', function(){
   'use strict';
 
   beforeEach(module('npact'));
-  beforeEach(module('templates-main'));
+  beforeEach(module('assets'));
 
   var ng = {}, $scope, $compile, $q, $httpBackend, Err;
   beforeEach(inject(function (_$rootScope_, _$compile_, _$q_, _$httpBackend_, _$timeout_, _Err_) {
