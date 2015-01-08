@@ -17,36 +17,40 @@ angular.module('npact')
     $scope.ready = false;
     $scope.FETCH_URL = FETCH_URL;
 
-    kickstarter().then(function(config) {
+    kickstarter.start().then(function(config) {
       $scope.status = 'Running';
       // got config, request the first round of results
       $scope.title = config[Pynpact.TITLE];
       $scope.email = config[Pynpact.EMAIL];
       $scope.configureUrl = config[Pynpact.CONFIGURE_URL];
 
-      // $q.all([nprofile, inputFileCds, extraFileList])
-      //     .then(function() { delete $scope.status; })
-      //     .catch(function(err) { $scope.status = err; });
+      kickstarter.everything
+        .catch(function(err) {
+          $scope.error = true;
+        })
+        .then(function() { delete $scope.status; });
+
     });
     $scope.$watch(FileManager.getFiles, function(val) {
       $scope.miscFiles = val;
     }, true);
   })
-  .factory('kickstarter', function($q, Err, KICKSTART_BASE_URL, TrackReader, $window, $http, $log, NProfiler, PredictionManager, ExtractManager, FileManager, GraphConfig) {
+  .service('kickstarter', function($q, Err, KICKSTART_BASE_URL, TrackReader, $window, $http, $log, NProfiler, PredictionManager, ExtractManager, FileManager, GraphConfig) {
     'use strict';
-    return function() {
+    this.start = function() {
       var url = KICKSTART_BASE_URL + $window.location.search;
-      var basePromise = $http.get(url)
+      this.basePromise = $http.get(url)
             .then(function(res) {
               $log.log('Kickstart successful:', res.data);
               angular.extend(GraphConfig, res.data);
               return res.data;
             });
-      basePromise.then(NProfiler.start);
-      basePromise.then(PredictionManager.start);
-      basePromise.then(ExtractManager.start);
-      basePromise.then(FileManager.start);
-      return basePromise;
+      this.everything = $q.all([
+        this.basePromise.then(NProfiler.start),
+        this.basePromise.then(PredictionManager.start),
+        this.basePromise.then(ExtractManager.start),
+        this.basePromise.then(FileManager.start)]);
+      return this.basePromise;
     };
   })
 
