@@ -71,8 +71,8 @@ angular.module('npact')
   .directive('npactGraphConfig', function npactGraphConfig(STATIC_BASE_URL, GraphConfig) {
     return {
       restrict: 'A',
-      templateUrl:STATIC_BASE_URL+'js/graphs/config.html',
-      link: function($scope){
+      templateUrl: STATIC_BASE_URL + 'js/graphs/config.html',
+      link: function($scope) {
         $scope.gc = GraphConfig;
       }
     };
