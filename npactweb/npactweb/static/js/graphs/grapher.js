@@ -24,6 +24,7 @@ angular.module('npact')
                  onPoint: function(coord, rv, gv, bv) {
                    angular.forEach({r:rv, g:gv, b:bv}, function(v, k) {
                      profilePoints[k].push(coord);
+                     //invert because drawing is from the top so 100% is 0 pix
                      profilePoints[k].push(100-v);
                    });
                  }})

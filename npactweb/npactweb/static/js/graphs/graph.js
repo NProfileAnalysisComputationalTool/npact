@@ -21,8 +21,6 @@ angular.module('npact')
           $log.log('Pan event:', opts);
           var offset = Math.floor(opts.newStartBase - opts.oldStartBase);
           GraphConfig.offset += offset;
-          // TODO: Event originated from outside ng, but why doesn't
-          // `$watch` pick up the `offset` change?
           $scope.$apply();
         },
         onZoom = function(evt, opts) {
@@ -31,8 +29,6 @@ angular.module('npact')
               res = GraphingCalculator.zoom(zoomOpts);
           GraphConfig.offset = res.offset;
           GraphConfig.basesPerGraph = res.basesPerGraph;
-          // TODO: Event originated from outside ng, but why doesn't
-          // `$watch` pick up the `offset` change?
           $scope.$apply();
         },
         redraw = function() {
