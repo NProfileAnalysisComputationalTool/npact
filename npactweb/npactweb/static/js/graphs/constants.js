@@ -50,6 +50,7 @@ angular.module('npact')
 
   })
   .constant('Evt', {
+    DRAW: 'draw',
     REDRAW: 'redraw',
     NOOP: 'noop',
     REBUILD: 'rebuild',

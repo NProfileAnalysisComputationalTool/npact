@@ -38,7 +38,8 @@ angular.module('npact')
           $log.log('Partitioned into', $scope.graphSpecs.length, 'rows.');
           updateVisibility();
           rebuild();
-        },
+    },
+        draw = function() { $scope.$broadcast(Evt.DRAW); },
         redraw = function() { $scope.$broadcast(Evt.REDRAW); },
         rebuild = function() { $scope.$broadcast(Evt.REBUILD); };
 
@@ -82,7 +83,7 @@ angular.module('npact')
         },
         onScroll = function() {
           updateVisibility();
-          $scope.$apply();
+          draw();
         },
         onResize = function() {
           winHeight = $win.height();
@@ -147,10 +148,11 @@ angular.module('npact')
                 g = null;
               }
             };
+        $scope.$on(Evt.DRAW, draw);
         $scope.$on(Evt.REDRAW, redraw);
         $scope.$on(Evt.REBUILD, discard);
-        //Just call draw every time
-        $scope.$watch(_.debounce(draw, 50, {maxWait: 120}));
+        //Just call draw every time, it shortcuts if not doing anything
+        $scope.$watch(draw);
         $scope.$on('$destroy', discard);
       }
     };
