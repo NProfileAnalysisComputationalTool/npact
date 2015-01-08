@@ -9,9 +9,28 @@ angular.module('npact')
 
     function Grapher(opts, $scope){
       angular.extend(this, opts);
+      // invariants: startBase, endBase, margin
       this.startBaseM = Math.max(this.startBase - this.margin, 0);
       this.endBaseM = this.endBase + this.margin;
       this.$element = jQuery(this.element);
+
+      // start slicing the NProfile into Kinetic-compatible [x1, y1,
+      // x2, y2, ...] lists, make a promise for the completed group of
+      // points
+      var profilePoints = {r:[], g:[], b:[]};
+      this.onProfilePoints = NProfiler
+        .slice({ startBase: this.startBaseM,
+                 endBase: this.endBaseM,
+                 onPoint: function(coord, rv, gv, bv) {
+                   angular.forEach({r:rv, g:gv, b:bv}, function(v, k) {
+                     profilePoints[k].push(coord);
+                     profilePoints[k].push(100-v);
+                   });
+                 }})
+        .then(function(opts) {
+          $log.log('Finished slicing', opts);
+          return profilePoints;
+        });
 
       this.stage = new K.Stage({
         container:this.element,
@@ -264,12 +283,6 @@ angular.module('npact')
             scaleY: m.graph.h / 100,
             offsetX: this.startBase
           }),
-          rps=[],gps=[],bps=[],
-          buildPoint = function(coord, rv, gv, bv) {
-            rps.push(coord); rps.push(100-rv);
-            gps.push(coord); gps.push(100-gv);
-            bps.push(coord); bps.push(100-bv);
-          },
           buildLine = function(points, color) {
             return new K.Line({
               points:points,
@@ -279,20 +292,35 @@ angular.module('npact')
             });
           }
       ;
-      NProfiler
-        .slice({ startBase: this.startBaseM,
-                 endBase: this.endBaseM,
-                 onPoint: buildPoint})
-        .then(function(opts) {
-          if(!g.getLayer()) return;
-          g.add(buildLine(rps, colors.r),
-                buildLine(gps, colors.g),
-                buildLine(bps, colors.b));
-          $log.debug('redrawing nprofile slice', opts);
+      this.onProfilePoints
+        .then(function(points) {
+          if(!g.getLayer()) {return;}
+          angular.forEach(points, function(v, k) {
+            g.add(buildLine(v, colors[k]));
+          });
+          $log.debug('redrawing nprofile');
           g.draw();
         });
 
       return (this._profileGroup = g);
+    };
+
+    /**
+     * get the relevant slice of track data for the given header
+     *
+     * Keeps a cache on this to avoid duplicate computation
+     *
+     * @return {Promise}
+     */
+    GP.trackSlice = function(name) {
+      if(!this.trackSliceCache) { this.trackSliceCache = {}; }
+
+      return this.trackSliceCache[name] ||
+        (this.trackSliceCache[name] = TrackReader.slice({
+          name: name,
+          startBase: this.startBaseM,
+          endBase: this.endBaseM
+        }));
     };
 
     GP.redraw = function(){
@@ -300,20 +328,17 @@ angular.module('npact')
       gg.add(self.xAxisGroup(), self.profileGroup());
 
       var drawings = _.map(self.headerSpec.headers, function(hdr) {
-        return TrackReader.slice({
-          name: hdr.text,
-          startBase: self.startBaseM,
-          endBase: self.endBaseM
-        }).then(function(data){
-          switch(hdr.lineType){
-          case 'extracts':
-            return self.cdsGroup(hdr, data);
-          case 'hits':
-            return self.drawHit(hdr, data);
-          default:
-            throw new Error("don't know how to draw " + hdr);
-          }
-        }).then(function(img) { gg.add(img); });
+        return self.trackSlice(hdr.text)
+          .then(function(data){
+            switch(hdr.lineType){
+            case 'extracts':
+              return self.cdsGroup(hdr, data);
+            case 'hits':
+              return self.drawHit(hdr, data);
+            default:
+              throw new Error("don't know how to draw " + hdr);
+            }
+          }).then(function(img) { gg.add(img); });
       });
 
       return $q.all(drawings).then(function() {
