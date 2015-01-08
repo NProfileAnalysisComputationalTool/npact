@@ -7,12 +7,12 @@ angular.module('npact')
       }
     }
 
-    function Grapher(opts, $scope){
+    function Grapher(element, opts){
+      this.$element = jQuery(element);
       angular.extend(this, opts);
       // invariants: startBase, endBase, margin
       this.startBaseM = Math.max(this.startBase - this.margin, 0);
       this.endBaseM = this.endBase + this.margin;
-      this.$element = jQuery(this.element);
 
       // start slicing the NProfile into Kinetic-compatible [x1, y1,
       // x2, y2, ...] lists, make a promise for the completed group of
@@ -34,7 +34,7 @@ angular.module('npact')
         });
 
       this.stage = new K.Stage({
-        container:this.element,
+        container: element,
         height: this.height,
         width: this.width
       });
@@ -187,7 +187,7 @@ angular.module('npact')
         var oldStartBase = self.startBase,
             newStartBase = (this.offsetX() / self.xaxis.scaleX) + oldStartBase;
         // tell the world
-        self.$scope.$emit(Evt.PAN, {oldStartBase: oldStartBase, newStartBase: newStartBase, evt:evt});
+        self.onPan({oldStartBase: oldStartBase, newStartBase: newStartBase, evt:evt});
       });
 
       g.on('mouseover', function() {
@@ -211,8 +211,8 @@ angular.module('npact')
       var zoomOnPx = evt.evt.layerX - this.m.graph.x,
           zoomOnPct = zoomOnPx / this.m.graph.w;
       // tell the world
-      this.$scope.$emit(Evt.ZOOM, {
-        evt:evt,
+      this.onZoom({
+        evt: evt,
         // these keys must match what's expected by `GraphingCalculator.zoom`
         startBase: this.startBase,
         zoomOnPct: zoomOnPct,

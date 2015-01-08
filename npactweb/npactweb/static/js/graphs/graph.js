@@ -3,69 +3,68 @@ angular.module('npact')
   .controller('npactGraphContainerCtrl', function($scope, $element, $window, npactConstants, Utils, GraphConfig, Evt, $log, GraphingCalculator) {
     'use strict';
 
-    var baseOpts = angular.extend({ width: $element.width() },
-                                  npactConstants.graphSpecDefaults),
-        updateBaseOptions = function() {
-          baseOpts.headerSpec = GraphConfig.headerSpec();
-          // Disabling margin, we're not sure this really is worth it
-          // and it is causing Z-index paint problems at the moment.
-          // baseOpts.margin = Utils.orderOfMagnitude(GraphConfig.basesPerGraph, -1);
-          baseOpts.margin = 0;
-          baseOpts.colors = GraphConfig.colorBlindFriendly ?
-            npactConstants.colorBlindLineColors : npactConstants.lineColors;
-          baseOpts.headerY = baseOpts.headerSpec.headerY;
-          baseOpts.axisTitle = GraphConfig.profileTitle();
-          return baseOpts;
-        },
-        onPan = function(evt, opts) {
+    //The mouse event responders
+    var onPan = function(opts) {
           $log.log('Pan event:', opts);
           var offset = Math.floor(opts.newStartBase - opts.oldStartBase);
           GraphConfig.offset += offset;
           $scope.$apply();
         },
-        onZoom = function(evt, opts) {
+        onZoom = function(opts) {
           $log.log('Zoom event:', opts);
-          var zoomOpts = angular.extend({}, opts, GraphConfig),
-              res = GraphingCalculator.zoom(zoomOpts);
-          GraphConfig.offset = res.offset;
-          GraphConfig.basesPerGraph = res.basesPerGraph;
+          var zoomOpts = angular.extend({}, opts, GraphConfig);
+          //updates `offset`, and `basesPerGraph`
+          angular.extend(GraphConfig, GraphingCalculator.zoom(zoomOpts));
           $scope.$apply();
-        },
-        redraw = function() {
-          updateBaseOptions();
-          $scope.$broadcast(Evt.REDRAW);
-        },
-        rebuild = function() {
-          $scope.graphSpecs = GraphConfig.partition();
-          $log.log('Partitioned into', $scope.graphSpecs.length, 'rows.');
-          updateVisibility();
-          updateBaseOptions();
-          $scope.$broadcast(Evt.REBUILD);
         };
 
-
-    this.graphOptions = function(idx, element) {
+    //The baseOpts are the graph options that are the same for every graph
+    var baseOpts = angular.extend({ width: $element.width(),
+                                    margin: 0,
+                                    onPan: onPan, onZoom: onZoom },
+                                  npactConstants.graphSpecDefaults);
+    this.graphOptions = function(idx) {
+      // This function builds the specific options for a graph, the
+      // options object is lazily generated when needed
       var range = $scope.graphSpecs[idx],
-          opts = angular.extend(
-            {$scope: $scope, element: element},
-            baseOpts, range);
+          opts = angular.extend({}, baseOpts, range);
       opts.m = GraphingCalculator.chart(opts);
       opts.xaxis = GraphingCalculator.xaxis(opts);
       return opts;
     };
 
-    // listen for graph events
-    $scope.$on(Evt.PAN, onPan);
-    $scope.$on(Evt.ZOOM, onZoom);
+    var repartition = function() {
+          $scope.graphSpecs = GraphConfig.partition();
+          $log.log('Partitioned into', $scope.graphSpecs.length, 'rows.');
+          updateVisibility();
+          rebuild();
+        },
+        redraw = function() { $scope.$broadcast(Evt.REDRAW); },
+        rebuild = function() { $scope.$broadcast(Evt.REBUILD); };
+
 
     // watch the environment for changes we care about
     $scope.$watchCollection(function() {
       return [ GraphConfig.length, GraphConfig.basesPerGraph,
                GraphConfig.offset, GraphConfig.startBase,
-               GraphConfig.endBase, GraphConfig.profileTitle() ];
-    }, rebuild);
-    $scope.$watch(GraphConfig.headerSpec, redraw, true);
-    $scope.$watch(function() { return GraphConfig.colorBlindFriendly; }, redraw);
+               GraphConfig.endBase];
+    }, repartition);
+    $scope.$watch(GraphConfig.profileTitle, function(title) {
+      //A profileTitle change indicates different nucleotides: rebuild
+      baseOpts.axisTitle = title;
+      rebuild();
+    });
+    $scope.$watch(GraphConfig.headerSpec, function(val) {
+      baseOpts.headerSpec = val;
+      baseOpts.headerY = val.headerY;
+      redraw();
+    }, true);
+    $scope.$watch(
+      function() { return GraphConfig.colorBlindFriendly; },
+      function(val) {
+        baseOpts.colors = val ? npactConstants.colorBlindLineColors : npactConstants.lineColors;
+        redraw();
+    });
 
 
     /***  Scrolling and Graph Visibility management ***/
@@ -125,11 +124,11 @@ angular.module('npact')
             visible = ctrl.visible,
             idx = $attrs.idx,
             el = $element[0],
-            draw = _.debounce(function() {
+            draw = function() {
               if(g || !visible(idx)) return;
-              g = new Grapher(ctrl.graphOptions(idx, el));
+              g = new Grapher(el, ctrl.graphOptions(idx));
               redraw();
-            }, 50, {maxWait: 120}),
+            },
             redraw = function() {
               if(g !== null) {
                 var t1 = new Date();
@@ -151,7 +150,7 @@ angular.module('npact')
         $scope.$on(Evt.REDRAW, redraw);
         $scope.$on(Evt.REBUILD, discard);
         //Just call draw every time
-        $scope.$watch(draw);
+        $scope.$watch(_.debounce(draw, 50, {maxWait: 120}));
         $scope.$on('$destroy', discard);
       }
     };
