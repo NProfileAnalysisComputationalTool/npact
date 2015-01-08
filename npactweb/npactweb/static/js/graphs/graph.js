@@ -43,8 +43,8 @@ angular.module('npact')
           $scope.graphSpecs = GraphConfig.partition();
           $log.log('Partitioned into', $scope.graphSpecs.length, 'rows.');
           updateVisibility();
-          //TODO: this would be the DISCARD event
-          redraw();
+          updateBaseOptions();
+          $scope.$broadcast(Evt.REBUILD);
         };
 
 
@@ -131,26 +131,29 @@ angular.module('npact')
             el = $element[0],
             draw = _.debounce(function() {
               if(g || !visible(idx)) return;
-              var graphUpdateStart = new Date();
               g = new Grapher(ctrl.graphOptions(idx, el));
-              g.redraw().then(function() {
-                $log.log('Draw of startBase:',
-                         $scope.spec.startBase, 'took',
-                         new Date() - graphUpdateStart, 'ms');
-              });
+              redraw();
             }, 50, {maxWait: 120}),
             redraw = function() {
-              g.redraw();
+              if(g !== null) {
+                var t1 = new Date();
+                g.redraw(ctrl.graphOptions(idx, el))
+                  .then(function() {
+                    $log.log('drew npactGraph', g.startBase,
+                             'took', new Date() - t1, 'ms');
+                  });
+              }
+              else{ draw(); }
             },
             discard = function() {
               if(g !== null) {
+                $log.log('discarding npactGraph', g.startBase);
                 g.destroy();
                 g = null;
               }
-              //Don't need to do anything: `$scope.$watch(draw);`
-              //handles it
             };
-        $scope.$on(Evt.REDRAW, discard);
+        $scope.$on(Evt.REDRAW, redraw);
+        $scope.$on(Evt.REBUILD, discard);
         //Just call draw every time
         $scope.$watch(draw);
         $scope.$on('$destroy', discard);

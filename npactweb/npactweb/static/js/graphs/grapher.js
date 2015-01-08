@@ -28,7 +28,7 @@ angular.module('npact')
                    });
                  }})
         .then(function(opts) {
-          $log.log('Finished slicing', opts);
+          $log.log('Finished profile slicing', opts);
           return profilePoints;
         });
 
