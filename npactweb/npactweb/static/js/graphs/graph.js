@@ -1,6 +1,6 @@
 angular.module('npact')
 
-  .controller('npactGraphContainerCtrl', function($scope, $element, $window, npactConstants, Utils, GraphConfig, Evt, $log, GraphingCalculator) {
+  .controller('npactGraphContainerCtrl', function($scope, $element, $window, npactConstants, Utils, GraphConfig, Evt, $log, GraphingCalculator, headerSpecCalc) {
     'use strict';
 
     //The mouse event responders
@@ -54,9 +54,9 @@ angular.module('npact')
       baseOpts.axisTitle = title;
       rebuild();
     });
-    $scope.$watch(GraphConfig.headerSpec, function(val) {
-      baseOpts.headerSpec = val;
-      baseOpts.headerY = val.headerY;
+    $scope.$watch(GraphConfig.activeTracks, function(val) {
+      //Find headers and headerY
+      angular.extend(baseOpts, headerSpecCalc(val));
       redraw();
     }, true);
     $scope.$watch(
@@ -132,7 +132,7 @@ angular.module('npact')
             redraw = function() {
               if(g !== null) {
                 var t1 = new Date();
-                g.redraw(ctrl.graphOptions(idx, el))
+                g.redraw(ctrl.graphOptions(idx))
                   .then(function() {
                     $log.log('drew npactGraph', g.startBase,
                              'took', new Date() - t1, 'ms');

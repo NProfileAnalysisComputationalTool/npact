@@ -309,6 +309,26 @@ describe('Graphs', function(){
 
   });
 
+  describe('headerSpecCalc', function() {
+    var testExtractsTrack = {text: 'test', lineType: 'extracts', active: true};
+    var testHitsTrack = {text: 'test3', lineType: 'hits', active: true};
+    it('with one extract', inject(function(headerSpecCalc) {
+      expect(headerSpecCalc([testExtractsTrack])).toEqual({
+        headerY: 35,
+        headers: [ { text: 'test', lineType: 'extracts', y: 5, height: 30 }]
+      });
+    }));
+    it('with many', inject(function(headerSpecCalc) {
+      expect(headerSpecCalc([testExtractsTrack, testExtractsTrack, testHitsTrack]))
+        .toEqual({
+          headerY: 85,
+          headers: [
+            { text: 'test', lineType: 'extracts', y: 5, height: 30 },
+            { text: 'test', lineType: 'extracts', y: 35, height: 30 },
+            { text: 'test3', lineType: 'hits', y: 65, height: 20 },
+          ]});
+    }));
+  });
   describe('GraphConfig', function() {
     var G;
     beforeEach(inject(function(GraphConfig){
@@ -344,40 +364,7 @@ describe('Graphs', function(){
       });
     });
 
-    describe('.headerSpec', function() {
-      it('with one extract', function() {
-        G.loadTrack('test', 'extracts');
-        expect(G.headerSpec()).toEqual({
-          headerY: 35,
-          headers: [ { text: 'test', lineType: 'extracts', y: 5, height: 30 }]
-        });
-      });
-      it('with many', function() {
-        G.loadTrack('test', 'extracts');
-        G.loadTrack('test2', 'extracts');
-        G.loadTrack('test3', 'hits');
-        expect(G.headerSpec()).toEqual({
-          headerY: 85,
-          headers: [
-            { text: 'test', lineType: 'extracts', y: 5, height: 30 },
-            { text: 'test2', lineType: 'extracts', y: 35, height: 30 },
-            { text: 'test3', lineType: 'hits', y: 65, height: 20 },
-          ]});
-      });
 
-      it('ignores disabled tracks', function() {
-        G.loadTrack('test', 'extracts');
-        G.loadTrack('test2', 'extracts');
-        G.loadTrack('test3', 'hits');
-        _.find(G.tracks, {text:'test3'}).active = false;
-        expect(G.headerSpec()).toEqual({
-          headerY: 65,
-          headers: [
-            { text: 'test', lineType: 'extracts', y: 5, height: 30 },
-            { text: 'test2', lineType: 'extracts', y: 35, height: 30 },
-          ]});
-      });
-    });
     describe('.partition', function() {
       beforeEach(function() {
         angular.extend(G, {startBase: 0, endBase: 450,

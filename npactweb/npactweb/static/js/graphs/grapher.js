@@ -91,7 +91,7 @@ angular.module('npact')
             var txtOpts = angular.extend({}, defaultTextOpts, header);
             return new K.Text(txtOpts);
           },
-          lbls =  this.headerSpec.headers.map(makeLabel);
+          lbls =  this.headers.map(makeLabel);
 
       addMany(g, lbls);
       return g;
@@ -130,9 +130,7 @@ angular.module('npact')
 
     var leftLayerCache = {};
     GP.leftLayer = function(){
-      // TODO: find a way to cache this key, or make headerSpec.headers
-      // immutable so it can be the key directly
-      var key = angular.toJson(this.headerSpec.headers) + this.axisTitle,
+      var key = angular.toJson(this.headers) + this.axisTitle,
           opts = {
             width: this.leftPadding,
             x:0, y:0,
@@ -334,7 +332,7 @@ angular.module('npact')
       var self = this, gg = self._genomeGroup;
       gg.add(self.xAxisGroup(), self.profileGroup());
 
-      var drawings = _.map(self.headerSpec.headers, function(hdr) {
+      var drawings = _.map(self.headers, function(hdr) {
         return self.trackSlice(hdr.text)
           .then(function(data){
             switch(hdr.lineType){

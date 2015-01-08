@@ -14,8 +14,8 @@ angular.module('npact')
       return '% ' + self.nucleotides.join('');
     };
 
-    var activeTracks = function(){
-      return _.filter(self.tracks, {active: true}, 'active');
+    self.activeTracks = function(){
+      return _.filter(self.tracks, 'active');
     };
 
     /**
@@ -49,24 +49,6 @@ angular.module('npact')
     /**
      * calcuate the header information
      */
-    this.headerSpec = function() {
-      var offset = npactConstants.graphSpecDefaults.headerY;
-      var headers = _.map(activeTracks(), function(cfg) {
-        var h = npactConstants.headerSizes[cfg.lineType],
-            y = offset;
-        offset += h;
-        return {
-          text: cfg.text,
-          lineType: cfg.lineType,
-          y: y,
-          height: h
-        };
-      });
-      return {
-        headers: headers,
-        headerY: offset
-      };
-    };
     this.partition = function() {
       var idx = 0,
           offset = self.offset || 0,
@@ -94,4 +76,26 @@ angular.module('npact')
         $scope.gc = GraphConfig;
       }
     };
-  });
+  })
+
+  .factory('headerSpecCalc', function(npactConstants) {
+    return function(activeTracks) {
+      var offset = npactConstants.graphSpecDefaults.headerY;
+      var headers = _.map(activeTracks, function(cfg) {
+        var h = npactConstants.headerSizes[cfg.lineType],
+            y = offset;
+        offset += h;
+        return {
+          text: cfg.text,
+          lineType: cfg.lineType,
+          y: y,
+          height: h
+        };
+      });
+      return {
+        headers: headers,
+        headerY: offset
+      };
+    };
+  })
+;
