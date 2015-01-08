@@ -1,6 +1,8 @@
 angular.module('npact')
 
-  .controller('npactGraphContainerCtrl', function($scope, $element, $window, npactConstants, Utils, GraphConfig, Evt, $log, GraphingCalculator, headerSpecCalc) {
+  .controller('npactGraphContainerCtrl', function($scope, $element, $window, $log,
+                                           npactConstants, Utils, GraphConfig, Evt,
+                                           GraphingCalculator, headerSpecCalc) {
     'use strict';
 
     //The mouse event responders
