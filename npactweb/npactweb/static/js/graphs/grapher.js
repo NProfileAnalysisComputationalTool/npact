@@ -323,7 +323,13 @@ angular.module('npact')
         }));
     };
 
-    GP.redraw = function(){
+    GP.redraw = function(newOpts){
+      if(newOpts) {
+        // heavy-handed
+        angular.extend(this, newOpts);
+        this.stage.destroyChildren();
+        this.stage.add(this.leftLayer(), this.chartLayer());
+      }
       var self = this, gg = self._genomeGroup;
       gg.add(self.xAxisGroup(), self.profileGroup());
 
