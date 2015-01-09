@@ -65,6 +65,7 @@ def build_config(path, request):
     for k in VALID_KEYS:
         if k in request.GET:
             config[k] = request.GET[k]
+    parsing.endBase(config)
 
 
     for key in MAGIC_PARAMS:

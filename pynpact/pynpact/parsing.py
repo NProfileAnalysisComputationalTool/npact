@@ -107,12 +107,16 @@ def length(config):
             pass
         else:
             config['length'] = 0
+    else:
+        config['length'] = int(config['length'])
     return config['length']
 
 
 def endBase(config):
     if 'endBase' not in config:
         config['endBase'] = length(config)
+    else:
+        config['endBase'] = int(config['endBase'])
     return config['endBase']
 
 
