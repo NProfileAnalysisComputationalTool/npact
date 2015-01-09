@@ -95,6 +95,18 @@ angular.module('npact')
           self.files = files;
         });
     };
+
+    self.onSignificanceChange = function(significance) {
+      $log.log("New prediction significance: ", significance);
+      /*
+         We want to:
+
+         * ask the server to run prediction with the new significance
+         * Add the resulting tracks to GraphConfig
+             * overriding existing ones by name if so
+             * (preserving active status)
+       */
+    };
   })
   .service('FileManager', function(PredictionManager, StatusPoller, Pynpact, $log) {
     'use strict';

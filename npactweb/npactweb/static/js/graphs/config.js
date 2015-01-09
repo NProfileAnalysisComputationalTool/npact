@@ -68,17 +68,22 @@ angular.module('npact')
       return g;
     };
   })
-  .directive('npactGraphConfig', function npactGraphConfig(STATIC_BASE_URL, GraphConfig) {
+  .directive('npactGraphConfig', function npactGraphConfig(STATIC_BASE_URL) {
+    'use strict';
     return {
       restrict: 'A',
       templateUrl: STATIC_BASE_URL + 'js/graphs/config.html',
-      link: function($scope) {
-        $scope.gc = GraphConfig;
-      }
+      controller: 'npactGraphConfigCtrl as gcctrl'
     };
+  })
+  .controller('npactGraphConfigCtrl', function($scope, GraphConfig, PredictionManager) {
+    'use strict';
+    $scope.gc = GraphConfig;
+    $scope.$watch('gc.significance', PredictionManager.onSignificanceChange);
   })
 
   .factory('headerSpecCalc', function(npactConstants) {
+    'use strict';
     return function(activeTracks) {
       var offset = npactConstants.graphSpecDefaults.headerY;
       var headers = _.map(activeTracks, function(cfg) {
