@@ -22,7 +22,7 @@
   <h2>NPACT - N-Profile Analysis Computational Tool (Prokaryotes)</h2>
   <img src="{% url start %}devassets/images/dna.jpg" alt="N-Profile Genbank Analysis Computational Tool image" style="margin:0 0 5px 8px; width:98%" />
   <p>For quantitative frame-analysis and identification of ORFs with statistically-significant 3-base periodicities in <b> prokaryotic sequences </b> NPACT is currently accepting sequence files in the GenBank format (see a <a href="http://www.ncbi.nlm.nih.gov/Sitemap/samplerecord.html">sample record</a> or the <a href="{% url about %}">About</a> page).</p>
-  <p>After seleting a sequence file, "Start Analysis!" will result in a graphical output showing sequence compositional contrasts for frame analysis, coding region (CDS) annotation from the input file, and, by default, regions of non-random 3-base compositional periodicity (hits), newly-identified or modified ORFs, and corresponding output text files. Parameters that can be modified using "Configure Analysis" are: nucleotide type(s) represented in frame analysis; start and end position of the graphical output; significance threshold for high scoring segments (hits). Identification of hits and corresponding ORFs can also be disabled, in which case N-PACT will only produce the graph of frame-specific nucleotide content and positions of genes annotated in the input file when available. </p>
+  <p>After seleting a sequence file, "Start Analysis!" will result in a graphical output showing sequence compositional contrasts for frame analysis, coding region (CDS) annotation from the input file, and, by default, regions of non-random 3-base compositional periodicity (hits), newly-identified or modified ORFs, and corresponding output text files.  </p>
 
   <p class="orange-text">The NPACT server can process uploaded files, files fetched from a url, or
     genbank data pasted directly in. <strong>Only one of the  following is neccessary</strong>.</p>
@@ -56,10 +56,6 @@
     <button class="Start" type="submit" name="action" value="run" 
             title="Get the analysis results based on default configuration.">
       Start Analysis!
-    </button>
-    <button class="Start" type="submit" name="action" value="config" 
-            title="Configure the analysis before running.">
-      Configure Analysis
     </button>
   </form>
   <br/>

@@ -145,7 +145,7 @@ def view(req):
             logger.info("Form is valid; action is %r", action)
             kwargs = startform.cleaned_data
             path = kwargs.pop('path')
-            if action in ['run', 'config']:
+            if action == 'run':
                 return HttpResponseRedirect(
                     reverse(action, args=[path]) + dict_to_querystring(kwargs))
             else:
