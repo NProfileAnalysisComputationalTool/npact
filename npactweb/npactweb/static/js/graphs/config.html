@@ -1,39 +1,56 @@
 <div>
-  <h2>Graph Controls</h2>
-
-  <ul>
-    <li>Click and drag on a graph to pan from left to right</li>
-    <li>Double click on a graph to zoom into that point</li>
-    <li>Hold shift and double click on a graph to zoom out</li>
-  </ul>
   <form name="configForm">
-    <label>Zoom:
-      <input type="number" name="basesPerGraph"
-             style="width:6em;"
-             min="100" required
-             ng-model-options="{debounce: 1000}"
-	     ng-model="gc.basesPerGraph"/> bases/graph
-    </label>
-    <div class="error" ng-messages="configForm.basesPerGraph.$error">
-      <div ng-message="min">Cannot zoom in that far.</div>
-      <div ng-message="required">Must specify a zoom level</div>
+    <h2>Graph Controls</h2>
+
+    <ul>
+      <li>Click and drag on a graph to pan from left to right</li>
+      <li>Double click on a graph to zoom into that point</li>
+      <li>Hold shift and double click on a graph to zoom out</li>
+    </ul>
+
+    <div>
+      <label>Zoom:
+        <input type="number" name="basesPerGraph"
+               style="width:6em;"
+               min="100" required
+               ng-model-options="{debounce: 1000}"
+	       ng-model="gc.basesPerGraph"/> bases/graph
+      </label>
+      <div class="error" ng-messages="configForm.basesPerGraph.$error">
+        <div ng-message="min">Cannot zoom in that far.</div>
+        <div ng-message="required">Must specify a zoom level</div>
+      </div>
     </div>
+    <div>
+      <label>Range</label>
+      <input type="number" name="startBase" style="width:6em;"
+             min="0" ng-model="gc.startBase">
+      to
+      <input type="number" name="endBase" style="width:6em;"
+             min="0" ng-model="gc.endBase">
+
+      <div>
+
+        <label>
+          <input type="checkbox" ng-model="gc.colorBlindFriendly" />
+          Color-blind friendly
+        </label>
+      </div>
+
+      <h3>Tracks</h3>
+      <div>
+        <div ng-repeat="t in gc.tracks">
+          <label><input ng-model="t.active" type="checkbox" /> {{t.text}}</label>
+        </div>
+      </div>
+
+      <h3>NProfile Options</h3>
+      <div>
+        <label>Which nucleotides to analyze?</label><br/>
+        <select multiple ng-model="gc.nucleotides"
+                style="width:100%; display:block;"
+                ng-options="x for x in ['A', 'C', 'G', 'T']">
+        </select>
+      </div>
   </form>
-  <br/>
-  <label><input type="checkbox" ng-model="gc.colorBlindFriendly" /> Color-blind friendly</label>
-  <br/>
-
-  <h3>Tracks</h3>
-  <div ng-repeat="t in gc.tracks">
-    <label><input ng-model="t.active" type="checkbox" /> {{t.text}}</label>
-  </div>
-
-  <h3>NProfile Options</h3>
-  <div>
-    <label>Which nucleotides to analyze?</label><br/>
-    <select multiple ng-model="gc.nucleotides"
-            style="width:100%; display:block;"
-            ng-options="x for x in ['A', 'C', 'G', 'T']">
-    </select>
-  </div>
 </div>
