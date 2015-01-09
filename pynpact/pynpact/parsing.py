@@ -34,7 +34,7 @@ defaults = {
         'following_page_title': 'Page {0}',
 
         'bp_per_page': 50000,
-        'start_base': 0,
+        'startBase': 0,
 
         }
 
@@ -110,10 +110,10 @@ def length(config):
     return config['length']
 
 
-def end_base(config):
-    if 'end_base' not in config:
-        config['end_base'] = length(config)
-    return config['end_base']
+def endBase(config):
+    if 'endBase' not in config:
+        config['endBase'] = length(config)
+    return config['endBase']
 
 
 def first_page_title(config):
@@ -138,8 +138,8 @@ def derive_filename(config, hash, newext):
 
 
 CONFIG_HELP_TEXT = {
-    'start_base': "The base pair coordinate at which to start graphing.",
-    'end_base': "The base pair coordinate at which to end graphing.",
+    'startBase': "The base pair coordinate at which to start graphing.",
+    'endBase': "The base pair coordinate at which to end graphing.",
     'length': "The length, in base pairs, of the genome being analyzed.",
     'first_page_title': "The title of the page containing the beginning of the genome.",
     'following_page_title': "The title of the pages after the first. Use {0} to get the page number.",
@@ -175,4 +175,4 @@ significance_levels = zip(significance_levels, significance_levels)
 #     def __contains__(self, key):
 #         return key in self.__dict__
 #     first_page_title = first_page_title
-#     end_base = end_base
+#     endBase = endBase

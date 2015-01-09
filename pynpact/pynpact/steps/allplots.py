@@ -17,7 +17,7 @@ statuslog = logging.getLogger('pynpact.statuslog')
 BIN = binfile('Allplots')
 
 KEYS = ['first_page_title', 'following_page_title',
-        'length', 'start_base', 'end_base', 'period', 'bp_per_page',
+        'length', 'startBase', 'endBase', 'period', 'bp_per_page',
         'nucleotides', 'alternate_colors', 'basename']
 FILE_KEYS = ['File_of_unbiased_CDSs',
              'File_of_conserved_CDSs',
@@ -64,36 +64,36 @@ def allplots(config, executor):
 
     parsing.length(config)
     parsing.first_page_title(config)
-    parsing.end_base(config)
+    parsing.endBase(config)
 
     h = Hasher()
     # Strip down to the config for this task only
     rconfig = reducedict(config, KEYS + FILE_KEYS)
 
     bp_per_page = rconfig['bp_per_page']
-    start_base = rconfig.pop('start_base')
-    end_base = rconfig.pop('end_base')
+    startBase = rconfig.pop('startBase')
+    endBase = rconfig.pop('endBase')
 
-    page_count = math.ceil(float(end_base - start_base) / bp_per_page)
+    page_count = math.ceil(float(endBase - startBase) / bp_per_page)
     log.info("Generating %d pages of allplots", page_count)
     page_num = 1  # page number offset
     filenames = []
     waiton = []
     # per-page loop
-    while start_base < end_base:
+    while startBase < endBase:
         pconfig = dict(rconfig.items())
         pconfig['page_num'] = page_num
-        pconfig['start_base'] = start_base
-        if start_base + bp_per_page < end_base:
-            pconfig['end_base'] = start_base + bp_per_page
+        pconfig['startBase'] = startBase
+        if startBase + bp_per_page < endBase:
+            pconfig['endBase'] = startBase + bp_per_page
         else:
-            pconfig['end_base'] = end_base
+            pconfig['endBase'] = endBase
         h = Hasher().hashdict(pconfig).hashfiletime(BIN)
         psname = parsing.derive_filename(config, h.hexdigest(), 'ps')
         filenames.append(psname)
         waiton.extend(enqueue(_ap, executor, pconfig, psname, after=after))
         page_num += 1
-        start_base += bp_per_page
+        startBase += bp_per_page
 
     # Finally set the output filenames into the master config dict
     config['psnames'] = filenames
@@ -108,13 +108,13 @@ def _ap(pconfig, out):
         cmd.append("-C")
 
     # add the rest of the required args
-    cmd += [pconfig['start_base'],
+    cmd += [pconfig['startBase'],
             pconfig['bp_per_page'],
             # TODO: move these into config
             5,     # lines on a page
             1000,  # Number of subdivisions
             pconfig['period'],
-            pconfig['end_base']]
+            pconfig['endBase']]
 
     with capproc.guardPopen(
             cmd, stdin=PIPE, stdout=out, stderr=False,

@@ -161,8 +161,6 @@ def sanitize_config_for_client(config):
         output[k] = v
     if 'psnames' in output:
         del output['psnames']
-    output['startBase'] = output['start_base']
-    output['endBase'] = output['end_base']
     return output
 
 def send_email(email_address, config, run_link, result_link):
