@@ -112,20 +112,22 @@ def run_frame(request, path):
 def kickstart(request, path):
     assert_clean_path(path, request)
     config = build_config(path, request)
-
-    # at the moment we always want PDF
-    config['pdf_output'] = True
+    verb = request.GET['verb']
+    verb = verb.split(',')
 
     email = request.GET.get('email')
     client.ensure_daemon()
     executor = client.get_server()
-    config = main.process('nprofile', config, executor=executor)
-    config = main.process('extract', config, executor=executor)
-    config = main.process('acgt_gamma', config, executor=executor)
 
-    if email:
-        config = main.process('allplots', config, executor=executor)
-        build_email(request, path, config)
+    for v in verb:
+        if email:
+            config = main.process('allplots', config, executor=executor)
+            build_email(request, path, config)
+        elif v == 'parse':
+            pass
+        else:
+            # main.process handles the rest of the verbs, or errors
+            config = main.process(v, config, executor=executor)
 
     return HttpResponse(
         json.dumps(sanitize_config_for_client(config)),
@@ -138,7 +140,7 @@ def build_email(request, path, config):
         target_file = config['pdf_filename'] or config['combined_ps_name']
         assert target_file, \
             "Configured for email but didn't get emailable file."
-        # The direcect download link for the PS or PDF file.
+        # The direct download link for the PS or PDF file.
         result_link = request.build_absolute_uri(
             get_result_link(target_file))
         # build path back to run screen.
@@ -164,8 +166,8 @@ def sanitize_config_for_client(config):
         del output['psnames']
     return output
 
+
 def send_email(email_address, config, run_link, result_link):
-    # config is the result of running the process, needs to be first parameter
     try:
         logger.debug("Task completed; sending email %r, %r, %r",
                      email_address, run_link, result_link)

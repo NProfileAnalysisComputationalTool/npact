@@ -35,16 +35,15 @@ angular.module('npact')
       $scope.miscFiles = val;
     }, true);
   })
-  .service('kickstarter', function($q, Err, KICKSTART_BASE_URL, TrackReader, $window, $http, $log, NProfiler, PredictionManager, ExtractManager, FileManager, GraphConfig) {
+
+  .service('kickstarter', function($q, $log, processOnServer,
+                            NProfiler, PredictionManager, ExtractManager, FileManager) {
     'use strict';
+    //Kickstart the whole process, start all the main managers
     this.start = function() {
-      var url = KICKSTART_BASE_URL + $window.location.search;
-      this.basePromise = $http.get(url)
-            .then(function(res) {
-              $log.log('Kickstart successful:', res.data);
-              angular.extend(GraphConfig, res.data);
-              return res.data;
-            });
+      $log.log('kickstarting');
+      this.basePromise = processOnServer( 'extract');
+
       this.everything = $q.all([
         this.basePromise.then(NProfiler.start),
         this.basePromise.then(PredictionManager.start),
@@ -67,11 +66,12 @@ angular.module('npact')
       }
     };
   })
-  .service('PredictionManager', function(Fetcher, StatusPoller, Pynpact, TrackReader, GraphConfig, $log, ACGT_GAMMA_FILE_LIST_URL) {
+  .service('PredictionManager', function(Fetcher, StatusPoller, Pynpact, TrackReader, GraphConfig,
+                                  processOnServer, $log, ACGT_GAMMA_FILE_LIST_URL) {
     'use strict';
     var self = this;
     self.files = null;
-    self.start = function(config) {
+    self.process = function(config) {
       Fetcher.fetchFile(config[Pynpact.NEW_CDS])
         .then(function(data) {
           var name = 'Newly Identified ORFs';
@@ -95,17 +95,13 @@ angular.module('npact')
           self.files = files;
         });
     };
+    //just match the api of expecting a 'start' method
+    self.start = self.process;
 
     self.onSignificanceChange = function(significance) {
       $log.log("New prediction significance: ", significance);
-      /*
-         We want to:
-
-         * ask the server to run prediction with the new significance
-         * Add the resulting tracks to GraphConfig
-             * overriding existing ones by name if so
-             * (preserving active status)
-       */
+      self.files = null;
+      processOnServer('acgt_gamma').then(self.process);
     };
   })
   .service('FileManager', function(PredictionManager, StatusPoller, Pynpact, $log) {

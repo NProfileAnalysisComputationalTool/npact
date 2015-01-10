@@ -68,6 +68,33 @@ angular.module('npact')
       return g;
     };
   })
+
+  .factory('processOnServer', function(GraphConfig, KICKSTART_BASE_URL,
+                                $http, $log, $location) {
+    'use strict';
+    //The keys the server is going to accept from our GraphConfig
+    var configKeys = ['first_page_title', 'following_page_title', //'nucleotides',
+                       'significance', 'alternate_colors', 'startBase', 'endBase'];
+    return function(verb) {
+      var url = KICKSTART_BASE_URL;
+      var postconfig = angular.extend({verb: verb}, $location.search());
+      $log.log('Going to request', verb, url, postconfig);
+      configKeys.forEach(function(k) {
+        postconfig[k] = GraphConfig[k];
+      });
+
+      return $http.get(url, { cache: true, params: postconfig })
+        .then(function(res) {
+          $log.log('Server process successful:', res.data);
+          angular.extend(GraphConfig, res.data);
+          return res.data;
+        });
+      ;
+    };
+  })
+
+
+
   .directive('npactGraphConfig', function npactGraphConfig(STATIC_BASE_URL) {
     'use strict';
     return {
