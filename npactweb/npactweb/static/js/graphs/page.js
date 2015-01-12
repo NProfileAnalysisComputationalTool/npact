@@ -83,7 +83,7 @@ angular.module('npact')
           var type = 'hits';
           var name = 'Hits';
           TrackReader.load(name, data)
-            .then(function() { GraphConfig.loadTrack(name, type); });
+            .then(function() { GraphConfig.loadTrack(name, type, 100); });
 
         });
       StatusPoller.start(config[Pynpact.ACGT_GAMMA_FILES])

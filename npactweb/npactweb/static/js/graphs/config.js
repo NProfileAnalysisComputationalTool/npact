@@ -21,29 +21,29 @@ angular.module('npact')
     /**
      * do we have a track with a given name?
      */
-    this.hasTrack = function(name){
-      return _.some(self.tracks, {text: name});
+    this.findTrack = function(name){
+      return _.find(self.tracks, {text: name});
     };
 
     /**
      * register a track to be displayed on the graph
      */
-    this.loadTrack = function(name, type) {
-      //TODO: This needs to replace existing track on name match
-      if(self.hasTrack(name)){ throw new Err.TrackAlreadyDefined(); }
-      $log.log('loading track', name, type);
-      var newTrack = { text: name, lineType: type, active: true },
-          isHit = function(t) { return t.lineType === 'hits'; },
-          hitIdx = self.tracks.indexOf(_.find(self.tracks, isHit))
-      ;
-
-      // ensure any hits are last, which will display them close to
-      // the graph
-      if(!isHit(newTrack) && hitIdx !== -1){
-        self.tracks.splice(hitIdx, 0, newTrack);
-      }else{
-        self.tracks.push(newTrack);
+    this.loadTrack = function(name, type, weight) {
+      weight = weight || 0;
+      var existing = this.findTrack(name);
+      if(existing) {
+        $log.log("Updating track:", name);
+        existing.lineType = type;
+        existing.weight = weight;
       }
+      else {
+        $log.log('loading new track', name, type, weight);
+        self.tracks.push({
+          text: name, lineType: type,
+          active: true, weight: weight
+        });
+      }
+      self.tracks = _.sortBy(self.tracks, 'weight');
     };
 
     /**

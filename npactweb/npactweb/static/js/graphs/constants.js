@@ -42,8 +42,7 @@ angular.module('npact')
           self[name] = _.partial(Error, message);
         };
 
-    _.map({TrackAlreadyDefined:'Track with this name already defined, each track name must be unique',
-           TrackNotFound: 'track not found',
+    _.map({TrackNotFound: 'track not found',
            ProfileNotFound: 'profile not found'
           },
           makeError);

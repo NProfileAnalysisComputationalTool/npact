@@ -8,7 +8,6 @@ angular.module('npact')
      * load the given track name and data
      */
     this.load = function(name, data) {
-      if (_.has(self.tracks, name)) { throw new Err.TrackAlreadyDefined(); }
       return ExtractParser.parseAsync(data)
         .then(
           function(data) {
@@ -40,7 +39,6 @@ angular.module('npact')
      * load the given track name and data
      */
     this.load = function(name, data) {
-      if (_.has(self.tracks, name)) { throw new Err.TrackAlreadyDefined(); }
       return ExtractParser.parseAsync(data)
         .then(
           function(data) { return (self.tracks[name] = data); },
@@ -79,7 +77,6 @@ angular.module('npact')
      * load the given track name and data
      */
     this.load = function(name, data) {
-      if (_.has(self.tracks, name)) { throw new Err.TrackAlreadyDefined(); }
       return ExtractParser.parseAsync(data)
         .then(
           function(data) {

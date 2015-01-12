@@ -1,7 +1,9 @@
 describe('Graphs', function(){
   'use strict';
 
-  beforeEach(module('npact'));
+  beforeEach(module('npact', function($provide) {
+    $provide.value('$log', console);
+  }));
   beforeEach(module('assets'));
 
   var ng = {}, $scope, $compile, $q, $httpBackend, Err;
@@ -266,13 +268,6 @@ describe('Graphs', function(){
         });
         ng.$timeout.flush();
       });
-      it('throws on duplicate names', function() {
-        T.load('test', extract);
-        ng.$timeout.flush();
-        expect(function() {
-          T.load('test', '');
-        }).toThrow(new Err.TrackAlreadyDefined());
-      });
     });
 
     describe('.slice',function() {
@@ -344,23 +339,27 @@ describe('Graphs', function(){
 
     describe('.loadTrack', function() {
       it('loads', function() {
-        expect(G.tracks).toEqual([]);
-        expect(G.hasTrack('test')).toBe(false);
+        expect(G.activeTracks().length).toBe(0);
+        expect(G.findTrack('test')).toBeFalsy();
         G.loadTrack('test', 'extracts');
-        expect(G.hasTrack('test')).toBe(true);
+        expect(G.findTrack('test')).toBeTruthy();
       });
-      it('throws on duplicate', function() {
+      it('replaces on duplicate', function() {
         G.loadTrack('test', 'extracts');
-        expect(function() {
-          G.loadTrack('test', 'whatever');
-        }).toThrow(new Err.TrackAlreadyDefined());
+        G.tracks[0].active = false;
+        G.loadTrack('test', 'whatever');
+        expect(G.findTrack('test').lineType).toBe('whatever');
+        it('should maintain activity on replace', function() {
+          expect(G.tracks.test.active).toBe(false);
+        });
       });
-      it('keeps "hits" as the last track',function() {
+      it('keeps "hits" as the last track', function() {
         G.loadTrack('test', 'extracts');
-        G.loadTrack('testh', 'hits');
-        expect(G.tracks[1].text).toBe('testh');
-        G.loadTrack('test2', 'extracts');
-        expect(G.tracks[2].text).toBe('testh');
+        G.loadTrack('testh', 'hits', 100);
+        expect(G.activeTracks().length).toBe(2);
+        expect(_.last(G.activeTracks()).text).toBe('testh');
+        G.loadTrack('test3', 'extracts');
+        expect(_.last(G.activeTracks()).text).toBe('testh');
       });
     });
 
