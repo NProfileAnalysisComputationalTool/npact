@@ -65,6 +65,8 @@ def build_config(path, request):
     for k in VALID_KEYS:
         if k in request.GET:
             config[k] = request.GET[k]
+    # These need to be converted to ints
+    parsing.startBase(config)
     parsing.endBase(config)
 
 
@@ -124,6 +126,7 @@ def kickstart(request, path):
             config = main.process('allplots', config, executor=executor)
             build_email(request, path, config)
         elif v == 'parse':
+            # we've already parsed in `build_config` above.
             pass
         else:
             # main.process handles the rest of the verbs, or errors

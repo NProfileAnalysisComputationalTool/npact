@@ -112,6 +112,13 @@ def length(config):
     return config['length']
 
 
+def startBase(config):
+    if 'startBase' not in config:
+        config['startBase'] = 0
+    else:
+        config['startBase'] = int(config['startBase'])
+
+
 def endBase(config):
     if 'endBase' not in config:
         config['endBase'] = length(config)
