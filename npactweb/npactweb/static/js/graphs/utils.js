@@ -221,16 +221,16 @@ angular.module('npact')
   .service('StatusPoller', function(STATUS_BASE_URL, FETCH_URL,
                                     $q, $http, $timeout, $log) {
     'use strict';
-    var POLLTIME = 1000;
+    var initialPollTime = 400;
 
-    function poller(tid, deferred) {
+    function poller(tid, deferred, time) {
       // remember our arguments
-      var pollAgain = _.partial(poller, tid, deferred);
+      var pollAgain = _.partial(poller, tid, deferred, time * 1.5);
 
       $http.get(STATUS_BASE_URL + tid)
         .then(function(res) {
           if(res.data.ready) { deferred.resolve(tid); }
-          else { $timeout(pollAgain, POLLTIME); }
+          else { $timeout(pollAgain, time); }
         })
         .catch(function(err) {
           $log.error('Error while fetching tid: ', tid, err);
@@ -244,7 +244,7 @@ angular.module('npact')
       if(!tid || tid.length === 0){
         return $q.reject(new Error('Invalid task id'));
       }
-      return poller(tid, $q.defer());
+      return poller(tid, $q.defer(), initialPollTime);
     };
   })
 ;
