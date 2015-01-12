@@ -12,7 +12,7 @@
     <div id="computationrunning">
       <div class=" ui-corner-all" ng-class="{'ui-state-highlight': !error,
                      'ui-state-error': error}">
-        <img src="{{STATIC_BASE_URL}}images/spinner.gif" class="spinner"/>
+        <img ng-src="{{STATIC_BASE_URL}}images/spinner.gif" class="spinner"/>
         <p>
           N-PACT is: <em ng-bind="status">Initializing</em>
         </p>
