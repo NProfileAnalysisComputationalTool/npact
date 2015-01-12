@@ -47,6 +47,7 @@ angular.module('npact')
         });
       });
     };
+
     self._slice = function(opts) {
       //This function assumes all the error checking and prep has been
       //done by the `slice` function
@@ -91,7 +92,7 @@ angular.module('npact')
                   normfactor * profile[2]);
         }
       }
-      $log.debug('Slice took ', new Date() - t1);
+      $log.debug('Slice @', opts.startBase, 'took', new Date() - t1);
     };
   })
 ;

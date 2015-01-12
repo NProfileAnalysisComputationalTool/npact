@@ -28,10 +28,7 @@ angular.module('npact')
                      profilePoints[k].push(100-v);
                    });
                  }})
-        .then(function(opts) {
-          $log.log('Finished profile slicing', opts);
-          return profilePoints;
-        });
+        .then(function(opts) { return profilePoints; });
 
       this.stage = new K.Stage({
         container: element,
