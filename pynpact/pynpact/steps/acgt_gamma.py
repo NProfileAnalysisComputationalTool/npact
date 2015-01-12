@@ -40,7 +40,6 @@ def plan(config, executor):
     config['File_of_G+C_coding_potential_regions'] = j('.profiles')
     config[OUTPUTKEY] = outdir
 
-
     return enqueue(_acgt_gamma, executor, rconfig, outdir)
 
 
