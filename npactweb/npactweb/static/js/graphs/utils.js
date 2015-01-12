@@ -197,13 +197,21 @@ angular.module('npact')
     /**
      * download contents from a "fetch" path
      */
-    self.fetchFile = function(path){ return self.rawFile(FETCH_URL + path); };
+    self.fetchFile = function(path){
+      if(!path) {
+        throw new Error("Path is undefined");
+      }
+      return self.rawFile(FETCH_URL + path);
+    };
 
 
     /**
      * poll the server for when `path` is ready, then fetch it
      */
     self.pollThenFetch = function(path) {
+      if(!path) {
+        throw new Error("Path is undefined");
+      }
       return StatusPoller.start(path).then(self.fetchFile);
     };
 
