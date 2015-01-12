@@ -39,91 +39,105 @@ angular.module('npact')
     $scope.ready = false;
     $scope.FETCH_URL = FETCH_URL;
 
-    kickstarter.start().then(function(config) {
-      $scope.status = 'Running';
-      // got config, request the first round of results
-      $scope.title = config[Pynpact.TITLE];
-      $scope.email = config[Pynpact.EMAIL];
-      $scope.configureUrl = config[Pynpact.CONFIGURE_URL];
+    $scope.$watch(function() { return GraphConfig[Pynpact.TITLE]; },
+                 function(newTitle) { $scope.title = newTitle; });
 
-      kickstarter.everything
-        .catch(function(err) {
-          $scope.error = true;
-        })
-        .then(function() { delete $scope.status; });
-
-    });
+    kickstarter.start();
     $scope.$watch(FileManager.getFiles, function(val) {
       $scope.miscFiles = val;
     }, true);
   })
 
-  .service('kickstarter', function($q, $log, processOnServer,
+  .service('kickstarter', function($q, $log, processOnServer, MessageBus,
                             NProfiler, PredictionManager, ExtractManager, FileManager) {
     'use strict';
     //Kickstart the whole process, start all the main managers
     this.start = function() {
-      $log.log('kickstarting');
-      this.basePromise = processOnServer( 'extract');
-
-      this.everything = $q.all([
-        this.basePromise.then(NProfiler.start),
-        this.basePromise.then(PredictionManager.start),
-        this.basePromise.then(ExtractManager.start),
-        this.basePromise.then(FileManager.start)]);
+      MessageBus.info('kickstarting');
+      this.basePromise = processOnServer( 'parse');
+      this.basePromise.then(NProfiler.start);
+      this.basePromise.then(PredictionManager.start);
+      this.basePromise.then(ExtractManager.start);
+      this.basePromise.then(FileManager.start);
       return this.basePromise;
     };
   })
 
-  .service('ExtractManager', function(Fetcher, Pynpact, TrackReader, GraphConfig, $log) {
+  .service('ExtractManager', function(Fetcher, Pynpact, TrackReader, GraphConfig,
+                               processOnServer, MessageBus, $log) {
     'use strict';
     this.start = function(config) {
-      if(config[Pynpact.CDS]) {
-        Fetcher.pollThenFetch(config[Pynpact.CDS])
-          .then(function(data) {
-            var name = 'Input file CDS';
-            TrackReader.load(name, data)
-              .then(function() { GraphConfig.loadTrack(name, 'extracts'); });
-          });
-      }
+      if(config.format != 'genbank') { return; }
+      processOnServer('extract').then(function(config) {
+        if(config[Pynpact.CDS]) {
+          Fetcher.pollThenFetch(config[Pynpact.CDS])
+            .then(function(data) {
+              var name = 'Input file CDS';
+              TrackReader.load(name, data)
+                .then(function() { GraphConfig.loadTrack(name, 'extracts'); });
+            });
+        }
+      });
     };
   })
-  .service('PredictionManager', function(Fetcher, StatusPoller, Pynpact, TrackReader, GraphConfig,
-                                  processOnServer, $log, ACGT_GAMMA_FILE_LIST_URL) {
+  .service('PredictionManager', function(Fetcher, StatusPoller, Pynpact, TrackReader,
+                                  GraphConfig, processOnServer, $log,
+                                  ACGT_GAMMA_FILE_LIST_URL) {
     'use strict';
     var self = this;
     self.files = null;
-    self.process = function(config) {
-      Fetcher.fetchFile(config[Pynpact.NEW_CDS])
-        .then(function(data) {
-          var name = 'Newly Identified ORFs';
-          TrackReader.load(name, data)
-            .then(function() { GraphConfig.loadTrack(name, 'extracts'); });
-        });
-      Fetcher.fetchFile(config[Pynpact.HITS])
-        .then(function(data) {
-          var type = 'hits';
-          var name = 'Hits';
-          TrackReader.load(name, data)
-            .then(function() { GraphConfig.loadTrack(name, type, 100); });
-
-        });
-      StatusPoller.start(config[Pynpact.ACGT_GAMMA_FILES])
-        .then(function(path) {
-          return Fetcher.rawFile(ACGT_GAMMA_FILE_LIST_URL + path);
-        })
+    self.updateFiles = function(path) {
+      $log.log('Fetching the ACGT_GAMMA_FILE_LIST from', path);
+      Fetcher.rawFile(ACGT_GAMMA_FILE_LIST_URL + path)
         .then(function(files) {
           $log.log('ACGT Gamma Files ready', files);
           self.files = files;
         });
     };
-    //just match the api of expecting a 'start' method
-    self.start = self.process;
+    self.disableTrack = function(nameBase, oldSig) {
+      if(oldSig) {
+        var oldTrack = GraphConfig.findTrack(nameBase + oldSig);
+        if(oldTrack) { oldTrack.active = false; }
+      }
+    };
+    self.newHits = function(waitOn, config, oldSig) {
+      var nameBase = 'Hits @';
+      self.disableTrack(nameBase, oldSig);
+      waitOn.then(function(path) {
+        Fetcher.fetchFile(config[Pynpact.HITS])
+          .then(function(data) {
+            var type = 'hits', name = nameBase + config.significance;
+            TrackReader.load(name, data)
+              .then(function() { GraphConfig.loadTrack(name, type, 100); });
 
-    self.onSignificanceChange = function(significance) {
-      $log.log("New prediction significance: ", significance);
-      self.files = null;
-      processOnServer('acgt_gamma').then(self.process);
+          });
+      });
+    };
+    self.newCds = function(waitOn, config, oldSig) {
+      var nameBase = 'Newly Identified ORFs @';
+      self.disableTrack(nameBase, oldSig);
+      waitOn.then(function(path) {
+        Fetcher.fetchFile(config[Pynpact.NEW_CDS])
+          .then(function(data) {
+            var name = nameBase + config.significance;
+            TrackReader.load(name, data)
+              .then(function() { GraphConfig.loadTrack(name, 'extracts', 15); });
+          });
+      });
+    };
+
+    self.onSignificanceChange = function(significance, oldSig) {
+      if(significance) {
+        $log.log("New prediction significance: ", significance);
+        self.files = null;
+        processOnServer('acgt_gamma').then(function(config) {
+          var waitOn = StatusPoller.start(config[Pynpact.ACGT_GAMMA_FILES]);
+          self.newHits(waitOn, config, oldSig);
+          self.newCds(waitOn, config, oldSig);
+          waitOn.then(self.updateFiles);
+          return waitOn;
+        });
+      }
     };
   })
   .service('FileManager', function(PredictionManager, StatusPoller, Pynpact, $log) {
