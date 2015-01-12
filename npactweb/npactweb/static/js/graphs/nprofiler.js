@@ -6,10 +6,11 @@ angular.module('npact')
       $log.log("Starting nprofiler", self);
       self.config = config;
 
-      return self.fetching = Fetcher.fetchFile(config[Pynpact.DDNA_FILE]).then(function(ddna) {
+      self.fetching = Fetcher.fetchFile(config[Pynpact.DDNA_FILE]).then(function(ddna) {
         $log.debug('Got back a ddna of length: ', ddna.length);
         self.ddna = ddna;
       });
+      return self.fetching;
     };
 
     self.avgParams = function(len) {
