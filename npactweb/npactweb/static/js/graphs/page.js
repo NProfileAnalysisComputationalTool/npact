@@ -9,6 +9,28 @@ angular.module('npact')
     };
   })
 
+  .service('MessageBus', function($log) {
+    this.error = function(msg) {
+      return this.log('error', msg);
+    };
+    this.info = function(msg) {
+      return this.log('info', msg);
+    };
+    this.log = function(level, msg) {
+      $log.log(level, msg);
+      /// TODO: Make these user-visible on the screen
+      // var msgpane = angular.element('#msgpane');
+      // var newmessage = angular.element('<div>' + msg + '</div>')
+      //       .addClass('alert').addClass('alert-' + level)
+      //       .css({display: 'none'});
+      // msgpane.append(newmessage);
+      // newmessage.slideDown(1000, function() {
+      //   $timeout(function () { newmessage.slideUp(1000); },
+      //            MessageDisplayTime);
+      // });
+    };
+  })
+
   .controller('npactGraphPageCtrl', function($scope, Fetcher, $q, $log, StatusPoller, FETCH_URL, GraphConfig, Pynpact, FileManager, kickstarter) {
     'use strict';
 

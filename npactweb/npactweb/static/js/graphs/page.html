@@ -1,13 +1,7 @@
 <div>
-  <h2>{{title}}</h2>
-  <div id="computationerred" class="ui-state-error ui-corner-all" ng-if="error">
-    <p>
-      <span class="ui-icon ui-icon-alert"></span>
-      There was an error. You can click refresh to try again
-      or return to the <a href="/npact/">start</a>.
-    </p>
-  </div>
-  <div id="progressreport" ng-show="status">
+  <h2 ng-bind="title"></h2>
+  <div id="progressreport" ng-show="false">
+    <!-- This needs to display messages from MessageBus -->
     <h3> Status </h3>
     <div id="computationrunning">
       <div class=" ui-corner-all" ng-class="{'ui-state-highlight': !error,
