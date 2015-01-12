@@ -69,6 +69,10 @@ angular.module('npact')
     };
   })
 
+  /*
+   * Run a VERB (e.g. extract, acgt_gamma) on server.
+   * Get back a config dictionary (which automatically updates GraphConfig)
+   */
   .factory('processOnServer', function(GraphConfig, KICKSTART_BASE_URL,
                                 $http, $log, $location) {
     'use strict';
@@ -89,7 +93,6 @@ angular.module('npact')
           angular.extend(GraphConfig, res.data);
           return res.data;
         });
-      ;
     };
   })
 
