@@ -286,8 +286,22 @@ angular.module('npact')
               strokeWidth:1,
               strokeScaleEnabled: false
             });
+          },
+          shades = GraphingCalculator.shades({
+            start: this.startBaseM,
+            end: this.endBaseM,
+            interval: xaxis.interval
+          }),
+          shadeOpts = {
+            y: 2, height: 96,
+            fill: this.profileShadeColor
           }
       ;
+      _.each(shades, function(x) {
+        g.add(new K.Rect(angular.extend(x, shadeOpts)));
+      });
+
+
       this.onProfilePoints
         .then(function(points) {
           if(!g.getLayer()) {return;}

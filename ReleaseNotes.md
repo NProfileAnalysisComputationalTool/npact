@@ -4,5 +4,6 @@
 * Render only visible graphs as you scroll #846
 * toggle tracks visibility from the control panel #849
 * clean the file (gbk,fasta) before doing anything #844
+* render background shading in graphs #848
 * bug fixes
    * correct scaling of nprofile lines
