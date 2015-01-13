@@ -288,8 +288,8 @@ angular.module('npact')
             });
           },
           shades = GraphingCalculator.shades({
-            start: this.startBaseM,
-            end: this.endBaseM,
+            startBase: this.startBaseM,
+            endBase: this.endBaseM,
             interval: xaxis.interval
           }),
           shadeOpts = {
