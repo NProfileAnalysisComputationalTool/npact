@@ -84,7 +84,8 @@ angular.module('npact')
       var postconfig = angular.extend({verb: verb}, $location.search());
       $log.log('Going to request', verb, url, postconfig);
       configKeys.forEach(function(k) {
-        postconfig[k] = GraphConfig[k];
+        if(GraphConfig[k])
+          postconfig[k] = GraphConfig[k];
       });
 
       return $http.get(url, { cache: true, params: postconfig })
