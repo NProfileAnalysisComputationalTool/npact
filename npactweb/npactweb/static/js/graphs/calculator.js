@@ -182,5 +182,33 @@ angular.module('npact')
       return {x: rect.x + (rect.width/2) - (toAlign.width/2),
               y: rect.y + (rect.height/2) - (toAlign.height/2)};
     };
+
+    /**
+     * determine background shading
+     *
+     * @param {Object} opts - {startBase, endBase, interval}, where
+     * interval is the space between axis labels
+     */
+    self.shades = function(opts) {
+      var width = opts.interval / 2,
+          // want the X to start on 0 or multiples of `interval`
+          nearestEvenStartBase = Math.floor(opts.startBase / opts.interval) *
+            opts.interval,
+          xes = _.range(nearestEvenStartBase, opts.endBase, opts.interval)
+      ;
+      return _.map(xes, function(x) {
+        var w = width;
+        // handle shades falling off the left side
+        if (x < opts.startBase){
+          w -= opts.startBase - x;
+          x = opts.startBase;
+        }
+        // handle shades falling off the right side
+        if(x + width > opts.endBase){
+          w = opts.endBase - x;
+        }
+        return { width: w, x: x };
+      });
+    };
   })
 ;

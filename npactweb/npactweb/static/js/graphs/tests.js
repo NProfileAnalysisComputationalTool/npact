@@ -188,6 +188,24 @@ describe('Graphs', function(){
       expectZoom([10000, 0.5, 10000, 0], 7500, 5000);
       expectZoom([20000, 0.5, 10000, 0], 12500, 5000);
     });
+
+    it('calculates shading', function() {
+      expect(GC.shades({startBase:0, endBase:50, interval:10}))
+        .toEqual([{width: 5, x:0},
+                  {width: 5, x:10},
+                  {width: 5, x:20},
+                  {width: 5, x:30},
+                  {width: 5, x:40}]);
+    });
+    it('calculates even shading with uneven start/end ', function() {
+      expect(GC.shades({startBase:12, endBase:51, interval:10}))
+        .toEqual([{width: 3, x:12},
+                  {width: 5, x:20},
+                  {width: 5, x:30},
+                  {width: 5, x:40},
+                  {width: 1, x:50},]);
+
+    });
   });
 
   describe('ExtractParser', function(){
