@@ -3,7 +3,7 @@ angular.module('npact')
     'use strict';
     var self = this;
 
-    self.stops = function(a,b){
+    self.stops = function(a, b){
       var length = b - a,
           // get even stops; look for one lower order of magnitude
           // than our length - TODO: too many stops for lower ranges

@@ -54,7 +54,7 @@ angular.module('npact')
     //Kickstart the whole process, start all the main managers
     this.start = function() {
       MessageBus.info('kickstarting');
-      this.basePromise = processOnServer( 'parse');
+      this.basePromise = processOnServer('parse');
       this.basePromise.then(NProfiler.start);
       this.basePromise.then(PredictionManager.start);
       this.basePromise.then(ExtractManager.start);

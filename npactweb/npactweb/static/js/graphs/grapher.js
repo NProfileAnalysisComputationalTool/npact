@@ -17,12 +17,12 @@ angular.module('npact')
       // start slicing the NProfile into Kinetic-compatible [x1, y1,
       // x2, y2, ...] lists, make a promise for the completed group of
       // points
-      var profilePoints = {r:[], g:[], b:[]};
+      var profilePoints = {r: [], g: [], b: []};
       this.onProfilePoints = NProfiler
         .slice({ startBase: this.startBaseM,
                  endBase: this.endBaseM,
                  onPoint: function(coord, rv, gv, bv) {
-                   angular.forEach({r:rv, g:gv, b:bv}, function(v, k) {
+                   angular.forEach({r: rv, g: gv, b: bv}, function(v, k) {
                      profilePoints[k].push(coord);
                      //invert because drawing is from the top so 100% is 0 pix
                      profilePoints[k].push(100-v);
@@ -47,7 +47,7 @@ angular.module('npact')
     };
 
     GP.drawAxisTicks = function(ticks){
-      var tickOpts = {x: 0, y:0,
+      var tickOpts = {x: 0, y: 0,
                       stroke: this.borderColor,
                       strokeScaleEnabled: false};
       return ticks
@@ -57,20 +57,20 @@ angular.module('npact')
         });
     };
 
-    GP.drawAxisLabels = function(labels, textOpts){
+    GP.drawAxisLabels = function(labels, textOpts) {
       // draw labels at the right spacing
       var defaultTextOpts = {
         fontSize: this.axisLabelFontsize,
-        fill:this.axisFontcolor
+        fill: this.axisFontcolor
       };
 
-      return labels.map(function(lbl){
+      return labels.map(function(lbl) {
         var txtOpts = angular.extend({}, lbl, defaultTextOpts, textOpts);
         return new K.Text(txtOpts);
       });
     };
 
-    GP.headerGroup = function(g){
+    GP.headerGroup = function(g) {
 
       // TODO: derive opts.leftPadding
       // * add all labels
@@ -82,7 +82,7 @@ angular.module('npact')
         align: 'right', x: 0,
         fontSize: this.headerLabelFontsize,
         width: this.leftPadding - this.headerLabelPadding,
-        fill:this.headerLabelFontcolor
+        fill: this.headerLabelFontcolor
       },
           makeLabel = function(header) {
             var txtOpts = angular.extend({}, defaultTextOpts, header);
@@ -94,18 +94,18 @@ angular.module('npact')
       return g;
     };
 
-    GP.yAxisGroup = function(g){
+    GP.yAxisGroup = function(g) {
       var m = this.m;
 
       addMany(g, this.drawAxisTicks(m.yaxis.ticks));
       // draw labels at the right aligned
-      addMany(g, this.drawAxisLabels(m.yaxis.labels, {align:'right'}));
+      addMany(g, this.drawAxisLabels(m.yaxis.labels, {align: 'right'}));
 
       // the title
       var title = new K.Text({
-        y:0, x:0, // reposition this below
-        rotation:-90,
-        fill:this.axisFontcolor,
+        y: 0, x: 0, // reposition this below
+        rotation: -90,
+        fill: this.axisFontcolor,
         fontSize: this.axisTitleFontsize,
         text: this.axisTitle
       });
@@ -130,14 +130,14 @@ angular.module('npact')
       var key = angular.toJson(this.headers) + this.axisTitle,
           opts = {
             width: this.leftPadding,
-            x:0, y:0,
+            x: 0, y: 0,
             height: this.height
           },
           layer = new K.FastLayer(opts);
 
       if(leftLayerCache[key]){
         leftLayerCache[key].then(function(image) {
-          layer.add(new K.Image(angular.extend(opts, {image:image})));
+          layer.add(new K.Image(angular.extend(opts, {image: image})));
           layer.draw();
         });
       }else{
@@ -145,7 +145,7 @@ angular.module('npact')
         this.headerGroup(layer);
         leftLayerCache[key] = $q(function(resolve) {
           $log.log('saving leftLayer image');
-          layer.toImage(angular.extend(opts, {callback:resolve}));
+          layer.toImage(angular.extend(opts, {callback: resolve}));
         });
       }
       return layer;
@@ -154,11 +154,11 @@ angular.module('npact')
     GP.genomeGroup = function(){
       var self = this,
           gx = this.m.graph.x,
-          dragRes = {x: gx, y:0},
+          dragRes = {x: gx, y: 0},
           g = new K.Group({
             x: gx,
             draggable: true,
-            dragBoundFunc:function(pos){
+            dragBoundFunc: function(pos){
               // pos is the distance dragged, except `pos.x` always
               // starts at `gx`. Something due to container coordinate
               // system vs stage coordinate system. `pos.y` is not
@@ -182,7 +182,8 @@ angular.module('npact')
         var oldStartBase = self.startBase,
             newStartBase = (this.offsetX() / self.xaxis.scaleX) + oldStartBase;
         // tell the world
-        self.onPan({oldStartBase: oldStartBase, newStartBase: newStartBase, evt:evt});
+        self.onPan(
+          {oldStartBase: oldStartBase, newStartBase: newStartBase, evt: evt});
       });
 
       g.on('mouseover', function() {
@@ -194,9 +195,9 @@ angular.module('npact')
       g.on('dblclick', _.bind(this.onDblClick, this));
       // need a shape that can be clicked on to allow dragging the
       // entire canvas
-      g.add(new K.Rect({x: 0, y:this.m.graph.y,
-                        width:this.m.graph.w,
-                        height:this.m.graph.h}));
+      g.add(new K.Rect({x: 0, y: this.m.graph.y,
+                        width: this.m.graph.w,
+                        height: this.m.graph.h}));
       return (this._genomeGroup = g);
     };
 
@@ -218,10 +219,10 @@ angular.module('npact')
     GP.chartLayer = function(){
       var m = this.m,
           l = new K.Layer({
-            clip:{
-              x: m.graph.x-1, y:0,
-              width:m.graph.w+2,
-              height:1000
+            clip: {
+              x: m.graph.x-1, y: 0,
+              width: m.graph.w+2,
+              height: 1000
             }
           }),
           // frame around the graph
@@ -261,7 +262,7 @@ angular.module('npact')
       addMany(g, labels);
 
       // call `centerXLabel(txt, xaxis.scaleX)`
-      labels.map(function(txt){
+      labels.map(function(txt) {
         centerXLabel(txt, xaxis.scaleX);
       });
 
@@ -272,8 +273,8 @@ angular.module('npact')
       var m = this.m, xaxis = this.xaxis,
           colors = this.colors,
           g = new K.Group({
-            x: 0, y:m.graph.y,
-            height: m.graph.h, width:xaxis.length,
+            x: 0, y: m.graph.y,
+            height: m.graph.h, width: xaxis.length,
             scaleX: xaxis.scaleX,
             // convert % to px
             scaleY: m.graph.h / 100,
@@ -281,9 +282,9 @@ angular.module('npact')
           }),
           buildLine = function(points, color) {
             return new K.Line({
-              points:points,
-              stroke:color,
-              strokeWidth:1,
+              points: points,
+              stroke: color,
+              strokeWidth: 1,
               strokeScaleEnabled: false
             });
           },
@@ -333,9 +334,9 @@ angular.module('npact')
         }));
     };
 
-    GP.redraw = function(newOpts){
       if(newOpts) {
         // heavy-handed
+    GP.redraw = function(newOpts) {
         angular.extend(this, newOpts);
         this.stage.destroyChildren();
         this.stage.add(this.leftLayer(), this.chartLayer());
@@ -370,8 +371,8 @@ angular.module('npact')
             arrowBounds,
             {
               // convert to gene space
-              width:txt.getWidth()/ scaleX,
-              height:txt.getHeight()
+              width: txt.getWidth() / scaleX,
+              height: txt.getHeight()
             });
       pos.x = Math.max(pos.x, arrowBounds.x+1);
       txt.position(pos);
@@ -438,7 +439,7 @@ angular.module('npact')
               line = new K.Line(angular.extend({
                 extract: x,
                 points: shape,
-                stroke:c
+                stroke: c
               }, arrowOpts)),
               // render the name, too
               lbl = new K.Text(angular.extend({
@@ -448,7 +449,7 @@ angular.module('npact')
               }, textOpts)),
               // need a dummy group for clipping, `Text` doesn't
               // support clip directly
-              lblGroup = new K.Group({clip:arrowBounds});
+              lblGroup = new K.Group({clip: arrowBounds});
 
           lblGroup.add(lbl);
           g.add(line, lblGroup);
@@ -467,12 +468,12 @@ angular.module('npact')
         scope.extract = evt.target.getAttrs().extract;
         $el.qtip({
           content: {text: $compile(tpl)(scope)},
-          position:{
+          position: {
             my: scope.extract.complement === 0 ? 'top center' : 'bottom center',
-            target:[evt.evt.pageX, evt.evt.pageY]
+            target: [evt.evt.pageX, evt.evt.pageY]
           },
-          show: {event:'tooltipShow.npact'},
-          hide: {event:'tooltipHide.npact'}
+          show: {event: 'tooltipShow.npact'},
+          hide: {event: 'tooltipHide.npact'}
         });
         $el.trigger('tooltipShow.npact');
       });
@@ -497,7 +498,7 @@ angular.module('npact')
             offsetX: startBase
           }),
           guideLineOpts = {
-            stroke:'#ddd'
+            stroke: '#ddd'
           }
       ;
       // draw the guide lines
