@@ -13,12 +13,18 @@ angular.module('npact')
       return self.fetching;
     };
 
-    self.avgParams = function(len) {
-      return {
-        window: 201,
-        step: 51,
+    self.stepSize = function(opts) {
+      var len = (opts.endBase - opts.startBase) / 200;
+      //round to multiple of 3
+      return len + 1.5 - (len + 1.5) % 3;
+    };
+
+    self.defaultParams = function(opts) {
+      var step = opts.step || self.stepSize(opts);
+      return angular.extend({
+        window: 201, step: step,
         nucleotides: GraphConfig.nucleotides
-      };
+      }, opts);
     };
     self.slice = function(opts) {
       var d = $q.defer();
@@ -31,7 +37,7 @@ angular.module('npact')
       // The period is hardcoded to 3 (r,g,b) due to assumptions
       // throughout this graph system
       opts.period = 3;
-      opts = angular.extend(self.avgParams(), opts);
+      opts = self.defaultParams(opts);
 
       if(opts.window % opts.period) {
         d.reject("Window size (" + opts.window +
@@ -86,13 +92,15 @@ angular.module('npact')
         }
         n++;
         if(n >= window && ((n-window) % step) === 0) {
+          //idx+1: we 1 index our bases traditionally
+          //win2: we want report the coordinate at the center of the window
           onPoint((idx+1) - win2,
                   normfactor * profile[0],
                   normfactor * profile[1],
                   normfactor * profile[2]);
         }
       }
-      $log.debug('Slice @', opts.startBase, 'took', new Date() - t1);
+      $log.debug('Slice @', opts.startBase, 'step', step, 'took', new Date() - t1);
     };
   })
 ;

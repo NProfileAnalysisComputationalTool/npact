@@ -44,6 +44,16 @@ describe('NProfiler', function(){
     });
   });
 
+  describe('.stepSize', function() {
+    it('should work', function() {
+      var ss = NP.stepSize({startBase: 0, endBase: 10000});
+      expect(ss).toBe(51);
+    });
+    it('should always be multiple of 3',function() {
+      expect(NP.stepSize({startBase: 0, endBase: 9040}) % 3).toBe(0);
+    });
+  });
+
   describe('.slice', function() {
     beforeEach(inject(function($q) {
       NP.ddna = sampleDdnaFile;
@@ -86,6 +96,7 @@ describe('NProfiler', function(){
     it('Shouldn\'t fail with an end pass the length', function(done) {
       var count = 0;
       NP.slice({startBase: 0, endBase: 50000,
+                step: 51, window: 201,
                 onPoint: function() { count++; }})
         .then(function() {
           expect(count).toBe(215);
@@ -112,6 +123,19 @@ describe('NProfiler', function(){
       NP.slice({startBase:1, endBase:50, window: 50})
         .catch(function() { flag = true; })
         .finally(function() { expect(flag).toBe(true); done(); });
+      $timeout.flush();
+    });
+
+    var endBase = Math.max(2000,
+                           Math.round(Math.random() * sampleConfig.length));
+    it('has about 200 data points between 0 and ' + endBase, function(done) {
+      var count = 0;
+      NP.slice({startBase: 0, endBase: endBase, onPoint: function() { count++; }})
+        .then(function() {
+          expect(count).toBeGreaterThan(170);
+          expect(count).toBeLessThan(230);
+          done();
+      });
       $timeout.flush();
     });
   });
