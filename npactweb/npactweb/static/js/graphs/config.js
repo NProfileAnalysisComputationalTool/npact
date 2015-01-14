@@ -131,6 +131,11 @@ angular.module('npact')
     $scope.$watchGroup(gcpubkeys, function(newVals) {
       $location.search(_.object(PUBLIC_CONFIG_KEYS, newVals));
     });
+
+    this.defaults = function() {
+      $log.log("Defaults requested, redirecting", $location.path());
+      $window.location.href = $location.path();
+    };
   })
 
   .factory('headerSpecCalc', function(npactConstants) {
