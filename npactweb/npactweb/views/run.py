@@ -64,12 +64,15 @@ def build_config(path, request):
     for k in VALID_KEYS:
         if k in request.GET and request.GET[k]:
             config[k] = request.GET[k]
+    # fixup nucleotides list
+    if 'nucleotides' in request.GET:
+        logger.info("nucleotides: %r", request.GET.getlist('nucleotides'))
+        config['nucleotides'] = request.GET.getlist('nucleotides')
+
     # These need to be converted to ints
     parsing.startBase(config)
     parsing.endBase(config)
     parsing.first_page_title(config)
-
-
 
     for key in MAGIC_PARAMS:
         if key in request.GET:

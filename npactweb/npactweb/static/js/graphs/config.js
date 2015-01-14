@@ -1,6 +1,6 @@
 angular.module('npact')
   .constant('PUBLIC_CONFIG_KEYS',
-            ['first_page_title', 'following_page_title', //'nucleotides',
+            ['first_page_title', 'following_page_title', 'nucleotides',
              'significance', 'alternate_colors', 'startBase', 'endBase'])
 
 
