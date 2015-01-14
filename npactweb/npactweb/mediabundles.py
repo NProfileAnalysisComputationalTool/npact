@@ -27,7 +27,7 @@ MEDIA_BUNDLES = (
      'bower_components/lodash/dist/lodash.min.js',
      'bower_components/qtip2/jquery.qtip.min.js',
      'bower_components/rtree/dist/rtree.min.js',
-     'bower_components/ngSticky/sticky.min.js',
+     'bower_components/ngSticky/dist/sticky.min.js',
      'js/app.js',
      'js/graphs/constants.js',
      'js/graphs/utils.js',
