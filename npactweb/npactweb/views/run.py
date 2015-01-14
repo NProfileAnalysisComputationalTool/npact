@@ -105,10 +105,13 @@ def run_frame(request, path):
 
     return render_to_response(
         'processing.html',
-        {'status_base': reverse('runstatus', args=['']),
-         'kickstart_base': reverse('kickstart', args=[path]),
-         'fetch_base': reverse('raw', args=['']),
-         'acgt_gamma_base': reverse('acgt_gamma_file_list', args=[''])},
+        {
+            'status_base': reverse('runstatus', args=['']),
+            'kickstart_base': reverse('kickstart', args=[path]),
+            'fetch_base': reverse('raw', args=['']),
+            'acgt_gamma_base': reverse('acgt_gamma_file_list', args=['']),
+            'base_href': reverse('run', args=[path])
+        },
         context_instance=RequestContext(request))
 
 

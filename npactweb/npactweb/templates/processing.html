@@ -4,11 +4,12 @@
 {% block title %}N-PACT - N-Profile Analysis Computational Tool{% endblock %}
 
 {% block addScript %}
+<base href="{{base_href}}">
+
 {% include_media 'jquery.js' %}
 {% include_media 'processing.js' %}
 
 {% endblock addScript %}
-
 {% block content %}
 
 <div id="progress" class="contentPadding">
