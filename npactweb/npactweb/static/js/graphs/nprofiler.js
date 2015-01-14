@@ -13,19 +13,25 @@ angular.module('npact')
       return self.fetching;
     };
 
-    self.stepSize = function(opts) {
-      var len = (opts.endBase - opts.startBase) / 200;
+    var round3 = function(num) {
       //round to multiple of 3
-      return len + 1.5 - (len + 1.5) % 3;
+      return num + 1.5 - (num + 1.5) % 3;
     };
 
-    self.defaultParams = function(opts) {
-      var step = opts.step || self.stepSize(opts);
-      return angular.extend({
-        window: 201, step: step,
-        nucleotides: GraphConfig.nucleotides
-      }, opts);
+    self.defaultStepSize = function(len) {
+      //Targetting about 200 datapoints for one graph line
+      return round3(len / 200);
     };
+
+    self.defaultWindowSize = function(step) {
+      //
+      // This will be roughly this graph: http://www.wolframalpha.com/input/?i=plot+50*ln%28x%2F200%29+from+1000+to+100000
+      // At  2000 it is 111,
+      // At 10000 it is 198
+      // At 50000 it is 276
+      return round3(50 * Math.log(step));
+    };
+
     self.slice = function(opts) {
       var d = $q.defer();
       if(opts === undefined ||
@@ -37,7 +43,10 @@ angular.module('npact')
       // The period is hardcoded to 3 (r,g,b) due to assumptions
       // throughout this graph system
       opts.period = 3;
-      opts = self.defaultParams(opts);
+      var len = opts.endBase - opts.startBase;
+      if(!opts.step)        { opts.step = self.defaultStepSize(len); }
+      if(!opts.window)      { opts.window = self.defaultWindowSize(opts.step); }
+      if(!opts.nucleotides) { opts.nucleotides = GraphConfig.nucleotides; }
 
       if(opts.window % opts.period) {
         d.reject("Window size (" + opts.window +
@@ -100,7 +109,7 @@ angular.module('npact')
                   normfactor * profile[2]);
         }
       }
-      $log.debug('Slice @', opts.startBase, 'step', step, 'took', new Date() - t1);
+      $log.debug('Slice @', opts.startBase, 'step,win', step,window, 'took', new Date() - t1);
     };
   })
 ;
