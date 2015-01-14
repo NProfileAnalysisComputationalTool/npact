@@ -38,9 +38,7 @@ angular.module('npact')
     $scope.status = 'Initializing';
     $scope.ready = false;
     $scope.FETCH_URL = FETCH_URL;
-
-    $scope.$watch(function() { return GraphConfig[Pynpact.TITLE]; },
-                 function(newTitle) { $scope.title = newTitle; });
+    $scope.config = GraphConfig;
 
     kickstarter.start();
     $scope.$watch(FileManager.getFiles, function(val) {

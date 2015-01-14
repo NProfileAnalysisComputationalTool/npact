@@ -68,6 +68,8 @@ def build_config(path, request):
     # These need to be converted to ints
     parsing.startBase(config)
     parsing.endBase(config)
+    parsing.first_page_title(config)
+
 
 
     for key in MAGIC_PARAMS:
