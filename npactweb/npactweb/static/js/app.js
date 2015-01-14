@@ -35,6 +35,44 @@ angular.module('npact', ['ngMessages', 'sticky', 'ngSanitize'])
           }
           ngModel.$setViewValue(html);
         }
+
+        scope.$on('$destroy', function() {
+          element.off('blur keyup change');
+        });
       }
     };
-  }]);
+  }])
+
+  .directive('checkboxList', function() {
+    return {
+      restrict: 'E',
+      scope: { options: '=' },
+      require: 'ngModel',
+      template: '<label ng-repeat="key in options">{{key}}<input type="checkbox" ng-model="selected[key]"></label>',
+      link: function(scope, element, attrs, ngModel) {
+        scope.selected = _.object(scope.options);
+        ngModel.$render = function() {
+          //start with everything false
+          scope.selected = _.object(scope.options);
+          //set selected list to true
+          _.forEach(ngModel.$viewValue, function(el) {
+            scope.selected[el] = true;
+          });
+        }.bind(this);
+
+        element.on('change', function() {
+          scope.$evalAsync(function() {
+            var newVal = [];
+            _.forEach(scope.selected, function(v, k) {
+              if(v) {
+                newVal.push(k);
+              }
+            });
+            ngModel.$setViewValue(newVal);
+          });
+        });
+        scope.$on('$destroy', function() { element.off('change'); });
+      }
+    };
+  })
+;

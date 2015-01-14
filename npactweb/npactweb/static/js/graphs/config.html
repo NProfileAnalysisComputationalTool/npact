@@ -47,11 +47,9 @@
       <h3>NProfile Options</h3>
       <div>
         <label>Which nucleotides to analyze?</label><br/>
-        <select multiple ng-model="gc.nucleotides"
-                title="nucleotide type(s) represented in frame analysis"
-                style="width:100%; display:block;"
-                ng-options="x for x in ['A', 'C', 'G', 'T']">
-        </select>
+        <checkbox-list ng-model="gc.nucleotides"
+                       title="nucleotide type(s) represented in frame analysis"
+                       options="['A', 'C', 'G', 'T']">
       </div>
       <h3>Prediction Options</h3>
       <div>
