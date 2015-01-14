@@ -130,7 +130,7 @@ def endBase(config):
 def first_page_title(config):
     if not config.get('first_page_title'):
         detect_format(config)
-        config['first_page_title'] = config.get('description', 'Page 1')
+        config['first_page_title'] = config.get('description', 'Unknown Genome')
     return config['first_page_title']
 
 
