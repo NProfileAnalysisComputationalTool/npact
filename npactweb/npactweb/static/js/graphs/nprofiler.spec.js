@@ -44,13 +44,16 @@ describe('NProfiler', function(){
     });
   });
 
-  describe('.stepSize', function() {
+  describe('.defaultStepSize', function() {
     it('should work', function() {
-      var ss = NP.stepSize({startBase: 0, endBase: 10000});
+      var ss = NP.defaultStepSize(10000);
       expect(ss).toBe(51);
     });
     it('should always be multiple of 3',function() {
-      expect(NP.stepSize({startBase: 0, endBase: 9040}) % 3).toBe(0);
+      expect(NP.defaultStepSize(9040) % 3).toBe(0);
+      expect(NP.defaultStepSize(10000) % 3).toBe(0);
+      expect(NP.defaultStepSize(20000) % 3).toBe(0);
+      expect(NP.defaultStepSize(50000) % 3).toBe(0);
     });
   });
 
