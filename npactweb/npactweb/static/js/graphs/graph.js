@@ -14,7 +14,7 @@ angular.module('npact')
         },
         onZoom = function(opts) {
           $log.log('Zoom event:', opts);
-          var zoomOpts = angular.extend({}, opts, GraphConfig);
+          var zoomOpts = angular.extend({}, GraphConfig, opts);
           //updates `offset`, and `basesPerGraph`
           angular.extend(GraphConfig, GraphingCalculator.zoom(zoomOpts));
           $scope.$apply();
