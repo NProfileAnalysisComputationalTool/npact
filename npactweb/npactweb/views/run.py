@@ -63,7 +63,7 @@ def build_config(path, request):
 
     parsing.detect_format(config)
     for k in VALID_KEYS:
-        if k in request.GET:
+        if k in request.GET and request.GET[k]:
             config[k] = request.GET[k]
     # These need to be converted to ints
     parsing.startBase(config)

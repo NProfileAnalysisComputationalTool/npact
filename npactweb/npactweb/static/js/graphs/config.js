@@ -1,11 +1,24 @@
 angular.module('npact')
-  .service('GraphConfig', function(Err, npactConstants, Evt, $log) {
+  .constant('PUBLIC_CONFIG_KEYS',
+            ['first_page_title', 'following_page_title', //'nucleotides',
+             'significance', 'alternate_colors', 'startBase', 'endBase'])
+
+
+  .service('GraphConfig', function(Err, npactConstants, Evt, PUBLIC_CONFIG_KEYS,
+                            $location, $log) {
     var self = this;
     self.tracks = [];
     self.colorBlindFriendly = false;
     self.basesPerGraph = 10000;
     self.nucleotides = ['C', 'G'];
     self.offset = 0; // how much the graph is panned left/right
+
+    //Get values from the querystring
+    _.forEach(PUBLIC_CONFIG_KEYS, function(k) {
+      if($location.search()[k]) {
+        self[k] = $location.search()[k];
+      }
+    });
 
     /**
      * what's the right title for the current nucleotides?
@@ -74,16 +87,15 @@ angular.module('npact')
    * Get back a config dictionary (which automatically updates GraphConfig)
    */
   .factory('processOnServer', function(GraphConfig, KICKSTART_BASE_URL,
+                                PUBLIC_CONFIG_KEYS,
                                 $http, $log, $location) {
     'use strict';
     //The keys the server is going to accept from our GraphConfig
-    var configKeys = ['first_page_title', 'following_page_title', //'nucleotides',
-                       'significance', 'alternate_colors', 'startBase', 'endBase'];
     return function(verb) {
       var url = KICKSTART_BASE_URL;
       var postconfig = angular.extend({verb: verb}, $location.search());
       $log.log('Going to request', verb, url, postconfig);
-      configKeys.forEach(function(k) {
+      PUBLIC_CONFIG_KEYS.forEach(function(k) {
         if(GraphConfig[k])
           postconfig[k] = GraphConfig[k];
       });
@@ -107,10 +119,18 @@ angular.module('npact')
       controller: 'npactGraphConfigCtrl as gcctrl'
     };
   })
-  .controller('npactGraphConfigCtrl', function($scope, GraphConfig, PredictionManager) {
+  .controller('npactGraphConfigCtrl', function($scope, $window, $location, $log,
+                                        GraphConfig, PredictionManager,
+                                        PUBLIC_CONFIG_KEYS) {
     'use strict';
     $scope.gc = GraphConfig;
     $scope.$watch('gc.significance', PredictionManager.onSignificanceChange);
+
+    //  If any of the GraphConfig values change update the querystring
+    var gcpubkeys = PUBLIC_CONFIG_KEYS.map(function(k) { return 'gc.' + k; });
+    $scope.$watchGroup(gcpubkeys, function(newVals) {
+      $location.search(_.object(PUBLIC_CONFIG_KEYS, newVals));
+    });
   })
 
   .factory('headerSpecCalc', function(npactConstants) {
