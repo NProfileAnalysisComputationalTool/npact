@@ -372,3 +372,5 @@ button.Start { clear:both; margin: 8px;}
         .ui-state-highlight li a {font-weight:bold;}
                 #files li {color:#000;}
                 #files li:hover {color:#C60;}
+
+#configContainer h3 { margin-top: 10px; }
