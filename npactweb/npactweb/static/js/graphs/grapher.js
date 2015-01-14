@@ -40,6 +40,9 @@ angular.module('npact')
     }
     var GP = Grapher.prototype;
 
+    //Tie margin to 0 until we figure out clipping issues (not sure margin helped anyways.)
+    GP.margin = 0;
+
     GP.destroy = function() {
       if(this.stage) {
         this.stage.destroy();
