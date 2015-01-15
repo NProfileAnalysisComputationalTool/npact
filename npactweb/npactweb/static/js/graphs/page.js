@@ -31,7 +31,8 @@ angular.module('npact')
     };
   })
 
-  .controller('npactGraphPageCtrl', function($scope, Fetcher, $q, $log, StatusPoller, FETCH_URL, GraphConfig, Pynpact, FileManager, kickstarter) {
+  .controller('npactGraphPageCtrl', function($scope, $q, $log, Fetcher, FETCH_URL,
+                                      GraphConfig, FileManager, kickstarter) {
     'use strict';
 
     $scope.miscFiles = [];
