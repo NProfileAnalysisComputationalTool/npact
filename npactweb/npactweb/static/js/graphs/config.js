@@ -95,7 +95,7 @@ angular.module('npact')
       var url = KICKSTART_BASE_URL;
       var postconfig = angular.extend({verb: verb}, $location.search());
       $log.log('Going to request', verb, url, postconfig);
-      PUBLIC_CONFIG_KEYS.forEach(function(k) {
+      _.forEach(PUBLIC_CONFIG_KEYS, function(k) {
         if(GraphConfig[k])
           postconfig[k] = GraphConfig[k];
       });
@@ -127,7 +127,7 @@ angular.module('npact')
     $scope.$watch('gc.significance', PredictionManager.onSignificanceChange);
 
     //  If any of the GraphConfig values change update the querystring
-    var gcpubkeys = PUBLIC_CONFIG_KEYS.map(function(k) { return 'gc.' + k; });
+    var gcpubkeys = _.map(PUBLIC_CONFIG_KEYS, function(k) { return 'gc.' + k; });
     $scope.$watchGroup(gcpubkeys, function(newVals) {
       $location.search(_.object(PUBLIC_CONFIG_KEYS, newVals));
     });

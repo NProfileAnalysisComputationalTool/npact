@@ -50,11 +50,11 @@ angular.module('npact')
           // want to capture some margin
           start = ss[0],
           end = _.last(ss),
-          ticks = ss.map(makeTicks),
+          ticks = _.map(ss, makeTicks),
           scaleX = m.graph.w / length,
           // blow the text back up, we don't want it scaled
-          labelScaleX = 1/scaleX,
-          labels = ss.map(makeLabels)
+          labelScaleX = 1 / scaleX,
+          labels = _.map(ss, makeLabels)
       ;
 
       return {
@@ -130,11 +130,11 @@ angular.module('npact')
           },
           yAxisTickSpacing = g.h / yAxisTicks,
           yAxisTickX = g.x - opts.profileTicks,
-          yticks = yStops.map(makeYTick),
+          yticks = _.map(yStops, makeYTick),
           // space between the label and the tick
           yAxisLabelRightPadding = opts.profileTicks*2,
           yAxisLabelWidth = opts.leftPadding - yAxisLabelRightPadding,
-          ylabels = yStops.map(makeYLabel),
+          ylabels = _.map(yStops, makeYLabel),
           // box to center the title inside of
           ytitle={
             x: 0, y: g.y, width: yAxisLabelWidth, height: g.h
@@ -144,7 +144,7 @@ angular.module('npact')
       return {
         graph:g,
         // TODO: return xaxis here
-        yaxis:{
+        yaxis: {
           ticks: yticks,
           labels: ylabels,
           titleBox: ytitle

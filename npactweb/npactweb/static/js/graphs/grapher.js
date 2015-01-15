@@ -53,11 +53,10 @@ angular.module('npact')
       var tickOpts = {x: 0, y: 0,
                       stroke: this.borderColor,
                       strokeScaleEnabled: false};
-      return ticks
-        .map(function(t){
-          tickOpts.points = [t.x, t.y, t.x2, t.y2];
-          return new K.Line(tickOpts);
-        });
+      return _.map(ticks, function(t){
+        tickOpts.points = [t.x, t.y, t.x2, t.y2];
+        return new K.Line(tickOpts);
+      });
     };
 
     GP.drawAxisLabels = function(labels, textOpts) {
@@ -67,7 +66,7 @@ angular.module('npact')
         fill: this.axisFontcolor
       };
 
-      return labels.map(function(lbl) {
+      return _.map(labels, function(lbl) {
         var txtOpts = angular.extend({}, lbl, defaultTextOpts, textOpts);
         return new K.Text(txtOpts);
       });
@@ -91,7 +90,7 @@ angular.module('npact')
             var txtOpts = angular.extend({}, defaultTextOpts, header);
             return new K.Text(txtOpts);
           },
-          lbls =  this.headers.map(makeLabel);
+          lbls =  _.map(this.headers, makeLabel);
 
       addMany(g, lbls);
       return g;
@@ -265,7 +264,7 @@ angular.module('npact')
       addMany(g, labels);
 
       // call `centerXLabel(txt, xaxis.scaleX)`
-      labels.map(function(txt) {
+      _.map(labels, function(txt) {
         centerXLabel(txt, xaxis.scaleX);
       });
 
@@ -309,7 +308,7 @@ angular.module('npact')
       this.onProfilePoints
         .then(function(points) {
           if(!g.getLayer()) {return;}
-          angular.forEach(points, function(v, k) {
+          _.forEach(points, function(v, k) {
             g.add(buildLine(v, colors[k]));
           });
           $log.debug('redrawing nprofile');
@@ -406,8 +405,7 @@ angular.module('npact')
           }
       ;
 
-      _(cds)
-        .forEach(function(x){
+      _.forEach(cds, function(x) {
           var isComplement = x.complement === 1,
               c = colors[colorNames[x.phase]],
               baseY = isComplement ? y + self.headerArrowHeight : y,
@@ -515,7 +513,7 @@ angular.module('npact')
       }, guideLineOpts)));
 
       // draw each hit
-      _(hits).forEach(function(hit) {
+      _.forEach(hits, function(hit) {
         var y = baseY + (hit.complement ? -offset : offset);
 
         g.add(

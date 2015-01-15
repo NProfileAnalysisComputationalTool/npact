@@ -99,7 +99,7 @@ angular.module('npact')
     this.parse = function(text, parseLine){
       if (!_.isString(text)) { return text; }
       var lines = text.split('\n');
-      return lines.map(parseLine);
+      return _.map(lines, parseLine);
     };
     /**
      * parses many lines asynchronously
