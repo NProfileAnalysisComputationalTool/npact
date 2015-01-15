@@ -339,22 +339,22 @@ angular.module('npact')
       this.stage.setWidth(this.width);
       this.stage.add(this.chartLayer(), this.leftLayer());
 
-      var self = this, gg = self._genomeGroup;
-      gg.add(self.xAxisGroup(), self.profileGroup());
+      var gg = this._genomeGroup;
+      gg.add(this.xAxisGroup(), this.profileGroup());
 
-      var drawings = _.map(self.headers, function(hdr) {
-        return self.trackSlice(hdr.text)
+      var drawings = _.map(this.headers, function(hdr) {
+        return this.trackSlice(hdr.text)
           .then(function(data) {
             switch(hdr.lineType) {
             case 'extracts':
-              return self.cdsGroup(hdr, data);
+              return this.cdsGroup(hdr, data);
             case 'hits':
-              return self.drawHit(hdr, data);
+              return this.drawHit(hdr, data);
             default:
               throw new Error("don't know how to draw " + hdr);
             }
-          }).then(function(img) { gg.add(img); });
-      });
+          }.bind(this)).then(function(img) { gg.add(img); });
+      }, this);
 
       return $q.all(drawings).then(function() {
         this.stage.draw();
@@ -379,21 +379,20 @@ angular.module('npact')
     }
 
     GP.cdsGroup = function(header, cds) {
-      var self = this,
-          xaxis = self.xaxis, $el = self.$element,
-          colors = self.colors,
+      var xaxis = this.xaxis, $el = this.$element,
+          colors = this.colors,
           g = new K.Group({
             x: 0, y: 0,
             scaleX: xaxis.scaleX,
-            offsetX: self.startBase
+            offsetX: this.startBase
           }),
           colorNames = 'rgb',
           y = header.y,
-          ahHalfHeight = self.headerArrowHeight/2,
-          ahw = self.headerArrowWidth/xaxis.scaleX,
+          ahHalfHeight = this.headerArrowHeight/2,
+          ahw = this.headerArrowWidth/xaxis.scaleX,
           textOpts = {
-            fontSize: self.headerArrowFontsize,
-            fill: self.axisFontcolor,
+            fontSize: this.headerArrowFontsize,
+            fill: this.axisFontcolor,
             scaleX: 1/xaxis.scaleX,
             strokeScaleEnabled: false
           },
@@ -408,9 +407,9 @@ angular.module('npact')
       _.forEach(cds, function(x) {
           var isComplement = x.complement === 1,
               c = colors[colorNames[x.phase]],
-              baseY = isComplement ? y + self.headerArrowHeight : y,
+              baseY = isComplement ? y + this.headerArrowHeight : y,
               arrowPointY = baseY + ahHalfHeight,
-              arrowMaxY = baseY + self.headerArrowHeight,
+              arrowMaxY = baseY + this.headerArrowHeight,
               shape = isComplement ?
                 [
                   x.start, arrowPointY,
@@ -430,10 +429,10 @@ angular.module('npact')
               arrowBounds = isComplement ?
                 {
                   x: x.start+ahw, y: baseY,
-                  width: x.end-x.start-ahw, height: self.headerArrowHeight
+                  width: x.end-x.start-ahw, height: this.headerArrowHeight
                 } : {
                   x: x.start, y: baseY,
-                  width: x.end-x.start-ahw, height: self.headerArrowHeight
+                  width: x.end-x.start-ahw, height: this.headerArrowHeight
                 },
               line = new K.Line(angular.extend({
                 extract: x,
@@ -455,7 +454,7 @@ angular.module('npact')
           // now that lbl is on the canvas, we can see what it's
           // height/width is
           centerExtractLabel(lbl, xaxis.scaleX);
-        });
+      }, this);
 
 
       // TODO: move tooltip control to the `npactGraph`, just throw an
