@@ -48,23 +48,26 @@ angular.module('npact')
     // watch the environment for changes we care about
     $scope.$watchCollection(function() {
       return [ GraphConfig.length, GraphConfig.basesPerGraph,
-               GraphConfig.offset, GraphConfig.startBase,
-               GraphConfig.endBase];
+               GraphConfig.offset, GraphConfig.startBase, GraphConfig.endBase];
     }, repartition);
+
     $scope.$watch(GraphConfig.profileTitle, function(title) {
       //A profileTitle change indicates different nucleotides: rebuild
       baseOpts.axisTitle = title;
       rebuild();
     });
+
     $scope.$watch(GraphConfig.activeTracks, function(val) {
       //Find headers and headerY
       angular.extend(baseOpts, headerSpecCalc(val));
       redraw();
     }, true);
+
     $scope.$watch(
       function() { return GraphConfig.colorBlindFriendly; },
       function(val) {
-        baseOpts.colors = val ? npactConstants.colorBlindLineColors : npactConstants.lineColors;
+        baseOpts.colors = val ?
+          npactConstants.colorBlindLineColors : npactConstants.lineColors;
         redraw();
     });
 
@@ -88,13 +91,16 @@ angular.module('npact')
         },
         onResize = function() {
           winHeight = $win.height();
-          topOffset = $element.offset().top;
-          updateVisibility();
           if($element.width() !== baseOpts.width) {
+            topOffset = $element.offset().top;
             baseOpts.width = $element.width();
+            updateVisibility();
             redraw();
           }
-          $scope.$apply();
+          else {
+            //If the width didn't change then its the same as scrolling
+            onScroll();
+          }
         };
     $scope.graphHeight = npactConstants.graphSpecDefaults.height;
     this.visible = function(idx) {
@@ -116,7 +122,7 @@ angular.module('npact')
     };
   })
 
-  .directive('npactGraph', function npactGraph(Grapher, Evt, GraphingCalculator, $log) {
+  .directive('npactGraph', function (Grapher, Evt, GraphingCalculator, $log, $timeout) {
     'use strict';
     return {
       restrict: 'A',
@@ -126,21 +132,25 @@ angular.module('npact')
             visible = ctrl.visible,
             idx = $attrs.idx,
             el = $element[0],
+            // redraw gets set for all graphs once (e.g. a new track
+            // triggers broadcasts redraw), but only gets cleared as
+            // the currently visible ones are drawn
+            redraw = false,
+            drawTimer = null,
             draw = function() {
-              if(g || !visible(idx)) return;
-              g = new Grapher(el, ctrl.graphOptions(idx));
-              redraw();
+              if(!visible(idx)) { drawTimer = null; return; }
+              var opts = ctrl.graphOptions(idx);
+              (g || (g = new Grapher(el, opts)))
+                .redraw(opts)
+                .then(function() {
+                  redraw = false;
+                  drawTimer = null;
+                });
             },
-            redraw = function() {
-              if(g !== null) {
-                var t1 = new Date();
-                g.redraw(ctrl.graphOptions(idx))
-                  .then(function() {
-                    $log.log('drew npactGraph', g.startBase,
-                             'took', new Date() - t1, 'ms');
-                  });
+            schedule = function() {
+              if(redraw && !drawTimer && visible(idx)) {
+                drawTimer = $timeout(draw, 0, false);
               }
-              else{ draw(); }
             },
             discard = function() {
               if(g !== null) {
@@ -149,11 +159,9 @@ angular.module('npact')
                 g = null;
               }
             };
-        $scope.$on(Evt.DRAW, draw);
-        $scope.$on(Evt.REDRAW, redraw);
-        $scope.$on(Evt.REBUILD, discard);
-        //Just call draw every time, it shortcuts if not doing anything
-        $scope.$watch(draw);
+        $scope.$on(Evt.DRAW, schedule);
+        $scope.$on(Evt.REDRAW, function() { redraw = true; schedule();});
+        $scope.$on(Evt.REBUILD, function() { discard(); redraw = true; schedule(); });
         $scope.$on('$destroy', discard);
       }
     };

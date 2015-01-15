@@ -309,7 +309,6 @@ angular.module('npact')
           _.forEach(points, function(v, k) {
             g.add(buildLine(v, colors[k]));
           });
-          $log.debug('redrawing nprofile');
           g.draw();
         });
 
@@ -335,8 +334,10 @@ angular.module('npact')
     };
 
     GP.redraw = function(newOpts) {
+      var t1 = new Date();
       angular.extend(this, newOpts);
       this.stage.destroyChildren();
+      this.stage.setWidth(this.width);
       this.stage.add(this.chartLayer(), this.leftLayer());
 
       var self = this, gg = self._genomeGroup;
@@ -357,8 +358,10 @@ angular.module('npact')
       });
 
       return $q.all(drawings).then(function() {
-        self.stage.draw();
-      });
+        this.stage.draw();
+        $log.log('drew npactGraph', this.startBase,
+                 'took', new Date() - t1, 'ms');
+      }.bind(this));
     };
 
     function centerExtractLabel(txt, scaleX){
