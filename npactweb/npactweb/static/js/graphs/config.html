@@ -11,7 +11,7 @@
     <div>
       <label>Zoom:
         <input type="number" name="basesPerGraph"
-               style="width:6em;"
+               style="width:5em;"
                min="100" required
                ng-model-options="{debounce: 1000}"
 	       ng-model="gc.basesPerGraph"/> bases/graph
@@ -22,11 +22,11 @@
       </div>
     </div>
     <div>
-      <label>Range</label>
-      <input type="number" name="startBase" style="width:6em;"
+      <label>Range: </label>
+      <input type="number" name="startBase" style="width:5em;"
              min="0" ng-model="gc.startBase">
       to
-      <input type="number" name="endBase" style="width:6em;"
+      <input type="number" name="endBase" style="width:5em;"
              min="0" ng-model="gc.endBase">
 
       <div>
