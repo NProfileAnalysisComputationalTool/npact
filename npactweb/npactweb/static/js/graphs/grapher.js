@@ -17,18 +17,16 @@ angular.module('npact')
       // start slicing the NProfile into Kinetic-compatible [x1, y1,
       // x2, y2, ...] lists, make a promise for the completed group of
       // points
-      var profilePoints = {r: [], g: [], b: []};
+      var r= [], g= [], b= [];
       this.onProfilePoints = NProfiler
-        .slice({ startBase: this.startBaseM,
-                 endBase: this.endBaseM,
+        .slice({ startBase: this.startBaseM, endBase: this.endBaseM,
                  onPoint: function(coord, rv, gv, bv) {
-                   angular.forEach({r: rv, g: gv, b: bv}, function(v, k) {
-                     profilePoints[k].push(coord);
-                     //invert because drawing is from the top so 100% is 0 pix
-                     profilePoints[k].push(100-v);
-                   });
+                   //invert because drawing is from the top so 100% is 0 pix
+                   r.push(coord); r.push(100.0 - rv);
+                   g.push(coord); g.push(100.0 - gv);
+                   b.push(coord); b.push(100.0 - bv);
                  }})
-        .then(function(opts) { return profilePoints; });
+        .then(function(opts) { return {r: r, g: g, b: b}; });
 
       this.stage = new K.Stage({
         container: element,
