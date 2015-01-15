@@ -449,3 +449,6 @@ button.Start { clear:both; margin: 8px;}
    border-bottom: 1px solid #AAF;
    padding: 8px 10px 8px 0;
 }
+
+#printControls { float: right; }
+#printControls:hover { cursor: hand; }

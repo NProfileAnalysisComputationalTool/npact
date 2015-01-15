@@ -5,7 +5,7 @@ angular.module('npact')
       restrict: 'A',
       templateUrl: STATIC_BASE_URL + 'js/graphs/page.html',
       controller: 'npactGraphPageCtrl',
-      controllerAs: 'ctrl'
+      controllerAs: 'pageCtrl'
     };
   })
 
@@ -45,6 +45,12 @@ angular.module('npact')
     $scope.$watch(FileManager.getFiles, function(val) {
       $scope.miscFiles = val;
     }, true);
+
+    this.print = function() {
+      $log.log("print requested: ", new Date());
+      $scope.$broadcast('print');
+      $log.log("finished rendering: ", new Date());
+    };
   })
 
   .service('kickstarter', function($q, $log, processOnServer, MessageBus,

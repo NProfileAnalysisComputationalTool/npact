@@ -154,8 +154,8 @@ angular.module('npact')
             // triggers broadcasts redraw), but only gets cleared as
             // the currently visible ones are drawn
             redraw = false,
-            draw = function() {
-              if(!redraw || !visible(idx)) { return; }
+            draw = function(force) {
+              if(!redraw || (!force && !visible(idx))) { return; }
               var opts = ctrl.graphOptions(idx);
               //However long it actually takes to draw, we have the
               //latest options as of this point
@@ -179,6 +179,7 @@ angular.module('npact')
         $scope.$on(Evt.REDRAW, function() { redraw = true; schedule();});
         $scope.$on(Evt.REBUILD, function() { discard(); redraw = true; schedule(); });
         $scope.$on('$destroy', discard);
+        $scope.$on('print', function() { draw(true); });
       }
     };
   })
