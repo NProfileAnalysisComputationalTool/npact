@@ -7,7 +7,7 @@
       <li>Double click on a graph to zoom into that point</li>
       <li>Hold shift and double click on a graph to zoom out</li>
     </ul>
-    <div><a href="?" target="_self">Reset to defaults</a></div>
+    <div><a href="?" class="btn md-text" target="_self">Reset to defaults</a></div>
     <div>
       <label>Zoom:
         <input type="number" name="basesPerGraph"
@@ -22,20 +22,19 @@
       </div>
     </div>
     <div>
-      <label>Range: </label>
-      <input type="number" name="startBase" style="width:5em;"
+      <label>Range:</label>
+      <input type="number" name="startBase" style="width:6em;"
              min="0" ng-model="gc.startBase">
-      to
-      <input type="number" name="endBase" style="width:5em;"
+      <span class="sm-text">to</span>
+      <input type="number" name="endBase" style="width:6em;"
              min="0" ng-model="gc.endBase">
-
-      <div>
-
-        <label>
-          <input type="checkbox" ng-model="gc.colorBlindFriendly" />
-          Color-blind friendly
-        </label>
-      </div>
+    </div>
+    <div>
+      <label>
+        <input type="checkbox" ng-model="gc.colorBlindFriendly" />
+        Color-blind friendly
+      </label>
+    </div>
 
       <h3>Tracks</h3>
       <div>
