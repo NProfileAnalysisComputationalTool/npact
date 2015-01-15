@@ -375,7 +375,7 @@ button.Start { clear:both; margin: 8px;}
                 #files li:hover {color:#C60;}
 
 #configContainer {
-  background: #F7F7F7;
+  background: #F7F7F7; 
   border-bottom: solid 4px #4059BD;
   font-size: 14px;
   padding: 0px 8px 8px;
@@ -388,35 +388,35 @@ button.Start { clear:both; margin: 8px;}
   background: #4059BD;
   border-bottom: solid 2px #FF4A00;
   position: relative;
-  color: #fff;
-  margin-bottom: 10px;
+  color: #fff; 
+  margin-bottom: 10px; 
   margin-left: -8px;
   margin-right: -8px;
   padding: 3px 5px;
 }
-#configContainer h2:after {
-  left: 100%;
-  top: 50%;
-  border: solid transparent;
-  content: " ";
-  height: 0;
-  width: 0;
-  position: absolute;
-  pointer-events: none;
-  border-color: rgba(64, 89, 189, 0);
-  border-left-color: #4059BD;
-  border-width: 18px;
-  margin-top: -17px;
+#configContainer h2:after { 
+  left: 100%; 
+  top: 50%; 
+  border: solid transparent; 
+  content: " "; 
+  height: 0; 
+  width: 0; 
+  position: absolute; 
+  pointer-events: none; 
+  border-color: rgba(64, 89, 189, 0); 
+  border-left-color: #4059BD; 
+  border-width: 16px;
+  margin-top: -16px; 
   z-index: 500;
 }
-#configContainer h3 {
+#configContainer h3 { 
   color: #4059BD;
   font-size: 100%;
   font-style: normal;
   font-weight: bold;
   padding: 4px 0px 0px 0px;
   text-transform: uppercase;
-  margin-top: 10px;
+  margin-top: 10px; 
 }
 
 #configContainer ul {padding-left: 5px;}
@@ -425,7 +425,6 @@ button.Start { clear:both; margin: 8px;}
   margin-bottom: 5px;
   padding-bottom: 3px;
 }
-
 #configContainer input[type=checkbox] {
   margin: 0px 4px;
 }
