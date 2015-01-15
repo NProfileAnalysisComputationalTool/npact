@@ -1,13 +1,13 @@
 angular.module('npact')
-  .factory('Grapher', function(K, $log, GraphingCalculator, $rootScope, $compile, NProfiler, TrackReader, $q, Evt){
+  .factory('Grapher', function(K, $log, GraphingCalculator, $rootScope, $compile, NProfiler, TrackReader, $q, Evt) {
     'use strict';
-    function addMany(container, children){
+    function addMany(container, children) {
       if(children && children.length) {
         container.add.apply(container, children);
       }
     }
 
-    function Grapher(element, opts){
+    function Grapher(element, opts) {
       this.$element = jQuery(element);
       angular.extend(this, opts);
       // invariants: startBase, endBase, margin
@@ -47,11 +47,11 @@ angular.module('npact')
       }
     };
 
-    GP.drawAxisTicks = function(ticks){
+    GP.drawAxisTicks = function(ticks) {
       var tickOpts = {x: 0, y: 0,
                       stroke: this.borderColor,
                       strokeScaleEnabled: false};
-      return _.map(ticks, function(t){
+      return _.map(ticks, function(t) {
         tickOpts.points = [t.x, t.y, t.x2, t.y2];
         return new K.Line(tickOpts);
       });
@@ -126,7 +126,7 @@ angular.module('npact')
     };
 
     var leftLayerCache = {};
-    GP.leftLayer = function(){
+    GP.leftLayer = function() {
       var key = angular.toJson(this.headers) + this.axisTitle,
           opts = {
             width: this.leftPadding,
@@ -135,7 +135,7 @@ angular.module('npact')
           },
           layer = new K.FastLayer(opts);
 
-      if(leftLayerCache[key]){
+      if(leftLayerCache[key]) {
         leftLayerCache[key].then(function(image) {
           layer.add(new K.Image(angular.extend(opts, {image: image})));
           layer.draw();
@@ -151,14 +151,14 @@ angular.module('npact')
       return layer;
     };
 
-    GP.genomeGroup = function(){
+    GP.genomeGroup = function() {
       var self = this,
           gx = this.m.graph.x,
           dragRes = {x: gx, y: 0},
           g = new K.Group({
             x: gx,
             draggable: true,
-            dragBoundFunc: function(pos){
+            dragBoundFunc: function(pos) {
               // pos is the distance dragged, except `pos.x` always
               // starts at `gx`. Something due to container coordinate
               // system vs stage coordinate system. `pos.y` is not
@@ -172,13 +172,12 @@ angular.module('npact')
           });
       // remember where we are at the start/end of a drag, so dragging can
       // match our "scroll"
-      g.on('dragstart dragend', function(){
+      g.on('dragstart dragend', function() {
         // kill ALL tooltips, not just the ones on this graph
         jQuery('.qtip').qtip('destroy');
       });
 
-      g.on('dragend', function(evt){
-
+      g.on('dragend', function(evt) {
         var oldStartBase = self.startBase,
             newStartBase = (this.offsetX() / self.xaxis.scaleX) + oldStartBase;
         // tell the world
@@ -201,7 +200,7 @@ angular.module('npact')
       return (this._genomeGroup = g);
     };
 
-    GP.onDblClick = function(evt){
+    GP.onDblClick = function(evt) {
       jQuery('.qtip').qtip('destroy');
 
       var zoomOnPx = evt.evt.layerX - this.m.graph.x,
@@ -216,7 +215,7 @@ angular.module('npact')
       });
     };
 
-    GP.chartLayer = function(){
+    GP.chartLayer = function() {
       var m = this.m,
           l = new K.Layer({
             clip: {
@@ -238,7 +237,7 @@ angular.module('npact')
       return l;
     };
 
-    function centerXLabel(txt, scaleX){
+    function centerXLabel(txt, scaleX) {
       // center on the tick marks, at this point we know how wide
       // this text is
       var w = txt.getWidth() / scaleX,
@@ -247,7 +246,7 @@ angular.module('npact')
       txt.x(newX);
     }
 
-    GP.xAxisGroup = function(){
+    GP.xAxisGroup = function() {
       var m = this.m,
           xaxis = this.xaxis,
           g = new K.Group({
@@ -269,7 +268,7 @@ angular.module('npact')
       return (this._xAxisGroup = g);
     };
 
-    GP.profileGroup = function(){
+    GP.profileGroup = function() {
       var m = this.m, xaxis = this.xaxis,
           colors = this.colors,
           g = new K.Group({
@@ -345,8 +344,8 @@ angular.module('npact')
 
       var drawings = _.map(self.headers, function(hdr) {
         return self.trackSlice(hdr.text)
-          .then(function(data){
-            switch(hdr.lineType){
+          .then(function(data) {
+            switch(hdr.lineType) {
             case 'extracts':
               return self.cdsGroup(hdr, data);
             case 'hits':
@@ -364,7 +363,7 @@ angular.module('npact')
       }.bind(this));
     };
 
-    function centerExtractLabel(txt, scaleX){
+    function centerExtractLabel(txt, scaleX) {
       // now that lbl is on the canvas, we can see what it's
       // height/width is
       var arrowBounds = txt.getAttr('arrowBounds'),
@@ -379,7 +378,7 @@ angular.module('npact')
       txt.position(pos);
     }
 
-    GP.cdsGroup = function(header, cds){
+    GP.cdsGroup = function(header, cds) {
       var self = this,
           xaxis = self.xaxis, $el = self.$element,
           colors = self.colors,
@@ -462,7 +461,7 @@ angular.module('npact')
       // TODO: move tooltip control to the `npactGraph`, just throw an
       // event or callback here with the extract, let `npactGraph`
       // handle this stuff
-      g.on('click', function(evt){
+      g.on('click', function(evt) {
         var scope = $rootScope.$new(),
             tpl = '<div npact-extract="extract"></div>';
         scope.extract = evt.target.getAttrs().extract;
