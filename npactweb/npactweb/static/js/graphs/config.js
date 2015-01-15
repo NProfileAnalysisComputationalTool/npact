@@ -13,7 +13,7 @@ angular.module('npact')
     self.nucleotides = ['C', 'G'];
     self.offset = 0; // how much the graph is panned left/right
 
-    //Get values from the querystring
+    //Get values from the querystring during intialization
     _.forEach(PUBLIC_CONFIG_KEYS, function(k) {
       if($location.search()[k]) {
         self[k] = $location.search()[k];
