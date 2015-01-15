@@ -76,13 +76,13 @@ angular.module('npact')
       redraw();
     }, true);
 
-    $scope.$watch(
-      function() { return GraphConfig.colorBlindFriendly; },
-      function(val) {
-        baseOpts.colors = val ?
-          npactConstants.colorBlindLineColors : npactConstants.lineColors;
-        redraw();
-    });
+    $scope.$watch(function() { return GraphConfig.colorBlindFriendly; },
+                  function(val) {
+                    baseOpts.colors = val ?
+                      npactConstants.colorBlindLineColors :
+                      npactConstants.lineColors;
+                    redraw();
+                  });
 
 
     /***  Scrolling and Graph Visibility management ***/
