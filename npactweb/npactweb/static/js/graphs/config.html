@@ -45,20 +45,21 @@
       </div>
 
       <h3>NProfile Options</h3>
-      <div>
-        <label>Which nucleotides to analyze?</label><br/>
+      <div class="nprofile-options">
+        <span>Which nucleotides to analyze?</span>
         <checkbox-list ng-model="gc.nucleotides"
                        title="nucleotide type(s) represented in frame analysis"
                        options="['A', 'C', 'G', 'T']">
       </div>
       <h3>Prediction Options</h3>
       <div>
-        <label>Prediction significance</label>
+        <label>Prediction significance
         <select ng-model="gc.significance"
                 ng-options="x for x in ['0.01', '0.001', '0.0001']"
                 title="significance threshold for high scoring segments (hits)"
                 >
         </select>
+        </label>
       </div>
   </form>
 </div>

@@ -412,3 +412,5 @@ button.Start { clear:both; margin: 8px;}
   margin-bottom: 5px;
   padding-bottom: 3px;
 }
+
+#configContainer .nprofile-options label { padding-left: 8px; }
