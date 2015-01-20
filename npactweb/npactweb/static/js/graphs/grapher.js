@@ -14,20 +14,6 @@ angular.module('npact')
       this.startBaseM = Math.max(this.startBase - this.margin, 0);
       this.endBaseM = this.endBase + this.margin;
 
-      // start slicing the NProfile into Kinetic-compatible [x1, y1,
-      // x2, y2, ...] lists, make a promise for the completed group of
-      // points
-      var r= [], g= [], b= [];
-      this.onProfilePoints = NProfiler
-        .slice({ startBase: this.startBaseM, endBase: this.endBaseM,
-                 onPoint: function(coord, rv, gv, bv) {
-                   //invert because drawing is from the top so 100% is 0 pix
-                   r.push(coord); r.push(100.0 - rv);
-                   g.push(coord); g.push(100.0 - gv);
-                   b.push(coord); b.push(100.0 - bv);
-                 }})
-        .then(function(opts) { return {r: r, g: g, b: b}; });
-
       this.stage = new K.Stage({
         container: element,
         height: this.height,
@@ -45,6 +31,26 @@ angular.module('npact')
       if(this.stage) {
         this.stage.destroy();
       }
+    };
+
+    GP._onProfilePoints = null;
+    GP.getProfilePoints = function() {
+      if(!this._onProfilePoints) {
+        // start slicing the NProfile into Kinetic-compatible [x1, y1,
+        // x2, y2, ...] lists, make a promise for the completed group of
+        // points
+        var r= [], g= [], b= [];
+        this.onProfilePoints = NProfiler
+          .slice({ startBase: this.startBaseM, endBase: this.endBaseM,
+                   onPoint: function(coord, rv, gv, bv) {
+                     //invert because drawing is from the top so 100% is 0 pix
+                     r.push(coord); r.push(100.0 - rv);
+                     g.push(coord); g.push(100.0 - gv);
+                     b.push(coord); b.push(100.0 - bv);
+                   }})
+          .then(function(opts) { return {r: r, g: g, b: b}; });
+      }
+      return this._onProfilePoints;
     };
 
     GP.drawAxisTicks = function(ticks) {
@@ -302,7 +308,7 @@ angular.module('npact')
       });
 
 
-      this.onProfilePoints
+      this.getProfilePoints()
         .then(function(points) {
           if(!g.getLayer()) {return;}
           _.forEach(points, function(v, k) {
