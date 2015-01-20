@@ -1,6 +1,7 @@
 angular.module('npact')
   .factory('Grapher', function(K, $log, GraphingCalculator, $rootScope, $compile, NProfiler, TrackReader, $q, Evt) {
     'use strict';
+
     function addMany(container, children) {
       if(children && children.length) {
         container.add.apply(container, children);
@@ -26,9 +27,7 @@ angular.module('npact')
     GP.margin = 0;
 
     GP.destroy = function() {
-      if(this.stage) {
-        this.stage.destroy();
-      }
+      if(this.stage) { this.stage.destroy(); }
     };
 
     GP._onProfilePoints = null;
@@ -75,7 +74,6 @@ angular.module('npact')
     };
 
     GP.headerGroup = function(g) {
-
       // TODO: derive opts.leftPadding
       // * add all labels
       // * loop over K.Text objects, find max width
@@ -87,14 +85,12 @@ angular.module('npact')
         fontSize: this.headerLabelFontsize,
         width: this.leftPadding - this.headerLabelPadding,
         fill: this.headerLabelFontcolor
-      },
-          makeLabel = function(header) {
-            var txtOpts = angular.extend({}, defaultTextOpts, header);
-            return new K.Text(txtOpts);
-          },
-          lbls =  _.map(this.headers, makeLabel);
+      };
 
-      addMany(g, lbls);
+      addMany(g, _.map(this.headers, function(header) {
+        var txtOpts = angular.extend({}, defaultTextOpts, header);
+        return new K.Text(txtOpts);
+      }));
       return g;
     };
 
@@ -129,7 +125,7 @@ angular.module('npact')
       return g;
     };
 
-    var leftLayerCache = {};
+    var leftLayerCache = {};  // Shared amongst all Graphers
     GP.leftLayer = function() {
       var key = angular.toJson(this.headers) + this.axisTitle,
           opts = {
@@ -144,7 +140,7 @@ angular.module('npact')
           layer.add(new K.Image(angular.extend(opts, {image: image})));
           layer.draw();
         });
-      }else{
+      } else {
         this.yAxisGroup(layer);
         this.headerGroup(layer);
         leftLayerCache[key] = $q(function(resolve) {
@@ -153,6 +149,11 @@ angular.module('npact')
         });
       }
       return layer;
+    };
+
+    GP.clearAllToolTips = function() {
+        // kill ALL tooltips, not just the ones on this graph
+        jQuery('.qtip').qtip('destroy');
     };
 
     GP.genomeGroup = function() {
@@ -174,19 +175,15 @@ angular.module('npact')
               return dragRes;
             }
           });
-      // remember where we are at the start/end of a drag, so dragging can
-      // match our "scroll"
-      g.on('dragstart dragend', function() {
-        // kill ALL tooltips, not just the ones on this graph
-        jQuery('.qtip').qtip('destroy');
-      });
+
+      g.on('dragstart dragend', this.clearAllToolTips);
 
       g.on('dragend', function(evt) {
         var oldStartBase = self.startBase,
             newStartBase = (this.offsetX() / self.xaxis.scaleX) + oldStartBase;
         // tell the world
-        self.onPan(
-          {oldStartBase: oldStartBase, newStartBase: newStartBase, evt: evt});
+        self.onPan({
+          oldStartBase: oldStartBase, newStartBase: newStartBase, evt: evt});
       });
 
       g.on('mouseover', function() {
@@ -205,7 +202,7 @@ angular.module('npact')
     };
 
     GP.onDblClick = function(evt) {
-      jQuery('.qtip').qtip('destroy');
+      this.clearAllToolTips();
 
       var zoomOnPx = evt.evt.layerX - this.m.graph.x,
           zoomOnPct = zoomOnPx / this.m.graph.w;
@@ -224,7 +221,7 @@ angular.module('npact')
           l = new K.Layer({
             clip: {
               x: m.graph.x-1, y: 0,
-              width: m.graph.w+2,
+              width: m.graph.w + 2,
               height: 1000
             }
           }),
@@ -299,23 +296,21 @@ angular.module('npact')
           shadeOpts = {
             y: 2, height: 96,
             fill: this.profileShadeColor
-          }
-      ;
+          };
+
       _.each(shades, function(x) {
         g.add(new K.Rect(angular.extend(x, shadeOpts)));
       });
 
-
       this.getProfilePoints()
         .then(function(points) {
-          if(!g.getLayer()) {return;}
+          if(!g.getLayer()) { return; }
           _.forEach(points, function(v, k) {
             g.add(buildLine(v, colors[k]));
           });
           g.draw();
         });
-
-      return (this._profileGroup = g);
+      return g;
     };
 
     /**
