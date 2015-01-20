@@ -19,8 +19,6 @@ angular.module('npact')
         height: this.height,
         width: this.width
       });
-
-      this.stage.add(this.leftLayer(), this.chartLayer());
     }
     var GP = Grapher.prototype;
 
