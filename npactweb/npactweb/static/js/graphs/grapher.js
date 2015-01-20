@@ -1,5 +1,31 @@
 angular.module('npact')
-  .factory('Grapher', function(K, $log, GraphingCalculator, $rootScope, $compile, NProfiler, TrackReader, $q, Evt) {
+
+  .service('Tooltip', function($log, $rootScope, $compile) {
+      // TODO: move tooltip control to the `npactGraph`, just throw an
+      // event or callback here with the extract, let `npactGraph`
+    // handle this stuff
+    this.show = function ($el, extract, pageX, pageY) {
+      this.clearAll();
+      var scope = $rootScope.$new(),
+          tpl = '<div npact-extract="extract"></div>';
+      scope.extract = extract;
+      $el.qtip({
+        content: {text: $compile(tpl)(scope)},
+        position: {
+          my: scope.extract.complement === 0 ? 'top center' : 'bottom center',
+          target: [pageX, pageY]
+        },
+        show: {event: 'tooltipShow.npact'},
+        hide: {event: 'tooltipHide.npact'}
+      });
+      $el.trigger('tooltipShow.npact');
+    };
+    this.clearAll = function() {
+      jQuery('.qtip').qtip('destroy');
+    };
+  })
+
+  .factory('Grapher', function(K, $log, GraphingCalculator, Tooltip, NProfiler, TrackReader, $q, Evt) {
     'use strict';
 
     function addMany(container, children) {
@@ -151,11 +177,6 @@ angular.module('npact')
       return layer;
     };
 
-    GP.clearAllToolTips = function() {
-        // kill ALL tooltips, not just the ones on this graph
-        jQuery('.qtip').qtip('destroy');
-    };
-
     GP.genomeGroup = function() {
       var self = this,
           gx = this.m.graph.x,
@@ -176,7 +197,7 @@ angular.module('npact')
             }
           });
 
-      g.on('dragstart dragend', this.clearAllToolTips);
+      g.on('dragstart dragend', Tooltip.clearAll);
 
       g.on('dragend', function(evt) {
         var oldStartBase = self.startBase,
@@ -202,7 +223,7 @@ angular.module('npact')
     };
 
     GP.onDblClick = function(evt) {
-      this.clearAllToolTips();
+      Tooltip.clearAll();
 
       var zoomOnPx = evt.evt.layerX - this.m.graph.x,
           zoomOnPct = zoomOnPx / this.m.graph.w;
@@ -455,24 +476,8 @@ angular.module('npact')
           centerExtractLabel(lbl, xaxis.scaleX);
       }, this);
 
-
-      // TODO: move tooltip control to the `npactGraph`, just throw an
-      // event or callback here with the extract, let `npactGraph`
-      // handle this stuff
       g.on('click', function(evt) {
-        var scope = $rootScope.$new(),
-            tpl = '<div npact-extract="extract"></div>';
-        scope.extract = evt.target.getAttrs().extract;
-        $el.qtip({
-          content: {text: $compile(tpl)(scope)},
-          position: {
-            my: scope.extract.complement === 0 ? 'top center' : 'bottom center',
-            target: [evt.evt.pageX, evt.evt.pageY]
-          },
-          show: {event: 'tooltipShow.npact'},
-          hide: {event: 'tooltipHide.npact'}
-        });
-        $el.trigger('tooltipShow.npact');
+        Tooltip.show($el, evt.target.getAttrs().extract, evt.evt.pageX, evt.evt.pageY);
       });
       return g;
     };
