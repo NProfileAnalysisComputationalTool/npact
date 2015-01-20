@@ -40,7 +40,7 @@ def get_result_link(path):
 
 # Variables, mostly for debugging, that aren't exposed anywhere but
 # that if present in the request should be added to the config
-MAGIC_PARAMS = ['raiseerror', 'force']
+MAGIC_PARAMS = ('raiseerror', 'force')
 
 VALID_KEYS = ('first_page_title', 'following_page_title', 'nucleotides',
               'significance', 'alternate_colors', 'startBase', 'endBase')
