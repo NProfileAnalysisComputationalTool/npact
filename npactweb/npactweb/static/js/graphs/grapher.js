@@ -177,49 +177,72 @@ angular.module('npact')
       return layer;
     };
 
+    GP.genomeLayer = function() {
+      //Everything in this layer is in the coordinate system of the
+      //genome and will be scaled to pixels by Kinetic
+      var self = this;
+      var l = new K.Layer({
+        x: this.m.graph.x,
+        clip: {
+          x: 0, y: 0,
+          width: this.m.graph.w ,
+          height: 1000
+        }
+      });
+
+      var gg = this.genomeGroup();
+      gg.add(this.xAxisGroup(), this.profileGroup());
+      $q.all(_.map(this.headers, function(hdr) {
+        return self.trackSlice(hdr.text)
+          .then(function(data) {
+            switch(hdr.lineType) {
+            case 'extracts':
+              return self.cdsGroup(hdr, data);
+            case 'hits':
+              return self.drawHit(hdr, data);
+            default:
+              throw new Error("don't know how to draw " + hdr);
+            }
+          }).then(function(img) { gg.add(img); });
+      })).then(function(list) {
+        $log.log('Redrawing genome layer ', list.length);
+        l.draw();
+      });
+
+      l.add(gg);
+      return l;
+    };
+
     GP.genomeGroup = function() {
-      var self = this,
-          gx = this.m.graph.x,
-          dragRes = {x: gx, y: 0},
-          g = new K.Group({
-            x: gx,
+      var g = new K.Group({
+            x: 0,
             draggable: true,
             dragBoundFunc: function(pos) {
-              // pos is the distance dragged, except `pos.x` always
-              // starts at `gx`. Something due to container coordinate
-              // system vs stage coordinate system. `pos.y` is not
-              // similarly affected.
-              var nextOffset = - (pos.x - gx);
-              // change position via offsetX
-              this.offsetX(nextOffset);
-              // never change position via this return value
-              return dragRes;
+              pos.y = 0; //Disallow vertical movement
+              return pos;
             }
           });
 
       g.on('dragstart dragend', Tooltip.clearAll);
+      g.on('dragend', this.onDragEnd.bind(this));
+      g.on('mouseover', function() { document.body.style.cursor = 'pointer'; });
+      g.on('mouseout', function() { document.body.style.cursor = 'default'; });
+      g.on('dblclick', this.onDblClick.bind(this));
 
-      g.on('dragend', function(evt) {
-        var oldStartBase = self.startBase,
-            newStartBase = (this.offsetX() / self.xaxis.scaleX) + oldStartBase;
-        // tell the world
-        self.onPan({
-          oldStartBase: oldStartBase, newStartBase: newStartBase, evt: evt});
-      });
-
-      g.on('mouseover', function() {
-        document.body.style.cursor = 'pointer';
-      });
-      g.on('mouseout', function() {
-        document.body.style.cursor = 'default';
-      });
-      g.on('dblclick', _.bind(this.onDblClick, this));
       // need a shape that can be clicked on to allow dragging the
       // entire canvas
       g.add(new K.Rect({x: 0, y: this.m.graph.y,
                         width: this.m.graph.w,
                         height: this.m.graph.h}));
-      return (this._genomeGroup = g);
+      return g;
+    };
+    GP.onDragEnd = function(evt) {
+      $log.log('dragEnd', evt);
+      var oldStartBase = this.startBase,
+          newStartBase = (evt.target.x() / this.xaxis.scaleX) + oldStartBase;
+      // tell the world
+      this.onPan({
+        oldStartBase: oldStartBase, newStartBase: newStartBase, evt: evt});
     };
 
     GP.onDblClick = function(evt) {
@@ -237,15 +260,9 @@ angular.module('npact')
       });
     };
 
-    GP.chartLayer = function() {
+    GP.frameLayer = function() {
       var m = this.m,
-          l = new K.Layer({
-            clip: {
-              x: m.graph.x-1, y: 0,
-              width: m.graph.w + 2,
-              height: 1000
-            }
-          }),
+          l = new K.Layer({}),
           // frame around the graph
           border = new K.Rect({
             x: m.graph.x,
@@ -255,7 +272,7 @@ angular.module('npact')
             stroke: this.borderColor
           });
 
-      l.add(border, this.genomeGroup());
+      l.add(border);
       return l;
     };
 
@@ -353,34 +370,11 @@ angular.module('npact')
     };
 
     GP.redraw = function(newOpts) {
-      var t1 = new Date();
       angular.extend(this, newOpts);
       this.stage.destroyChildren();
       this.stage.setWidth(this.width);
-      this.stage.add(this.chartLayer(), this.leftLayer());
-
-      var gg = this._genomeGroup;
-      gg.add(this.xAxisGroup(), this.profileGroup());
-
-      var drawings = _.map(this.headers, function(hdr) {
-        return this.trackSlice(hdr.text)
-          .then(function(data) {
-            switch(hdr.lineType) {
-            case 'extracts':
-              return this.cdsGroup(hdr, data);
-            case 'hits':
-              return this.drawHit(hdr, data);
-            default:
-              throw new Error("don't know how to draw " + hdr);
-            }
-          }.bind(this)).then(function(img) { gg.add(img); });
-      }, this);
-
-      return $q.all(drawings).then(function() {
-        this.stage.draw();
-        $log.log('drew npactGraph', this.startBase,
-                 'took', new Date() - t1, 'ms');
-      }.bind(this));
+      this.stage.add(this.frameLayer(), this.leftLayer(), this.genomeLayer());
+      this.stage.draw();
     };
 
     function centerExtractLabel(txt, scaleX) {

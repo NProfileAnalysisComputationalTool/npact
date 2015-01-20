@@ -142,10 +142,12 @@ angular.module('npact')
               var opts = ctrl.graphOptions(idx);
               (g || (g = new Grapher(el, opts)))
                 .redraw(opts)
-                .then(function() {
-                  redraw = false;
-                  drawTimer = null;
-                });
+              //redraw doesn't return a promise at the moment, but that should return
+              // .then(function() {
+                //   redraw = false;
+                //   drawTimer = null;
+                // })
+              ;
             },
             schedule = function() {
               if(redraw && !drawTimer && visible(idx)) {
