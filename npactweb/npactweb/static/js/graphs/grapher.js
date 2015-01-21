@@ -185,7 +185,7 @@ angular.module('npact')
         x: this.m.graph.x,
         clip: {
           x: 0, y: 0,
-          width: this.m.graph.w ,
+          width: this.m.graph.w,
           height: 1000
         }
       });
