@@ -152,7 +152,7 @@ angular.module('npact')
     };
 
     var leftLayerCache = {};  // Shared amongst all Graphers
-    GP.leftLayer = function() {
+    GP.leftLayer = function(stage) {
       var key = angular.toJson(this.headers) + this.axisTitle,
           opts = {
             width: this.leftPadding,
@@ -160,24 +160,30 @@ angular.module('npact')
             height: this.height
           },
           layer = new K.FastLayer(opts);
+      stage.add(layer);
 
       if(leftLayerCache[key]) {
-        leftLayerCache[key].then(function(image) {
+        return leftLayerCache[key].then(function(image) {
           layer.add(new K.Image(angular.extend(opts, {image: image})));
           layer.draw();
-        });
-      } else {
-        this.yAxisGroup(layer);
-        this.headerGroup(layer);
-        leftLayerCache[key] = $q(function(resolve) {
-          $log.log('saving leftLayer image');
-          layer.toImage(angular.extend(opts, {callback: resolve}));
+          $log.log("finished drawing cached leftlayer");
         });
       }
-      return layer;
+      else {
+        this.yAxisGroup(layer);
+        this.headerGroup(layer);
+        var d = $q.defer();
+        layer.toImage(angular.extend(opts, {callback: function(v) {
+          $log.log('saved leftLayer image');
+          d.resolve(v);
+          $log.log('resolved');
+          layer.draw();
+        }}));
+        return (leftLayerCache[key] = d.promise);
+      }
     };
 
-    GP.genomeLayer = function() {
+    GP.genomeLayer = function(stage) {
       //Everything in this layer is in the coordinate system of the
       //genome and will be scaled to pixels by Kinetic
       var self = this;
@@ -189,12 +195,16 @@ angular.module('npact')
           height: 1000
         }
       });
-
+      stage.add(l);
       var gg = this.genomeGroup();
       gg.add(this.xAxisGroup());
       l.add(gg);
 
-      var p1 = this.profileGroup().then(function(pg) { gg.add(pg); });
+      var p1 = this.profileGroup()
+            .then(function(pg) {
+              gg.add(pg);
+              $log.log("Finished ProfileGroup");
+            });
       var p2 = $q.all(_.map(this.headers, function(hdr) {
         return self.trackSlice(hdr.text)
           .then(function(data) {
@@ -211,7 +221,9 @@ angular.module('npact')
         $log.log('Redrawing genome layer ', list.length);
         addMany(gg, list);
       });
-      return $q.all([p1,p2]).then(function() {
+      return $q.all([p1, p2]).then(function() {
+        $log.log("Drawing genomeLayer");
+        l.draw();
         return l;
       });
     };
@@ -227,10 +239,10 @@ angular.module('npact')
           });
 
       g.on('dragstart dragend', Tooltip.clearAll);
-      g.on('dragend', this.onDragEnd.bind(this));
+      g.on('dragend', _.bind(this.onDragEnd, this));
       g.on('mouseover', function() { document.body.style.cursor = 'pointer'; });
       g.on('mouseout', function() { document.body.style.cursor = 'default'; });
-      g.on('dblclick', this.onDblClick.bind(this));
+      g.on('dblclick', _.bind(this.onDblClick, this));
 
       // need a shape that can be clicked on to allow dragging the
       // entire canvas
@@ -263,9 +275,9 @@ angular.module('npact')
       });
     };
 
-    GP.frameLayer = function() {
+    GP.frameLayer = function(stage) {
       var m = this.m,
-          l = new K.Layer({}),
+          l = new K.FastLayer(),
           // frame around the graph
           border = new K.Rect({
             x: m.graph.x,
@@ -274,9 +286,12 @@ angular.module('npact')
             height: m.graph.h,
             stroke: this.borderColor
           });
+      stage.add(l);
 
       l.add(border);
-      return l;
+      l.draw();
+      $log.log("Finished drawing frame");
+      return $q.when(l);
     };
 
     function centerXLabel(txt, scaleX) {
@@ -371,15 +386,17 @@ angular.module('npact')
     };
 
     GP.redraw = function(newOpts) {
+      var t1 = new Date();
       angular.extend(this, newOpts);
       this.stage.destroyChildren();
       this.stage.setWidth(this.width);
-      this.stage.add(this.frameLayer(), this.leftLayer());
-      this.stage.draw();
-      return this.genomeLayer().then(function(image) {
-        this.stage.add(image);
-        image.draw();
-      }.bind(this));
+      var llp = this.leftLayer(this.stage);
+      var flp = this.frameLayer(this.stage);
+      var glp = this.genomeLayer(this.stage);
+      return $q.all([llp, flp, glp])
+        .then(function() {
+          $log.log("Finished draw at", newOpts.startBase, "in", new Date() - t1);
+        });
     };
 
     function centerExtractLabel(txt, scaleX) {

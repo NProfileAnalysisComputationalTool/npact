@@ -109,7 +109,7 @@ angular.module('npact')
                   normfactor * profile[2]);
         }
       }
-      $log.debug('Slice @', opts.startBase, 'step,win', step,window,
+      $log.debug('NP slice @', opts.startBase, 'step,win', step,window,
                  'took', new Date() - t1);
     };
   })
