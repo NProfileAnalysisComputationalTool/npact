@@ -63,7 +63,7 @@ angular.module('npact')
         // x2, y2, ...] lists, make a promise for the completed group of
         // points
         var r= [], g= [], b= [];
-        this.onProfilePoints = NProfiler
+        this._onProfilePoints = NProfiler
           .slice({ startBase: this.startBaseM, endBase: this.endBaseM,
                    onPoint: function(coord, rv, gv, bv) {
                      //invert because drawing is from the top so 100% is 0 pix
