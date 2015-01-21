@@ -93,7 +93,10 @@ angular.module('npact')
     };
 
     this.slice = function(opts) {
-      if (!_.has(self.tracks, opts.name)) { throw new Err.TrackNotFound(); }
+      if (!_.has(self.tracks, opts.name)) {
+        $log.log('Missing', opts.name);
+        throw new Err.TrackNotFound();
+      }
 
       var data = self.tracks[opts.name],
           min = opts.startBase,

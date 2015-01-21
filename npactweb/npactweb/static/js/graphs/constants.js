@@ -34,7 +34,7 @@ angular.module('npact')
       b: 'rgb(0, 114, 178)'
     },
     // how much vertical space to leave for different kinds of headers
-    headerSizes:{'extracts': 30, 'hits': 20}
+    headerSizes: {'extracts': 30, 'hits': 20}
   })
   .service('Err',function() {
 
