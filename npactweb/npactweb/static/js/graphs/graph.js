@@ -142,11 +142,15 @@ angular.module('npact')
               var opts = ctrl.graphOptions(idx);
               (g || (g = new Grapher(el, opts)))
                 .redraw(opts)
-              //redraw doesn't return a promise at the moment, but that should return
-              // .then(function() {
-                //   redraw = false;
-                //   drawTimer = null;
-                // })
+                .then(function() {
+                  redraw = false;
+                  drawTimer = null;
+                })
+                .catch(function() {
+                  //something went wrong, we will still need to redraw this
+                  redraw = true;
+                  drawTimer = null;
+                })
               ;
             },
             schedule = function() {

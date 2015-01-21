@@ -191,8 +191,11 @@ angular.module('npact')
       });
 
       var gg = this.genomeGroup();
-      gg.add(this.xAxisGroup(), this.profileGroup());
-      $q.all(_.map(this.headers, function(hdr) {
+      gg.add(this.xAxisGroup());
+      l.add(gg);
+
+      var p1 = this.profileGroup().then(function(pg) { gg.add(pg); });
+      var p2 = $q.all(_.map(this.headers, function(hdr) {
         return self.trackSlice(hdr.text)
           .then(function(data) {
             switch(hdr.lineType) {
@@ -203,14 +206,14 @@ angular.module('npact')
             default:
               throw new Error("don't know how to draw " + hdr);
             }
-          }).then(function(img) { gg.add(img); });
+          });
       })).then(function(list) {
         $log.log('Redrawing genome layer ', list.length);
-        l.draw();
+        addMany(gg, list);
       });
-
-      l.add(gg);
-      return l;
+      return $q.all([p1,p2]).then(function() {
+        return l;
+      });
     };
 
     GP.genomeGroup = function() {
@@ -340,15 +343,13 @@ angular.module('npact')
         g.add(new K.Rect(angular.extend(x, shadeOpts)));
       });
 
-      this.getProfilePoints()
+      return this.getProfilePoints()
         .then(function(points) {
-          if(!g.getLayer()) { return; }
           _.forEach(points, function(v, k) {
             g.add(buildLine(v, colors[k]));
           });
-          g.draw();
+          return g;
         });
-      return g;
     };
 
     /**
@@ -373,8 +374,12 @@ angular.module('npact')
       angular.extend(this, newOpts);
       this.stage.destroyChildren();
       this.stage.setWidth(this.width);
-      this.stage.add(this.frameLayer(), this.leftLayer(), this.genomeLayer());
+      this.stage.add(this.frameLayer(), this.leftLayer());
       this.stage.draw();
+      return this.genomeLayer().then(function(image) {
+        this.stage.add(image);
+        image.draw();
+      }.bind(this));
     };
 
     function centerExtractLabel(txt, scaleX) {
