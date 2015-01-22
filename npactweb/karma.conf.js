@@ -14,17 +14,13 @@ module.exports = function(config){
       'npactweb/static/js/*.js',
       'npactweb/static/js/**/*.js',
       'npactweb/static/js/**/*.html',
-      'npactweb/static/js/**/*.txt',
-      'npactweb/static/js/**/*.json',
-      'npactweb/static/js/**/*.ddna',
+      'npactweb/static/js/test-data/*'
 
     ],
     exclude: ['npactweb/static/js/*custom.min.js'],
     preprocessors: {
       'npactweb/static/js/**/*.html': ['ng-html2js'],
-      'npactweb/static/js/**/*.txt': ['ng-html2js'],
-      'npactweb/static/js/**/*.json': ['ng-html2js'],
-      'npactweb/static/js/**/*.ddna': ['ng-html2js']
+      'npactweb/static/js/test-data/*': ['ng-html2js']
     },
     frameworks:['jasmine'],
     browsers: ['PhantomJS'],

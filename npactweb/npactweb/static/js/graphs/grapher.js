@@ -166,7 +166,6 @@ angular.module('npact')
         return leftLayerCache[key].then(function(image) {
           layer.add(new K.Image(angular.extend(opts, {image: image})));
           layer.draw();
-          $log.log("finished drawing cached leftlayer");
         });
       }
       else {
@@ -174,9 +173,7 @@ angular.module('npact')
         this.headerGroup(layer);
         var d = $q.defer();
         layer.toImage(angular.extend(opts, {callback: function(v) {
-          $log.log('saved leftLayer image');
           d.resolve(v);
-          $log.log('resolved');
           layer.draw();
         }}));
         return (leftLayerCache[key] = d.promise);
@@ -200,11 +197,7 @@ angular.module('npact')
       gg.add(this.xAxisGroup());
       l.add(gg);
 
-      var p1 = this.profileGroup()
-            .then(function(pg) {
-              gg.add(pg);
-              $log.log("Finished ProfileGroup");
-            });
+      var p1 = this.profileGroup().then(function(pg) { gg.add(pg); });
       var p2 = $q.all(_.map(this.headers, function(hdr) {
         return self.trackSlice(hdr.text)
           .then(function(data) {
@@ -222,7 +215,6 @@ angular.module('npact')
         addMany(gg, list);
       });
       return $q.all([p1, p2]).then(function() {
-        $log.log("Drawing genomeLayer");
         l.draw();
         return l;
       });
@@ -290,7 +282,6 @@ angular.module('npact')
 
       l.add(border);
       l.draw();
-      $log.log("Finished drawing frame");
       return $q.when(l);
     };
 

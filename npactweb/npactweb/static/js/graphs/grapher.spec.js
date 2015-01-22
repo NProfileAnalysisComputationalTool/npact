@@ -1,11 +1,9 @@
 describe('Grapher', function() {
   'use strict';
-
   beforeEach(module('assets'));
   beforeEach(module('npact', function($provide) {
     $provide.value('$log', console);
     $provide.service('Fetcher', function() { });
-    $provide.value('$timeout', window.timeout);
   }));
 
   var Grapher, $digest, $timeout, element, npactConstants,
@@ -43,7 +41,7 @@ describe('Grapher', function() {
     };
   }));
 
-  beforeEach(inject(function(NProfiler, TrackReader, headerSpecCalc, $templateCache, $q, $log) {
+  beforeEach(inject(function(NProfiler, TrackReader, headerSpecCalc, $templateCache, $q, $log, $timeout) {
     NProfiler.ddna = $templateCache.get('/js/test-data/sampleDdnaFile.ddna');
     NProfiler.fetching = $q.when(NProfiler.ddna);
 
@@ -56,6 +54,7 @@ describe('Grapher', function() {
     sampleOpts = angular.extend(sampleOpts,
                                 headerSpecCalc([{text: 'Hits', lineType: 'hits'},
                                                 {text: 'Extracts', lineType: 'extracts'}]));
+    $timeout.flush();
   }));
 
   it('should have an element to work with', function() {
@@ -69,5 +68,9 @@ describe('Grapher', function() {
     g.redraw(sampleOpts).then(function() {
       done();
     });
+    $timeout.flush();
+    //KineticJs uses window timeouts, so we need to let that happen
+    //and then flush angular's fake $timeout again
+    window.setTimeout($timeout.flush, 0);
   });
 });
