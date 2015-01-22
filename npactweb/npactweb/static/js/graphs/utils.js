@@ -109,7 +109,9 @@ angular.module('npact')
      * @returns {Promise} for array of parsed objects
      */
     this.parseAsync = function(text, parseLine){
-      if (!_.isString(text)) { return $q.when(text); }
+      if (!_.isString(text)) {
+        throw new Error("Can't parse non-text " + typeof text);
+      }
 
       var results = [];
       // async loop, gathering results
