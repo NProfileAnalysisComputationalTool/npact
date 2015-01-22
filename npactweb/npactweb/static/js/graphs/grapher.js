@@ -185,18 +185,17 @@ angular.module('npact')
           width: this.m.graph.w,
           height: 1000
         }
-      }),
-          dg = new K.Group({
-            scaleX: this.xaxis.scaleX,
-            x: 0,
-            draggable: true,
-            dragBoundFunc: function(pos) {
-              pos.y = 0; //Disallow vertical movement
-              return pos;
-            }
-          });
-
+      });
       stage.add(l);
+      var dg = new K.Group({
+        scaleX: this.xaxis.scaleX,
+        x: 0,
+        draggable: true,
+        dragBoundFunc: function(pos) {
+          pos.y = 0; //Disallow vertical movement
+          return pos;
+        }
+      });
       l.add(dg);
       dg.on('dragstart dragend', Tooltip.clearAll);
       dg.on('dragend', _.bind(this.onDragEnd, this));
@@ -206,10 +205,9 @@ angular.module('npact')
 
       // need a shape that can be clicked on to allow dragging the
       // entire canvas
-      var r = new K.Rect({x: 0, y: this.m.graph.y,
-                          width: this.m.graph.w,
-                          height: this.m.graph.h});
-      dg.add(r);
+      dg.add(new K.Rect({x: 0, y: 0, //fill: '#BDD',
+                          width: this.xaxis.length,
+                          height: this.height}));
 
       //Everything in this layer needs to be part of that draggable.
       dg.add(this.xAxisGroup());
@@ -218,19 +216,14 @@ angular.module('npact')
       var p2 = $q.all(_.map(this.headers, this.makeHeader, this))
             .then(function(list) { addMany(dg, list); });
       return $q.all([p1, p2]).then(function() {
-        r.setZIndex(-1000); // the drag rectange should always be on top
         l.draw();
         return l;
       });
     };
 
     GP.onDragEnd = function(evt) {
-      $log.log('dragEnd', evt.target.x());
-      var oldStartBase = this.startBase,
-          newStartBase = (evt.target.x() / this.xaxis.scaleX) + oldStartBase;
-      // tell the world
-      this.onPan({
-        oldStartBase: oldStartBase, newStartBase: newStartBase, evt: evt});
+      $log.log('dragEnd', evt.target.x(), evt.target.getScaleX());
+      this.onPan(-evt.target.x() / evt.target.getScaleX());
     };
 
     GP.onDblClick = function(evt) {

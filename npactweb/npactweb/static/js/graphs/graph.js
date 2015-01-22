@@ -6,10 +6,8 @@ angular.module('npact')
     'use strict';
 
     //The mouse event responders
-    var onPan = function(opts) {
-          $log.log('Pan event:', opts);
-          var offset = Math.floor(opts.newStartBase - opts.oldStartBase);
-          GraphConfig.offset += offset;
+    var onPan = function(offset) {
+          GraphConfig.offset += Math.round(offset);
           $scope.$apply();
         },
         onZoom = function(opts) {

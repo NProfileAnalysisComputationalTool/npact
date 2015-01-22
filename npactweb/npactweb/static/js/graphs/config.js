@@ -1,7 +1,8 @@
 angular.module('npact')
   .constant('PUBLIC_CONFIG_KEYS',
             ['first_page_title', 'following_page_title', 'nucleotides',
-             'significance', 'alternate_colors', 'startBase', 'endBase'])
+             'significance', 'alternate_colors', 'startBase', 'endBase',
+             'basesPerGraph','offset'])
 
 
   .service('GraphConfig', function(Err, npactConstants, Evt, PUBLIC_CONFIG_KEYS,
@@ -15,8 +16,14 @@ angular.module('npact')
 
     //Get values from the querystring during intialization
     _.forEach(PUBLIC_CONFIG_KEYS, function(k) {
-      if($location.search()[k]) {
-        self[k] = $location.search()[k];
+      var v = $location.search()[k];
+      if(v) {
+        try {
+          self[k] = Number(v);
+        }
+        catch(e) {
+          self[k] = v;
+        }
       }
     });
 
@@ -24,7 +31,7 @@ angular.module('npact')
      * what's the right title for the current nucleotides?
      */
     self.profileTitle = function() {
-      return '% ' + self.nucleotides.join('');
+      return self.nucleotides ? '% ' + self.nucleotides.join('') : null;
     };
 
     self.activeTracks = function(){
@@ -65,10 +72,10 @@ angular.module('npact')
     this.partition = function() {
       var idx = 0,
           offset = self.offset || 0,
-          startBase = Math.max(self.startBase + offset, 0),
+          startBase = self.startBase + offset,
           endBase = self.endBase,
           bpg = self.basesPerGraph;
-      if(!(startBase >= 0 && endBase >= 0 && bpg >=0)) { return []; }
+
       var g = new Array(Math.ceil((endBase - startBase) / bpg));
       while(startBase < endBase) {
         g[idx] = {
