@@ -83,7 +83,7 @@ describe('Graphs', function(){
 
   describe('GraphingCalculator', function(){
     var GC, opts = {
-      height:150,
+      profileHeight:100,
       width:255,
       leftPadding: 50,
       rightPadding: 5,
@@ -128,7 +128,7 @@ describe('Graphs', function(){
       expect(m.graph).toEqual({
         x: 50,
         y: 10,
-        h: 120,
+        h: 100,
         w: 200
       });
     });

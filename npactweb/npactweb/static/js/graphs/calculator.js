@@ -1,5 +1,5 @@
 angular.module('npact')
-  .service('GraphingCalculator', function GraphingCalculator(K, Utils) {
+  .service('GraphingCalculator', function GraphingCalculator(K, Utils, npactConstants) {
     'use strict';
     var self = this;
 
@@ -122,22 +122,41 @@ angular.module('npact')
       return {offset: newoffset, basesPerGraph: newbasesPerGraph};
     };
 
+    self.trackSizeCalc = function(activeTracks, opts) {
+      var offset = opts.topPadding;
+      var headers = _.map(activeTracks, function(cfg) {
+        var h = npactConstants.trackHeights[cfg.lineType],
+            y = offset;
+        offset += h;
+        return {
+          text: cfg.text,
+          lineType: cfg.lineType,
+          y: y,
+          height: h
+        };
+      });
+      return {
+        trackHeaders: headers,
+        totalTrackHeight: offset
+      };
+    };
     /**
      * calculate measurements about the chart
      */
-    self.chart = function(opts){
+    self.chart = function(opts) {
       var yStops = [100, 80, 60, 40, 20, 0],
           yAxisTicks = yStops.length - 1,
-          profileHeight = opts.height - opts.headerY - opts.axisLabelFontsize -
-            3*opts.profileTicks,
+          //profileHeight = opts.height - opts.headerY - opts.axisLabelFontsize -
+          //   3*opts.profileTicks,
 
           // the line graph, excluding tick marks and axis labels
           g = {
             x: opts.leftPadding,
-            y: opts.height - profileHeight -
-              opts.axisLabelFontsize - // x-axis labels
-              2*opts.profileTicks, // tick marks
-            h: profileHeight,
+            y: opts.headerY + opts.profileTicks,
+            //opts.height - profileHeight -
+            //  opts.axisLabelFontsize - // x-axis labels
+            //  2*opts.profileTicks, // tick marks
+            h: opts.profileHeight,
             w: opts.width - opts.leftPadding - opts.rightPadding
           },
           yAxisTickSpacing = g.h / yAxisTicks,
@@ -150,11 +169,13 @@ angular.module('npact')
           // box to center the title inside of
           ytitle={
             x: 0, y: g.y, width: yAxisLabelWidth, height: g.h
-          }
+          },
+          height = opts.headerY + opts.axisLabelFontsize + 3*opts.profileTicks + opts.profileHeight
       ;
 
       return {
-        graph:g,
+        graph: g,
+        height: height,
         // TODO: return xaxis here
         yaxis: {
           ticks: yticks,
