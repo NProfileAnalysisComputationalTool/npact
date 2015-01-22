@@ -1,9 +1,10 @@
 describe('NProfiler', function(){
   'use strict';
+
   beforeEach(module('assets'));
   beforeEach(module('npact', function($provide) {
-    $provide.value('$log', console);
-    $provide.service('Fetcher', function($q, $log, $templateCache) {
+//    $provide.value('$log', console);
+    $provide.service('Fetcher', function($q, $log) {
       this.fetchFile = function(path) {
         $log.debug('Fetching ' + path);
         if(sampleConfig.ddna !== path) {
