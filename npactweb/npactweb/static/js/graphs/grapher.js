@@ -25,7 +25,7 @@ angular.module('npact')
     };
   })
 
-  .factory('Grapher', function(K, $log, GraphingCalculator, Tooltip, NProfiler, TrackReader, $q, Evt) {
+  .factory('Grapher', function(K, $log, GraphingCalculator, Tooltip, NProfiler, TrackReader, $q, Evt, Utils) {
     'use strict';
 
     function addMany(container, children) {
@@ -37,7 +37,8 @@ angular.module('npact')
     function Grapher(element, opts) {
       this.$element = jQuery(element);
       angular.extend(this, opts);
-      // invariants: startBase, endBase, margin
+      // invariants: startBase, endBase
+      this.margin = Utils.orderOfMagnitude(this.endBase - this.startBase, -1);
       this.startBaseM = Math.max(this.startBase - this.margin, 0);
       this.endBaseM = this.endBase + this.margin;
 
@@ -48,9 +49,6 @@ angular.module('npact')
       });
     }
     var GP = Grapher.prototype;
-
-    //Tie margin to 0 until we figure out clipping issues (not sure margin helped anyways.)
-    GP.margin = 0;
 
     GP.destroy = function() {
       if(this.stage) { this.stage.destroy(); }
@@ -183,7 +181,6 @@ angular.module('npact')
     GP.genomeLayer = function(stage) {
       //Everything in this layer is in the coordinate system of the
       //genome and will be scaled to pixels by Kinetic
-      var self = this;
       var l = new K.Layer({
         x: this.m.graph.x,
         clip: {
@@ -191,37 +188,8 @@ angular.module('npact')
           width: this.m.graph.w,
           height: 1000
         }
-      });
-      stage.add(l);
-      var gg = this.genomeGroup();
-      gg.add(this.xAxisGroup());
-      l.add(gg);
-
-      var p1 = this.profileGroup().then(function(pg) { gg.add(pg); });
-      var p2 = $q.all(_.map(this.headers, function(hdr) {
-        return self.trackSlice(hdr.text)
-          .then(function(data) {
-            switch(hdr.lineType) {
-            case 'extracts':
-              return self.cdsGroup(hdr, data);
-            case 'hits':
-              return self.drawHit(hdr, data);
-            default:
-              throw new Error("don't know how to draw " + hdr);
-            }
-          });
-      })).then(function(list) {
-        $log.log('Redrawing genome layer ', list.length);
-        addMany(gg, list);
-      });
-      return $q.all([p1, p2]).then(function() {
-        l.draw();
-        return l;
-      });
-    };
-
-    GP.genomeGroup = function() {
-      var g = new K.Group({
+      }),
+          dg = new K.Group({
             x: 0,
             draggable: true,
             dragBoundFunc: function(pos) {
@@ -230,19 +198,34 @@ angular.module('npact')
             }
           });
 
-      g.on('dragstart dragend', Tooltip.clearAll);
-      g.on('dragend', _.bind(this.onDragEnd, this));
-      g.on('mouseover', function() { document.body.style.cursor = 'pointer'; });
-      g.on('mouseout', function() { document.body.style.cursor = 'default'; });
-      g.on('dblclick', _.bind(this.onDblClick, this));
+      stage.add(l);
+      l.add(dg);
+      dg.on('dragstart dragend', Tooltip.clearAll);
+      dg.on('dragend', _.bind(this.onDragEnd, this));
+      dg.on('mouseover', function() { document.body.style.cursor = 'pointer'; });
+      dg.on('mouseout', function() { document.body.style.cursor = 'default'; });
+      dg.on('dblclick', _.bind(this.onDblClick, this));
 
       // need a shape that can be clicked on to allow dragging the
       // entire canvas
-      g.add(new K.Rect({x: 0, y: this.m.graph.y,
+      var r = new K.Rect({x: 0, y: this.m.graph.y,
                         width: this.m.graph.w,
-                        height: this.m.graph.h}));
-      return g;
+                          height: this.m.graph.h});
+      dg.add(r);
+
+      //Everything in this layer needs to be part of that draggable.
+      dg.add(this.xAxisGroup());
+
+      var p1 = this.profileGroup().then(function(pg) { dg.add(pg); });
+      var p2 = $q.all(_.map(this.headers, this.makeHeader, this))
+            .then(function(list) { addMany(dg, list); });
+      return $q.all([p1, p2]).then(function() {
+        r.setZIndex(1000); // the drag rectange should always be on top
+        l.draw();
+        return l;
+      });
     };
+
     GP.onDragEnd = function(evt) {
       $log.log('dragEnd', evt);
       var oldStartBase = this.startBase,
@@ -405,6 +388,19 @@ angular.module('npact')
       txt.position(pos);
     }
 
+    GP.makeHeader = function(hdr) {
+      return this.trackSlice(hdr.text)
+        .then(_.bind(function(data) {
+          switch(hdr.lineType) {
+          case 'extracts':
+            return this.cdsGroup(hdr, data);
+          case 'hits':
+            return this.drawHit(hdr, data);
+          default:
+            throw new Error("don't know how to draw " + hdr);
+          }
+        }, this));
+    };
     GP.cdsGroup = function(header, cds) {
       var xaxis = this.xaxis, $el = this.$element,
           colors = this.colors,
