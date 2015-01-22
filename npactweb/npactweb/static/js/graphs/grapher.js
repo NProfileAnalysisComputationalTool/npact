@@ -190,6 +190,7 @@ angular.module('npact')
         }
       }),
           dg = new K.Group({
+            scaleX: this.xaxis.scaleX,
             x: 0,
             draggable: true,
             dragBoundFunc: function(pos) {
@@ -283,7 +284,6 @@ angular.module('npact')
           g = new K.Group({
             x: 0, y: m.graph.h + m.graph.y,
             width: xaxis.length,
-            scaleX: xaxis.scaleX,
             offsetX: this.startBase
           });
 
@@ -305,7 +305,6 @@ angular.module('npact')
           g = new K.Group({
             x: 0, y: m.graph.y,
             height: m.graph.h, width: xaxis.length,
-            scaleX: xaxis.scaleX,
             // convert % to px
             scaleY: m.graph.h / 100,
             offsetX: this.startBase
@@ -406,7 +405,6 @@ angular.module('npact')
           colors = this.colors,
           g = new K.Group({
             x: 0, y: 0,
-            scaleX: xaxis.scaleX,
             offsetX: this.startBase
           }),
           colorNames = 'rgb',
@@ -499,7 +497,6 @@ angular.module('npact')
           baseY = header.y + (header.height / 2),
           g = new K.Group({
             x: 0, y: 0,
-            scaleX: xaxis.scaleX,
             offsetX: startBase
           }),
           guideLineOpts = {
