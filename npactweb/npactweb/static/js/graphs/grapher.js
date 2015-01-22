@@ -207,7 +207,7 @@ angular.module('npact')
       // need a shape that can be clicked on to allow dragging the
       // entire canvas
       var r = new K.Rect({x: 0, y: this.m.graph.y,
-                        width: this.m.graph.w,
+                          width: this.m.graph.w,
                           height: this.m.graph.h});
       dg.add(r);
 
