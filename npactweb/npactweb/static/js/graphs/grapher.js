@@ -110,8 +110,7 @@ angular.module('npact')
       };
 
       addMany(g, _.map(this.headers, function(header) {
-        var txtOpts = angular.extend({}, defaultTextOpts, header);
-        return new K.Text(txtOpts);
+        return new K.Text(angular.extend(defaultTextOpts, header));
       }));
       return g;
     };
@@ -321,8 +320,10 @@ angular.module('npact')
             fill: this.profileShadeColor
           };
 
-      _.each(shades, function(x) {
-        g.add(new K.Rect(angular.extend(x, shadeOpts)));
+      _.each(shades, function(shd) {
+        shadeOpts.width = shd.width;
+        shadeOpts.x = shd.x;
+        g.add(new K.Rect(shadeOpts));
       });
 
       return this.getProfilePoints()
