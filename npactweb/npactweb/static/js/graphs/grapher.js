@@ -219,14 +219,14 @@ angular.module('npact')
       var p2 = $q.all(_.map(this.headers, this.makeHeader, this))
             .then(function(list) { addMany(dg, list); });
       return $q.all([p1, p2]).then(function() {
-        r.setZIndex(1000); // the drag rectange should always be on top
+        r.setZIndex(-1000); // the drag rectange should always be on top
         l.draw();
         return l;
       });
     };
 
     GP.onDragEnd = function(evt) {
-      $log.log('dragEnd', evt);
+      $log.log('dragEnd', evt.target.x());
       var oldStartBase = this.startBase,
           newStartBase = (evt.target.x() / this.xaxis.scaleX) + oldStartBase;
       // tell the world
@@ -511,7 +511,7 @@ angular.module('npact')
 
       // draw each hit
       _.forEach(hits, function(hit) {
-        var y = baseY + (hit.complement ? -offset : offset);
+        var y = baseY + (hit.complement ? offset : -offset);
 
         g.add(
           new K.Line({
