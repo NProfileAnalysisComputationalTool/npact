@@ -1,9 +1,7 @@
 angular.module('npact')
 
   .service('Tooltip', function($log, $rootScope, $compile) {
-      // TODO: move tooltip control to the `npactGraph`, just throw an
-      // event or callback here with the extract, let `npactGraph`
-    // handle this stuff
+    'use strict';
     this.show = function ($el, extract, pageX, pageY) {
       this.clearAll();
       var scope = $rootScope.$new(),
