@@ -286,12 +286,9 @@ angular.module('npact')
           });
 
       addMany(g, this.drawAxisTicks(xaxis.ticks));
-      var labels = this.drawAxisLabels(xaxis.labels);
-      addMany(g, labels);
-
-      // call `centerXLabel(txt, xaxis.scaleX)`
-      _.map(labels, function(txt) {
-        centerXLabel(txt, xaxis.scaleX);
+      _.forEach(this.drawAxisLabels(xaxis.labels), function(lbl) {
+        g.add(lbl);
+        centerXLabel(lbl, xaxis.scaleX);
       });
       return g;
     };
