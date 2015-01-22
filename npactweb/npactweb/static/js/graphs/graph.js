@@ -136,34 +136,26 @@ angular.module('npact')
             // triggers broadcasts redraw), but only gets cleared as
             // the currently visible ones are drawn
             redraw = false,
-            drawTimer = null,
             draw = function() {
-              if(!visible(idx)) { drawTimer = null; return; }
+              if(!redraw || !visible(idx)) { return; }
               var opts = ctrl.graphOptions(idx);
+              //However long it actually takes to draw, we have the
+              //latest options as of this point
+              redraw = false;
               (g || (g = new Grapher(el, opts)))
                 .redraw(opts)
-                .then(function() {
-                  redraw = false;
-                  drawTimer = null;
-                })
                 .catch(function() {
                   //something went wrong, we will still need to redraw this
                   redraw = true;
-                  drawTimer = null;
                 })
               ;
             },
             schedule = function() {
-              if(redraw && !drawTimer && visible(idx)) {
-                drawTimer = $timeout(draw, 0, false);
-              }
+              if(!redraw || !visible(idx)) { return; }
+              $timeout(draw, 0, false);
             },
             discard = function() {
-              if(g !== null) {
-                $log.log('discarding npactGraph', g.startBase);
-                g.destroy();
-                g = null;
-              }
+              if(g) { g.destroy(); g = null; }
             };
         $scope.$on(Evt.DRAW, schedule);
         $scope.$on(Evt.REDRAW, function() { redraw = true; schedule();});
