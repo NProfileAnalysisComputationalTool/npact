@@ -1,6 +1,6 @@
 angular.module('npact')
 
-  .controller('npactGraphContainerCtrl', function($scope, $element, $window, $log,
+  .controller('npactGraphContainerCtrl', function($scope, $element, $window, $log, $timeout,
                                            npactConstants, Utils, GraphConfig, Evt,
                                            GraphingCalculator, headerSpecCalc) {
     'use strict';
@@ -35,10 +35,10 @@ angular.module('npact')
     };
 
     var repartition = function() {
-          $scope.graphSpecs = GraphConfig.partition();
-          $log.log('Partitioned into', $scope.graphSpecs.length, 'rows.');
-          updateVisibility();
-          rebuild();
+      $scope.graphSpecs = GraphingCalculator.partition(GraphConfig);
+      $log.log('Partitioned into', $scope.graphSpecs.length, 'rows.');
+      updateVisibility();
+      $timeout(rebuild);
     },
         draw = function() { $scope.$broadcast(Evt.DRAW); },
         redraw = function() { $scope.$broadcast(Evt.REDRAW); },
