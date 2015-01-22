@@ -25,8 +25,10 @@ angular.module('npact')
     this.graphOptions = function(idx) {
       // This function builds the specific options for a graph, the
       // options object is lazily generated when needed
-      var range = $scope.graphSpecs[idx],
-          opts = angular.extend({}, baseOpts, range);
+      var start = $scope.graphSpecs[idx];
+      var opts = { startBase: start,
+                   endBase: start + GraphConfig.basesPerGraph};
+      opts = angular.extend(opts, baseOpts);
       opts.m = GraphingCalculator.chart(opts);
       opts.xaxis = GraphingCalculator.xaxis(opts);
       return opts;

@@ -65,28 +65,6 @@ angular.module('npact')
       }
       self.tracks = _.sortBy(self.tracks, 'weight');
     };
-
-    /**
-     * calcuate the header information
-     */
-    this.partition = function() {
-      var idx = 0,
-          offset = self.offset || 0,
-          startBase = self.startBase + offset,
-          endBase = self.endBase,
-          bpg = self.basesPerGraph;
-
-      var g = new Array(Math.ceil((endBase - startBase) / bpg));
-      while(startBase < endBase) {
-        g[idx] = {
-          startBase: startBase,
-          endBase: startBase + bpg - 1
-        };
-        idx++;
-        startBase = startBase + bpg;
-      }
-      return g;
-    };
   })
 
   /*

@@ -3,6 +3,18 @@ angular.module('npact')
     'use strict';
     var self = this;
 
+    this.partition = function(opts) {
+      var offset = opts.offset || 0,
+          startBase = opts.startBase + offset,
+          endBase = opts.endBase,
+          basesPerGraph = opts.basesPerGraph;
+      if(basesPerGraph)
+        return _.range(startBase, endBase, basesPerGraph);
+      else
+        return [];
+    };
+
+
     self.stops = function(a, b){
       var length = b - a,
           // get even stops; look for one lower order of magnitude

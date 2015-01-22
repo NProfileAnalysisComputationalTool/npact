@@ -98,6 +98,31 @@ describe('Graphs', function(){
       GC = GraphingCalculator;
     }));
 
+    describe('.partition', function() {
+      it('partitions', function(){
+        var p = GC.partition({startBase: 0, endBase: 450,
+                             basesPerGraph: 100, offset: 0});
+        expect(p).toEqual([0, 100, 200, 300, 400]);
+      });
+
+      it('handles a positive offset', function(){
+        var p = GC.partition({startBase: 0, endBase: 450,
+                             basesPerGraph: 100, offset: 10});
+        expect(p).toEqual([ 10, 110, 210, 310, 410]);
+      });
+      it('handles a negative offset ', function() {
+        var p = GC.partition({startBase: 0, endBase: 450,
+                             basesPerGraph: 100, offset: -10});
+        expect(p).toEqual([ -10, 90, 190, 290, 390]);
+      });
+      it('handles a stupid negative offset', function() {
+        var p = GC.partition({startBase: 0, endBase: 450,
+                             basesPerGraph: 100, offset: -110});
+        expect(p).toEqual([ -110, -10, 90, 190, 290, 390]);
+      });
+    });
+
+
     it('calculates graph area', function(){
       var m = GC.chart(opts);
       expect(m.graph).toEqual({
@@ -322,35 +347,5 @@ describe('Graphs', function(){
       });
     });
 
-
-    describe('.partition', function() {
-      beforeEach(function() {
-        angular.extend(G, {startBase: 0, endBase: 450,
-                           basesPerGraph: 100, offset: 0});
-      });
-      it('partitions', function(){
-        var p = G.partition();
-        expect(p).toEqual([
-          {startBase:0, endBase:99},
-          {startBase:100, endBase:199},
-          {startBase:200, endBase:299},
-          {startBase:300, endBase:399},
-          {startBase:400, endBase:499}
-        ]);
-      });
-
-      it('handles a positive offset', function(){
-        G.offset = 10;
-        var p = G.partition();
-
-        expect(p).toEqual([
-          {startBase:10, endBase:109},
-          {startBase:110, endBase:209},
-          {startBase:210, endBase:309},
-          {startBase:310, endBase:409},
-          {startBase:410, endBase:509}
-        ]);
-      });
-    });
   });
 });
