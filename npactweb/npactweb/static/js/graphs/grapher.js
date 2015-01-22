@@ -293,8 +293,7 @@ angular.module('npact')
       _.map(labels, function(txt) {
         centerXLabel(txt, xaxis.scaleX);
       });
-
-      return (this._xAxisGroup = g);
+      return g;
     };
 
     GP.profileGroup = function() {
