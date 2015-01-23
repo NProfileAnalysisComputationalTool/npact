@@ -2,7 +2,7 @@ angular.module('npact')
 
   .controller('npactGraphContainerCtrl', function($scope, $element, $window, $log, $timeout,
                                            npactConstants, Utils, GraphConfig, Evt,
-                                           GraphingCalculator, headerSpecCalc) {
+                                           GraphingCalculator) {
     'use strict';
 
     //The mouse event responders
@@ -29,7 +29,6 @@ angular.module('npact')
       var opts = { startBase: start,
                    endBase: start + GraphConfig.basesPerGraph};
       opts = angular.extend(opts, baseOpts);
-      opts.m = GraphingCalculator.chart(opts);
       opts.xaxis = GraphingCalculator.xaxis(opts);
       return opts;
     };
@@ -68,7 +67,9 @@ angular.module('npact')
 
     $scope.$watch(GraphConfig.activeTracks, function(val) {
       //Find headers and headerY
-      angular.extend(baseOpts, headerSpecCalc(val));
+      angular.extend(baseOpts, GraphingCalculator.trackSizeCalc(val));
+      baseOpts.m = GraphingCalculator.chart(baseOpts);
+      $scope.graphHeight = baseOpts.height;
       redraw();
     }, true);
 
@@ -85,11 +86,12 @@ angular.module('npact')
     var $win = angular.element($window),
         winHeight = $win.height(),
         borderHeight = 1,
-        graphBoxHeight = npactConstants.graphSpecDefaults.height + borderHeight,
         slack = 50, // how many pixels outside of viewport to render
         topOffset = $element.offset().top,
         topIdx = 0, bottomIdx = 0,
         updateVisibility = function() {
+          if(!baseOpts.m) return;
+          var graphBoxHeight = $scope.graphHeight + borderHeight;
           var scrollDist = $window.scrollY - topOffset - slack;
           topIdx = Math.floor(scrollDist / graphBoxHeight);
           bottomIdx = topIdx + Math.ceil((winHeight) / graphBoxHeight);
@@ -111,7 +113,7 @@ angular.module('npact')
             onScroll();
           }
         };
-    $scope.graphHeight = npactConstants.graphSpecDefaults.height;
+
     this.visible = function(idx) {
       return idx >= topIdx && idx <= bottomIdx;
     };

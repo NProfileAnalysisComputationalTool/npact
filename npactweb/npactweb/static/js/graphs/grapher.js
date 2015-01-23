@@ -109,8 +109,11 @@ angular.module('npact')
         fill: this.headerLabelFontcolor
       };
 
-      addMany(g, _.map(this.headers, function(header) {
-        return new K.Text(angular.extend(defaultTextOpts, header));
+      addMany(g, _.map(this.tracks, function(track) {
+        defaultTextOpts.text = track.text;
+        defaultTextOpts.y = track.y;
+        defaultTextOpts.height = track.height;
+        return new K.Text(defaultTextOpts);
       }));
       return g;
     };
@@ -148,7 +151,7 @@ angular.module('npact')
 
     var leftLayerCache = {};  // Shared amongst all Graphers
     GP.leftLayer = function(stage) {
-      var key = angular.toJson(this.headers) + this.axisTitle,
+      var key = angular.toJson(this.tracks) + this.axisTitle,
           opts = {
             width: this.leftPadding,
             x: 0, y: 0,
@@ -213,8 +216,8 @@ angular.module('npact')
       dg.add(this.xAxisGroup());
 
       var p1 = this.profileGroup().then(function(pg) { dg.add(pg); });
-      var p2 = $q.all(_.map(this.headers, this.makeHeader, this))
-            .then(function(list) { addMany(dg, list); });
+      var p2 = this.tracksGroup().then(function(tg) { dg.add(tg); });
+
       return $q.all([p1, p2]).then(function() {
         l.draw();
         return l;
@@ -375,20 +378,27 @@ angular.module('npact')
       txt.position(pos);
     }
 
-    GP.makeHeader = function(hdr) {
-      return this.trackSlice(hdr.text)
-        .then(_.bind(function(data) {
-          switch(hdr.lineType) {
-          case 'extracts':
-            return this.cdsGroup(hdr, data);
-          case 'hits':
-            return this.drawHit(hdr, data);
-          default:
-            throw new Error("don't know how to draw " + hdr);
-          }
-        }, this));
+    GP.tracksGroup = function() {
+      var g = new K.Group();
+      return $q.all(_.map(this.tracks, function(track) {
+        return this.trackSlice(track.text)
+          .then(_.bind(function(data) {
+            switch(track.lineType) {
+            case 'extracts':
+              return this.cdsGroup(track, data);
+            case 'hits':
+              return this.drawHit(track, data);
+            default:
+              throw new Error("don't know how to draw " + track);
+            }
+          }, this));
+      }, this))
+        .then(function(list) {
+          addMany(g, list);
+          return g;
+        });
     };
-    GP.cdsGroup = function(header, cds) {
+    GP.cdsGroup = function(track, cds) {
       var xaxis = this.xaxis, $el = this.$element,
           colors = this.colors,
           g = new K.Group({
@@ -396,7 +406,7 @@ angular.module('npact')
             offsetX: this.startBase
           }),
           colorNames = 'rgb',
-          y = header.y,
+          y = track.y,
           ahHalfHeight = this.headerArrowHeight/2,
           ahw = this.headerArrowWidth/xaxis.scaleX,
           textOpts = {
@@ -471,18 +481,18 @@ angular.module('npact')
       return g;
     };
 
-    GP.drawHit = function(header, hits) {
+    GP.drawHit = function(track, hits) {
       var xaxis = this.xaxis,
           startBase = this.startBase,
           endBase = this.endBase,
           colors = this.colors,
           colorNames = 'rgb',
-          offset = header.height / 4,
+          offset = track.height / 4,
           hitStrokeWidth = offset / 2,
           guideYOffset = 2,
           // arrow sticks out ~1%
           guideArrowXOffset = Math.floor(0.01 * (endBase - startBase)),
-          baseY = header.y + (header.height / 2),
+          baseY = track.y + (track.height / 2),
           g = new K.Group({
             x: 0, y: 0,
             offsetX: startBase
@@ -495,10 +505,10 @@ angular.module('npact')
       g.add(new K.Line(angular.extend({
         points: [startBase, baseY + guideYOffset,
                  endBase, baseY + guideYOffset,
-                 endBase - guideArrowXOffset, header.y + header.height]
+                 endBase - guideArrowXOffset, track.y + track.height]
       }, guideLineOpts)));
       g.add(new K.Line(angular.extend({
-        points: [startBase + guideArrowXOffset, header.y,
+        points: [startBase + guideArrowXOffset, track.y,
                  startBase, baseY - guideYOffset,
                  endBase, baseY - guideYOffset]
       }, guideLineOpts)));

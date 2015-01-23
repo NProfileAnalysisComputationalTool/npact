@@ -31,6 +31,10 @@ describe('Grapher', function() {
       var opts = angular.extend(
         {}, npactConstants.graphSpecDefaults, sampleOpts);
       opts.colors = npactConstants.lineColors;
+      opts = angular.extend(opts,
+                            GraphingCalculator.trackSizeCalc(
+                              [{text: 'Hits', lineType: 'hits'},
+                               {text: 'Extracts', lineType: 'extracts'}]));
       opts.m = GraphingCalculator.chart(opts);
       opts.xaxis = GraphingCalculator.xaxis(opts);
 
@@ -41,7 +45,7 @@ describe('Grapher', function() {
     };
   }));
 
-  beforeEach(inject(function(NProfiler, TrackReader, headerSpecCalc, $templateCache, $q, $log, $timeout) {
+  beforeEach(inject(function(NProfiler, TrackReader, $templateCache, $q, $log, $timeout) {
     NProfiler.ddna = $templateCache.get('/js/test-data/sampleDdnaFile.ddna');
     NProfiler.fetching = $q.when(NProfiler.ddna);
 
@@ -51,9 +55,6 @@ describe('Grapher', function() {
     TrackReader.load('Hits',
                      $templateCache.get('/js/test-data/NC_007760.profiles'))
       .then(function() { $log.log("Finished loading hits"); });
-    sampleOpts = angular.extend(sampleOpts,
-                                headerSpecCalc([{text: 'Hits', lineType: 'hits'},
-                                                {text: 'Extracts', lineType: 'extracts'}]));
     $timeout.flush();
   }));
 

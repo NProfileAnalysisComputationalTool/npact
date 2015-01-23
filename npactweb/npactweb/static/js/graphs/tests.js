@@ -81,19 +81,8 @@ describe('Graphs', function(){
 
   });
 
-  describe('GraphingCalculator', function(){
-    var GC, opts = {
-      height:150,
-      width:255,
-      leftPadding: 50,
-      rightPadding: 5,
-      axisLabelFontsize:10,
-      axisTitleFontsize: 20,
-      axisTitle: '% GC',
-      profileTicks:5,
-      startBase: 0, endBase: 100,
-      headerY: 5
-    };
+  describe('GraphingCalculator', function() {
+    var GC;
     beforeEach(inject(function(GraphingCalculator){
       GC = GraphingCalculator;
     }));
@@ -101,64 +90,100 @@ describe('Graphs', function(){
     describe('.partition', function() {
       it('partitions', function(){
         var p = GC.partition({startBase: 0, endBase: 450,
-                             basesPerGraph: 100, offset: 0});
+                              basesPerGraph: 100, offset: 0});
         expect(p).toEqual([0, 100, 200, 300, 400]);
       });
 
-      it('handles a positive offset', function(){
+      it('handles a positive offset', function() {
         var p = GC.partition({startBase: 0, endBase: 450,
-                             basesPerGraph: 100, offset: 10});
+                              basesPerGraph: 100, offset: 10});
         expect(p).toEqual([ 10, 110, 210, 310, 410]);
       });
       it('handles a negative offset ', function() {
         var p = GC.partition({startBase: 0, endBase: 450,
-                             basesPerGraph: 100, offset: -10});
+                              basesPerGraph: 100, offset: -10});
         expect(p).toEqual([ -10, 90, 190, 290, 390]);
       });
       it('handles a stupid negative offset', function() {
         var p = GC.partition({startBase: 0, endBase: 450,
-                             basesPerGraph: 100, offset: -110});
+                              basesPerGraph: 100, offset: -110});
         expect(p).toEqual([ -110, -10, 90, 190, 290, 390]);
       });
     });
 
-
-    it('calculates graph area', function(){
-      var m = GC.chart(opts);
-      expect(m.graph).toEqual({
-        x: 50,
-        y: 10,
-        h: 120,
-        w: 200
+    describe('trackSizeCalc', function() {
+      var testExtractsTrack = {text: 'test', lineType: 'extracts', active: true};
+      var testHitsTrack = {text: 'test3', lineType: 'hits', active: true};
+      it('with one extract', function() {
+        expect(GC.trackSizeCalc([testExtractsTrack])).toEqual({
+          totalTrackHeight: 35,
+          tracks: [ { text: 'test', lineType: 'extracts', y: 5, height: 30 }]
+        });
+      });
+      it('with many', function() {
+        expect(GC.trackSizeCalc([testExtractsTrack, testExtractsTrack, testHitsTrack]))
+          .toEqual({
+            totalTrackHeight: 85,
+            tracks: [
+              { text: 'test', lineType: 'extracts', y: 5, height: 30 },
+              { text: 'test', lineType: 'extracts', y: 35, height: 30 },
+              { text: 'test3', lineType: 'hits', y: 65, height: 20 },
+            ]});
       });
     });
 
-    it('calculates y-axis title', function(){
-      var m = GC.chart(opts);
-      expect(m.yaxis.titleBox).toEqual(
-        {x: 0, y: 10, width: 40, height: 120}
-      );
+    describe('metrics', function() {
+      var opts = {
+        height:150,
+        width:255,
+        leftPadding: 50,
+        rightPadding: 5,
+        axisLabelFontsize:10,
+        axisTitleFontsize: 20,
+        axisTitle: '% GC',
+        profileTicks:5,
+        startBase: 0, endBase: 100,
+        totalTrackHeight: 5
+      };
+      it('calculates graph area', function(){
+        var m = GC.chart(opts);
+        expect(m.graph).toEqual({
+          x: 50,
+          y: 10,
+          h: 120,
+          w: 200
+        });
+      });
+      it('calculates y-axis title', function(){
+        var m = GC.chart(opts);
+        expect(m.yaxis.titleBox).toEqual(
+          {x: 0, y: 10, width: 40, height: 120}
+        );
+      });
+
+      it('calculates x-axis ticks', function(){
+
+        var ax = GC.xaxis(opts);
+        expect(ax.ticks).toEqual([
+          {x: 0, y: 0, x2: 0, y2: 5},
+          {x: 10, y: 0, x2: 10, y2: 5},
+          {x: 20, y: 0, x2: 20, y2: 5},
+          {x: 30, y: 0, x2: 30, y2: 5},
+          {x: 40, y: 0, x2: 40, y2: 5},
+          {x: 50, y: 0, x2: 50, y2: 5},
+          {x: 60, y: 0, x2: 60, y2: 5},
+          {x: 70, y: 0, x2: 70, y2: 5},
+          {x: 80, y: 0, x2: 80, y2: 5},
+          {x: 90, y: 0, x2: 90, y2: 5},
+          {x: 100, y: 0, x2: 100, y2: 5},
+          {x: 110, y: 0, x2: 110, y2: 5}
+
+        ]);
+      });
     });
 
-    it('calculates x-axis ticks', function(){
 
-      var ax = GC.xaxis(opts);
-      expect(ax.ticks).toEqual([
-        {x: 0, y: 0, x2: 0, y2: 5},
-        {x: 10, y: 0, x2: 10, y2: 5},
-        {x: 20, y: 0, x2: 20, y2: 5},
-        {x: 30, y: 0, x2: 30, y2: 5},
-        {x: 40, y: 0, x2: 40, y2: 5},
-        {x: 50, y: 0, x2: 50, y2: 5},
-        {x: 60, y: 0, x2: 60, y2: 5},
-        {x: 70, y: 0, x2: 70, y2: 5},
-        {x: 80, y: 0, x2: 80, y2: 5},
-        {x: 90, y: 0, x2: 90, y2: 5},
-        {x: 100, y: 0, x2: 100, y2: 5},
-        {x: 110, y: 0, x2: 110, y2: 5}
 
-      ]);
-    });
 
     it('can align rectangles', function(){
       var pos = GC.alignRectangles(
@@ -286,28 +311,6 @@ describe('Graphs', function(){
   });
 
 
-  ;
-
-  describe('headerSpecCalc', function() {
-    var testExtractsTrack = {text: 'test', lineType: 'extracts', active: true};
-    var testHitsTrack = {text: 'test3', lineType: 'hits', active: true};
-    it('with one extract', inject(function(headerSpecCalc) {
-      expect(headerSpecCalc([testExtractsTrack])).toEqual({
-        headerY: 35,
-        headers: [ { text: 'test', lineType: 'extracts', y: 5, height: 30 }]
-      });
-    }));
-    it('with many', inject(function(headerSpecCalc) {
-      expect(headerSpecCalc([testExtractsTrack, testExtractsTrack, testHitsTrack]))
-        .toEqual({
-          headerY: 85,
-          headers: [
-            { text: 'test', lineType: 'extracts', y: 5, height: 30 },
-            { text: 'test', lineType: 'extracts', y: 35, height: 30 },
-            { text: 'test3', lineType: 'hits', y: 65, height: 20 },
-          ]});
-    }));
-  });
   describe('GraphConfig', function() {
     var G;
     beforeEach(inject(function(GraphConfig){

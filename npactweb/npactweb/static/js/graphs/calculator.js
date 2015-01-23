@@ -1,5 +1,5 @@
 angular.module('npact')
-  .service('GraphingCalculator', function GraphingCalculator(K, Utils) {
+  .service('GraphingCalculator', function GraphingCalculator(K, Utils, npactConstants) {
     'use strict';
     var self = this;
 
@@ -122,13 +122,33 @@ angular.module('npact')
       return {offset: newoffset, basesPerGraph: newbasesPerGraph};
     };
 
+
+    self.trackSizeCalc = function(activeTracks) {
+      var offset = npactConstants.graphSpecDefaults.topPadding;
+      var tracks = _.map(activeTracks, function(cfg) {
+        var h = npactConstants.trackHeights[cfg.lineType],
+            y = offset;
+        offset += h;
+        return {
+          text: cfg.text,
+          lineType: cfg.lineType,
+          y: y,
+          height: h
+        };
+      });
+      return {
+        tracks: tracks,
+        totalTrackHeight: offset
+      };
+    };
+
     /**
      * calculate measurements about the chart
      */
-    self.chart = function(opts){
+    self.chart = function(opts) {
       var yStops = [100, 80, 60, 40, 20, 0],
           yAxisTicks = yStops.length - 1,
-          profileHeight = opts.height - opts.headerY - opts.axisLabelFontsize -
+          profileHeight = opts.height - opts.totalTrackHeight - opts.axisLabelFontsize -
             3*opts.profileTicks,
 
           // the line graph, excluding tick marks and axis labels
