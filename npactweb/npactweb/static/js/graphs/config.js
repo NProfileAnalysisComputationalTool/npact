@@ -117,4 +117,26 @@ angular.module('npact')
       $location.search(_.object(PUBLIC_CONFIG_KEYS, newVals));
     });
   })
+
+  .factory('headerSpecCalc', function(npactConstants) {
+    'use strict';
+    return function(activeTracks) {
+      var offset = npactConstants.graphSpecDefaults.headerY;
+      var headers = _.map(activeTracks, function(cfg) {
+        var h = npactConstants.headerSizes[cfg.lineType],
+            y = offset;
+        offset += h;
+        return {
+          text: cfg.text,
+          lineType: cfg.lineType,
+          y: y,
+          height: h
+        };
+      });
+      return {
+        headers: headers,
+        headerY: offset
+      };
+    };
+  })
 ;

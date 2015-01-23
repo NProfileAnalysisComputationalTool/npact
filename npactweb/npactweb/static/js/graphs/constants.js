@@ -3,19 +3,19 @@ angular.module('npact')
     graphSpecDefaults: {
       // TODO: determine me dynamically
       leftPadding: 120,
-      topPadding: 5,
-      rightPadding: 25,
 
       axisLabelFontsize: 11,
       axisFontcolor: '#444',
       axisTitleFontsize: 20,
       borderColor: '#444',
       profileShadeColor: '#f2f2f2',
-      profileHeight: 80,
+      rightPadding: 25,
+      height: 160,
       profileTicks: 5,
 
 
       // header labels and arrows
+      headerY: 5,
       headerLabelPadding: 10,
       headerLabelFontcolor: '#444',
       headerLabelFontsize: 11,
@@ -33,8 +33,8 @@ angular.module('npact')
       g: 'rgb(204, 121, 167)',
       b: 'rgb(0, 114, 178)'
     },
-    // how much vertical to use for different kinds of tracks
-    trackHeights: {'extracts': 30, 'hits': 20}
+    // how much vertical space to leave for different kinds of headers
+    headerSizes: {'extracts': 30, 'hits': 20}
   })
   .service('Err',function() {
 

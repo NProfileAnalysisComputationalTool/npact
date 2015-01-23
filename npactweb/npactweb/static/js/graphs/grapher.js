@@ -351,7 +351,6 @@ angular.module('npact')
       angular.extend(this, newOpts);
       this.stage.destroyChildren();
       this.stage.setWidth(this.width);
-      this.stage.setHeight(this.m.height);
       var llp = this.leftLayer(this.stage);
       var flp = this.frameLayer(this.stage);
       var glp = this.genomeLayer(this.stage);
