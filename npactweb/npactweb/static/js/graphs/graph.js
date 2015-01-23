@@ -35,14 +35,23 @@ angular.module('npact')
     };
 
     var repartition = function() {
+      if(GraphConfig.startBase === undefined ||
+         GraphConfig.endBase === undefined ||
+         GraphConfig.basesPerGraph === undefined) { return; }
       $scope.graphSpecs = GraphingCalculator.partition(GraphConfig);
       $log.log('Partitioned into', $scope.graphSpecs.length, 'rows.');
       updateVisibility();
       $timeout(rebuild);
     },
         draw = function() { $scope.$broadcast(Evt.DRAW); },
-        redraw = function() { $scope.$broadcast(Evt.REDRAW); },
-        rebuild = function() { $scope.$broadcast(Evt.REBUILD); };
+        redraw = function() {
+          if (!baseOpts.axisTitle) return;  //too early to do anything
+          $scope.$broadcast(Evt.REDRAW);
+        },
+        rebuild = function() {
+          if (!baseOpts.axisTitle) return;  //too early to do anything
+          $scope.$broadcast(Evt.REBUILD);
+        };
 
 
     // watch the environment for changes we care about
