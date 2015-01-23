@@ -149,33 +149,30 @@ angular.module('npact')
       return g;
     };
 
-    var leftLayerCache = {};  // Shared amongst all Graphers
-    GP.leftLayer = function(stage) {
-      var key = angular.toJson(this.tracks) + this.axisTitle,
-          opts = {
-            width: this.leftPadding,
-            x: 0, y: 0,
-            height: this.height
-          },
-          layer = new K.FastLayer(opts);
-      stage.add(layer);
-
-      if(leftLayerCache[key]) {
-        return leftLayerCache[key].then(function(image) {
-          layer.add(new K.Image(angular.extend(opts, {image: image})));
-          layer.draw();
-        });
-      }
-      else {
+    GP._leftLayerImage = function() {
+      return  $q(_.bind(function(resolve) {
+        var opts = {
+          width: this.leftPadding,
+          x: 0, y: 0,
+          height: this.height
+        };
+        var layer = new K.Layer(opts);
         this.yAxisGroup(layer);
         this.headerGroup(layer);
-        var d = $q.defer();
-        layer.toImage(angular.extend(opts, {callback: function(v) {
-          d.resolve(v);
+        layer.toImage(angular.extend(opts, {callback: resolve}));
+      }, this));
+    };
+
+    var leftLayerCache = {};  // Shared amongst all Graphers
+    GP.leftLayer = function(stage) {
+      var key = angular.toJson(this.tracks) + this.axisTitle;
+      var layer = new K.FastLayer();
+      stage.add(layer);
+      return (leftLayerCache[key] || (leftLayerCache[key] = this._leftLayerImage()))
+        .then(function(image) {
+          layer.add(new K.Image( {image: image}));
           layer.draw();
-        }}));
-        return (leftLayerCache[key] = d.promise);
-      }
+        });
     };
 
     GP.genomeLayer = function(stage) {
