@@ -482,8 +482,7 @@ angular.module('npact')
     };
 
     GP.drawHit = function(track, hits) {
-      var xaxis = this.xaxis,
-          startBase = this.startBase,
+      var startBase = this.startBase,
           endBase = this.endBase,
           colors = this.colors,
           colorNames = 'rgb',
