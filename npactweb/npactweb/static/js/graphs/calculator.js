@@ -146,60 +146,18 @@ angular.module('npact')
      * calculate measurements about the chart
      */
     self.chart = function(opts) {
-      var yStops = [100, 80, 60, 40, 20, 0],
-          yAxisTicks = yStops.length - 1,
-          profileHeight = opts.height - opts.totalTrackHeight - opts.axisLabelFontsize -
-            3*opts.profileTicks,
-
-          // the line graph, excluding tick marks and axis labels
-          g = {
+      var profileHeight = opts.height - opts.totalTrackHeight -
+            opts.axisLabelFontsize - 3*opts.profileTicks;
+      return {
+        graph: {
             x: opts.leftPadding,
             y: opts.height - profileHeight -
               opts.axisLabelFontsize - // x-axis labels
               2*opts.profileTicks, // tick marks
             h: profileHeight,
             w: opts.width - opts.leftPadding - opts.rightPadding
-          },
-          yAxisTickSpacing = g.h / yAxisTicks,
-          yAxisTickX = g.x - opts.profileTicks,
-          yticks = _.map(yStops, makeYTick),
-          // space between the label and the tick
-          yAxisLabelRightPadding = opts.profileTicks*2,
-          yAxisLabelWidth = opts.leftPadding - yAxisLabelRightPadding,
-          ylabels = _.map(yStops, makeYLabel),
-          // box to center the title inside of
-          ytitle={
-            x: 0, y: g.y, width: yAxisLabelWidth, height: g.h
           }
-      ;
-
-      return {
-        graph:g,
-        // TODO: return xaxis here
-        yaxis: {
-          ticks: yticks,
-          labels: ylabels,
-          titleBox: ytitle
-        }
       };
-
-      function makeYTick(lbl, n){
-        var y = g.y + n*yAxisTickSpacing;
-        return {
-          x: yAxisTickX, y: parseInt(y),
-          x2: g.x, y2: parseInt(y)
-        };
-      }
-
-      function makeYLabel(lbl, n){
-        // center on the tick
-        var y = yticks[n].y - (opts.axisLabelFontsize/2);
-        return {
-          x: 0, y: parseInt(y),
-          width: yAxisLabelWidth,
-          text: lbl
-        };
-      }
     };
 
     /**

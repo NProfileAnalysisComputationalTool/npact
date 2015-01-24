@@ -154,12 +154,6 @@ describe('Graphs', function(){
           w: 200
         });
       });
-      it('calculates y-axis title', function(){
-        var m = GC.chart(opts);
-        expect(m.yaxis.titleBox).toEqual(
-          {x: 0, y: 10, width: 40, height: 120}
-        );
-      });
 
       it('calculates x-axis ticks', function(){
 

@@ -162,34 +162,62 @@ angular.module('npact')
       return g;
     };
 
-    GP.yAxisGroup = function(g) {
-      var m = this.m;
 
-      addMany(g, this.drawAxisTicks(m.yaxis.ticks));
-      // draw labels at the right aligned
-      addMany(g, this.drawAxisLabels(m.yaxis.labels, {align: 'right'}));
+    GP.yAxisTicks = function(height) {
+      // Draw marks for percentage on domain of [0,100] then scale
+      // that to the height we need
+      var axisg = new K.Group({
+        scaleY: height / 100, strokeScaleEnabled: false});
+      var ystops = [100, 80, 60, 40, 20, 0];
+      _.forEach(ystops, function(ystop) {
+        // The tick itself
+        axisg.add(new K.Line({
+          points: [-this.profileTicks, ystop, 0, ystop],
+          stroke: this.borderColor,
+          strokeScaleEnabled: false}));
 
-      // the title
+        //label for the tick
+        var width  = 2 * this.axisLabelFontsize;
+        axisg.add(new K.Text({
+          text: ystop,
+          x: - (width + this.profileTicks * 2),
+          width: width,
+          y: 100 - ystop, // draw from the top
+          offsetY: this.axisLabelFontsize / 2, // center the text at that point
+          scaleY: 100 / height, //text itself needs to be unscaled
+          fill: this.axisFontcolor, fontSize: this.axisLabelFontsize,
+          align: 'right'
+        }));
+      }, this);
+      return axisg;
+    };
+    GP.yAxisTitle = function(height) {
       var title = new K.Text({
-        y: 0, x: 0, // reposition this below
         rotation: -90,
         fill: this.axisFontcolor,
         fontSize: this.axisTitleFontsize,
-        text: this.axisTitle
+        text: this.axisTitle,
+        strokeScaleEnabled: false
       });
-      // center it in the space left of the axes
-      var pos = GraphingCalculator.alignRectangles(
-        // define the space we want to center inside
-        m.yaxis.titleBox,
-        // bounding box of the text, pre-rotated so need to swap W and H
-        {width: title.getHeight(), height: title.getWidth()});
-
-      // translate to the bottom-left of the new rectangle, so after we rotate
-      // we'll be centered
-      pos.y += title.getWidth();
-      title.position(pos);
-
+      //All the width height x/y calcuations go on pre-rotation, so
+      // swap, align vertically and then stick in a group sized right
+      // so elsewhere we don't have to think about htat.
+      var w = title.getHeight(), h = title.getWidth();
+      title.y((height + h) / 2); // Align vertically in our space
+      title.x(-w);               // we're drawing leftwards
+      var g = new K.Group({width: w, height: h});
       g.add(title);
+      return g;
+    };
+
+    GP.yAxisGroup = function() {
+      //This group is drawn with m.graph.x as x=0 and we draw left from there.
+      var m = this.m;
+      var g = new K.Group({x: m.graph.x, y: m.graph.y});
+      var ticks = this.yAxisTicks(m.graph.h);
+      var title = this.yAxisTitle(m.graph.h);
+      title.offsetX(boundingBox(ticks).width + 2 * this.profileTicks);
+      g.add(ticks); g.add(title);
       return g;
     };
 
@@ -201,7 +229,7 @@ angular.module('npact')
           height: this.height
         };
         var layer = new K.Layer(opts);
-        this.yAxisGroup(layer);
+        layer.add(this.yAxisGroup());
         this.headerGroup(layer);
         layer.toImage(angular.extend(opts, {callback: resolve}));
       }, this));
