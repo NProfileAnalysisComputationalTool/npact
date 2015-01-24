@@ -32,6 +32,50 @@ angular.module('npact')
       }
     }
 
+    function boundingBox(container) {
+      var children = [];
+      if (container.hasChildren && container.hasChildren()) {
+        children = container.getChildren();
+      }
+      else if (_.isArray(container)) {
+        children = container;
+      }
+
+      var l,r,t,b;
+      children.each(function (child, idx) {
+        var cr,cb;
+        var cl = child.x() - child.offsetX();
+        var ct = child.y() - child.offsetY();
+
+        if(child.hasChildren()) {
+          child = new Kinetic.Shape(boundingBox(child));
+          //already applied coords of group inside our current container,
+          //but the items in there might have additional offset (i.e. not
+          //be at 0,0)
+          cl += child.x();
+          ct += child.y();
+        }
+        cr = cl + child.width();
+        cb = ct + child.height();
+
+        if (idx === 0) {
+          l = cl;  r = cr;
+          t = ct;  b = cb;
+        } else {
+          l = Math.min(l, cl);
+          r = Math.max(r, cr);
+          t = Math.min(t, ct);
+          b = Math.max(b, cb);
+        }
+      });
+      return  {
+        x: l,
+        y: t,
+        width: r - l,
+        height: b - t
+      };
+    }
+
     function Grapher(element, opts) {
       this.$element = jQuery(element);
       angular.extend(this, opts);
