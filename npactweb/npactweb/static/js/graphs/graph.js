@@ -5,6 +5,10 @@ angular.module('npact')
                                            GraphingCalculator) {
     'use strict';
 
+    var getWidth = function() {
+      return $element.width() - 15; //from style.css `.graph`
+    };
+
     //The mouse event responders
     var onPan = function(offset) {
           GraphConfig.offset += Math.round(offset);
@@ -19,7 +23,7 @@ angular.module('npact')
         };
 
     //The baseOpts are the graph options that are the same for every graph
-    var baseOpts = angular.extend({ width: $element.width(),
+    var baseOpts = angular.extend({ width: getWidth(),
                                     onPan: onPan, onZoom: onZoom },
                                   npactConstants.graphSpecDefaults);
     this.graphOptions = function(idx) {
@@ -69,7 +73,7 @@ angular.module('npact')
       //Find headers and headerY
       angular.extend(baseOpts, GraphingCalculator.trackSizeCalc(val));
       baseOpts.m = GraphingCalculator.chart(baseOpts);
-      $scope.graphHeight = baseOpts.height;
+      updateRowHeight(baseOpts.m.height);
       redraw();
     }, true);
 
@@ -85,13 +89,18 @@ angular.module('npact')
     /***  Scrolling and Graph Visibility management ***/
     var $win = angular.element($window),
         winHeight = $win.height(),
-        borderHeight = 1,
         slack = 50, // how many pixels outside of viewport to render
         topOffset = $element.offset().top,
         topIdx = 0, bottomIdx = 0,
+        graphBoxHeight = 0,
+        updateRowHeight = function(height) {
+          $scope.graphHeight = height;
+          //add padding and border from style.css `.graph`
+          graphBoxHeight = height + 10 + 1;
+          updateVisibility();
+        },
         updateVisibility = function() {
           if(!baseOpts.m) return;
-          var graphBoxHeight = $scope.graphHeight + borderHeight;
           var scrollDist = $window.scrollY - topOffset - slack;
           topIdx = Math.floor(scrollDist / graphBoxHeight);
           bottomIdx = topIdx + Math.ceil((winHeight) / graphBoxHeight);
@@ -104,7 +113,7 @@ angular.module('npact')
           winHeight = $win.height();
           if($element.width() !== baseOpts.width) {
             topOffset = $element.offset().top;
-            baseOpts.width = $element.width();
+            baseOpts.width = getWidth();
             updateVisibility();
             redraw();
           }
