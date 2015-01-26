@@ -165,6 +165,11 @@ angular.module('npact')
         xaxis: {
           height: xAxisHeight,
           y: xAxisTop
+        },
+        yaxis: {
+          height: style.profile.height,
+          y: graphTop,
+          x: style.leftPadding
         }
       };
     };

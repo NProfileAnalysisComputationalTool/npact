@@ -187,9 +187,9 @@ angular.module('npact')
     GP.yAxisGroup = function() {
       //This group is drawn with m.graph.x as x=0 and we draw left from there.
       var m = this.m;
-      var g = new K.Group({x: m.graph.x, y: m.graph.y});
-      var ticks = this.yAxisTicks(style.profile.height);
-      var title = this.yAxisTitle(style.profile.height);
+      var g = new K.Group({x: m.yaxis.x, y: m.yaxis.y});
+      var ticks = this.yAxisTicks(m.yaxis.height);
+      var title = this.yAxisTitle(m.yaxis.height);
       title.offsetX(boundingBox(ticks).width + 2 * style.paddingUnit);
       g.add(ticks); g.add(title);
       return g;
