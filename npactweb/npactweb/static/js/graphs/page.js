@@ -112,7 +112,7 @@ angular.module('npact')
       });
     };
     self.newCds = function(waitOn, config, oldSig) {
-      var nameBase = 'Newly Identified ORFs @';
+      var nameBase = 'New ORFs @';
       self.disableTrack(nameBase, oldSig);
       waitOn.then(function(path) {
         Fetcher.fetchFile(config[Pynpact.NEW_CDS])

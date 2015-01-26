@@ -1,29 +1,34 @@
 angular.module('npact')
   .constant('npactConstants', {
-    graphSpecDefaults: {
-      height: 160,
-
-      // TODO: determine me dynamically
+    graphStyle: {
+      paddingUnit: 5,
       leftPadding: 120,
-      topPadding: 5,
-      rightPadding: 25,
 
-      axisLabelFontsize: 11,
-      axisFontcolor: '#444',
-      axisTitleFontsize: 20,
-      borderColor: '#444',
-      profileShadeColor: '#f2f2f2',
-      profileHeight: 80,
-      profileTicks: 5,
-
-
-      // header labels and arrows
-      headerLabelPadding: 10,
-      headerLabelFontcolor: '#444',
-      headerLabelFontsize: 11,
-      headerArrowHeight: 12,
-      headerArrowWidth: 6,
-      headerArrowFontsize: 9
+      profile: {
+        height: 80,
+        yStops: [100, 80, 60, 40, 20, 0],
+        axis: {
+          text: {
+            fontSize: 11,
+            fill: '#444'
+          },
+          tickLength: 5
+        },
+        titleFontSize: 20,
+        borderColor: '#777',
+        shadeColor: '#f2f2f2',
+        tickLength: 5
+      },
+      tracks: {
+        text: {
+          fontSize: 9,
+          fill: '#444'
+        },
+        arrow: {
+          height: 12,
+          width: 6
+        }
+      }
     },
     lineColors : {
       r: 'red',
@@ -74,5 +79,4 @@ angular.module('npact')
     CONFIGURE_URL: 'configure_url',
     DDNA_FILE: 'ddna'
   })
-
 ;

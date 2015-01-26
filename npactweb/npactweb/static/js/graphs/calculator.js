@@ -124,7 +124,7 @@ angular.module('npact')
 
 
     self.trackSizeCalc = function(activeTracks) {
-      var offset = npactConstants.graphSpecDefaults.topPadding;
+      var offset = 0;
       var tracks = _.map(activeTracks, function(cfg) {
         var h = npactConstants.trackHeights[cfg.lineType],
             y = offset;
@@ -146,17 +146,26 @@ angular.module('npact')
      * calculate measurements about the chart
      */
     self.chart = function(opts) {
-      var profileHeight = opts.height - opts.totalTrackHeight -
-            opts.axisLabelFontsize - 3*opts.profileTicks;
+      var style = npactConstants.graphStyle;
+
+      var pstyle = style.profile;
+      var xAxisHeight = pstyle.axis.text.fontSize + pstyle.tickLength + style.paddingUnit,
+          graphTop = opts.totalTrackHeight + style.paddingUnit,
+          xAxisTop = graphTop + pstyle.height,
+          totalHeight = xAxisTop + xAxisHeight;
+
       return {
+        height: totalHeight,
         graph: {
-            x: opts.leftPadding,
-            y: opts.height - profileHeight -
-              opts.axisLabelFontsize - // x-axis labels
-              2*opts.profileTicks, // tick marks
-            h: profileHeight,
-            w: opts.width - opts.leftPadding - opts.rightPadding
-          }
+          x: style.leftPadding,
+          y: graphTop,
+          h: style.profile.height,
+          w: opts.width - style.leftPadding
+        },
+        xaxis: {
+          height: xAxisHeight,
+          y: xAxisTop
+        }
       };
     };
 

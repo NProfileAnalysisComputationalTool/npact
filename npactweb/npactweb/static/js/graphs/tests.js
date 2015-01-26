@@ -116,26 +116,25 @@ describe('Graphs', function(){
       var testHitsTrack = {text: 'test3', lineType: 'hits', active: true};
       it('with one extract', function() {
         expect(GC.trackSizeCalc([testExtractsTrack])).toEqual({
-          totalTrackHeight: 35,
-          tracks: [ { text: 'test', lineType: 'extracts', y: 5, height: 30 }]
+          totalTrackHeight: 30,
+          tracks: [ { text: 'test', lineType: 'extracts', y: 0, height: 30 }]
         });
       });
       it('with many', function() {
         expect(GC.trackSizeCalc([testExtractsTrack, testExtractsTrack, testHitsTrack]))
           .toEqual({
-            totalTrackHeight: 85,
+            totalTrackHeight: 80,
             tracks: [
-              { text: 'test', lineType: 'extracts', y: 5, height: 30 },
-              { text: 'test', lineType: 'extracts', y: 35, height: 30 },
-              { text: 'test3', lineType: 'hits', y: 65, height: 20 },
+              { text: 'test', lineType: 'extracts', y: 0, height: 30 },
+              { text: 'test', lineType: 'extracts', y: 30, height: 30 },
+              { text: 'test3', lineType: 'hits', y: 60, height: 20 },
             ]});
       });
     });
 
     describe('metrics', function() {
       var opts = {
-        height:150,
-        width:255,
+        width:250,
         leftPadding: 50,
         rightPadding: 5,
         axisLabelFontsize:10,
@@ -145,15 +144,6 @@ describe('Graphs', function(){
         startBase: 0, endBase: 100,
         totalTrackHeight: 5
       };
-      it('calculates graph area', function(){
-        var m = GC.chart(opts);
-        expect(m.graph).toEqual({
-          x: 50,
-          y: 10,
-          h: 120,
-          w: 200
-        });
-      });
 
       it('calculates x-axis ticks', function(){
 
@@ -175,9 +165,6 @@ describe('Graphs', function(){
         ]);
       });
     });
-
-
-
 
     it('can align rectangles', function(){
       var pos = GC.alignRectangles(

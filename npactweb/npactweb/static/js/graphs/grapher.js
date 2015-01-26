@@ -23,8 +23,10 @@ angular.module('npact')
     };
   })
 
-  .factory('Grapher', function(K, $log, GraphingCalculator, Tooltip, NProfiler, TrackReader, $q, Evt, Utils) {
+  .factory('Grapher', function(K, $log, GraphingCalculator, Tooltip, NProfiler, TrackReader, $q, Evt, Utils, npactConstants) {
     'use strict';
+
+    var style = npactConstants.graphStyle;
 
     function addMany(container, children) {
       if(children && children.length) {
@@ -42,7 +44,7 @@ angular.module('npact')
       }
 
       var l,r,t,b;
-      children.each(function (child, idx) {
+      _.forEach(children, function (child, idx) {
         var cr,cb;
         var cl = child.x() - child.offsetX();
         var ct = child.y() - child.offsetY();
@@ -83,7 +85,6 @@ angular.module('npact')
       this.margin = Utils.orderOfMagnitude(this.endBase - this.startBase, -1);
       this.startBaseM = Math.max(this.startBase - this.margin, 0);
       this.endBaseM = this.endBase + this.margin;
-
       this.stage = new K.Stage({
         container: element,
         height: this.height,
@@ -116,28 +117,6 @@ angular.module('npact')
       return this._onProfilePoints;
     };
 
-    GP.drawAxisTicks = function(ticks) {
-      var tickOpts = {x: 0, y: 0,
-                      stroke: this.borderColor,
-                      strokeScaleEnabled: false};
-      return _.map(ticks, function(t) {
-        tickOpts.points = [t.x, t.y, t.x2, t.y2];
-        return new K.Line(tickOpts);
-      });
-    };
-
-    GP.drawAxisLabels = function(labels, textOpts) {
-      // draw labels at the right spacing
-      var defaultTextOpts = {
-        fontSize: this.axisLabelFontsize,
-        fill: this.axisFontcolor
-      };
-
-      return _.map(labels, function(lbl) {
-        var txtOpts = angular.extend({}, lbl, defaultTextOpts, textOpts);
-        return new K.Text(txtOpts);
-      });
-    };
 
     GP.headerGroup = function(g) {
       // TODO: derive opts.leftPadding
@@ -146,12 +125,10 @@ angular.module('npact')
       // * leftPadding = maxWidth + headerLabelPadding
       // * loop over K.Text objects, set width to leftPadding
 
-      var defaultTextOpts = {
+      var defaultTextOpts = _.defaults({
         align: 'right', x: 0,
-        fontSize: this.headerLabelFontsize,
-        width: this.leftPadding - this.headerLabelPadding,
-        fill: this.headerLabelFontcolor
-      };
+        width: style.leftPadding - 2 * style.paddingUnit
+      }, style.tracks.text);
 
       addMany(g, _.map(this.tracks, function(track) {
         defaultTextOpts.text = track.text;
@@ -166,39 +143,36 @@ angular.module('npact')
     GP.yAxisTicks = function(height) {
       // Draw marks for percentage on domain of [0,100] then scale
       // that to the height we need
-      var axisg = new K.Group({
-        scaleY: height / 100, strokeScaleEnabled: false});
-      var ystops = [100, 80, 60, 40, 20, 0];
-      _.forEach(ystops, function(ystop) {
+      var axisg = new K.Group({scaleY: height / 100, strokeScaleEnabled: false});
+      var profileSpec = style.profile,
+          axisSpec = style.profile.axis;
+
+      _.forEach(profileSpec.yStops, function(ystop) {
         // The tick itself
         axisg.add(new K.Line({
-          points: [-this.profileTicks, ystop, 0, ystop],
-          stroke: this.borderColor,
-          strokeScaleEnabled: false}));
+          points: [-axisSpec.tickLength, ystop, 0, ystop],
+          stroke: profileSpec.borderColor, strokeScaleEnabled: false}));
 
         //label for the tick
-        var width  = 2 * this.axisLabelFontsize;
-        axisg.add(new K.Text({
+        var width  = 2 * axisSpec.text.fontSize;
+        axisg.add(new K.Text(_.defaults({
           text: ystop,
-          x: - (width + this.profileTicks * 2),
+          x: - width - style.paddingUnit * 2,
           width: width,
           y: 100 - ystop, // draw from the top
-          offsetY: this.axisLabelFontsize / 2, // center the text at that point
+          offsetY: axisSpec.text.fontSize / 2, // center the text at that point
           scaleY: 100 / height, //text itself needs to be unscaled
-          fill: this.axisFontcolor, fontSize: this.axisLabelFontsize,
           align: 'right'
-        }));
+        }, axisSpec.text)));
       }, this);
       return axisg;
     };
     GP.yAxisTitle = function(height) {
-      var title = new K.Text({
+      var title = new K.Text(_.defaults({
         rotation: -90,
-        fill: this.axisFontcolor,
-        fontSize: this.axisTitleFontsize,
-        text: this.axisTitle,
-        strokeScaleEnabled: false
-      });
+        fontSize: style.profile.titleFontSize,
+        text: this.axisTitle
+      }, style.profile.axis.text));
       //All the width height x/y calcuations go on pre-rotation, so
       // swap, align vertically and then stick in a group sized right
       // so elsewhere we don't have to think about htat.
@@ -214,9 +188,9 @@ angular.module('npact')
       //This group is drawn with m.graph.x as x=0 and we draw left from there.
       var m = this.m;
       var g = new K.Group({x: m.graph.x, y: m.graph.y});
-      var ticks = this.yAxisTicks(m.graph.h);
-      var title = this.yAxisTitle(m.graph.h);
-      title.offsetX(boundingBox(ticks).width + 2 * this.profileTicks);
+      var ticks = this.yAxisTicks(style.profile.height);
+      var title = this.yAxisTitle(style.profile.height);
+      title.offsetX(boundingBox(ticks).width + 2 * style.paddingUnit);
       g.add(ticks); g.add(title);
       return g;
     };
@@ -224,9 +198,9 @@ angular.module('npact')
     GP._leftLayerImage = function() {
       return  $q(_.bind(function(resolve) {
         var opts = {
-          width: this.leftPadding,
+          width: style.leftPadding,
           x: 0, y: 0,
-          height: this.height
+          height: this.m.height
         };
         var layer = new K.Layer(opts);
         layer.add(this.yAxisGroup());
@@ -275,19 +249,18 @@ angular.module('npact')
       dg.on('mouseout', function() { document.body.style.cursor = 'default'; });
       dg.on('dblclick', _.bind(this.onDblClick, this));
 
+      var dgAdd = _.bind(dg.add, dg);
       // need a shape that can be clicked on to allow dragging the
       // entire canvas
-      dg.add(new K.Rect({x: 0, y: 0, //fill: '#BDD',
-                          width: this.xaxis.length,
-                          height: this.height}));
+      dgAdd(new K.Rect({x: 0, y: 0, //fill: '#BDD',
+                         width: this.xaxis.length,
+                         height: this.m.height}));
 
-      //Everything in this layer needs to be part of that draggable.
-      dg.add(this.xAxisGroup());
+      var p1 = this.profileGroup().then(dgAdd);
+      var p2 = this.tracksGroup().then(dgAdd);
+      var p3 = this.xAxisGroup().then(dgAdd);
 
-      var p1 = this.profileGroup().then(function(pg) { dg.add(pg); });
-      var p2 = this.tracksGroup().then(function(tg) { dg.add(tg); });
-
-      return $q.all([p1, p2]).then(function() {
+      return $q.all([p1, p2, p3]).then(function() {
         l.draw();
         return l;
       });
@@ -318,11 +291,9 @@ angular.module('npact')
           l = new K.FastLayer(),
           // frame around the graph
           border = new K.Rect({
-            x: m.graph.x,
-            y: m.graph.y,
-            width: m.graph.w,
-            height: m.graph.h,
-            stroke: this.borderColor
+            x: m.graph.x, y: m.graph.y,
+            width: m.graph.w, height: m.graph.h,
+            stroke: style.profile.borderColor
           });
       stage.add(l);
 
@@ -340,21 +311,40 @@ angular.module('npact')
       txt.x(newX);
     }
 
+    GP.drawAxisTicks = function(ticks) {
+      var tickOpts = {x: 0, y: 0,
+                      stroke: style.profile.borderColor,
+                      strokeScaleEnabled: false};
+      return _.map(ticks, function(t) {
+        tickOpts.points = [t.x, t.y, t.x2, t.y2];
+        return new K.Line(tickOpts);
+      });
+    };
+
+    GP.drawAxisLabels = function(labels, textOpts) {
+      // draw labels at the right spacing
+      var defaultTextOpts = style.profile.axis.text;
+
+      return _.map(labels, function(lbl) {
+        var txtOpts = angular.extend({}, lbl, defaultTextOpts, textOpts);
+        return new K.Text(txtOpts);
+      });
+    };
+
     GP.xAxisGroup = function() {
       var m = this.m,
           xaxis = this.xaxis,
-          g = new K.Group({
-            x: 0, y: m.graph.h + m.graph.y,
+          g = new K.Group(_.assign({
             width: xaxis.length,
             offsetX: this.startBase
-          });
+          }, this.m.xaxis));
 
       addMany(g, this.drawAxisTicks(xaxis.ticks));
       _.forEach(this.drawAxisLabels(xaxis.labels), function(lbl) {
         g.add(lbl);
         centerXLabel(lbl, xaxis.scaleX);
       });
-      return g;
+      return $q.when(g);
     };
 
     GP.profileGroup = function() {
@@ -382,7 +372,7 @@ angular.module('npact')
           }),
           shadeOpts = {
             y: 2, height: 96,
-            fill: this.profileShadeColor
+            fill: style.profile.shadeColor
           };
 
       _.each(shades, function(shd) {
@@ -423,9 +413,10 @@ angular.module('npact')
       angular.extend(this, newOpts);
       this.stage.destroyChildren();
       this.stage.setWidth(this.width);
+      this.stage.setHeight(this.m.height);
+      var glp = this.genomeLayer(this.stage);
       var llp = this.leftLayer(this.stage);
       var flp = this.frameLayer(this.stage);
-      var glp = this.genomeLayer(this.stage);
       return $q.all([llp, flp, glp])
         .then(function() {
           $log.log("Finished draw at", newOpts.startBase, "in", new Date() - t1);
@@ -476,14 +467,12 @@ angular.module('npact')
           }),
           colorNames = 'rgb',
           y = track.y,
-          ahHalfHeight = this.headerArrowHeight/2,
-          ahw = this.headerArrowWidth/xaxis.scaleX,
-          textOpts = {
-            fontSize: this.headerArrowFontsize,
-            fill: this.axisFontcolor,
+          arrowHeight = style.tracks.arrow.height,
+          ahw = style.tracks.arrow.width / xaxis.scaleX,
+          textOpts = _.assign({
             scaleX: 1/xaxis.scaleX,
             strokeScaleEnabled: false
-          },
+          }, style.tracks.text),
           arrowOpts = {
             x: 0, y: 0,
             closed: true,
@@ -495,9 +484,9 @@ angular.module('npact')
       _.forEach(cds, function(x) {
           var isComplement = x.complement === 1,
               c = colors[colorNames[x.phase]],
-              baseY = isComplement ? y + this.headerArrowHeight : y,
-              arrowPointY = baseY + ahHalfHeight,
-              arrowMaxY = baseY + this.headerArrowHeight,
+              baseY = isComplement ? y + arrowHeight : y,
+              arrowPointY = baseY + arrowHeight / 2,
+              arrowMaxY = baseY + arrowHeight,
               shape = isComplement ?
                 [
                   x.start, arrowPointY,
