@@ -33,7 +33,6 @@ angular.module('npact')
       var opts = { startBase: start,
                    endBase: start + GraphConfig.basesPerGraph};
       opts = angular.extend(opts, baseOpts);
-      opts.xaxis = GraphingCalculator.xaxis(opts);
       return opts;
     };
 

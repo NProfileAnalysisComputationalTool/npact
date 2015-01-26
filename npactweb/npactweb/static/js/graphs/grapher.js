@@ -78,13 +78,23 @@ angular.module('npact')
       };
     }
 
+    function digitCount(x) {
+      return (1 + Math.floor(Math.log(x) / Math.LN10));
+    }
+
     function Grapher(element, opts) {
       this.$element = jQuery(element);
       angular.extend(this, opts);
       // invariants: startBase, endBase
-      this.margin = Utils.orderOfMagnitude(this.endBase - this.startBase, -1);
+      var length = this.endBase - this.startBase;
+      this.xaxis = {
+        length: length,
+        scaleX: this.m.graph.w / length
+      };
+      this.margin = Utils.orderOfMagnitude(length, -1);
       this.startBaseM = Math.max(this.startBase - this.margin, 0);
       this.endBaseM = this.endBase + this.margin;
+
       this.stage = new K.Stage({
         container: element,
         height: this.height,
@@ -256,9 +266,9 @@ angular.module('npact')
                          width: this.xaxis.length,
                          height: this.m.height}));
 
-      var p1 = this.profileGroup().then(dgAdd);
-      var p2 = this.tracksGroup().then(dgAdd);
       var p3 = this.xAxisGroup().then(dgAdd);
+      var p2 = this.tracksGroup().then(dgAdd);
+      var p1 = this.profileGroup().then(dgAdd);
 
       return $q.all([p1, p2, p3]).then(function() {
         l.draw();
@@ -296,53 +306,43 @@ angular.module('npact')
             stroke: style.profile.borderColor
           });
       stage.add(l);
-
       l.add(border);
       l.draw();
       return $q.when(l);
     };
 
-    function centerXLabel(txt, scaleX) {
-      // center on the tick marks, at this point we know how wide
-      // this text is
-      var w = txt.getWidth() / scaleX,
-          x = txt.getAttr('coord'),
-          newX = x - w/2;
-      txt.x(newX);
-    }
-
-    GP.drawAxisTicks = function(ticks) {
-      var tickOpts = {x: 0, y: 0,
-                      stroke: style.profile.borderColor,
-                      strokeScaleEnabled: false};
-      return _.map(ticks, function(t) {
-        tickOpts.points = [t.x, t.y, t.x2, t.y2];
-        return new K.Line(tickOpts);
-      });
-    };
-
-    GP.drawAxisLabels = function(labels, textOpts) {
-      // draw labels at the right spacing
-      var defaultTextOpts = style.profile.axis.text;
-
-      return _.map(labels, function(lbl) {
-        var txtOpts = angular.extend({}, lbl, defaultTextOpts, textOpts);
-        return new K.Text(txtOpts);
-      });
-    };
-
     GP.xAxisGroup = function() {
-      var m = this.m,
-          xaxis = this.xaxis,
-          g = new K.Group(_.assign({
+      var xaxis = this.xaxis,
+          stops = GraphingCalculator.stops(this.startBaseM, this.endBaseM),
+          g = new K.Group({
             width: xaxis.length,
-            offsetX: this.startBase
-          }, this.m.xaxis));
+            offsetX: this.startBase,
+            x: 0, y: this.m.xaxis.y
+          }),
+          tickOpts = {
+            stroke: style.profile.borderColor, strokeScaleEnabled: false
+          },
+          labelOpts = _.assign({
+            scaleX: 1/xaxis.scaleX,
+            y: style.profile.tickLength
+          }, style.profile.axis.text),
+          shadeOpts = {
+            height: this.m.graph.h,
+            offsetY: this.m.graph.h,
+            fill: style.profile.shadeColor,
+            width: stops.interval / 2
+          };
 
-      addMany(g, this.drawAxisTicks(xaxis.ticks));
-      _.forEach(this.drawAxisLabels(xaxis.labels), function(lbl) {
-        g.add(lbl);
-        centerXLabel(lbl, xaxis.scaleX);
+      _.forEach(stops.stops, function(stop) {
+        tickOpts.points = [stop, 0, stop, style.profile.tickLength];
+        labelOpts.text = stop;
+        labelOpts.x = stop;
+        labelOpts.offsetX =
+          (digitCount(stop) * style.profile.axis.text.fontSize / 4);
+        shadeOpts.x = stop;
+        g.add(new K.Line(tickOpts));
+        g.add(new K.Text(labelOpts));
+        g.add(new K.Rect(shadeOpts));
       });
       return $q.when(g);
     };
@@ -364,22 +364,7 @@ angular.module('npact')
               strokeWidth: 1,
               strokeScaleEnabled: false
             });
-          },
-          shades = GraphingCalculator.shades({
-            startBase: this.startBaseM,
-            endBase: this.endBaseM,
-            interval: xaxis.interval
-          }),
-          shadeOpts = {
-            y: 2, height: 96,
-            fill: style.profile.shadeColor
           };
-
-      _.each(shades, function(shd) {
-        shadeOpts.width = shd.width;
-        shadeOpts.x = shd.x;
-        g.add(new K.Rect(shadeOpts));
-      });
 
       return this.getProfilePoints()
         .then(function(points) {
@@ -414,6 +399,7 @@ angular.module('npact')
       this.stage.destroyChildren();
       this.stage.setWidth(this.width);
       this.stage.setHeight(this.m.height);
+
       var glp = this.genomeLayer(this.stage);
       var llp = this.leftLayer(this.stage);
       var flp = this.frameLayer(this.stage);
@@ -421,6 +407,20 @@ angular.module('npact')
         .then(function() {
           $log.log("Finished draw at", newOpts.startBase, "in", new Date() - t1);
         });
+    };
+
+    /**
+     * Paint a green border around the graph to help verify the height and width
+     */
+    GP.testFrame = function() {
+      var testLayer = new K.Layer(
+        {x: 0, y: 0, width: this.width, height: this.m.height});
+      testLayer.add(
+        new K.Rect({x: 0, y: 0, width: this.width, height: this.m.height,
+                    stroke: 'green', strokeWidth:1
+                   }));
+      this.stage.add(testLayer);
+      testLayer.draw();
     };
 
     function centerExtractLabel(txt, scaleX) {

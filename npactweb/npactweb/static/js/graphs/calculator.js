@@ -35,55 +35,6 @@ angular.module('npact')
       };
     };
 
-    self.xaxis = function(opts){
-
-      var makeTicks = function(lbl, n){
-        var x = parseInt(start + n*interval);
-        return {
-          x: x, y: 0,
-          x2: x, y2: opts.profileTicks
-        };
-      };
-
-      var makeLabels = function(lbl, n){
-        return {
-          x: ticks[n].x, y: opts.profileTicks,
-          coord: ticks[n].x,
-          text: lbl,
-          scaleX: labelScaleX
-        };
-      };
-
-      var m = self.chart(opts),
-          s = self.stops(opts.startBase, opts.endBase),
-          length = opts.endBase - opts.startBase,
-          interval = s.interval,
-          ss = s.stops,
-          // want to capture some margin
-          start = ss[0],
-          end = _.last(ss),
-          ticks = _.map(ss, makeTicks),
-          scaleX = m.graph.w / length,
-          // blow the text back up, we don't want it scaled
-          labelScaleX = 1 / scaleX,
-          labels = _.map(ss, makeLabels)
-      ;
-
-      return {
-        start: start,
-        end: end,
-        // total length of profile to draw
-        length: length,
-        interval: interval,
-        x: m.graph.x,
-        y: m.graph.y + m.graph.h,
-        scaleX: scaleX,
-        ticks: ticks,
-        labels:labels
-      };
-    };
-
-
     /**
      * determine new offset and basesPerGraph for a zoom, retaining
      * relative position
@@ -149,9 +100,9 @@ angular.module('npact')
       var style = npactConstants.graphStyle;
 
       var pstyle = style.profile;
-      var xAxisHeight = pstyle.axis.text.fontSize + pstyle.tickLength + style.paddingUnit,
-          graphTop = opts.totalTrackHeight + style.paddingUnit,
+      var graphTop = opts.totalTrackHeight + style.paddingUnit,
           xAxisTop = graphTop + pstyle.height,
+          xAxisHeight = pstyle.axis.text.fontSize + pstyle.tickLength,
           totalHeight = xAxisTop + xAxisHeight;
 
       return {
@@ -185,34 +136,6 @@ angular.module('npact')
       // get the top left coordinate of the `toAlign` rect
       return {x: rect.x + (rect.width/2) - (toAlign.width/2),
               y: rect.y + (rect.height/2) - (toAlign.height/2)};
-    };
-
-    /**
-     * determine background shading
-     *
-     * @param {Object} opts - {startBase, endBase, interval}, where
-     * interval is the space between axis labels
-     */
-    self.shades = function(opts) {
-      var width = opts.interval / 2,
-          // want the X to start on 0 or multiples of `interval`
-          nearestEvenStartBase = Math.floor(opts.startBase / opts.interval) *
-            opts.interval,
-          xes = _.range(nearestEvenStartBase, opts.endBase, opts.interval)
-      ;
-      return _.map(xes, function(x) {
-        var w = width;
-        // handle shades falling off the left side
-        if (x < opts.startBase){
-          w -= opts.startBase - x;
-          x = opts.startBase;
-        }
-        // handle shades falling off the right side
-        if(x + width > opts.endBase){
-          w = opts.endBase - x;
-        }
-        return { width: w, x: x };
-      });
     };
   })
 ;

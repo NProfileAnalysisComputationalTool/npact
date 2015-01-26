@@ -36,7 +36,6 @@ describe('Grapher', function() {
                               [{text: 'Hits', lineType: 'hits'},
                                {text: 'Extracts', lineType: 'extracts'}]));
       opts.m = GraphingCalculator.chart(opts);
-      opts.xaxis = GraphingCalculator.xaxis(opts);
 
       var g = new Grapher(element[0], opts);
       expect(g).toBeDefined();

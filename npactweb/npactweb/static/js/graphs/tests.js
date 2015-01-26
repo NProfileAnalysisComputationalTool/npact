@@ -134,35 +134,24 @@ describe('Graphs', function(){
 
     describe('metrics', function() {
       var opts = {
-        width:250,
-        leftPadding: 50,
-        rightPadding: 5,
-        axisLabelFontsize:10,
-        axisTitleFontsize: 20,
+        width: 250,
         axisTitle: '% GC',
-        profileTicks:5,
+        profileTicks: 5,
         startBase: 0, endBase: 100,
         totalTrackHeight: 5
       };
+      beforeEach(inject(function(npactConstants) {
+        npactConstants.graphStyle.paddingUnit = 5;
+        npactConstants.graphStyle.leftPadding = 50;
+        npactConstants.graphStyle.tickLength = 5;
+      }));
 
-      it('calculates x-axis ticks', function(){
-
-        var ax = GC.xaxis(opts);
-        expect(ax.ticks).toEqual([
-          {x: 0, y: 0, x2: 0, y2: 5},
-          {x: 10, y: 0, x2: 10, y2: 5},
-          {x: 20, y: 0, x2: 20, y2: 5},
-          {x: 30, y: 0, x2: 30, y2: 5},
-          {x: 40, y: 0, x2: 40, y2: 5},
-          {x: 50, y: 0, x2: 50, y2: 5},
-          {x: 60, y: 0, x2: 60, y2: 5},
-          {x: 70, y: 0, x2: 70, y2: 5},
-          {x: 80, y: 0, x2: 80, y2: 5},
-          {x: 90, y: 0, x2: 90, y2: 5},
-          {x: 100, y: 0, x2: 100, y2: 5},
-          {x: 110, y: 0, x2: 110, y2: 5}
-
-        ]);
+      it('calculates basic metrics', function() {
+        var m = GC.chart(opts);
+        expect(m).toBeDefined();
+        expect(m.height).toEqual(106);
+        expect(m.graph.x).toEqual(50);
+        expect(m.graph.y).toEqual(10);
       });
     });
 
@@ -218,24 +207,6 @@ describe('Graphs', function(){
     it('can zoom on the higher rows', function(){
       expectZoom([10000, 0.5, 10000, 0], 7500, 5000);
       expectZoom([20000, 0.5, 10000, 0], 12500, 5000);
-    });
-
-    it('calculates shading', function() {
-      expect(GC.shades({startBase:0, endBase:50, interval:10}))
-        .toEqual([{width: 5, x:0},
-                  {width: 5, x:10},
-                  {width: 5, x:20},
-                  {width: 5, x:30},
-                  {width: 5, x:40}]);
-    });
-    it('calculates even shading with uneven start/end ', function() {
-      expect(GC.shades({startBase:12, endBase:51, interval:10}))
-        .toEqual([{width: 3, x:12},
-                  {width: 5, x:20},
-                  {width: 5, x:30},
-                  {width: 5, x:40},
-                  {width: 1, x:50},]);
-
     });
   });
 
