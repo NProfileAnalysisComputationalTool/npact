@@ -245,7 +245,7 @@ angular.module('npact')
       stage.add(l);
       var dg = new K.Group({
         scaleX: this.xaxis.scaleX,
-        x: 0,
+        offsetX: this.startBase,
         draggable: true,
         dragBoundFunc: function(pos) {
           pos.y = 0; //Disallow vertical movement
@@ -262,7 +262,7 @@ angular.module('npact')
       var dgAdd = _.bind(dg.add, dg);
       // need a shape that can be clicked on to allow dragging the
       // entire canvas
-      dgAdd(new K.Rect({x: 0, y: 0, //fill: '#BDD',
+      dgAdd(new K.Rect({x: this.startBase, y: 0,// fill: '#BDD',
                          width: this.xaxis.length,
                          height: this.m.height}));
 
@@ -316,7 +316,6 @@ angular.module('npact')
           stops = GraphingCalculator.stops(this.startBaseM, this.endBaseM),
           g = new K.Group({
             width: xaxis.length,
-            offsetX: this.startBase,
             x: 0, y: this.m.xaxis.y
           }),
           tickOpts = {
@@ -354,8 +353,7 @@ angular.module('npact')
             x: 0, y: m.graph.y,
             height: m.graph.h, width: xaxis.length,
             // convert % to px
-            scaleY: m.graph.h / 100,
-            offsetX: this.startBase
+            scaleY: m.graph.h / 100
           }),
           buildLine = function(points, color) {
             return new K.Line({
@@ -462,8 +460,7 @@ angular.module('npact')
       var xaxis = this.xaxis, $el = this.$element,
           colors = this.colors,
           g = new K.Group({
-            x: 0, y: 0,
-            offsetX: this.startBase
+            x: 0, y: 0
           }),
           colorNames = 'rgb',
           y = track.y,
@@ -550,13 +547,8 @@ angular.module('npact')
           // arrow sticks out ~1%
           guideArrowXOffset = Math.floor(0.01 * (endBase - startBase)),
           baseY = track.y + (track.height / 2),
-          g = new K.Group({
-            x: 0, y: 0,
-            offsetX: startBase
-          }),
-          guideLineOpts = {
-            stroke: '#ddd'
-          }
+          g = new K.Group({ x: 0, y: 0 }),
+          guideLineOpts = { stroke: '#ddd' }
       ;
       // draw the guide lines
       g.add(new K.Line(angular.extend({
