@@ -113,6 +113,7 @@ angular.module('npact')
           if(getWidth() !== baseOpts.width) {
             topOffset = $element.offset().top;
             baseOpts.width = getWidth();
+            baseOpts.m = GraphingCalculator.chart(baseOpts);
             updateVisibility();
             redraw();
           }
