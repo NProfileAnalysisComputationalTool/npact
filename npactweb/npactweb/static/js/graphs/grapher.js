@@ -95,15 +95,19 @@ angular.module('npact')
       this.margin = Utils.orderOfMagnitude(length, -1);
       this.startBaseM = Math.max(this.startBase - this.margin, 0);
       this.endBaseM = this.endBase + this.margin;
-
-      this.stage = new K.Stage({
-        container: element,
-        height: this.height,
-        width: this.width
-      });
     }
     var GP = Grapher.prototype;
 
+    GP.getStage = function() {
+      if(!this.stage) {
+        this.stage = new K.Stage({
+          container: this.$element[0],
+          height: this.height,
+          width: this.width
+        });
+      }
+      return this.stage;
+    };
     GP.destroy = function() {
       if(this.stage) { this.stage.destroy(); }
     };
@@ -395,13 +399,14 @@ angular.module('npact')
     GP.redraw = function(newOpts) {
       var t1 = new Date();
       angular.extend(this, newOpts);
-      this.stage.destroyChildren();
-      this.stage.setWidth(this.width);
-      this.stage.setHeight(this.m.height);
+      var stage = this.getStage();
+      stage.destroyChildren();
+      stage.setWidth(this.width);
+      stage.setHeight(this.m.height);
 
-      var glp = this.genomeLayer(this.stage);
-      var llp = this.leftLayer(this.stage);
-      var flp = this.frameLayer(this.stage);
+      var glp = this.genomeLayer(stage);
+      var llp = this.leftLayer(stage);
+      var flp = this.frameLayer(stage);
       return $q.all([llp, flp, glp])
         .then(function() {
           $log.log("Finished draw at", newOpts.startBase, "in", new Date() - t1);
@@ -577,5 +582,22 @@ angular.module('npact')
 
       return g;
     };
+
+
+    GP.replaceWithImage = function() {
+      var self = this;
+      var $el = this.$element;
+      return $q(function(resolve) {
+        self.stage.toImage({
+          mimeType: 'image/png',
+          callback: function(image) {
+            self.stage.destroy();
+            self.stage = null;
+            $el.append(image);
+            resolve();
+          }});
+      });
+    };
+
     return Grapher;
   });

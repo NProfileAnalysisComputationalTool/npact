@@ -182,10 +182,11 @@ angular.module('npact')
 
         $scope.$on('print', function(evt, callback) {
           var p = schedule(true);
-          if(p) { callback(p); }
+          if(p) {
+            callback(p.then(function() { return g.replaceWithImage(); }));
+          }
+          else { callback(g.replaceWithImage()); }
         });
-
-
       }
     };
   })
