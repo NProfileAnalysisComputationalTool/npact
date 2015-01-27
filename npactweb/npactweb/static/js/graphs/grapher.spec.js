@@ -11,6 +11,7 @@ describe('Grapher', function() {
       sampleOpts = {
         startBase: 0,
         endBase: 10000,
+        margin: 1000,
         offset: 0,
         width: 600,
         axisTitle: 'C+G'
@@ -28,18 +29,20 @@ describe('Grapher', function() {
 
     makeGrapher = function() {
       expect(Grapher).toEqual(jasmine.any(Function));
-      var opts = angular.extend(
-        {}, npactConstants.graphSpecDefaults, sampleOpts);
+      var opts = _.clone(sampleOpts);
       opts.colors = npactConstants.lineColors;
       opts = angular.extend(opts,
                             GraphingCalculator.trackSizeCalc(
                               [{text: 'Hits', lineType: 'hits'},
                                {text: 'Extracts', lineType: 'extracts'}]));
       opts.m = GraphingCalculator.chart(opts);
-
+      expect(opts.m.graph).toBeDefined();
+      expect(opts.m.graph.w).toBeDefined();
       var g = new Grapher(element[0], opts);
       expect(g).toBeDefined();
       expect(g).toEqual(jasmine.any(Grapher));
+      expect(g.xaxis).toBeDefined();
+      expect(g.onDragEnd).toEqual(jasmine.any(Function));
       return g;
     };
   }));
@@ -62,12 +65,20 @@ describe('Grapher', function() {
   });
 
   it('should be valid', function(done) {
+    //This is mostly just a smoke test to run through all the code.
+
     var g = makeGrapher();
-    expect(g).toBeDefined();
-    expect(g.onDragEnd).toEqual(jasmine.any(Function));
-    g.redraw(sampleOpts).then(function() {
-      done();
-    });
+    var redraw = function() {
+      expect(g).toBeDefined();
+      expect(g).toEqual(jasmine.any(Grapher));
+      expect(g.xaxis).toBeDefined();
+      return g.redraw(sampleOpts);
+    };
+    var p = redraw();
+    for(var i = 20; i > 0; --i) {
+      p = p.then(redraw);
+    }
+    p.then(done);
     $timeout.flush();
     //KineticJs uses window timeouts, so we need to let that happen
     //and then flush angular's fake $timeout again
