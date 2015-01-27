@@ -451,4 +451,4 @@ button.Start { clear:both; margin: 8px;}
 }
 
 #printControls { float: right; }
-#printControls:hover { cursor: hand; }
+#printControls:hover { cursor: pointer; }

@@ -2,6 +2,9 @@
   <div id="printControls" ng-click="pageCtrl.print()">
     <span class="ui-icon ui-icon-print"></span>
     Print
+    <span ng-if="printCounter">
+      <img ng-src="{{STATIC_BASE_URL}}images/spinner.gif" class="spinner"/>
+      Waiting on {{printCounter}}</span>
   </div>
   <h2 ng-model="gc.first_page_title" contenteditable strip-br="true"></h2>
   <div id="progressreport" ng-show="false">

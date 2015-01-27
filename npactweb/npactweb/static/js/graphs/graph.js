@@ -155,31 +155,37 @@ angular.module('npact')
             // the currently visible ones are drawn
             redraw = false,
             draw = function(force) {
-              if(!redraw || (!force && !visible(idx))) { return; }
+              if(!redraw || (!force && !visible(idx))) { return null; }
               var opts = ctrl.graphOptions(idx);
               //However long it actually takes to draw, we have the
               //latest options as of this point
               redraw = false;
-              (g || (g = new Grapher(el, opts)))
-                .redraw(opts)
-                .catch(function() {
-                  //something went wrong, we will still need to redraw this
-                  redraw = true;
-                })
-              ;
+              return (g || (g = new Grapher(el, opts)))
+                    .redraw(opts)
+                    .catch(function() {
+                      //something went wrong, we will still need to redraw this
+                      redraw = true;
+                    });
             },
-            schedule = function() {
-              if(!redraw || !visible(idx)) { return; }
-              $timeout(draw, 0, false);
+            schedule = function(force) {
+              if(!redraw || (!force && !visible(idx))) { return null; }
+              return $timeout(_.partial(draw, force), 0, false);
             },
             discard = function() {
               if(g) { g.destroy(); g = null; }
             };
-        $scope.$on(Evt.DRAW, schedule);
+        $scope.$on(Evt.DRAW, _.partial(schedule, false));
         $scope.$on(Evt.REDRAW, function() { redraw = true; schedule();});
         $scope.$on(Evt.REBUILD, function() { discard(); redraw = true; schedule(); });
         $scope.$on('$destroy', discard);
-        $scope.$on('print', function() { draw(true); });
+
+
+        $scope.$on('print', function(evt, callback) {
+          var p = schedule(true);
+          if(p) { callback(p); }
+        });
+
+
       }
     };
   })

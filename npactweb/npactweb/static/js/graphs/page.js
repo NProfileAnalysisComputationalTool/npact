@@ -47,9 +47,18 @@ angular.module('npact')
     }, true);
 
     this.print = function() {
-      $log.log("print requested: ", new Date());
-      $scope.$broadcast('print');
-      $log.log("finished rendering: ", new Date());
+      var t1 = new Date();
+      $log.log("print requested: ", t1);
+      $scope.printCounter = 0;
+      var waitList = [];
+      var evt = $scope.$broadcast('print', function(promise) {
+        $scope.printCounter++;
+        waitList.push(promise);
+      });
+      $q.all(waitList).then(function() {
+        $scope.printCounter = 0;
+        $log.log('Finished rendering', new Date() - t1);
+      });
     };
   })
 
