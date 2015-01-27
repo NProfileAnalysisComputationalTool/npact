@@ -314,7 +314,7 @@ angular.module('npact')
 
     GP.xAxisGroup = function() {
       var xaxis = this.xaxis,
-          stops = GraphingCalculator.stops(this.startBaseM, this.endBaseM),
+          stops = GraphingCalculator.stops(this.startBase, this.endBase),
           g = new K.Group({
             width: xaxis.length,
             x: 0, y: this.m.xaxis.y
