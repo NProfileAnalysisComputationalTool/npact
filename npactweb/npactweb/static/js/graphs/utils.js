@@ -2,8 +2,7 @@ angular.module('npact')
   .service('Utils', function($q, $timeout, $log) {
     'use strict';
     // sigil value for quitting forEachAsync
-    var STOP_ITERATING = {},
-        log10 = Math.log(10);
+    var STOP_ITERATING = {};
     this.STOP_ITERATING = STOP_ITERATING;
 
     /**
@@ -16,7 +15,7 @@ angular.module('npact')
      * @param {Number} [exponent] shift the result by this many digits
      */
     this.orderOfMagnitude = function(x, exponent){
-      return Math.pow(10, Math.round(Math.log(x) / log10) + (exponent || 0));
+      return Math.pow(10, Math.round(Math.log(x) / Math.LN10) + (exponent || 0));
     };
 
     /**
