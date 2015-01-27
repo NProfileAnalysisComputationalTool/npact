@@ -18,7 +18,7 @@ angular.module('npact')
     self.stops = function(a, b){
       var length = b - a,
           // get even stops; look for one lower order of magnitude
-          // than our length - TODO: too many stops for lower ranges
+          // than our length
           interval = Utils.orderOfMagnitude(length, -1),
           // want to get ticks aligned on `interval`. a and b might
           // have weird offsets

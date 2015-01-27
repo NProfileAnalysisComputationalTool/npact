@@ -15,7 +15,9 @@ angular.module('npact')
      * @param {Number} [exponent] shift the result by this many digits
      */
     this.orderOfMagnitude = function(x, exponent){
-      return Math.pow(10, Math.round(Math.log(x) / Math.LN10) + (exponent || 0));
+      var k = Math.floor(Math.log(x) / Math.LN10),
+          t = Math.floor(0.5 + x / Math.pow(10, k));
+      return t * Math.pow(10, k + (exponent || 0));
     };
 
     /**

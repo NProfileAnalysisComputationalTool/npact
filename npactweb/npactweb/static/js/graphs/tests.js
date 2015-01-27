@@ -66,6 +66,12 @@ describe('Graphs', function(){
       it('handles positive offset', function(){
         expect(U.orderOfMagnitude(1012, 1)).toBe(10000);
       });
+      it('shouldn\'t jerk badly', function() {
+        expect(U.orderOfMagnitude(31012, -1)).toBe(3000);
+        expect(U.orderOfMagnitude(30012, -1)).toBe(3000);
+        expect(U.orderOfMagnitude(33012, -1)).toBe(3000);
+        expect(U.orderOfMagnitude(39012, -1)).toBe(4000);
+      });
     });
 
     describe('.extendByPage', function() {
