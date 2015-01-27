@@ -79,7 +79,8 @@ angular.module('npact')
     }
 
     function digitCount(x) {
-      return (1 + Math.floor(Math.log(x) / Math.LN10));
+      //avoid log of 0
+      return x ? 1 + Math.floor(Math.log(x) / Math.LN10) : 0;
     }
 
     function Grapher(element, opts) {
