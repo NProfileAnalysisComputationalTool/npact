@@ -447,5 +447,5 @@ button.Start { clear:both; margin: 8px;}
     * Changes here need to be updated in graph.css, search for `.graph` (with ticks)
     */
    border-bottom: 1px solid #AAF;
-   padding: 5px 10px 5px 0;
+   padding: 8px 10px 8px 0;
 }

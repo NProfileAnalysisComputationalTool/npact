@@ -95,7 +95,7 @@ angular.module('npact')
         updateRowHeight = function(height) {
           $scope.graphHeight = height;
           //add padding and border from style.css `.graph`
-          graphRowHeight = height + 10 + 1;
+          graphRowHeight = height + 8 + 8 + 1;
           updateVisibility();
         },
         updateVisibility = function() {
