@@ -51,8 +51,6 @@ angular.module('npact')
 
       var minIdx = null, maxIdx, data = this.tracks[opts.name];
       return this.tracks[opts.name].then(function(data) {
-        // TODO: use _.sortedIndex to binary search, or some other
-        // better index structure/algorithm
         return Utils.forEachAsync(data, function(dataPoint, idx) {
           // extract starts in this range?
           var startsInRange = dataPoint.start >= opts.startBase &&
