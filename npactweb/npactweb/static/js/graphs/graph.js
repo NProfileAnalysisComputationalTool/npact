@@ -1,5 +1,4 @@
 angular.module('npact')
-
   .controller('npactGraphContainerCtrl', function($scope, $element, $window, $log, $timeout,
                                            npactConstants, Utils, GraphConfig, Evt,
                                            GraphingCalculator) {
@@ -25,8 +24,9 @@ angular.module('npact')
     //The baseOpts are the graph options that are the same for every graph
     var baseOpts = { width: getWidth(), onPan: onPan, onZoom: onZoom };
     this.graphOptions = function(idx) {
-      // This function builds the specific options for a graph, the
-      // options object is lazily generated when needed
+      // This function builds the specific options for a graph; as
+      // many graph rows will never be drawn this only generates the
+      // object for a row when needed.
       var start = $scope.graphSpecs[idx];
       var opts = { startBase: start,
                    endBase: start + GraphConfig.basesPerGraph};
@@ -34,31 +34,33 @@ angular.module('npact')
       return opts;
     };
 
-    var repartition = function() {
-      if(GraphConfig.startBase === undefined ||
-         GraphConfig.endBase === undefined ||
-         GraphConfig.basesPerGraph === undefined) { return; }
-      $scope.graphSpecs = GraphingCalculator.partition(GraphConfig);
-      $log.log('Partitioned into', $scope.graphSpecs.length, 'rows.');
-      updateVisibility();
-      $timeout(rebuild);
-    },
-        draw = function() { $scope.$broadcast(Evt.DRAW); },
+    var draw = function() { $scope.$broadcast(Evt.DRAW); },
         redraw = function() {
-          if (!baseOpts.axisTitle) return;  //too early to do anything
+          if (!baseOpts.axisTitle || !baseOpts.m) return;  //too early to do anything
           $scope.$broadcast(Evt.REDRAW);
         },
         rebuild = function() {
-          if (!baseOpts.axisTitle) return;  //too early to do anything
+          if (!baseOpts.axisTitle || !baseOpts.m) return;  //too early to do anything
           $scope.$broadcast(Evt.REBUILD);
         };
 
 
-    // watch the environment for changes we care about
-    $scope.$watchCollection(function() {
-      return [ GraphConfig.length, GraphConfig.basesPerGraph,
-               GraphConfig.offset, GraphConfig.startBase, GraphConfig.endBase];
-    }, repartition);
+    /*** Watch the config for changes we care about ***/
+    $scope.$watchCollection(
+      function() {
+        return [GraphConfig.length, GraphConfig.basesPerGraph,
+                GraphConfig.offset, GraphConfig.startBase, GraphConfig.endBase];
+      },
+      function() {
+        // basic row geometry changed, repartition and rebuild
+        if(GraphConfig.startBase === undefined ||
+           GraphConfig.endBase === undefined ||
+           GraphConfig.basesPerGraph === undefined) { return; }
+        $scope.graphSpecs = GraphingCalculator.partition(GraphConfig);
+        $log.log('Partitioned into', $scope.graphSpecs.length, 'rows.');
+        updateVisibility(); //number of rows might have changed.
+        $timeout(rebuild);
+      });
 
     $scope.$watch(GraphConfig.profileTitle, function(title) {
       //A profileTitle change indicates different nucleotides: rebuild
@@ -89,18 +91,18 @@ angular.module('npact')
         slack = 50, // how many pixels outside of viewport to render
         topOffset = $element.offset().top,
         topIdx = 0, bottomIdx = 0,
-        graphBoxHeight = 0,
+        graphRowHeight = 0,
         updateRowHeight = function(height) {
           $scope.graphHeight = height;
           //add padding and border from style.css `.graph`
-          graphBoxHeight = height + 10 + 1;
+          graphRowHeight = height + 10 + 1;
           updateVisibility();
         },
         updateVisibility = function() {
           if(!baseOpts.m) return;
           var scrollDist = $window.scrollY - topOffset - slack;
-          topIdx = Math.floor(scrollDist / graphBoxHeight);
-          bottomIdx = topIdx + Math.ceil((winHeight) / graphBoxHeight);
+          topIdx = Math.floor(scrollDist / graphRowHeight);
+          bottomIdx = topIdx + Math.ceil(winHeight / graphRowHeight);
         },
         onScroll = function() {
           updateVisibility();
@@ -108,7 +110,7 @@ angular.module('npact')
         },
         onResize = function() {
           winHeight = $win.height();
-          if($element.width() !== baseOpts.width) {
+          if(getWidth() !== baseOpts.width) {
             topOffset = $element.offset().top;
             baseOpts.width = getWidth();
             updateVisibility();
@@ -120,9 +122,7 @@ angular.module('npact')
           }
         };
 
-    this.visible = function(idx) {
-      return idx >= topIdx && idx <= bottomIdx;
-    };
+    this.visible = function(idx) { return idx >= topIdx && idx <= bottomIdx; };
     $win.on('resize', onResize);
     $win.on('scroll', onScroll);
     $scope.$on('$destroy', function() {
