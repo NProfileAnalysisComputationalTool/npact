@@ -503,10 +503,10 @@ angular.module('npact')
               arrowBounds = isComplement ?
                 {
                   x: x.start+ahw, y: baseY,
-                  width: x.end-x.start-ahw, height: this.headerArrowHeight
+                  width: x.end-x.start-ahw, height: arrowHeight
                 } : {
                   x: x.start, y: baseY,
-                  width: x.end-x.start-ahw, height: this.headerArrowHeight
+                  width: x.end-x.start-ahw, height: arrowHeight
                 },
               line = new K.Line(angular.extend({
                 extract: x,
