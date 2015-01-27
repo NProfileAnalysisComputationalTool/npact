@@ -23,9 +23,7 @@ angular.module('npact')
         };
 
     //The baseOpts are the graph options that are the same for every graph
-    var baseOpts = angular.extend({ width: getWidth(),
-                                    onPan: onPan, onZoom: onZoom },
-                                  npactConstants.graphSpecDefaults);
+    var baseOpts = { width: getWidth(), onPan: onPan, onZoom: onZoom };
     this.graphOptions = function(idx) {
       // This function builds the specific options for a graph, the
       // options object is lazily generated when needed
