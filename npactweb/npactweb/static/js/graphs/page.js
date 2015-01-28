@@ -8,41 +8,6 @@ angular.module('npact')
       controllerAs: 'pageCtrl'
     };
   })
-
-  .service('MessageBus', function($log, $q, $timeout) {
-    'use strict';
-    this.log = function(level, msg, hideWhen) {
-      $log.log(level, msg);
-      var msgpane = angular.element('#msgpane');
-      var newmessage = angular.element('<div>' + msg + '</div>')
-            .addClass(level)
-            .addClass('ui-state-highlight')
-            .css({display: 'none'});
-      if(_.includes(['error', 'danger'], level)) {
-        newmessage.addClass('ui-state-error');
-      }
-      var slideUpAndRemove = function() {
-        newmessage.slideUp(1000, function() { newmessage.remove(); });
-      };
-      msgpane.append(newmessage);
-      newmessage.slideDown(800, function() {
-        if(hideWhen && isNaN(hideWhen)) {
-          $q.when(hideWhen).then(slideUpAndRemove);
-        }
-        else {
-          hideWhen = hideWhen || 5000;
-          $timeout(slideUpAndRemove, hideWhen);
-        }
-      });
-    };
-
-    _.forEach(['info', 'danger', 'warning', 'success'], function(lvl) {
-      this[lvl] = _.partial(this.log, lvl);
-    }, this);
-
-  })
-
-
   .controller('npactGraphPageCtrl', function($scope, $q, $log, Fetcher, FETCH_URL,
                                       GraphConfig, FileManager, kickstarter) {
     'use strict';
@@ -186,5 +151,37 @@ angular.module('npact')
       }
       return list;
     };
+  })
+
+
+  .service('MessageBus', function($log, $q, $timeout) {
+    'use strict';
+    this.log = function(level, msg, hideWhen) {
+      $log.log(level, msg);
+      var msgpane = angular.element('#msgpane');
+      var newmessage = angular.element('<p class="ui-state-highlight ui-corner-all">' + msg + '</p>')
+            .addClass(level)
+            .css({display: 'none'});
+      if(_.includes(['error', 'danger'], level)) {
+        newmessage.addClass('ui-state-error');
+      }
+      var slideUpAndRemove = function() {
+//        newmessage.slideUp(1000, function() { newmessage.remove(); });
+      };
+      msgpane.append(newmessage);
+      newmessage.slideDown(800, function() {
+        if(hideWhen && isNaN(hideWhen)) {
+          $q.when(hideWhen).then(slideUpAndRemove);
+        }
+        else {
+          hideWhen = hideWhen || 5000;
+          $timeout(slideUpAndRemove, hideWhen);
+        }
+      });
+    };
+
+    _.forEach(['info', 'danger', 'warning', 'success'], function(lvl) {
+      this[lvl] = _.partial(this.log, lvl);
+    }, this);
   })
   ;
