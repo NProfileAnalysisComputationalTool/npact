@@ -2,7 +2,7 @@ describe('Grapher', function() {
   'use strict';
   beforeEach(module('assets'));
   beforeEach(module('npact', function($provide) {
-    $provide.value('$log', console);
+//    $provide.value('$log', console);
     $provide.service('Fetcher', function() { });
   }));
 

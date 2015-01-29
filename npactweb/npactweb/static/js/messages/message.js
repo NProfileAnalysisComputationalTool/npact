@@ -1,16 +1,14 @@
 angular.module('npact')
   .config(function($provide) {
     $provide.decorator('$log', function($delegate, $sniffer) {
-      var original = _.clone($delegate);
-      var messages = [];
+      var newobj = {messages: []};
       _.forEach(['debug', 'error', 'info', 'log', 'warn'], function(lvl) {
-        $delegate[lvl] = function() {
-          messages.push(_.toArray(arguments));
-          original[lvl].apply($delegate, arguments);
+        newobj[lvl] = function() {
+          newobj.messages.push(_.toArray(arguments));
+          return $delegate[lvl].apply($delegate, arguments);
         };
       });
-      $delegate.messages = messages;
-      return $delegate;
+      return newobj;
     });
 
     $provide.decorator('$exceptionHandler', function($delegate, $injector) {
