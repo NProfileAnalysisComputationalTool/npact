@@ -73,6 +73,7 @@ def build_config(path, request):
     parsing.startBase(config)
     parsing.endBase(config)
     parsing.first_page_title(config)
+    parsing.significance(config)
 
     for key in MAGIC_PARAMS:
         if key in request.GET:

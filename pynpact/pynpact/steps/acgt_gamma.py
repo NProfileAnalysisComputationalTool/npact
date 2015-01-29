@@ -47,7 +47,7 @@ def plan(config, executor):
 def _acgt_gamma(config, dtemp):
     cmd = [BIN, "-q", config['filename']]
     if 'significance' in config:
-        cmd.append(config['significance'])
+        cmd.append(str(config['significance']))
 
     statuslog.info(
         "Identifying ORFs with 3-base compositional periodicity "

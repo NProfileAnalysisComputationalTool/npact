@@ -26,7 +26,7 @@ defaults = {
 
         # acgt_gamma:
         'skip_prediction': False,
-        'significance': "0.001",
+        'significance': 0.001,
 
         ##allplots
         #http://docs.python.org/library/string.html#formatspec
@@ -127,6 +127,13 @@ def endBase(config):
     return config['endBase']
 
 
+def significance(config):
+    if 'significance' not in config:
+        config['significance'] = float(config['significance'])
+    else:
+        config['significance'] = 0.001
+
+
 def first_page_title(config):
     if not config.get('first_page_title'):
         detect_format(config)
@@ -159,11 +166,6 @@ CONFIG_HELP_TEXT = {
     'nucleotides': "The bases to count the frequency of on the primary strand.",
     'alternate_colors': "Modifies graph colors from RGB to an alternative set that should be more easily distinguishable by people with certain color-blindness conditions.",
     }
-
-significance_levels = ("0.01", "0.001", "0.0001")
-significance_levels = zip(significance_levels, significance_levels)
-
-
 
 
 ## playing around with this idea, haven't really gotten it yet
