@@ -3,7 +3,7 @@ angular.module('npact')
     'use strict';
     var self = this;
     self.start = function(config) {
-      $log.log("Starting nprofiler", self);
+      $log.log("Starting nprofiler");
       self.config = config;
 
       self.fetching = Fetcher.fetchFile(config[Pynpact.DDNA_FILE]).then(function(ddna) {

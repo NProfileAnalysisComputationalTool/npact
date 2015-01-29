@@ -8,8 +8,8 @@
   </div>
   <h2 ng-model="gc.first_page_title" contenteditable strip-br="true"></h2>
   <div id="progressreport">
-    <h3> Status </h3>
-    <div id="msgpane"></div>
+    <h3> Status <img ng-src="{{STATIC_BASE_URL}}images/mail-envelope-closed-16.png" title="Email a report about this run to Acceleration" ng-click="email()"></h3>
+    <npact-msg-pane></npact-msg-pane>
   </div>
 
   <div id="results">

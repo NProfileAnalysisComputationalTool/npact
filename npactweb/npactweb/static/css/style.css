@@ -450,5 +450,8 @@ button.Start { clear:both; margin: 8px;}
    padding: 8px 10px 8px 0;
 }
 
+#msgpane p { padding: 8px; }
+#msgpane .message button { float:right; }
+
 #printControls { float: right; }
 #printControls:hover { cursor: pointer; }

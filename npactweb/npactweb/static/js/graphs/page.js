@@ -9,15 +9,14 @@ angular.module('npact')
     };
   })
   .controller('npactGraphPageCtrl', function($scope, $q, $log, Fetcher, FETCH_URL,
+                                      EmailBuilder,
                                       GraphConfig, FileManager, kickstarter) {
     'use strict';
 
     $scope.miscFiles = [];
-    $scope.status = 'Initializing';
-    $scope.ready = false;
     $scope.FETCH_URL = FETCH_URL;
     $scope.config = GraphConfig;
-
+    $scope.email = EmailBuilder.send;
     kickstarter.start();
     $scope.$watch(FileManager.getFiles, function(val) {
       $scope.miscFiles = val;
@@ -44,8 +43,8 @@ angular.module('npact')
     'use strict';
     //Kickstart the whole process, start all the main managers
     this.start = function() {
-      MessageBus.info('kickstarting');
       this.basePromise = processOnServer('parse');
+      MessageBus.info('kickstarting', this.basePromise);
       this.basePromise.then(NProfiler.start);
       this.basePromise.then(PredictionManager.start);
       this.basePromise.then(ExtractManager.start);
@@ -59,7 +58,7 @@ angular.module('npact')
     'use strict';
     this.start = function(config) {
       if(config.format != 'genbank') { return; }
-      processOnServer('extract').then(function(config) {
+      var p = processOnServer('extract').then(function(config) {
         if(config[Pynpact.CDS]) {
           Fetcher.pollThenFetch(config[Pynpact.CDS])
             .then(function(data) {
@@ -69,10 +68,11 @@ angular.module('npact')
             });
         }
       });
+      MessageBus.info("Fetching extract data from server", p);
     };
   })
   .service('PredictionManager', function(Fetcher, StatusPoller, Pynpact, TrackReader,
-                                  GraphConfig, processOnServer, $log,
+                                  GraphConfig, processOnServer, $log, MessageBus,
                                   ACGT_GAMMA_FILE_LIST_URL) {
     'use strict';
     var self = this;
@@ -121,13 +121,14 @@ angular.module('npact')
       if(significance) {
         $log.log("New prediction significance: ", significance);
         self.files = null;
-        processOnServer('acgt_gamma').then(function(config) {
+        var p = processOnServer('acgt_gamma').then(function(config) {
           var waitOn = StatusPoller.start(config[Pynpact.ACGT_GAMMA_FILES]);
           self.newHits(waitOn, config, oldSig);
           self.newCds(waitOn, config, oldSig);
           waitOn.then(self.updateFiles);
           return waitOn;
         });
+        MessageBus.info('Asking server to calculate ACGT gamma @ ' + significance, p);
       }
     };
   })
@@ -152,36 +153,4 @@ angular.module('npact')
       return list;
     };
   })
-
-
-  .service('MessageBus', function($log, $q, $timeout) {
-    'use strict';
-    this.log = function(level, msg, hideWhen) {
-      $log.log(level, msg);
-      var msgpane = angular.element('#msgpane');
-      var newmessage = angular.element('<p class="ui-state-highlight ui-corner-all">' + msg + '</p>')
-            .addClass(level)
-            .css({display: 'none'});
-      if(_.includes(['error', 'danger'], level)) {
-        newmessage.addClass('ui-state-error');
-      }
-      var slideUpAndRemove = function() {
-//        newmessage.slideUp(1000, function() { newmessage.remove(); });
-      };
-      msgpane.append(newmessage);
-      newmessage.slideDown(800, function() {
-        if(hideWhen && isNaN(hideWhen)) {
-          $q.when(hideWhen).then(slideUpAndRemove);
-        }
-        else {
-          hideWhen = hideWhen || 5000;
-          $timeout(slideUpAndRemove, hideWhen);
-        }
-      });
-    };
-
-    _.forEach(['info', 'danger', 'warning', 'success'], function(lvl) {
-      this[lvl] = _.partial(this.log, lvl);
-    }, this);
-  })
-  ;
+;
