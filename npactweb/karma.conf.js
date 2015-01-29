@@ -1,14 +1,14 @@
 module.exports = function(config){
   'use strict';
   config.set({
-    files:[
+    files: [
       'npactweb/static/bower_components/jquery/dist/jquery.min.js',
       'npactweb/static/bower_components/angular/angular.min.js',
       'npactweb/static/bower_components/angular-messages/angular-messages.min.js',
       'npactweb/static/bower_components/angular-sanitize/angular-sanitize.min.js',
       'npactweb/static/bower_components/angular-mocks/angular-mocks.js',
       'npactweb/static/bower_components/kineticjs/kinetic.min.js',
-      'npactweb/static/bower_components/lodash/dist/lodash.min.js',
+      'npactweb/static/bower_components/lodash/lodash.min.js',
       'npactweb/static/bower_components/rtree/dist/rtree.min.js',
       'npactweb/static/bower_components/ngSticky/dist/sticky.min.js',
       'npactweb/static/js/*.js',
