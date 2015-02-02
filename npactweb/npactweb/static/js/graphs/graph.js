@@ -70,7 +70,7 @@ angular.module('npact')
 
     $scope.$watch(GraphConfig.activeTracks, function(val) {
       //Find headers and headerY
-      angular.extend(baseOpts, GraphingCalculator.trackSizeCalc(val));
+      baseOpts.tracks = val;
       baseOpts.m = GraphingCalculator.chart(baseOpts);
       updateRowHeight(baseOpts.m.height);
       redraw();

@@ -224,7 +224,7 @@ angular.module('npact')
   .service('StatusPoller', function(STATUS_BASE_URL, FETCH_URL,
                                     $q, $http, $timeout, $log) {
     'use strict';
-    var initialPollTime = 400;
+    var initialPollTime = 200;
 
     function poller(tid, deferred, time) {
       // remember our arguments

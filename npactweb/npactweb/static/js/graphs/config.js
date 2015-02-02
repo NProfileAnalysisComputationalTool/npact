@@ -5,7 +5,7 @@ angular.module('npact')
              'basesPerGraph','offset'])
 
 
-  .service('GraphConfig', function(Err, npactConstants, Evt, PUBLIC_CONFIG_KEYS,
+  .service('GraphConfig', function(Err, npactConstants, Evt, PUBLIC_CONFIG_KEYS, Track,
                             $location, $log) {
     var self = this;
     self.tracks = [];
@@ -42,27 +42,16 @@ angular.module('npact')
      * do we have a track with a given name?
      */
     this.findTrack = function(name){
-      return _.find(self.tracks, {text: name});
+      return _.find(self.tracks, {name: name});
     };
 
     /**
      * register a track to be displayed on the graph
      */
-    this.loadTrack = function(name, type, weight) {
-      weight = weight || 0;
-      var existing = this.findTrack(name);
-      if(existing) {
-        $log.log("Updating track:", name);
-        existing.lineType = type;
-        existing.weight = weight;
-      }
-      else {
-        $log.log('loading new track', name, type, weight);
-        self.tracks.push({
-          text: name, lineType: type,
-          active: true, weight: weight
-        });
-      }
+    this.loadTrack = function(track) {
+      $log.log('loading new track', track);
+      _.remove(self.tracks, {name: track.name});  //mutates
+      self.tracks.push(track);
       self.tracks = _.sortBy(self.tracks, 'weight');
     };
   })

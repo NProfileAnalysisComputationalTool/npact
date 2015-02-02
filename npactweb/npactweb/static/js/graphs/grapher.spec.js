@@ -6,35 +6,38 @@ describe('Grapher', function() {
     $provide.service('Fetcher', function() { });
   }));
 
-  var Grapher, $digest, $timeout, element, npactConstants,
-      makeGrapher,
-      sampleOpts = {
-        startBase: 0,
-        endBase: 10000,
-        margin: 1000,
-        offset: 0,
-        width: 600,
-        axisTitle: 'C+G'
-      };
+  var tracks;
+  // Fill out some dependency data
+  beforeEach(inject(function(NProfiler, $templateCache, $q, $log, $timeout, Track) {
+    NProfiler.ddna = $templateCache.get('/js/test-data/sampleDdnaFile.ddna');
+    NProfiler.fetching = $q.when(NProfiler.ddna);
+    tracks = [new Track('Extracts',
+                        $templateCache.get('/js/test-data/NC_007760.genes'),
+                        'extracts'),
+              new Track('Hits',
+                        $templateCache.get('/js/test-data/NC_007760.profiles'),
+                        'hits')];
+    $timeout.flush();
+  }));
 
+
+  var element;
+  //Setup a test dom node we can render to.
   beforeEach(function() { element = angular.element('<div id="testGraph"></div>'); });
   afterEach(function() { angular.element(element).remove(); });
 
-  beforeEach(inject(function(_Grapher_, $rootScope, _$timeout_, _npactConstants_,
-                      GraphingCalculator) {
+
+  var Grapher, $timeout, makeGrapher;
+
+  beforeEach(inject(function(_Grapher_, $rootScope, _$timeout_, npactConstants, GraphingCalculator) {
     Grapher = _Grapher_;
-    npactConstants = _npactConstants_;
-    $digest = $rootScope.$digest;
     $timeout = _$timeout_;
 
-    makeGrapher = function() {
+    makeGrapher = function(sampleOpts) {
       expect(Grapher).toEqual(jasmine.any(Function));
       var opts = _.clone(sampleOpts);
+      opts.tracks = tracks;
       opts.colors = npactConstants.lineColors;
-      opts = angular.extend(opts,
-                            GraphingCalculator.trackSizeCalc(
-                              [{text: 'Hits', lineType: 'hits'},
-                               {text: 'Extracts', lineType: 'extracts'}]));
       opts.m = GraphingCalculator.chart(opts);
       expect(opts.m.graph).toBeDefined();
       expect(opts.m.graph.w).toBeDefined();
@@ -47,27 +50,21 @@ describe('Grapher', function() {
     };
   }));
 
-  beforeEach(inject(function(NProfiler, TrackReader, $templateCache, $q, $log, $timeout) {
-    NProfiler.ddna = $templateCache.get('/js/test-data/sampleDdnaFile.ddna');
-    NProfiler.fetching = $q.when(NProfiler.ddna);
-
-    TrackReader.load('Extracts',
-                     $templateCache.get('/js/test-data/NC_007760.genes'))
-      .then(function() { $log.log("Finished loading extracts"); });
-    TrackReader.load('Hits',
-                     $templateCache.get('/js/test-data/NC_007760.profiles'))
-      .then(function() { $log.log("Finished loading hits"); });
-    $timeout.flush();
-  }));
-
   it('should have an element to work with', function() {
     expect(element).toBeDefined();
   });
 
   it('should be valid', function(done) {
     //This is mostly just a smoke test to run through all the code.
-
-    var g = makeGrapher();
+    var sampleOpts = {
+        startBase: 0,
+        endBase: 10000,
+        margin: 1000,
+        offset: 0,
+        width: 600,
+        axisTitle: 'C+G'
+    };
+    var g = makeGrapher(sampleOpts);
     var redraw = function() {
       expect(g).toBeDefined();
       expect(g).toEqual(jasmine.any(Grapher));

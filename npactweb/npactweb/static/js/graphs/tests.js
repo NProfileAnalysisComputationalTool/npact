@@ -118,23 +118,19 @@ describe('Graphs', function(){
     });
 
     describe('trackSizeCalc', function() {
-      var testExtractsTrack = {text: 'test', lineType: 'extracts', active: true};
-      var testHitsTrack = {text: 'test3', lineType: 'hits', active: true};
+      var testExtractsTrack = {text: 'test', type: 'extracts', active: true, height: 30};
+      var testHitsTrack = {text: 'test3', type: 'hits', active: true, height: 20};
       it('with one extract', function() {
-        expect(GC.trackSizeCalc([testExtractsTrack])).toEqual({
-          totalTrackHeight: 30,
-          tracks: [ { text: 'test', lineType: 'extracts', y: 0, height: 30 }]
-        });
+        var tracks = [testExtractsTrack];
+        expect(GC.trackSizeCalc([testExtractsTrack])).toEqual(30);
+        expect(tracks[0].y).toEqual(0);
       });
       it('with many', function() {
-        expect(GC.trackSizeCalc([testExtractsTrack, testExtractsTrack, testHitsTrack]))
-          .toEqual({
-            totalTrackHeight: 80,
-            tracks: [
-              { text: 'test', lineType: 'extracts', y: 0, height: 30 },
-              { text: 'test', lineType: 'extracts', y: 30, height: 30 },
-              { text: 'test3', lineType: 'hits', y: 60, height: 20 },
-            ]});
+        var tracks = [testExtractsTrack, _.clone(testExtractsTrack), testHitsTrack];
+        expect(GC.trackSizeCalc(tracks)).toEqual(80);
+        expect(tracks[0].y).toEqual(0);
+        expect(tracks[1].y).toEqual(30);
+        expect(tracks[2].y).toEqual(60);
       });
     });
 
@@ -144,7 +140,7 @@ describe('Graphs', function(){
         axisTitle: '% GC',
         profileTicks: 5,
         startBase: 0, endBase: 100,
-        totalTrackHeight: 5
+        tracks: [{height: 5}]
       };
       beforeEach(inject(function(npactConstants) {
         npactConstants.graphStyle.paddingUnit = 5;
@@ -286,25 +282,24 @@ describe('Graphs', function(){
       it('loads', function() {
         expect(G.activeTracks().length).toBe(0);
         expect(G.findTrack('test')).toBeFalsy();
-        G.loadTrack('test', 'extracts');
+        G.loadTrack({name: 'test', weight: 10});
         expect(G.findTrack('test')).toBeTruthy();
       });
       it('replaces on duplicate', function() {
-        G.loadTrack('test', 'extracts');
-        G.tracks[0].active = false;
-        G.loadTrack('test', 'whatever');
-        expect(G.findTrack('test').lineType).toBe('whatever');
-        it('should maintain activity on replace', function() {
-          expect(G.tracks.test.active).toBe(false);
-        });
+        G.loadTrack({name: 'test', type:'extracts', weight: 5, active: false});
+        expect(G.findTrack('test')).toBeTruthy();
+        G.loadTrack({name: 'test', weight: 10, active: true});
+        expect(G.tracks.length).toBe(1);
+        expect(G.findTrack('test').weight).toBe(10);
       });
       it('keeps "hits" as the last track', function() {
-        G.loadTrack('test', 'extracts');
-        G.loadTrack('testh', 'hits', 100);
+        G.loadTrack({name: 'test', type: 'extracts', weight: 0, active: true});
+        G.loadTrack({name: 'testh', type: 'hits', weight: 100, active: true});
+        G.loadTrack({name: 'inactive', active: false, weight: 1000});
         expect(G.activeTracks().length).toBe(2);
-        expect(_.last(G.activeTracks()).text).toBe('testh');
-        G.loadTrack('test3', 'extracts');
-        expect(_.last(G.activeTracks()).text).toBe('testh');
+        expect(_.last(G.activeTracks()).name).toBe('testh');
+        G.loadTrack({name: 'test3', type: 'extracts', weight: 10});
+        expect(_.last(G.activeTracks()).name).toBe('testh');
       });
     });
 

@@ -23,7 +23,7 @@ angular.module('npact')
     };
   })
 
-  .factory('Grapher', function(K, $log, GraphingCalculator, Tooltip, NProfiler, TrackReader, $q, Evt, Utils, npactConstants) {
+  .factory('Grapher', function(K, $log, GraphingCalculator, Tooltip, NProfiler, $q, Evt, Utils, npactConstants) {
     'use strict';
 
     var style = npactConstants.graphStyle;
@@ -95,6 +95,7 @@ angular.module('npact')
       this.margin = Utils.orderOfMagnitude(length, -1);
       this.startBaseM = Math.max(this.startBase - this.margin, 0);
       this.endBaseM = this.endBase + this.margin;
+      this._trackSliceCache = {};
     }
     var GP = Grapher.prototype;
 
@@ -163,7 +164,7 @@ angular.module('npact')
       }, style.tracks.text);
 
       addMany(g, _.map(this.tracks, function(track) {
-        defaultTextOpts.text = track.text;
+        defaultTextOpts.text = track.name;
         defaultTextOpts.y = track.y;
         defaultTextOpts.height = track.height;
         return new K.Text(defaultTextOpts);
@@ -395,24 +396,6 @@ angular.module('npact')
         });
     };
 
-    /**
-     * get the relevant slice of track data for the given header
-     *
-     * Keeps a cache on this to avoid duplicate computation
-     *
-     * @return {Promise}
-     */
-    GP.trackSlice = function(name) {
-      if(!this.trackSliceCache) { this.trackSliceCache = {}; }
-
-      return this.trackSliceCache[name] ||
-        (this.trackSliceCache[name] = TrackReader.slice({
-          name: name,
-          startBase: this.startBaseM,
-          endBase: this.endBaseM
-        }));
-    };
-
     function centerExtractLabel(txt, scaleX) {
       // now that lbl is on the canvas, we can see what it's
       // height/width is
@@ -430,24 +413,33 @@ angular.module('npact')
 
     GP.tracksGroup = function() {
       var g = new K.Group();
-      return $q.all(_.map(this.tracks, function(track) {
-        return this.trackSlice(track.text)
-          .then(_.bind(function(data) {
-            switch(track.lineType) {
-            case 'extracts':
-              return this.cdsGroup(track, data);
-            case 'hits':
-              return this.drawHit(track, data);
-            default:
-              throw new Error("don't know how to draw " + track);
-            }
-          }, this));
-      }, this))
+      return $q.all(_.map(this.tracks, this.oneTrack, this))
         .then(function(list) {
           addMany(g, list);
           return g;
         });
     };
+
+    GP.oneTrack = function(track) {
+      var trackSlice = this._trackSliceCache[track.name] ||
+            (this._trackSliceCache[track.name] = track.slice({
+              startBase: this.startBaseM,
+              endBase: this.endBaseM
+            }));
+
+      return trackSlice
+        .then(_.bind(function(data) {
+          switch(track.type) {
+          case 'extracts':
+            return this.cdsGroup(track, data);
+          case 'hits':
+            return this.drawHit(track, data);
+          default:
+            throw new Error("don't know how to draw " + track);
+          }
+        }, this));
+    };
+
     GP.cdsGroup = function(track, cds) {
       var xaxis = this.xaxis, $el = this.$element,
           colors = this.colors,

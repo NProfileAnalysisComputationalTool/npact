@@ -33,7 +33,7 @@ MEDIA_BUNDLES = (
      'js/graphs/constants.js',
      'js/graphs/utils.js',
      'js/graphs/nprofiler.js',
-     'js/graphs/readers.js',
+     'js/graphs/tracks.js',
      'js/graphs/page.js',
      'js/graphs/calculator.js',
      'js/graphs/grapher.js',
