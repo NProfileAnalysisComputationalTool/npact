@@ -88,7 +88,7 @@ angular.module('npact')
     /***  Scrolling and Graph Visibility management ***/
     var $win = angular.element($window),
         winHeight = $win.height(),
-        slack = 50, // how many pixels outside of viewport to render
+        slack = 20, // how many pixels outside of viewport to render
         topOffset = $element.offset().top,
         topIdx = 0, bottomIdx = 0,
         graphRowHeight = 0,
@@ -102,7 +102,7 @@ angular.module('npact')
           if(!baseOpts.m) return;
           var scrollDist = $window.scrollY - topOffset - slack;
           topIdx = Math.floor(scrollDist / graphRowHeight);
-          bottomIdx = topIdx + Math.ceil(winHeight / graphRowHeight);
+          bottomIdx = topIdx + Math.ceil((winHeight + slack) / graphRowHeight);
         },
         onScroll = function() {
           updateVisibility();
