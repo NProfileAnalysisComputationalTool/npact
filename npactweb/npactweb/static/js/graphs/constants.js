@@ -30,16 +30,9 @@ angular.module('npact')
         }
       }
     },
-    lineColors : {
-      r: 'red',
-      g: 'blue',
-      b: 'green'
-    },
-    colorBlindLineColors : {
-      r: 'rgb(213, 94, 0)',
-      g: 'rgb(204, 121, 167)',
-      b: 'rgb(0, 114, 178)'
-    },
+    //Indexed by phase
+    lineColors : ['red', 'green', 'blue'],
+    colorBlindLineColors : ['rgb(213, 94, 0)', 'rgb(204, 121, 167)', 'rgb(0, 114, 178)'],
     // how much vertical to use for different kinds of tracks
     trackHeights: {'extracts': 30, 'hits': 20}
   })

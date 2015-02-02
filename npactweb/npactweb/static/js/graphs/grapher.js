@@ -118,16 +118,16 @@ angular.module('npact')
         // start slicing the NProfile into Kinetic-compatible [x1, y1,
         // x2, y2, ...] lists, make a promise for the completed group of
         // points
-        var r= [], g= [], b= [];
+        var p0 = [], p1 = [], p2 = [];
         this._onProfilePoints = NProfiler
           .slice({ startBase: this.startBaseM, endBase: this.endBaseM,
-                   onPoint: function(coord, rv, gv, bv) {
+                   onPoint: function(coord, p0v, p1v, p2v) {
                      //invert because drawing is from the top so 100% is 0 pix
-                     r.push(coord); r.push(100.0 - rv);
-                     g.push(coord); g.push(100.0 - gv);
-                     b.push(coord); b.push(100.0 - bv);
+                     p0.push(coord); p0.push(100.0 - p0v);
+                     p1.push(coord); p1.push(100.0 - p1v);
+                     p2.push(coord); p2.push(100.0 - p2v);
                    }})
-          .then(function(opts) { return {r: r, g: g, b: b}; });
+          .then(function(opts) { return [p0, p1, p2]; });
       }
       return this._onProfilePoints;
     };
@@ -468,7 +468,6 @@ angular.module('npact')
           g = new K.Group({
             x: 0, y: 0
           }),
-          colorNames = 'rgb',
           y = track.y,
           arrowHeight = style.tracks.arrow.height,
           ahw = style.tracks.arrow.width / xaxis.scaleX,
@@ -486,7 +485,7 @@ angular.module('npact')
 
       _.forEach(cds, function(x) {
           var isComplement = x.complement === 1,
-              c = colors[colorNames[x.phase]],
+              c = colors[x.phase],
               baseY = isComplement ? y + arrowHeight : y,
               arrowPointY = baseY + arrowHeight / 2,
               arrowMaxY = baseY + arrowHeight,
@@ -546,7 +545,6 @@ angular.module('npact')
       var startBase = this.startBase,
           endBase = this.endBase,
           colors = this.colors,
-          colorNames = 'rgb',
           offset = track.height / 4,
           hitStrokeWidth = offset / 2,
           guideYOffset = 2,
@@ -575,7 +573,7 @@ angular.module('npact')
         g.add(
           new K.Line({
             points: [hit.start, y, hit.end, y],
-            stroke: colors[colorNames[hit.phase]],
+            stroke: colors[hit.phase],
             strokeWidth: hitStrokeWidth
           }));
       });
