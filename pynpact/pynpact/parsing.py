@@ -26,7 +26,7 @@ defaults = {
 
         # acgt_gamma:
         'skip_prediction': False,
-        'significance': 0.001,
+        'significance': 0.01,
 
         ##allplots
         #http://docs.python.org/library/string.html#formatspec
@@ -128,10 +128,10 @@ def endBase(config):
 
 
 def significance(config):
-    if 'significance' not in config:
+    if 'significance' in config:
         config['significance'] = float(config['significance'])
     else:
-        config['significance'] = 0.001
+        config['significance'] = 0.01
 
 
 def first_page_title(config):
