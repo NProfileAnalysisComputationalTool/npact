@@ -112,6 +112,23 @@ angular.module('npact')
       if(this.stage) { this.stage.destroy(); }
     };
 
+    GP.redraw = function(newOpts) {
+      var t1 = new Date();
+      angular.extend(this, newOpts);
+      var stage = this.getStage();
+      stage.destroyChildren();
+      stage.setWidth(this.width);
+      stage.setHeight(this.m.height);
+
+      var glp = this.genomeLayer(stage);
+      var llp = this.leftLayer(stage);
+      var flp = this.frameLayer(stage);
+      return $q.all([llp, flp, glp])
+        .then(function() {
+          $log.log("Finished draw at", newOpts.startBase, "in", new Date() - t1);
+        });
+    };
+
     GP._onProfilePoints = null;
     GP.getProfilePoints = function() {
       if(!this._onProfilePoints) {
@@ -396,37 +413,6 @@ angular.module('npact')
         }));
     };
 
-    GP.redraw = function(newOpts) {
-      var t1 = new Date();
-      angular.extend(this, newOpts);
-      var stage = this.getStage();
-      stage.destroyChildren();
-      stage.setWidth(this.width);
-      stage.setHeight(this.m.height);
-
-      var glp = this.genomeLayer(stage);
-      var llp = this.leftLayer(stage);
-      var flp = this.frameLayer(stage);
-      return $q.all([llp, flp, glp])
-        .then(function() {
-          $log.log("Finished draw at", newOpts.startBase, "in", new Date() - t1);
-        });
-    };
-
-    /**
-     * Paint a green border around the graph to help verify the height and width
-     */
-    GP.testFrame = function() {
-      var testLayer = new K.Layer(
-        {x: 0, y: 0, width: this.width, height: this.m.height});
-      testLayer.add(
-        new K.Rect({x: 0, y: 0, width: this.width, height: this.m.height,
-                    stroke: 'green', strokeWidth:1
-                   }));
-      this.stage.add(testLayer);
-      testLayer.draw();
-    };
-
     function centerExtractLabel(txt, scaleX) {
       // now that lbl is on the canvas, we can see what it's
       // height/width is
@@ -581,7 +567,24 @@ angular.module('npact')
       return g;
     };
 
+    /**
+     * Paint a green border around the graph to help verify the height and width
+     */
+    GP.testFrame = function() {
+      var testLayer = new K.Layer(
+        {x: 0, y: 0, width: this.width, height: this.m.height});
+      testLayer.add(
+        new K.Rect({x: 0, y: 0, width: this.width, height: this.m.height,
+                    stroke: 'green', strokeWidth:1
+                   }));
+      this.stage.add(testLayer);
+      testLayer.draw();
+    };
 
+    /**
+     * Capture the fully rendered graph row as a static image and
+     * replace the canvas element with it.
+     */
     GP.replaceWithImage = function() {
       var self = this;
       var $el = this.$element;
