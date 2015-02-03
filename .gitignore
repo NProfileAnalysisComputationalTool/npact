@@ -24,3 +24,5 @@ webroot
 /npactweb/jshint.xml
 /npactweb/test-results.xml
 /pytest.xml
+/.projectile
+/TAGS
