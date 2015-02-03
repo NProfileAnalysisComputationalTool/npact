@@ -2,14 +2,17 @@ angular.module('npact')
   .service('NProfiler', function(Fetcher, Pynpact, $log, GraphConfig, $q, $timeout) {
     'use strict';
     var self = this;
+    var defered = $q.defer();
+    this.fetching = defered.promise;
+
     self.start = function(config) {
       $log.log("Starting nprofiler");
       self.config = config;
 
-      self.fetching = Fetcher.fetchFile(config[Pynpact.DDNA_FILE]).then(function(ddna) {
+      defered.resolve(Fetcher.fetchFile(config[Pynpact.DDNA_FILE]).then(function(ddna) {
         $log.debug('Got back a ddna of length: ', ddna.length);
         self.ddna = ddna;
-      });
+      }));
       return self.fetching;
     };
 
@@ -43,7 +46,7 @@ angular.module('npact')
       // The period is hardcoded to 3 (r,g,b) due to assumptions
       // throughout this graph system
       opts.period = 3;
-      var len = opts.endBase - opts.startBase;
+      var len = GraphConfig.basesPerGraph;
       if(!opts.step)        { opts.step = self.defaultStepSize(len); }
       if(!opts.window)      { opts.window = self.defaultWindowSize(opts.step); }
       if(!opts.nucleotides) { opts.nucleotides = GraphConfig.nucleotides; }

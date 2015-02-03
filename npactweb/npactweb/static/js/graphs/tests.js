@@ -165,26 +165,32 @@ describe('Graphs', function(){
     });
 
     it('calculates stops for axes', function(){
-      expect(GC.stops(0,10000)).toEqual({
+      expect(GC.stops(0, 10000)).toEqual({
         interval:1000,
-        stops:[0, 1000, 2000, 3000, 4000, 5000, 6000, 7000, 8000, 9000, 10000, 11000]
+        stops:[0, 1000, 2000, 3000, 4000, 5000, 6000, 7000, 8000, 9000, 10000]
       });
 
-      expect(GC.stops(0,1000)).toEqual({
+      expect(GC.stops(0, 1000)).toEqual({
         interval:100,
-        stops: [0, 100, 200, 300, 400, 500, 600, 700, 800, 900, 1000, 1100]
+        stops: [0, 100, 200, 300, 400, 500, 600, 700, 800, 900, 1000]
       });
 
-      expect(GC.stops(1000,2000)).toEqual({
+      expect(GC.stops(1000, 2000)).toEqual({
         interval:100,
-        stops: [900, 1000, 1100, 1200, 1300, 1400, 1500, 1600, 1700, 1800, 1900, 2000, 2100]
+        stops: [1000, 1100, 1200, 1300, 1400, 1500, 1600, 1700, 1800, 1900, 2000]
       });
     });
 
     it('calculates stops for offset axes', function(){
-      expect(GC.stops(50,10050)).toEqual({
+      expect(GC.stops(50, 10050)).toEqual({
         interval:1000,
-        stops:[0, 1000, 2000, 3000, 4000, 5000, 6000, 7000, 8000, 9000, 10000, 11000]
+        stops:[0, 1000, 2000, 3000, 4000, 5000, 6000, 7000, 8000, 9000, 10000]
+      });
+    });
+    it('calculates stops for given length', function(){
+      expect(GC.stops(0, 3000, 10000)).toEqual({
+        interval: 1000,
+        stops:[0, 1000, 2000, 3000]
       });
     });
 

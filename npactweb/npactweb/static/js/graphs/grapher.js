@@ -23,7 +23,8 @@ angular.module('npact')
     };
   })
 
-  .factory('Grapher', function($log, GraphingCalculator, Tooltip, NProfiler, $q, Utils, npactConstants) {
+  .factory('Grapher', function($log, $q, GraphConfig, GraphingCalculator, $rootScope,
+                        Tooltip, NProfiler, Utils, npactConstants) {
     'use strict';
     var K = Kinetic;
     var style = npactConstants.graphStyle;
@@ -32,14 +33,15 @@ angular.module('npact')
       this.$element = jQuery(element);
       angular.extend(this, opts);
       // invariants: startBase, endBase
-      var length = this.endBase - this.startBase;
+      var length = GraphConfig.basesPerGraph;
       this.xaxis = {
         length: length,
         scaleX: this.m.graph.w / length
       };
+      this.endBase = Math.min(GraphConfig.endBase, this.startBase + GraphConfig.basesPerGraph);
       this.margin = Utils.orderOfMagnitude(length, -1);
       this.startBaseM = Math.max(this.startBase - this.margin, 0);
-      this.endBaseM = this.endBase + this.margin;
+      this.endBaseM = Math.min(this.endBase + this.margin, GraphConfig.endBase);
       this._trackSliceCache = {};
     }
     var GP = Grapher.prototype;
@@ -61,6 +63,10 @@ angular.module('npact')
     GP.redraw = function(newOpts) {
       var t1 = new Date();
       angular.extend(this, newOpts);
+      this.colors = GraphConfig.colorBlindFriendly ?
+        npactConstants.colorBlindLineColors :
+        npactConstants.lineColors;
+
       var stage = this.getStage();
       stage.destroyChildren();
       stage.setWidth(this.width);
@@ -76,6 +82,9 @@ angular.module('npact')
     };
 
     GP._onProfilePoints = null;
+    GP.clearProfilePoints = function() {
+      this._onProfilePoints = null;
+    };
     GP.getProfilePoints = function() {
       if(!this._onProfilePoints) {
         // start slicing the NProfile into Kinetic-compatible [x1, y1,
@@ -149,7 +158,7 @@ angular.module('npact')
       var title = new K.Text(_.defaults({
         rotation: -90,
         fontSize: style.profile.titleFontSize,
-        text: this.axisTitle
+        text: GraphConfig.profileTitle()
       }, style.profile.axis.text));
       //All the width height x/y calcuations go on pre-rotation, so
       // swap, align vertically and then stick in a group sized right
@@ -222,10 +231,10 @@ angular.module('npact')
       });
       l.add(dg);
       dg.on('dragstart dragend', Tooltip.clearAll);
-      dg.on('dragend', _.bind(this.onDragEnd, this));
+      dg.on('dragend', this.onPan);
       dg.on('mouseover', function() { document.body.style.cursor = 'pointer'; });
       dg.on('mouseout', function() { document.body.style.cursor = 'default'; });
-      dg.on('dblclick', _.bind(this.onDblClick, this));
+      dg.on('dblclick', _.bind(this.onZoom, this));
 
       var dgAdd = _.bind(dg.add, dg);
       // need a shape that can be clicked on to allow dragging the
@@ -244,24 +253,30 @@ angular.module('npact')
       });
     };
 
-    GP.onDragEnd = function(evt) {
+    GP.onPan = function(evt) {
       $log.log('dragEnd', evt.target.x(), evt.target.getScaleX());
-      this.onPan(-evt.target.x() / evt.target.getScaleX());
+      $rootScope.$evalAsync(function() {
+        var offset = Math.round(-evt.target.x() / evt.target.getScaleX());
+        GraphConfig.offset += offset;
+      });
     };
 
-    GP.onDblClick = function(evt) {
+    GP.onZoom = function(evt) {
       Tooltip.clearAll();
-
       var zoomOnPx = evt.evt.layerX - this.m.graph.x,
-          zoomOnPct = zoomOnPx / this.m.graph.w;
-      // tell the world
-      this.onZoom({
-        evt: evt,
-        // these keys must match what's expected by `GraphingCalculator.zoom`
-        startBase: this.startBase,
-        zoomOnPct: zoomOnPct,
-        zoomingOut: evt.evt.shiftKey
-      });
+          zoomOnPct = zoomOnPx / this.m.graph.w,
+          opts = {
+            // these keys must match what's expected by `GraphingCalculator.zoom`
+            startBase: this.startBase,
+            zoomOnPct: zoomOnPct,
+            basesPerGraph: GraphConfig.basesPerGraph,
+            offset: GraphConfig.offset,
+            zoomingOut: evt.evt.shiftKey
+      };
+      $log.log('Zoom event:', opts);
+      //updates `offset`, and `basesPerGraph`
+      angular.extend(GraphConfig, GraphingCalculator.zoom(opts));
+      $rootScope.$apply();
     };
 
     GP.frameLayer = function(stage) {
@@ -281,7 +296,7 @@ angular.module('npact')
 
     GP.xAxisGroup = function() {
       var xaxis = this.xaxis,
-          stops = GraphingCalculator.stops(this.startBase, this.endBase),
+          stops = GraphingCalculator.stops(this.startBaseM, this.endBaseM, xaxis.length),
           g = new K.Group({
             width: xaxis.length,
             x: 0, y: this.m.xaxis.y

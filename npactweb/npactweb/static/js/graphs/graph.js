@@ -8,65 +8,50 @@ angular.module('npact')
       return $element.width() - 15; //from style.css `.graph`
     };
 
-    //The mouse event responders
-    var onPan = function(offset) {
-          GraphConfig.offset += Math.round(offset);
-          $scope.$apply();
-        },
-        onZoom = function(opts) {
-          $log.log('Zoom event:', opts);
-          var zoomOpts = angular.extend({}, GraphConfig, opts);
-          //updates `offset`, and `basesPerGraph`
-          angular.extend(GraphConfig, GraphingCalculator.zoom(zoomOpts));
-          $scope.$apply();
-        };
-
     //The baseOpts are the graph options that are the same for every graph
-    var baseOpts = { width: getWidth(), onPan: onPan, onZoom: onZoom };
+    var baseOpts = { width: getWidth() };
     this.graphOptions = function(idx) {
       // This function builds the specific options for a graph; as
       // many graph rows will never be drawn this only generates the
       // object for a row when needed.
       var start = $scope.graphSpecs[idx];
-      var opts = { startBase: start,
-                   endBase: start + GraphConfig.basesPerGraph};
-      opts = angular.extend(opts, baseOpts);
-      return opts;
+      return angular.extend({ startBase: start }, baseOpts);
     };
 
-    var draw = function() { $scope.$broadcast(Evt.DRAW); },
+    var ready = function() {
+          return GraphConfig.nucleotides && GraphConfig.nucleotides.length &&
+            baseOpts.m;
+        },
+        draw = function() { $scope.$broadcast(Evt.DRAW); },
         redraw = function() {
-          if (!baseOpts.axisTitle || !baseOpts.m) return;  //too early to do anything
+          if (!ready()) return;  //too early to do anything
           $scope.$broadcast(Evt.REDRAW);
         },
         rebuild = function() {
-          if (!baseOpts.axisTitle || !baseOpts.m) return;  //too early to do anything
+          if (!ready()) return;  //too early to do anything
           $scope.$broadcast(Evt.REBUILD);
         };
 
 
     /*** Watch the config for changes we care about ***/
     $scope.$watchCollection(
-      function() {
-        return [GraphConfig.length, GraphConfig.basesPerGraph,
-                GraphConfig.offset, GraphConfig.startBase, GraphConfig.endBase];
-      },
+      function() { return [GraphConfig.basesPerGraph,
+                    GraphConfig.offset, GraphConfig.startBase, GraphConfig.endBase]; },
       function() {
         // basic row geometry changed, repartition and rebuild
-        if(GraphConfig.startBase === undefined ||
-           GraphConfig.endBase === undefined ||
-           GraphConfig.basesPerGraph === undefined) { return; }
+        if(isNaN(GraphConfig.startBase) ||
+           isNaN(GraphConfig.endBase) ||
+           isNaN(GraphConfig.basesPerGraph)) { return; }
         $scope.graphSpecs = GraphingCalculator.partition(GraphConfig);
         $log.log('Partitioned into', $scope.graphSpecs.length, 'rows.');
         updateVisibility(); //number of rows might have changed.
         $timeout(rebuild);
       });
 
-    $scope.$watch(GraphConfig.profileTitle, function(title) {
-      //A profileTitle change indicates different nucleotides: rebuild
-      baseOpts.axisTitle = title;
-      rebuild();
-    });
+    $scope.$watch(function() { return GraphConfig.nucleotides; }, function() {
+      $scope.$broadcast('n-profile');
+    }, true);
+    $scope.$watch(function() { return GraphConfig.colorBlindFriendly; }, redraw);
 
     $scope.$watch(GraphConfig.activeTracks, function(val) {
       //Find headers and headerY
@@ -76,13 +61,6 @@ angular.module('npact')
       redraw();
     }, true);
 
-    $scope.$watch(function() { return GraphConfig.colorBlindFriendly; },
-                  function(val) {
-                    baseOpts.colors = val ?
-                      npactConstants.colorBlindLineColors :
-                      npactConstants.lineColors;
-                    redraw();
-                  });
 
 
     /***  Scrolling and Graph Visibility management ***/
@@ -177,8 +155,12 @@ angular.module('npact')
         $scope.$on(Evt.DRAW, _.partial(schedule, false));
         $scope.$on(Evt.REDRAW, function() { redraw = true; schedule();});
         $scope.$on(Evt.REBUILD, function() { discard(); redraw = true; schedule(); });
+        $scope.$on('n-profile', function() {
+          redraw = true;
+          if(g) { g.clearProfilePoints(); }
+          schedule();
+        });
         $scope.$on('$destroy', discard);
-
 
         $scope.$on('print', function(evt, callback) {
           var p = schedule(true);

@@ -129,18 +129,5 @@ describe('NProfiler', function(){
         .finally(function() { expect(flag).toBe(true); done(); });
       $timeout.flush();
     });
-
-    var endBase = Math.max(2000,
-                           Math.round(Math.random() * sampleConfig.length));
-    it('has about 200 data points between 0 and ' + endBase, function(done) {
-      var count = 0;
-      NP.slice({startBase: 0, endBase: endBase, onPoint: function() { count++; }})
-        .then(function() {
-          expect(count).toBeGreaterThan(170);
-          expect(count).toBeLessThan(230);
-          done();
-      });
-      $timeout.flush();
-    });
   });
 });

@@ -1,12 +1,11 @@
 angular.module('npact')
   .constant('PUBLIC_CONFIG_KEYS',
             ['first_page_title', 'following_page_title', 'nucleotides',
-             'significance', 'alternate_colors', 'startBase', 'endBase',
-             'basesPerGraph','offset'])
+             'significance', 'startBase', 'endBase', 'basesPerGraph','offset'])
 
 
   .service('GraphConfig', function(Err, npactConstants, Evt, PUBLIC_CONFIG_KEYS, Track,
-                            $location, $log) {
+                            $location, $log, $rootScope) {
     var self = this;
     self.tracks = [];
     self.colorBlindFriendly = false;

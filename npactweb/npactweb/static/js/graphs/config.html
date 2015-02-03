@@ -24,10 +24,12 @@
     <div>
       <label>Range:</label>
       <input type="number" name="startBase" style="width:6em;"
-             min="0" ng-model="gc.startBase">
+             min="0" max="{{gc.length}}"
+             ng-model="gc.startBase">
       <span class="sm-text">to</span>
       <input type="number" name="endBase" style="width:6em;"
-             min="0" ng-model="gc.endBase">
+             min="0" max="{{gc.length}}"
+             ng-model="gc.endBase">
     </div>
     <div>
       <label>

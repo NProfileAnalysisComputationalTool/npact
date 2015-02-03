@@ -15,8 +15,9 @@ angular.module('npact')
     };
 
 
-    self.stops = function(a, b){
-      var length = b - a,
+    self.stops = function(a, b, length){
+      length = length || b - a;
+      var
           // get even stops; look for one lower order of magnitude
           // than our length
           interval = Utils.orderOfMagnitude(length, -1),
@@ -27,11 +28,11 @@ angular.module('npact')
 
       return {
         interval: interval,
-        // capture some margin
         stops: _.range(
-          Math.max(0, start - interval),
+          Math.max(0, start),
           // want to be start/end INCLUSIVE so pad the end
-          end + 2*interval, interval)
+          end + interval,
+          interval)
       };
     };
 
