@@ -1,4 +1,4 @@
-describe('ITrackReader', function() {
+describe('ITrackReader', function() {
   'use strict';
   beforeEach(module('npact', function($provide) {
     $provide.value('$log', console);
