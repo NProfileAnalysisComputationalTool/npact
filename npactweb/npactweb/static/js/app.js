@@ -1,13 +1,16 @@
 angular.module('npact', ['ngMessages', 'sticky', 'ngSanitize'])
   .value('K', Kinetic)
   .config(function($locationProvider) {
+    'use strict';
     $locationProvider.html5Mode(true);
   })
   .run(function($rootScope, STATIC_BASE_URL) {
+    'use strict';
     $rootScope.STATIC_BASE_URL = STATIC_BASE_URL;
   })
 
   .directive('contenteditable', ['$sce', function($sce) {
+    'use strict';
     return {
       restrict: 'A', // only activate on element attribute
       require: '?ngModel', // get a hold of NgModelController
@@ -44,6 +47,7 @@ angular.module('npact', ['ngMessages', 'sticky', 'ngSanitize'])
   }])
 
   .directive('checkboxList', function() {
+    'use strict';
     return {
       restrict: 'E',
       scope: { options: '=' },
