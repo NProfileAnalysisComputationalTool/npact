@@ -10,7 +10,8 @@ describe('ITrackReader', function() {
     $timeout = _$timeout_;
     Err = _Err_;
   }));
-  var extract = ['H-51*G complement(57104..57904)',
+  var extract = ['Adeh_0001 22..1395',
+                 'H-51*G complement(57104..57904)',
                  'H-53*A complement(58013..59380)',
                  'H-64-C 71945..72100',
                  'G-125-G 88111..88275',
@@ -24,6 +25,13 @@ describe('ITrackReader', function() {
   beforeEach(inject(function(ExtractParser) {
     parsedData = ExtractParser.parse(extract);
   }));
+
+  //Sanity check test
+  describe('parsedData', function() {
+    it('should have 10 elements', function() {
+      expect(parsedData.length).toEqual(10);
+    });
+  });
 
   _.map(
     ['TrackRTreeIndex', 'TrackNaiveIndex', 'TrackBinSearchIndex'],
@@ -52,7 +60,7 @@ describe('ITrackReader', function() {
             $timeout.flush();
           });
           it('returns empty array on no matches', function() {
-            tIndex({name:'test', startBase:0, endBase:100})
+            tIndex({name:'test', startBase:0, endBase:10})
               .then(function(slice) {
                 expect(slice).toEqual([]);
               });

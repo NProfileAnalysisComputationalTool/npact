@@ -74,7 +74,7 @@ angular.module('npact')
     return function(data) {
       var byStart = _.sortBy(data, 'start');
       var byEnd = _(byStart).map(function(d, idx) {
-                return {end:d.end, idx:idx};
+                return {end: d.end, idx: idx};
       }).sortBy('end').value();
 
       return function(opts) {
