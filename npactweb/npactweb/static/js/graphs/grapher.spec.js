@@ -17,7 +17,7 @@ describe('Grapher', function() {
               new Track('Hits',
                         $templateCache.get('/js/test-data/NC_007760.profiles'),
                         'hits')];
-    $timeout.flush();
+    try { $timeout.flush(); } catch(e) {}
   }));
 
 
