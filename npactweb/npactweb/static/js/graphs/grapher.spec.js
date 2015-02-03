@@ -8,7 +8,7 @@ describe('Grapher', function() {
 
   var tracks;
   // Fill out some dependency data
-  beforeEach(inject(function(NProfiler, $templateCache, $q, $log, $timeout, Track) {
+  beforeEach(inject(function(NProfiler, $templateCache, $q, $timeout, Track) {
     NProfiler.ddna = $templateCache.get('/js/test-data/sampleDdnaFile.ddna');
     NProfiler.fetching = $q.when(NProfiler.ddna);
     tracks = [new Track('Extracts',
@@ -23,15 +23,19 @@ describe('Grapher', function() {
 
   var element;
   //Setup a test dom node we can render to.
-  beforeEach(function() { element = angular.element('<div id="testGraph"></div>'); });
+  beforeEach(function() {
+    element = angular.element('<div id="testGraph"></div>');
+    angular.element('body').append(element);
+  });
   afterEach(function() { angular.element(element).remove(); });
 
 
-  var Grapher, $timeout, makeGrapher;
+  var Grapher, $timeout, makeGrapher, $log;
 
-  beforeEach(inject(function(_Grapher_, $rootScope, _$timeout_, npactConstants, GraphingCalculator) {
+  beforeEach(inject(function(_Grapher_, $rootScope, _$timeout_, npactConstants, GraphingCalculator, _$log_) {
     Grapher = _Grapher_;
     $timeout = _$timeout_;
+    $log = _$log_;
 
     makeGrapher = function(sampleOpts) {
       expect(Grapher).toEqual(jasmine.any(Function));
@@ -51,6 +55,7 @@ describe('Grapher', function() {
   }));
 
   it('should have an element to work with', function() {
+    $log.log("In element test", element);
     expect(element).toBeDefined();
   });
 
