@@ -49,7 +49,7 @@ describe('Grapher', function() {
       expect(g).toBeDefined();
       expect(g).toEqual(jasmine.any(Grapher));
       expect(g.xaxis).toBeDefined();
-      expect(g.onDragEnd).toEqual(jasmine.any(Function));
+      expect(g.onPan).toEqual(jasmine.any(Function));
       return g;
     };
   }));
