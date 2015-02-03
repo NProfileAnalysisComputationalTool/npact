@@ -23,9 +23,9 @@ angular.module('npact')
     };
   })
 
-  .factory('Grapher', function(K, $log, GraphingCalculator, Tooltip, NProfiler, $q, Evt, Utils, npactConstants) {
+  .factory('Grapher', function($log, GraphingCalculator, Tooltip, NProfiler, $q, Evt, Utils, npactConstants) {
     'use strict';
-
+    var K = Kinetic;
     var style = npactConstants.graphStyle;
 
     function addMany(container, children) {

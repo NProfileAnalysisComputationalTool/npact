@@ -1,5 +1,5 @@
 angular.module('npact')
-  .service('GraphingCalculator', function GraphingCalculator(K, Utils, npactConstants) {
+  .service('GraphingCalculator', function GraphingCalculator(Utils, npactConstants) {
     'use strict';
     var self = this;
 

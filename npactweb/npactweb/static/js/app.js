@@ -1,5 +1,4 @@
 angular.module('npact', ['ngMessages', 'sticky', 'ngSanitize'])
-  .value('K', Kinetic)
   .config(function($locationProvider) {
     'use strict';
     $locationProvider.html5Mode(true);
