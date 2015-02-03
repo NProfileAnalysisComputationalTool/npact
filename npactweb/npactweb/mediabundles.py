@@ -7,7 +7,7 @@
 MEDIA_BUNDLES = (
     ('main.css',
      'css/basic.css',
-     'css/custom-theme/jquery-ui-1.10.4.custom.css',
+     'css/custom-theme/jquery-ui.min.css',
      'css/style.css',
      'bower_components/qtip2/jquery.qtip.min.css'),
 
@@ -16,8 +16,8 @@ MEDIA_BUNDLES = (
 
     ('jquery.js',
      'bower_components/jquery/dist/jquery.min.js',
-     # customized to only load UI elements we want
-     'js/jquery-ui-1.10.4.custom.min.js',
+     'css/custom-theme/jquery-ui.min.js',
+
      'bower_components/qtip2/jquery.qtip.min.js'),
 
     ('processing.js',
