@@ -51,7 +51,6 @@ angular.module('npact')
     'use strict';
     return function(data) {
       return function(opts) {
-        $log.log('TrackIndex.slice', opts);
         var minIdx = null, maxIdx;
         return Utils.forEachAsync(data, function(dataPoint, idx) {
           // extract starts in this range?
@@ -79,7 +78,6 @@ angular.module('npact')
       }).sortBy('end').value();
 
       return function(opts) {
-        $log.log('TrackIndex.slice', opts);
         return $timeout(function() {
           var min = opts.startBase,
               max = opts.endBase,
