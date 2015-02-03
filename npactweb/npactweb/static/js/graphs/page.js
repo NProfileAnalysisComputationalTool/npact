@@ -8,8 +8,8 @@ angular.module('npact')
       controllerAs: 'pageCtrl'
     };
   })
-  .controller('npactGraphPageCtrl', function($scope, $q, $log, Fetcher, FETCH_URL,
-                                      EmailBuilder,
+  .controller('npactGraphPageCtrl', function($scope, $q, $log, $window,
+                                      Fetcher, FETCH_URL, EmailBuilder,
                                       GraphConfig, FileManager, kickstarter) {
     'use strict';
 
@@ -22,7 +22,8 @@ angular.module('npact')
       $scope.miscFiles = val;
     }, true);
 
-    this.print = function() {
+
+    var _doPrint = function() {
       var t1 = new Date();
       $log.log("print requested: ", t1);
       $scope.printCounter = 0;
@@ -34,8 +35,26 @@ angular.module('npact')
       $q.all(waitList).then(function() {
         $scope.printCounter = 0;
         $log.log('Finished rendering', new Date() - t1);
+        $window.print();
       });
     };
+
+    this.print = function() {
+       $( "#printConfirm" ).dialog({
+         resizable: false,
+         modal: true,
+         buttons: {
+           "Cancel": function() {
+             $( this ).dialog( "close" );
+           },
+           "Proceed": function() {
+             $( this ).dialog( "close" );
+             _doPrint();
+           }
+         }
+       });
+    };
+
   })
 
   .service('kickstarter', function($q, $log, processOnServer, MessageBus,

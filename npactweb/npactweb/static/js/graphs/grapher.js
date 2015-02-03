@@ -581,6 +581,11 @@ angular.module('npact')
       var self = this;
       var $el = this.$element;
       return $q(function(resolve) {
+        if(self.stage === null) {
+          //already converted to an image
+          resolve();
+          return;
+        }
         self.stage.toImage({
           mimeType: 'image/png',
           callback: function(image) {
