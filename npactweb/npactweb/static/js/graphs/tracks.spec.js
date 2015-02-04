@@ -42,13 +42,14 @@ describe('ITrackReader', function() {
           TrackIndex = tr;
           tIndex = new TrackIndex(parsedData);
         }]));
-        it('instantiates', function() {
-          expect(tIndex).toEqual(jasmine.any(Function));
-        });
+        it('instantiates', function() { expect(tIndex).toEqual(jasmine.any(Function)); });
 
         describe('slices', function() {
           it('slices', function() {
-            tIndex({name:'test', startBase:72000, endBase:88600})
+            tIndex({startBase: 0, endBase: 1200}).then(function(slice) {
+              expect(slice).toContain({start: 22, end: 1395, complement: 0, name: 'Adeh_0001', phase: 2, approximate: false});
+            });
+            tIndex({startBase:72000, endBase:88600})
               .then(function(slice) {
                 expect(slice)
                   .toContain({start: 71945, end: 72100, complement: 0, name: 'H-64-C', phase: 0, approximate: false});
@@ -57,19 +58,33 @@ describe('ITrackReader', function() {
                 expect(slice)
                   .toContain({start: 88111, end: 88275, complement: 0, name: 'G-125-G', phase: 2, approximate: false});
               });
-            $timeout.flush();
           });
           it('returns empty array on no matches', function() {
-            tIndex({name:'test', startBase:0, endBase:10})
-              .then(function(slice) {
-                expect(slice).toEqual([]);
-              });
-            $timeout.flush();
+            tIndex({startBase:0, endBase:10})
+              .then(function(slice) { expect(slice).toEqual([]); });
+            tIndex({startBase: 132000, endBase: 135000 })
+              .then(function(slice) { expect(slice).toEqual([]); });
           });
+          it('doesn\'t match when abutting a gene border from the outside', function() {
+            //We have gene at 22..1395
+            tIndex({startBase:0, endBase: 22})
+              .then(function(slice) { expect(slice).toEqual([]); });
+            tIndex({startBase:1395, endBase: 1400})
+              .then(function(slice) { expect(slice).toEqual([]); });
+          });
+          it('does match when abutting a gene border from the inside', function() {
+            //We have gene at 22..1395
+            tIndex({startBase:22, endBase: 50}).then(function(slice) {
+              expect(slice).toContain({start: 22, end: 1395, complement: 0, name: 'Adeh_0001', phase: 2, approximate: false});
+              tIndex({startBase:16, endBase: 1395}).then(function(slice) {
+                expect(slice).toContain({start: 22, end: 1395, complement: 0, name: 'Adeh_0001', phase: 2, approximate: false});
+              });
+            });
+          });
+          afterEach(function() { $timeout.flush(); });
         });
       });
     });
-
   describe('Track', function() {
     var track;
     beforeEach(inject(function(Track) {

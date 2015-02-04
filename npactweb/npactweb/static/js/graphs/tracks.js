@@ -55,9 +55,9 @@ angular.module('npact')
         return Utils.forEachAsync(data, function(dataPoint, idx) {
           // extract starts in this range?
           var startsInRange = dataPoint.start >= opts.startBase &&
-                dataPoint.start <= opts.endBase,
+                dataPoint.start < opts.endBase,
               // extract ends in this range?
-              endsInRange = dataPoint.end >= opts.startBase &&
+              endsInRange = dataPoint.end > opts.startBase &&
                 dataPoint.end <= opts.endBase;
           if(startsInRange || endsInRange){
             if(minIdx === null) { minIdx = idx; }
@@ -79,20 +79,28 @@ angular.module('npact')
 
       return function(opts) {
         return $timeout(function() {
-          var min = opts.startBase,
-              max = opts.endBase,
-              rightIdx = _.sortedIndex(byStart, {start: max}, 'start'),
-              leftPointerIdx = _.sortedIndex(byEnd, {end: min}, 'end'),
-              leftIdx = byStart.length -1;
-          while(leftPointerIdx < byEnd.length &&
-                byEnd[leftPointerIdx].end <= max) {
+          var min = opts.startBase, max = opts.endBase;
+          if(isNaN(min) || isNaN(max)) {
+            throw new Error("Invalid start or end coordinate");
+          }
+          //Is the max coord larger than the start of any?
+          var rightIdx = _.sortedIndex(byStart, {start: max}, 'start');
+          //Is the min coord smaller than the end of any (with reference back to item)
+          var leftPointerIdx = _.sortedLastIndex(byEnd, {end: min}, 'end'),
+              leftIdx = rightIdx;
+          //Because the byEnd array isn't necessarilty sorted by start
+          //walk it to the right and if any of the entries reference
+          //one that is less than our current left idx then update the
+          //lefidx
+          while(leftPointerIdx < byEnd.length) {
             leftIdx = Math.min(leftIdx, byEnd[leftPointerIdx].idx);
+            //if the end coordinate is past the max then we're done
+            if(byEnd[leftPointerIdx].end <= max) break;
             leftPointerIdx++;
           }
-          return byStart.slice(leftIdx, rightIdx);
+          return _.slice(byStart, leftIdx, rightIdx);
         });
       };
     };
   })
-
 ;
