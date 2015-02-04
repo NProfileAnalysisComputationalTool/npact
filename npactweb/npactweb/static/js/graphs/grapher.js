@@ -82,9 +82,7 @@ angular.module('npact')
     };
 
     GP._onProfilePoints = null;
-    GP.clearProfilePoints = function() {
-      this._onProfilePoints = null;
-    };
+    GP.clearProfilePoints = function() { this._onProfilePoints = null; };
     GP.getProfilePoints = function() {
       if(!this._onProfilePoints) {
         // start slicing the NProfile into Kinetic-compatible [x1, y1,
