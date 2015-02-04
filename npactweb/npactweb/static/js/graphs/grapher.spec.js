@@ -32,10 +32,13 @@ describe('Grapher', function() {
 
   var Grapher, $timeout, makeGrapher, $log;
 
-  beforeEach(inject(function(_Grapher_, $rootScope, _$timeout_, npactConstants, GraphingCalculator, _$log_) {
+  beforeEach(inject(function(GraphConfig, _Grapher_, $rootScope, _$timeout_, npactConstants,
+                      GraphingCalculator, _$log_) {
     Grapher = _Grapher_;
     $timeout = _$timeout_;
     $log = _$log_;
+    GraphConfig.endBase = 11140;
+    GraphConfig.basesPerGraph = 5000;
 
     makeGrapher = function(sampleOpts) {
       expect(Grapher).toEqual(jasmine.any(Function));
@@ -63,7 +66,6 @@ describe('Grapher', function() {
     //This is mostly just a smoke test to run through all the code.
     var sampleOpts = {
         startBase: 0,
-        endBase: 10000,
         margin: 1000,
         offset: 0,
         width: 600,
@@ -77,9 +79,9 @@ describe('Grapher', function() {
       return g.redraw(sampleOpts);
     };
     var p = redraw();
-    for(var i = 20; i > 0; --i) {
+    _.times(2, function() {
       p = p.then(redraw);
-    }
+    });
     p.then(done);
     $timeout.flush();
     //KineticJs uses window timeouts, so we need to let that happen
