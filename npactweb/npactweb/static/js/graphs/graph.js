@@ -9,7 +9,10 @@ angular.module('npact')
     };
 
     //The baseOpts are the graph options that are the same for every graph
-    var baseOpts = { width: getWidth() };
+    var baseOpts = { width: getWidth() },
+        updateMetrics = function() {
+          baseOpts.m = GraphingCalculator.chart(baseOpts);
+        };
     this.graphOptions = function(idx) {
       // This function builds the specific options for a graph; as
       // many graph rows will never be drawn this only generates the
@@ -42,8 +45,10 @@ angular.module('npact')
         if(isNaN(GraphConfig.startBase) ||
            isNaN(GraphConfig.endBase) ||
            isNaN(GraphConfig.basesPerGraph)) { return; }
+        baseOpts.basesPerGraph = GraphConfig.basesPerGraph;
         $scope.graphSpecs = GraphingCalculator.partition(GraphConfig);
         $log.log('Partitioned into', $scope.graphSpecs.length, 'rows.');
+        updateMetrics();
         updateVisibility(); //number of rows might have changed.
         $timeout(rebuild);
       });
@@ -56,7 +61,7 @@ angular.module('npact')
     $scope.$watch(GraphConfig.activeTracks, function(val) {
       //Find headers and headerY
       baseOpts.tracks = val;
-      baseOpts.m = GraphingCalculator.chart(baseOpts);
+      updateMetrics();
       updateRowHeight(baseOpts.m.height);
       redraw();
     }, true);
@@ -91,7 +96,7 @@ angular.module('npact')
           if(getWidth() !== baseOpts.width) {
             topOffset = $element.offset().top;
             baseOpts.width = getWidth();
-            baseOpts.m = GraphingCalculator.chart(baseOpts);
+            updateMetrics();
             updateVisibility();
             redraw();
           }

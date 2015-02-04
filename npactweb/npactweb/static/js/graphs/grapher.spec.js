@@ -51,7 +51,6 @@ describe('Grapher', function() {
       var g = new Grapher(element[0], opts);
       expect(g).toBeDefined();
       expect(g).toEqual(jasmine.any(Grapher));
-      expect(g.xaxis).toBeDefined();
       expect(g.onPan).toEqual(jasmine.any(Function));
       return g;
     };
@@ -75,7 +74,6 @@ describe('Grapher', function() {
     var redraw = function() {
       expect(g).toBeDefined();
       expect(g).toEqual(jasmine.any(Grapher));
-      expect(g.xaxis).toBeDefined();
       return g.redraw(sampleOpts);
     };
     var p = redraw();

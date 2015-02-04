@@ -96,17 +96,21 @@ angular.module('npact')
           xAxisHeight = pstyle.axis.text.fontSize + pstyle.tickLength,
           totalHeight = xAxisTop + xAxisHeight;
 
+      var graphWidth = opts.width - style.leftPadding;
       return {
         height: totalHeight,
         graph: {
           x: style.leftPadding,
           y: graphTop,
           h: style.profile.height,
-          w: opts.width - style.leftPadding
+          w: graphWidth
         },
         xaxis: {
           height: xAxisHeight,
-          y: xAxisTop
+          y: xAxisTop,
+          length: opts.basesPerGraph,
+          scaleX: graphWidth / opts.basesPerGraph
+
         },
         yaxis: {
           height: style.profile.height,

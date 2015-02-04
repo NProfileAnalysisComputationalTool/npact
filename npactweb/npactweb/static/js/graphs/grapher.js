@@ -34,10 +34,6 @@ angular.module('npact')
       angular.extend(this, opts);
       // invariants: startBase, endBase
       var length = GraphConfig.basesPerGraph;
-      this.xaxis = {
-        length: length,
-        scaleX: this.m.graph.w / length
-      };
       this.endBase = Math.min(GraphConfig.endBase, this.startBase + GraphConfig.basesPerGraph);
       this.margin = Utils.orderOfMagnitude(length, -1);
       this.startBaseM = Math.max(this.startBase - this.margin, 0);
@@ -56,9 +52,7 @@ angular.module('npact')
       }
       return this.stage;
     };
-    GP.destroy = function() {
-      if(this.stage) { this.stage.destroy(); }
-    };
+    GP.destroy = function() { if(this.stage) { this.stage.destroy(); } };
 
     GP.redraw = function(newOpts) {
       var t1 = new Date();
@@ -219,7 +213,7 @@ angular.module('npact')
       });
       stage.add(l);
       var dg = new K.Group({
-        scaleX: this.xaxis.scaleX,
+        scaleX: this.m.xaxis.scaleX,
         offsetX: this.startBase,
         draggable: true,
         dragBoundFunc: function(pos) {
@@ -238,7 +232,7 @@ angular.module('npact')
       // need a shape that can be clicked on to allow dragging the
       // entire canvas
       dgAdd(new K.Rect({x: this.startBase, y: 0,// fill: '#BDD',
-                         width: this.xaxis.length,
+                         width: this.m.xaxis.length,
                          height: this.m.height}));
 
       var p3 = this.xAxisGroup().then(dgAdd);
@@ -293,7 +287,7 @@ angular.module('npact')
     };
 
     GP.xAxisGroup = function() {
-      var xaxis = this.xaxis,
+      var xaxis = this.m.xaxis,
           stops = GraphingCalculator.stops(this.startBaseM, this.endBaseM, xaxis.length),
           g = new K.Group({
             width: xaxis.length,
@@ -328,7 +322,7 @@ angular.module('npact')
     };
 
     GP.profileGroup = function() {
-      var m = this.m, xaxis = this.xaxis,
+      var m = this.m, xaxis = this.m.xaxis,
           colors = this.colors,
           g = new K.Group({
             x: 0, y: m.graph.y,
@@ -399,7 +393,7 @@ angular.module('npact')
     };
 
     GP.cdsGroup = function(track, cds) {
-      var xaxis = this.xaxis, $el = this.$element,
+      var xaxis = this.m.xaxis, $el = this.$element,
           colors = this.colors,
           g = new K.Group({
             x: 0, y: 0
