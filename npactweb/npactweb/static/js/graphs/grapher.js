@@ -477,23 +477,23 @@ angular.module('npact')
           colors = this.colors,
           offset = track.height / 4,
           hitStrokeWidth = offset / 2,
-          guideYOffset = 2,
+          guideYOffset = offset / 2,
           // arrow sticks out ~1%
-          guideArrowXOffset = Math.floor(0.01 * (endBase - startBase)),
+          guideArrowXOffset = 8 / this.m.xaxis.scaleX,
           baseY = track.y + (track.height / 2),
           g = new K.Group({ x: 0, y: 0 }),
-          guideLineOpts = { stroke: '#ddd' }
+          guideLineOpts = { stroke: '#ddd'}
       ;
       // draw the guide lines
       g.add(new K.Line(angular.extend({
-        points: [startBase, baseY + guideYOffset,
-                 endBase, baseY + guideYOffset,
-                 endBase - guideArrowXOffset, track.y + track.height]
+        points: [startBase, baseY - guideYOffset,
+                 endBase, baseY - guideYOffset,
+                 endBase - guideArrowXOffset, track.y]
       }, guideLineOpts)));
       g.add(new K.Line(angular.extend({
-        points: [startBase + guideArrowXOffset, track.y,
-                 startBase, baseY - guideYOffset,
-                 endBase, baseY - guideYOffset]
+        points: [startBase + guideArrowXOffset, track.y + track.height,
+                 startBase, baseY + guideYOffset,
+                 endBase, baseY + guideYOffset]
       }, guideLineOpts)));
 
       // draw each hit
