@@ -35,11 +35,15 @@ def assert_clean_path(path, request,
         raise RedirectException(reverse(destination))
 
 
+class MissingFileError(Exception):
+    pass
+
+
 def getabspath(relpath, raise_on_missing=True):
     if not is_clean_path(relpath):
         logger.error("Illegal path submitted", relpath)
-        raise Exception("Illegal path")
+        raise MissingFileError("Bad characters")
     abspath = os.path.join(settings.MEDIA_ROOT, relpath)
     if raise_on_missing and not os.path.exists(abspath):
-        raise IOError("Path not found: " + relpath)
+        raise MissingFileError("Path not found: " + relpath)
     return abspath

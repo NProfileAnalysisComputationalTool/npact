@@ -16,7 +16,7 @@ from django.template.loader import get_template
 from pynpact import parsing, util
 from pynpact import main
 
-from npactweb import assert_clean_path, getabspath, getrelpath
+from npactweb import assert_clean_path, getabspath, getrelpath, MissingFileError
 from npactweb.middleware import RedirectException
 
 from taskqueue import client, NoSuchTaskError
@@ -48,17 +48,12 @@ VALID_KEYS = ('first_page_title', 'following_page_title', 'nucleotides',
 
 def build_config(path, request):
     "Tries to build the config dictionary for the given path"
-    assert_clean_path(path, request)
-
     try:
         config = parsing.initial(getabspath(path))
     except:
         logger.exception(
             "Error parsing gbk: %r", getabspath(path, raise_on_missing=False))
-        messages.error(request,
-                       "There was a problem loading file '%s', "
-                       "please try again or try a different record." % path)
-        raise RedirectException(reverse('start'))
+        raise
 
     parsing.detect_format(config)
     for k in VALID_KEYS:
@@ -120,29 +115,37 @@ def run_frame(request, path):
 
 
 def kickstart(request, path):
-    assert_clean_path(path, request)
-    config = build_config(path, request)
-    verb = request.GET['verb']
-    verb = verb.split(',')
+    try:
+        config = build_config(path, request)
+        verb = request.GET['verb']
+        verb = verb.split(',')
 
-    email = request.GET.get('email')
-    client.ensure_daemon()
-    executor = client.get_server()
+        email = request.GET.get('email')
+        client.ensure_daemon()
+        executor = client.get_server()
+        for v in verb:
+            if email:
+                config = main.process('allplots', config, executor=executor)
+                build_email(request, path, config)
+            elif v == 'parse':
+                # we've already parsed in `build_config` above.
+                pass
+            else:
+                # main.process handles the rest of the verbs, or errors
+                config = main.process(v, config, executor=executor)
 
-    for v in verb:
-        if email:
-            config = main.process('allplots', config, executor=executor)
-            build_email(request, path, config)
-        elif v == 'parse':
-            # we've already parsed in `build_config` above.
-            pass
-        else:
-            # main.process handles the rest of the verbs, or errors
-            config = main.process(v, config, executor=executor)
+        return HttpResponse(
+            json.dumps(sanitize_config_for_client(config)),
+            content_type="application/json")
+    except RedirectException:
+        raise
+    except MissingFileError as e:
+        return HttpResponse(e.message, status=404, content_type="text/plain")
 
-    return HttpResponse(
-        json.dumps(sanitize_config_for_client(config)),
-        content_type="application/json")
+    except Exception as e:
+        logger.exception(e)
+        return HttpResponse(
+            repr(e), status=500, content_type="application/json")
 
 
 def build_email(request, path, config):

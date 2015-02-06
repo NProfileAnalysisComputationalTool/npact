@@ -63,7 +63,11 @@ angular.module('npact')
     //Kickstart the whole process, start all the main managers
     this.start = function() {
       this.basePromise = processOnServer('parse');
-      MessageBus.info('kickstarting', this.basePromise);
+      var safePromise = this.basePromise.catch(function(e) {
+        $log.error(e);
+        MessageBus.danger('There\'s been an error starting up; please try starting over.');
+      });
+      MessageBus.info('kickstarting', safePromise);
       this.basePromise.then(NProfiler.start);
       this.basePromise.then(PredictionManager.start);
       this.basePromise.then(ExtractManager.start);
@@ -85,7 +89,9 @@ angular.module('npact')
             });
         }
       });
-      MessageBus.info("Fetching extract data from server", p);
+      MessageBus.info(
+        "Fetching extract data from server",
+        p.catch("Failure while extracting known genes."));
     };
   })
   .service('PredictionManager', function(Fetcher, StatusPoller, Pynpact, Track,
@@ -157,7 +163,11 @@ angular.module('npact')
         waitOn.then(self.newHits);
         waitOn.then(self.newCds);
         waitOn.then(self.updateFiles);
-        MessageBus.info('Identifying significant 3-base periodicities @ ' + significance, waitOn);
+        MessageBus.info(
+          'Identifying significant 3-base periodicities @ ' + significance,
+          waitOn.catch(function(e) {
+            MessageBus.danger('Failure while identifying significant 3-base periodicities');
+          }));
       }
     };
   })
@@ -165,11 +175,13 @@ angular.module('npact')
     'use strict';
     var pdffile = null;
     this.start = function(config) {
-      StatusPoller.start(config[Pynpact.PDF])
+      if(config[Pynpact.PDF]) {
+        StatusPoller.start(config[Pynpact.PDF])
         .then(function(pdfFilename) {
           $log.log('PDF ready', pdfFilename);
           pdffile = pdfFilename;
         });
+      }
     };
     this.getFiles = function() {
       var list = [];

@@ -64,17 +64,25 @@ angular.module('npact')
       var remove = _.bind(this.remove, this, obj);
       if(hideWhen){
         if(isNaN(hideWhen)) {
-          $q.when(hideWhen).then(remove);
+          $q.when(hideWhen).catch(_.bind(function(e) {
+            if(e.data) {
+              this.danger(new String(e.data));
+            }
+            else {
+              this.danger(new String(e));
+            }
+
+          }, this)).then(remove);
         }
         else {
           $timeout(remove, hideWhen);
         }
       }
     };
-
     _.forEach(['info', 'danger', 'warning', 'success'], function(lvl) {
       this[lvl] = _.partial(this.log, lvl);
     }, this);
+    this.error = this.danger;
   })
 
   .service('EmailBuilder', function(MessageBus, $log, $location) {
