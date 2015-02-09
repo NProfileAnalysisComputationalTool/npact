@@ -14,6 +14,9 @@ describe('ITrackReader', function() {
                  'H-51*G complement(57104..57904)',
                  'H-53*A complement(58013..59380)',
                  'H-64-C 71945..72100',
+                 'H complement(78698..81685)',
+                 'H 81578..81631',
+                 'H 81894..83693',
                  'G-125-G 88111..88275',
                  'G-124*t 88544..88906',
                  'H-102-C 112734..112931',
@@ -28,8 +31,8 @@ describe('ITrackReader', function() {
 
   //Sanity check test
   describe('parsedData', function() {
-    it('should have 10 elements', function() {
-      expect(parsedData.length).toEqual(10);
+    it('should have the right number of elements', function() {
+      expect(parsedData.length).toEqual(13);
     });
   });
 
@@ -81,6 +84,16 @@ describe('ITrackReader', function() {
               });
             });
           });
+
+          it('should match this one complement that it is not right now', function() {
+            // `H complement(78698..81685)` is hidden sometimes
+            // because it contains `H 81578..81631`
+            tIndex({startBase: 73000, endBase: 91000}).then(function(slice) {
+              expect(slice).toContain(
+                { start: 78698, end: 81685, complement: 1, name: 'H', approximate: false, phase: 1 }
+              );
+            });
+          });
           afterEach(function() { $timeout.flush(); });
         });
       });
@@ -108,11 +121,11 @@ describe('ITrackReader', function() {
 
     it('should be sliceable', function(done) {
       track.slice({name:'test', startBase:72000, endBase:88600}).then(function(results) {
-        expect(results.length).toEqual(3);
+        expect(results.length).toEqual(6);
       }).then(function() {
         // Ensure it works more than once
         track.slice({name:'test', startBase:72000, endBase:88600}).then(function(results) {
-          expect(results.length).toEqual(3);
+          expect(results.length).toEqual(6);
           done();
         });
       });

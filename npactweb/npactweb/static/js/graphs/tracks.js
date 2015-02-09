@@ -95,7 +95,7 @@ angular.module('npact')
           while(leftPointerIdx < byEnd.length) {
             leftIdx = Math.min(leftIdx, byEnd[leftPointerIdx].idx);
             //if the end coordinate is past the max then we're done
-            if(byEnd[leftPointerIdx].end <= max) break;
+            if(byEnd[leftPointerIdx].end >= max) break;
             leftPointerIdx++;
           }
           return _.slice(byStart, leftIdx, rightIdx);
