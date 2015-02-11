@@ -210,7 +210,7 @@ struct HSSs {
     int	  gsuper;
     int	  exten;
     char	  hit_type;	// 'H' (hss) or 'G' (G-test).
-    float  prob;
+    char  prob;
     double nuc[24];
     double score;
     double scpp;              // score per position of ORF
@@ -930,9 +930,13 @@ int score_orf_table(char *orf, int n, int tot_hss)
                 hss[tot_hss + h].score= maxscore;
                 for(k= t; k < 3 && maxscore >= thr[k]; ++k);
 				--k;
-                if(k == 0) hss[tot_hss + h].prob= 0.01;
-                else if(k == 1) hss[tot_hss + h].prob= 0.001;
-                else if(k == 2) hss[tot_hss + h].prob= 0.0001;
+
+// float prob is now char prob, with k corresponding to probabilities:
+//               if(k == 0) hss[tot_hss + h].prob= 0.01;
+//               else if(k == 1) hss[tot_hss + h].prob= 0.001;
+//               else if(k == 2) hss[tot_hss + h].prob= 0.0001;
+
+                hss[tot_hss + h].prob= k;
                 hss[tot_hss+h].type= 5;
 
                 //logmsg(10,"\nSEGMENT FOUND (len: %d; Score: %.3f). ", to_pos - from_pos + 1, maxscore);
@@ -971,9 +975,13 @@ int score_orf_table(char *orf, int n, int tot_hss)
 
                 for(k= t; k < 3 && maxscore >= thr[k]; ++k);
 				--k;
-                if(k == 0) hss[tot_hss + h].prob= 0.01;
-                else if(k == 1) hss[tot_hss + h].prob= 0.001;
-                else if(k == 2) hss[tot_hss + h].prob= 0.0001;
+
+// float prob is now char prob, with k corresponding to probabilities:
+//              if(k == 0) hss[tot_hss + h].prob= 0.01;
+//              else if(k == 1) hss[tot_hss + h].prob= 0.001;
+//              else if(k == 2) hss[tot_hss + h].prob= 0.0001;
+
+                hss[tot_hss + h].prob= k;
 
 
 				if (to - from + 1 - 3 * ncod >= mHL)
@@ -1670,10 +1678,10 @@ int maxG_test(char *seq, int len, int ori, char strand, int frame, int orfn, int
 						//					else    hss[hit].sig_len= max_len;
 						
 						/* LN LN LENGTH PARAMETERS */
-						if(maxG >= 21.782 * lg + 9.6705) { hss[hit].prob= 0.00001; strcpy(hss[hit].pstring,"(p <= 1.0e-05)"); } 
-						else if(maxG >= 19.071 * lg + 7.6498) { hss[hit].prob= 0.0001; strcpy(hss[hit].pstring,"(p <= 1.0e-04)"); }
-						else if(maxG >= 18.090 * lg + 4.4864) { hss[hit].prob= 0.001; strcpy(hss[hit].pstring,"(p <= 1.0e-03)"); }
-						else if(maxG >= 17.070 * lg + 1.0753) {  hss[hit].prob= 0.01; strcpy(hss[hit].pstring,"(p <= 1.0e-02)"); }
+						if(maxG >= 21.782 * lg + 9.6705) { hss[hit].prob= 3; strcpy(hss[hit].pstring,"(p <= 1.0e-05)"); } 
+						else if(maxG >= 19.071 * lg + 7.6498) { hss[hit].prob= 2; strcpy(hss[hit].pstring,"(p <= 1.0e-04)"); }
+						else if(maxG >= 18.090 * lg + 4.4864) { hss[hit].prob= 1; strcpy(hss[hit].pstring,"(p <= 1.0e-03)"); }
+						else if(maxG >= 17.070 * lg + 1.0753) {  hss[hit].prob= 0; strcpy(hss[hit].pstring,"(p <= 1.0e-02)"); }
 						/**/
 						
 						/* LINEAR DEPENDENCE OF SIGNIFICANCE OF G WITH LENGTH */
@@ -1681,8 +1689,8 @@ int maxG_test(char *seq, int len, int ori, char strand, int frame, int orfn, int
 						//        if(SIGNIFICANCE == 0.01)         HIGH_G = 0.0102 * lg + 29.845;
 						//        else if(SIGNIFICANCE == 0.001)   HIGH_G = 0.0172 * lg + 33.609;
 						//
-						//					if(maxG >= 0.0172 * lg + 33.609) { hss[hit].prob= 0.001; strcpy(hss[hit].pstring,"(p <= 1.0e-03)"); }
-						//					else if(maxG >= 0.0102 * lg + 29.845) {  hss[hit].prob= 0.01; strcpy(hss[hit].pstring,"(p <= 1.0e-02)"); }
+						//					if(maxG >= 0.0172 * lg + 33.609) { hss[hit].prob= 1; strcpy(hss[hit].pstring,"(p <= 1.0e-03)"); }
+						//					else if(maxG >= 0.0102 * lg + 29.845) {  hss[hit].prob= 0; strcpy(hss[hit].pstring,"(p <= 1.0e-02)"); }
 						
 						//					if(flag)
 						//					{
@@ -2591,7 +2599,7 @@ genome= ORF + 3 * MAX_ORF_SIZE;
 		if(hss[o[i]].sig_len < po) print_len= hss[o[i]].sig_len;
 		else print_len= po;
 
-        fprintf(output3, "%d.%d\t%s\t%d\t%d\t%d\t%c\t%c\t%d\t%d\t%d\t%d\t%.2f\t%.2f\t%.4f\t%6.2f %s\t%.5e\t%c-%s", hss[o[i]].orf_num, hss[o[i]].frame, name, hss[o[i]].stop1+s1, hss[o[i]].stop2+s2, hss[o[i]].stop2-hss[o[i]].stop1+1, hss[o[i]].strand, hss[o[i]].color, hss[o[i]].hit_num, hss[o[i]].fromp+1, hss[o[i]].top+1, hss[o[i]].top-hss[o[i]].fromp+1, hss[o[i]].entropy, hss[o[i]].score, hss[o[i]].prob, G, Pg, print_len, hss[o[i]].hit_type, Prediction[k]);
+        fprintf(output3, "%d.%d\t%s\t%d\t%d\t%d\t%c\t%c\t%d\t%d\t%d\t%d\t%.2f\t%.2f\t%.4f\t%6.2f %s\t%.5e\t%c-%s", hss[o[i]].orf_num, hss[o[i]].frame, name, hss[o[i]].stop1+s1, hss[o[i]].stop2+s2, hss[o[i]].stop2-hss[o[i]].stop1+1, hss[o[i]].strand, hss[o[i]].color, hss[o[i]].hit_num, hss[o[i]].fromp+1, hss[o[i]].top+1, hss[o[i]].top-hss[o[i]].fromp+1, hss[o[i]].entropy, hss[o[i]].score, pow(10.0, (double)(-(hss[o[i]].prob + 2))), G, Pg, print_len, hss[o[i]].hit_type, Prediction[k]);
 		if(hss[o[i]].entropy <= MIN_ENTROPY) fprintf(output3, " repetitive");
 
 		if(k == 3) fprintf(output3," %d",hss[o[i]].exten);
@@ -2868,8 +2876,8 @@ genome= ORF + 3 * MAX_ORF_SIZE;
 				}
 			}
 
-			if(hss[o[i]].strand == 'D') fprintf(output2,"%c %d..%d\n", hss[o[i]].hit_type, hss[o[i]].fromp + 1, hss[o[i]].top + 1);
-			else                        fprintf(output2,"%c complement(%d..%d)\n", hss[o[i]].hit_type, hss[o[i]].fromp + 1, hss[o[i]].top + 1);
+			if(hss[o[i]].strand == 'D') fprintf(output2,"%c%d %d..%d\n", hss[o[i]].hit_type, hss[o[i]].prob, hss[o[i]].fromp + 1, hss[o[i]].top + 1);
+			else                        fprintf(output2,"%c%d complement(%d..%d)\n", hss[o[i]].hit_type, hss[o[i]].prob, hss[o[i]].fromp + 1, hss[o[i]].top + 1);
 		}
 	}
     fprintf(output3,"\n");
