@@ -190,7 +190,7 @@ angular.module('npact')
 
     var leftLayerCache = {};  // Shared amongst all Graphers
     GP.leftLayer = function(stage) {
-      var key = angular.toJson(this.tracks) + this.axisTitle;
+      var key = angular.toJson(this.tracks) + GraphConfig.profileTitle();
       var layer = new K.FastLayer();
       stage.add(layer);
       return (leftLayerCache[key] || (leftLayerCache[key] = this._leftLayerImage()))

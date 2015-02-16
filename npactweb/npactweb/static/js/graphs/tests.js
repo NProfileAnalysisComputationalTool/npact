@@ -137,7 +137,6 @@ describe('Graphs', function(){
     describe('metrics', function() {
       var opts = {
         width: 250,
-        axisTitle: '% GC',
         profileTicks: 5,
         startBase: 0, endBase: 100,
         tracks: [{height: 5}]

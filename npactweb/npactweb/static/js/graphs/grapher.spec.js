@@ -67,8 +67,7 @@ describe('Grapher', function() {
         startBase: 0,
         margin: 1000,
         offset: 0,
-        width: 600,
-        axisTitle: 'C+G'
+        width: 600
     };
     var g = makeGrapher(sampleOpts);
     var redraw = function() {
