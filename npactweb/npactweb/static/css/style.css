@@ -449,8 +449,8 @@ button.Start { clear:both; margin: 8px;}
 
 #msgpane p { padding: 8px; }
 #msgpane .message button { float:right; }
+.pointer:hover { cursor: pointer; }
 
 #printControls { float: right; }
-#printControls:hover { cursor: pointer; }
 #printConfirm { display: none; }
 #printConfirm p {text-align: left; margin-top: 10px;}
