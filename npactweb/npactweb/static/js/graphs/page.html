@@ -22,17 +22,19 @@
 
   <div id="results">
     <h3 class="pointer" onclick="$('#downloads').toggle('blind');">Downloads</h3>
-    <div id="downloads" style="display:none;">
-      <div class="ui-state-highlight ui-corner-all"
-           ng-show="miscFiles.length > 0">
-        <div class="ui-icon ui-icon-info"></div>
-        <p>
-          The prediction results are now ready:
+    <div id="downloads" style="display:none;" ng-controller="DownloadsCtrl">
+      <div class="ui-state-highlight ui-corner-all" >
+        <p><button ng-if="!pdf" ng-click="requestPDF()" class="btn md-text">Request PDF</button>
+          <a ng-if="pdf" href="{{FETCH_URL}}{{pdf}}" target="_blank">Download PDF</a>
+        </p>
+        <div ng-show="predictionFiles.length > 0">
+          <p>The prediction results are now ready:
           <ul id="files">
-            <li ng-repeat="f in miscFiles">
+            <li ng-repeat="f in predictionFiles">
               <a href="{{FETCH_URL}}{{f}}" target="_blank">{{f}}</a>
             </li>
-        </p>
+          </ul>
+        </div>
       </div>
     </div>
     <h3 class="pointer" onclick="$('#graphcontainer').toggle('blind');">Graphs</h3>

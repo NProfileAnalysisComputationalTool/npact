@@ -10,17 +10,13 @@ angular.module('npact')
   })
   .controller('npactGraphPageCtrl', function($scope, $q, $log, $window,
                                       Fetcher, FETCH_URL, EmailBuilder,
-                                      GraphConfig, FileManager, kickstarter) {
+                                      GraphConfig,  kickstarter) {
     'use strict';
 
-    $scope.miscFiles = [];
     $scope.FETCH_URL = FETCH_URL;
     $scope.config = GraphConfig;
     $scope.email = EmailBuilder.send;
     kickstarter.start();
-    $scope.$watch(FileManager.getFiles, function(val) {
-      $scope.miscFiles = val;
-    }, true);
 
 
     var _doPrint = function() {
@@ -54,11 +50,24 @@ angular.module('npact')
          }
        });
     };
+  })
 
+  .controller('DownloadsCtrl', function($scope, PredictionManager, processOnServer, MessageBus, $log) {
+    $scope.$watch( function() { return PredictionManager.files; },
+                   function(val) { $scope.predictionFiles = val; });
+    /*
+    if(config[Pynpact.PDF]) {
+        StatusPoller.start(config[Pynpact.PDF])
+        .then(function(pdfFilename) {
+          $log.log('PDF ready', pdfFilename);
+          pdffile = pdfFilename;
+        });
+    }
+      */
   })
 
   .service('kickstarter', function($q, $log, processOnServer, MessageBus,
-                            NProfiler, PredictionManager, ExtractManager, FileManager) {
+                            NProfiler, PredictionManager, ExtractManager) {
     'use strict';
     //Kickstart the whole process, start all the main managers
     this.start = function() {
@@ -71,7 +80,6 @@ angular.module('npact')
       this.basePromise.then(NProfiler.start);
       this.basePromise.then(PredictionManager.start);
       this.basePromise.then(ExtractManager.start);
-      this.basePromise.then(FileManager.start);
       return this.basePromise;
     };
   })
@@ -169,29 +177,6 @@ angular.module('npact')
             MessageBus.danger('Failure while identifying significant 3-base periodicities');
           }));
       }
-    };
-  })
-  .service('FileManager', function(PredictionManager, StatusPoller, Pynpact, $log) {
-    'use strict';
-    var pdffile = null;
-    this.start = function(config) {
-      if(config[Pynpact.PDF]) {
-        StatusPoller.start(config[Pynpact.PDF])
-        .then(function(pdfFilename) {
-          $log.log('PDF ready', pdfFilename);
-          pdffile = pdfFilename;
-        });
-      }
-    };
-    this.getFiles = function() {
-      var list = [];
-      if(pdffile) {
-        list.push(pdffile);
-      }
-      if(PredictionManager.files) {
-        list.push.apply(list, PredictionManager.files);
-      }
-      return list;
     };
   })
 ;
