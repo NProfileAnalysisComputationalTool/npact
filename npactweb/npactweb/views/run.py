@@ -43,7 +43,7 @@ MAGIC_PARAMS = ('raiseerror', 'force')
 
 VALID_KEYS = ('first_page_title', 'following_page_title', 'nucleotides',
               'significance', 'alternate_colors', 'startBase', 'endBase',
-              'basesPerGraph')
+              'basesPerGraph', 'x-tics')
 
 
 def build_config(path, request):

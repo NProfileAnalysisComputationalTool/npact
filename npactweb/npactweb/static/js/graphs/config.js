@@ -67,6 +67,7 @@ angular.module('npact')
         if(GraphConfig[k])
           postconfig[k] = GraphConfig[k];
       });
+      postconfig['x-tics'] = Utils.orderOfMagnitude(GraphConfig.basesPerGraph, -1);
 
       return $http.get(url, { cache: true, params: postconfig })
         .then(function(res) {
