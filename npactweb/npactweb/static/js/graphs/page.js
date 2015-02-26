@@ -52,18 +52,21 @@ angular.module('npact')
     };
   })
 
-  .controller('DownloadsCtrl', function($scope, PredictionManager, processOnServer, MessageBus, $log) {
+  .controller('DownloadsCtrl', function($scope, $log, PredictionManager, MessageBus, Pynpact, StatusPoller, GraphConfig) {
     $scope.$watch( function() { return PredictionManager.files; },
                    function(val) { $scope.predictionFiles = val; });
-    /*
-    if(config[Pynpact.PDF]) {
-        StatusPoller.start(config[Pynpact.PDF])
-        .then(function(pdfFilename) {
-          $log.log('PDF ready', pdfFilename);
-          pdffile = pdfFilename;
-        });
-    }
-      */
+    $scope.$watch(
+      function() { return GraphConfig[Pynpact.PDF]; },
+      function(pdfFilename) {
+        if(!pdfFilename) return;
+        var p = StatusPoller.start(pdfFilename)
+          .then(function(pdfFilename) {
+            $log.log('PDF ready', pdfFilename);
+            MessageBus.info('PDF ready', 1000);
+            $scope.pdf = pdfFilename;
+          });
+        MessageBus.info("Generating PDF", p);
+      });
   })
 
   .service('kickstarter', function($q, $log, processOnServer, MessageBus,

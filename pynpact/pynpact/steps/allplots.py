@@ -64,6 +64,7 @@ def allplots(config, executor):
 
     parsing.length(config)
     parsing.first_page_title(config)
+    parsing.following_page_title(config)
     parsing.endBase(config)
 
     h = Hasher()
@@ -126,13 +127,22 @@ def _ap(pconfig, out):
 
 
 def write_allplots_def(out, pconfig, page_num):
+    """Write the configuration file for Allplots that it's expecting on stdin
+
+    Allplots used to check for 'Allplots.def' in the dcurrent
+    directory but we modified it to be able to read this configuration
+    on stdin, this writes in that format.
+
+    """
     parsing.first_page_title(pconfig)
+    parsing.following_page_title(pconfig)
 
     def wl(line):
         "helper function for writing a line to the allplots file."
         if line:
             out.write(line)
         out.write('\n')
+        log.debug('Allplots.def: %s', line)
 
     # NB: the "Plot Title" is disregarded, but that line
     # should also contain the total number of bases

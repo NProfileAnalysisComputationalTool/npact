@@ -17,12 +17,7 @@ angular.module('npact')
     _.forEach(PUBLIC_CONFIG_KEYS, function(k) {
       var v = $location.search()[k];
       if(v) {
-        try {
-          self[k] = Number(v);
-        }
-        catch(e) {
-          self[k] = v;
-        }
+        self[k] = !isNaN(Number(v)) ? Number(v) : v ;
       }
     });
 
@@ -60,7 +55,7 @@ angular.module('npact')
    * Get back a config dictionary (which automatically updates GraphConfig)
    */
   .factory('processOnServer', function(GraphConfig, KICKSTART_BASE_URL,
-                                PUBLIC_CONFIG_KEYS,
+                                PUBLIC_CONFIG_KEYS, Util,
                                 $http, $log, $location) {
     'use strict';
     //The keys the server is going to accept from our GraphConfig
@@ -94,6 +89,7 @@ angular.module('npact')
   })
   .controller('npactGraphConfigCtrl', function($scope, $window, $location, $log,
                                         GraphConfig, PredictionManager,
+                                        processOnServer,
                                         PUBLIC_CONFIG_KEYS) {
     'use strict';
     $scope.gc = GraphConfig;
@@ -104,5 +100,11 @@ angular.module('npact')
     $scope.$watchGroup(gcpubkeys, function(newVals) {
       $location.search(_.object(PUBLIC_CONFIG_KEYS, newVals));
     });
+
+    $scope.requestPDF = function() {
+      processOnServer('allplots').catch(function(e) {
+        $log.error('Error requesting PDF:', e);
+      });
+    };
   })
 ;

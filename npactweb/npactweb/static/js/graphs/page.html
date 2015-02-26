@@ -22,9 +22,9 @@
 
   <div id="results">
     <h3 class="pointer" onclick="$('#downloads').toggle('blind');">Downloads</h3>
-    <div id="downloads" style="display:none;" ng-controller="DownloadsCtrl">
+    <div id="downloads" style="display:none;" ng-controller="DownloadsCtrl as dc">
       <div class="ui-state-highlight ui-corner-all" >
-        <p><button ng-if="!pdf" ng-click="requestPDF()" class="btn md-text">Request PDF</button>
+        <p>
           <a ng-if="pdf" href="{{FETCH_URL}}{{pdf}}" target="_blank">Download PDF</a>
         </p>
         <div ng-show="predictionFiles.length > 0">
@@ -37,8 +37,7 @@
         </div>
       </div>
     </div>
-    <h3 class="pointer" onclick="$('#graphcontainer').toggle('blind');">Graphs</h3>
+    <h3>Graphs</h3>
     <div npact-graph-container id="graphcontainer"></div>
-
   </div>
 </div>
