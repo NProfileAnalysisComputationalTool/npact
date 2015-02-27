@@ -89,7 +89,7 @@ def allplots(config, executor):
             pconfig['endBase'] = startBase + bp_per_page
         else:
             pconfig['endBase'] = endBase
-        h = Hasher().hashdict(pconfig).hashfiletime(BIN)
+        h = Hasher().hashdict(pconfig).hashfiletime(BIN).hashfiletime(__file__)
         psname = parsing.derive_filename(config, h.hexdigest(), 'ps')
         filenames.append(psname)
         waiton.extend(enqueue(_ap, executor, pconfig, psname, after=after))
@@ -148,8 +148,8 @@ def write_allplots_def(out, pconfig, page_num):
     # should also contain the total number of bases
     wl("%s %d" % ("FOOBAR", pconfig['length']))
 
-    # Nucleotide(s)_plotted (e.g.: C+G)
-    wl('+'.join(pconfig['nucleotides']))
+    # Nucleotide(s)_plotted (e.g.: `% CG`)
+    wl(''.join(pconfig['nucleotides']))
     # First-Page title
     wl(pconfig['first_page_title'].format(page_num))
     # Title of following pages

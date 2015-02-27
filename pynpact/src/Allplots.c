@@ -160,8 +160,8 @@ main(int argc, char *argv[]) {
     /* For cmd line argument parsing. */
     char* opt;
     int argi = 1;
-    char use_stdin= 0, c;
-    int tstart, bp_per_page, tend, lines, period= 3, l;
+    char use_stdin=0;
+    int tstart, bp_per_page, tend, lines, period=3;
 
     /* other counters, values, variables for the program */
 
@@ -270,15 +270,8 @@ main(int argc, char *argv[]) {
     sscanf(longstr,"%s %d", NAME, &len);
     logmsg(10, "%s %d nt\n", NAME, len);
 
-// NUCLEOTIDES string should be written differently (in main.py?)
-// Temporary fix:
     fgets(NUCLEOTIDES,8,files);
-    NUCLEOTIDES[strlen(NUCLEOTIDES)-1]= '\0';
-        for(i= 0; i < strlen(NUCLEOTIDES); i += 2) NUCLEOTIDES[i / 2]= NUCLEOTIDES[i] + 'A' - 'a';
-    NUCLEOTIDES[i - 2]= '\0';
-    l= strlen(NUCLEOTIDES);
-	for(i= 0; i < l / 2; ++i) { c= NUCLEOTIDES[i]; NUCLEOTIDES[i]= NUCLEOTIDES[l - 1 - i]; NUCLEOTIDES[l - 1 - i]= c; }
-// End of temporary fix;
+    NUCLEOTIDES[strlen(NUCLEOTIDES)-1]='\0';
     logmsg(0, "%s\n", NUCLEOTIDES);
 
     title1 = np_getl(files);     logmsg(0,"\n%s",title1);
