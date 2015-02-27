@@ -420,9 +420,9 @@ main(int argc, char *argv[]) {
                 Scodpot_type[nScp]= longstr[0];
                 p= strchr(longstr,'.');
                 ge= atoi(p+2);
-                if(longstr[2]=='c') { gs= atoi(longstr+13); Scodpot_str[nScp]='C'; Scodpot_col[nScp]= gs%period; }
-                else if(longstr[2]=='r') { gs= atoi(longstr+9); Scodpot_str[nScp]='R'; }
-                else { gs= atoi(longstr + 2); Scodpot_str[nScp]='D'; Scodpot_col[nScp]= ge%period; }
+                if(longstr[3]=='c') { gs= atoi(longstr+14); Scodpot_str[nScp]='C'; Scodpot_col[nScp]= gs%period; }
+                else if(longstr[3]=='r') { gs= atoi(longstr+10); Scodpot_str[nScp]='R'; }
+                else { gs= atoi(longstr + 3); Scodpot_str[nScp]='D'; Scodpot_col[nScp]= ge%period; }
                 if(gs>=start && gs<end && ge>start && ge<=end) { Scodpot[nScp][0]= gs; Scodpot[nScp][1]= ge; ++nScp; }
                 else if(gs>=start && gs<end && ge>end) { Scodpot[nScp][0]= gs; Scodpot[nScp][1]= end; ++nScp; }
                 else if(ge<=end && ge>start && gs<start)
