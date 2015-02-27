@@ -61,6 +61,7 @@ def build_config(path, request):
         if v:
             nv = parsing.number(v)
             config[k] = v if nv is None else nv
+    parsing.endBase(config)
 
     # fixup nucleotides list
     if 'nucleotides' in request.GET:
