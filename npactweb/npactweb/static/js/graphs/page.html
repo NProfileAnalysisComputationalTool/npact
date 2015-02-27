@@ -24,8 +24,8 @@
     <npact-msg-pane></npact-msg-pane>
   </div>
 
-  <div id="results">
-    <h3 class="pointer" onclick="$('#downloads').toggle('blind');">Downloads</h3>
+  <div id="results" jq-accordion>
+    <h3>Downloads</h3>
     <div id="downloads" style="display:none;" ng-controller="DownloadsCtrl as dc">
       <div class="ui-state-highlight ui-corner-all" >
         <p>

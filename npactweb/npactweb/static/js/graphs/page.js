@@ -188,4 +188,17 @@ angular.module('npact')
       }
     };
   })
+
+  .directive('jqAccordion', function($log) {
+    'use strict';
+    return {
+      restrict: 'A',
+      link: function($scope, $element, $attrs, ctrl) {
+        $($element).accordion({
+          heightStyle: "content",
+          active: 1
+        });
+      }
+    };
+  })
 ;
