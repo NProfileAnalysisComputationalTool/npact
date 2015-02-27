@@ -10,7 +10,7 @@ angular.module('npact')
   })
   .controller('npactGraphPageCtrl', function($scope, $q, $log, $window,
                                       Fetcher, FETCH_URL, EmailBuilder,
-                                      GraphConfig,  kickstarter) {
+                                      GraphConfig,  kickstarter, processOnServer) {
     'use strict';
 
     $scope.FETCH_URL = FETCH_URL;
@@ -49,6 +49,11 @@ angular.module('npact')
            }
          }
        });
+    };
+    this.requestPDF = function() {
+      processOnServer('allplots').catch(function(e) {
+        $log.error('Error requesting PDF:', e);
+      });
     };
   })
 

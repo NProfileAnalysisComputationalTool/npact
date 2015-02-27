@@ -90,7 +90,6 @@ angular.module('npact')
   })
   .controller('npactGraphConfigCtrl', function($scope, $window, $location, $log,
                                         GraphConfig, PredictionManager,
-                                        processOnServer,
                                         PUBLIC_CONFIG_KEYS) {
     'use strict';
     $scope.gc = GraphConfig;
@@ -101,11 +100,5 @@ angular.module('npact')
     $scope.$watchGroup(gcpubkeys, function(newVals) {
       $location.search(_.object(PUBLIC_CONFIG_KEYS, newVals));
     });
-
-    $scope.requestPDF = function() {
-      processOnServer('allplots').catch(function(e) {
-        $log.error('Error requesting PDF:', e);
-      });
-    };
   })
 ;
