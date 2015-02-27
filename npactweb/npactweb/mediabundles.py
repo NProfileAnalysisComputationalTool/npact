@@ -25,6 +25,7 @@ MEDIA_BUNDLES = (
      'bower_components/angular/angular.min.js',
      'bower_components/angular-messages/angular-messages.min.js',
      'bower_components/angular-sanitize/angular-sanitize.min.js',
+     'bower_components/angular-jquery-dialog-service/dialog-service.js',
      'bower_components/lodash/lodash.min.js',
      'bower_components/qtip2/jquery.qtip.min.js',
      'bower_components/rtree/dist/rtree.min.js',

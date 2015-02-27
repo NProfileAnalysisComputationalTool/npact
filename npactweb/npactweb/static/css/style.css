@@ -452,5 +452,4 @@ button.Start { clear:both; margin: 8px;}
 .pointer:hover { cursor: pointer; }
 
 #printControls { float: right; }
-#printConfirm { display: none; }
 #printConfirm p {text-align: left; margin-top: 10px;}

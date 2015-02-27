@@ -8,8 +8,9 @@ angular.module('npact')
       controllerAs: 'pageCtrl'
     };
   })
-  .controller('npactGraphPageCtrl', function($scope, $q, $log, $window,
-                                      Fetcher, FETCH_URL, EmailBuilder,
+
+  .controller('npactGraphPageCtrl', function($scope, $q, $log, $window, dialogService,
+                                      Fetcher, FETCH_URL, EmailBuilder, STATIC_BASE_URL,
                                       GraphConfig,  kickstarter, processOnServer) {
     'use strict';
 
@@ -36,7 +37,8 @@ angular.module('npact')
     };
 
     this.print = function() {
-       $( "#printConfirm" ).dialog({
+      var printTemplate = STATIC_BASE_URL + 'js/graphs/printConfirm.html';
+      dialogService.open('printConfirm', printTemplate, null, {
          resizable: false,
          modal: true,
          buttons: {
@@ -57,7 +59,7 @@ angular.module('npact')
     };
   })
 
-  .controller('DownloadsCtrl', function($scope, $log, PredictionManager, MessageBus, Pynpact, StatusPoller, GraphConfig) {
+  .controller('DownloadsCtrl', function($scope, $log, PredictionManager, MessageBus, Pynpact, StatusPoller, GraphConfig, STATIC_BASE_URL, dialogService) {
     'use strict';
     $scope.$watch( function() { return PredictionManager.files; },
                    function(val) { $scope.predictionFiles = val; });
@@ -68,7 +70,8 @@ angular.module('npact')
         var p = StatusPoller.start(pdfFilename)
           .then(function(pdfFilename) {
             $log.log('PDF ready', pdfFilename);
-            MessageBus.info('PDF ready', 1000);
+            var dialogTemplate = STATIC_BASE_URL + 'js/graphs/pdfReady.html';
+            dialogService.open('pdfReady', dialogTemplate, { pdf: pdfFilename });
             $scope.pdf = pdfFilename;
           });
         MessageBus.info("Generating PDF", p);
@@ -192,12 +195,21 @@ angular.module('npact')
   .directive('jqAccordion', function($log) {
     'use strict';
     return {
+      scope: true,
       restrict: 'A',
-      link: function($scope, $element, $attrs, ctrl) {
-        $($element).accordion({
+      link: function($scope, $element, $attrs) {
+        var defaults = {
           heightStyle: "content",
-          active: 1
-        });
+          collapsible: true,
+          active: 0
+        };
+        var opts = _.transform(defaults, function(acc, v, k, o) {
+          v = $attrs[k];
+          if(v) {
+            acc[k] = $scope.$eval(v);
+          }
+        }, defaults);
+        $($element).accordion(opts);
       }
     };
   })
