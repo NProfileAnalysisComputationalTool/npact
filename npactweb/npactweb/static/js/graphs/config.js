@@ -55,7 +55,7 @@ angular.module('npact')
    * Get back a config dictionary (which automatically updates GraphConfig)
    */
   .factory('processOnServer', function(GraphConfig, KICKSTART_BASE_URL,
-                                PUBLIC_CONFIG_KEYS, Util,
+                                PUBLIC_CONFIG_KEYS, Utils,
                                 $http, $log, $location) {
     'use strict';
     //The keys the server is going to accept from our GraphConfig

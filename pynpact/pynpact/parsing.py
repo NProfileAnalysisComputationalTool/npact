@@ -28,13 +28,13 @@ defaults = {
         'skip_prediction': False,
         'significance': 0.01,
 
-        ##allplots
-        #http://docs.python.org/library/string.html#formatspec
+        # allplots
         'first_page_title': None,
 
-        'bp_per_page': 50000,
         'startBase': 0,
-
+        'basesPerGraph': 10000,
+        'graphsPerPage': 5,
+        'x-tics': 1000
         }
 
 
