@@ -7,15 +7,16 @@ CC = gcc
 
 SRC = $(shell find $(SRCDIR) | grep .c)
 OBJ = $(patsubst $(SRCDIR)/%.c, $(OBJDIR)/%.o, $(SRC))
-_PROGS = acgt_gamma AG Allplots atg extract gtg nprofile stops ttg
+_PROGS = acgt_gamma AG Allplots atg extract gtg nprofile stops ttg demoddna
 PROGS = $(patsubst %,$(BINDIR)/%,$(_PROGS))
 
 DEPS = $(shell find $(SRCDIR) | grep .h)
 DEPSO = $(pathsubs %,$(OBJDIR)/%.o,$(_DEPS))
 
-.PHONY: all clean init
+.PHONY: all
 
 all: init $(PROGS)
+
 clean:
 	rm -rf $(OBJDIR) $(BINDIR)
 
@@ -28,6 +29,11 @@ init:
 $(OBJDIR)/%.o: $(SRCDIR)/%.c $(DEPS)
 	$(CC) $(FLAGS) -c $< -o $@
 
+$(BINDIR)/nprofile: $(OBJDIR)/nprofile.o $(OBJDIR)/util.o
+	$(CC) $(FLAGS) -o $@ $^
+
+$(BINDIR)/demoddna: $(OBJDIR)/demoddna.o $(OBJDIR)/util.o
+	$(CC) $(FLAGS) -o $@ $^
 
 #Link acgt_gamma if the object file changes include lib m
 $(BINDIR)/acgt_gamma: $(OBJDIR)/acgt_gamma.o $(OBJDIR)/util.o
@@ -36,6 +42,7 @@ $(BINDIR)/acgt_gamma: $(OBJDIR)/acgt_gamma.o $(OBJDIR)/util.o
 #Allplots needs util and lib m
 $(BINDIR)/Allplots: $(OBJDIR)/Allplots.o $(OBJDIR)/util.o
 	$(CC) $(FLAGS) -o $@ $^  -lm
+
 
 #anything else can be linked with just its own object file.
 $(BINDIR)/%: $(OBJDIR)/%.o

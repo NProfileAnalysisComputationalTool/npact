@@ -9,44 +9,12 @@
 #include <math.h>
 #include <string.h>
 
+#include "util.h"
+
 #define ORDER 0
 
 const char usage[]= "\nUsage: [-b bases] input.gbk [start end [window_size step [period_of_frames]]]\nDefaults: start=1; end= end of genome sequence; window_size= 201; step= 51; period_of_frames= 3.\n";
 
-
-int mapfile(char* filename, char** addr, size_t* length) {
-   struct stat sb;
-   int fd;
-
-   fd = open(filename, O_RDONLY);
-   if (fd == -1) {
-      fprintf(stderr, "ERROR: Error opening '%s': ", filename);
-      perror(NULL);
-      return 1;
-   }
-
-   if (fstat (fd, &sb) == -1) {
-      perror("fstat");
-      return 1;
-   }
-
-   if (!S_ISREG (sb.st_mode)) {
-      fprintf (stderr, "%s is not a file\n", filename);
-      return 1;
-   }
-   *length = sb.st_size;
-   *addr = mmap (NULL, sb.st_size, PROT_READ, MAP_SHARED, fd, 0);
-   if (*addr == MAP_FAILED) {
-      perror ("mmap");
-      return 1;
-   }
-
-   if (close (fd) == -1) {
-      perror ("close");
-      return 1;
-   }
-   return 0;
-}
 
 void calculateProfile(const char* origin,
                       const char* bases, const int start, const int end,

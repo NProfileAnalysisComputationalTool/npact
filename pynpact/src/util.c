@@ -1,6 +1,9 @@
-# include <stdlib.h>
-# include <stdio.h>
-# include <string.h>
+#include <sys/mman.h>
+#include <stdlib.h>
+#include <stdio.h>
+#include <string.h>
+#include <fcntl.h>
+#include <sys/stat.h>
 
 #include "util.h"
 
@@ -8,7 +11,7 @@
 /* For use with logmsg, controls how verbose the message stream is. */
 int quiet = 0;
 
-/*
+/**
  * Read a line of arbitrary length from a file; strips the \n off the end.
  *
  * Returns a malloced null-terminated string, should be freed by caller.
@@ -45,7 +48,7 @@ char * np_getl(FILE * f) {
 /**********************************/
 /****  Function join_paths()   ****/
 /**********************************/
-/*
+/**
  * This function will join a directory base and filename semi-intelligently.
  *
  *
@@ -70,4 +73,43 @@ char* join_paths(char* base, char* filename) {
     //Finally add the filename
     strcat(returnfile, filename);
     return returnfile;
+}
+
+
+
+/**
+ * mapfile opens a whole file as an mmap segment, RO, shared
+ */
+int mapfile(char* filename, char** addr, size_t* length) {
+   struct stat sb;
+   int fd;
+
+   fd = open(filename, O_RDONLY);
+   if (fd == -1) {
+      fprintf(stderr, "ERROR: Error opening '%s': ", filename);
+      perror(NULL);
+      return 1;
+   }
+
+   if (fstat (fd, &sb) == -1) {
+      perror("fstat");
+      return 1;
+   }
+
+   if (!S_ISREG (sb.st_mode)) {
+      fprintf (stderr, "%s is not a file\n", filename);
+      return 1;
+   }
+   *length = sb.st_size;
+   *addr = mmap (NULL, sb.st_size, PROT_READ, MAP_SHARED, fd, 0);
+   if (*addr == MAP_FAILED) {
+      perror ("mmap");
+      return 1;
+   }
+
+   if (close (fd) == -1) {
+      perror ("close");
+      return 1;
+   }
+   return 0;
 }
