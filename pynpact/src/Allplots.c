@@ -192,7 +192,7 @@ main(int argc, char *argv[]) {
 
     char *unb_str=NULL, *con_str=NULL, *new_str=NULL, *newP_str=NULL, *cg_str=NULL,
         *pub_str=NULL, *mod_str=NULL, *block_str=NULL, *BLOCK_str=NULL,
-        *codpot_str=NULL, *codpot_col=NULL, *Scodpot_str=NULL, *Scodpot_col=NULL, *Scodpot_type=NULL,
+        *codpot_str=NULL, *codpot_col=NULL, *Scodpot_str=NULL, *Scodpot_col=NULL, **Scodpot_type=NULL,
         *met_str=NULL, *tata_str=NULL, *cap_str=NULL, *ccaa_str=NULL,
         *gcbox_str=NULL, *stop_str=NULL, *kozak_str=NULL;
 
@@ -412,13 +412,15 @@ main(int argc, char *argv[]) {
         if(input=fopen(Scodpot_file,"r")) {
             ++Scpf;
             while(fgets(longstr,198,input) && !feof(input)) {
-                Scodpot_str= (char *)realloc(Scodpot_str,(nScp+1)*sizeof(char));
-                Scodpot_col= (char *)realloc(Scodpot_col,(nScp+1)*sizeof(char));
-                Scodpot_type= (char *)realloc(Scodpot_type,(nScp+1)*sizeof(char));
-                Scodpot= (int **)realloc(Scodpot,(nScp+1)*sizeof(int *));
-                Scodpot[nScp]= (int *)malloc(2*sizeof(int));
-                Scodpot_type[nScp]= longstr[0];
-                p= strchr(longstr,'.');
+                Scodpot_str= (char *)realloc(Scodpot_str, (nScp + 1) * sizeof(char));
+                Scodpot_col= (char *)realloc(Scodpot_col, (nScp + 1) * sizeof(char));
+                Scodpot_type= (char **)realloc(Scodpot_type, (nScp + 1) * sizeof(char *));
+                Scodpot_type[nScp]= (char *)malloc(2 * sizeof(char));
+                Scodpot= (int **)realloc(Scodpot, (nScp + 1) * sizeof(int *));
+                Scodpot[nScp]= (int *)malloc(2 * sizeof(int));
+                Scodpot_type[nScp][0]= longstr[0];
+                Scodpot_type[nScp][1]= atoi(longstr[1]);
+                p= strchr(longstr, '.');
                 ge= atoi(p+2);
                 if(longstr[3]=='c') { gs= atoi(longstr+14); Scodpot_str[nScp]='C'; Scodpot_col[nScp]= gs%period; }
                 else if(longstr[3]=='r') { gs= atoi(longstr+10); Scodpot_str[nScp]='R'; }
@@ -923,11 +925,13 @@ main(int argc, char *argv[]) {
             fprintf(stdout,"%%!PS-Adobe-2.0\n\n");
             fprintf(stdout,"gsave\n");
             fprintf(stdout,"%d dict begin\n",DICT_SIZE);
-            fprintf(stdout,"/L2 { 2.0 setlinewidth } def\n");
-            fprintf(stdout,"/L15 { 1.5 setlinewidth } def\n");
-            fprintf(stdout,"/L1 { 1.0 setlinewidth } def\n");
-            fprintf(stdout,"/L05 { 0.5 setlinewidth } def\n");
             fprintf(stdout,"/L025 { 0.25 setlinewidth } def\n");
+            fprintf(stdout,"/L05 { 0.5 setlinewidth } def\n");
+            fprintf(stdout,"/L1 { 1.0 setlinewidth } def\n");
+            fprintf(stdout,"/L15 { 1.5 setlinewidth } def\n");
+            fprintf(stdout,"/L2 { 2.0 setlinewidth } def\n");
+            fprintf(stdout,"/L3 { 3.0 setlinewidth } def\n");
+            fprintf(stdout,"/L4 { 4.0 setlinewidth } def\n");
             fprintf(stdout,"/M {moveto} def\n");
             fprintf(stdout,"/L {lineto} def\n");
             fprintf(stdout,"/RM {rmoveto} def\n");
@@ -1612,24 +1616,30 @@ fprintf(stdout,"\n0 setlinejoin 0 setlinecap\n");
         /* Prints Hits */
         /***************/
 
-        if(nScp) fprintf(stdout,"\nL1 ");
+        if(nScp) fprintf(stdout,"\n");
 
-        for(i= 0; i < nScp; ++i) {
-            if(Scodpot_str[i] != 'R') {
+        for(i= 0; i < nScp; ++i)
+	{
+            if(Scodpot_str[i] != 'R')
+	    {
+// 1. Line width proportional to significance level.
+// 2. H-hits in full color; G-hits in light color.
+
+	    fprintf(stdout, "L%d ", Scodpot_type[i][1] + 1);
+
+		if(Scodpot_type[i][0] == 'G') fprintf(stdout, "L");
+
                 if(Scodpot_col[i] == 1) fprintf(stdout, "R");
                 else if(Scodpot_col[i] == 2) fprintf(stdout, "G");
                 else if(Scodpot_col[i] == 0) fprintf(stdout, "B");
             }
-
-	    if(Scodpot_type[i] == 'H') fprintf(stdout, " L2 ");
-	    else                       fprintf(stdout, " L1 ");
 
             if(Scodpot_str[i]=='D')
                 fprintf(stdout, " %.1f %.2f M %.1f %.2f L stroke\n", (Scodpot[i][0] - (float)start) / delta * WIDTH, HIGHT + HIGHT_SCP + 1.0, (Scodpot[i][1] - (float)start) / delta * WIDTH, HIGHT + HIGHT_SCP + 1.0);
             else if(Scodpot_str[i] == 'C')
                 fprintf(stdout, " %.1f %.2f M %.1f %.2f L stroke\n", (Scodpot[i][0] - (float)start) / delta * WIDTH, HIGHT + HIGHT_SCP - 1.0, (Scodpot[i][1] - (float)start) / delta * WIDTH, HIGHT + HIGHT_SCP - 1.0);
             else if(Scodpot_str[i] == 'R') {
-                fprintf(stdout, "Gray");
+                fprintf(stdout, "L1 Gray");
                 fprintf(stdout, " %.1f %.2f M %.1f %.2f L stroke\n", (Scodpot[i][0] - (float)start) / delta * WIDTH, HIGHT + HIGHT_SCP, (Scodpot[i][1] - (float)start) / delta * WIDTH, HIGHT + HIGHT_SCP);
             }
         }
