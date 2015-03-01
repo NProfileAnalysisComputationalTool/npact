@@ -1616,7 +1616,9 @@ fprintf(stdout,"\n0 setlinejoin 0 setlinecap\n");
         /* Prints Hits */
         /***************/
 
-        if(nScp) fprintf(stdout,"\n");
+    if(nScp)
+    {
+    fprintf(stdout,"\n");
 
         for(i= 0; i < nScp; ++i)
 	{
@@ -1642,7 +1644,14 @@ fprintf(stdout,"\n0 setlinejoin 0 setlinecap\n");
                 fprintf(stdout, "L1 Gray");
                 fprintf(stdout, " %.1f %.2f M %.1f %.2f L stroke\n", (Scodpot[i][0] - (float)start) / delta * WIDTH, HIGHT + HIGHT_SCP, (Scodpot[i][1] - (float)start) / delta * WIDTH, HIGHT + HIGHT_SCP);
             }
+        free(Scodpot_type[i]);
+        free(Scodpot[i]);
         }
+    free(Scodpot_str);
+    free(Scodpot_col);
+    free(Scodpot_type);
+    free(Scodpot);
+    }
 
         fprintf(stdout,"\nL05\n");
 
