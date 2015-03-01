@@ -7,6 +7,7 @@ module.exports = function(config){
       'npactweb/static/bower_components/angular-messages/angular-messages.min.js',
       'npactweb/static/bower_components/angular-sanitize/angular-sanitize.min.js',
       'npactweb/static/bower_components/angular-mocks/angular-mocks.js',
+      'npactweb/static/bower_components/angular-jquery-dialog-service/dialog-service.js',
       'npactweb/static/bower_components/kineticjs/kinetic.min.js',
       'npactweb/static/bower_components/lodash/lodash.min.js',
       'npactweb/static/bower_components/rtree/dist/rtree.min.js',

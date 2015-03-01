@@ -28,14 +28,13 @@ defaults = {
         'skip_prediction': False,
         'significance': 0.01,
 
-        ##allplots
-        #http://docs.python.org/library/string.html#formatspec
+        # allplots
         'first_page_title': None,
-        'following_page_title': 'Page {0}',
 
-        'bp_per_page': 50000,
         'startBase': 0,
-
+        'basesPerGraph': 10000,
+        'graphsPerPage': 5,
+        'x-tics': 1000
         }
 
 
@@ -127,6 +126,18 @@ def endBase(config):
     return config['endBase']
 
 
+def number(val):
+    try:
+        return int(val)
+    except ValueError:
+        pass
+    try:
+        return float(val)
+    except ValueError:
+        pass
+    return None
+
+
 def significance(config):
     if 'significance' in config:
         config['significance'] = float(config['significance'])
@@ -139,6 +150,12 @@ def first_page_title(config):
         detect_format(config)
         config['first_page_title'] = config.get('description', 'Unknown Genome')
     return config['first_page_title']
+
+
+def following_page_title(config):
+    if 'following_page_title' not in config:
+        config['following_page_title'] = 'Page {0}'
+    return config['following_page_title']
 
 
 def derive_filename(config, hash, newext):

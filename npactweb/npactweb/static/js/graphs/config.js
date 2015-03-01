@@ -17,12 +17,7 @@ angular.module('npact')
     _.forEach(PUBLIC_CONFIG_KEYS, function(k) {
       var v = $location.search()[k];
       if(v) {
-        try {
-          self[k] = Number(v);
-        }
-        catch(e) {
-          self[k] = v;
-        }
+        self[k] = !isNaN(Number(v)) ? Number(v) : v ;
       }
     });
 
@@ -60,7 +55,7 @@ angular.module('npact')
    * Get back a config dictionary (which automatically updates GraphConfig)
    */
   .factory('processOnServer', function(GraphConfig, KICKSTART_BASE_URL,
-                                PUBLIC_CONFIG_KEYS,
+                                PUBLIC_CONFIG_KEYS, Utils,
                                 $http, $log, $location) {
     'use strict';
     //The keys the server is going to accept from our GraphConfig
@@ -72,6 +67,7 @@ angular.module('npact')
         if(GraphConfig[k])
           postconfig[k] = GraphConfig[k];
       });
+      postconfig['x-tics'] = Utils.orderOfMagnitude(GraphConfig.basesPerGraph, -1);
 
       return $http.get(url, { cache: true, params: postconfig })
         .then(function(res) {

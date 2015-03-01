@@ -8,9 +8,10 @@ angular.module('npact')
       controllerAs: 'pageCtrl'
     };
   })
-  .controller('npactGraphPageCtrl', function($scope, $q, $log, $window,
-                                      Fetcher, FETCH_URL, EmailBuilder,
-                                      GraphConfig,  kickstarter) {
+
+  .controller('npactGraphPageCtrl', function($scope, $q, $log, $window, dialogService,
+                                      Fetcher, FETCH_URL, EmailBuilder, STATIC_BASE_URL,
+                                      GraphConfig,  kickstarter, processOnServer) {
     'use strict';
 
     $scope.FETCH_URL = FETCH_URL;
@@ -36,7 +37,8 @@ angular.module('npact')
     };
 
     this.print = function() {
-       $( "#printConfirm" ).dialog({
+      var printTemplate = STATIC_BASE_URL + 'js/graphs/printConfirm.html';
+      dialogService.open('printConfirm', printTemplate, null, {
          resizable: false,
          modal: true,
          buttons: {
@@ -50,20 +52,30 @@ angular.module('npact')
          }
        });
     };
+    this.requestPDF = function() {
+      processOnServer('allplots').catch(function(e) {
+        $log.error('Error requesting PDF:', e);
+      });
+    };
   })
 
-  .controller('DownloadsCtrl', function($scope, PredictionManager, processOnServer, MessageBus, $log) {
+  .controller('DownloadsCtrl', function($scope, $log, PredictionManager, MessageBus, Pynpact, StatusPoller, GraphConfig, STATIC_BASE_URL, dialogService) {
+    'use strict';
     $scope.$watch( function() { return PredictionManager.files; },
                    function(val) { $scope.predictionFiles = val; });
-    /*
-    if(config[Pynpact.PDF]) {
-        StatusPoller.start(config[Pynpact.PDF])
-        .then(function(pdfFilename) {
-          $log.log('PDF ready', pdfFilename);
-          pdffile = pdfFilename;
-        });
-    }
-      */
+    $scope.$watch(
+      function() { return GraphConfig[Pynpact.PDF]; },
+      function(pdfFilename) {
+        if(!pdfFilename) return;
+        var p = StatusPoller.start(pdfFilename)
+          .then(function(pdfFilename) {
+            $log.log('PDF ready', pdfFilename);
+            var dialogTemplate = STATIC_BASE_URL + 'js/graphs/pdfReady.html';
+            dialogService.open('pdfReady', dialogTemplate, { pdf: pdfFilename });
+            $scope.pdf = pdfFilename;
+          });
+        MessageBus.info("Generating PDF", p);
+      });
   })
 
   .service('kickstarter', function($q, $log, processOnServer, MessageBus,
@@ -176,6 +188,28 @@ angular.module('npact')
           waitOn.catch(function(e) {
             MessageBus.danger('Failure while identifying significant 3-base periodicities');
           }));
+      }
+    };
+  })
+
+  .directive('jqAccordion', function($log) {
+    'use strict';
+    return {
+      scope: true,
+      restrict: 'A',
+      link: function($scope, $element, $attrs) {
+        var defaults = {
+          heightStyle: "content",
+          collapsible: true,
+          active: 0
+        };
+        var opts = _.transform(defaults, function(acc, v, k, o) {
+          v = $attrs[k];
+          if(v) {
+            acc[k] = $scope.$eval(v);
+          }
+        }, defaults);
+        $($element).accordion(opts);
       }
     };
   })

@@ -17,15 +17,16 @@ statuslog = logging.getLogger('pynpact.statuslog')
 BIN = binfile('Allplots')
 
 KEYS = ['first_page_title', 'following_page_title',
-        'length', 'startBase', 'endBase', 'period', 'bp_per_page',
+        'length', 'startBase', 'endBase', 'period',
+        'basesPerGraph', 'graphsPerPage', 'x-tics',
         'nucleotides', 'alternate_colors', 'basename']
 FILE_KEYS = ['File_of_unbiased_CDSs',
              'File_of_conserved_CDSs',
              'File_of_new_CDSs',
-             'File_of_published_rejected_CDSs',               #switched with "file_of_potential_new_CDs"
+             'File_of_published_rejected_CDSs',
              'File_of_stretches_where_CG_is_asymmetric',
              'File_of_published_accepted_CDSs',
-             'File_of_potential_new_CDSs',                    #switched with "file_of_published_rejected_CDs"
+             'File_of_potential_new_CDSs',
              'File_of_blocks_from_new_ORFs_as_cds',
              'File_of_blocks_from_annotated_genes_as_cds',
              'File_of_GeneMark_regions',
@@ -64,16 +65,18 @@ def allplots(config, executor):
 
     parsing.length(config)
     parsing.first_page_title(config)
+    parsing.following_page_title(config)
     parsing.endBase(config)
 
     h = Hasher()
     # Strip down to the config for this task only
     rconfig = reducedict(config, KEYS + FILE_KEYS)
 
-    bp_per_page = rconfig['bp_per_page']
+    basesPerGraph = rconfig['basesPerGraph']
+    graphsPerPage = rconfig['graphsPerPage']
     startBase = rconfig.pop('startBase')
     endBase = rconfig.pop('endBase')
-
+    bp_per_page = rconfig['bp_per_page'] = basesPerGraph * graphsPerPage
     page_count = math.ceil(float(endBase - startBase) / bp_per_page)
     log.info("Generating %d pages of allplots", page_count)
     page_num = 1  # page number offset
@@ -88,7 +91,7 @@ def allplots(config, executor):
             pconfig['endBase'] = startBase + bp_per_page
         else:
             pconfig['endBase'] = endBase
-        h = Hasher().hashdict(pconfig).hashfiletime(BIN)
+        h = Hasher().hashdict(pconfig).hashfiletime(BIN).hashfiletime(__file__)
         psname = parsing.derive_filename(config, h.hexdigest(), 'ps')
         filenames.append(psname)
         waiton.extend(enqueue(_ap, executor, pconfig, psname, after=after))
@@ -110,9 +113,8 @@ def _ap(pconfig, out):
     # add the rest of the required args
     cmd += [pconfig['startBase'],
             pconfig['bp_per_page'],
-            # TODO: move these into config
-            5,     # lines on a page
-            1000,  # Number of subdivisions
+            pconfig['graphsPerPage'],
+            pconfig['x-tics'],
             pconfig['period'],
             pconfig['endBase']]
 
@@ -126,20 +128,29 @@ def _ap(pconfig, out):
 
 
 def write_allplots_def(out, pconfig, page_num):
+    """Write the configuration file for Allplots that it's expecting on stdin
+
+    Allplots used to check for 'Allplots.def' in the dcurrent
+    directory but we modified it to be able to read this configuration
+    on stdin, this writes in that format.
+
+    """
     parsing.first_page_title(pconfig)
+    parsing.following_page_title(pconfig)
 
     def wl(line):
         "helper function for writing a line to the allplots file."
         if line:
             out.write(line)
         out.write('\n')
+        log.debug('Allplots.def: %s', line)
 
     # NB: the "Plot Title" is disregarded, but that line
     # should also contain the total number of bases
     wl("%s %d" % ("FOOBAR", pconfig['length']))
 
-    # Nucleotide(s)_plotted (e.g.: C+G)
-    wl('+'.join(pconfig['nucleotides']))
+    # Nucleotide(s)_plotted (e.g.: `% CG`)
+    wl(''.join(pconfig['nucleotides']))
     # First-Page title
     wl(pconfig['first_page_title'].format(page_num))
     # Title of following pages

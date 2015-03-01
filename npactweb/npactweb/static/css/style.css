@@ -187,7 +187,7 @@ width:550px;
 }
 
 /*\*/#footerHome span {
-background:url(http://images.webadmin.ufl.edu/signatures/UF-Signature-Themeline.gif) 0 0 no-repeat;
+background:url(//images.webadmin.ufl.edu/signatures/UF-Signature-Themeline.gif) 0 0 no-repeat;
 height:54px;
 position:absolute;
 right:0;
@@ -351,7 +351,7 @@ button.Start { clear:both; margin: 8px;}
 
 /* ****** For the processing page ****** */
 #progress .ui-icon { float:left;  margin-right: .5em;}
-#progress h3 { color:#0021A5;margin-left:4px; }
+
 #progress h3 + div { padding-left: 16px; }
 #progress h4 { margin-top: 6px; color:#FF4A00; }
 
@@ -452,5 +452,4 @@ button.Start { clear:both; margin: 8px;}
 .pointer:hover { cursor: pointer; }
 
 #printControls { float: right; }
-#printConfirm { display: none; }
 #printConfirm p {text-align: left; margin-top: 10px;}

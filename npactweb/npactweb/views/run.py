@@ -5,7 +5,6 @@ import os.path
 import json
 
 from django.conf import settings
-from django.contrib import messages
 from django.core.urlresolvers import reverse
 from django.http import HttpResponseRedirect, HttpResponse
 from django.shortcuts import render_to_response
@@ -43,7 +42,8 @@ def get_result_link(path):
 MAGIC_PARAMS = ('raiseerror', 'force')
 
 VALID_KEYS = ('first_page_title', 'following_page_title', 'nucleotides',
-              'significance', 'alternate_colors', 'startBase', 'endBase')
+              'significance', 'alternate_colors', 'startBase', 'endBase',
+              'basesPerGraph', 'x-tics')
 
 
 def build_config(path, request):
@@ -57,18 +57,16 @@ def build_config(path, request):
 
     parsing.detect_format(config)
     for k in VALID_KEYS:
-        if k in request.GET and request.GET[k]:
-            config[k] = request.GET[k]
+        v = request.GET.get(k)
+        if v:
+            nv = parsing.number(v)
+            config[k] = v if nv is None else nv
+    parsing.endBase(config)
+
     # fixup nucleotides list
     if 'nucleotides' in request.GET:
         logger.info("nucleotides: %r", request.GET.getlist('nucleotides'))
         config['nucleotides'] = request.GET.getlist('nucleotides')
-
-    # These need to be converted to ints
-    parsing.startBase(config)
-    parsing.endBase(config)
-    parsing.first_page_title(config)
-    parsing.significance(config)
 
     for key in MAGIC_PARAMS:
         if key in request.GET:
