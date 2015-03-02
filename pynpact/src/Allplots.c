@@ -1347,33 +1347,6 @@ fprintf(stdout,"Black %.3f %.3f M (Input file CDS) Lshow\n",-15.0,HIGHT+HIGHT_PU
 
         /* Prints stops */
 
-        /*
-
-          for(i=0;i<ns;++i)
-          if(stop_str[i]=='D')
-          {
-          if(conf)
-          {
-          fprintf(stdout,"%.3f %.3f M (Conserved) Lshow\n",-15.0,HIGHT+HIGHT_HOM-2);
-          fprintf(stdout," L025 LightGray\n");
-          fprintf(stdout,"0 %.3f M %.3f 0 RL stroke\n",HIGHT+HIGHT_HOM+1.5,(end-start)/delta*WIDTH);
-          fprintf(stdout,"0 %.3f M %.3f 0 RL stroke\n",HIGHT+HIGHT_HOM-1.5,(end-start)/delta*WIDTH);
-          fprintf(stdout," Black\n");
-          }
-          if(newf) fprintf(stdout,"%.3f %.3f M (Mrazek-Karlin annotation) Lshow\n",-15.0,HIGHT+HIGHT_NEW-2);
-
-          fprintf(stdout,"/Helvetica-Roman findfont LegendFontSize scalefont setfont Black\n");
-          if(k == (lines - 1) || (end-start) < line_range) fprintf(stdout,"%.3f %.3f M (Sequence position / nt) Cshow\n", 0.5 * WIDTH, -40.0);
-          fprintf(stdout,"90 rotate %.3f %.3f M (%% %s) Cshow -90 rotate\n",0.5*HIGHT,40.0,NUCLEOTIDES);
-
-
-          fprintf(stdout,"stroke DarkGray\n");
-
-          fprintf(stdout,"%.1f %.2f M\n",(x[0]-(float)start)/delta*WIDTH,HIGHT*y[0][period]/MAX);
-          for(i=1;i<n;++i)
-          fprintf(stdout,"%.1f %.2f L\n",(x[i]-(float)start)/delta*WIDTH,HIGHT*y[i][period]/MAX);
-        */
-
         /****************************************/
         /* Prints S-profiles from small windows */
         /****************************************/
@@ -1614,9 +1587,9 @@ fprintf(stdout,"\n0 setlinejoin 0 setlinecap\n");
         }
 
 
-        /***************************************************************/
-        /* Prints blocks of homology between potential new genes genes */
-        /***************************************************************/
+        /*********************************************************/
+        /* Prints blocks of homology between potential new genes */
+        /*********************************************************/
 
         for(i=0;i<nb;++i) {
             if(block_str[i]=='D') {
