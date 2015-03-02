@@ -1681,13 +1681,13 @@ fprintf(stdout,"\n0 setlinejoin 0 setlinecap\n");
                 fprintf(stdout, "L1 Gray");
                 fprintf(stdout, " %.1f %.2f M %.1f %.2f L stroke\n", (Scodpot[i][0] - (float)start) / delta * WIDTH, HIGHT + HIGHT_SCP, (Scodpot[i][1] - (float)start) / delta * WIDTH, HIGHT + HIGHT_SCP);
             }
-        free(Scodpot_type[i]);
-        free(Scodpot[i]);
+        free(Scodpot_type[i]); Scodpot_type[i] = NULL;
+        free(Scodpot[i]); Scodpot[i] = NULL;
         }
-    free(Scodpot_str);
-    free(Scodpot_col);
-    free(Scodpot_type);
-    free(Scodpot);
+    free(Scodpot_str); Scodpot_str = NULL;
+    free(Scodpot_col); Scodpot_col = NULL;
+    free(Scodpot_type); Scodpot_type = NULL;
+    free(Scodpot); Scodpot = NULL;
     }
 
         fprintf(stdout,"\nL05\n");
