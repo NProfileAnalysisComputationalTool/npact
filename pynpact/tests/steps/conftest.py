@@ -1,13 +1,11 @@
-import os.path
 import pytest
-import py
-
-from taskqueue import get_ServerManager
+import taskqueue
 
 
-@pytest.fixture()
+@pytest.fixture(scope="session")
 def async_executor(request):
-    sm = get_ServerManager(make_server=True)
+    taskqueue.LISTEN_ADDRESS = ('127.0.1.1', 57129)
+    sm = taskqueue.get_ServerManager(make_server=True)
     sm.start()
     request.addfinalizer(sm.shutdown)
     return sm.Server()
