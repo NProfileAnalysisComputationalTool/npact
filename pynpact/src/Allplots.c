@@ -168,6 +168,7 @@ main(int argc, char *argv[]) {
     int	i, j, k, d, n, N, nub, nc, nn, nnP, np, ne, nb, ns, ncg, nB, ncp, nScp,
         nm, nk, nt, ncap, ncca, ngcb, gs, ge, lp, len, swflag=1,
         start, end, pos, name_pos, name_len, line_range,
+        expand=0,
         unbf=0, conf=0, newf=0, newPf=0, cgf=0, cpf= 0, Scpf= 0, npali= 0, wind,
         pub_line[300 + 2 * HANGOVER], new_line[300 + 2 * HANGOVER],
         exc_line[300 + 2 * HANGOVER], newP_line[300 + 2 * HANGOVER],
@@ -408,26 +409,33 @@ main(int argc, char *argv[]) {
         if(input=fopen(Scodpot_file,"r")) {
             logmsg(10, "Reading Scodpot_file %s\n", Scodpot_file);
             ++Scpf;
+            expand = 1;
             while(fgets(longstr,198,input) && !feof(input)) {
-                Scodpot_str= (char *)realloc(Scodpot_str, (nScp + 1) * sizeof(char));
-                Scodpot_col= (char *)realloc(Scodpot_col, (nScp + 1) * sizeof(char));
-                Scodpot_type= (char **)realloc(Scodpot_type, (nScp + 1) * sizeof(char *));
-                Scodpot_type[nScp]= (char *)malloc(2 * sizeof(char));
-                Scodpot= (int **)realloc(Scodpot, (nScp + 1) * sizeof(int *));
-                Scodpot[nScp]= (int *)malloc(2 * sizeof(int));
+                if(expand) {
+                    Scodpot_str= (char *)realloc(Scodpot_str, (nScp + 1) * sizeof(char));
+                    Scodpot_col= (char *)realloc(Scodpot_col, (nScp + 1) * sizeof(char));
+                    Scodpot_type= (char **)realloc(Scodpot_type, (nScp + 1) * sizeof(char *));
+                    Scodpot_type[nScp]= (char *)malloc(2 * sizeof(char));
+                    Scodpot= (int **)realloc(Scodpot, (nScp + 1) * sizeof(int *));
+                    Scodpot[nScp]= (int *) calloc(2, sizeof(int));
+                }
                 Scodpot_type[nScp][0]= longstr[0];
-                Scodpot_type[nScp][1]= atoi(longstr[1]);
+                Scodpot_type[nScp][1]= atoi(longstr + 1);
                 p= strchr(longstr, '.');
                 ge= atoi(p+2);
                 if(longstr[3]=='c') { gs= atoi(longstr+14); Scodpot_str[nScp]='C'; Scodpot_col[nScp]= gs%period; }
                 else if(longstr[3]=='r') { gs= atoi(longstr+10); Scodpot_str[nScp]='R'; }
                 else { gs= atoi(longstr + 3); Scodpot_str[nScp]='D'; Scodpot_col[nScp]= ge%period; }
+                expand = 1;   // Should we expand again next lop?
                 if(gs>=start && gs<end && ge>start && ge<=end) { Scodpot[nScp][0]= gs; Scodpot[nScp][1]= ge; ++nScp; }
                 else if(gs>=start && gs<end && ge>end) { Scodpot[nScp][0]= gs; Scodpot[nScp][1]= end; ++nScp; }
                 else if(ge<=end && ge>start && gs<start)
                 { Scodpot[nScp][0]= start; Scodpot[nScp][0] += gs%period-Scodpot[nScp][0]%period; Scodpot[nScp][1]= ge; ++nScp; }
                 else if(gs<start && ge>end)
                 { Scodpot[nScp][0]= start; Scodpot[nScp][0] += gs%period-Scodpot[nScp][0]%period; Scodpot[nScp][1]= end; ++nScp; }
+                else {
+                    expand = 0; // didn't use the current slot, don't need to expand
+                }
             }
             fclose(input);
         }
@@ -653,39 +661,44 @@ main(int argc, char *argv[]) {
         if(input= fopen(new_file,"r")) {
             logmsg(10, "Reading new_file %s\n", new_file);
             newf= 1;
+            expand = 1;
             while(fgets(longstr,198,input) && !feof(input)) {
-                new_name= (char **)realloc(new_name, (nn + 1) * sizeof(char *));
-                new_name[nn]= (char *)malloc(50 * sizeof(char *));
-                new_str= (char *)realloc(new_str, (nn + 1) * sizeof(char));
-                new= (int **)realloc(new, (nn + 1)*sizeof(int *));
-                new[nn]= (int *)malloc(2 * sizeof(int));
+                if(expand) {
+                    new_name= (char **)realloc(new_name, (nn + 1) * sizeof(char *));
+                    new_name[nn]= (char *)malloc(50 * sizeof(char *));
+                    new_str= (char *)realloc(new_str, (nn + 1) * sizeof(char));
+                    new= (int **)realloc(new, (nn + 1)*sizeof(int *));
+                    new[nn]= (int *)malloc(2 * sizeof(int));
+                }
                 strncpy(new_name[nn], longstr, 48);
                 p= strchr(new_name[nn], ' ');
                 p[0]= '\0';
-		p= strrchr(longstr, ' '); ++p;
+                p= strrchr(longstr, ' '); ++p;
                 p= strchr(p, '.'); p += 2;
-			if(p[0] == '>' || p[0] == '<') ++p;
+                if(p[0] == '>' || p[0] == '<') ++p;
                 ge= atoi(p);
-		p= strrchr(longstr, ' '); ++p;
-                if(p[0] == 'c')
-		{
-		p += 11;
-			if(p[0] == '>' || p[0] == '<') ++p;
-		gs= atoi(p);
-		new_str[nn]='C';
-		}
-                else
-		{
-			if(p[0] == '>' || p[0] == '<') ++p;
-		gs= atoi(p);
-		new_str[nn]='D';
-		}
+                p= strrchr(longstr, ' '); ++p;
+                if(p[0] == 'c') {
+                    p += 11;
+                    if(p[0] == '>' || p[0] == '<') ++p;
+                    gs= atoi(p);
+                    new_str[nn]='C';
+                }
+                else {
+                    if(p[0] == '>' || p[0] == '<') ++p;
+                    gs= atoi(p);
+                    new_str[nn]='D';
+                }
+                expand = 1;   // Should we expand again next lop?
                 if(gs >= start - line_range / 50 && gs < end && ge <= end + line_range / 50) { new[nn][0]= gs; new[nn][1]= ge; ++nn; }
                 else if(gs >= start - line_range / 50 && gs < end && ge > end + line_range / 50) { new[nn][0]= gs; new[nn][1]= end + line_range / 50; ++nn; }
                 else if(ge <= end + line_range / 50 && ge > start && gs < start - line_range / 50)
                 { new[nn][0]= start - line_range / 50; new[nn][0] += gs % period - new[nn][0] % period; new[nn][1]= ge; ++nn; }
                 else if(gs < start - line_range / 50 && ge > end + line_range / 50)
                 { new[nn][0]= start - line_range / 50; new[nn][0] += gs % period - new[nn][0] % period; new[nn][1]= end + line_range / 50; ++nn; }
+                else {
+                    expand = 0; // didn't use the current slot, don't need to expand
+                }
             }
             fclose(input);
         }
@@ -698,36 +711,42 @@ main(int argc, char *argv[]) {
             newPf= 1;
             /* Header line not printed in current version of acgt_gamma */
 //          fgets(longstr, 198, input);
+            expand = 1;
             while(fgets(longstr,198,input) && !feof(input)) {
-                newP_name= (char **)realloc(newP_name, (nnP + 1) * sizeof(char *));
-                newP_name[nnP]= (char *)malloc(50 * sizeof(char *));
-                newP_str= (char *)realloc(newP_str, (nnP + 1) * sizeof(char));
-                newP= (int **)realloc(newP, (nnP + 1) * sizeof(int *));
-                newP[nnP]= (int *)malloc(2 * sizeof(int));
+                if(expand) {
+                    newP_name= (char **)realloc(newP_name, (nnP + 1) * sizeof(char *));
+                    newP_name[nnP]= (char *)malloc(50 * sizeof(char *));
+                    newP_str= (char *)realloc(newP_str, (nnP + 1) * sizeof(char));
+                    newP= (int **)realloc(newP, (nnP + 1) * sizeof(int *));
+                    newP[nnP]= (int *)malloc(2 * sizeof(int));
+                }
                 strncpy(newP_name[nnP], longstr, 48);
                 p= strchr(newP_name[nnP], ' ');
                 p[0]= '\0';
-		p= strrchr(longstr, ' '); ++p;
+                p= strrchr(longstr, ' '); ++p;
                 p= strchr(p, '.');
                 ge= atoi(p + 2);
-		p= strrchr(longstr, ' '); ++p;
-                if(p[0] == 'c')
-		{
-		p += 11;
-		gs= atoi(p);
-		newP_str[nnP]= 'C';
-		}
-                else
-		{
-		gs= atoi(p);
-		newP_str[nnP]= 'D';
-		}
+                p= strrchr(longstr, ' '); ++p;
+                if(p[0] == 'c') {
+                    p += 11;
+                    gs= atoi(p);
+                    newP_str[nnP]= 'C';
+                }
+                else {
+                    gs= atoi(p);
+                    newP_str[nnP]= 'D';
+                }
+                expand = 1;   // Should we expand again next lop?
+
                 if(gs >= start - line_range / 50 && gs < end && ge <= end + line_range / 50) { newP[nnP][0]= gs; newP[nnP][1]= ge; ++nnP; }
                 else if(gs >= start - line_range / 50 && gs < end && ge > end + line_range / 50) { newP[nnP][0]= gs; newP[nnP][1]= end + line_range / 50; ++nnP; }
                 else if(ge <= end + line_range / 50 && ge > start && gs < start - line_range / 50)
                 { newP[nnP][0]= start - line_range / 50; newP[nnP][0] += gs % period - newP[nnP][0] % period; newP[nnP][1]= ge; ++nnP; }
                 else if(gs < start - line_range / 50 && ge > end + line_range / 50)
                 { newP[nnP][0]= start - line_range / 50; newP[nnP][0] += gs % period - newP[nnP][0] % period; newP[nnP][1]= end + line_range / 50; ++nnP; }
+                else {
+                    expand = 0; // didn't use the current slot, don't need to expand
+                }
             }
             fclose(input);
         }
@@ -761,33 +780,36 @@ main(int argc, char *argv[]) {
 
         if(input= fopen(pub_file,"r")) {
             logmsg(10, "Reading pub_file %s\n", pub_file);
+            expand = 1;
             while(fgets(longstr, 198, input) && !feof(input)) {
-                pub_name= (char **)realloc(pub_name, (np + 1) * sizeof(char *));
-                pub_name[np]= (char *)malloc(50 * sizeof(char *));
-                pub_str= (char *)realloc(pub_str, (np + 1) * sizeof(char));
-                pub= (int **)realloc(pub, (np + 1) * sizeof(int *));
-                pub[np]= (int *)malloc(2 * sizeof(int));
+                if(expand) {
+                    pub_name= (char **)realloc(pub_name, (np + 1) * sizeof(char *));
+                    pub_name[np]= (char *)malloc(50 * sizeof(char *));
+                    pub_str= (char *)realloc(pub_str, (np + 1) * sizeof(char));
+                    pub= (int **)realloc(pub, (np + 1) * sizeof(int *));
+                    pub[np]= (int *)malloc(2 * sizeof(int));
+                }
                 strncpy(pub_name[np], longstr, 48);
                 p= strchr(pub_name[np],' ');
                 p[0]= '\0';
-		p= strrchr(longstr, ' '); ++p;
+                p= strrchr(longstr, ' '); ++p;
                 p= strchr(p, '.'); p += 2;
-			if(p[0] == '>' || p[0] == '<') ++p;
+                if(p[0] == '>' || p[0] == '<') ++p;
                 ge= atoi(p);
-		p= strrchr(longstr, ' '); ++p;
-                if(p[0]=='c')
-		{
-		p += 11;
-			if(p[0] == '>' || p[0] == '<') ++p;
-		gs= atoi(p);
-		pub_str[np]='C';
-		}
-                else
-		{
-			if(p[0] == '>' || p[0] == '<') ++p;
-		gs= atoi(p);
-		pub_str[np]='D';
-		}
+                p= strrchr(longstr, ' '); ++p;
+                if(p[0]=='c') {
+                    p += 11;
+                    if(p[0] == '>' || p[0] == '<') ++p;
+                    gs= atoi(p);
+                    pub_str[np]='C';
+                }
+                else {
+                    if(p[0] == '>' || p[0] == '<') ++p;
+                    gs= atoi(p);
+                    pub_str[np]='D';
+                }
+
+                expand = 1;   // Should we expand again next lop?
                 if(gs >= start - line_range / 50 && gs < end && ge <= end + line_range / 50 && ge > start) { 
                     pub[np][0] = gs;
                     pub[np][1] = ge;
@@ -809,6 +831,9 @@ main(int argc, char *argv[]) {
                     pub[np][0] += gs % period - pub[np][0] % period;
                     pub[np][1]  = end + line_range / 50;
                     ++np;
+                }
+                else {
+                    expand = 0; // didn't use the current slot, don't need to expand
                 }
             }
             fclose(input);
