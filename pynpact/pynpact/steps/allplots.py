@@ -122,12 +122,15 @@ def _ap(pconfig, out):
             cmd, stdin=PIPE, stdout=out, stderr=False,
             logger=log) as ap:
         # write the allplots.def file information through stdin.
-        write_allplots_def(ap.stdin, pconfig, page_num)
+        apdef = build_allplots_def(pconfig, page_num)
+        log.debug("Writing Allplots.def:\n%s", apdef)
+        ap.stdin.write(apdef)
         ap.stdin.close()
         ap.wait()
+        log.debug("Finished allplots with rc %s", ap.returncode)
 
 
-def write_allplots_def(out, pconfig, page_num):
+def build_allplots_def(pconfig, page_num):
     """Write the configuration file for Allplots that it's expecting on stdin
 
     Allplots used to check for 'Allplots.def' in the dcurrent
@@ -137,13 +140,8 @@ def write_allplots_def(out, pconfig, page_num):
     """
     parsing.first_page_title(pconfig)
     parsing.following_page_title(pconfig)
-
-    def wl(line):
-        "helper function for writing a line to the allplots file."
-        if line:
-            out.write(line)
-        out.write('\n')
-        log.debug('Allplots.def: %s', line)
+    lines = []
+    wl = lines.append
 
     # NB: the "Plot Title" is disregarded, but that line
     # should also contain the total number of bases
@@ -160,6 +158,7 @@ def write_allplots_def(out, pconfig, page_num):
         # allplots doesn't like blank lines so make sure there is at
         # least a dummy value on every line.
         wl(pconfig.get(k, "None"))
+    return '\n'.join(lines)
 
 
 def combine_ps_files(config, executor):
