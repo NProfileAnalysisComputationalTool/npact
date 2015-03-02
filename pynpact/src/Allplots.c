@@ -1129,10 +1129,10 @@ fprintf(stdout,"Black %.3f %.3f M (Input file CDS) Lshow\n",-15.0,HIGHT+HIGHT_PU
         // Prints HSSs
 
         if(Scpf) {
-            fprintf(stdout,"%.3f %.3f M (Hits) Lshow\n",-15.0,HIGHT+HIGHT_SCP-2);
+            fprintf(stdout,"%.3f %.3f M (Hits) Lshow\n",-15.0, HIGHT + HIGHT_SCP - 2);
             fprintf(stdout,"L025 LightGray\n");
-            fprintf(stdout,"-4 %.3f M %.3f 0 RL -3 +3 RL stroke\n",HIGHT+HIGHT_SCP+1,(end-start)/delta*WIDTH+8);
-            fprintf(stdout,"-1 %.3f -3 add M -3 3 RL %.3f 0 RL stroke\n",HIGHT+HIGHT_SCP-1,(end-start)/delta*WIDTH+8);
+            fprintf(stdout,"-4 %.3f M %.3f 0 RL -3 +3 RL stroke\n",HIGHT + HIGHT_SCP + 2, (end - start) / delta * WIDTH + 8);
+            fprintf(stdout,"-1 %.3f -3 add M -3 3 RL %.3f 0 RL stroke\n", HIGHT + HIGHT_SCP - 2,(end - start) / delta * WIDTH + 8);
             fprintf(stdout," Black\n");
         }
 
@@ -1647,9 +1647,9 @@ fprintf(stdout,"\n0 setlinejoin 0 setlinecap\n");
             }
 
             if(Scodpot_str[i]=='D')
-                fprintf(stdout, " %.1f %.2f M %.1f %.2f L stroke\n", (Scodpot[i][0] - (float)start) / delta * WIDTH, HIGHT + HIGHT_SCP + 1.0, (Scodpot[i][1] - (float)start) / delta * WIDTH, HIGHT + HIGHT_SCP + 1.0);
+                fprintf(stdout, " %.1f %.2f M %.1f %.2f L stroke\n", (Scodpot[i][0] - (float)start) / delta * WIDTH, HIGHT + HIGHT_SCP + 2.0, (Scodpot[i][1] - (float)start) / delta * WIDTH, HIGHT + HIGHT_SCP + 2.0);
             else if(Scodpot_str[i] == 'C')
-                fprintf(stdout, " %.1f %.2f M %.1f %.2f L stroke\n", (Scodpot[i][0] - (float)start) / delta * WIDTH, HIGHT + HIGHT_SCP - 1.0, (Scodpot[i][1] - (float)start) / delta * WIDTH, HIGHT + HIGHT_SCP - 1.0);
+                fprintf(stdout, " %.1f %.2f M %.1f %.2f L stroke\n", (Scodpot[i][0] - (float)start) / delta * WIDTH, HIGHT + HIGHT_SCP - 2.0, (Scodpot[i][1] - (float)start) / delta * WIDTH, HIGHT + HIGHT_SCP - 2.0);
             else if(Scodpot_str[i] == 'R') {
                 fprintf(stdout, "L1 Gray");
                 fprintf(stdout, " %.1f %.2f M %.1f %.2f L stroke\n", (Scodpot[i][0] - (float)start) / delta * WIDTH, HIGHT + HIGHT_SCP, (Scodpot[i][1] - (float)start) / delta * WIDTH, HIGHT + HIGHT_SCP);
