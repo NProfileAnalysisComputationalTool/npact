@@ -158,7 +158,7 @@ def build_allplots_def(pconfig, page_num):
         # allplots doesn't like blank lines so make sure there is at
         # least a dummy value on every line.
         wl(pconfig.get(k, "None"))
-    return '\n'.join(lines)
+    return '\n'.join(lines) + '\n'
 
 
 def combine_ps_files(config, executor):

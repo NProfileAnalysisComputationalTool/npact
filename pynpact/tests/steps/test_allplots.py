@@ -1,7 +1,4 @@
 import os.path
-import pytest
-import py
-import StringIO
 from pynpact import parsing
 from pynpact.steps import allplots
 from pynpact.util import which
@@ -12,11 +9,9 @@ def test_binfile_exists():
     assert os.path.exists(allplots.BIN)
 
 
-def test_write_allplotsdef(gbkconfig):
+def test_build_allplotsdef(gbkconfig):
     parsing.length(gbkconfig)
-    buf = StringIO.StringIO()
-    allplots.write_allplots_def(buf, gbkconfig, 1)
-    lines = buf.getvalue().split('\n')
+    lines = allplots.build_allplots_def(gbkconfig, 1).split('\n')
     assert 26 == len(lines)
 
 
