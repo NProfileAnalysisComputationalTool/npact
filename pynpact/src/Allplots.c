@@ -388,7 +388,7 @@ int main(int argc, char *argv[]) {
 
 // READS FILE OF GENEMARK CODING POTENTIALS
 
-/*
+
         if((input=fopen(codpot_file, "r"))) {
             logmsg(10, "Reading codpot_file %s\n", codpot_file);
             ++cpf;
@@ -410,7 +410,7 @@ int main(int argc, char *argv[]) {
             fclose(input);
         }
         else logmsg(10, "File of GeneMark coding potential %s NOT read\n", codpot_file);
-*/
+
 
 // READS FILE OF HITS
 
@@ -593,7 +593,7 @@ int main(int argc, char *argv[]) {
 
 // READS FILE OF UNBIASED ORFS
 
-/*
+
         if((input= fopen(unb_file,"r"))) {
             logmsg(10, "Reading unb_file %s\n", unb_file);
             unbf= 1;
@@ -628,12 +628,12 @@ int main(int argc, char *argv[]) {
             fclose(input);
         }
         else logmsg(10,"Acc file NOT read\n") ;
-*/
+
 
 
 // READS FILE OF CONSERVED ORFS
 
-/*
+
         if((input= fopen(con_file,"r"))) {
             logmsg(10, "Reading con_file %s\n", con_file);
             conf= 1;
@@ -668,7 +668,7 @@ int main(int argc, char *argv[]) {
             fclose(input);
         }
         else logmsg(10,"Conserved file NOT read\n") ;
-*/
+
 
 // READS FILE OF NEW PROPOSED CODING REGIONS
 
@@ -770,7 +770,7 @@ int main(int argc, char *argv[]) {
 
 // READS FILE OF BLOCKS OF CONTRASTING S_PATTERNS
 
-/*
+
         if((input= fopen(cg_file,"r"))) { cgf= 1;
             logmsg(10, "Reading cg_file %s\n", cg_file);
             while(fgets(longstr,198,input) && !feof(input)) {
@@ -790,7 +790,7 @@ int main(int argc, char *argv[]) {
             fclose(input);
         }
         else logmsg(10,"Files with blocks of asymmetric CG content NOT read\n") ;
-*/
+
 
 // READS FILE OF ACCEPTED PUBLIC GENES
 
@@ -861,7 +861,7 @@ int main(int argc, char *argv[]) {
 // FILE OF NEW PREDICTIONS MODIFYING START OF TRANSLATION OF ANNOTATED GENES
 // IS READ INSTEAD INTO NEW POTENTIAL CODING REGIONS (newP* variables)
 
-/*
+
         if((input= fopen(mod_file,"r"))) {
             logmsg(10, "Reading modified-predictions file %s\n", mod_file);
 // Skip passed the header line
@@ -921,9 +921,9 @@ int main(int argc, char *argv[]) {
             logmsg(10,"Modified file %s read\n", mod_file);
         }
         else logmsg(10,"Modified file NOT read\n") ;
-*/
 
-// FILE OF S-PROFILES
+
+// READS FILE OF S-PROFILES
 
         if((input= fopen(CG200_file,"r"))) {
             logmsg(10, "Reading CG200_file %s\n", CG200_file);
@@ -1680,10 +1680,10 @@ fprintf(stdout,"\n0 setlinejoin 0 setlinecap\n");
                 fprintf(stdout, " %.1f %.2f M %.1f %.2f L stroke\n", (Hits[i * 2 + 0] - (float)start) / delta * WIDTH, HIGHT + HIGHT_SCP, (Hits[i * 2 + 1] - (float)start) / delta * WIDTH, HIGHT + HIGHT_SCP);
             }
         }
-    free(Hits_str); Hits_str = NULL;
-    free(Hits_col); Hits_col = NULL;
-    free(Hits_type); Hits_type = NULL;
-    free(Hits); Hits = NULL;
+    free(Hits_str); Hits_str= NULL;
+    free(Hits_col); Hits_col= NULL;
+    free(Hits_type); Hits_type= NULL;
+    free(Hits); Hits= NULL;
     }
 
         fprintf(stdout,"\nL05\n");
