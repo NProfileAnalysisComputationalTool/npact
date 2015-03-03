@@ -5,13 +5,13 @@
     <a href="#" ng-click="pageCtrl.print()" class="btn md-text">
       <span class="ui-icon ui-icon-print"></span>
       Print
-    </a>
+    </a> 
     <span ng-if="printCounter">
       <img ng-src="{{STATIC_BASE_URL}}images/spinner.gif" class="spinner"/>
       waiting on {{printCounter}} rows to finish
     </span>
 
-    <a href="#" ng-click="pageCtrl.requestPDF()" class="btn md-text">Request PDF</a>
+    &nbsp;<a href="#" ng-click="pageCtrl.requestPDF()" class="btn md-text">Request PDF</a>&nbsp;
   </div>
   <h2 ng-model="gc.first_page_title" contenteditable strip-br="true"></h2>
   <div id="progressreport">
