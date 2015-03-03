@@ -156,7 +156,7 @@ return(n);
 /*********************************************/
 
 
-main(int argc, char *argv[]) {
+int main(int argc, char *argv[]) {
     /* For cmd line argument parsing. */
     char* opt;
     int argi = 1;
