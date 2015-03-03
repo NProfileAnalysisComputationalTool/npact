@@ -166,7 +166,7 @@ int main(int argc, char *argv[]) {
     /* other counters, values, variables for the program */
 
     int	i, j, k, d, n, N, nub, nc, nn, nnP, np, ne, nb, ns, ncg, nB, ncp, nScp,
-        nm, nk, nt, ncap, ncca, ngcb, gs, ge, lp, len, swflag=1,
+        nm, nk, nt, ncap, ncca, ngcb, gs, ge, lp, len, swflag=0,
         start, end, pos, name_pos, name_len, line_range,
         expand=0,
         unbf=0, conf=0, newf=0, newPf=0, cgf=0, cpf= 0, Scpf= 0, npali= 0, wind,
@@ -340,7 +340,9 @@ int main(int argc, char *argv[]) {
         if(end > tend) end = tend;
         if(end < start) break;
 
+// BLOCK_file and block_file excluded
 
+/*
         if((input=fopen(BLOCK_file,"r"))) {
             logmsg(10, "Reading BLOCK_file %s\n", BLOCK_file);
             while(fgets(longstr,198,input) && !feof(input)) {
@@ -382,6 +384,7 @@ int main(int argc, char *argv[]) {
             fclose(input);
         }
         else logmsg(10, "File of new blocks %s NOT read\n", block_file);
+*/
 
         if((input=fopen(codpot_file, "r"))) {
             logmsg(10, "Reading codpot_file %s\n", codpot_file);
@@ -702,7 +705,7 @@ int main(int argc, char *argv[]) {
         }
         else logmsg(10,"New file NOT read\n") ;
 
-        /* READS FILE OF NEW PREDICTION CORRESPONDING TO ANNOTATED BUT WITH DIFFERENT PREDICTED START */
+// READS FILE OF NEW PREDICTION CORRESPONDING TO ANNOTATED BUT WITH DIFFERENT PREDICTED START
 
         if((input= fopen(newP_file, "r"))) {
             logmsg(10, "Reading newP file %s\n", newP_file);
@@ -752,7 +755,7 @@ int main(int argc, char *argv[]) {
 
 
 
-        /* READS FILE OF BLOCKS OF CONTRASTING S_PATTERNS */
+// READS FILE OF BLOCKS OF CONTRASTING S_PATTERNS
 
         if((input= fopen(cg_file,"r"))) { cgf= 1;
             logmsg(10, "Reading cg_file %s\n", cg_file);
@@ -839,8 +842,9 @@ int main(int argc, char *argv[]) {
         else logmsg(10,"Pub file NOT read\n") ;
 
 
-        /* READS FILE OF MODIFIED PUBLIC GENES. FILE OF NEW PREDICTIONS MODIFYING STRAT OF TRANSLATION OF ANNOTATED GENES
-	   IS READ INSTEAD INTO NEW POTENTIAL CODING REGIONS (newP* variables) */
+// READS FILE OF MODIFIED PUBLIC GENES.
+// FILE OF NEW PREDICTIONS MODIFYING START OF TRANSLATION OF ANNOTATED GENES
+// IS READ INSTEAD INTO NEW POTENTIAL CODING REGIONS (newP* variables)
 
         if((input= fopen(mod_file,"r"))) {
             logmsg(10, "Reading modified-predictions file %s\n", mod_file);
@@ -930,8 +934,9 @@ int main(int argc, char *argv[]) {
         else 
             logmsg(10,"Large-window composition file NOT read\n");
 
-/* READS FILE OF RNA-SEQ READ NUMBERS */
+// READS FILE OF RNA-SEQ READ NUMBERS
 
+/*
         if((input= fopen(read_file,"r"))) {
             logmsg(10, "Reading read_file %s\n", read_file);
         fscanf(input,"%d",&wind);
@@ -952,8 +957,9 @@ int main(int argc, char *argv[]) {
             else fgets(longstr, 198, input);
           }
           fclose(input);
+	  swflag= 1;
           logmsg(10,"Read-numbers file %s read\n",  read_file); }
-          else { logmsg(10, "Read-numbers file NOT read\n") ; swflag= 0; }
+          else { logmsg(10, "Read-numbers file NOT read\n") ; }
 
 
         if(!k) {
@@ -1343,8 +1349,6 @@ fprintf(stdout,"Black %.3f %.3f M (Input file CDS) Lshow\n",-15.0,HIGHT+HIGHT_PU
             }
         }
 
-        /* Prints stops */
-
         /****************************************/
         /* Prints S-profiles from small windows */
         /****************************************/
@@ -1452,7 +1456,7 @@ fprintf(stdout,"\n0 setlinejoin 0 setlinecap\n");
             }
         }
 
-        /* Prints stops */
+// Prints stops
 
         /*
 
@@ -1474,7 +1478,7 @@ fprintf(stdout,"\n0 setlinejoin 0 setlinecap\n");
 
         */
 
-        /* Prints methionines */
+// Prints methionines
 
         /*
           fprintf(stdout,"\nL2 1 setlinecap\n");
@@ -1496,8 +1500,9 @@ fprintf(stdout,"\n0 setlinejoin 0 setlinecap\n");
           }
         */
 
-        /* Prints Kozak sequence positions */
+// Prints Kozak sequence positions
 
+/*
         fprintf(stdout,"\nL05 0 setlinecap\n");
 
         for(i=0;i<nk;++i) {
@@ -1514,16 +1519,20 @@ fprintf(stdout,"\n0 setlinejoin 0 setlinecap\n");
                 fprintf(stdout," %.1f %.2f M 0 3 RL -2 0 RL stroke\n",(kozak[i]-(float)start)/delta*WIDTH,HIGHT);
             }
         }
+*/
 
-        /* Prints PALINDROMES */
+// Prints PALINDROMES
 
+/*
         fprintf(stdout,"\nL05 0 setlinecap Black\n");
 
         for(i=0;i<npali;++i)
             fprintf(stdout," %.1f %.2f M %d hairpin stroke\n",((float)pali[i][0]-(float)start)/delta*WIDTH,HIGHT,pali[i][1]);
+*/
 
-        /* Prints TATABOX */
+// Prints TATABOX
 
+/*
         fprintf(stdout,"\nL025 0 setlinecap Black\n");
 
         for(i=0;i<nt;++i)
@@ -1531,9 +1540,11 @@ fprintf(stdout,"\n0 setlinejoin 0 setlinecap\n");
                 fprintf(stdout," %.1f %.2f M 0 5 RL 2 0 RL stroke\n",(tata[i]-(float)start)/delta*WIDTH,0.0);
             else
                 fprintf(stdout," %.1f %.2f M 0 5 RL -2 0 RL stroke\n",(tata[i]-(float)start)/delta*WIDTH,0.0);
+*/
 
-        /* Prints CCAATBOX */
+// Prints CCAATBOX
 
+/*
         fprintf(stdout,"\nDarkGray\n");
 
         for(i=0;i<ncca;++i)
@@ -1541,9 +1552,11 @@ fprintf(stdout,"\n0 setlinejoin 0 setlinecap\n");
                 fprintf(stdout," %.1f %.2f M 0 3 RL 2 0 RL stroke\n",(ccaa[i]-(float)start)/delta*WIDTH,0.0);
             else
                 fprintf(stdout," %.1f %.2f M 0 3 RL -2 0 RL stroke\n",(ccaa[i]-(float)start)/delta*WIDTH,0.0);
+*/
 
-        /* Prints CAPBOX */
+// Prints CAPBOX
 
+/*
         fprintf(stdout,"\nGray\n");
 
         for(i=0;i<ncap;++i)
@@ -1551,9 +1564,11 @@ fprintf(stdout,"\n0 setlinejoin 0 setlinecap\n");
                 fprintf(stdout," %.1f %.2f M 0 4 RL 2 0 RL stroke\n",(cap[i]-(float)start)/delta*WIDTH,0.0);
             else
                 fprintf(stdout," %.1f %.2f M 0 4 RL -2 0 RL stroke\n",(cap[i]-(float)start)/delta*WIDTH,0.0);
+*/
 
-        /* Prints GCBOX */
+// Prints GCBOX
 
+/*
         fprintf(stdout,"\nLightGray\n");
 
         for(i=0;i<ngcb;++i)
@@ -1561,12 +1576,14 @@ fprintf(stdout,"\n0 setlinejoin 0 setlinecap\n");
                 fprintf(stdout," %.1f %.2f M 0 2 RL 2 0 RL stroke\n",(gcbox[i]-(float)start)/delta*WIDTH,0.0);
             else
                 fprintf(stdout," %.1f %.2f M 0 2 RL -2 0 RL stroke\n",(gcbox[i]-(float)start)/delta*WIDTH,0.0);
+*/
 
 
         /*****************************************************/
         /* Prints blocks of homology between annotated genes */
         /*****************************************************/
 
+/*
         fprintf(stdout,"\nL2\n");
 
         for(i=0;i<nB;++i) {
@@ -1583,12 +1600,14 @@ fprintf(stdout,"\n0 setlinejoin 0 setlinecap\n");
                 fprintf(stdout," %.1f %.2f M %.1f %.2f L stroke\n",(BLOCK[i][0]-(float)start)/delta*WIDTH,HIGHT+HIGHT_PUB-2,(BLOCK[i][1]-(float)start)/delta*WIDTH,HIGHT+HIGHT_PUB-2);
             }
         }
+*/
 
 
         /*********************************************************/
         /* Prints blocks of homology between potential new genes */
         /*********************************************************/
 
+/*
         for(i=0;i<nb;++i) {
             if(block_str[i]=='D') {
                 if(block[i][0]%period==1) fprintf(stdout,"B");
@@ -1603,12 +1622,14 @@ fprintf(stdout,"\n0 setlinejoin 0 setlinecap\n");
                 fprintf(stdout," %.1f %.2f M %.1f %.2f L stroke\n",(block[i][0]-(float)start)/delta*WIDTH,HIGHT+HIGHT_HOM-1.5,(block[i][1]-(float)start)/delta*WIDTH,HIGHT+HIGHT_HOM-1.5);
             }
         }
+*/
 
 
         /***************************************************/
         /* Prints blocks of high GeneMark coding potential */
         /***************************************************/
 
+/*
         fprintf(stdout,"\nL1\n");
 
         for(i=0;i<ncp;++i) {
@@ -1618,6 +1639,7 @@ fprintf(stdout,"\n0 setlinejoin 0 setlinecap\n");
             if(codpot_str[i]=='D') fprintf(stdout," %.1f %.2f M %.1f %.2f L stroke\n",(codpot[i][0]-(float)start)/delta*WIDTH,HIGHT+HIGHT_CP+1.0,(codpot[i][1]-(float)start)/delta*WIDTH,HIGHT+HIGHT_CP+1.0);
             else fprintf(stdout," %.1f %.2f M %.1f %.2f L stroke\n",(codpot[i][0]-(float)start)/delta*WIDTH,HIGHT+HIGHT_CP-1.0,(codpot[i][1]-(float)start)/delta*WIDTH,HIGHT+HIGHT_CP-1.0);
         }
+*/
 
 
         /***************/
