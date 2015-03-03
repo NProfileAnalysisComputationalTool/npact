@@ -178,7 +178,7 @@ main(int argc, char *argv[]) {
 
     /* Filename buffers */
     char *unb_file, *con_file, * new_file, *newP_file, *cg_file, *pub_file,
-        *mod_file, *block_file, *BLOCK_file, *codpot_file, *Scodpot_file, *met_file,
+        *mod_file, *block_file, *BLOCK_file, *codpot_file, *Hits_file, *met_file,
         *kozak_file, *tata_file, *pali_file, *cap_file, *ccaa_file, *gcbox_file,
         *stop_file, *CG200_file, *read_file;
 
@@ -186,14 +186,14 @@ main(int argc, char *argv[]) {
     /* by declaring them initially to be NULL, when realloc sees it, it
        will treat it as a malloc */
     int **unb=NULL, **con=NULL, **new=NULL, **newP=NULL, **cg=NULL, **pub=NULL,
-        **modified=NULL, **block=NULL, **BLOCK=NULL, **codpot=NULL, **Scodpot=NULL,
+        **modified=NULL, **block=NULL, **BLOCK=NULL, **codpot=NULL, *Hits= NULL,
         *met=NULL, *tata=NULL, *cap=NULL, *ccaa=NULL, *gcbox=NULL, *stop=NULL,
         *kozak=NULL, **pali=NULL, *X=NULL, *x=NULL;
     float **y=NULL,**Y=NULL, **reads= NULL;
 
     char *unb_str=NULL, *con_str=NULL, *new_str=NULL, *newP_str=NULL, *cg_str=NULL,
         *pub_str=NULL, *mod_str=NULL, *block_str=NULL, *BLOCK_str=NULL,
-        *codpot_str=NULL, *codpot_col=NULL, *Scodpot_str=NULL, *Scodpot_col=NULL, **Scodpot_type=NULL,
+        *codpot_str=NULL, *codpot_col=NULL, *Hits_str=NULL, *Hits_col=NULL, *Hits_type= NULL,
         *met_str=NULL, *tata_str=NULL, *cap_str=NULL, *ccaa_str=NULL,
         *gcbox_str=NULL, *stop_str=NULL, *kozak_str=NULL;
 
@@ -298,7 +298,7 @@ main(int argc, char *argv[]) {
     /*File_of_GeneMark_regions */
     codpot_file = np_getl(files); logmsg(0,"%s\n",codpot_file);
     /*File_of_G+C_coding_potential_regions */
-    Scodpot_file = np_getl(files); logmsg(0,"%s\n",Scodpot_file);
+    Hits_file = np_getl(files); logmsg(0,"%s\n",Hits_file);
     /*File_of_met_positions (e.g.:D 432) */
     met_file = np_getl(files);   logmsg(0,"%s\n",met_file);
     /*File_of_stop_positions (e.g.:D 432) */
@@ -332,28 +332,30 @@ main(int argc, char *argv[]) {
 
     /************ Start Working **********/
 
-    for(k=0; k<lines && tstart + k*line_range<len; ++k) {
+    for(k= 0; k < lines && tstart + k * line_range < len; ++k)
+    {
         n= N= nub= nc= nn= nnP= ncg= nm= nk= nt= ncap= ncca= ngcb= ns= np= ne= nb= nB= ncp= nScp= npali= 0;
-        start= tstart + k*line_range;
-        end= tstart + (k+1)*line_range;
+        start= tstart + k * line_range;
+        end= tstart + (k + 1) * line_range;
         if(end > len) end = len;
         if(end > tend) end = tend;
         if(end < start) break;
 
-
-        if(input=fopen(BLOCK_file,"r")) {
+// Commenting out files not used by NPACT
+/*
+        if((input= fopen(BLOCK_file, "r"))) {
             logmsg(10, "Reading BLOCK_file %s\n", BLOCK_file);
-            while(fgets(longstr,198,input) && !feof(input)) {
-                BLOCK_str= (char *)realloc(BLOCK_str,(nB+1)*sizeof(char));
-                BLOCK= (int **)realloc(BLOCK,(nB+1)*sizeof(int *));
-                BLOCK[nB]= (int *)malloc(2*sizeof(int));
+            while(fgets(longstr, 198, input) && !feof(input)) {
+                BLOCK_str= (char *)realloc(BLOCK_str, (nB + 1) * sizeof(char));
+                BLOCK= (int **)realloc(BLOCK, (nB + 1) * sizeof(int *));
+                BLOCK[nB]= (int *)malloc(2 * sizeof(int));
                 p= strchr(longstr,'.');
-                ge= atoi(p+2);
-                if(longstr[0]=='c') { gs= atoi(longstr+11); BLOCK_str[nB]='C'; }
+                ge= atoi(p + 2);
+                if(longstr[0]=='c') { gs= atoi(longstr + 11); BLOCK_str[nB]='C'; }
                 else { gs= atoi(longstr); BLOCK_str[nB]='D'; }
-                if(gs>=start-line_range/50 && gs<end && ge>start && ge<=end+line_range/50) { BLOCK[nB][0]= gs; BLOCK[nB][1]= ge; ++nB; }
-                else if(gs>=start && gs<end && ge>end+line_range/50) { BLOCK[nB][0]= gs; BLOCK[nB][1]= end+line_range/50; ++nB; }
-                else if(ge<=end+line_range/50 && ge>start && gs<start-line_range/50)
+                if(gs >= start - line_range / 50 && gs < end && ge > start && ge <= end + line_range / 50) { BLOCK[nB][0]= gs; BLOCK[nB][1]= ge; ++nB; }
+                else if(gs >= start && gs < end && ge > end + line_range / 50) { BLOCK[nB][0]= gs; BLOCK[nB][1]= end + line_range / 50; ++nB; }
+                else if(ge <= end + line_range / 50 && ge > start && gs < start - line_range / 50)
                 { BLOCK[nB][0]= start-line_range/50; BLOCK[nB][0] += gs%period-BLOCK[nB][0]%period; BLOCK[nB][1]= ge; ++nB; }
                 else if(gs<start-line_range/50 && ge>end+line_range/50)
                 { BLOCK[nB][0]= start-line_range/50; BLOCK[nB][0] += gs%period-BLOCK[nB][0]%period; BLOCK[nB][1]= end+line_range/50; ++nB; }
@@ -382,65 +384,72 @@ main(int argc, char *argv[]) {
             fclose(input);
         }
         else logmsg(10, "File of new blocks %s NOT read\n", block_file);
+*/
 
+// READS FILE OF GENEMARK CODING POTENTIALS
+
+/*
         if(input=fopen(codpot_file, "r")) {
             logmsg(10, "Reading codpot_file %s\n", codpot_file);
             ++cpf;
             while(fgets(longstr,198,input) && !feof(input)) {
                 codpot_str= (char *)realloc(codpot_str,(ncp+1)*sizeof(char));
                 codpot_col= (char *)realloc(codpot_col,(ncp+1)*sizeof(char));
-                codpot= (int **)realloc(codpot,(ncp+1)*sizeof(int *));
-                codpot[ncp]= (int *)malloc(2*sizeof(int));
+                codpot= (int *)realloc(codpot, 2 * (ncp + 1) * sizeof(int));
                 p= strchr(longstr,'.');
                 ge= atoi(p+2);
                 if(longstr[0]=='c') { gs= atoi(longstr+11); codpot_str[ncp]='C'; codpot_col[ncp]= gs%period; }
                 else { gs= atoi(longstr); codpot_str[ncp]='D'; codpot_col[ncp]= ge%period; }
-                if(gs>=start && gs<end && ge>start && ge<=end) { codpot[ncp][0]= gs; codpot[ncp][1]= ge; ++ncp; }
-                else if(gs>=start && gs<end && ge>end) { codpot[ncp][0]= gs; codpot[ncp][1]= end; ++ncp; }
+                if(gs>=start && gs<end && ge>start && ge<=end) { codpot[ncp * 2 + 0]= gs; codpot[ncp * 2 + 1]= ge; ++ncp; }
+                else if(gs>=start && gs<end && ge>end) { codpot[ncp * 2 + 0]= gs; codpot[ncp * 2 + 1]= end; ++ncp; }
                 else if(ge<=end && ge>start && gs<start)
-                { codpot[ncp][0]= start; codpot[ncp][0] += gs%period-codpot[ncp][0]%period; codpot[ncp][1]= ge; ++ncp; }
-                else if(gs<start && ge>end)
-                { codpot[ncp][0]= start; codpot[ncp][0] += gs%period-codpot[ncp][0]%period; codpot[ncp][1]= end; ++ncp; }
+                { codpot[ncp * 2 + 0]= start; codpot[ncp * 2 + 0] += gs%period-codpot[ncp * 2 + 0] % period; codpot[ncp * 2 + 1]= ge; ++ncp; }
+                else if(gs < start && ge > end)
+                { codpot[ncp * 2 + 0]= start; codpot[ncp * 2 + 0] += gs%period-codpot[ncp * 2 + 0] % period; codpot[ncp * 2 + 1]= end; ++ncp; }
             }
             fclose(input);
         }
         else logmsg(10, "File of GeneMark coding potential %s NOT read\n", codpot_file);
+*/
 
-        if(input=fopen(Scodpot_file,"r")) {
-            logmsg(10, "Reading Scodpot_file %s\n", Scodpot_file);
+// READS FILE OF HITS
+
+        if(input=fopen(Hits_file,"r")) {
+            logmsg(10, "Reading Hits_file %s\n", Hits_file);
             ++Scpf;
             expand = 1;
             while(fgets(longstr,198,input) && !feof(input)) {
                 if(expand) {
-                    Scodpot_str= (char *)realloc(Scodpot_str, (nScp + 1) * sizeof(char));
-                    Scodpot_col= (char *)realloc(Scodpot_col, (nScp + 1) * sizeof(char));
-                    Scodpot_type= (char **)realloc(Scodpot_type, (nScp + 1) * sizeof(char *));
-                    Scodpot_type[nScp]= (char *)malloc(2 * sizeof(char));
-                    Scodpot= (int **)realloc(Scodpot, (nScp + 1) * sizeof(int *));
-                    Scodpot[nScp]= (int *) calloc(2, sizeof(int));
+                    Hits_str= (char *)realloc(Hits_str, (nScp + 1) * sizeof(char));
+                    Hits_col= (char *)realloc(Hits_col, (nScp + 1) * sizeof(char));
+                    Hits_type= (char *)realloc(Hits_type, 2 * (nScp + 1) * sizeof(char));
+                    Hits= (int *)realloc(Hits, 2 * (nScp + 1) * sizeof(int));
                 }
-                Scodpot_type[nScp][0]= longstr[0];
-                Scodpot_type[nScp][1]= atoi(longstr + 1);
+                Hits_type[nScp * 2 + 0]= longstr[0];
+                Hits_type[nScp * 2 + 1]= atoi(longstr + 1);
                 p= strchr(longstr, '.');
-                ge= atoi(p+2);
-                if(longstr[3]=='c') { gs= atoi(longstr+14); Scodpot_str[nScp]='C'; Scodpot_col[nScp]= gs%period; }
-                else if(longstr[3]=='r') { gs= atoi(longstr+10); Scodpot_str[nScp]='R'; }
-                else { gs= atoi(longstr + 3); Scodpot_str[nScp]='D'; Scodpot_col[nScp]= ge%period; }
+                ge= atoi(p + 2);
+                if(longstr[3] == 'c') { gs= atoi(longstr + 14); Hits_str[nScp]= 'C'; Hits_col[nScp]= gs % period; }
+                else if(longstr[3] == 'r') { gs= atoi(longstr + 10); Hits_str[nScp]= 'R'; }
+                else { gs= atoi(longstr + 3); Hits_str[nScp]= 'D'; Hits_col[nScp]= ge % period; }
                 expand = 1;   // Should we expand again next lop?
-                if(gs>=start && gs<end && ge>start && ge<=end) { Scodpot[nScp][0]= gs; Scodpot[nScp][1]= ge; ++nScp; }
-                else if(gs>=start && gs<end && ge>end) { Scodpot[nScp][0]= gs; Scodpot[nScp][1]= end; ++nScp; }
-                else if(ge<=end && ge>start && gs<start)
-                { Scodpot[nScp][0]= start; Scodpot[nScp][0] += gs%period-Scodpot[nScp][0]%period; Scodpot[nScp][1]= ge; ++nScp; }
-                else if(gs<start && ge>end)
-                { Scodpot[nScp][0]= start; Scodpot[nScp][0] += gs%period-Scodpot[nScp][0]%period; Scodpot[nScp][1]= end; ++nScp; }
+                if(gs >= start && gs < end && ge > start && ge <= end) { Hits[nScp * 2 + 0]= gs; Hits[nScp * 2 + 1]= ge; ++nScp; }
+                else if(gs >= start && gs < end && ge > end) { Hits[nScp * 2 + 0]= gs; Hits[nScp * 2 + 1]= end; ++nScp; }
+                else if(ge <= end && ge > start && gs < start)
+                { Hits[nScp * 2 + 0]= start; Hits[nScp * 2 + 0] += gs % period - Hits[nScp * 2 + 0] % period; Hits[nScp * 2 + 1]= ge; ++nScp; }
+                else if(gs < start && ge > end)
+                { Hits[nScp * 2 + 0]= start; Hits[nScp * 2 + 0] += gs % period - Hits[nScp * 2 + 0] % period; Hits[nScp * 2 + 1]= end; ++nScp; }
                 else {
                     expand = 0; // didn't use the current slot, don't need to expand
                 }
             }
             fclose(input);
         }
-        else logmsg(10, "File of G+C coding potential %s NOT read\n", Scodpot_file);
+        else logmsg(10, "File of G+C coding potential %s NOT read\n", Hits_file);
 
+// READS FILES OF SEQUENCE SIGNALS
+
+/*
         if(input=fopen(met_file,"r")) {
             logmsg(10, "Reading met_file %s\n", met_file);
             while(fgets(longstr,198,input) && !feof(input)) {
@@ -579,10 +588,12 @@ main(int argc, char *argv[]) {
             fclose(input);
         }
         else logmsg(10,"File of palindromes %s NOT read\n", pali_file);
+*/
 
 
-        /* READS FILE OF UNBIASED ORFS */
+// READS FILE OF UNBIASED ORFS
 
+/*
         if(input=fopen(unb_file,"r")) {
             logmsg(10, "Reading unb_file %s\n", unb_file);
             unbf= 1;
@@ -617,10 +628,12 @@ main(int argc, char *argv[]) {
             fclose(input);
         }
         else logmsg(10,"Acc file NOT read\n") ;
+*/
 
 
-        /* READS FILE OF CONSERVED ORFS */
+// READS FILE OF CONSERVED ORFS
 
+/*
         if(input= fopen(con_file,"r")) {
             logmsg(10, "Reading con_file %s\n", con_file);
             conf= 1;
@@ -655,8 +668,9 @@ main(int argc, char *argv[]) {
             fclose(input);
         }
         else logmsg(10,"Conserved file NOT read\n") ;
+*/
 
-        /* READS FILE OF NEW PROPOSED CODING REGIONS */
+// READS FILE OF NEW PROPOSED CODING REGIONS
 
         if(input= fopen(new_file,"r")) {
             logmsg(10, "Reading new_file %s\n", new_file);
@@ -754,8 +768,9 @@ main(int argc, char *argv[]) {
 
 
 
-        /* READS FILE OF BLOCKS OF CONTRASTING S_PATTERNS */
+// READS FILE OF BLOCKS OF CONTRASTING S_PATTERNS
 
+/*
         if(input= fopen(cg_file,"r")) { cgf= 1;
             logmsg(10, "Reading cg_file %s\n", cg_file);
             while(fgets(longstr,198,input) && !feof(input)) {
@@ -775,8 +790,9 @@ main(int argc, char *argv[]) {
             fclose(input);
         }
         else logmsg(10,"Files with blocks of asymmetric CG content NOT read\n") ;
+*/
 
-        /* READS FILE OF ACCEPTED PUBLIC GENES */
+// READS FILE OF ACCEPTED PUBLIC GENES
 
         if(input= fopen(pub_file,"r")) {
             logmsg(10, "Reading pub_file %s\n", pub_file);
@@ -841,9 +857,11 @@ main(int argc, char *argv[]) {
         else logmsg(10,"Pub file NOT read\n") ;
 
 
-        /* READS FILE OF MODIFIED PUBLIC GENES. FILE OF NEW PREDICTIONS MODIFYING STRAT OF TRANSLATION OF ANNOTATED GENES
-	   IS READ INSTEAD INTO NEW POTENTIAL CODING REGIONS (newP* variables) */
+// READS FILE OF MODIFIED PUBLIC GENES.
+// FILE OF NEW PREDICTIONS MODIFYING START OF TRANSLATION OF ANNOTATED GENES
+// IS READ INSTEAD INTO NEW POTENTIAL CODING REGIONS (newP* variables)
 
+/*
         if(input= fopen(mod_file,"r")) {
             logmsg(10, "Reading modified-predictions file %s\n", mod_file);
             /* Skip passed the header line */
@@ -903,6 +921,9 @@ main(int argc, char *argv[]) {
             logmsg(10,"Modified file %s read\n", mod_file);
         }
         else logmsg(10,"Modified file NOT read\n") ;
+*/
+
+// FILE OF S-PROFILES
 
         if(input= fopen(CG200_file,"r")) {
             logmsg(10, "Reading CG200_file %s\n", CG200_file);
@@ -932,8 +953,9 @@ main(int argc, char *argv[]) {
         else 
             logmsg(10,"Large-window composition file NOT read\n");
 
-/* READS FILE OF RNA-SEQ READ NUMBERS */
+// READS FILE OF RNA-SEQ READ NUMBERS
 
+/*
         if(input= fopen(read_file,"r")) {
             logmsg(10, "Reading read_file %s\n", read_file);
         fscanf(input,"%d",&wind);
@@ -956,6 +978,7 @@ main(int argc, char *argv[]) {
           fclose(input);
           logmsg(10,"Read-numbers file %s read\n",  read_file); }
           else { logmsg(10, "Read-numbers file NOT read\n") ; swflag= 0; }
+*/
 
 
         if(!k) {
@@ -1617,8 +1640,8 @@ fprintf(stdout,"\n0 setlinejoin 0 setlinecap\n");
             if(codpot_col[i]==1) fprintf(stdout,"R");
             else if(codpot_col[i]==2) fprintf(stdout,"G");
             else if(codpot_col[i]==0) fprintf(stdout,"B");
-            if(codpot_str[i]=='D') fprintf(stdout," %.1f %.2f M %.1f %.2f L stroke\n",(codpot[i][0]-(float)start)/delta*WIDTH,HIGHT+HIGHT_CP+1.0,(codpot[i][1]-(float)start)/delta*WIDTH,HIGHT+HIGHT_CP+1.0);
-            else fprintf(stdout," %.1f %.2f M %.1f %.2f L stroke\n",(codpot[i][0]-(float)start)/delta*WIDTH,HIGHT+HIGHT_CP-1.0,(codpot[i][1]-(float)start)/delta*WIDTH,HIGHT+HIGHT_CP-1.0);
+            if(codpot_str[i]=='D') fprintf(stdout," %.1f %.2f M %.1f %.2f L stroke\n", (codpot[i * 2 + 0] - (float)start) / delta * WIDTH, HIGHT + HIGHT_CP + 1.0, (codpot[i * 2 + 1] - (float)start) / delta * WIDTH, HIGHT + HIGHT_CP + 1.0);
+            else fprintf(stdout," %.1f %.2f M %.1f %.2f L stroke\n",(codpot[i * 2 + 0] - (float)start) / delta * WIDTH, HIGHT + HIGHT_CP - 1.0, (codpot[i * 2 + 1] - (float)start) / delta * WIDTH, HIGHT + HIGHT_CP - 1.0);
         }
 
 
@@ -1632,35 +1655,33 @@ fprintf(stdout,"\n0 setlinejoin 0 setlinecap\n");
 
         for(i= 0; i < nScp; ++i)
 	{
-            if(Scodpot_str[i] != 'R')
+            if(Hits_str[i] != 'R')
 	    {
 // 1. Line width proportional to significance level.
 // 2. H-hits in full color; G-hits in light color.
 
-	    fprintf(stdout, "L%d ", Scodpot_type[i][1] + 1);
+	    fprintf(stdout, "L%d ", Hits_type[i * 2 + 1] + 1);
 
-		if(Scodpot_type[i][0] == 'G') fprintf(stdout, "L");
+		if(Hits_type[i * 2 + 0] == 'G') fprintf(stdout, "L");
 
-                if(Scodpot_col[i] == 1) fprintf(stdout, "R");
-                else if(Scodpot_col[i] == 2) fprintf(stdout, "G");
-                else if(Scodpot_col[i] == 0) fprintf(stdout, "B");
+                if(Hits_col[i] == 1) fprintf(stdout, "R");
+                else if(Hits_col[i] == 2) fprintf(stdout, "G");
+                else if(Hits_col[i] == 0) fprintf(stdout, "B");
             }
 
-            if(Scodpot_str[i]=='D')
-                fprintf(stdout, " %.1f %.2f M %.1f %.2f L stroke\n", (Scodpot[i][0] - (float)start) / delta * WIDTH, HIGHT + HIGHT_SCP + 2.0, (Scodpot[i][1] - (float)start) / delta * WIDTH, HIGHT + HIGHT_SCP + 2.0);
-            else if(Scodpot_str[i] == 'C')
-                fprintf(stdout, " %.1f %.2f M %.1f %.2f L stroke\n", (Scodpot[i][0] - (float)start) / delta * WIDTH, HIGHT + HIGHT_SCP - 2.0, (Scodpot[i][1] - (float)start) / delta * WIDTH, HIGHT + HIGHT_SCP - 2.0);
-            else if(Scodpot_str[i] == 'R') {
+            if(Hits_str[i]=='D')
+                fprintf(stdout, " %.1f %.2f M %.1f %.2f L stroke\n", (Hits[i * 2 + 0] - (float)start) / delta * WIDTH, HIGHT + HIGHT_SCP + 2.0, (Hits[i * 2 + 1] - (float)start) / delta * WIDTH, HIGHT + HIGHT_SCP + 2.0);
+            else if(Hits_str[i] == 'C')
+                fprintf(stdout, " %.1f %.2f M %.1f %.2f L stroke\n", (Hits[i * 2 + 0] - (float)start) / delta * WIDTH, HIGHT + HIGHT_SCP - 2.0, (Hits[i * 2 + 1] - (float)start) / delta * WIDTH, HIGHT + HIGHT_SCP - 2.0);
+            else if(Hits_str[i] == 'R') {
                 fprintf(stdout, "L1 Gray");
-                fprintf(stdout, " %.1f %.2f M %.1f %.2f L stroke\n", (Scodpot[i][0] - (float)start) / delta * WIDTH, HIGHT + HIGHT_SCP, (Scodpot[i][1] - (float)start) / delta * WIDTH, HIGHT + HIGHT_SCP);
+                fprintf(stdout, " %.1f %.2f M %.1f %.2f L stroke\n", (Hits[i * 2 + 0] - (float)start) / delta * WIDTH, HIGHT + HIGHT_SCP, (Hits[i * 2 + 1] - (float)start) / delta * WIDTH, HIGHT + HIGHT_SCP);
             }
-        free(Scodpot_type[i]); Scodpot_type[i] = NULL;
-        free(Scodpot[i]); Scodpot[i] = NULL;
         }
-    free(Scodpot_str); Scodpot_str = NULL;
-    free(Scodpot_col); Scodpot_col = NULL;
-    free(Scodpot_type); Scodpot_type = NULL;
-    free(Scodpot); Scodpot = NULL;
+    free(Hits_str); Hits_str = NULL;
+    free(Hits_col); Hits_col = NULL;
+    free(Hits_type); Hits_type = NULL;
+    free(Hits); Hits = NULL;
     }
 
         fprintf(stdout,"\nL05\n");
