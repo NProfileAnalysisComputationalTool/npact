@@ -156,7 +156,7 @@ return(n);
 /*********************************************/
 
 
-main(int argc, char *argv[]) {
+int main(int argc, char *argv[]) {
     /* For cmd line argument parsing. */
     char* opt;
     int argi = 1;
@@ -186,7 +186,7 @@ main(int argc, char *argv[]) {
     /* by declaring them initially to be NULL, when realloc sees it, it
        will treat it as a malloc */
     int **unb=NULL, **con=NULL, **new=NULL, **newP=NULL, **cg=NULL, **pub=NULL,
-        **modified=NULL, **block=NULL, **BLOCK=NULL, **codpot=NULL, *Hits= NULL,
+        **modified=NULL, **block=NULL, **BLOCK=NULL, *codpot=NULL, *Hits= NULL,
         *met=NULL, *tata=NULL, *cap=NULL, *ccaa=NULL, *gcbox=NULL, *stop=NULL,
         *kozak=NULL, **pali=NULL, *X=NULL, *x=NULL;
     float **y=NULL,**Y=NULL, **reads= NULL;
@@ -364,7 +364,7 @@ main(int argc, char *argv[]) {
         }
         else logmsg(10, "File of blocks from annotated genes %s NOT read\n", BLOCK_file);
 
-        if(input=fopen(block_file, "r")) {
+        if((input=fopen(block_file, "r"))) {
             logmsg(10, "Reading block_file %s\n", block_file);
             while(fgets(longstr,198,input) && !feof(input)) {
                 block_str= (char *)realloc(block_str,(nb+1)*sizeof(char));
@@ -389,7 +389,7 @@ main(int argc, char *argv[]) {
 // READS FILE OF GENEMARK CODING POTENTIALS
 
 /*
-        if(input=fopen(codpot_file, "r")) {
+        if((input=fopen(codpot_file, "r"))) {
             logmsg(10, "Reading codpot_file %s\n", codpot_file);
             ++cpf;
             while(fgets(longstr,198,input) && !feof(input)) {
@@ -414,7 +414,7 @@ main(int argc, char *argv[]) {
 
 // READS FILE OF HITS
 
-        if(input=fopen(Hits_file,"r")) {
+        if((input= fopen(Hits_file,"r"))) {
             logmsg(10, "Reading Hits_file %s\n", Hits_file);
             ++Scpf;
             expand = 1;
@@ -450,7 +450,7 @@ main(int argc, char *argv[]) {
 // READS FILES OF SEQUENCE SIGNALS
 
 /*
-        if(input=fopen(met_file,"r")) {
+        if((input= fopen(met_file,"r"))) {
             logmsg(10, "Reading met_file %s\n", met_file);
             while(fgets(longstr,198,input) && !feof(input)) {
                 gs= atoi(longstr+2);
@@ -468,7 +468,7 @@ main(int argc, char *argv[]) {
         }
         else logmsg(10,"File of Met %s NOT read\n", met_file);
 
-        if(input=fopen(stop_file,"r")) {
+        if((input= fopen(stop_file,"r"))) {
             logmsg(10, "Reading stop_file %s\n", stop_file);
             while(fgets(longstr,198,input) && !feof(input)) {
                 gs= atoi(longstr+2);
@@ -487,7 +487,7 @@ main(int argc, char *argv[]) {
         else logmsg(10,"File of Stop %s NOT read\n", stop_file);
 
 
-        if(input=fopen(tata_file,"r")) {
+        if((input= fopen(tata_file,"r"))) {
             logmsg(10, "Reading tata_file %s\n", tata_file);
             while(fgets(longstr,198,input) && !feof(input)) {
                 sscanf(longstr,"%f %s %d %s",&tpr,ts,&gs,tatastr);
@@ -504,7 +504,7 @@ main(int argc, char *argv[]) {
         }
         else logmsg(10,"File of TATA box %s NOT read\n", tata_file);
 
-        if(input=fopen(cap_file,"r")) {
+        if((input= fopen(cap_file,"r"))) {
             logmsg(10, "Reading cap_file %s\n", cap_file);
             while(fgets(longstr,198,input) && !feof(input)) {
                 sscanf(longstr,"%f %s %d %s",&tpr,ts,&gs,tatastr);
@@ -521,7 +521,7 @@ main(int argc, char *argv[]) {
         }
         else logmsg(10,"File of CAP box %s NOT read\n", cap_file);
 
-        if(input=fopen(ccaa_file,"r")) {
+        if((input= fopen(ccaa_file,"r"))) {
             logmsg(10, "Reading ccaa_file %s\n", ccaa_file);
             while(fgets(longstr,198,input) && !feof(input)) {
                 sscanf(longstr,"%f %s %d %s",&tpr,ts,&gs,tatastr);
@@ -538,7 +538,7 @@ main(int argc, char *argv[]) {
         }
         else logmsg(10,"File of CCAAT box %s NOT read\n", ccaa_file);
 
-        if(input=fopen(gcbox_file,"r")) {
+        if((input= fopen(gcbox_file,"r"))) {
             logmsg(10, "Reading gcbox_file %s\n", gcbox_file);
             while(fgets(longstr,198,input) && !feof(input)) {
                 sscanf(longstr,"%f %s %d %s",&tpr,ts,&gs,tatastr);
@@ -555,7 +555,7 @@ main(int argc, char *argv[]) {
         }
         else logmsg(10,"File of GC box %s NOT read\n", gcbox_file);
 
-        if(input=fopen(kozak_file,"r")) {
+        if((input= fopen(kozak_file,"r"))) {
             logmsg(10, "Reading kozak_file %s\n", kozak_file);
             while(fgets(longstr,198,input) && !feof(input)) {
                 sscanf(longstr,"%f %s %d %s",&tpr,ts,&gs,tatastr);
@@ -573,7 +573,7 @@ main(int argc, char *argv[]) {
         else logmsg(10,"File of Kozak sequences %s NOT read\n", kozak_file);
 
 
-        if(input=fopen(pali_file,"r")) {
+        if((input= fopen(pali_file,"r"))) {
             logmsg(10, "Reading pali_file %s\n", pali_file);
             while(fgets(longstr,198,input) && !feof(input)) {
                 sscanf(longstr,"%f %d",&pp,&lp);
@@ -594,7 +594,7 @@ main(int argc, char *argv[]) {
 // READS FILE OF UNBIASED ORFS
 
 /*
-        if(input=fopen(unb_file,"r")) {
+        if((input= fopen(unb_file,"r"))) {
             logmsg(10, "Reading unb_file %s\n", unb_file);
             unbf= 1;
             while(fgets(longstr,198,input) && !feof(input)) {
@@ -634,7 +634,7 @@ main(int argc, char *argv[]) {
 // READS FILE OF CONSERVED ORFS
 
 /*
-        if(input= fopen(con_file,"r")) {
+        if((input= fopen(con_file,"r"))) {
             logmsg(10, "Reading con_file %s\n", con_file);
             conf= 1;
             while(fgets(longstr,198,input) && !feof(input)) {
@@ -672,7 +672,7 @@ main(int argc, char *argv[]) {
 
 // READS FILE OF NEW PROPOSED CODING REGIONS
 
-        if(input= fopen(new_file,"r")) {
+        if((input= fopen(new_file,"r"))) {
             logmsg(10, "Reading new_file %s\n", new_file);
             newf= 1;
             expand = 1;
@@ -718,12 +718,12 @@ main(int argc, char *argv[]) {
         }
         else logmsg(10,"New file NOT read\n") ;
 
-        /* READS FILE OF NEW PREDICTION CORRESPONDING TO ANNOTATED BUT WITH DIFFERENT PREDICTED START */
+// READS FILE OF NEW PREDICTION CORRESPONDING TO ANNOTATED BUT WITH DIFFERENT PREDICTED START
 
-        if(input= fopen(newP_file, "r")) {
+        if((input= fopen(newP_file, "r"))) {
             logmsg(10, "Reading newP file %s\n", newP_file);
             newPf= 1;
-            /* Header line not printed in current version of acgt_gamma */
+// Header line not printed in current version of acgt_gamma
 //          fgets(longstr, 198, input);
             expand = 1;
             while(fgets(longstr,198,input) && !feof(input)) {
@@ -771,7 +771,7 @@ main(int argc, char *argv[]) {
 // READS FILE OF BLOCKS OF CONTRASTING S_PATTERNS
 
 /*
-        if(input= fopen(cg_file,"r")) { cgf= 1;
+        if((input= fopen(cg_file,"r"))) { cgf= 1;
             logmsg(10, "Reading cg_file %s\n", cg_file);
             while(fgets(longstr,198,input) && !feof(input)) {
                 cg_str= (char *)realloc(cg_str,(ncg+1)*sizeof(char));
@@ -794,7 +794,7 @@ main(int argc, char *argv[]) {
 
 // READS FILE OF ACCEPTED PUBLIC GENES
 
-        if(input= fopen(pub_file,"r")) {
+        if((input= fopen(pub_file,"r"))) {
             logmsg(10, "Reading pub_file %s\n", pub_file);
             expand = 1;
             while(fgets(longstr, 198, input) && !feof(input)) {
@@ -862,9 +862,9 @@ main(int argc, char *argv[]) {
 // IS READ INSTEAD INTO NEW POTENTIAL CODING REGIONS (newP* variables)
 
 /*
-        if(input= fopen(mod_file,"r")) {
+        if((input= fopen(mod_file,"r"))) {
             logmsg(10, "Reading modified-predictions file %s\n", mod_file);
-            /* Skip passed the header line */
+// Skip passed the header line
             fgets(longstr, 198, input);
             while(fgets(longstr, 198, input) && !feof(input)) {
                 mod_name= (char **)realloc(mod_name, (ne + 1) * sizeof(char *));
@@ -925,7 +925,7 @@ main(int argc, char *argv[]) {
 
 // FILE OF S-PROFILES
 
-        if(input= fopen(CG200_file,"r")) {
+        if((input= fopen(CG200_file,"r"))) {
             logmsg(10, "Reading CG200_file %s\n", CG200_file);
             while(!feof(input)) {
                 fscanf(input,"%d",&pos);
@@ -956,7 +956,7 @@ main(int argc, char *argv[]) {
 // READS FILE OF RNA-SEQ READ NUMBERS
 
 /*
-        if(input= fopen(read_file,"r")) {
+        if((input= fopen(read_file,"r"))) {
             logmsg(10, "Reading read_file %s\n", read_file);
         fscanf(input,"%d",&wind);
           while(!feof(input))
@@ -1634,6 +1634,7 @@ fprintf(stdout,"\n0 setlinejoin 0 setlinecap\n");
         /* Prints blocks of high GeneMark coding potential */
         /***************************************************/
 
+/*
         fprintf(stdout,"\nL1\n");
 
         for(i=0;i<ncp;++i) {
@@ -1643,6 +1644,7 @@ fprintf(stdout,"\n0 setlinejoin 0 setlinecap\n");
             if(codpot_str[i]=='D') fprintf(stdout," %.1f %.2f M %.1f %.2f L stroke\n", (codpot[i * 2 + 0] - (float)start) / delta * WIDTH, HIGHT + HIGHT_CP + 1.0, (codpot[i * 2 + 1] - (float)start) / delta * WIDTH, HIGHT + HIGHT_CP + 1.0);
             else fprintf(stdout," %.1f %.2f M %.1f %.2f L stroke\n",(codpot[i * 2 + 0] - (float)start) / delta * WIDTH, HIGHT + HIGHT_CP - 1.0, (codpot[i * 2 + 1] - (float)start) / delta * WIDTH, HIGHT + HIGHT_CP - 1.0);
         }
+*/
 
 
         /***************/
