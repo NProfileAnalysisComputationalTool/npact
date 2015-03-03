@@ -582,7 +582,7 @@ int main(int argc, char *argv[]) {
         else logmsg(10,"File of palindromes %s NOT read\n", pali_file);
 
 
-        /* READS FILE OF UNBIASED ORFS */
+// READS FILE OF UNBIASED ORFS
 
         if((input=fopen(unb_file,"r"))) {
             logmsg(10, "Reading unb_file %s\n", unb_file);
@@ -620,7 +620,7 @@ int main(int argc, char *argv[]) {
         else logmsg(10,"Acc file NOT read\n") ;
 
 
-        /* READS FILE OF CONSERVED ORFS */
+// READS FILE OF CONSERVED ORFS
 
         if((input= fopen(con_file,"r"))) {
             logmsg(10, "Reading con_file %s\n", con_file);
@@ -657,7 +657,7 @@ int main(int argc, char *argv[]) {
         }
         else logmsg(10,"Conserved file NOT read\n") ;
 
-        /* READS FILE OF NEW PROPOSED CODING REGIONS */
+// READS FILE OF NEW PROPOSED CODING REGIONS
 
         if((input= fopen(new_file,"r"))) {
             logmsg(10, "Reading new_file %s\n", new_file);
@@ -710,7 +710,7 @@ int main(int argc, char *argv[]) {
         if((input= fopen(newP_file, "r"))) {
             logmsg(10, "Reading newP file %s\n", newP_file);
             newPf= 1;
-            /* Header line not printed in current version of acgt_gamma */
+// Header line not printed in current version of acgt_gamma
 //          fgets(longstr, 198, input);
             expand = 1;
             while(fgets(longstr,198,input) && !feof(input)) {
@@ -960,6 +960,7 @@ int main(int argc, char *argv[]) {
 	  swflag= 1;
           logmsg(10,"Read-numbers file %s read\n",  read_file); }
           else { logmsg(10, "Read-numbers file NOT read\n") ; }
+*/
 
 
         if(!k) {
