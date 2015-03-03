@@ -2,7 +2,6 @@
 
 from optparse import OptionParser
 import os
-import urllib
 import subprocess
 import shutil
 import logging
@@ -11,6 +10,7 @@ import re
 
 pwd = os.path.abspath(os.path.dirname(__file__))
 vedir = os.path.abspath(os.path.join(pwd, "ve"))
+
 
 def kill_daemons(sig=signal.SIGKILL):
     uid = os.getuid()
