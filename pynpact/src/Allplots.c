@@ -317,7 +317,7 @@ int main(int argc, char *argv[]) {
     pali_file = np_getl(files);  logmsg(0,"%s\n",pali_file);
     /*File_list_of_nucleotides_in_200bp windows. */
     CG200_file = np_getl(files); logmsg(0,"%s\n",CG200_file);
-    /*File_list_of_read_numbers. */
+    /*  File_list_of_read_numbers. */
     read_file = np_getl(files); logmsg(0,"%s\n",read_file);
 
     fclose(files);
@@ -386,6 +386,9 @@ int main(int argc, char *argv[]) {
         else logmsg(10, "File of new blocks %s NOT read\n", block_file);
 */
 
+// FILE OF GENEMARK CODING POTENTIALS
+
+/*
         if((input=fopen(codpot_file, "r"))) {
             logmsg(10, "Reading codpot_file %s\n", codpot_file);
             ++cpf;
@@ -408,6 +411,7 @@ int main(int argc, char *argv[]) {
             fclose(input);
         }
         else logmsg(10, "File of GeneMark coding potential %s NOT read\n", codpot_file);
+*/
 
         if((input=fopen(Hits_file,"r"))) {
             logmsg(10, "Reading Hits_file %s\n", Hits_file);
@@ -442,6 +446,9 @@ int main(int argc, char *argv[]) {
         }
         else logmsg(10, "File of G+C coding potential %s NOT read\n", Hits_file);
 
+// FILES OF SEQUENCE SIGNALS
+
+/*
         if((input=fopen(met_file,"r"))) {
             logmsg(10, "Reading met_file %s\n", met_file);
             while(fgets(longstr,198,input) && !feof(input)) {
@@ -580,6 +587,7 @@ int main(int argc, char *argv[]) {
             fclose(input);
         }
         else logmsg(10,"File of palindromes %s NOT read\n", pali_file);
+*/
 
 
 // READS FILE OF UNBIASED ORFS
