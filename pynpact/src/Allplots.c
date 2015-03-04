@@ -861,6 +861,7 @@ int main(int argc, char *argv[]) {
 // FILE OF NEW PREDICTIONS MODIFYING START OF TRANSLATION OF ANNOTATED GENES
 // IS READ INSTEAD INTO NEW POTENTIAL CODING REGIONS (newP* variables)
 
+/*
         if((input= fopen(mod_file,"r"))) {
             logmsg(10, "Reading modified-predictions file %s\n", mod_file);
             /* Skip passed the header line */
@@ -920,6 +921,7 @@ int main(int argc, char *argv[]) {
             logmsg(10,"Modified file %s read\n", mod_file);
         }
         else logmsg(10,"Modified file NOT read\n") ;
+*/
 
 
 // READS FILE OF N-PROFILES
