@@ -5,7 +5,7 @@ HOST="genome.ufl.edu"
 ROOT="/var/www/html/genome.ufl.edu/npact"
 
 
-rsync -vrt --exclude-from=.gitignore . $HOST:"${ROOT}"
+ssh -A $HOST "git pull"
 ssh $HOST "[ -e ${ROOT}/webroot/uploads ] ||  mkdir -p -m 777 ${ROOT}/webroot/uploads"
 ssh $HOST "[ -e ${ROOT}/webroot/logs ] || mkdir -p -m 777 ${ROOT}/webroot/logs"
 ssh $HOST "umask 0002; ${ROOT}/bootstrap.py"
