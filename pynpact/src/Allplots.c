@@ -342,76 +342,76 @@ int main(int argc, char *argv[]) {
 
 // BLOCK_file and block_file excluded
 
-/*
-        if((input=fopen(BLOCK_file,"r"))) {
-            logmsg(10, "Reading BLOCK_file %s\n", BLOCK_file);
-            while(fgets(longstr,198,input) && !feof(input)) {
-                BLOCK_str= (char *)realloc(BLOCK_str,(nB+1)*sizeof(char));
-                BLOCK= (int **)realloc(BLOCK,(nB+1)*sizeof(int *));
-                BLOCK[nB]= (int *)malloc(2*sizeof(int));
-                p= strchr(longstr,'.');
-                ge= atoi(p+2);
-                if(longstr[0]=='c') { gs= atoi(longstr+11); BLOCK_str[nB]='C'; }
-                else { gs= atoi(longstr); BLOCK_str[nB]='D'; }
-                if(gs>=start-line_range/50 && gs<end && ge>start && ge<=end+line_range/50) { BLOCK[nB][0]= gs; BLOCK[nB][1]= ge; ++nB; }
-                else if(gs>=start && gs<end && ge>end+line_range/50) { BLOCK[nB][0]= gs; BLOCK[nB][1]= end+line_range/50; ++nB; }
-                else if(ge<=end+line_range/50 && ge>start && gs<start-line_range/50)
-                { BLOCK[nB][0]= start-line_range/50; BLOCK[nB][0] += gs%period-BLOCK[nB][0]%period; BLOCK[nB][1]= ge; ++nB; }
-                else if(gs<start-line_range/50 && ge>end+line_range/50)
-                { BLOCK[nB][0]= start-line_range/50; BLOCK[nB][0] += gs%period-BLOCK[nB][0]%period; BLOCK[nB][1]= end+line_range/50; ++nB; }
-            }
-            fclose(input);
-        }
-        else logmsg(10, "File of blocks from annotated genes %s NOT read\n", BLOCK_file);
-
-        if((input=fopen(block_file, "r"))) {
-            logmsg(10, "Reading block_file %s\n", block_file);
-            while(fgets(longstr,198,input) && !feof(input)) {
-                block_str= (char *)realloc(block_str,(nb+1)*sizeof(char));
-                block= (int **)realloc(block,(nb+1)*sizeof(int *));
-                block[nb]= (int *)malloc(2*sizeof(int));
-                p= strchr(longstr,'.');
-                ge= atoi(p+2);
-                if(longstr[0]=='c') { gs= atoi(longstr+11); block_str[nb]='C'; }
-                else { gs= atoi(longstr); block_str[nb]='D'; }
-                if(gs>=start-line_range/50 && gs<end && ge>start && ge<=end+line_range/50) { block[nb][0]= gs; block[nb][1]= ge; ++nb; }
-                else if(gs>=start && gs<end && ge>end+line_range/50) { block[nb][0]= gs; block[nb][1]= end+line_range/50; ++nb; }
-                else if(ge<=end+line_range/50 && ge>start && gs<start-line_range/50)
-                { block[nb][0]= start-line_range/50; block[nb][0] += gs%period-block[nb][0]%period; block[nb][1]= ge; ++nb; }
-                else if(gs<start-line_range/50 && ge>end+line_range/50)
-                { block[nb][0]= start-line_range/50; block[nb][0] += gs%period-block[nb][0]%period; block[nb][1]= end+line_range/50; ++nb; }
-            }
-            fclose(input);
-        }
-        else logmsg(10, "File of new blocks %s NOT read\n", block_file);
-*/
+//
+//       if((input=fopen(BLOCK_file,"r"))) {
+//           logmsg(10, "Reading BLOCK_file %s\n", BLOCK_file);
+//           while(fgets(longstr,198,input) && !feof(input)) {
+//               BLOCK_str= (char *)realloc(BLOCK_str,(nB+1)*sizeof(char));
+//               BLOCK= (int **)realloc(BLOCK,(nB+1)*sizeof(int *));
+//               BLOCK[nB]= (int *)malloc(2*sizeof(int));
+//               p= strchr(longstr,'.');
+//               ge= atoi(p+2);
+//               if(longstr[0]=='c') { gs= atoi(longstr+11); BLOCK_str[nB]='C'; }
+//               else { gs= atoi(longstr); BLOCK_str[nB]='D'; }
+//               if(gs>=start-line_range/50 && gs<end && ge>start && ge<=end+line_range/50) { BLOCK[nB][0]= gs; BLOCK[nB][1]= ge; ++nB; }
+//               else if(gs>=start && gs<end && ge>end+line_range/50) { BLOCK[nB][0]= gs; BLOCK[nB][1]= end+line_range/50; ++nB; }
+//               else if(ge<=end+line_range/50 && ge>start && gs<start-line_range/50)
+//               { BLOCK[nB][0]= start-line_range/50; BLOCK[nB][0] += gs%period-BLOCK[nB][0]%period; BLOCK[nB][1]= ge; ++nB; }
+//               else if(gs<start-line_range/50 && ge>end+line_range/50)
+//               { BLOCK[nB][0]= start-line_range/50; BLOCK[nB][0] += gs%period-BLOCK[nB][0]%period; BLOCK[nB][1]= end+line_range/50; ++nB; }
+//           }
+//           fclose(input);
+//       }
+//       else logmsg(10, "File of blocks from annotated genes %s NOT read\n", BLOCK_file);
+//
+//       if((input=fopen(block_file, "r"))) {
+//           logmsg(10, "Reading block_file %s\n", block_file);
+//           while(fgets(longstr,198,input) && !feof(input)) {
+//               block_str= (char *)realloc(block_str,(nb+1)*sizeof(char));
+//               block= (int **)realloc(block,(nb+1)*sizeof(int *));
+//               block[nb]= (int *)malloc(2*sizeof(int));
+//               p= strchr(longstr,'.');
+//               ge= atoi(p+2);
+//               if(longstr[0]=='c') { gs= atoi(longstr+11); block_str[nb]='C'; }
+//               else { gs= atoi(longstr); block_str[nb]='D'; }
+//               if(gs>=start-line_range/50 && gs<end && ge>start && ge<=end+line_range/50) { block[nb][0]= gs; block[nb][1]= ge; ++nb; }
+//               else if(gs>=start && gs<end && ge>end+line_range/50) { block[nb][0]= gs; block[nb][1]= end+line_range/50; ++nb; }
+//               else if(ge<=end+line_range/50 && ge>start && gs<start-line_range/50)
+//               { block[nb][0]= start-line_range/50; block[nb][0] += gs%period-block[nb][0]%period; block[nb][1]= ge; ++nb; }
+//               else if(gs<start-line_range/50 && ge>end+line_range/50)
+//               { block[nb][0]= start-line_range/50; block[nb][0] += gs%period-block[nb][0]%period; block[nb][1]= end+line_range/50; ++nb; }
+//           }
+//           fclose(input);
+//       }
+//       else logmsg(10, "File of new blocks %s NOT read\n", block_file);
+//
 
 // FILE OF GENEMARK CODING POTENTIALS
 
-/*
-        if((input=fopen(codpot_file, "r"))) {
-            logmsg(10, "Reading codpot_file %s\n", codpot_file);
-            ++cpf;
-            while(fgets(longstr,198,input) && !feof(input)) {
-                codpot_str= (char *)realloc(codpot_str,(ncp+1)*sizeof(char));
-                codpot_col= (char *)realloc(codpot_col,(ncp+1)*sizeof(char));
-                codpot= (int **)realloc(codpot,(ncp+1)*sizeof(int *));
-                codpot[ncp]= (int *)malloc(2*sizeof(int));
-                p= strchr(longstr,'.');
-                ge= atoi(p+2);
-                if(longstr[0]=='c') { gs= atoi(longstr+11); codpot_str[ncp]='C'; codpot_col[ncp]= gs%period; }
-                else { gs= atoi(longstr); codpot_str[ncp]='D'; codpot_col[ncp]= ge%period; }
-                if(gs>=start && gs<end && ge>start && ge<=end) { codpot[ncp][0]= gs; codpot[ncp][1]= ge; ++ncp; }
-                else if(gs>=start && gs<end && ge>end) { codpot[ncp][0]= gs; codpot[ncp][1]= end; ++ncp; }
-                else if(ge<=end && ge>start && gs<start)
-                { codpot[ncp][0]= start; codpot[ncp][0] += gs%period-codpot[ncp][0]%period; codpot[ncp][1]= ge; ++ncp; }
-                else if(gs<start && ge>end)
-                { codpot[ncp][0]= start; codpot[ncp][0] += gs%period-codpot[ncp][0]%period; codpot[ncp][1]= end; ++ncp; }
-            }
-            fclose(input);
-        }
-        else logmsg(10, "File of GeneMark coding potential %s NOT read\n", codpot_file);
-*/
+//
+//      if((input=fopen(codpot_file, "r"))) {
+//           logmsg(10, "Reading codpot_file %s\n", codpot_file);
+//           ++cpf;
+//           while(fgets(longstr,198,input) && !feof(input)) {
+//               codpot_str= (char *)realloc(codpot_str,(ncp+1)*sizeof(char));
+//               codpot_col= (char *)realloc(codpot_col,(ncp+1)*sizeof(char));
+//               codpot= (int **)realloc(codpot,(ncp+1)*sizeof(int *));
+//               codpot[ncp]= (int *)malloc(2*sizeof(int));
+//               p= strchr(longstr,'.');
+//               ge= atoi(p+2);
+//               if(longstr[0]=='c') { gs= atoi(longstr+11); codpot_str[ncp]='C'; codpot_col[ncp]= gs%period; }
+//               else { gs= atoi(longstr); codpot_str[ncp]='D'; codpot_col[ncp]= ge%period; }
+//               if(gs>=start && gs<end && ge>start && ge<=end) { codpot[ncp][0]= gs; codpot[ncp][1]= ge; ++ncp; }
+//               else if(gs>=start && gs<end && ge>end) { codpot[ncp][0]= gs; codpot[ncp][1]= end; ++ncp; }
+//               else if(ge<=end && ge>start && gs<start)
+//               { codpot[ncp][0]= start; codpot[ncp][0] += gs%period-codpot[ncp][0]%period; codpot[ncp][1]= ge; ++ncp; }
+//               else if(gs<start && ge>end)
+//               { codpot[ncp][0]= start; codpot[ncp][0] += gs%period-codpot[ncp][0]%period; codpot[ncp][1]= end; ++ncp; }
+//           }
+//           fclose(input);
+//       }
+//       else logmsg(10, "File of GeneMark coding potential %s NOT read\n", codpot_file);
+//
 
         if((input=fopen(Hits_file,"r"))) {
             logmsg(10, "Reading Hits_file %s\n", Hits_file);
@@ -448,222 +448,222 @@ int main(int argc, char *argv[]) {
 
 // FILES OF SEQUENCE SIGNALS
 
-/*
-        if((input=fopen(met_file,"r"))) {
-            logmsg(10, "Reading met_file %s\n", met_file);
-            while(fgets(longstr,198,input) && !feof(input)) {
-                gs= atoi(longstr+2);
-                if(gs>=start && gs<=end)
-                {
-                    met_str= (char *)realloc(met_str,(nm+1)*sizeof(char));
-                    met= (int *)realloc(met,(nm+1)*sizeof(int));
-                    if(longstr[0]=='C') met_str[nm]='C';
-                    else met_str[nm]='D';
-                    met[nm]= gs;
-                    ++nm;
-                }
-            }
-            fclose(input);
-        }
-        else logmsg(10,"File of Met %s NOT read\n", met_file);
-
-        if((input=fopen(stop_file,"r"))) {
-            logmsg(10, "Reading stop_file %s\n", stop_file);
-            while(fgets(longstr,198,input) && !feof(input)) {
-                gs= atoi(longstr+2);
-                if(gs>=start && gs<=end)
-                {
-                    stop_str= (char *)realloc(stop_str,(ns+1)*sizeof(char));
-                    stop= (int *)realloc(stop,(ns+1)*sizeof(int));
-                    if(longstr[0]=='C') stop_str[ns]='C';
-                    else stop_str[ns]='D';
-                    stop[ns]= gs;
-                    ++ns;
-                }
-            }
-            fclose(input);
-        }
-        else logmsg(10,"File of Stop %s NOT read\n", stop_file);
-
-
-        if((input=fopen(tata_file,"r"))) {
-            logmsg(10, "Reading tata_file %s\n", tata_file);
-            while(fgets(longstr,198,input) && !feof(input)) {
-                sscanf(longstr,"%f %s %d %s",&tpr,ts,&gs,tatastr);
-                if(gs>=start && gs<=end) {
-                    tata_str= (char *)realloc(tata_str,(nt+1)*sizeof(char));
-                    tata= (int *)realloc(tata,(nt+1)*sizeof(int));
-                    if(ts[0]=='C') tata_str[nt]='C';
-                    else tata_str[nt]='D';
-                    tata[nt]= gs;
-                    ++nt;
-                }
-            }
-            fclose(input);
-        }
-        else logmsg(10,"File of TATA box %s NOT read\n", tata_file);
-
-        if((input=fopen(cap_file,"r"))) {
-            logmsg(10, "Reading cap_file %s\n", cap_file);
-            while(fgets(longstr,198,input) && !feof(input)) {
-                sscanf(longstr,"%f %s %d %s",&tpr,ts,&gs,tatastr);
-                if(gs>=start && gs<=end) {
-                    cap_str= (char *)realloc(cap_str,(ncap+1)*sizeof(char));
-                    cap= (int *)realloc(cap,(ncap+1)*sizeof(int));
-                    if(ts[0]=='C') cap_str[ncap]='C';
-                    else cap_str[ncap]='D';
-                    cap[ncap]= gs;
-                    ++ncap;
-                }
-            }
-            fclose(input);
-        }
-        else logmsg(10,"File of CAP box %s NOT read\n", cap_file);
-
-        if((input=fopen(ccaa_file,"r"))) {
-            logmsg(10, "Reading ccaa_file %s\n", ccaa_file);
-            while(fgets(longstr,198,input) && !feof(input)) {
-                sscanf(longstr,"%f %s %d %s",&tpr,ts,&gs,tatastr);
-                if(gs>=start && gs<=end) {
-                    ccaa_str= (char *)realloc(ccaa_str,(ncca+1)*sizeof(char));
-                    ccaa= (int *)realloc(ccaa,(ncca+1)*sizeof(int));
-                    if(ts[0]=='C') ccaa_str[ncca]='C';
-                    else ccaa_str[ncca]='D';
-                    ccaa[ncca]= gs;
-                    ++ncca;
-                }
-            }
-            fclose(input);
-        }
-        else logmsg(10,"File of CCAAT box %s NOT read\n", ccaa_file);
-
-        if((input=fopen(gcbox_file,"r"))) {
-            logmsg(10, "Reading gcbox_file %s\n", gcbox_file);
-            while(fgets(longstr,198,input) && !feof(input)) {
-                sscanf(longstr,"%f %s %d %s",&tpr,ts,&gs,tatastr);
-                if(gs>=start && gs<=end) {
-                    gcbox_str= (char *)realloc(gcbox_str,(ngcb+1)*sizeof(char));
-                    gcbox= (int *)realloc(gcbox,(ngcb+1)*sizeof(int));
-                    if(ts[0]=='C') gcbox_str[ngcb]='C';
-                    else gcbox_str[ngcb]='D';
-                    gcbox[ngcb]= gs;
-                    ++ngcb;
-                }
-            }
-            fclose(input);
-        }
-        else logmsg(10,"File of GC box %s NOT read\n", gcbox_file);
-
-        if((input=fopen(kozak_file,"r"))) {
-            logmsg(10, "Reading kozak_file %s\n", kozak_file);
-            while(fgets(longstr,198,input) && !feof(input)) {
-                sscanf(longstr,"%f %s %d %s",&tpr,ts,&gs,tatastr);
-                if(gs>=start && gs<=end) {
-                    kozak_str= (char *)realloc(kozak_str,(nk+1)*sizeof(char));
-                    kozak= (int *)realloc(kozak,(nk+1)*sizeof(int));
-                    if(ts[0]=='C') kozak_str[nk]='C';
-                    else kozak_str[nk]='D';
-                    kozak[nk]= gs;
-                    ++nk;
-                }
-            }
-            fclose(input);
-        }
-        else logmsg(10,"File of Kozak sequences %s NOT read\n", kozak_file);
-
-
-        if((input=fopen(pali_file,"r"))) {
-            logmsg(10, "Reading pali_file %s\n", pali_file);
-            while(fgets(longstr,198,input) && !feof(input)) {
-                sscanf(longstr,"%f %d",&pp,&lp);
-                if(pp>=start && pp<=end) {
-                    pali= (int **)realloc(pali,(npali+1)*sizeof(int *));
-                    pali[npali]= (int *)malloc(2*sizeof(int));
-                    pali[npali][0]= (int)pp;
-                    pali[npali][1]= lp;
-                    ++npali;
-                }
-            }
-            fclose(input);
-        }
-        else logmsg(10,"File of palindromes %s NOT read\n", pali_file);
-*/
+//
+//      if((input=fopen(met_file,"r"))) {
+//           logmsg(10, "Reading met_file %s\n", met_file);
+//           while(fgets(longstr,198,input) && !feof(input)) {
+//               gs= atoi(longstr+2);
+//               if(gs>=start && gs<=end)
+//               {
+//                   met_str= (char *)realloc(met_str,(nm+1)*sizeof(char));
+//                   met= (int *)realloc(met,(nm+1)*sizeof(int));
+//                   if(longstr[0]=='C') met_str[nm]='C';
+//                   else met_str[nm]='D';
+//                   met[nm]= gs;
+//                   ++nm;
+//               }
+//            }
+//            fclose(input);
+//        }
+//        else logmsg(10,"File of Met %s NOT read\n", met_file);
+//
+//        if((input=fopen(stop_file,"r"))) {
+//            logmsg(10, "Reading stop_file %s\n", stop_file);
+//            while(fgets(longstr,198,input) && !feof(input)) {
+//                gs= atoi(longstr+2);
+//                if(gs>=start && gs<=end)
+//                {
+//                    stop_str= (char *)realloc(stop_str,(ns+1)*sizeof(char));
+//                    stop= (int *)realloc(stop,(ns+1)*sizeof(int));
+//                    if(longstr[0]=='C') stop_str[ns]='C';
+//                    else stop_str[ns]='D';
+//                    stop[ns]= gs;
+//                    ++ns;
+//                }
+//            }
+//            fclose(input);
+//        }
+//        else logmsg(10,"File of Stop %s NOT read\n", stop_file);
+//
+//
+//        if((input=fopen(tata_file,"r"))) {
+//            logmsg(10, "Reading tata_file %s\n", tata_file);
+//            while(fgets(longstr,198,input) && !feof(input)) {
+//                sscanf(longstr,"%f %s %d %s",&tpr,ts,&gs,tatastr);
+//                if(gs>=start && gs<=end) {
+//                    tata_str= (char *)realloc(tata_str,(nt+1)*sizeof(char));
+//                    tata= (int *)realloc(tata,(nt+1)*sizeof(int));
+//                    if(ts[0]=='C') tata_str[nt]='C';
+//                    else tata_str[nt]='D';
+//                    tata[nt]= gs;
+//                    ++nt;
+//                }
+//            }
+//            fclose(input);
+//        }
+//        else logmsg(10,"File of TATA box %s NOT read\n", tata_file);
+//
+//        if((input=fopen(cap_file,"r"))) {
+//            logmsg(10, "Reading cap_file %s\n", cap_file);
+//            while(fgets(longstr,198,input) && !feof(input)) {
+//                sscanf(longstr,"%f %s %d %s",&tpr,ts,&gs,tatastr);
+//                if(gs>=start && gs<=end) {
+//                    cap_str= (char *)realloc(cap_str,(ncap+1)*sizeof(char));
+//                    cap= (int *)realloc(cap,(ncap+1)*sizeof(int));
+//                    if(ts[0]=='C') cap_str[ncap]='C';
+//                    else cap_str[ncap]='D';
+//                    cap[ncap]= gs;
+//                    ++ncap;
+//                }
+//            }
+//            fclose(input);
+//       }
+//      else logmsg(10,"File of CAP box %s NOT read\n", cap_file);
+//
+//        if((input=fopen(ccaa_file,"r"))) {
+//            logmsg(10, "Reading ccaa_file %s\n", ccaa_file);
+//            while(fgets(longstr,198,input) && !feof(input)) {
+//                sscanf(longstr,"%f %s %d %s",&tpr,ts,&gs,tatastr);
+//                if(gs>=start && gs<=end) {
+//                    ccaa_str= (char *)realloc(ccaa_str,(ncca+1)*sizeof(char));
+//                    ccaa= (int *)realloc(ccaa,(ncca+1)*sizeof(int));
+//                    if(ts[0]=='C') ccaa_str[ncca]='C';
+//                    else ccaa_str[ncca]='D';
+//                    ccaa[ncca]= gs;
+//                    ++ncca;
+//                }
+//            }
+//            fclose(input);
+//        }
+//        else logmsg(10,"File of CCAAT box %s NOT read\n", ccaa_file);
+//
+//        if((input=fopen(gcbox_file,"r"))) {
+//            logmsg(10, "Reading gcbox_file %s\n", gcbox_file);
+//            while(fgets(longstr,198,input) && !feof(input)) {
+//                sscanf(longstr,"%f %s %d %s",&tpr,ts,&gs,tatastr);
+//                if(gs>=start && gs<=end) {
+//                    gcbox_str= (char *)realloc(gcbox_str,(ngcb+1)*sizeof(char));
+//                    gcbox= (int *)realloc(gcbox,(ngcb+1)*sizeof(int));
+//                    if(ts[0]=='C') gcbox_str[ngcb]='C';
+//                    else gcbox_str[ngcb]='D';
+//                    gcbox[ngcb]= gs;
+//                    ++ngcb;
+//                }
+//            }
+//            fclose(input);
+//        }
+//        else logmsg(10,"File of GC box %s NOT read\n", gcbox_file);
+//
+//        if((input=fopen(kozak_file,"r"))) {
+//            logmsg(10, "Reading kozak_file %s\n", kozak_file);
+//            while(fgets(longstr,198,input) && !feof(input)) {
+//                sscanf(longstr,"%f %s %d %s",&tpr,ts,&gs,tatastr);
+//                if(gs>=start && gs<=end) {
+//                    kozak_str= (char *)realloc(kozak_str,(nk+1)*sizeof(char));
+//                    kozak= (int *)realloc(kozak,(nk+1)*sizeof(int));
+//                    if(ts[0]=='C') kozak_str[nk]='C';
+//                    else kozak_str[nk]='D';
+//                    kozak[nk]= gs;
+//                    ++nk;
+//                }
+//            }
+//            fclose(input);
+//        }
+//        else logmsg(10,"File of Kozak sequences %s NOT read\n", kozak_file);
+//
+//
+//        if((input=fopen(pali_file,"r"))) {
+//            logmsg(10, "Reading pali_file %s\n", pali_file);
+//            while(fgets(longstr,198,input) && !feof(input)) {
+//                sscanf(longstr,"%f %d",&pp,&lp);
+//                if(pp>=start && pp<=end) {
+//                    pali= (int **)realloc(pali,(npali+1)*sizeof(int *));
+//                    pali[npali]= (int *)malloc(2*sizeof(int));
+//                    pali[npali][0]= (int)pp;
+//                    pali[npali][1]= lp;
+//                    ++npali;
+//                }
+//            }
+//            fclose(input);
+//        }
+//        else logmsg(10,"File of palindromes %s NOT read\n", pali_file);
+//
 
 
 // READS FILE OF UNBIASED ORFS
 
-        if((input=fopen(unb_file,"r"))) {
-            logmsg(10, "Reading unb_file %s\n", unb_file);
-            unbf= 1;
-            while(fgets(longstr,198,input) && !feof(input)) {
-                unb_str= (char *)realloc(unb_str,(nub+1)*sizeof(char));
-                unb= (int **)realloc(unb,(nub+1)*sizeof(int *));
-                unb[nub]= (int *)malloc(2*sizeof(int));
-                p= strchr(longstr,'.'); p += 2;
-			if(p[0] == '>' || p[0] == '<') ++p;
-                ge= atoi(p);
-                if(longstr[0]=='c')
-		{
-		p= longstr + 11;
-			if(p[0] == '>' || p[0] == '<') ++p;
-		gs= atoi(p);
-		unb_str[nub]='C';
-		}
-                else
-		{
-		p= longstr;
-			if(p[0] == '>' || p[0] == '<') ++p;
-		gs= atoi(p);
-		unb_str[nub]='D';
-		}
-                if(gs>=start-line_range/50 && gs<end && ge>start && ge<=end+line_range/50) { unb[nub][0]= gs; unb[nub][1]= ge; ++nub; }
-                else if(gs>=start && gs<end && ge>end+line_range/50) { unb[nub][0]= gs; unb[nub][1]= end+line_range/50; ++nub; }
-                else if(ge<=end+line_range/50 && ge>start && gs<start-line_range/50)
-                { unb[nub][0]= start-line_range/50; unb[nub][0] += gs%period-unb[nub][0]%period; unb[nub][1]= ge; ++nub; }
-                else if(gs<start-line_range/50 && ge>end+line_range/50)
-                { unb[nub][0]= start-line_range/50; unb[nub][0] += gs%period-unb[nub][0]%period; unb[nub][1]= end+line_range/50; ++nub; }
-            }
-            fclose(input);
-        }
-        else logmsg(10,"Acc file NOT read\n") ;
-
+//        if((input=fopen(unb_file,"r"))) {
+//            logmsg(10, "Reading unb_file %s\n", unb_file);
+//            unbf= 1;
+//            while(fgets(longstr,198,input) && !feof(input)) {
+//                unb_str= (char *)realloc(unb_str,(nub+1)*sizeof(char));
+//                unb= (int **)realloc(unb,(nub+1)*sizeof(int *));
+//                unb[nub]= (int *)malloc(2*sizeof(int));
+//                p= strchr(longstr,'.'); p += 2;
+//			if(p[0] == '>' || p[0] == '<') ++p;
+//                ge= atoi(p);
+//                if(longstr[0]=='c')
+//		{
+//		p= longstr + 11;
+//			if(p[0] == '>' || p[0] == '<') ++p;
+//		gs= atoi(p);
+//		unb_str[nub]='C';
+//		}
+//                else
+//		{
+//		p= longstr;
+//			if(p[0] == '>' || p[0] == '<') ++p;
+//		gs= atoi(p);
+//		unb_str[nub]='D';
+//		}
+//                if(gs>=start-line_range/50 && gs<end && ge>start && ge<=end+line_range/50) { unb[nub][0]= gs; unb[nub][1]= ge; ++nub; }
+//                else if(gs>=start && gs<end && ge>end+line_range/50) { unb[nub][0]= gs; unb[nub][1]= end+line_range/50; ++nub; }
+//                else if(ge<=end+line_range/50 && ge>start && gs<start-line_range/50)
+//                { unb[nub][0]= start-line_range/50; unb[nub][0] += gs%period-unb[nub][0]%period; unb[nub][1]= ge; ++nub; }
+//                else if(gs<start-line_range/50 && ge>end+line_range/50)
+//                { unb[nub][0]= start-line_range/50; unb[nub][0] += gs%period-unb[nub][0]%period; unb[nub][1]= end+line_range/50; ++nub; }
+//            }
+//            fclose(input);
+//        }
+//        else logmsg(10,"Acc file NOT read\n") ;
+//
 
 // READS FILE OF CONSERVED ORFS
 
-        if((input= fopen(con_file,"r"))) {
-            logmsg(10, "Reading con_file %s\n", con_file);
-            conf= 1;
-            while(fgets(longstr,198,input) && !feof(input)) {
-                con_str= (char *)realloc(con_str,(nc+1)*sizeof(char));
-                con= (int **)realloc(con,(nc+1)*sizeof(int *));
-                con[nc]= (int *)malloc(2*sizeof(int));
-                p= strchr(longstr,'.'); p += 2;
-			if(p[0] == '>' || p[0] == '<') ++p;
-                ge= atoi(p);
-                if(longstr[0]=='c')
-		{
-		p= longstr + 11;
-			if(p[0] == '>' || p[0] == '<') ++p;
-		gs= atoi(p);
-		con_str[nc]='C';
-		}
-                else
-		{
-		p= longstr;
-			if(p[0] == '>' || p[0] == '<') ++p;
-		gs= atoi(p);
-		con_str[nc]='D';
-		}
-                if(gs>=start-line_range/50 && gs<end && ge<=end+line_range/50) { con[nc][0]= gs; con[nc][1]= ge; ++nc; }
-                else if(gs>=start-line_range/50 && gs<end && ge>end+line_range/50) { con[nc][0]= gs; con[nc][1]= end+line_range/50; ++nc; }
-                else if(ge<=end+line_range/50 && ge>start && gs<start-line_range/50)
-                { con[nc][0]= start-line_range/50; con[nc][0] += gs%period-con[nc][0]%period; con[nc][1]= ge; ++nc; }
-                else if(gs<start-line_range/50 && ge>end+line_range/50)
-                { con[nc][0]= start-line_range/50; con[nc][0] += gs%period-con[nc][0]%period; con[nc][1]= end+line_range/50; ++nc; }
-            }
-            fclose(input);
-        }
-        else logmsg(10,"Conserved file NOT read\n") ;
+//        if((input= fopen(con_file,"r"))) {
+//            logmsg(10, "Reading con_file %s\n", con_file);
+//            conf= 1;
+//            while(fgets(longstr,198,input) && !feof(input)) {
+//                con_str= (char *)realloc(con_str,(nc+1)*sizeof(char));
+//                con= (int **)realloc(con,(nc+1)*sizeof(int *));
+//                con[nc]= (int *)malloc(2*sizeof(int));
+//                p= strchr(longstr,'.'); p += 2;
+//			if(p[0] == '>' || p[0] == '<') ++p;
+//                ge= atoi(p);
+//                if(longstr[0]=='c')
+//		{
+//		p= longstr + 11;
+//			if(p[0] == '>' || p[0] == '<') ++p;
+//		gs= atoi(p);
+//		con_str[nc]='C';
+//		}
+//                else
+//		{
+//		p= longstr;
+//			if(p[0] == '>' || p[0] == '<') ++p;
+//		gs= atoi(p);
+//		con_str[nc]='D';
+//		}
+//                if(gs>=start-line_range/50 && gs<end && ge<=end+line_range/50) { con[nc][0]= gs; con[nc][1]= ge; ++nc; }
+//                else if(gs>=start-line_range/50 && gs<end && ge>end+line_range/50) { con[nc][0]= gs; con[nc][1]= end+line_range/50; ++nc; }
+//                else if(ge<=end+line_range/50 && ge>start && gs<start-line_range/50)
+//                { con[nc][0]= start-line_range/50; con[nc][0] += gs%period-con[nc][0]%period; con[nc][1]= ge; ++nc; }
+//                else if(gs<start-line_range/50 && ge>end+line_range/50)
+//                { con[nc][0]= start-line_range/50; con[nc][0] += gs%period-con[nc][0]%period; con[nc][1]= end+line_range/50; ++nc; }
+//            }
+//            fclose(input);
+//        }
+//        else logmsg(10,"Conserved file NOT read\n") ;
 
 // READS FILE OF NEW PROPOSED CODING REGIONS
 
