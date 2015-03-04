@@ -413,10 +413,14 @@ int main(int argc, char *argv[]) {
 //       else logmsg(10, "File of GeneMark coding potential %s NOT read\n", codpot_file);
 //
 
+// FILE OF HITS. Formats: [H,G][0-3] from..to
+//                        [H,G][0-3] complement(from..to)
+
         if((input=fopen(Hits_file,"r"))) {
             logmsg(10, "Reading Hits_file %s\n", Hits_file);
             ++Scpf;
             expand = 1;
+
             while(fgets(longstr,198,input) && !feof(input)) {
                 if(expand) {
                     Hits_str= (char *)realloc(Hits_str, (nScp + 1) * sizeof(char));
@@ -431,7 +435,9 @@ int main(int argc, char *argv[]) {
                 if(longstr[3]=='c') { gs= atoi(longstr+14); Hits_str[nScp]='C'; Hits_col[nScp]= gs%period; }
                 else if(longstr[3]=='r') { gs= atoi(longstr+10); Hits_str[nScp]='R'; }
                 else { gs= atoi(longstr + 3); Hits_str[nScp]='D'; Hits_col[nScp]= ge%period; }
-                expand = 1;   // Should we expand again next lop?
+
+            expand = 1;   // Should we expand again next loop?
+
                 if(gs>=start && gs<end && ge>start && ge<=end) { Hits[nScp * 2 + 0]= gs; Hits[nScp * 2 + 1]= ge; ++nScp; }
                 else if(gs>=start && gs<end && ge>end) { Hits[nScp * 2 + 0]= gs; Hits[nScp * 2 + 1]= end; ++nScp; }
                 else if(ge<=end && ge>start && gs<start)
@@ -762,30 +768,31 @@ int main(int argc, char *argv[]) {
         else logmsg(10,"newP file NOT read\n") ;
 
 
-
 // READS FILE OF BLOCKS OF CONTRASTING S_PATTERNS
 
-        if((input= fopen(cg_file,"r"))) { cgf= 1;
-            logmsg(10, "Reading cg_file %s\n", cg_file);
-            while(fgets(longstr,198,input) && !feof(input)) {
-                cg_str= (char *)realloc(cg_str,(ncg+1)*sizeof(char));
-                cg= (int **)realloc(cg,(ncg+1)*sizeof(int *));
-                cg[ncg]= (int *)malloc(2*sizeof(int));
-                p= strchr(longstr,'.');
-                ge= atoi(p+2)+50;
-                if(longstr[0]=='c') { gs= atoi(longstr+11)-50; cg_str[ncg]='C'; }
-                else { gs= atoi(longstr)-50; cg_str[ncg]='D'; }
-                if(gs>=start && gs<end && ge<=end) { cg[ncg][0]= gs; cg[ncg][1]= ge; ++ncg; }
-                else if(gs>=start && gs<end && ge>end) { cg[ncg][0]= gs; cg[ncg][1]= end; ++ncg; }
-                else if(ge<=end && ge>start && gs<start) { cg[ncg][0]= start; cg[ncg][1]= ge; ++ncg; }
-                else if(gs<start && ge>end)
-                { cg[ncg][0]= start; cg[ncg][1]= end; ++ncg; }
-            }
-            fclose(input);
-        }
-        else logmsg(10,"Files with blocks of asymmetric CG content NOT read\n") ;
+//
+//        if((input= fopen(cg_file,"r"))) { cgf= 1;
+//            logmsg(10, "Reading cg_file %s\n", cg_file);
+//            while(fgets(longstr,198,input) && !feof(input)) {
+//                cg_str= (char *)realloc(cg_str,(ncg+1)*sizeof(char));
+//                cg= (int **)realloc(cg,(ncg+1)*sizeof(int *));
+//                cg[ncg]= (int *)malloc(2*sizeof(int));
+//                p= strchr(longstr,'.');
+//                ge= atoi(p+2)+50;
+//                if(longstr[0]=='c') { gs= atoi(longstr+11)-50; cg_str[ncg]='C'; }
+//                else { gs= atoi(longstr)-50; cg_str[ncg]='D'; }
+//                if(gs>=start && gs<end && ge<=end) { cg[ncg][0]= gs; cg[ncg][1]= ge; ++ncg; }
+//                else if(gs>=start && gs<end && ge>end) { cg[ncg][0]= gs; cg[ncg][1]= end; ++ncg; }
+//                else if(ge<=end && ge>start && gs<start) { cg[ncg][0]= start; cg[ncg][1]= ge; ++ncg; }
+//                else if(gs<start && ge>end)
+//                { cg[ncg][0]= start; cg[ncg][1]= end; ++ncg; }
+//            }
+//            fclose(input);
+//        }
+//        else logmsg(10,"Files with blocks of asymmetric CG content NOT read\n") ;
+//
 
-        /* READS FILE OF ACCEPTED PUBLIC GENES */
+// READS FILE OF ACCEPTED PUBLIC GENES
 
         if((input= fopen(pub_file,"r"))) {
             logmsg(10, "Reading pub_file %s\n", pub_file);
@@ -914,6 +921,9 @@ int main(int argc, char *argv[]) {
         }
         else logmsg(10,"Modified file NOT read\n") ;
 
+
+// READS FILE OF N-PROFILES
+
         if((input= fopen(CG200_file,"r"))) {
             logmsg(10, "Reading CG200_file %s\n", CG200_file);
             while(!feof(input)) {
@@ -944,31 +954,31 @@ int main(int argc, char *argv[]) {
 
 // READS FILE OF RNA-SEQ READ NUMBERS
 
-/*
-        if((input= fopen(read_file,"r"))) {
-            logmsg(10, "Reading read_file %s\n", read_file);
-        fscanf(input,"%d",&wind);
-          while(!feof(input))
-          {
-          fscanf(input,"%d",&pos);
-            for(j= 0; j < 4; ++j) fscanf(input,"%f", S + j);
-            if(pos >= start && pos < end)
-            {
-            X= (int *)realloc(X, (N + 1) * sizeof(int));
-            Y= (float **)realloc(Y, (N + 1) * sizeof(float *));
-            Y[N]= (float *)malloc(4 * sizeof(float));
-            X[N]= pos;
-              for(j= 0; j < 4; ++j) Y[N][j]= S[j];
-            ++N;
-            pos= -1;
-            }
-            else fgets(longstr, 198, input);
-          }
-          fclose(input);
-	  swflag= 1;
-          logmsg(10,"Read-numbers file %s read\n",  read_file); }
-          else { logmsg(10, "Read-numbers file NOT read\n") ; }
-*/
+//
+//        if((input= fopen(read_file,"r"))) {
+//            logmsg(10, "Reading read_file %s\n", read_file);
+//        fscanf(input,"%d",&wind);
+//          while(!feof(input))
+//          {
+//          fscanf(input,"%d",&pos);
+//            for(j= 0; j < 4; ++j) fscanf(input,"%f", S + j);
+//            if(pos >= start && pos < end)
+//            {
+//            X= (int *)realloc(X, (N + 1) * sizeof(int));
+//            Y= (float **)realloc(Y, (N + 1) * sizeof(float *));
+//            Y[N]= (float *)malloc(4 * sizeof(float));
+//            X[N]= pos;
+//              for(j= 0; j < 4; ++j) Y[N][j]= S[j];
+//            ++N;
+//            pos= -1;
+//            }
+//            else fgets(longstr, 198, input);
+//          }
+//          fclose(input);
+//	  swflag= 1;
+//          logmsg(10,"Read-numbers file %s read\n",  read_file); }
+//          else { logmsg(10, "Read-numbers file NOT read\n") ; }
+//
 
 
         if(!k) {
