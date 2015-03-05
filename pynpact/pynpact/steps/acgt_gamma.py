@@ -7,7 +7,7 @@ from pynpact.util import Hasher, reducedict, mkdtemp_rename
 from pynpact.steps import producer, enqueue
 
 
-log = logging.getLogger(__name__)
+log = logging.getLogger('pynpact.steps.acgt_gamma')
 statuslog = logging.getLogger('pynpact.statuslog')
 
 BIN = binfile("acgt_gamma")
@@ -60,3 +60,4 @@ def _acgt_gamma(config, dtemp):
         env={'BASE_DIR_THRESHOLD_TABLES': DATAPATH},
         stderr=sys.stderr,
         logger=log)
+    log.debug("Prediction finished successfully")
