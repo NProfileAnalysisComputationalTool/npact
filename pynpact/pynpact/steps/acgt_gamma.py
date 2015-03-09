@@ -53,11 +53,14 @@ def _acgt_gamma(config, dtemp):
         "Identifying ORFs with 3-base compositional periodicity "
         "with significance: %s.", config.get('significance'))
     log.debug("Starting prediction program in %s", dtemp)
-    # TODO: acgt actually takes the string of characters to skip,
-    # not the length.
-    capproc.capturedCall(
-        cmd, cwd=dtemp, check=True,
-        env={'BASE_DIR_THRESHOLD_TABLES': DATAPATH},
-        stderr=sys.stderr,
-        logger=log)
-    log.debug("Prediction finished successfully")
+    try:
+        capproc.capturedCall(
+            cmd, cwd=dtemp, check=True,
+            env={'BASE_DIR_THRESHOLD_TABLES': DATAPATH},
+            stderr=sys.stderr,
+            logger=log)
+        log.debug("Prediction finished successfully")
+    except capproc.CallProcError as cpe:
+        log.error("acgt_gamma exitted with rc: %r", cpe.returncode)
+        raise
+
