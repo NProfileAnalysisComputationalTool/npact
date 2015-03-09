@@ -1,4 +1,4 @@
-# Version 2.2.1
+# Version 2.2.1 - 2015-03-09
 * polyfill for missing getChild in python2.6
 * better logging of acgt_gamma exit
 * Quiet some warnings in publish.sh
