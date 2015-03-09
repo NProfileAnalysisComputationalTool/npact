@@ -13,6 +13,14 @@ class NullHandler(logging.Handler):
 # messages
 logging.getLogger('pynpact').addHandler(NullHandler())
 
+if not hasattr(logmod.Logger, 'getChild'):
+    def getChildLogger(self, suffix):
+        if(len(self.name) > 0):
+            return logmod.getLogger("%s.%s" % (self.name, suffix))
+        else:
+            return logmod.getLogger(suffix)
+    logging.Logger.getChild = getChildLogger
+
 
 BINPATH = os.path.realpath(
     os.path.join(os.path.dirname(__file__), "bin"))
