@@ -1,6 +1,7 @@
 # Version 2.2.1
 * polyfill for missing getChild in python2.6
 * better logging of acgt_gamma exit
+* Quiet some warnings in publish.sh
 
 # Version 2.2.0 - 2015-03-04
 * Ability to request PDF in new interface
