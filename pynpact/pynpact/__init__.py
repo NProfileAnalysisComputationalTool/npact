@@ -13,12 +13,12 @@ class NullHandler(logging.Handler):
 # messages
 logging.getLogger('pynpact').addHandler(NullHandler())
 
-if not hasattr(logmod.Logger, 'getChild'):
+if not hasattr(logging.Logger, 'getChild'):
     def getChildLogger(self, suffix):
         if(len(self.name) > 0):
-            return logmod.getLogger("%s.%s" % (self.name, suffix))
+            return logging.getLogger("%s.%s" % (self.name, suffix))
         else:
-            return logmod.getLogger(suffix)
+            return logging.getLogger(suffix)
     logging.Logger.getChild = getChildLogger
 
 
