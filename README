@@ -2,7 +2,7 @@
 # About
 
 NPACT (N-Profile Analysis and Computation Tool) implements methods to
-identifies in nucleotide sequences regions of statistically-significant
+identify in nucleotide sequences regions of statistically-significant
 compositional three-base periodicity associated to ORF structures,
 to compare the newly-identified ORFs with pre-annotated collections
 of genes and to highlight potential new genes not included in the annotation.
