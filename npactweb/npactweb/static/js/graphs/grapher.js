@@ -408,52 +408,52 @@ angular.module('npact')
       ;
 
       _.forEach(cds, function(x) {
-          var isComplement = x.complement === 1,
-              c = colors[x.phase],
-              baseY = isComplement ? arrowHeight : 0,
-              arrowPointY = baseY + arrowHeight / 2,
-              arrowMaxY = baseY + arrowHeight,
-              shape = isComplement ?
-                [ x.start, arrowPointY,
-                  x.start + ahw, baseY,
-                  x.end, baseY,
-                  x.end, arrowMaxY,
-                  x.start + ahw, arrowMaxY
-                ] :
-                [ x.start, baseY,
-                  x.end - ahw, baseY,
-                  x.end, arrowPointY,
-                  x.end - ahw, arrowMaxY,
-                  x.start, arrowMaxY
-                ],
-              arrowBounds = isComplement ?
-                {
-                  x: x.start+ahw, y: baseY,
-                  width: x.end-x.start-ahw, height: arrowHeight
-                } : {
-                  x: x.start, y: baseY,
-                  width: x.end-x.start-ahw, height: arrowHeight
-                },
-              line = new K.Line(angular.extend({
-                extract: x,
-                points: shape,
-                stroke: c
-              }, arrowOpts)),
-              // render the name, too
-              lbl = new K.Text(angular.extend({
-                extract: x,
-                arrowBounds: arrowBounds,
-                text: x.name
-              }, textOpts)),
-              // need a dummy group for clipping, `Text` doesn't
-              // support clip directly
-              lblGroup = new K.Group({clip: arrowBounds});
+        var isComplement = x.complement === 1,
+            c = colors[x.phase],
+            baseY = isComplement ? arrowHeight : 0,
+            arrowPointY = baseY + arrowHeight / 2,
+            arrowMaxY = baseY + arrowHeight,
+            shape = isComplement ?
+              [ x.start, arrowPointY,
+                x.start + ahw, baseY,
+                x.end, baseY,
+                x.end, arrowMaxY,
+                x.start + ahw, arrowMaxY
+              ] :
+              [ x.start, baseY,
+                x.end - ahw, baseY,
+                x.end, arrowPointY,
+                x.end - ahw, arrowMaxY,
+                x.start, arrowMaxY
+              ],
+            arrowBounds = isComplement ?
+              {
+                x: x.start+ahw, y: baseY,
+                width: x.end-x.start-ahw, height: arrowHeight
+              } : {
+                x: x.start, y: baseY,
+                width: x.end-x.start-ahw, height: arrowHeight
+              },
+            line = new K.Line(angular.extend({
+              extract: x,
+              points: shape,
+              stroke: c
+            }, arrowOpts)),
+            // render the name, too
+            lbl = new K.Text(angular.extend({
+              extract: x,
+              arrowBounds: arrowBounds,
+              text: x.name
+            }, textOpts)),
+            // need a dummy group for clipping, `Text` doesn't
+            // support clip directly
+            lblGroup = new K.Group({clip: arrowBounds});
 
-          lblGroup.add(lbl);
-          g.add(line, lblGroup);
-          // now that lbl is on the canvas, we can see what it's
-          // height/width is
-          centerExtractLabel(lbl, xaxis.scaleX);
+        lblGroup.add(lbl);
+        g.add(line, lblGroup);
+        // now that lbl is on the canvas, we can see what it's
+        // height/width is
+        centerExtractLabel(lbl, xaxis.scaleX);
       }, this);
 
       g.on('click', function(evt) {
