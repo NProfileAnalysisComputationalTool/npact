@@ -111,7 +111,7 @@ angular.module('npact')
 
       addMany(g, _.map(this.tracks, function(track) {
         defaultTextOpts.text = track.name;
-        defaultTextOpts.y = track.y;
+        defaultTextOpts.y = track.y + track.height/4;
         defaultTextOpts.height = track.height;
         return new K.Text(defaultTextOpts);
       }));
@@ -397,63 +397,62 @@ angular.module('npact')
           colors = this.colors,
           g = new K.Group({ x: 0, y: track.y }),
           arrowHeight = style.tracks.arrow.height,
-          ahw = style.tracks.arrow.width / xaxis.scaleX,
+          arrowHeadWidth = style.tracks.arrow.width / xaxis.scaleX,
           textOpts = _.assign({scaleX: 1 / xaxis.scaleX }, style.tracks.text),
           arrowOpts = {
             x: 0, y: 0,
             closed: true,
             strokeWidth: 1,
             strokeScaleEnabled: false
-          }
+          },
+          arrowPointY = arrowHeight / 2
       ;
 
       _.forEach(cds, function(x) {
-        var isComplement = x.complement === 1,
-            c = colors[x.phase],
-            baseY = isComplement ? arrowHeight : 0,
-            arrowPointY = baseY + arrowHeight / 2,
-            arrowMaxY = baseY + arrowHeight,
-            shape = isComplement ?
-              [ x.start, arrowPointY,
-                x.start + ahw, baseY,
-                x.end, baseY,
-                x.end, arrowMaxY,
-                x.start + ahw, arrowMaxY
-              ] :
-              [ x.start, baseY,
-                x.end - ahw, baseY,
-                x.end, arrowPointY,
-                x.end - ahw, arrowMaxY,
-                x.start, arrowMaxY
-              ],
-            arrowBounds = isComplement ?
-              {
-                x: x.start+ahw, y: baseY,
-                width: x.end-x.start-ahw, height: arrowHeight
-              } : {
-                x: x.start, y: baseY,
-                width: x.end-x.start-ahw, height: arrowHeight
-              },
-            line = new K.Line(angular.extend({
-              extract: x,
-              points: shape,
-              stroke: c
-            }, arrowOpts)),
-            // render the name, too
-            lbl = new K.Text(angular.extend({
-              extract: x,
-              arrowBounds: arrowBounds,
-              text: x.name
-            }, textOpts)),
-            // need a dummy group for clipping, `Text` doesn't
-            // support clip directly
-            lblGroup = new K.Group({clip: arrowBounds});
-
-        lblGroup.add(lbl);
-        g.add(line, lblGroup);
-        // now that lbl is on the canvas, we can see what it's
-        // height/width is
-        centerExtractLabel(lbl, xaxis.scaleX);
+        var width = x.end - x.start,
+            baseY = 0, shape,
+            ahw = Math.min(width, arrowHeadWidth),
+            arrowBounds = { x: 0, y:0, width: width - ahw, height: arrowHeight}
+        ;
+        if(x.complement === 1) {
+          arrowBounds.x = ahw;
+          baseY = arrowHeight;
+          //arrow pointing left, starting at the tip, clockwise
+          shape = [ 0, arrowPointY,
+                    ahw, 0,
+                    width, 0,
+                    width, arrowHeight,
+                    ahw, arrowHeight ];
+        }
+        else {
+          //arrow pointing right, starting at the tip, clockwise
+          shape = [ width, arrowPointY,
+                    width - ahw, arrowHeight,
+                    0, arrowHeight,
+                    0, 0,
+                    width - ahw, 0 ];
+        }
+        g.add(new K.Line(angular.extend(arrowOpts, {
+          x: x.start, y: baseY,
+          extract: x,
+          points: shape,
+          stroke: colors[x.phase]
+        })));
+        // Only put a label in it if there is any room
+        if(width > arrowHeadWidth) {
+          // need a dummy group for clipping, `Text` doesn't
+          // support clip directly
+          var lblGroup = new K.Group({ x: x.start, y: baseY, clip: arrowBounds}),
+              // render the name, too
+              lbl = new K.Text(angular.extend({
+                extract: x,
+                arrowBounds: arrowBounds,
+                text: x.name
+              }, textOpts));
+          lblGroup.add(lbl);
+          g.add(lblGroup);
+          centerExtractLabel(lbl, xaxis.scaleX);
+        }
       }, this);
 
       g.on('click', function(evt) {
