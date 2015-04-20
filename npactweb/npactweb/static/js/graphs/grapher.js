@@ -232,8 +232,8 @@ angular.module('npact')
       // need a shape that can be clicked on to allow dragging the
       // entire canvas
       dgAdd(new K.Rect({x: this.startBase, y: 0,// fill: '#BDD',
-                         width: this.m.xaxis.length,
-                         height: this.m.height}));
+                        width: this.m.xaxis.length,
+                        height: this.m.height}));
 
       var p3 = this.xAxisGroup().then(dgAdd);
       var p2 = this.tracksGroup().then(dgAdd);
@@ -264,7 +264,7 @@ angular.module('npact')
             basesPerGraph: GraphConfig.basesPerGraph,
             offset: GraphConfig.offset,
             zoomingOut: evt.evt.shiftKey
-      };
+          };
       $log.log('Zoom event:', opts);
       //updates `offset`, and `basesPerGraph`
       angular.extend(GraphConfig, GraphingCalculator.zoom(opts));
@@ -385,7 +385,7 @@ angular.module('npact')
           case 'extracts':
             return this.cdsGroup(track, data);
           case 'hits':
-            return this.drawHit(track, data);
+            return this.drawHitsTrack(track, data);
           default:
             throw new Error("don't know how to draw " + track);
           }
@@ -471,41 +471,48 @@ angular.module('npact')
       return g;
     };
 
-    GP.drawHit = function(track, hits) {
-      var startBase = this.startBase,
-          endBase = this.endBase,
-          colors = this.colors,
-          offset = track.height / 4,
-          hitStrokeWidth = offset / 2,
-          guideYOffset = offset / 2,
-          // arrow sticks out ~1%
+    GP.drawHitsTrack = function(track, hits) {
+      var startBase = this.startBase, endBase = this.endBase,
+          midY = (track.height / 2),
+          offset = 2,  //how far off midline
           guideArrowXOffset = 8 / this.m.xaxis.scaleX,
-          baseY = track.y + (track.height / 2),
-          g = new K.Group({ x: 0, y: 0 }),
-          guideLineOpts = { stroke: '#ddd'}
+          g = new K.Group({ x: 0, y: track.y }),
+          guideLineOpts = style.tracks.guidelines,
+          $el = this.$element,
+          colors = {
+            'H': this.colors,
+            //G type hits should be lighter
+            'G': _.map(this.colors, function(c) { return shadeBlend(0.5, c); })}
       ;
       // draw the guide lines
       g.add(new K.Line(angular.extend({
-        points: [startBase, baseY - guideYOffset,
-                 endBase, baseY - guideYOffset,
-                 endBase - guideArrowXOffset, track.y]
+        points: [startBase, midY - offset,
+                 endBase, midY - offset,
+                 endBase - guideArrowXOffset, 0]
       }, guideLineOpts)));
       g.add(new K.Line(angular.extend({
-        points: [startBase + guideArrowXOffset, track.y + track.height,
-                 startBase, baseY + guideYOffset,
-                 endBase, baseY + guideYOffset]
+        points: [startBase + guideArrowXOffset, track.height,
+                 startBase, midY + offset,
+                 endBase, midY + offset]
       }, guideLineOpts)));
 
       // draw each hit
       _.forEach(hits, function(hit) {
-        var y = baseY + (hit.complement ? offset : -offset);
-
-        g.add(
-          new K.Line({
-            points: [hit.start, y, hit.end, y],
-            stroke: colors[hit.phase],
-            strokeWidth: hitStrokeWidth
-          }));
+        var type = hit.name[0],  // {G,H}
+            confidence = _.parseInt(hit.name[1]), // {0,1,2,3}
+            strokeWidth = (confidence + 1) * 2;
+        var y = midY + (hit.complement ? offset : -offset);
+        g.add(new K.Line({
+          hit: hit,
+          points: [hit.start, y, hit.end, y],
+          // set it outside the guidelines instead of ontop:
+          offsetY: (hit.complement ? -strokeWidth : strokeWidth)/2,
+          stroke: colors[type][hit.phase],
+          strokeWidth: strokeWidth
+        }));
+      });
+      g.on('click', function(evt) {
+        Tooltip.show($el, evt.target.getAttrs().hit, evt.evt.pageX, evt.evt.pageY);
       });
 
       return g;
@@ -602,6 +609,18 @@ angular.module('npact')
     function digitCount(x) {
       //avoid log of 0
       return x ? 1 + Math.floor(Math.log(x) / Math.LN10) : 0;
+    }
+
+    // From http://stackoverflow.com/questions/5560248/programmatically-lighten-or-darken-a-hex-color-or-rgb-and-blend-colors
+    function shadeBlend(p,c0,c1) {
+      var n=p<0?p*-1:p,u=Math.round,w=parseInt;
+      if(c0.length>7){
+        var f=c0.split(","),t=(c1?c1:p<0?"rgb(0,0,0)":"rgb(255,255,255)").split(","),R=w(f[0].slice(4)),G=w(f[1]),B=w(f[2]);
+        return "rgb("+(u((w(t[0].slice(4))-R)*n)+R)+","+(u((w(t[1])-G)*n)+G)+","+(u((w(t[2])-B)*n)+B)+")"
+      }else{
+        var f=w(c0.slice(1),16),t=w((c1?c1:p<0?"#000000":"#FFFFFF").slice(1),16),R1=f>>16,G1=f>>8&0x00FF,B1=f&0x0000FF;
+        return "#"+(0x1000000+(u(((t>>16)-R1)*n)+R1)*0x10000+(u(((t>>8&0x00FF)-G1)*n)+G1)*0x100+(u(((t&0x0000FF)-B1)*n)+B1)).toString(16).slice(1)
+      }
     }
 
     return Grapher;

@@ -27,14 +27,15 @@ angular.module('npact')
         arrow: {
           height: 12,
           width: 6
-        }
+        },
+        guidelines: { stroke: '#bbb'}
       }
     },
     //Indexed by phase
-    lineColors : ['red', 'green', 'blue'],
+    lineColors : ['rgb(255, 0, 0)', 'rgb(0, 255, 0)', 'rgb(0, 0, 255)'],
     colorBlindLineColors : ['rgb(213, 94, 0)', 'rgb(204, 121, 167)', 'rgb(0, 114, 178)'],
     // how much vertical to use for different kinds of tracks
-    trackHeights: {'extracts': 30, 'hits': 20}
+    trackHeights: {'extracts': 30, 'hits': 24}
   })
   .service('Err',function() {
 
