@@ -395,16 +395,10 @@ angular.module('npact')
     GP.cdsGroup = function(track, cds) {
       var xaxis = this.m.xaxis, $el = this.$element,
           colors = this.colors,
-          g = new K.Group({
-            x: 0, y: 0
-          }),
-          y = track.y,
+          g = new K.Group({ x: 0, y: track.y }),
           arrowHeight = style.tracks.arrow.height,
           ahw = style.tracks.arrow.width / xaxis.scaleX,
-          textOpts = _.assign({
-            scaleX: 1/xaxis.scaleX,
-            strokeScaleEnabled: false
-          }, style.tracks.text),
+          textOpts = _.assign({scaleX: 1 / xaxis.scaleX }, style.tracks.text),
           arrowOpts = {
             x: 0, y: 0,
             closed: true,
@@ -416,24 +410,21 @@ angular.module('npact')
       _.forEach(cds, function(x) {
           var isComplement = x.complement === 1,
               c = colors[x.phase],
-              baseY = isComplement ? y + arrowHeight : y,
+              baseY = isComplement ? arrowHeight : 0,
               arrowPointY = baseY + arrowHeight / 2,
               arrowMaxY = baseY + arrowHeight,
               shape = isComplement ?
-                [
-                  x.start, arrowPointY,
+                [ x.start, arrowPointY,
                   x.start + ahw, baseY,
                   x.end, baseY,
                   x.end, arrowMaxY,
-                  x.start + ahw, arrowMaxY,
-                  x.start, arrowPointY
-                ] : [
-                  x.start, baseY,
+                  x.start + ahw, arrowMaxY
+                ] :
+                [ x.start, baseY,
                   x.end - ahw, baseY,
                   x.end, arrowPointY,
                   x.end - ahw, arrowMaxY,
-                  x.start, arrowMaxY,
-                  x.start, y
+                  x.start, arrowMaxY
                 ],
               arrowBounds = isComplement ?
                 {
