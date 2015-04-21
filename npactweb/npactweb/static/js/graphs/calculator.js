@@ -75,11 +75,11 @@ angular.module('npact')
     };
 
 
-    self.trackSizeCalc = function(activeTracks) {
+    self.trackSizeCalc = function(activeTracks, trackPadding) {
       var offset = 0;
       _.forEach(activeTracks, function(track) {
         track.y = offset;
-        offset += track.height;
+        offset += track.height + trackPadding;
       });
       return offset;
     };
@@ -90,7 +90,7 @@ angular.module('npact')
     self.chart = function(opts) {
       var style = npactConstants.graphStyle;
       var pstyle = style.profile;
-      var totalTrackHeight = self.trackSizeCalc(opts.tracks);
+      var totalTrackHeight = self.trackSizeCalc(opts.tracks, style.paddingUnit);
       var graphTop = totalTrackHeight + style.paddingUnit,
           xAxisTop = graphTop + pstyle.height,
           xAxisHeight = pstyle.axis.text.fontSize + pstyle.tickLength,
