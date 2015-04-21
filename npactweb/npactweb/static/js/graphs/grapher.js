@@ -348,21 +348,6 @@ angular.module('npact')
         });
     };
 
-    function centerExtractLabel(txt, scaleX) {
-      // now that lbl is on the canvas, we can see what it's
-      // height/width is
-      var arrowBounds = txt.getAttr('arrowBounds'),
-          pos = GraphingCalculator.alignRectangles(
-            arrowBounds,
-            {
-              // convert to gene space
-              width: txt.getWidth() / scaleX,
-              height: txt.getHeight()
-            });
-      pos.x = Math.max(pos.x, arrowBounds.x+1);
-      txt.position(pos);
-    }
-
     GP.tracksGroup = function() {
       var g = new K.Group();
       return $q.all(_.map(this.tracks, this.oneTrack, this))
@@ -392,66 +377,71 @@ angular.module('npact')
         }, this));
     };
 
+    var arrowHeight = style.tracks.arrow.height,
+        arrowHalfHeight = arrowHeight / 2,
+        leftArrow = function(width, headWidth, tailWidth) {
+          //Starting at the tip, clockwise
+          return [ 0, arrowHalfHeight,
+                   headWidth, 0,
+                   width, 0,
+                   width, arrowHeight,
+                   headWidth, arrowHeight ];
+        },
+        rightArrow = function(width, headWidth, tailWidth) {
+          //Starting at the tip, clockwise
+          return [ width, arrowHalfHeight,
+                   tailWidth, arrowHeight,
+                   0, arrowHeight,
+                   0, 0,
+                   tailWidth, 0 ];
+        };
     GP.cdsGroup = function(track, cds) {
       var xaxis = this.m.xaxis, $el = this.$element,
           colors = this.colors,
-          g = new K.Group({ x: 0, y: track.y }),
-          arrowHeight = style.tracks.arrow.height,
-          arrowHeadWidth = style.tracks.arrow.width / xaxis.scaleX,
-          textOpts = _.assign({scaleX: 1 / xaxis.scaleX }, style.tracks.text),
-          arrowOpts = {
-            x: 0, y: 0,
-            closed: true,
-            strokeWidth: 1,
-            strokeScaleEnabled: false
-          },
-          arrowPointY = arrowHeight / 2
-      ;
+          g = new K.Group({ y: track.y }),
+          arrowHeadWidth = style.tracks.arrow.width / xaxis.scaleX;
 
+      // Go through the list of genes in the track.
       _.forEach(cds, function(x) {
         var width = x.end - x.start,
             baseY = 0, shape,
-            ahw = Math.min(width, arrowHeadWidth),
-            arrowBounds = { x: 0, y:0, width: width - ahw, height: arrowHeight}
-        ;
+            headWidth = Math.min(width, arrowHeadWidth),
+            tailWidth = Math.max(width - headWidth, 0);
         if(x.complement === 1) {
-          arrowBounds.x = ahw;
-          baseY = arrowHeight;
-          //arrow pointing left, starting at the tip, clockwise
-          shape = [ 0, arrowPointY,
-                    ahw, 0,
-                    width, 0,
-                    width, arrowHeight,
-                    ahw, arrowHeight ];
+          shape = leftArrow(width, headWidth, tailWidth);
+          baseY = arrowHalfHeight;       // complement gets drawn lower
         }
         else {
-          //arrow pointing right, starting at the tip, clockwise
-          shape = [ width, arrowPointY,
-                    width - ahw, arrowHeight,
-                    0, arrowHeight,
-                    0, 0,
-                    width - ahw, 0 ];
+          shape = rightArrow(width, headWidth, tailWidth);
         }
-        g.add(new K.Line(angular.extend(arrowOpts, {
+        g.add(new K.Line({
           x: x.start, y: baseY,
           extract: x,
-          points: shape,
-          stroke: colors[x.phase]
-        })));
+          points: shape, closed: true,
+          stroke: colors[x.phase],
+          strokeWidth: 1, strokeScaleEnabled: false
+        }));
         // Only put a label in it if there is any room
-        if(width > arrowHeadWidth) {
+        if(tailWidth) {
           // need a dummy group for clipping, `Text` doesn't
           // support clip directly
-          var lblGroup = new K.Group({ x: x.start, y: baseY, clip: arrowBounds}),
-              // render the name, too
-              lbl = new K.Text(angular.extend({
+          var textBounds =
+                {
+                  x: x.complement === 1 ? headWidth : 0, y:0,
+                  width: tailWidth, height: arrowHeight
+                },
+              lblGroup = new K.Group({ x: x.start, y: baseY, clip: textBounds }),
+              lbl = new K.Text(_.assign({
+                x: textBounds.x + 1,
+                text: x.name,
                 extract: x,
-                arrowBounds: arrowBounds,
-                text: x.name
-              }, textOpts));
+                scaleX: 1/xaxis.scaleX //undo parent scaling for readable txt
+              }, style.tracks.text)),
+              lblOffsetX = (lbl.getWidth() - (tailWidth * xaxis.scaleX)) / 2,
+              lblOffsetY =  (lbl.getHeight() - arrowHeight) / 2;
           lblGroup.add(lbl);
           g.add(lblGroup);
-          centerExtractLabel(lbl, xaxis.scaleX);
+          lbl.setOffset({ x: Math.min(lblOffsetX, 0), y: lblOffsetY });
         }
       }, this);
 
