@@ -139,20 +139,25 @@ describe('Graphs', function(){
         width: 250,
         profileTicks: 5,
         startBase: 0, endBase: 100,
-        tracks: [{height: 5}]
+        tracks: [{height: 7}]
       };
       beforeEach(inject(function(npactConstants) {
         npactConstants.graphStyle.paddingUnit = 5;
         npactConstants.graphStyle.leftPadding = 50;
-        npactConstants.graphStyle.tickLength = 5;
+        npactConstants.graphStyle.profile.tickLength = 6;
+        npactConstants.graphStyle.profile.height = 80;
+        npactConstants.graphStyle.profile.axis.text.fontSize = 10;
       }));
 
       it('calculates basic metrics', function() {
         var m = GC.chart(opts);
         expect(m).toBeDefined();
-        expect(m.height).toEqual(106);
         expect(m.graph.x).toEqual(50);
-        expect(m.graph.y).toEqual(10);
+        expect(m.graph.y).toEqual(7 + 5);
+        expect(m.graph.h).toEqual(80);
+        expect(m.xaxis.y).toEqual(7 + 5 + 80);
+        expect(m.xaxis.height).toEqual(10 + 6);
+        expect(m.height).toEqual(7 + 5 + 80 + 6 + 10);
       });
     });
 

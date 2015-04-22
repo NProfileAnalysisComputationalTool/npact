@@ -76,6 +76,7 @@ angular.module('npact')
 
 
     self.trackSizeCalc = function(activeTracks, trackPadding) {
+      trackPadding = trackPadding || 0;
       var offset = 0;
       _.forEach(activeTracks, function(track) {
         track.y = offset;
@@ -91,7 +92,7 @@ angular.module('npact')
       var style = npactConstants.graphStyle;
       var pstyle = style.profile;
       var totalTrackHeight = self.trackSizeCalc(opts.tracks, style.paddingUnit);
-      var graphTop = totalTrackHeight + style.paddingUnit,
+      var graphTop = totalTrackHeight || style.paddingUnit,
           xAxisTop = graphTop + pstyle.height,
           xAxisHeight = pstyle.axis.text.fontSize + pstyle.tickLength,
           totalHeight = xAxisTop + xAxisHeight;
