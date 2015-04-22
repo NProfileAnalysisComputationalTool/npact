@@ -2,7 +2,7 @@ describe('Grapher', function() {
   'use strict';
   beforeEach(module('assets'));
   beforeEach(module('npact', function($provide) {
-//    $provide.value('$log', console);
+    $provide.value('$log', console);
     $provide.service('Fetcher', function() { });
   }));
 
@@ -75,11 +75,11 @@ describe('Grapher', function() {
       expect(g).toEqual(jasmine.any(Grapher));
       return g.redraw(sampleOpts);
     };
+    var d1 = new Date();
     var p = redraw();
-    _.times(2, function() {
-      p = p.then(redraw);
-    });
-    p.then(done);
+    _.times(10, function() { p = p.then(redraw); });
+    p.then(function() { $log.log("Total time to render: ", new Date() - d1); })
+      .then(done);
     $timeout.flush();
     //KineticJs uses window timeouts, so we need to let that happen
     //and then flush angular's fake $timeout again

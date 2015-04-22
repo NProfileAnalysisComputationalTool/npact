@@ -182,6 +182,7 @@ angular.module('npact')
           height: this.m.height
         };
         var layer = new K.Layer(opts);
+        layer.hitGraphEnabled(false);
         layer.add(this.yAxisGroup());
         this.headerGroup(layer);
         layer.toImage(angular.extend(opts, {callback: resolve}));
@@ -291,20 +292,24 @@ angular.module('npact')
           stops = GraphingCalculator.stops(this.startBaseM, this.endBaseM, xaxis.length),
           g = new K.Group({
             width: xaxis.length,
-            x: 0, y: this.m.xaxis.y
+            x: 0, y: this.m.xaxis.y,
+            listening: false
           }),
           tickOpts = {
-            stroke: style.profile.borderColor, strokeScaleEnabled: false
+            stroke: style.profile.borderColor, strokeScaleEnabled: false,
+            listening: false
           },
           labelOpts = _.assign({
             scaleX: 1/xaxis.scaleX,
-            y: style.profile.tickLength
+            y: style.profile.tickLength,
+            listening: false
           }, style.profile.axis.text),
           shadeOpts = {
             height: this.m.graph.h,
             offsetY: this.m.graph.h,
             fill: style.profile.shadeColor,
-            width: stops.interval / 2
+            width: stops.interval / 2,
+            listening: false
           };
 
       _.forEach(stops.stops, function(stop) {
@@ -328,14 +333,16 @@ angular.module('npact')
             x: 0, y: m.graph.y,
             height: m.graph.h, width: xaxis.length,
             // convert % to px
-            scaleY: m.graph.h / 100
+            scaleY: m.graph.h / 100,
+            listening: false
           }),
           buildLine = function(points, color) {
             return new K.Line({
               points: points,
               stroke: color,
               strokeWidth: 1,
-              strokeScaleEnabled: false
+              strokeScaleEnabled: false,
+              listening: false
             });
           };
 
@@ -430,11 +437,16 @@ angular.module('npact')
                   x: x.complement === 1 ? headWidth : 0, y:0,
                   width: tailWidth, height: arrowHeight
                 },
-              lblGroup = new K.Group({ x: x.start, y: baseY, clip: textBounds }),
+              lblGroup = new K.Group({
+                x: x.start, y: baseY,
+                clip: textBounds,
+                listening: false
+              }),
               lbl = new K.Text(_.assign({
                 x: textBounds.x + 1,
                 text: x.name,
                 extract: x,
+                listening: false,
                 scaleX: 1/xaxis.scaleX //undo parent scaling for readable txt
               }, style.tracks.text)),
               lblOffsetX = (lbl.getWidth() - (tailWidth * xaxis.scaleX)) / 2,
@@ -466,11 +478,14 @@ angular.module('npact')
       ;
       // draw the guide lines
       g.add(new K.Line(angular.extend({
+        listening: false,
         points: [startBase, midY - offset,
                  endBase, midY - offset,
                  endBase - guideArrowXOffset, 0]
+
       }, guideLineOpts)));
       g.add(new K.Line(angular.extend({
+        listening: false,
         points: [startBase + guideArrowXOffset, track.height,
                  startBase, midY + offset,
                  endBase, midY + offset]
