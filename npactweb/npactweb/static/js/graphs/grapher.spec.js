@@ -77,7 +77,7 @@ describe('Grapher', function() {
     };
     var d1 = new Date();
     var p = redraw();
-    _.times(10, function() { p = p.then(redraw); });
+    _.times(40, function() { p = p.then(redraw); });
     p.then(function() { $log.log("Total time to render: ", new Date() - d1); })
       .then(done);
     $timeout.flush();

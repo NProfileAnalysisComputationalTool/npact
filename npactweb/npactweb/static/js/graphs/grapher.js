@@ -154,9 +154,9 @@ angular.module('npact')
     GP._leftLayerImage = function() {
       return  $q(_.bind(function(resolve) {
         var opts = {
-          width: style.leftPadding,
           x: 0, y: 0,
-          height: this.m.height
+          height: this.m.height, width: style.leftPadding,
+          listening: false
         };
         var layer = new K.Layer(opts);
         layer.hitGraphEnabled(false);
@@ -253,19 +253,62 @@ angular.module('npact')
     };
 
     GP.frameLayer = function(stage) {
-      var m = this.m,
-          l = new K.FastLayer(),
+      // This holds the frame around the profile and the guide lines
+      // for any hits tracks; it is fixed, it does not scroll left and
+      // right.
+      var l = new K.FastLayer();
+      stage.add(l);
+
+      var mg = this.m.graph,
           // frame around the graph
           border = new K.Rect({
-            x: m.graph.x, y: m.graph.y,
-            width: m.graph.w, height: m.graph.h,
-            stroke: style.profile.borderColor
+            x: mg.x, y: mg.y,
+            width: mg.w, height: mg.h,
+            stroke: style.profile.borderColor, strokeWidth: 1
           });
-      stage.add(l);
       l.add(border);
-      l.draw();
-      return $q.when(l);
+      var guides = _(this.tracks)
+            .filter({type: 'hits'})
+            .map(function(track) {
+              return this.hitsTrackGuideLinesImage(track.height, mg.w)
+                .then(function(img) {
+                  l.add(new K.Image({
+                    image: img,
+                    x: mg.x, y: track.y,
+                    height: track.height, width: mg.w
+                  }));
+                });
+            }, this).value();
+      return $q.all(guides).then(function() { l.draw(); });
     };
+
+    var hitsTrackGuideLinesCache = {};
+    GP.hitsTrackGuideLinesImage = function(height, width) {
+      var key = _([height, width]).toString();
+      return hitsTrackGuideLinesCache[key] ||
+        (hitsTrackGuideLinesCache[key] = $q(function(resolve) {
+          var layer = new K.FastLayer({height: height, width: width}),
+              midY = (height / 2),
+              offset = 2,  //how far off midline
+              guideArrowXOffset = 8,
+              guideLineOpts = style.tracks.guidelines;
+          layer.add(new K.Line(angular.extend({
+            points: [0, midY - offset,
+                     width, midY - offset,
+                     width - guideArrowXOffset, 0]
+
+          }, guideLineOpts)));
+          layer.add(new K.Line(angular.extend({
+            listening: false,
+            points: [0 + guideArrowXOffset, height,
+                     0, midY + offset,
+                     width, midY + offset]
+          }, guideLineOpts)));
+
+          layer.toImage({callback: resolve});
+        }));
+    };
+
 
     GP.xAxisGroup = function() {
       var xaxis = this.m.xaxis,
@@ -445,32 +488,15 @@ angular.module('npact')
     };
 
     GP.drawHitsTrack = function(track, hits) {
-      var startBase = this.startBase, endBase = this.endBase,
-          midY = (track.height / 2),
+      var midY = (track.height / 2),
           offset = 2,  //how far off midline
-          guideArrowXOffset = 8 / this.m.xaxis.scaleX,
           g = new K.Group({ x: 0, y: track.y }),
-          guideLineOpts = style.tracks.guidelines,
           $el = this.$element,
           colors = {
             'H': this.colors,
             //G type hits should be lighter
             'G': _.map(this.colors, function(c) { return shadeBlend(0.5, c); })}
       ;
-      // draw the guide lines
-      g.add(new K.Line(angular.extend({
-        listening: false,
-        points: [startBase, midY - offset,
-                 endBase, midY - offset,
-                 endBase - guideArrowXOffset, 0]
-
-      }, guideLineOpts)));
-      g.add(new K.Line(angular.extend({
-        listening: false,
-        points: [startBase + guideArrowXOffset, track.height,
-                 startBase, midY + offset,
-                 endBase, midY + offset]
-      }, guideLineOpts)));
 
       // draw each hit
       _.forEach(hits, function(hit) {
