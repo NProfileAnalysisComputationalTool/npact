@@ -43,9 +43,9 @@ angular.module('npact')
       stage.setWidth(this.width);
       stage.setHeight(this.m.height);
 
-      var glp = this.genomeLayer(stage);
       var llp = this.leftLayer(stage);
       var flp = this.frameLayer(stage);
+      var glp = this.genomeLayer(stage);
       return $q.all([llp, flp, glp])
         .then(function() {
           $log.log("Finished draw at", newOpts.startBase, "in", new Date() - t1);
@@ -180,13 +180,16 @@ angular.module('npact')
 
     GP.genomeLayer = function(stage) {
       //Everything in this layer is in the coordinate system of the
-      //genome and will be scaled to pixels by Kinetic
+      //genome and will be scaled to pixels by Kinetic. Quirk: apply
+      //the scale to the first group inside the layer so that the
+      //clipping on the layer itself (which makes the viewport) isn't
+      //scaled
       var l = new K.Layer({
         x: this.m.graph.x,
         clip: {
-          x: 0, y: 0,
-          width: this.m.graph.w,
-          height: 1000
+          // Leave room for the border itself
+          x: 1, width: this.m.graph.w - 2,
+          y: 0, height: this.m.height
         }
       });
       stage.add(l);
@@ -282,8 +285,9 @@ angular.module('npact')
             listening: false
           }, style.profile.axis.text),
           shadeOpts = {
-            height: this.m.graph.h,
-            offsetY: this.m.graph.h,
+            // a touch smaller to sit inside the border
+            height: this.m.graph.h - 2,
+            offsetY: this.m.graph.h - 1,
             fill: style.profile.shadeColor,
             width: stops.interval / 2,
             listening: false

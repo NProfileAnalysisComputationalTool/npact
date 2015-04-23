@@ -97,7 +97,8 @@ angular.module('npact')
           xAxisHeight = pstyle.axis.text.fontSize + pstyle.tickLength,
           totalHeight = xAxisTop + xAxisHeight;
 
-      var graphWidth = opts.width - style.leftPadding;
+      //Stop a point left of our full width so no cutoff on the right side
+      var graphWidth = opts.width - style.leftPadding - 1;
       return {
         height: totalHeight,
         graph: {
