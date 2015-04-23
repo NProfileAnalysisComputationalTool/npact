@@ -104,14 +104,27 @@ angular.module('npact')
             //If the width didn't change then its the same as scrolling
             onScroll();
           }
-        };
+        },
+        onKey = _.throttle(function(event) {
+          var keyCode = event.which;
+          switch(keyCode) {
+          case 37: // left key
+            $scope.$broadcast('offset', -GraphConfig.basesPerGraph / 100);
+            break;
+          case 39: // right key
+            $scope.$broadcast('offset', GraphConfig.basesPerGraph / 100);
+            break;
+          }
+        }, 40, {leading:true});
 
     this.visible = function(idx) { return idx >= topIdx && idx <= bottomIdx; };
     $win.on('resize', onResize);
     $win.on('scroll', onScroll);
+    $win.on('keydown', onKey);
     $scope.$on('$destroy', function() {
       $win.off('resize', onResize);
       $win.off('scroll', onScroll);
+      $win.off('keydown', onKey);
     });
   })
   .directive('npactGraphContainer', function(STATIC_BASE_URL) {
@@ -164,6 +177,11 @@ angular.module('npact')
           redraw = true;
           if(g) { g.clearProfilePoints(); }
           schedule();
+        });
+        $scope.$on('offset', function(event, dx) {
+          if(g && g.offset && visible(idx)) {
+            g.offset(dx);
+          }
         });
         $scope.$on('$destroy', discard);
 

@@ -193,9 +193,10 @@ angular.module('npact')
         }
       });
       stage.add(l);
+      var offsetX = this.startBase;
       var dg = new K.Group({
         scaleX: this.m.xaxis.scaleX,
-        offsetX: this.startBase,
+        offsetX: offsetX,
         draggable: true,
         dragBoundFunc: function(pos) {
           pos.y = 0; //Disallow vertical movement
@@ -219,6 +220,12 @@ angular.module('npact')
       var p3 = this.xAxisGroup().then(dgAdd);
       var p2 = this.tracksGroup().then(dgAdd);
       var p1 = this.profileGroup().then(dgAdd);
+
+      this.offset = function(dx) {
+        offsetX += dx;
+        dg.offsetX(offsetX);
+        l.batchDraw();
+      };
 
       return $q.all([p1, p2, p3]).then(function() {
         l.draw();
