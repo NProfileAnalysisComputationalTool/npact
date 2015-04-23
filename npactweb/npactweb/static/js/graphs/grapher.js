@@ -3,7 +3,7 @@ angular.module('npact')
   .factory('Grapher', function($log, $q, GraphConfig, GraphingCalculator, $rootScope,
                         Tooltip, NProfiler, Utils, npactConstants) {
     'use strict';
-    var K = Kinetic;
+    var K = Konva;
     var style = npactConstants.graphStyle;
 
     function Grapher(element, opts) {
@@ -158,7 +158,7 @@ angular.module('npact')
           height: this.m.height, width: style.leftPadding,
           listening: false
         };
-        var layer = new K.Layer(opts);
+        var layer = new K.Layer();
         layer.hitGraphEnabled(false);
         layer.add(this.yAxisGroup());
         this.headerGroup(layer);
@@ -287,7 +287,7 @@ angular.module('npact')
       var key = _([height, width]).toString();
       return hitsTrackGuideLinesCache[key] ||
         (hitsTrackGuideLinesCache[key] = $q(function(resolve) {
-          var layer = new K.FastLayer({height: height, width: width}),
+          var layer = new K.FastLayer(),
               midY = (height / 2),
               offset = 2,  //how far off midline
               guideArrowXOffset = 8,
@@ -305,7 +305,7 @@ angular.module('npact')
                      width, midY + offset]
           }, guideLineOpts)));
 
-          layer.toImage({callback: resolve});
+          layer.toImage({height: height, width: width, callback: resolve});
         }));
     };
 
