@@ -4,7 +4,7 @@ angular.module('npact')
     var self = this;
 
     this.partition = function(opts) {
-      var offset = opts.offset || 0,
+      var offset = Math.round(opts.offset || 0),
           startBase = opts.startBase + offset,
           endBase = opts.endBase,
           basesPerGraph = opts.basesPerGraph;
@@ -98,7 +98,7 @@ angular.module('npact')
           totalHeight = xAxisTop + xAxisHeight;
 
       //Stop a point left of our full width so no cutoff on the right side
-      var graphWidth = opts.width - style.leftPadding - 1;
+      var graphWidth = opts.width - style.leftPadding - 3;
       return {
         height: totalHeight,
         graph: {

@@ -184,18 +184,18 @@ angular.module('npact')
       //the scale to the first group inside the layer so that the
       //clipping on the layer itself (which makes the viewport) isn't
       //scaled
-      var l = new K.Layer({
-        x: this.m.graph.x,
-        clip: {
-          // Leave room for the border itself
-          x: 1, width: this.m.graph.w - 2,
-          y: 0, height: this.m.height
-        }
-      });
+      var scaleX = this.m.xaxis.scaleX,
+          l = new K.Layer({
+            x: this.m.graph.x,
+            scaleX: scaleX,
+            clip: {
+              x: 0, width: this.m.graph.w / scaleX,
+              y: 0, height: this.m.height
+            }
+          });
       stage.add(l);
       var offsetX = this.startBase;
       var dg = new K.Group({
-        scaleX: this.m.xaxis.scaleX,
         offsetX: offsetX,
         draggable: true,
         dragBoundFunc: function(pos) {
@@ -204,28 +204,41 @@ angular.module('npact')
         }
       });
       l.add(dg);
-      dg.on('dragstart dragend', Tooltip.clearAll);
-      dg.on('dragend', this.onPan);
+      var moving = false;
+      dg.on('dragmove', function(evt) {
+        var delta = evt.target.x() - moving || 0;
+        $rootScope.$broadcast('offset', - delta);
+        moving = evt.target.x();
+      });
+      dg.on('dragend', function(evt) {
+        moving = false;
+        $rootScope.$evalAsync(function() {
+          GraphConfig.offset += -evt.target.x();
+        });
+      });
+      this.offset = function(dx) {
+        if(moving === false){
+          offsetX += dx;
+          dg.offsetX(offsetX);
+          l.batchDraw();
+        }
+      };
+
+      dg.on('dragstart', Tooltip.clearAll);
       dg.on('mouseover', function() { document.body.style.cursor = 'pointer'; });
       dg.on('mouseout', function() { document.body.style.cursor = 'default'; });
       dg.on('dblclick', _.bind(this.onZoom, this));
 
       var dgAdd = _.bind(dg.add, dg);
       // need a shape that can be clicked on to allow dragging the
-      // entire canvas
-      dgAdd(new K.Rect({x: this.startBase, y: 0,// fill: '#BDD',
-                        width: this.m.xaxis.length,
+      // entire layer
+      dgAdd(new K.Rect({x: this.startBaseM, y: 0, //fill: '#BDD',
+                        width: this.m.xaxis.length * 2,
                         height: this.m.height}));
 
       var p3 = this.xAxisGroup().then(dgAdd);
       var p2 = this.tracksGroup().then(dgAdd);
       var p1 = this.profileGroup().then(dgAdd);
-
-      this.offset = function(dx) {
-        offsetX += dx;
-        dg.offsetX(offsetX);
-        l.batchDraw();
-      };
 
       return $q.all([p1, p2, p3]).then(function() {
         l.draw();
@@ -233,12 +246,9 @@ angular.module('npact')
       });
     };
 
-    GP.onPan = function(evt) {
-      $log.log('dragEnd', evt.target.x(), evt.target.getScaleX());
-      $rootScope.$evalAsync(function() {
-        var offset = Math.round(-evt.target.x() / evt.target.getScaleX());
-        GraphConfig.offset += offset;
-      });
+    GP.setupEvents = function(dragGroup) {
+
+
     };
 
     GP.onZoom = function(evt) {
@@ -254,9 +264,10 @@ angular.module('npact')
             zoomingOut: evt.evt.shiftKey
           };
       $log.log('Zoom event:', opts);
-      //updates `offset`, and `basesPerGraph`
-      angular.extend(GraphConfig, GraphingCalculator.zoom(opts));
-      $rootScope.$apply();
+      $rootScope.$evalAsync(function() {
+        //updates `offset`, and `basesPerGraph`
+        angular.extend(GraphConfig, GraphingCalculator.zoom(opts));
+      });
     };
 
     GP.frameLayer = function(stage) {
@@ -269,8 +280,8 @@ angular.module('npact')
       var mg = this.m.graph,
           // frame around the graph
           border = new K.Rect({
-            x: mg.x, y: mg.y,
-            width: mg.w, height: mg.h,
+            x: mg.x-1, y: mg.y,
+            width: mg.w + 2, height: mg.h,
             stroke: style.profile.borderColor, strokeWidth: 1
           });
       l.add(border);

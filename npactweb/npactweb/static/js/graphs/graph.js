@@ -48,7 +48,6 @@ angular.module('npact')
         baseOpts.basesPerGraph = GraphConfig.basesPerGraph;
         $scope.graphSpecs = GraphingCalculator.partition(GraphConfig);
         $log.log('Partitioned into', $scope.graphSpecs.length, 'rows.');
-        updateMetrics();
         updateVisibility(); //number of rows might have changed.
         $timeout(rebuild);
       });
@@ -105,26 +104,41 @@ angular.module('npact')
             onScroll();
           }
         },
-        onKey = _.throttle(function(event) {
+        onKeyDown = _.throttle(function(event) {
+          var keyCode = event.which, delta;
+          switch(keyCode) {
+          case 37: // left key
+            delta = -GraphConfig.basesPerGraph / 100;
+            GraphConfig.offset += delta;
+            $scope.$broadcast('offset', delta);
+            break;
+          case 39: // right key
+            delta = GraphConfig.basesPerGraph / 100;
+            GraphConfig.offset += delta;
+            $scope.$broadcast('offset', delta);
+            break;
+          }
+        }, 40, {leading:true}),
+        onKeyUp = _.debounce(function(event) {
           var keyCode = event.which;
           switch(keyCode) {
           case 37: // left key
-            $scope.$broadcast('offset', -GraphConfig.basesPerGraph / 100);
-            break;
           case 39: // right key
-            $scope.$broadcast('offset', GraphConfig.basesPerGraph / 100);
+            $scope.$apply();
             break;
           }
-        }, 40, {leading:true});
+        }, 800);
 
     this.visible = function(idx) { return idx >= topIdx && idx <= bottomIdx; };
     $win.on('resize', onResize);
     $win.on('scroll', onScroll);
-    $win.on('keydown', onKey);
+    $win.on('keydown', onKeyDown);
+    $win.on('keyup', onKeyUp);
     $scope.$on('$destroy', function() {
       $win.off('resize', onResize);
       $win.off('scroll', onScroll);
-      $win.off('keydown', onKey);
+      $win.off('keydown', onKeyDown);
+      $win.off('keyup', onKeyUp);
     });
   })
   .directive('npactGraphContainer', function(STATIC_BASE_URL) {
