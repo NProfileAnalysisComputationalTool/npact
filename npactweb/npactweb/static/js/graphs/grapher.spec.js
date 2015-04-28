@@ -51,7 +51,6 @@ describe('Grapher', function() {
       var g = new Grapher(element[0], opts);
       expect(g).toBeDefined();
       expect(g).toEqual(jasmine.any(Grapher));
-      expect(g.onPan).toEqual(jasmine.any(Function));
       return g;
     };
   }));
