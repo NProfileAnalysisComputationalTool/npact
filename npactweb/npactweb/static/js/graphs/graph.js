@@ -47,6 +47,7 @@ angular.module('npact')
            isNaN(GraphConfig.basesPerGraph)) { return; }
         baseOpts.basesPerGraph = GraphConfig.basesPerGraph;
         $scope.graphSpecs = GraphingCalculator.partition(GraphConfig);
+        updateMetrics();
         $log.log('Partitioned into', $scope.graphSpecs.length, 'rows.');
         updateVisibility(); //number of rows might have changed.
         $timeout(rebuild);
