@@ -40,14 +40,17 @@ This is the code for the website.
 
 ## Graphing
 
-Graphs are drawn as data is received, using [kineticjs][]
+Graphs are drawn as data is received, using
+[konvajs](http://konvajs.github.io/). Konvajs provides an interface
+that is more like vector drawing and a scene graph to make this easier
+while still rendering to the fast browser `<canvas>` element.
 
-[kineticjs]: http://kineticjs.com/docs/
+
 
 ### Popups
 
 Rendered using `qtip2` as the `npactExtract` directive, based on
-kinetic mouse click events.
+konvajs mouse click events.
 
 ### Development
 
