@@ -33,14 +33,16 @@
 {% block content %}
 
 <div id="progress" class="contentPadding">
-  <div npact-graph-page ></div>
+  <div npact-graph-page ></div>{% csrf_token %}
 
   <script type="text/javascript">
     angular.module('npact')
       .constant('STATUS_BASE_URL', '{{status_base}}')
       .constant('KICKSTART_BASE_URL', '{{kickstart_base}}')
+      .constant('TRANSLATE_BASE_URL', '{{translate_base}}')
       .constant('FETCH_URL', '{{fetch_base}}')
       .constant('ACGT_GAMMA_FILE_LIST_URL', '{{acgt_gamma_base}}')
+      .constant('CSRF_TOKEN', '{{csrf_token}}')
       .constant('STATIC_BASE_URL', '{{STATIC_URL}}');
   </script>
 </div>

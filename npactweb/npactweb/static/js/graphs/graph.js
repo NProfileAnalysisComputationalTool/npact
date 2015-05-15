@@ -210,11 +210,24 @@ angular.module('npact')
       }
     };
   })
-  .directive('npactExtract', function(STATIC_BASE_URL) {
+  .directive('npactExtract', function(STATIC_BASE_URL, GraphConfig, NProfiler,
+                               $log, Fetcher) {
     return {
       restrict: 'A',
       scope: { extract: '=npactExtract'},
-      templateUrl: STATIC_BASE_URL + 'js/graphs/extract.html'
+      templateUrl: STATIC_BASE_URL + 'js/graphs/extract.html',
+      link: function($scope, $element, $attrs, ctrl) {
+        $log.log(NProfiler);
+        window.currentScope = $scope;
+        $scope.NProfiler = NProfiler;
+        // TODO: if extract.complement, reverse the string
+        $scope.ddna = NProfiler.ddna.slice($scope.extract.start, $scope.extract.end);
+        Fetcher.translate($scope.ddna, GraphConfig.mycoplasma).then(function(res) {
+          $scope.ddnaP = res.data && res.data.seq;
+        });
+
+        $scope.config = GraphConfig;
+      }
     };
   })
 ;

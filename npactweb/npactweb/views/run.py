@@ -3,6 +3,7 @@ import logging
 import os
 import os.path
 import json
+import Bio.Seq
 
 from django.conf import settings
 from django.core.urlresolvers import reverse
@@ -43,7 +44,7 @@ MAGIC_PARAMS = ('raiseerror', 'force')
 
 VALID_KEYS = ('first_page_title', 'following_page_title', 'nucleotides',
               'significance', 'alternate_colors', 'startBase', 'endBase',
-              'basesPerGraph', 'x-tics')
+              'basesPerGraph', 'x-tics', 'mycoplasma')
 
 
 def build_config(path, request):
@@ -105,11 +106,34 @@ def run_frame(request, path):
         {
             'status_base': reverse('runstatus', args=['']),
             'kickstart_base': reverse('kickstart', args=[path]),
+            'translate_base': reverse('translate', args=[]),
             'fetch_base': reverse('raw', args=['']),
             'acgt_gamma_base': reverse('acgt_gamma_file_list', args=['']),
             'base_href': reverse('run', args=[path])
         },
         context_instance=RequestContext(request))
+
+
+def translate(request):
+    try:
+        # table 4 is for mycoplasma ala:
+        # http://www.ncbi.nlm.nih.gov/Taxonomy/Utils/wprintgc.cgi
+        table = 1
+        if request.POST.get('mycoplasma'):
+            table = 4
+        seq = Bio.Seq.Seq(request.POST.get('seq'))
+        trans = Bio.Seq.translate(seq, table)
+        return HttpResponse(json.dumps({'seq': str(trans)}),
+                            status=200, content_type="application/json")
+    except RedirectException:
+        raise
+    except MissingFileError as e:
+        return HttpResponse(e.message, status=404, content_type="text/plain")
+
+    except Exception as e:
+        logger.exception(e)
+        return HttpResponse(
+            repr(e), status=500, content_type="application/json")
 
 
 def kickstart(request, path):
