@@ -211,7 +211,7 @@ angular.module('npact')
     };
   })
   .directive('npactExtract', function(STATIC_BASE_URL, GraphConfig, NProfiler,
-                               $log, Fetcher) {
+                               $log, Translater) {
     return {
       restrict: 'A',
       scope: { extract: '=npactExtract'},
@@ -221,8 +221,13 @@ angular.module('npact')
         window.currentScope = $scope;
         $scope.NProfiler = NProfiler;
         // TODO: if extract.complement, reverse the string
-        $scope.ddna = NProfiler.ddna.slice($scope.extract.start, $scope.extract.end);
-        Fetcher.translate($scope.ddna, GraphConfig.mycoplasma).then(function(res) {
+        // ?Maybe we get results either way?
+
+        // I *think* we need to subtract 1 because coming from C/NCBI
+        // the DNA is treated as 1 indexed
+        // at least we got no results till we did this.
+        $scope.ddna = NProfiler.ddna.slice($scope.extract.start - 1, $scope.extract.end - 1);
+        Translater($scope.ddna, GraphConfig.mycoplasma).then(function(res) {
           $scope.ddnaP = res.data && res.data.seq;
         });
 

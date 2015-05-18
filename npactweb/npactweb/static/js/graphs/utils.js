@@ -187,17 +187,9 @@ angular.module('npact')
     return ParserFactory.create(parseExtract);
   })
 
-  .service('Fetcher', function(StatusPoller, $http, FETCH_URL, TRANSLATE_BASE_URL, CSRF_TOKEN) {
+  .factory('Translater', function($http, $log, TRANSLATE_BASE_URL, CSRF_TOKEN){
     'use strict';
-    var self = this;
-    /**
-     * download contents from any url
-     */
-    self.rawFile = function(url) {
-      return $http.get(url).then(function(res) { return res.data; });
-    };
-
-    self.translate = function (dna, mycoplasma) {
+    return function (dna, mycoplasma) {
       return $http({
         method: 'POST',
         url:TRANSLATE_BASE_URL,
@@ -207,6 +199,19 @@ angular.module('npact')
         headers: {'Content-Type': 'application/x-www-form-urlencoded'}
       });
     };
+  })
+
+  .service('Fetcher', function(StatusPoller, $http, FETCH_URL) {
+    'use strict';
+    var self = this;
+    /**
+     * download contents from any url
+     */
+    self.rawFile = function(url) {
+      return $http.get(url).then(function(res) { return res.data; });
+    };
+
+
 
     /**
      * download contents from a "fetch" path
