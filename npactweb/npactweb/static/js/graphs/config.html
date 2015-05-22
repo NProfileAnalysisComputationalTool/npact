@@ -34,7 +34,8 @@
     </div>
     <div>
       <label>
-        <input type="checkbox" ng-model="gc.colorBlindFriendly" />
+        <input type="checkbox" ng-model="gc.colorBlindFriendly"
+               ng-change="gc.cookiePersist()" />
         Color-blind friendly
       </label>
     </div>

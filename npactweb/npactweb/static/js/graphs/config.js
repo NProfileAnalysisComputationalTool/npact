@@ -5,10 +5,26 @@ angular.module('npact')
 
 
   .service('GraphConfig', function(Err, npactConstants, Evt, PUBLIC_CONFIG_KEYS, Track,
-                            $location, $log, $rootScope) {
+                            $location, $log, $rootScope, $cookies) {
     var self = this;
-    self.tracks = [];
+    self.cookieBools = ["colorBlindFriendly"];
     self.colorBlindFriendly = false;
+    self.cookieInit = function() {
+      _.each(self.cookieBools, function(v){
+        var cv = $cookies.get(v);
+        if( cv == "true" ) self[v] = true;
+        else if(cv == "false") self[v] = false;
+      });
+    };
+    self.cookiePersist  = function(){
+      _.each(self.cookieBools, function(v){
+        if(self[v]) $cookies.put(v, "true");
+        else $cookies.put(v, "false");
+      });
+    };
+    self.tracks = [];
+    self.cookieInit();
+
     self.basesPerGraph = 10000;
     self.nucleotides = ['C', 'G'];
     self.offset = 0; // how much the graph is panned left/right
