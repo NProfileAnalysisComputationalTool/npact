@@ -7,8 +7,8 @@
 <base href="{{base_href}}">
 
 {% include_media 'jquery.js' %}
-
 <script type="text/javascript" src="{{STATIC_URL}}bower_components/angular/angular.min.js"></script>
+<script type="text/javascript" src="{{STATIC_URL}}bower_components/angular-cookies/angular-cookies.min.js"></script>
 <script type="text/javascript" src="{{STATIC_URL}}bower_components/konva/konva.min.js" defer></script>
 <script type="text/javascript" src="{{STATIC_URL}}bower_components/angular-messages/angular-messages.min.js" defer></script>
 <script type="text/javascript" src="{{STATIC_URL}}bower_components/angular-sanitize/angular-sanitize.min.js" defer></script>
@@ -28,6 +28,7 @@
 <script type="text/javascript" src="{{STATIC_URL}}js/graphs/grapher.js" defer></script>
 <script type="text/javascript" src="{{STATIC_URL}}js/graphs/graph.js" defer></script>
 <script type="text/javascript" src="{{STATIC_URL}}js/graphs/config.js" defer></script>
+
 
 {% endblock addScript %}
 {% block content %}
