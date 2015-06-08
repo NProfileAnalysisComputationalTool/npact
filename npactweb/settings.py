@@ -102,7 +102,7 @@ MIDDLEWARE_CLASSES = (
     'django.contrib.auth.middleware.AuthenticationMiddleware',
     'django.contrib.auth.middleware.RemoteUserMiddleware',
     'django.contrib.messages.middleware.MessageMiddleware',
-    'npactweb.middleware.RedirectExceptionHandler',
+    'npactweb.middleware.NPactResponseExceptionHandler',
 )
 
 

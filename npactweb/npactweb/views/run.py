@@ -3,10 +3,10 @@ import logging
 import os
 import os.path
 import json
-
+import Bio.Seq
 from django.conf import settings
 from django.core.urlresolvers import reverse
-from django.http import HttpResponseRedirect, HttpResponse
+from django.http import HttpResponse
 from django.shortcuts import render_to_response
 from django.utils.http import urlencode
 from django.template import RequestContext, Context
@@ -15,8 +15,7 @@ from django.template.loader import get_template
 from pynpact import parsing, util
 from pynpact import main
 
-from npactweb import assert_clean_path, getabspath, getrelpath, MissingFileError
-from npactweb.middleware import RedirectException
+from npactweb import assert_clean_path, getabspath, getrelpath
 
 from taskqueue import client, NoSuchTaskError
 
@@ -43,7 +42,7 @@ MAGIC_PARAMS = ('raiseerror', 'force')
 
 VALID_KEYS = ('first_page_title', 'following_page_title', 'nucleotides',
               'significance', 'alternate_colors', 'startBase', 'endBase',
-              'basesPerGraph', 'x-tics')
+              'basesPerGraph', 'x-tics', 'mycoplasma')
 
 
 def build_config(path, request):
@@ -105,6 +104,7 @@ def run_frame(request, path):
         {
             'status_base': reverse('runstatus', args=['']),
             'kickstart_base': reverse('kickstart', args=[path]),
+            'translate_base': reverse('translate', args=[]),
             'fetch_base': reverse('raw', args=['']),
             'acgt_gamma_base': reverse('acgt_gamma_file_list', args=['']),
             'base_href': reverse('run', args=[path])
@@ -112,39 +112,40 @@ def run_frame(request, path):
         context_instance=RequestContext(request))
 
 
+def translate(request):
+    # table 4 is for mycoplasma ala:
+    # http://www.ncbi.nlm.nih.gov/Taxonomy/Utils/wprintgc.cgi
+    table = 1
+    if request.POST.get('mycoplasma'):
+        table = 4
+    seq = Bio.Seq.Seq(request.POST.get('seq'))
+    trans = Bio.Seq.translate(seq, table)
+    return HttpResponse(json.dumps({'seq': str(trans)}),
+                        status=200, content_type="application/json")
+
+
 def kickstart(request, path):
-    try:
-        config = build_config(path, request)
-        verb = request.GET['verb']
-        verb = verb.split(',')
+    config = build_config(path, request)
+    verb = request.GET['verb']
+    verb = verb.split(',')
 
-        email = request.GET.get('email')
-        client.ensure_daemon()
-        executor = client.get_server()
-        for v in verb:
-            if email:
-                config = main.process('allplots', config, executor=executor)
-                build_email(request, path, config)
-            elif v == 'parse':
-                # we've already parsed in `build_config` above.
-                pass
-            else:
-                # main.process handles the rest of the verbs, or errors
-                config = main.process(v, config, executor=executor)
+    email = request.GET.get('email')
+    client.ensure_daemon()
+    executor = client.get_server()
+    for v in verb:
+        if email:
+            config = main.process('allplots', config, executor=executor)
+            build_email(request, path, config)
+        elif v == 'parse':
+            # we've already parsed in `build_config` above.
+            pass
+        else:
+            # main.process handles the rest of the verbs, or errors
+            config = main.process(v, config, executor=executor)
 
-        return HttpResponse(
-            json.dumps(sanitize_config_for_client(config)),
-            content_type="application/json")
-    except RedirectException:
-        raise
-    except MissingFileError as e:
-        return HttpResponse(e.message, status=404, content_type="text/plain")
-
-    except Exception as e:
-        logger.exception(e)
-        return HttpResponse(
-            repr(e), status=500, content_type="application/json")
-
+    return HttpResponse(
+        json.dumps(sanitize_config_for_client(config)),
+        content_type="application/json")
 
 def build_email(request, path, config):
     try:

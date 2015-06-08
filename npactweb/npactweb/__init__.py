@@ -5,8 +5,6 @@ from django.conf import settings
 from django.contrib import messages
 from django.core.urlresolvers import reverse
 
-from npactweb.middleware import RedirectException
-
 logger = logging.getLogger(__name__)
 
 
@@ -37,6 +35,20 @@ def assert_clean_path(path, request,
 
 class MissingFileError(Exception):
     pass
+
+
+class ImmediateHttpResponseException (Exception):
+    httpResponse = None
+
+    def __init__(self, httpResponse):
+        self.httpResponse = httpResponse
+
+
+class RedirectException(Exception):
+    url = None
+
+    def __init__(self, url):
+        self.url = url
 
 
 def getabspath(relpath, raise_on_missing=True):

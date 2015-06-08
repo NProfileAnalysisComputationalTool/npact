@@ -14,6 +14,7 @@ npact_patterns = \
              url(r'^run/(.+)', 'run.run_frame', name="run"),
              url(r'^runstatus/(.*)', 'run.run_status', name='runstatus'),
              url(r'^kickstart/(.*)', 'run.kickstart', name='kickstart'),
+             url(r'^translate', 'run.translate', name='translate'),
              url(r'^acgt_gamma_file_list/(.*)', 'run.acgt_gamma_file_list', name='acgt_gamma_file_list'),
              url(r'^(run|config)^', 'view_none'),
              url(r'^raw/(?P<path>.*)$', 'static_serve_wrapper', name='raw'),

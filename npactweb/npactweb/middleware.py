@@ -3,8 +3,10 @@ import sys
 from datetime import datetime
 
 from django.conf import settings
-from django.http import HttpResponseRedirect
 from django.views.debug import technical_500_response
+from django.http import HttpResponseRedirect, HttpResponse
+from npactweb import MissingFileError, ImmediateHttpResponseException, \
+    RedirectException
 
 
 logger = logging.getLogger(__name__)
@@ -16,17 +18,19 @@ class AddItemsDict(object):
         return None
 
 
-class RedirectException(Exception):
-    url = None
-
-    def __init__(self, url):
-        self.url = url
-
-
-class RedirectExceptionHandler(object):
+class NPactResponseExceptionHandler(object):
     def process_exception(self, request, exception):
-        if isinstance(exception, RedirectException):
+        if isinstance(exception, ImmediateHttpResponseException):
+            return exception.httpResponse
+        elif isinstance(exception, RedirectException):
             return HttpResponseRedirect(exception.url)
+        elif isinstance(exception, MissingFileError):
+            return HttpResponse(exception.message, status=404,
+                                content_type="text/plain")
+        else:
+            logger.exception(exception)
+            return HttpResponse(repr(exception), status=500,
+                                content_type="application/json")
 
 
 class SaveTraceExceptionMiddleware(object):
