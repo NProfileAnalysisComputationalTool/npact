@@ -227,10 +227,13 @@ angular.module('npact')
         // the DNA is treated as 1 indexed
         // at least we got no results till we did this.
         $scope.ddna = NProfiler.ddna.slice($scope.extract.start - 1, $scope.extract.end - 1);
-        Translater($scope.ddna, GraphConfig.mycoplasma).then(function(res) {
-          $scope.ddnaP = res.data && res.data.seq;
-        });
-
+        Translater($scope.ddna, GraphConfig.mycoplasma, $scope.extract.complement)
+          .then(function(res) {
+            $scope.ddnaP = res.data && res.data.seq;
+            $scope.ddnaRC = res.data && res.data.complement;
+            $scope.query = $scope.extract.complement ? $scope.ddnaRC : $scope.ddna;
+          });
+        //window.NProfiler = NProfiler; window.GraphConfig = GraphConfig;
         $scope.config = GraphConfig;
       }
     };

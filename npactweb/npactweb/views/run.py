@@ -119,9 +119,14 @@ def translate(request):
     if request.POST.get('mycoplasma'):
         table = 4
     seq = Bio.Seq.Seq(request.POST.get('seq'))
+    rc = request.POST.get('complement')
+    if rc:
+        seq = seq.reverse_complement()
     trans = Bio.Seq.translate(seq, table)
-    return HttpResponse(json.dumps({'seq': str(trans)}),
-                        status=200, content_type="application/json")
+    return HttpResponse(json.dumps({
+        'seq': str(trans),
+        'complement': rc and str(seq)}
+    ), status=200, content_type="application/json")
 
 
 def kickstart(request, path):

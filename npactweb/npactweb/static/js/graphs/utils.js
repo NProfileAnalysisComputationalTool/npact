@@ -189,13 +189,15 @@ angular.module('npact')
 
   .factory('Translater', function($http, $log, TRANSLATE_BASE_URL, CSRF_TOKEN){
     'use strict';
-    return function (dna, mycoplasma) {
+    return function (dna, mycoplasma, complement) {
       return $http({
         method: 'POST',
         url:TRANSLATE_BASE_URL,
-        data:$.param({seq:dna,
-              mycoplasma:mycoplasma,
-              csrfmiddlewaretoken:CSRF_TOKEN}),
+        data:$.param({
+          seq:dna,
+          complement: complement,
+          mycoplasma: mycoplasma,
+          csrfmiddlewaretoken:CSRF_TOKEN}),
         headers: {'Content-Type': 'application/x-www-form-urlencoded'}
       });
     };
