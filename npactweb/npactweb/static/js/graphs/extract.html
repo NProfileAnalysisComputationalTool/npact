@@ -10,9 +10,11 @@
   DNA:<br >
   {{ddna}}
   <hr>
+  <div ng-if="extract.complement">
   DNA (reverse complement):<br >
   {{ddnaRC}}
+  </div>
   <hr>
-  Amino Acid Sequence:<br >
+  Amino Acid Sequence<span ng-if="extract.complement">(reverse complement)</span>:<br >
   {{ddnaP}}
 </div>
