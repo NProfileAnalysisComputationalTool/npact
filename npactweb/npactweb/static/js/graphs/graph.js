@@ -5,6 +5,7 @@ angular.module('npact')
     'use strict';
 
     var getWidth = function() {
+      //TODO: Probably need to use $element.innerWidth();
       return $element.width() - 15; //from style.css `.graph`
     };
 
