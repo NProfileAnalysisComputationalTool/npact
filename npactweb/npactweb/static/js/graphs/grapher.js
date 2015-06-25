@@ -224,7 +224,6 @@ angular.module('npact')
         }
       };
 
-      dg.on('dragstart', Tooltip.clearAll);
       dg.on('mouseover', function() { document.body.style.cursor = 'pointer'; });
       dg.on('mouseout', function() { document.body.style.cursor = 'default'; });
       dg.on('dblclick', _.bind(this.onZoom, this));
@@ -252,7 +251,6 @@ angular.module('npact')
     };
 
     GP.onZoom = function(evt) {
-      Tooltip.clearAll();
       var zoomOnPx = evt.evt.layerX - this.m.graph.x,
           zoomOnPct = zoomOnPx / this.m.graph.w,
           opts = {
@@ -503,7 +501,7 @@ angular.module('npact')
       }, this);
 
       g.on('click', function(evt) {
-        Tooltip.show($el, evt.target.getAttrs().extract, evt.evt.pageX, evt.evt.pageY);
+        Tooltip.show(evt.target.getAttrs().extract, evt.evt.pageX, evt.evt.pageY);
       });
       return g;
     };
@@ -535,7 +533,7 @@ angular.module('npact')
         }));
       });
       g.on('click', function(evt) {
-        Tooltip.show($el, evt.target.getAttrs().hit, evt.evt.pageX, evt.evt.pageY);
+        Tooltip.show(evt.target.getAttrs().hit, evt.evt.pageX, evt.evt.pageY);
       });
 
       return g;
@@ -651,21 +649,22 @@ angular.module('npact')
 
   .service('Tooltip', function($log, $rootScope, $compile) {
     'use strict';
-    this.show = function ($el, extract, pageX, pageY) {
-      this.clearAll();
+    this.show = function (extract, pageX, pageY) {
       var scope = $rootScope.$new(),
           tpl = '<div npact-extract="extract"></div>';
       scope.extract = extract;
-      $el.qtip({
+      $('#qtiptarget').qtip({
         content: {text: $compile(tpl)(scope)},
         position: {
           my: scope.extract.complement === 0 ? 'top center' : 'bottom center',
           target: [pageX, pageY]
         },
-        show: {event: 'tooltipShow.npact'},
-        hide: {event: 'tooltipHide.npact'}
+        show: true,
+        hide: 'unfocus',
+        events: {
+          'hide': function(event, api) { api.destroy(); }
+        }
       });
-      $el.trigger('tooltipShow.npact');
     };
     this.clearAll = function() {
       jQuery('.qtip').qtip('destroy');
