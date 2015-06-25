@@ -72,10 +72,12 @@ angular.module('npact')
     var $win = angular.element($window),
         winHeight = $win.height(),
         slack = 20, // how many pixels outside of viewport to render
-        topOffset = $element.offset().top,
+        topOffset = 0,
         topIdx = 0, bottomIdx = 0,
         graphRowHeight = 0,
         updateRowHeight = function(height) {
+          topOffset = Math.floor($element.offset().top + _.parseInt($element.css('padding-top')));
+          $log.log('topOffset:', topOffset);
           $scope.graphHeight = height;
           try {
              graphRowHeight = angular.element('#graph_0', $element).outerHeight();
@@ -84,6 +86,15 @@ angular.module('npact')
             graphRowHeight = 0; // There are no rows
           }
           updateVisibility();
+        },
+        scrollToBase = function(base) {
+          if(isNaN(base)) return;
+          var idx = Math.floor(base / GraphConfig.basesPerGraph);
+          var id = '#graph_' + idx;
+          $timeout(function() {
+            $log.log('scrolling to', id);
+            $window.scrollTo(0, $(id).offset().top);
+          }, 40);
         },
         updateVisibility = function() {
           if(!baseOpts.m) return;
@@ -133,6 +144,7 @@ angular.module('npact')
             break;
           }
         }, 800);
+    $scope.$watch(function() { return GraphConfig.gotoBase; }, scrollToBase);
 
     this.visible = function(idx) { return idx >= topIdx && idx <= bottomIdx; };
     $win.on('resize', onResize);
@@ -155,7 +167,8 @@ angular.module('npact')
     };
   })
 
-  .directive('npactGraph', function (Grapher, Evt, GraphingCalculator, $log, $timeout) {
+  .directive('npactGraph', function (Grapher, Evt, GraphingCalculator, GraphConfig,
+                              $log, $timeout) {
     'use strict';
     return {
       restrict: 'A',
@@ -210,6 +223,18 @@ angular.module('npact')
             callback(p.then(function() { return g.replaceWithImage(); }));
           }
           else { callback(g.replaceWithImage()); }
+        });
+        $scope.$watch(function() { return GraphConfig.gotoBase; }, function(gotoBase, fromBase) {
+          var start = idx * GraphConfig.basesPerGraph,
+              end = start + GraphConfig.basesPerGraph;
+          if (gotoBase && start <= gotoBase && gotoBase <= end) {
+            $log.log('gotoBase triggered redraw:', gotoBase);
+            redraw = true;
+            schedule(true);
+          }
+          else if(fromBase && start <= fromBase && fromBase <= end) {
+            redraw = true;
+          }
         });
       }
     };

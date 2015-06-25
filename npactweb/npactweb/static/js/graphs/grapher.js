@@ -238,16 +238,24 @@ angular.module('npact')
       var p3 = this.xAxisGroup().then(dgAdd);
       var p2 = this.tracksGroup().then(dgAdd);
       var p1 = this.profileGroup().then(dgAdd);
+      var maybeGoto = _.bind(function() {
+        if(GraphConfig.gotoBase &&
+           GraphConfig.gotoBase > this.startBaseM && GraphConfig.gotoBase < this.endBaseM) {
+          dgAdd(new K.Line({stroke: style.profile.axis.text.fill, strokeWidth: 1,
+                            strokeScaleEnabled: false,
+                            points: [
+                              GraphConfig.gotoBase, 0, GraphConfig.gotoBase, this.m.height]}));
+        }
+
+        l.draw();
+        return l;
+      }, this);
 
       return $q.all([p1, p2, p3]).then(function() {
+        maybeGoto();
         l.draw();
         return l;
       });
-    };
-
-    GP.setupEvents = function(dragGroup) {
-
-
     };
 
     GP.onZoom = function(evt) {

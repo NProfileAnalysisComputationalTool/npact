@@ -32,6 +32,13 @@
              ng-model="gc.endBase">
     </div>
     <div>
+      <label>Goto:
+        <input type="number" name="gotoBase" style="width:6em;"
+               min="0" max="{{gc.length}}"
+               ng-model="gc.gotoBase">
+      </label>
+    </div>
+    <div>
       <label>
         <input type="checkbox" ng-model="gc.colorBlindFriendly"
                ng-change="gc.cookiePersist()" />
