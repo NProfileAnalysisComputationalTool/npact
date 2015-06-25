@@ -77,15 +77,19 @@ angular.module('npact')
         graphRowHeight = 0,
         updateRowHeight = function(height) {
           $scope.graphHeight = height;
-          //add padding and border from style.css `.graph`
-          graphRowHeight = height + 8 + 8 + 1;
+          try {
+             graphRowHeight = angular.element('#graph_0', $element).outerHeight();
+          }
+          catch(e) {
+            graphRowHeight = 0; // There are no rows
+          }
           updateVisibility();
         },
         updateVisibility = function() {
           if(!baseOpts.m) return;
           var scrollDist = $window.scrollY - topOffset - slack;
           topIdx = Math.floor(scrollDist / graphRowHeight);
-          bottomIdx = topIdx + Math.ceil((winHeight + slack) / graphRowHeight);
+          bottomIdx = topIdx + Math.ceil((winHeight + 2* slack) / graphRowHeight);
         },
         onScroll = function() {
           updateVisibility();

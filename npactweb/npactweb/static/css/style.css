@@ -440,9 +440,6 @@ button.Start { clear:both; margin: 8px;}
 .md-text {font-size: 14px;}
 
 .graph {
-   /**
-    * Changes here need to be updated in graph.css, search for `.graph` (with ticks)
-    */
    border-bottom: 2px solid #AAF;
    padding: 8px 10px 8px 0;
 }
