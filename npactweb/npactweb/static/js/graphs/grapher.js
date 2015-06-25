@@ -88,8 +88,8 @@ angular.module('npact')
 
       addMany(g, _.map(this.tracks, function(track) {
         defaultTextOpts.text = track.name;
-        defaultTextOpts.y = track.y + track.height/4;
-        defaultTextOpts.height = track.height;
+        defaultTextOpts.y = track.y + track.style.height/4;
+        defaultTextOpts.height = track.style.height;
         return new K.Text(defaultTextOpts);
       }));
       return g;
@@ -288,12 +288,12 @@ angular.module('npact')
       var guides = _(this.tracks)
             .filter({type: 'hits'})
             .map(function(track) {
-              return this.hitsTrackGuideLinesImage(track.height, mg.w)
+              return this.hitsTrackGuideLinesImage(track.style.height, mg.w)
                 .then(function(img) {
                   l.add(new K.Image({
                     image: img,
                     x: mg.x, y: track.y,
-                    height: track.height, width: mg.w
+                    height: track.style.height, width: mg.w
                   }));
                 });
             }, this).value();
@@ -416,8 +416,10 @@ angular.module('npact')
       return trackSlice
         .then(_.bind(function(data) {
           switch(track.type) {
+          case 'neworfs':
+          case 'modified':
           case 'extracts':
-            return this.cdsGroup(track, data);
+            return this.drawORFsTrack(track, data);
           case 'hits':
             return this.drawHitsTrack(track, data);
           default:
@@ -444,14 +446,14 @@ angular.module('npact')
                    0, 0,
                    tailWidth, 0 ];
         };
-    GP.cdsGroup = function(track, cds) {
+    GP.drawORFsTrack = function(track, orfs) {
       var xaxis = this.m.xaxis, $el = this.$element,
           colors = this.colors,
           g = new K.Group({ y: track.y }),
           arrowHeadWidth = style.tracks.arrow.width / xaxis.scaleX;
 
       // Go through the list of genes in the track.
-      _.forEach(cds, function(x) {
+      _.forEach(orfs, function(x) {
         var width = x.end - x.start,
             baseY = 0, shape,
             headWidth = Math.min(width, arrowHeadWidth),
@@ -467,8 +469,9 @@ angular.module('npact')
           x: x.start, y: baseY,
           extract: x,
           points: shape, closed: true,
-          stroke: colors[x.phase],
-          strokeWidth: 1, strokeScaleEnabled: false
+          stroke: track.style.light ? shadeBlend(0.7, colors[x.phase]) : colors[x.phase],
+          strokeWidth: track.style.strokeWidth,
+          strokeScaleEnabled: false
         }));
         // Only put a label in it if there is any room
         if(tailWidth) {
@@ -506,7 +509,7 @@ angular.module('npact')
     };
 
     GP.drawHitsTrack = function(track, hits) {
-      var midY = (track.height / 2),
+      var midY = (track.style.height / 2),
           offset = 2,  //how far off midline
           g = new K.Group({ x: 0, y: track.y }),
           $el = this.$element,

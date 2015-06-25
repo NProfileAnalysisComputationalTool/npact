@@ -118,8 +118,8 @@ describe('Graphs', function(){
     });
 
     describe('trackSizeCalc', function() {
-      var testExtractsTrack = {text: 'test', type: 'extracts', active: true, height: 30};
-      var testHitsTrack = {text: 'test3', type: 'hits', active: true, height: 20};
+      var testExtractsTrack = {text: 'test', type: 'extracts', active: true, style: {height: 30}};
+      var testHitsTrack = {text: 'test3', type: 'hits', active: true, style: {height: 20}};
       it('with one extract', function() {
         var tracks = [testExtractsTrack];
         expect(GC.trackSizeCalc([testExtractsTrack])).toEqual(30);
@@ -139,7 +139,7 @@ describe('Graphs', function(){
         width: 250,
         profileTicks: 5,
         startBase: 0, endBase: 100,
-        tracks: [{height: 7}]
+        tracks: [{style: {height: 7}}]
       };
       beforeEach(inject(function(npactConstants) {
         npactConstants.graphStyle.paddingUnit = 5;

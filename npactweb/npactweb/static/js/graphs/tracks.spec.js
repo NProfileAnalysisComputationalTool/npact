@@ -108,12 +108,13 @@ describe('ITrackReader', function() {
       expect(track.name).toEqual('test');
       expect(track.weight).toEqual(0);
       expect(track.type).toEqual('extracts');
-      expect(track.height).toBeTruthy();
+      expect(track.style.height).toBeTruthy();
     });
 
-    it('should throw on unknown track type', function() {
+    it('should throw on unknown track type', inject(function(Track) {
       expect(function() { new Track('test', null, 'unknown'); }).toThrow();
-    });
+      expect(function() { new Track('test', '', 'neworfs'); }).not.toThrow();
+    }));
 
     it('should be active by default', function() {
       expect(track.active).toBe(true);

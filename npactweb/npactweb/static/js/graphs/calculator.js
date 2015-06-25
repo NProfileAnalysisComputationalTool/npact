@@ -80,7 +80,7 @@ angular.module('npact')
       var offset = 0;
       _.forEach(activeTracks, function(track) {
         track.y = offset;
-        offset += track.height + trackPadding;
+        offset += track.style.height + trackPadding;
       });
       return offset;
     };

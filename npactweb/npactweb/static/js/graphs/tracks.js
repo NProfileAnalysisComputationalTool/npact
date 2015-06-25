@@ -6,10 +6,11 @@ angular.module('npact')
       this.active = true;
       this.name = name;
       this.type = type;
-      this.height = npactConstants.trackHeights[type];
-      if(this.height === undefined) {
+      if(!_.includes(['extracts', 'hits', 'modified', 'neworfs'], type)) {
         throw new Error("Unknown track type: +", type);
       }
+      var trackStyle = npactConstants.trackStyle[type] || {};
+      this.style = _.defaults(trackStyle, npactConstants.trackStyle['default']);
       this.weight = weight || 0;
       this.index = this.load(data);
     }

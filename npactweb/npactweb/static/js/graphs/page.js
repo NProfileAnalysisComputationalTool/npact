@@ -161,7 +161,7 @@ angular.module('npact')
         result.newORFs = Fetcher.fetchFile(result.config[Pynpact.NEW_ORFS])
           .then(function(data) {
             var name = 'New ORFs @' + result.config.significance,
-                track = new Track(name, data, 'extracts', 15 - result.config.significance);
+                track = new Track(name, data, 'neworfs', 15 - result.config.significance);
             GraphConfig.loadTrack(track);
             return track;
           });
@@ -174,7 +174,7 @@ angular.module('npact')
         result.modified = Fetcher.fetchFile(config[Pynpact.MODIFIED])
           .then(function(data) {
             var name = 'Modified ORFs @' + config.significance,
-                track = new Track(name, data, 'extracts', 10 - config.significance);
+                track = new Track(name, data, 'modified', 10 - config.significance);
             GraphConfig.loadTrack(track);
             return track;
           });
