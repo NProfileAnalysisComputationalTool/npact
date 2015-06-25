@@ -138,6 +138,7 @@ angular.module('npact')
         results[oldSig].then(function(result) {
           self.toggleTrack(result.hits, false);
           self.toggleTrack(result.newCds, false);
+          self.toggleTrack(result.modified, false);
           self.files = null;
         });
       }
@@ -167,6 +168,19 @@ angular.module('npact')
       }
       self.toggleTrack(result.newCds, true);
     };
+    self.newModified = function(result) {
+      var config = result.config;
+      if(!result.modified) {
+        result.modified = Fetcher.fetchFile(config[Pynpact.MODIFIED])
+          .then(function(data) {
+            var name = 'Modified ORFs @' + config.significance,
+                track = new Track(name, data, 'extracts', 10 - config.significance);
+            GraphConfig.loadTrack(track);
+            return track;
+          });
+      }
+      self.toggleTrack(result.modified, true);
+    };
 
     self.onSignificanceChange = function(significance, oldSig) {
       self.disableOld(oldSig);
@@ -182,6 +196,7 @@ angular.module('npact')
         var waitOn = results[significance];
         waitOn.then(self.newHits);
         waitOn.then(self.newCds);
+        waitOn.then(self.newModified);
         waitOn.then(self.updateFiles);
         MessageBus.info(
           'Identifying significant 3-base periodicities @ ' + significance,

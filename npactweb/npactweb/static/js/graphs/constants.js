@@ -67,6 +67,7 @@ angular.module('npact')
     NPROFILE: 'nprofileData',
     CDS: 'File_of_published_accepted_CDSs',
     ACGT_GAMMA_FILES: 'acgt_gamma_output',
+    MODIFIED: 'File_of_published_rejected_CDSs',
     TITLE: 'first_page_title',
     HAS_CDS: 'isgbk',
     EMAIL: 'email',
