@@ -189,8 +189,8 @@ angular.module('npact')
         if(!results[significance]) {
           results[significance] = processOnServer('acgt_gamma')
             .then(function(config) {
-              return StatusPoller.start(config[Pynpact.ACGT_GAMMA_FILES]).
-                then(function(path) { return ({ path: path, config: config }); });
+              return StatusPoller.start(config[Pynpact.ACGT_GAMMA_FILES])
+                .then(function(path) { return ({ path: path, config: config }); });
           });
         }
         var waitOn = results[significance];
