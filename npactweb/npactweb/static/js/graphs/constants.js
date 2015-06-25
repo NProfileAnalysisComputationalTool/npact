@@ -61,7 +61,7 @@ angular.module('npact')
   })
 // these are expected to match strings specified in pynpact
   .constant('Pynpact', {
-    NEW_CDS: 'File_of_new_CDSs',
+    NEW_ORFS: 'File_of_new_CDSs',
     HITS: 'File_of_G+C_coding_potential_regions',
     PDF: 'pdf_filename',
     NPROFILE: 'nprofileData',

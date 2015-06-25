@@ -137,7 +137,7 @@ angular.module('npact')
       if(oldSig && results[oldSig]) {
         results[oldSig].then(function(result) {
           self.toggleTrack(result.hits, false);
-          self.toggleTrack(result.newCds, false);
+          self.toggleTrack(result.newORFs, false);
           self.toggleTrack(result.modified, false);
           self.files = null;
         });
@@ -156,9 +156,9 @@ angular.module('npact')
       self.toggleTrack(result.hits, true);
     };
 
-    self.newCds = function(result) {
-      if(!result.newCds) {
-        result.newCds = Fetcher.fetchFile(result.config[Pynpact.NEW_CDS])
+    self.newORFs = function(result) {
+      if(!result.newORFs) {
+        result.newORFs = Fetcher.fetchFile(result.config[Pynpact.NEW_ORFS])
           .then(function(data) {
             var name = 'New ORFs @' + result.config.significance,
                 track = new Track(name, data, 'extracts', 15 - result.config.significance);
@@ -166,7 +166,7 @@ angular.module('npact')
             return track;
           });
       }
-      self.toggleTrack(result.newCds, true);
+      self.toggleTrack(result.newORFs, true);
     };
     self.newModified = function(result) {
       var config = result.config;
@@ -195,7 +195,7 @@ angular.module('npact')
         }
         var waitOn = results[significance];
         waitOn.then(self.newHits);
-        waitOn.then(self.newCds);
+        waitOn.then(self.newORFs);
         waitOn.then(self.newModified);
         waitOn.then(self.updateFiles);
         MessageBus.info(
