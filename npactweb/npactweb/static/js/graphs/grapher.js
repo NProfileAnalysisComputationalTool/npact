@@ -655,10 +655,7 @@ angular.module('npact')
       scope.extract = extract;
       $('#qtiptarget').qtip({
         content: {text: $compile(tpl)(scope)},
-        position: {
-          my: scope.extract.complement === 0 ? 'top center' : 'bottom center',
-          target: [pageX, pageY]
-        },
+        position: { my: 'top center', target: [pageX, pageY] },
         show: true,
         hide: 'unfocus',
         events: {
