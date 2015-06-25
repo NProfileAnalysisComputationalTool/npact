@@ -78,4 +78,19 @@ angular.module('npact', ['ngMessages', 'sticky', 'ngSanitize', 'dialogService', 
       }
     };
   })
+
+  .directive('qtipHelpIcon', function($log) {
+    'use strict';
+    return {
+      restrict: 'C',
+      link: function($scope, $element, $attrs) {
+        $log.log("In link function: ", $element.next('.qtip-help-text'));
+        $element.qtip({
+           content: {
+             text: $element.parent().next('.qtip-help-text')
+            }
+        });
+      }
+    };
+  })
 ;
