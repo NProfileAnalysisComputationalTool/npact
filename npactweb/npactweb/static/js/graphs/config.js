@@ -117,5 +117,52 @@ angular.module('npact')
     $scope.$watchGroup(gcpubkeys, function(newVals) {
       $location.search(_.object(PUBLIC_CONFIG_KEYS, newVals));
     });
+
+  })
+
+  .directive('npactOrfFinder', function(GraphConfig, MessageBus, $q, $log) {
+    'use strict';
+    return {
+      restrict: 'A',
+      require: 'ngModel',
+      link: function($scope, element, attrs, ngModel) {
+        function doSearch(val) {
+          $log.log("Searching for:", val);
+          $scope.hitsIndex = null;
+          if(!val) return $q.when(true);
+          function hitInRange(hit) {
+            return hit.start >= GraphConfig.startBase &&
+              hit.end <= GraphConfig.endBase;
+          }
+          return $q
+            .all(_.map(GraphConfig.activeTracks(), function(t) { return t.findByName(val); }))
+            .then(function(values) {
+              $scope.hits = _(values).flatten().filter(hitInRange).sortBy('start').value();
+              $log.log("Total results", $scope.hits.length);
+              if($scope.hits.length > 0) {
+                $scope.hitsIndex = 0;
+                return true;
+              }
+              else {
+                MessageBus.warning("No matches found", 1000);
+                return $q.reject("No matches found for: '" + val + "'");
+              }
+            });
+        }
+        $scope.$watchGroup(['gc.startBase', 'gc.endBase'], function() {
+          if(GraphConfig.findORF) {
+            doSearch(GraphConfig.findORF);
+          }
+        });
+        ngModel.$asyncValidators.matchingOrfs = doSearch;
+        $scope.$watch('hitsIndex', function(idx) {
+          if(!$scope.hits || $scope.hits.length === 0) return;
+          if(idx < 0) { $scope.hitsIndex = 0; }
+          if(idx >= $scope.hits.length) { $scope.hitsIndex = $scope.hits.length - 1; }
+          GraphConfig.gotoBase = $scope.hits[$scope.hitsIndex].start;
+        });
+
+      }
+    };
   })
 ;

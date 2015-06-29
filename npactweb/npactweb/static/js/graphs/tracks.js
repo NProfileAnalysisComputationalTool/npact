@@ -12,18 +12,32 @@ angular.module('npact')
       var trackStyle = npactConstants.trackStyle[type] || {};
       this.style = _.defaults(trackStyle, npactConstants.trackStyle['default']);
       this.weight = weight || 0;
-      this.index = this.load(data);
+      this.data = this.loadData(data);
+      this.index = this.indexData(this.data);
     }
-    Track.prototype.load = function(data) {
+    Track.prototype.loadData = function(data) {
       return ExtractParser.parseAsync(data)
+        .catch(function(e) { $log.log('Track.loadData failed', name, e); throw e; });
+    };
+    Track.prototype.indexData = function(data) {
+      return data
         .then(function(data) { return new ITrackIndex(data); })
-        .catch(function(e) { $log.log('Track.load failed', name, e); throw e; });
+        .catch(function(e) { $log.log('Track.indexData failed', name, e); throw e; });
     };
     Track.prototype.slice = function(opts) {
       return this.index.then(_.bind(function(index) {
         this.slice = index;
         return index(opts);
       }, this));
+    };
+    Track.prototype.findByName = function(substr) {
+      return this.data.then(function(parsedData) {
+        if(!parsedData) return [];
+        var searcher = new RegExp(substr.replace(/[.*+?^${}()|[\]\\]/g, "\\$&"), "i");
+        return _.filter(parsedData, function(orf) {
+          return searcher.test(orf.name);
+        });
+      });
     };
     return Track;
   })

@@ -43,6 +43,21 @@
       </label>
     </div>
     <div>
+      <label>Find ORF by name:<br/>
+        <input type="text" name="findORF" style="width:9em;"
+               ng-model="gc.findORF"
+               ng-model-options="{ updateOn: 'default blur', debounce: { 'default': 1200, 'blur': 0 } }"
+               npact-orf-finder
+               >
+      </label>
+      <span ng-show="hits && hits.length > 0">
+      <button ng-click="hitsIndex = hitsIndex - 1" class="arrowbutton">&lt;</button>
+      <button ng-click="hitsIndex = hitsIndex + 1" class="arrowbutton">&gt;</button>
+      {{hitsIndex}} of {{hits.length}}
+
+      </span>
+    </div>
+    <div>
       <label>
         <input type="checkbox" ng-model="gc.colorBlindFriendly"
                ng-change="gc.cookiePersist()" />

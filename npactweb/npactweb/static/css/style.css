@@ -488,3 +488,8 @@ h2 span.qtip-help-icon { float: right; }
     font-weight: bold;
     color: #fff;
 }
+
+input.ng-invalid {
+   border: 2px red dashed !important;
+}
+button.arrowbutton { margin: 0 2px; padding: 0 2px;}
