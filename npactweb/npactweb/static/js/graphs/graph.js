@@ -76,9 +76,9 @@ angular.module('npact')
         topIdx = 0, bottomIdx = 0,
         graphRowHeight = 0,
         updateRowHeight = function(height) {
-            topOffset = $element.offset().top;
-            topOffset += _.parseInt($element.css('padding-top'));
-            topOffset = Math.floor(topOffset);
+          topOffset = $element.offset().top;
+          topOffset += _.parseInt($element.css('padding-top'));
+          topOffset = Math.floor(topOffset);
           $log.log('topOffset:', topOffset);
           $scope.graphHeight = height;
           try {

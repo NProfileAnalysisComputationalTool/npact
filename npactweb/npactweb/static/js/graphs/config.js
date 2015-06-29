@@ -45,7 +45,7 @@ angular.module('npact')
       return self.nucleotides ? '% ' + self.nucleotides.join('') : null;
     };
 
-    self.activeTracks = function(){
+    self.activeTracks = function() {
       return _.filter(self.tracks, 'active');
     };
 
