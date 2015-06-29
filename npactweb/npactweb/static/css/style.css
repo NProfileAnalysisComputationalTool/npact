@@ -451,6 +451,7 @@ h2 span.qtip-help-icon { float: right; }
 .graph {
    border-bottom: 2px solid #AAF;
    padding: 8px 0px;
+   overflow: hidden;
 }
 
 #msgpane p { padding: 8px; }

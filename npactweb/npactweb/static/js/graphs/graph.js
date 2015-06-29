@@ -25,13 +25,18 @@ angular.module('npact')
           return GraphConfig.nucleotides && GraphConfig.nucleotides.length &&
             baseOpts.m;
         },
-        draw = function() { $scope.$broadcast(Evt.DRAW); },
+        draw = function() {
+          updateVisibility();
+          $scope.$broadcast(Evt.DRAW);
+        },
         redraw = function() {
           if (!ready()) return;  //too early to do anything
+          updateVisibility();
           $scope.$broadcast(Evt.REDRAW);
         },
         rebuild = function() {
           if (!ready()) return;  //too early to do anything
+          updateVisibility();
           $scope.$broadcast(Evt.REBUILD);
         };
 
@@ -49,7 +54,6 @@ angular.module('npact')
         $scope.graphSpecs = GraphingCalculator.partition(GraphConfig);
         updateMetrics();
         $log.log('Partitioned into', $scope.graphSpecs.length, 'rows.');
-        updateVisibility(); //number of rows might have changed.
         $timeout(rebuild);
       });
 
@@ -58,15 +62,12 @@ angular.module('npact')
     }, true);
     $scope.$watch(function() { return GraphConfig.colorBlindFriendly; }, redraw);
 
-    $scope.$watch(GraphConfig.activeTracks, function(val) {
+    $scope.$watchCollection(GraphConfig.activeTracks, function(val, old) {
       //Find headers and headerY
       baseOpts.tracks = val;
       updateMetrics();
       updateRowHeight(baseOpts.m.height);
-      redraw();
-    }, true);
-
-
+    });
 
     /***  Scrolling and Graph Visibility management ***/
     var $win = angular.element($window),
@@ -80,14 +81,26 @@ angular.module('npact')
           topOffset += _.parseInt($element.css('padding-top'));
           topOffset = Math.floor(topOffset);
           $log.log('topOffset:', topOffset);
-          $scope.graphHeight = height;
-          try {
-             graphRowHeight = angular.element('#graph_0', $element).outerHeight();
+
+          // Keep the topIdx at the top through the height change
+          var delta = Math.max(0, topIdx) * (height - $scope.graphHeight);
+          if (delta) {
+            $window.scrollBy(0, delta);
           }
-          catch(e) {
-            graphRowHeight = 0; // There are no rows
-          }
-          updateVisibility();
+          $scope.graphHeight = height;  //set the inner height of the canvas container
+          $timeout(function() {
+            //This code won't work until after the `$scope.graphHeight`
+            //above has a chance to take effect. Hence the $timeout.
+            try {
+              // Find the height including the padding+border for
+              // graphRowHeight visibility calculations
+              graphRowHeight = angular.element('#graph_0', $element).outerHeight();
+            }
+            catch(e) {
+              graphRowHeight = 0; // There are no rows
+            }
+            redraw();
+          });
         },
         scrollToBase = function(base) {
           if(isNaN(base)) return;
@@ -99,22 +112,18 @@ angular.module('npact')
           }, 40);
         },
         updateVisibility = function() {
-          if(!baseOpts.m) return;
+          if(!graphRowHeight) return;
           var scrollDist = $window.scrollY - topOffset - slack;
           topIdx = Math.floor(scrollDist / graphRowHeight);
           bottomIdx = topIdx + Math.ceil((winHeight + 2* slack) / graphRowHeight);
         },
-        onScroll = function() {
-          updateVisibility();
-          draw();
-        },
+        onScroll = draw,
         onResize = function() {
           winHeight = $win.height();
           if(getWidth() !== baseOpts.width) {
             topOffset = $element.offset().top;
             baseOpts.width = getWidth();
             updateMetrics();
-            updateVisibility();
             redraw();
           }
           else {
