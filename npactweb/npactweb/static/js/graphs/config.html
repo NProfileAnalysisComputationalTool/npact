@@ -13,8 +13,9 @@
         <input type="number" name="basesPerGraph"
                style="width:5em;"
                min="100" required
-               ng-model-options="{debounce: 1000}"
-	       ng-model="gc.basesPerGraph"/> bases/line
+               ng-model="gc.basesPerGraph"
+               ng-model-options="{ updateOn: 'default blur', debounce: { 'default': 600, 'blur': 0 } }">
+        bases/line
       </label>
       <div class="error" ng-messages="configForm.basesPerGraph.$error">
         <div ng-message="min">Cannot zoom in that far.</div>
@@ -25,17 +26,20 @@
       <label>Range:</label>
       <input type="number" name="startBase" style="width:6em;"
              min="0" max="{{gc.length}}"
-             ng-model="gc.startBase">
+             ng-model="gc.startBase"
+             ng-model-options="{ updateOn: 'default blur', debounce: { 'default': 600, 'blur': 0 } }">
       <span class="sm-text">to</span>
       <input type="number" name="endBase" style="width:6em;"
              min="0" max="{{gc.length}}"
-             ng-model="gc.endBase">
+             ng-model="gc.endBase"
+             ng-model-options="{ updateOn: 'default blur', debounce: { 'default': 600, 'blur': 0 } }">
     </div>
     <div>
       <label>Goto:
         <input type="number" name="gotoBase" style="width:6em;"
                min="0" max="{{gc.length}}"
-               ng-model="gc.gotoBase">
+               ng-model="gc.gotoBase"
+               ng-model-options="{ updateOn: 'default blur', debounce: { 'default': 600, 'blur': 0 } }">
       </label>
     </div>
     <div>
