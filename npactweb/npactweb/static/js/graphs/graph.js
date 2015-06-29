@@ -5,8 +5,7 @@ angular.module('npact')
     'use strict';
 
     var getWidth = function() {
-      //TODO: Probably need to use $element.innerWidth();
-      return $element.width() - 15; //from style.css `.graph`
+      return $element.width(); //from style.css `.graph`
     };
 
     //The baseOpts are the graph options that are the same for every graph
