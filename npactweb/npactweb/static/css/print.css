@@ -1,6 +1,6 @@
 body, p, h1, h2, h3, h4, h5, h6, li  {font-family : "Trebuchet MS", verdana, lucida, arial, helvetica, sans-serif; }
 
-#header, #leftCol, #footer, #printControls, #predictionresults, #progressreport {display:none;}
+#header, #leftCol, #footer, #printControls, #predictionresults, #progressreport, .ui-dialog {display:none;}
 
 .graph {
    border-bottom: 2px solid #AAF;

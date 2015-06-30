@@ -159,6 +159,16 @@ angular.module('npact')
           }
         }, 800);
     $scope.$watch(function() { return GraphConfig.gotoBase; }, scrollToBase);
+    $scope.$on('printresize', function(event, printing) {
+      if(printing) {
+        $element.css({width: '7in'});
+        onResize();
+      }
+      else {
+        $element.css({width: 'auto'});
+        onResize();
+      }
+    });
 
     this.visible = function(idx) { return idx >= topIdx && idx <= bottomIdx; };
     $win.on('resize', onResize);

@@ -23,6 +23,7 @@ angular.module('npact')
     var _doPrint = function() {
       var t1 = new Date();
       $log.log("print requested: ", t1);
+      $scope.$broadcast('printresize', true);
       $scope.printCounter = 0;
       var waitList = [];
       var evt = $scope.$broadcast('print', function(promise) {
@@ -33,6 +34,7 @@ angular.module('npact')
         $scope.printCounter = 0;
         $log.log('Finished rendering', new Date() - t1);
         $window.print();
+        $scope.$broadcast('printresize', false);
       });
     };
 
