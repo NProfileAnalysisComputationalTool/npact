@@ -95,8 +95,6 @@ angular.module('npact')
     };
   })
 
-
-
   .directive('npactGraphConfig', function npactGraphConfig(STATIC_BASE_URL) {
     'use strict';
     return {
@@ -117,7 +115,6 @@ angular.module('npact')
     $scope.$watchGroup(gcpubkeys, function(newVals) {
       $location.search(_.object(PUBLIC_CONFIG_KEYS, newVals));
     });
-
   })
 
   .directive('npactOrfFinder', function(GraphConfig, MessageBus, $q, $log, $timeout) {
