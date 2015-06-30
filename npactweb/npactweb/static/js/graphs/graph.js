@@ -133,6 +133,8 @@ angular.module('npact')
           }
         },
         onKeyDown = _.throttle(function(event) {
+          //Ignore keys while the user is typing in input controls
+          if(event.target.nodeName == "INPUT") return;
           var keyCode = event.which, delta;
           switch(keyCode) {
           case 37: // left key
