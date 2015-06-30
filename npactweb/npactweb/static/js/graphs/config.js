@@ -120,48 +120,52 @@ angular.module('npact')
 
   })
 
-  .directive('npactOrfFinder', function(GraphConfig, MessageBus, $q, $log) {
+  .directive('npactOrfFinder', function(GraphConfig, MessageBus, $q, $log, $timeout) {
     'use strict';
     return {
       restrict: 'A',
       require: 'ngModel',
       link: function($scope, element, attrs, ngModel) {
+        function resultInRange(result) {
+          return result.start >= GraphConfig.startBase &&
+            result.end <= GraphConfig.endBase;
+        }
+
         function doSearch(val) {
           $log.log("Searching for:", val);
-          $scope.hitsIndex = null;
+          delete $scope.results;
+          delete $scope.resultsIndex;
           if(!val) return $q.when(true);
-          function hitInRange(hit) {
-            return hit.start >= GraphConfig.startBase &&
-              hit.end <= GraphConfig.endBase;
-          }
           return $q
             .all(_.map(GraphConfig.activeTracks(), function(t) { return t.findByName(val); }))
             .then(function(values) {
-              $scope.hits = _(values).flatten().filter(hitInRange).sortBy('start').value();
-              $log.log("Total results", $scope.hits.length);
-              if($scope.hits.length > 0) {
-                $scope.hitsIndex = 0;
-                return true;
-              }
-              else {
-                MessageBus.warning("No matches found", 1000);
-                return $q.reject("No matches found for: '" + val + "'");
-              }
+              return $timeout(function() {  // let other code run
+                $scope.results = _(values).flatten().filter(resultInRange).sortBy('start').value();
+                $log.log("Total results", $scope.results.length);
+                if($scope.results.length > 0) {
+                  $scope.resultsIndex = 0;
+                  GraphConfig.gotoBase = $scope.results[$scope.resultsIndex].start;
+                  return true;
+                }
+                else {
+                  MessageBus.warning("No matches found", 1000);
+                  return $q.reject("No matches found for: '" + val + "'");
+                }
+              });
             });
         }
+        ngModel.$asyncValidators.matchingOrfs = doSearch;
         $scope.$watchGroup(['gc.startBase', 'gc.endBase'], function() {
           if(GraphConfig.findORF) {
             doSearch(GraphConfig.findORF);
           }
         });
-        ngModel.$asyncValidators.matchingOrfs = doSearch;
-        $scope.$watch('hitsIndex', function(idx) {
-          if(!$scope.hits || $scope.hits.length === 0) return;
-          if(idx < 0) { $scope.hitsIndex = 0; }
-          if(idx >= $scope.hits.length) { $scope.hitsIndex = $scope.hits.length - 1; }
-          GraphConfig.gotoBase = $scope.hits[$scope.hitsIndex].start;
+        $scope.$watch('resultsIndex', function(idx) {
+          if(!$scope.results || $scope.results.length === 0) return;
+          if(idx < 0) { $scope.resultsIndex = 0; }
+          if(idx >= $scope.results.length) { $scope.resultsIndex = $scope.results.length - 1; }
+          GraphConfig.gotoBase = $scope.results[$scope.resultsIndex].start;
         });
-
       }
     };
   })
