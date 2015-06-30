@@ -104,7 +104,8 @@ angular.module('npact')
         },
         scrollToBase = function(base) {
           if(isNaN(base)) return;
-          var idx = Math.floor(base / GraphConfig.basesPerGraph);
+          var idx = Math.floor((base - GraphConfig.startBase - GraphConfig.offset) /
+                               GraphConfig.basesPerGraph);
           var id = '#graph_' + idx;
           $timeout(function() {
             $log.log('scrolling to', id);
@@ -188,6 +189,7 @@ angular.module('npact')
         var g = null,
             visible = ctrl.visible,
             idx = $attrs.idx,
+            startBase = $attrs.startBase,
             el = $element[0],
             // redraw gets set for all graphs once (e.g. a new track
             // triggers broadcasts redraw), but only gets cleared as
@@ -236,14 +238,13 @@ angular.module('npact')
           else { callback(g.replaceWithImage()); }
         });
         $scope.$watch(function() { return GraphConfig.gotoBase; }, function(gotoBase, fromBase) {
-          var start = idx * GraphConfig.basesPerGraph,
-              end = start + GraphConfig.basesPerGraph;
-          if (gotoBase && start <= gotoBase && gotoBase <= end) {
+          var endBase = startBase + GraphConfig.basesPerGraph;
+          if (gotoBase && startBase <= gotoBase && gotoBase <= endBase) {
             $log.log('gotoBase triggered redraw:', gotoBase);
             redraw = true;
             schedule(true);
           }
-          else if(fromBase && start <= fromBase && fromBase <= end) {
+          else if(fromBase && startBase <= fromBase && fromBase <= endBase) {
             redraw = true;
           }
         });
