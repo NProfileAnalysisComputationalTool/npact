@@ -53,7 +53,7 @@
       <span ng-show="results && results.length > 0">
       <button ng-click="resultsIndex = resultsIndex - 1" class="arrowbutton">&lt;</button>
       <button ng-click="resultsIndex = resultsIndex + 1" class="arrowbutton">&gt;</button>
-      {{resultsIndex}} of {{results.length}}
+      {{resultsIndex + 1}} of {{results.length}}
       </span>
       <span ng-show="results && results.length == 0">
         No results found
