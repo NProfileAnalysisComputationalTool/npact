@@ -102,16 +102,6 @@ angular.module('npact')
             redraw();
           });
         },
-        scrollToBase = function(base) {
-          if(isNaN(base)) return;
-          var idx = Math.floor((base - GraphConfig.startBase - GraphConfig.offset) /
-                               GraphConfig.basesPerGraph);
-          var id = '#graph_' + idx;
-          $timeout(function() {
-            $log.log('scrolling to', id);
-            $window.scrollTo(0, $(id).offset().top);
-          }, 40);
-        },
         updateVisibility = function() {
           if(!graphRowHeight) return;
           var scrollDist = $window.scrollY - topOffset - slack;
@@ -158,7 +148,6 @@ angular.module('npact')
             break;
           }
         }, 800);
-    $scope.$watch(function() { return GraphConfig.gotoBase; }, scrollToBase);
     $scope.$on('printresize', function(event, printing) {
       if(printing) {
         $element.css({width: '7in'});
@@ -192,7 +181,7 @@ angular.module('npact')
   })
 
   .directive('npactGraph', function (Grapher, Evt, GraphingCalculator, GraphConfig,
-                              $log, $timeout) {
+                              $log, $timeout, $window) {
     'use strict';
     return {
       restrict: 'A',
@@ -200,8 +189,8 @@ angular.module('npact')
       link: function($scope, $element, $attrs, ctrl) {
         var g = null,
             visible = ctrl.visible,
-            idx = $attrs.idx,
-            startBase = $attrs.startBase,
+            idx = $attrs.idx, id = '#graph_' + idx,
+            startBase = Number($attrs.startBase),
             el = $element[0],
             // redraw gets set for all graphs once (e.g. a new track
             // triggers broadcasts redraw), but only gets cleared as
@@ -224,8 +213,10 @@ angular.module('npact')
               if(!redraw || (!force && !visible(idx))) { return null; }
               return $timeout(_.partial(draw, force), 0, false);
             },
-            discard = function() {
-              if(g) { g.destroy(); g = null; }
+            discard = function() { if(g) { g.destroy(); g = null; } },
+            scrollToHere = function() {
+              $log.log('scrolling to', id);
+              $window.scrollTo(0, $(id).offset().top);
             };
         $scope.$on(Evt.DRAW, _.partial(schedule, false));
         $scope.$on(Evt.REDRAW, function() { redraw = true; schedule();});
@@ -250,14 +241,17 @@ angular.module('npact')
           else { callback(g.replaceWithImage()); }
         });
         $scope.$watch(function() { return GraphConfig.gotoBase; }, function(gotoBase, fromBase) {
-          var endBase = startBase + GraphConfig.basesPerGraph;
-          if (gotoBase && startBase <= gotoBase && gotoBase <= endBase) {
-            $log.log('gotoBase triggered redraw:', gotoBase);
-            redraw = true;
-            schedule(true);
-          }
-          else if(fromBase && startBase <= fromBase && fromBase <= endBase) {
-            redraw = true;
+          if(_.isFinite(gotoBase)) {
+            var endBase = startBase + GraphConfig.basesPerGraph;
+            if (startBase <= gotoBase && gotoBase <= endBase) {
+              $log.log('gotoBase triggered redraw:', startBase, id);
+              redraw = true;
+              schedule();
+              $timeout(scrollToHere());
+            }
+            else if(fromBase && startBase <= fromBase && fromBase <= endBase) {
+              redraw = true;
+            }
           }
         });
       }
