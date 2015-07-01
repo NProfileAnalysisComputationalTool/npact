@@ -241,17 +241,15 @@ angular.module('npact')
           else { callback(g.replaceWithImage()); }
         });
         $scope.$watch(function() { return GraphConfig.gotoBase; }, function(gotoBase, fromBase) {
-          if(_.isFinite(gotoBase)) {
-            var endBase = startBase + GraphConfig.basesPerGraph;
-            if (startBase <= gotoBase && gotoBase <= endBase) {
-              $log.log('gotoBase triggered redraw:', startBase, id);
-              redraw = true;
-              schedule();
-              $timeout(scrollToHere());
-            }
-            else if(fromBase && startBase <= fromBase && fromBase <= endBase) {
-              redraw = true;
-            }
+          var endBase = startBase + GraphConfig.basesPerGraph;
+          if (_.isFinite(gotoBase) && startBase <= gotoBase && gotoBase <= endBase) {
+            $log.log('gotoBase triggered redraw:', startBase, id);
+            redraw = true;
+            schedule();
+            $timeout(scrollToHere());
+          }
+          else if(_.isFinite(fromBase) && startBase <= fromBase && fromBase <= endBase) {
+            redraw = true;
           }
         });
       }
