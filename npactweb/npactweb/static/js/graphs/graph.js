@@ -190,7 +190,6 @@ angular.module('npact')
         var g = null,
             visible = ctrl.visible,
             idx = $attrs.idx, id = '#graph_' + idx,
-            startBase = Number($attrs.startBase),
             el = $element[0],
             // redraw gets set for all graphs once (e.g. a new track
             // triggers broadcasts redraw), but only gets cleared as
@@ -241,6 +240,7 @@ angular.module('npact')
           else { callback(g.replaceWithImage()); }
         });
         $scope.$watch(function() { return GraphConfig.gotoBase; }, function(gotoBase, fromBase) {
+          var startBase = Number($attrs.startBase);
           var endBase = startBase + GraphConfig.basesPerGraph;
           if (_.isFinite(gotoBase) && startBase <= gotoBase && gotoBase <= endBase) {
             $log.log('gotoBase triggered redraw:', startBase, id);
