@@ -1,0 +1,495 @@
+* {
+margin:0;
+padding:0;
+}
+
+body {
+background:#fff url(../images/bg.jpg) repeat-x;
+text-align:center;
+padding:0 20px;
+}
+
+a {
+text-decoration:none;
+}
+
+a:link,a:visited {
+   color:#0021a5 !important;
+}
+
+a:hover,a:active {
+color:#ff4a00;
+}
+
+acronym {
+border:0;
+font-style:normal;
+}
+
+h1#dept {
+position: relative;
+height: 40px;
+
+font-size: 14px;
+/* \*/
+overflow: hidden;
+/* */
+}
+
+h1#dept a {
+   color: white !important;
+   line-height:160%;
+   font-family: Century Gothic;
+   font-size: larger;
+}
+
+h1#dept a span {
+position: absolute;
+top: 0;
+left: 0;
+display: block;
+background: url(../images/unitHeader.gif);
+width: 100%;
+height: 100%;
+cursor: hand;
+}
+
+h2#uf{
+font-size: 1px;
+width: 181px;
+height: 40px;
+top:0;
+left: 60%;
+position: absolute;
+/*\*/overflow: hidden;
+font-size: 14px;/**/
+}
+
+h2#uf a span{
+background-image: url(../images/universityOfFlorida.gif);
+top:0;
+left:0;
+display:block;
+position: absolute;
+width: 181px;
+height: 40px;
+font-size: 1px;
+cursor: pointer;
+}
+
+h3,h4 {
+font-weight:400;
+}
+
+p,li,td,dd,dt {
+color:#444;
+font-size:75%;
+}
+
+th { color:#222; font-size: .75em; }
+
+th,td { padding: 3px; }
+
+ul {
+list-style:none;
+}
+
+.contentPadding { padding: 5px; }
+
+
+#content {
+border-left:solid 1px #CCC;
+float:right;
+padding-top:10px;
+position:relative;
+width:77%;
+z-index:5;
+min-height: 376px;
+}
+
+#content h2 { margin:12px 0 15px 8px; }
+#content h3 { /*font-size:125%;  margin:5px 0 0 12px; */}
+#content h2 + h3 { margin-top: 2px; }
+
+#content h4 {
+color:#000;
+font-family:Trebuchet MS, Arial, Helvetica, sans-serif;
+font-size:18px;
+margin: 10px 0 10px 12px;
+}
+
+#content ul {
+margin: 10px;
+}
+
+#content li {
+line-height: 110%;
+list-style:disc;
+margin:6px 0 6px 20px;
+}
+
+#content li li {
+padding:0 5px 0 20px;
+}
+
+#content p {
+line-height:17px;
+margin:2px 10px 15px 13px;
+}
+
+#content p a {
+border-bottom:1px dashed #0021A5;
+}
+
+#content p a:link,#content p a:visited {
+color:#24b;
+}
+
+#content p a:hover,#content p a:active {
+color:#f40;
+}
+
+#content p#listing {
+letter-spacing:-1px;
+padding-top:15px;
+text-align:center;
+}
+
+#content ul {
+margin:15px;
+}
+
+#footer {
+background-color:#fff;
+border-top:1px solid #d1d1d1;
+clear:both;
+color:#999;
+height:50px;
+padding:10px 0 25px;
+position:relative;
+}
+
+#footer li {
+border-right:1px solid #ccc;
+display:inline;
+/*\*/float:left;/**/
+font-size:100%;
+margin-right:4px;
+padding-right:4px;
+}
+
+#footer ul,#footer p {
+clear:both;
+float:left;
+font-size:60%;
+line-height:1.4em;
+width:550px;
+}
+
+/*\*/#footerHome span {
+background:url(//images.webadmin.ufl.edu/signatures/UF-Signature-Themeline.gif) 0 0 no-repeat;
+height:54px;
+position:absolute;
+right:0;
+top:10px;
+width:195px;
+}/**/
+
+#header {
+height:41px;
+margin:0 auto;
+padding-left:25px;
+position:relative;
+text-align:left;
+max-width:1300px;
+width:99%;
+}
+
+#mainContainer {
+background:#fff url(../images/bg_priNav.jpg) repeat-x;
+max-width:1300px;
+min-width:800px;
+margin:0 auto;
+padding-top:10px;
+position:relative;
+text-align:left;
+width:100%;
+}
+
+/* \*/* html #mainContainer {
+background-position: 249px 0;
+}/* */
+
+#leftCol {
+left:0;
+padding:3px 2px 0;
+position:relative;
+top:0;
+width:23%;
+}
+#leftCol #search {margin-bottom: 25px;}
+
+#priNav h2,#footer h3 {
+display:none;
+}
+
+#priNav h3 {
+background:url(../images/pointer.gif) no-repeat 0 11px;
+font:normal 115% Trebuchet MS, Arial, Helvetica, sans-serif;
+letter-spacing:1px;
+}
+
+#priNav li {
+font:125%/18px 'Trebuchet MS', verdana, geneva, Arial, Helvetica, sans-serif;
+}
+
+#priNav li a {
+background:url(../images/pointer.gif) no-repeat 10px 11px;
+border-bottom:1px solid #e6e6e6;
+color:#0021a5;
+display:block;
+letter-spacing:1px;
+padding:7px 0 6px 23px;
+width:88%;
+}
+
+/*\*/* html #priNav li a, * html #priNav #active{
+width:248px;
+}/**/
+
+#priNav #active {
+color: #000;
+}
+
+#priNav li a:hover {
+background-color:#CFD5EE;
+}
+
+#related {
+padding:32px 8px 0;
+width:90%;
+}
+
+#related h3 {
+color:#111;
+font-size:75%;
+font-style:italic;
+padding:4px 0 0 10px;
+text-transform:uppercase;
+}
+
+#related h4 {
+background:url(../images/pointer_small.gif) no-repeat 0 13px;
+clear:left;
+letter-spacing:1px;
+padding:7px 0 3px 10px;
+}
+
+#related li {
+padding-right:2px;
+}
+
+* html #related li {
+float:none;
+}
+
+#related ul {
+float:left;
+padding:0 0 5px 10px;
+}
+
+
+/* ### section header image ### */
+
+/* margin accounts for content padding */
+h2#secHeader { margin:-2px 0 0; }
+
+#secHeader {
+height:194px;
+margin-bottom:14px;
+position:relative;
+width:516px;
+}
+
+#secHeader span {
+height:100%;
+position:absolute;
+width:98.5%;
+background-size:100%;
+}
+
+dl { margin-bottom:25px;}
+dt { font-weight: bold; margin-left: 10px; margin-top:4px;}
+dd { margin-left: 18px; margin-bottom:10px;}
+
+
+textarea { width: 100%; }
+#content .ui-accordion-content p { margin: 0; }
+
+.helptext {font-size: 1em; float:right; }
+
+#accordion {margin-left:9px;width:95%;}
+
+#accordion div {margin-top:5px;}
+#accordion div div {margin-top:0px;}
+#id_url {width:98%;}
+
+.error, ul.errorlist li { color:red; }
+
+ul.messages { border: 1px dotted #444; }
+
+
+button.Start { clear:both; margin: 8px;}
+
+.qtip-help-text {
+   display: none;
+   font-size: 1.5em;
+}
+.qtip-help-text p { padding: 5px; }
+.qtip {
+   max-width: 400px !important;
+}
+h2 span.qtip-help-icon { float: right; }
+
+
+.blue-text {color:#5368C1;}
+.orange-text {color:#FF4A00;}
+
+#start-over {font-size:14px;font-weight:bold;}
+#start-over a, #start-over a:visited {color:#FF4A00;}
+
+/* ****** For the processing page ****** */
+#progress .ui-icon { float:left;  margin-right: .5em;}
+
+#progress h3 + div { padding-left: 16px; }
+#progress h4 { margin-top: 6px; color:#FF4A00; }
+
+
+.spinner { height: 24px; width=24px; float:left;}
+
+#content .ui-state-error { font-size: 1.2em; }
+#content .ui-corner-all p { margin: .5em .7em .7em .7em }
+
+
+/* ****** For the Results page ****** */
+#
+.ui-state-highlight { margin-top:10px; padding:10px; width:94%; }
+        .ui-state-highlight p {color:#000;}
+
+        .ui-state-highlight li a {font-weight:bold;}
+                #files li {color:#000;}
+                #files li:hover {color:#C60;}
+
+#configContainer {
+  background: #F7F7F7; 
+  border-bottom: solid 4px #4059BD;
+  font-size: 14px;
+  padding: 0px 8px 8px;
+}
+
+#configContainer div {margin-bottom: 12px;}
+#configContainer div.ng-scope {margin-bottom: 5px;}
+
+#configContainer h2 {
+  background: #4059BD;
+  border-bottom: solid 2px #FF4A00;
+  position: relative;
+  color: #fff; 
+  margin-bottom: 10px; 
+  margin-left: -8px;
+  margin-right: -8px;
+  padding: 3px 5px;
+}
+#configContainer h2:after { 
+  left: 100%; 
+  top: 50%; 
+  border: solid transparent; 
+  content: " "; 
+  height: 0; 
+  width: 0; 
+  position: absolute; 
+  pointer-events: none; 
+  border-color: rgba(64, 89, 189, 0); 
+  border-left-color: #4059BD; 
+  border-width: 16px;
+  margin-top: -16px; 
+  z-index: 500;
+}
+#configContainer h3 { 
+  color: #4059BD;
+  font-size: 100%;
+  font-style: normal;
+  font-weight: bold;
+  padding: 4px 0px 0px 0px;
+  text-transform: uppercase;
+  margin-top: 10px; 
+}
+
+#configContainer ul {padding-left: 5px;}
+#configContainer li {
+  border-bottom: solid 1px #E5E5E5;
+  margin-bottom: 5px;
+  padding-bottom: 3px;
+}
+#configContainer input[type=checkbox] {
+  margin: 0px 4px;
+}
+.btn {
+  background: #E5E5E5;
+  -webkit-border-radius: 5px;
+  -moz-border-radius: 5px;
+  border-radius: 5px;
+  margin-bottom: 20px;
+  padding: 3px 6px;
+  text-align: center;
+}
+  .btn:hover {background: #C1C1C1;}
+
+.sm-text {font-size: 10px;}
+.md-text {font-size: 14px;}
+
+.graph {
+   border-bottom: 2px solid #AAF;
+   padding: 8px 0px;
+   overflow: hidden;
+}
+
+#msgpane p { padding: 8px; }
+#msgpane .message button { float:right; }
+.pointer:hover { cursor: pointer; }
+
+#printControls { float: right;}
+#printControls .btn {
+  display: inline-block; 
+  padding: 4px 10px 6px;
+}
+#printControls .ui-icon-print {margin-top: 1px;}
+#printConfirm p {text-align: left; margin-top: 10px;}
+
+
+.ui-widget-header {
+    color: #fff;
+}
+.ui-front {box-shadow: 0px 1px 8px #000;}
+.ui-front .ui-button {border:none; background: #7084D3;}
+
+/* Accordion styles */
+
+#results {padding: 5px ;}
+
+#results h3 {margin: 10px 0px 0px;}
+
+.ui-state-active, 
+.ui-widget-content 
+.ui-state-active, 
+.ui-widget-header .ui-state-active {
+    border: 1px solid #AAA;
+    background: url("/npact/devassets/css/custom-theme/images/ui-bg_flat_65_5368C1_40x100.png?version=67e7644522b42d47721f44734383a7218a6ffcfe") repeat-x scroll 50% 50% #5368C1;
+    font-weight: bold;
+    color: #fff;
+}
+
+input.ng-invalid {
+   border: 2px red dashed !important;
+}
+button.arrowbutton { margin: 0 2px; padding: 0 2px;}

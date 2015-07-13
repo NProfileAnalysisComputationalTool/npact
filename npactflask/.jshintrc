@@ -1,0 +1,16 @@
+{
+  "browser": true,
+  "indent": 2,
+  "latedef": true,
+  "unused": "vars",
+  "eqeqeq": true,
+  "jasmine": true,
+  "globals": {
+    "angular": false,
+    "jQuery": false,
+    "_": false,
+    "module": false,
+    "inject": false,
+    "RTree": false
+  }
+}

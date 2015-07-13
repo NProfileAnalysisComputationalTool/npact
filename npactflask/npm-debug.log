@@ -1,0 +1,151 @@
+0 info it worked if it ends with ok
+1 verbose cli [ 'node', '/usr/bin/npm', 'install', 'Flask' ]
+2 info using npm@2.12.0
+3 info using node@v0.10.37
+4 verbose node symlink /usr/bin/node
+5 verbose install initial load of /home/ACCELERATION/psun/Projects/npact/package.json
+6 warn package.json flaskapp@0.0.0 No repository field.
+7 warn package.json flaskapp@0.0.0 No license field.
+8 verbose installManyTop reading scoped package data from /home/ACCELERATION/psun/Projects/npact/node_modules/grunt/package.json
+9 verbose installManyTop reading scoped package data from /home/ACCELERATION/psun/Projects/npact/node_modules/grunt-autoprefixer/package.json
+10 verbose installManyTop reading scoped package data from /home/ACCELERATION/psun/Projects/npact/node_modules/grunt-bower-install/package.json
+11 verbose installManyTop reading scoped package data from /home/ACCELERATION/psun/Projects/npact/node_modules/grunt-bowercopy/package.json
+12 verbose installManyTop reading scoped package data from /home/ACCELERATION/psun/Projects/npact/node_modules/grunt-concurrent/package.json
+13 verbose installManyTop reading scoped package data from /home/ACCELERATION/psun/Projects/npact/node_modules/grunt-connect-proxy/package.json
+14 verbose installManyTop reading scoped package data from /home/ACCELERATION/psun/Projects/npact/node_modules/grunt-contrib-clean/package.json
+15 verbose installManyTop reading scoped package data from /home/ACCELERATION/psun/Projects/npact/node_modules/grunt-contrib-concat/package.json
+16 verbose installManyTop reading scoped package data from /home/ACCELERATION/psun/Projects/npact/node_modules/grunt-contrib-connect/package.json
+17 verbose installManyTop reading scoped package data from /home/ACCELERATION/psun/Projects/npact/node_modules/grunt-contrib-copy/package.json
+18 verbose installManyTop reading scoped package data from /home/ACCELERATION/psun/Projects/npact/node_modules/grunt-contrib-cssmin/package.json
+19 verbose installManyTop reading scoped package data from /home/ACCELERATION/psun/Projects/npact/node_modules/grunt-contrib-htmlmin/package.json
+20 verbose installManyTop reading scoped package data from /home/ACCELERATION/psun/Projects/npact/node_modules/grunt-contrib-imagemin/package.json
+21 verbose installManyTop reading scoped package data from /home/ACCELERATION/psun/Projects/npact/node_modules/grunt-contrib-jshint/package.json
+22 verbose installManyTop reading scoped package data from /home/ACCELERATION/psun/Projects/npact/node_modules/grunt-contrib-uglify/package.json
+23 verbose installManyTop reading scoped package data from /home/ACCELERATION/psun/Projects/npact/node_modules/grunt-contrib-watch/package.json
+24 verbose installManyTop reading scoped package data from /home/ACCELERATION/psun/Projects/npact/node_modules/grunt-karma/package.json
+25 verbose installManyTop reading scoped package data from /home/ACCELERATION/psun/Projects/npact/node_modules/grunt-modernizr/package.json
+26 verbose installManyTop reading scoped package data from /home/ACCELERATION/psun/Projects/npact/node_modules/grunt-ngmin/package.json
+27 verbose installManyTop reading scoped package data from /home/ACCELERATION/psun/Projects/npact/node_modules/grunt-rev/package.json
+28 verbose installManyTop reading scoped package data from /home/ACCELERATION/psun/Projects/npact/node_modules/grunt-svgmin/package.json
+29 verbose installManyTop reading scoped package data from /home/ACCELERATION/psun/Projects/npact/node_modules/grunt-sync/package.json
+30 verbose installManyTop reading scoped package data from /home/ACCELERATION/psun/Projects/npact/node_modules/grunt-usemin/package.json
+31 verbose installManyTop reading scoped package data from /home/ACCELERATION/psun/Projects/npact/node_modules/karma/package.json
+32 verbose installManyTop reading scoped package data from /home/ACCELERATION/psun/Projects/npact/node_modules/karma-chrome-launcher/package.json
+33 verbose installManyTop reading scoped package data from /home/ACCELERATION/psun/Projects/npact/node_modules/karma-coffee-preprocessor/package.json
+34 verbose installManyTop reading scoped package data from /home/ACCELERATION/psun/Projects/npact/node_modules/karma-firefox-launcher/package.json
+35 verbose installManyTop reading scoped package data from /home/ACCELERATION/psun/Projects/npact/node_modules/karma-html2js-preprocessor/package.json
+36 verbose installManyTop reading scoped package data from /home/ACCELERATION/psun/Projects/npact/node_modules/karma-jasmine/package.json
+37 verbose installManyTop reading scoped package data from /home/ACCELERATION/psun/Projects/npact/node_modules/karma-junit-reporter/package.json
+38 verbose installManyTop reading scoped package data from /home/ACCELERATION/psun/Projects/npact/node_modules/karma-ng-scenario/package.json
+39 verbose installManyTop reading scoped package data from /home/ACCELERATION/psun/Projects/npact/node_modules/karma-phantomjs-launcher/package.json
+40 verbose installManyTop reading scoped package data from /home/ACCELERATION/psun/Projects/npact/node_modules/karma-requirejs/package.json
+41 verbose installManyTop reading scoped package data from /home/ACCELERATION/psun/Projects/npact/node_modules/karma-script-launcher/package.json
+42 verbose installManyTop reading scoped package data from /home/ACCELERATION/psun/Projects/npact/node_modules/load-grunt-tasks/package.json
+43 verbose installManyTop reading scoped package data from /home/ACCELERATION/psun/Projects/npact/node_modules/requirejs/package.json
+44 verbose installManyTop reading scoped package data from /home/ACCELERATION/psun/Projects/npact/node_modules/time-grunt/package.json
+45 info package.json grunt-contrib-htmlmin@0.1.3 No README data
+46 info package.json grunt-contrib-htmlmin@0.1.3 No license field.
+47 info package.json grunt-rev@0.1.0 No license field.
+48 info package.json karma-phantomjs-launcher@0.1.4 No README data
+49 info package.json grunt@0.4.5 No license field.
+50 info package.json grunt-autoprefixer@0.4.2 No license field.
+51 info package.json grunt-bower-install@0.7.0 No license field.
+52 info package.json grunt-bowercopy@0.4.1 No license field.
+53 info package.json grunt-concurrent@0.4.3 No license field.
+54 info package.json grunt-connect-proxy@0.2.0 No license field.
+55 info package.json grunt-contrib-clean@0.5.0 No license field.
+56 info package.json grunt-contrib-concat@0.3.0 No license field.
+57 info package.json grunt-contrib-connect@0.5.0 No license field.
+58 info package.json grunt-contrib-copy@0.4.1 No license field.
+59 info package.json grunt-contrib-cssmin@0.7.0 No license field.
+60 info package.json grunt-contrib-imagemin@0.4.1 No license field.
+61 info package.json grunt-contrib-jshint@0.7.2 No license field.
+62 info package.json grunt-contrib-uglify@0.2.7 No license field.
+63 info package.json grunt-contrib-watch@0.5.3 No license field.
+64 info package.json grunt-modernizr@0.4.1 No license field.
+65 info package.json grunt-ngmin@0.0.3 license should be a valid SPDX license expression
+66 info package.json grunt-svgmin@0.3.1 No license field.
+67 info package.json grunt-sync@0.0.8 No license field.
+68 info package.json grunt-usemin@2.0.2 license should be a valid SPDX license expression
+69 info package.json requirejs@2.1.18 No license field.
+70 info package.json karma@0.10.10 No license field.
+71 verbose readDependencies loading dependencies from /home/ACCELERATION/psun/Projects/npact/package.json
+72 silly cache add args [ 'Flask', null ]
+73 verbose cache add spec Flask
+74 silly cache add parsed spec { raw: 'Flask',
+74 silly cache add   scope: null,
+74 silly cache add   name: 'Flask',
+74 silly cache add   rawSpec: '',
+74 silly cache add   spec: '*',
+74 silly cache add   type: 'range' }
+75 silly addNamed Flask@*
+76 verbose addNamed "*" is a valid semver range for Flask
+77 silly addNameRange { name: 'Flask', range: '*', hasData: false }
+78 silly mapToRegistry name Flask
+79 silly mapToRegistry using default registry
+80 silly mapToRegistry registry https://registry.npmjs.org/
+81 silly mapToRegistry uri https://registry.npmjs.org/Flask
+82 verbose addNameRange registry:https://registry.npmjs.org/Flask not in flight; fetching
+83 verbose request uri https://registry.npmjs.org/Flask
+84 verbose request no auth needed
+85 info attempt registry request try #1 at 14:27:40
+86 verbose request id 7c6721c9b640e4c0
+87 http request GET https://registry.npmjs.org/Flask
+88 http 404 https://registry.npmjs.org/Flask
+89 verbose headers { server: 'CouchDB/1.5.0 (Erlang OTP/R16B03)',
+89 verbose headers   'content-type': 'application/json',
+89 verbose headers   'cache-control': 'max-age=0',
+89 verbose headers   'content-length': '51',
+89 verbose headers   'accept-ranges': 'bytes',
+89 verbose headers   date: 'Wed, 08 Jul 2015 18:27:40 GMT',
+89 verbose headers   via: '1.1 varnish',
+89 verbose headers   age: '0',
+89 verbose headers   connection: 'keep-alive',
+89 verbose headers   'x-served-by': 'cache-atl6222-ATL',
+89 verbose headers   'x-cache': 'MISS',
+89 verbose headers   'x-cache-hits': '0',
+89 verbose headers   'x-timer': 'S1436380060.477019,VS0,VE88' }
+90 silly get cb [ 404,
+90 silly get   { server: 'CouchDB/1.5.0 (Erlang OTP/R16B03)',
+90 silly get     'content-type': 'application/json',
+90 silly get     'cache-control': 'max-age=0',
+90 silly get     'content-length': '51',
+90 silly get     'accept-ranges': 'bytes',
+90 silly get     date: 'Wed, 08 Jul 2015 18:27:40 GMT',
+90 silly get     via: '1.1 varnish',
+90 silly get     age: '0',
+90 silly get     connection: 'keep-alive',
+90 silly get     'x-served-by': 'cache-atl6222-ATL',
+90 silly get     'x-cache': 'MISS',
+90 silly get     'x-cache-hits': '0',
+90 silly get     'x-timer': 'S1436380060.477019,VS0,VE88' } ]
+91 verbose stack Error: 404 Not Found: Flask
+91 verbose stack     at CachingRegistryClient.<anonymous> (/usr/lib/node_modules/npm/node_modules/npm-registry-client/lib/request.js:245:14)
+91 verbose stack     at Request._callback (/usr/lib/node_modules/npm/node_modules/npm-registry-client/lib/request.js:170:14)
+91 verbose stack     at Request.self.callback (/usr/lib/node_modules/npm/node_modules/request/request.js:197:22)
+91 verbose stack     at Request.emit (events.js:98:17)
+91 verbose stack     at Request.<anonymous> (/usr/lib/node_modules/npm/node_modules/request/request.js:1050:14)
+91 verbose stack     at Request.emit (events.js:117:20)
+91 verbose stack     at IncomingMessage.<anonymous> (/usr/lib/node_modules/npm/node_modules/request/request.js:996:12)
+91 verbose stack     at IncomingMessage.emit (events.js:117:20)
+91 verbose stack     at _stream_readable.js:944:16
+91 verbose stack     at process._tickCallback (node.js:448:13)
+92 verbose statusCode 404
+93 verbose pkgid Flask
+94 verbose cwd /home/ACCELERATION/psun/Projects/npact/npactflask
+95 error Linux 3.13.0-49-generic
+96 error argv "node" "/usr/bin/npm" "install" "Flask"
+97 error node v0.10.37
+98 error npm  v2.12.0
+99 error code E404
+100 error 404 Not Found: Flask
+100 error 404
+100 error 404 'Flask' is not in the npm registry.
+100 error 404 Your package name is not valid, because
+100 error 404
+100 error 404  1. name can no longer contain capital letters
+100 error 404 It was specified as a dependency of 'flaskapp'
+100 error 404
+100 error 404 Note that you can also install from a
+100 error 404 tarball, folder, http url, or git url.
+101 verbose exit [ 1, true ]

@@ -1,0 +1,20 @@
+{%extends "base.html" %}
+{%block title %}N-PACT Results{%endblock %}
+
+{%block addScript %}
+{% if download_link %}
+<script type="text/javascript" defer="defer">
+    window.onload= function() {
+        window.location= document.getElementById('downloadlink').href;
+    }
+</script>
+{% endif %}
+{% endblock %}
+
+
+{%block content %}
+<div class="contentPadding">
+  <h2>S-P.A.T. Results</h2>
+  {% if download_link %}
+</div>
+{%endblock content %}

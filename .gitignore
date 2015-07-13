@@ -23,6 +23,11 @@ webroot
 /npactweb/npactweb/static/bower_components
 /npactweb/jshint.xml
 /npactweb/test-results.xml
+/npactflask/.tmp/templates.js
+/npactflask/node_modules
+/npactflask/npactflask/static/bower_components
+/npactflask/jshint.xml
+/npactflask/test-results.xml
 /pytest.xml
 /.projectile
 /TAGS
