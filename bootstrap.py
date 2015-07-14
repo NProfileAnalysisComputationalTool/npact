@@ -58,7 +58,7 @@ def init_virtualenv():
 
     logging.debug("Installing libraries")
     cmd = [os.path.join(vedir, 'bin', 'pip'), "install",
-           "--index-url=''",
+#           "--index-url=''",
            "--requirement", os.path.join(pwd, "requirements.txt")]
     ret = subprocess.call(cmd, cwd=pwd)
     if ret:
