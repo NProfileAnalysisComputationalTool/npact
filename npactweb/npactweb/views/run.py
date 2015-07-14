@@ -152,6 +152,7 @@ def kickstart(request, path):
         json.dumps(sanitize_config_for_client(config)),
         content_type="application/json")
 
+
 def build_email(request, path, config):
     try:
         email = request.GET.get('email')
