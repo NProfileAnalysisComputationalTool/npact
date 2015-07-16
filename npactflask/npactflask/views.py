@@ -5,6 +5,7 @@ import os.path
 import json
 import Bio.Seq
 from flask import url_for, request, send_from_directory, flash, redirect
+from werkzeug.exceptions import NotFound
 from npactflask import app
 from npactflask import settings
 from pynpact import main, parsing, util
@@ -64,10 +65,10 @@ class RedirectException(Exception):
 def getabspath(relpath, raise_on_missing=True):
     if not is_clean_path(relpath):
         logger.error("Illegal path submitted", relpath)
-        raise MissingFileError("Bad characters")
+        raise NotFound("Bad characters")
     abspath = os.path.join(settings.MEDIA_ROOT, relpath)
     if raise_on_missing and not os.path.exists(abspath):
-        raise MissingFileError("Path not found: " + relpath)
+        raise NotFound
     return abspath
 
 
