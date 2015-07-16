@@ -8,17 +8,17 @@ This is the code for the website.
   website. Tells what modules and applications to load; configures
   where paths for different content are.
 
-* `npactweb/static/` holds the static images, CSS, and JS used on the
+* `npactflask/static/` holds the static images, CSS, and JS used on the
   website.
 
-* `npactweb/templates/` holds the templates that generate html on the
+* `npactflask/templates/` holds the templates that generate html on the
   website. Go here to change text on the site, rearrange blocks, or
   add new content.
 
-* `npactweb/urls.py` controls the web sites url space; django uses
+* `npactflask/urls.py` controls the web sites url space; django uses
   this to dispatch incoming requests to views.
 
-* `npactweb/views/` holds the code that gets run on an
+* `npactflask/views/` holds the code that gets run on an
   incoming request.
 
 * `cleanup.py` used to clean out old uploaded files so they
@@ -26,9 +26,9 @@ This is the code for the website.
 
 * `django.fcgi` is the entry point for fcgi webservers.
 
-* `npactweb/mediabundles.py` controls loading static assets
+* `npactflask/mediabundles.py` controls loading static assets
 
-* `npactweb/static/bower_components` - third party javascript
+* `npactflask/static/bower_components` - third party javascript
   libraries installed via [bower][], to be used in the final
   application
 

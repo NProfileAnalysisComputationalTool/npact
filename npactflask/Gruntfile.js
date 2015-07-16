@@ -2,7 +2,7 @@ module.exports = function(grunt){
   'use strict';
   require('load-grunt-tasks')(grunt);
   grunt.loadNpmTasks('grunt-contrib-jshint');
-  var jsFiles = ['npactweb/static/js/**/*.js'];
+  var jsFiles = ['npactflask/static/js/**/*.js'];
 
   grunt.initConfig({
     jshint: {
@@ -37,7 +37,7 @@ module.exports = function(grunt){
 	singleModule:true
       },
       main: {
-	src: ['npactweb/static/js/**/*.html'],
+	src: ['npactflask/static/js/**/*.html'],
 	dest: '.tmp/templates.js'
       }
     }

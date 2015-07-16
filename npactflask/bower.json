@@ -1,5 +1,5 @@
 {
-  "name": "npactweb",
+  "name": "npactflask",
   "version": "0.0.0",
   "authors": [
     "Nathan Bird <nathan@acceleration.net>",
@@ -12,7 +12,7 @@
     "**/.*",
     "node_modules",
     "bower_components",
-    "npactweb/static/bower_components",
+    "npactflask/static/bower_components",
     "test",
     "tests"
   ],
