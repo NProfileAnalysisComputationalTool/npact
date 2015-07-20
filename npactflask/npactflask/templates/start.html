@@ -28,6 +28,56 @@ $(function(){
   <p class="orange-text">The NPACT server can process uploaded files, files fetched from a url, or
     genbank data pasted directly in. <strong>Only one of the  following is neccessary</strong>.</p>
   <input type="hidden" name="selected" value="" id="selected"/>
+  <div id="selectors">
+    <button class="btn-upload">File Upload</button>
+    <button class="btn-url">From URL</button>
+    <button class="btn-pastein">Paste in as text</button>
+    <button class="btn-number">Accession Number</button>
+  </div>
+  <div id="forms">
+    <div class="form-upload">
+      <button class="ui-button btn-file" title="Select a file for upload">Choose File</button><span class="button-message">No file selected</span>
+      <p>Email me the results @ <input id="email" name="email" type="email">(optional)</p>
+      <button class="Start ui-button ui-widget ui-state-default ui-corner-all ui-button-text-only" type="submit" name="action" value="run" title="Get the analysis results based on default configuration." role="button">
+        <span class="ui-button-text">Start Analysis!</span>
+      </button>
+    </div>
+    <div class="form-url">
+      <input id="url" name="url" type="url" value="">
+      <p>Email me the results @ <input id="email" name="email" type="email">(optional)</p>
+      <button class="Start ui-button ui-widget ui-state-default ui-corner-all ui-button-text-only" type="submit" name="action" value="run" title="Get the analysis results based on default configuration." role="button">
+        <span class="ui-button-text">Start Analysis!</span>
+      </button>
+    </div>
+    <div class="form-pastein">
+      <textarea id="pastein" name="pastein"></textarea>
+      <p>Email me the results @ <input id="email" name="email" type="email">(optional)</p>
+      <button class="Start ui-button ui-widget ui-state-default ui-corner-all ui-button-text-only" type="submit" name="action" value="run" title="Get the analysis results based on default configuration." role="button">
+        <span class="ui-button-text">Start Analysis!</span>
+      </button>
+    </div>
+    <div class="form-number">
+      <input id="entrez_search_term" name="entrez_search_term" type="search" value="">
+      <p>Email me the results @ <input id="email" name="email" type="email">(optional)</p>
+      <button class="Start ui-button ui-widget ui-state-default ui-corner-all ui-button-text-only" type="submit" name="action" value="run" title="Get the analysis results based on default configuration." role="button">
+        <span class="ui-button-text">Start Analysis!</span>
+      </button>
+    </div>
+  </div>
+
+// <script>
+// function getParameterByName(name) {
+//     name = name.replace(/[\[]/, "\\[").replace(/[\]]/, "\\]");
+//     var regex = new RegExp("[\\?&]" + name + "=([^&#]*)"),
+//        results = regex.exec(location.search);
+//     return results === null ? "" : decodeURIComponent(results[1].replace(/\+/g, " "));
+// }
+
+// jQuery(document).ready(function() {
+//   jQuery('#selectors button')
+// });
+// </script>
+
   <form method="post" action="/npact" enctype="multipart/form-data">
     {{ form.csrf_token }}
     {{ form.non_field_errors }}
