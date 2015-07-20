@@ -28,6 +28,7 @@ $(function(){
   <p class="orange-text">The NPACT server can process uploaded files, files fetched from a url, or
     genbank data pasted directly in. <strong>Only one of the  following is neccessary</strong>.</p>
   <input type="hidden" name="selected" value="" id="selected"/>
+ 
   <div id="selectors">
     <button class="btn-upload">File Upload</button>
     <button class="btn-url">From URL</button>
@@ -36,88 +37,44 @@ $(function(){
   </div>
   <div id="forms">
     <div class="form-upload">
-      <button class="ui-button btn-file" title="Select a file for upload">Choose File</button><span class="button-message">No file selected</span>
-      <p>Email me the results @ <input id="email" name="email" type="email">(optional)</p>
-      <button class="Start ui-button ui-widget ui-state-default ui-corner-all ui-button-text-only" type="submit" name="action" value="run" title="Get the analysis results based on default configuration." role="button">
-        <span class="ui-button-text">Start Analysis!</span>
-      </button>
+      <form method="post" action="#" enctype="multipart/form-data">
+        <button class="ui-button btn-file" title="Select a file for upload">Choose File</button><span class="button-message">No file selected</span>
+        <p>Email me the results @ <input id="email" name="email" type="email">(optional)</p>
+        <button class="Start ui-button ui-widget ui-state-default ui-corner-all ui-button-text-only" type="submit" name="action" value="run" title="Get the analysis results based on default configuration." role="button">
+          <span class="ui-button-text">Start Analysis!</span>
+        </button>
+      </form>
     </div>
     <div class="form-url">
-      <input id="url" name="url" type="url" value="">
-      <p>Email me the results @ <input id="email" name="email" type="email">(optional)</p>
-      <button class="Start ui-button ui-widget ui-state-default ui-corner-all ui-button-text-only" type="submit" name="action" value="run" title="Get the analysis results based on default configuration." role="button">
-        <span class="ui-button-text">Start Analysis!</span>
-      </button>
+      <form method="post" action="#" enctype="multipart/form-data">
+        <input id="url" name="url" type="url" value="">
+        <p>Email me the results @ <input id="email" name="email" type="email">(optional)</p>
+        <button class="Start ui-button ui-widget ui-state-default ui-corner-all ui-button-text-only" type="submit" name="action" value="run" title="Get the analysis results based on default configuration." role="button">
+          <span class="ui-button-text">Start Analysis!</span>
+        </button>
+      </form>
     </div>
     <div class="form-pastein">
-      <textarea id="pastein" name="pastein"></textarea>
-      <p>Email me the results @ <input id="email" name="email" type="email">(optional)</p>
-      <button class="Start ui-button ui-widget ui-state-default ui-corner-all ui-button-text-only" type="submit" name="action" value="run" title="Get the analysis results based on default configuration." role="button">
-        <span class="ui-button-text">Start Analysis!</span>
-      </button>
+      <input type="hidden" name="action" value="pastein">
+      <form method="post" action="#" enctype="multipart/form-data">
+        <textarea id="pastein" name="pastein"></textarea>
+        <p>Email me the results @ <input id="email" name="email" type="email">(optional)</p>
+        <button class="Start ui-button ui-widget ui-state-default ui-corner-all ui-button-text-only" type="submit" name="action" value="run" title="Get the analysis results based on default configuration." role="button">
+          <span class="ui-button-text">Start Analysis!</span>
+        </button>
+      </form>
     </div>
     <div class="form-number">
-      <input id="entrez_search_term" name="entrez_search_term" type="search" value="">
-      <p>Email me the results @ <input id="email" name="email" type="email">(optional)</p>
-      <button class="Start ui-button ui-widget ui-state-default ui-corner-all ui-button-text-only" type="submit" name="action" value="run" title="Get the analysis results based on default configuration." role="button">
-        <span class="ui-button-text">Start Analysis!</span>
-      </button>
+      <form method="post" action="#" enctype="multipart/form-data">
+        <input id="entrez_search_term" name="entrez_search_term" type="search" value="">
+        <p>Email me the results @ <input id="email" name="email" type="email">(optional)</p>
+        <button class="Start ui-button ui-widget ui-state-default ui-corner-all ui-button-text-only" type="submit" name="action" value="run" title="Get the analysis results based on default configuration." role="button">
+          <span class="ui-button-text">Start Analysis!</span>
+        </button>
+      </form>
     </div>
   </div>
 
-// <script>
-// function getParameterByName(name) {
-//     name = name.replace(/[\[]/, "\\[").replace(/[\]]/, "\\]");
-//     var regex = new RegExp("[\\?&]" + name + "=([^&#]*)"),
-//        results = regex.exec(location.search);
-//     return results === null ? "" : decodeURIComponent(results[1].replace(/\+/g, " "));
-// }
-
-// jQuery(document).ready(function() {
-//   jQuery('#selectors button')
-// });
-// </script>
-
-  <form method="post" action="/npact" enctype="multipart/form-data">
-    {{ form.csrf_token }}
-    {{ form.non_field_errors }}
-    <div id="accordion">
-      {% for field in form %}
-      {% if field.name in form.accordion_fields %}
-      <div>
-        <h3 {% if field.name == form.active %}class="active"{% endif %}>
-          <a name="#"> {{ field.label }} </a>
-        </h3>
-        <div>
-          {% if field.errors %}
-          <ul class=errors>
-            {% for error in field.errors %}
-            <li>{{ error }}</li>
-            {% endfor %}
-          </ul>
-          {% endif %}
-          {{ field }}
-          {% if field.html_name == 'entrez_search_term' %}
-          {% include "start/EntrezSearchForm.html" %}
-          {% endif %}
-          <br>
-          <p class="blue-text" style="padding-left:15px;">
-            <strong style="font-size:15px;">Email me the results @</strong> {{ form.email }}(optional) 
-          </p>
-          <button class="Start" type="submit" name="action" value="run" 
-                  title="Get the analysis results based on default configuration.">
-            Start Analysis!
-          </button>
-        </div>
-      </div>
-      {% endif %}
-      {% endfor %}
-    </div>
-<br/>
-    <p class="blue-text" style="padding-left:15px;">
-      <strong style="font-size:15px;">Email me the results @</strong> {{ form.email }}(optional) 
-    </p>
-  </form>
   <br/>
   <p id="start-over">
     <a href="">&laquo; Start Over</a>

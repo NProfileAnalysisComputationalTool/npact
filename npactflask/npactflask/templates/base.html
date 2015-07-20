@@ -18,16 +18,16 @@
 
     <div id="mainContainer">
       <div id="content">
+        {% with messages = get_flashed_messages() %}
         {% if messages %}
         <ul class=flashes>
-          {% for category, message in messages %}
-          <li class="{{ category }}">{{ message }}</li>
+          {% for message in messages %}
+          <li>{{ message }}</li>
           {% endfor %}
         </ul>
         {% endif %}
-
-        {% block content %}
-        {% endblock %}
+        {% endwith %}
+        {% block content %}{% endblock %}
       </div>
       <div id="leftCol">
         <div id="priNav">
