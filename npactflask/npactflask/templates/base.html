@@ -19,9 +19,9 @@
     <div id="mainContainer">
       <div id="content">
         {% if messages %}
-        <ul class="messages">
-          {% for message in messages %}
-          <li{% if message.tags %} class="{{ message.tags }}"{% endif %}>{{ message }}</li>
+        <ul class=flashes>
+          {% for category, message in messages %}
+          <li class="{{ category }}">{{ message }}</li>
           {% endfor %}
         </ul>
         {% endif %}

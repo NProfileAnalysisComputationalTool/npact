@@ -31,141 +31,108 @@ def get_ti(size):
     return fields.TextField(attrs={'size': size})
 
 
-class StartForm(Form):
-    active = None
-    accordion_fields = [
-        'file_upload', 'url', 'pastein', 'entrez_search_term']
-    file_upload = fields.FileField(u'File Uploads')
-    url = html5.URLField(u'From URL')
-    pastein = fields.TextAreaField(
-        u'Paste in as text')
-    entrez_search_term = html5.SearchField(u'Accession Number')
-    email = html5.EmailField(u'Email')
+def file_upload(self):
+    cleaned_data = self.cleaned_data
 
-    def __init__(self, *args, **kwargs):
-        super(StartForm, self).__init__(*args, **kwargs)
+    if cleaned_data.get('file_upload'):
+        self.active = 'file_upload'
+        fu = cleaned_data.get('file_upload')
+        logger.info("Checking Uploaded file %s", fu)
+        if not is_clean_path(fu.name):
+            raise Form.ValidationError("Illegal filename")
 
-    def clean_file_upload(self):
-        cleaned_data = self.cleaned_data
+        fd, savepath, relpath = mksavefile("up-%s-" % fu.name)
+        logger.info("Saving uploaded file to %r", relpath)
+        with os.fdopen(fd, 'wb') as fh:
+            for chunk in fu.chunks():
+                fh.write(chunk)
 
-        if cleaned_data.get('file_upload'):
-            self.active = 'file_upload'
-            fu = cleaned_data.get('file_upload')
-            logger.info("Checking Uploaded file %s", fu)
-            if not is_clean_path(fu.name):
-                raise Form.ValidationError("Illegal filename")
+        cleaned_data['path'] = relpath
 
-            fd, savepath, relpath = mksavefile("up-%s-" % fu.name)
-            logger.info("Saving uploaded file to %r", relpath)
-            with os.fdopen(fd, 'wb') as fh:
-                for chunk in fu.chunks():
-                    fh.write(chunk)
 
+def fetchurl(self):
+    cleaned_data = self.cleaned_data
+    if cleaned_data.get('url'):
+        self.active = 'url'
+        url = cleaned_data.get('url')
+        logger.debug("Going to pull from %r", url)
+        pull_req = urllib2.Request(url)
+        if pull_req.get_type == "file":
+            raise Form.ValidationError("Illegal URL")
+        try:
+            fh = urllib2.urlopen(pull_req)
+            fd, savepath, relpath = mksavefile("url")
+            util.stream_to_file(fh, savepath)
             cleaned_data['path'] = relpath
-
-    def clean_url(self):
-        cleaned_data = self.cleaned_data
-        if cleaned_data.get('url'):
-            self.active = 'url'
-            url = cleaned_data.get('url')
-            logger.debug("Going to pull from %r", url)
-            pull_req = urllib2.Request(url)
-            if pull_req.get_type == "file":
-                raise Form.ValidationError("Illegal URL")
-            try:
-                fh = urllib2.urlopen(pull_req)
-                fd, savepath, relpath = mksavefile("url")
-                util.stream_to_file(fh, savepath)
-                cleaned_data['path'] = relpath
-            except:
-                logger.exception("Error fetching url %s", url)
-                raise Form.ValidationError("Error fetching url")
-
-    def clean_pastein(self):
-        cleaned_data = self.cleaned_data
-        if cleaned_data.get('pastein'):
-            self.active = 'pastein'
-            text = cleaned_data.get('pastein')
-            (fd, savepath, relpath) = mksavefile("txt")
-            logger.info("Saving paste to %r", relpath)
-            cleaned_data['path'] = relpath
-            with os.fdopen(fd, 'wb') as fh:
-                fh.write(text)
-
-    def clean_entrez_search_term(self):
-        cleaned_data = self.cleaned_data
-        if cleaned_data.get('entrez_search_term'):
-            self.active = 'entrez_search_term'
-            self.session = entrez.CachedEntrezSession(library_root())
-
-            self.session.search(cleaned_data['entrez_search_term'])
-            logger.debug(
-                "Search finished, found %d matches",
-                self.session.result_count)
-            if self.session.result_count == 1:
-                cleaned_data['path'] = getrelpath(self.session.fetch())
-            elif self.session.result_count > 1:
-                raise Form.ValidationError(
-                    "Too many results (%d) found, need 1."
-                    " Try refining the search or searching for a RefSeq id."
-                    % (self.session.result_count))
-            else:
-                raise Form.ValidationError("No results found.")
-
-    def clean(self):
-        cleaned_data = self.cleaned_data
-
-        if not cleaned_data.get('path'):
-            raise Form.ValidationError("No valid GenBank file submitted.")
-        return cleaned_data
+        except:
+            logger.exception("Error fetching url %s", url)
+            raise Form.ValidationError("Error fetching url")
 
 
-@app.route('file-upload', method="POST")
-def file_upload(path):
-    logger.info("Checking Uploaded file %s", fu)
-    if not is_clean_path(fu.name):
-        raise Form.ValidationError("Illegal filename")
-
-    fd, savepath, relpath = mksavefile("up-%s-" % fu.name)
-    logger.info("Saving uploaded file to %r", relpath)
+def pastein():
+    text = request.form['pastein']
+    email = request.args.get['email']
+    if not text:
+        flash('Text Required in Pastefield')
+        redirect(url_for('start', active='pastein'))
+    (fd, savepath, relpath) = mksavefile("txt")
+    logger.info("Saving paste to %r", relpath)
     with os.fdopen(fd, 'wb') as fh:
-        for chunk in fu.chunks():
-            fh.write(chunk)
-    redirect(url_for('run', path=path) + kwargs)
+        fh.write(text)
+    redirect(url_for('run_frame', path=relpath, email=email))
+
+
+def search(self):
+    cleaned_data = self.cleaned_data
+    if cleaned_data.get('entrez_search_term'):
+        self.active = 'entrez_search_term'
+        self.session = entrez.CachedEntrezSession(library_root())
+
+        self.session.search(cleaned_data['entrez_search_term'])
+        logger.debug(
+            "Search finished, found %d matches",
+            self.session.result_count)
+        if self.session.result_count == 1:
+            cleaned_data['path'] = getrelpath(self.session.fetch())
+        elif self.session.result_count > 1:
+            raise Form.ValidationError(
+                "Too many results (%d) found, need 1."
+                " Try refining the search or searching for a RefSeq id."
+                % (self.session.result_count))
+        else:
+            raise Form.ValidationError("No results found.")
 
 
 def view():
-    action = None
-    if request.method == 'POST':
-        path = None
-        startform = StartForm(request.POST, request.FILES)
+    # if request.method == 'POST':
+    #     path = None
 
-        action = request.POST.get('action')
-        if startform.is_valid():
+    #     action = request.POST.get('action')
+    #     if form.is_valid():
 
-            logger.info("Form is valid; action is %r", action)
-            kwargs = startform.cleaned_data
-            path = kwargs.pop('path')
-            if action == 'run':
-                return redirect(url_for(action, path=path) + kwargs)
-            else:
-                logger.error("Unknown action %r", action)
-                flash("Unknown action.")
-    else:
-        startform = StartForm()
-        email = startform['email'].data or request.args.get('email')
+    #         logger.info("Form is valid; action is %r", action)
+    #         kwargs = startform.cleaned_data
+    #         path = kwargs.pop('path')
+    #         if action == 'run':
+    #             return redirect(url_for(action, path=path) + kwargs)
+    #         else:
+    #             logger.error("Unknown action %r", action)
+    #             flash("Unknown action.")
+    # else:
+    #     email = startform['email'].data or request.args.get('email')
+    action = request.form('action')
+    if action == 'pastein':
+        pastein()
     return flask.render_template(
         'start.html', **{
-            'form': startform,
-            'action': action,
-            'email': email
+            'action': action
         })
 
 
 def re_search():
     if request.REQUEST.get('entrez_search_term'):
         return flask.render_template(
-            'start.html', **{'form': StartForm(request.REQUEST)})
+            'start.html')
     else:
         return view(request)
 
