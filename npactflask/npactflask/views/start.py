@@ -3,8 +3,8 @@ import logging
 import os.path
 import tempfile
 import urllib2
-from flask_wtf import Form, file, html5
-from wtforms import TextField, TextAreaField
+from flask_wtf import Form, html5
+from wtforms import fields
 from npactflask.views import settings, getrelpath
 from npactflask.views import is_clean_path, library_root
 from pynpact import util, entrez, parsing
@@ -28,21 +28,19 @@ def mksavefile(prefix):
 
 
 def get_ti(size):
-    return TextField(attrs={'size': size})
+    return fields.TextField(attrs={'size': size})
 
 
 class StartForm(Form):
     active = None
-    accordion_fields = ['file_upload', 'url', 'pastein', 'entrez_search_term']
-    file_upload = file.FileField()
-    url = html5.URLField(label="From URL",
-                         widget=get_ti(50))
-    pastein = TextField(
-        label="Paste in as text",
-        widget=TextAreaField(attrs={'rows': 3, 'cols': ""}))
-    entrez_search_term = TextField(
-        label="Accession Number")
-    email = html5.EmailField()
+    accordion_fields = [
+        'file_upload', 'url', 'pastein', 'entrez_search_term']
+    file_upload = fields.FileField(u'File Uploads')
+    url = html5.URLField(u'From URL')
+    pastein = fields.TextAreaField(
+        u'Paste in as text')
+    entrez_search_term = html5.SearchField(u'Accession Number')
+    email = html5.EmailField(u'Email')
 
     def __init__(self, *args, **kwargs):
         super(StartForm, self).__init__(*args, **kwargs)
@@ -120,6 +118,20 @@ class StartForm(Form):
         if not cleaned_data.get('path'):
             raise Form.ValidationError("No valid GenBank file submitted.")
         return cleaned_data
+
+
+@app.route('file-upload', method="POST")
+def file_upload(path):
+    logger.info("Checking Uploaded file %s", fu)
+    if not is_clean_path(fu.name):
+        raise Form.ValidationError("Illegal filename")
+
+    fd, savepath, relpath = mksavefile("up-%s-" % fu.name)
+    logger.info("Saving uploaded file to %r", relpath)
+    with os.fdopen(fd, 'wb') as fh:
+        for chunk in fu.chunks():
+            fh.write(chunk)
+    redirect(url_for('run', path=path) + kwargs)
 
 
 def view():
