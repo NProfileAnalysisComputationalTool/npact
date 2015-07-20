@@ -45,11 +45,8 @@ MEDIA_RETAIN_FOR = 7
 ATIME_DEFAULT = 30
 
 
-
-
-
 MIDDLEWARE_CLASSES = (
-     # Media middleware has to come first
+    # Media middleware has to come first
     'npactweb.middleware.NPactResponseExceptionHandler',
 )
 
