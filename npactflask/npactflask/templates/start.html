@@ -15,6 +15,29 @@ $(function(){
     }
 
 });
+
+function getParameterByName(name) {
+    name = name.replace(/[\[]/, "\\[").replace(/[\]]/, "\\]");
+    var regex = new RegExp("[\\?&]" + name + "=([^&#]*)"),
+       results = regex.exec(location.search);
+    return results === null ? "" : decodeURIComponent(results[1].replace(/\+/g, " "));
+}
+
+jQuery(document).ready(function() {
+  jQuery('#forms form').hide();
+
+  jQuery('#selectors button').on('click', function(evt) {
+    var btn = jQuery(evt.target).parent();
+    var target = jQuery(btn).data('target');
+    jQuery('#forms form').hide();
+    jQuery(target).toggle();
+  });
+  var active = getParameterByName('active');
+  if(active) {
+    var form = '#form-' + active;
+    jQuery(form).show();
+  }
+});
 </script>
 {% endblock %}
 
@@ -29,13 +52,13 @@ $(function(){
     genbank data pasted directly in. <strong>Only one of the  following is neccessary</strong>.</p>
   <input type="hidden" name="selected" value="" id="selected"/>
  
-  <div id="selectors">
-    <button class="btn-upload">File Upload</button>
-    <button class="btn-url">From URL</button>
-    <button class="btn-pastein">Paste in as text</button>
-    <button class="btn-number">Accession Number</button>
+  <div id="selectors" style="margin-bottom: 15px;">
+    <button data-target="#form-upload" class="btn-upload">File Upload</button>
+    <button data-target="#form-url" class="btn-url">From URL</button>
+    <button data-target="#form-pastein" class="btn-pastein">Paste in as text</button>
+    <button data-target="#form-number" class="btn-number">Accession Number</button>
   </div>
-  <div id="forms">
+  <div id="forms" style="margin: 5px 5px;">
     <div class="form-upload">
       <form method="post" action="#" enctype="multipart/form-data">
         <button class="ui-button btn-file" title="Select a file for upload">Choose File</button><span class="button-message">No file selected</span>
