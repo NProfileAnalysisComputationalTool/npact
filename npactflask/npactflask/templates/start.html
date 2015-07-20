@@ -2,19 +2,19 @@
 {% block title %}NPACT - N-Profile Analysis Computational Tool{% endblock %}
 
 {% block addScript %}
-<script src="{{ url_for('static', filename='bower_components/jquery/dist/jquery.min.js') }}"></script>
-<script src="{{ url_for('static', filename='css/custom-theme/jquery-ui.min.js')}}">
-<script src="{{ url_for('static', filename='bower_components/qtip2/jquery.qtip.min.js')}}">
+<script src="{{ url_for('static', filename='css/custom-theme/jquery-ui.min.js')}}"></script>
+<script src="{{ url_for('static', filename='bower_components/qtip2/jquery.qtip.min.js')}}"></script>
 <script type="text/javascript">
-  $(function(){
+$(function(){
+    console.log("Startup");
     $('button').button()
     if( $("#accordion > *").length > 1) {
-      $("#accordion").accordion({ header: "h3", clearStyle: false,
-                                  autoHeight:false,
-                                  active: "h3.active"});
+        $("#accordion").accordion({ header: "h3", clearStyle: false,
+                                    autoHeight:false,
+                                    active: "h3.active"});
     }
 
-  });
+});
 </script>
 {% endblock %}
 
@@ -27,22 +27,37 @@
 
   <p class="orange-text">The NPACT server can process uploaded files, files fetched from a url, or
     genbank data pasted directly in. <strong>Only one of the  following is neccessary</strong>.</p>
-
   <input type="hidden" name="selected" value="" id="selected"/>
   <form method="post" action="/npact" enctype="multipart/form-data">
+    {{ form.csrf_token }}
+    {{ form.non_field_errors }}
     <div id="accordion">
       {% for field in form %}
       {% if field.name in form.accordion_fields %}
       <div>
-        <h3 {% if field.html_name == form.active %}class="active"{% endif %}>
-          <a name="#"> {{ field.label_tag }} </a>
+        <h3 {% if field.name == form.active %}class="active"{% endif %}>
+          <a name="#"> {{ field.label }} </a>
         </h3>
         <div>
-          {{ field.errors }}
+          {% if field.errors %}
+          <ul class=errors>
+            {% for error in field.errors %}
+            <li>{{ error }}</li>
+            {% endfor %}
+          </ul>
+          {% endif %}
           {{ field }}
           {% if field.html_name == 'entrez_search_term' %}
           {% include "start/EntrezSearchForm.html" %}
           {% endif %}
+          <br>
+          <p class="blue-text" style="padding-left:15px;">
+            <strong style="font-size:15px;">Email me the results @</strong> {{ form.email }}(optional) 
+          </p>
+          <button class="Start" type="submit" name="action" value="run" 
+                  title="Get the analysis results based on default configuration.">
+            Start Analysis!
+          </button>
         </div>
       </div>
       {% endif %}
@@ -50,12 +65,8 @@
     </div>
 <br/>
     <p class="blue-text" style="padding-left:15px;">
-      <strong style="font-size:15px;">Email me the results @</strong> (optional) 
+      <strong style="font-size:15px;">Email me the results @</strong> {{ form.email }}(optional) 
     </p>
-    <button class="Start" type="submit" name="action" value="run" 
-            title="Get the analysis results based on default configuration.">
-      Start Analysis!
-    </button>
   </form>
   <br/>
   <p id="start-over">
