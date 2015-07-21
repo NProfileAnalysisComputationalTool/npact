@@ -5,17 +5,6 @@
 <script src="{{ url_for('static', filename='css/custom-theme/jquery-ui.min.js')}}"></script>
 <script src="{{ url_for('static', filename='bower_components/qtip2/jquery.qtip.min.js')}}"></script>
 <script type="text/javascript">
-$(function(){
-    console.log("Startup");
-    $('button').button()
-    if( $("#accordion > *").length > 1) {
-        $("#accordion").accordion({ header: "h3", clearStyle: false,
-                                    autoHeight:false,
-                                    active: "h3.active"});
-    }
-
-});
-
 function getParameterByName(name) {
     name = name.replace(/[\[]/, "\\[").replace(/[\]]/, "\\]");
     var regex = new RegExp("[\\?&]" + name + "=([^&#]*)"),
@@ -24,25 +13,21 @@ function getParameterByName(name) {
 }
 
 $(document).ready(function() {
+    console.log("Startup");
+    $('button').button();
     $('#startforms div').hide();
     var selectform = function(index) {
+        console.log('Selecting form', index);
         if($('#form-'+index).css('display') == 'none') {
-          jQuery('#startforms div').hide();
-          jQuery('#form-'+index).slideDown();
+          $('#startforms div').hide();
+          $('#form-'+index).slideDown();
         }
-        jQuery('#selectors button').removeClass('force-active');
-        jQuery('#btn-'+index).addClass('force-active');
-
-        if(!getParameterByName('active')) {
-          window.history.pushState('active', index, '?active=' + index);
-        }
-         else {
-           window.history.replaceState('active', index, '?active=' + index);
-         }
+        $('#selectors button').removeClass('force-active');
+        $('#btn-'+index).addClass('force-active');
+        window.history.replaceState('active', index, '?active='+index);
     }
     $('#selectors button').on('click', function(evt) {
-        var index = jQuery(evt.target).parent().data('target');
-        selectform(index);
+        selectform($(evt.target).parent().data('target'));
     });
     var active = getParameterByName('active');
     if(active) {
@@ -83,44 +68,43 @@ genbank data pasted directly in. <strong>Only one of the  following is neccessar
   </div>
   <div id="startforms">
     <div id="form-upload">
-      <form method="post" action="#" enctype="multipart/form-data">
+      <form method="post" action="" enctype="multipart/form-data">
         <button class="ui-button btn-file" title="Select a file for upload">Choose File</button><span class="button-message">No file selected</span>
         <p>Email me the results @ <input id="email" name="email" type="email">(optional)</p>
-        <button class="Start ui-button ui-widget ui-state-default ui-corner-all ui-button-text-only" type="submit" name="action" value="run" title="Get the analysis results based on default configuration." role="button">
+        <button type="submit" name="action" value="upload" title="Get the analysis results based on default configuration.">
           <span class="ui-button-text">Start Analysis!</span>
         </button>
       </form>
     </div>
     <div id="form-url">
-      <form method="post" action="#" enctype="multipart/form-data">
+      <form method="post" action="" enctype="multipart/form-data">
         <label>Url:
           <input id="url" name="url" type="url" value="">
         </label>
         <br>
         <label>Email me the results @ <input id="email" name="email" type="email">(optional)</label>
         <br>
-        <button class="Start ui-button ui-widget ui-state-default ui-corner-all ui-button-text-only" type="submit" name="action" value="run" title="Get the analysis results based on default configuration." role="button">
+        <button type="submit" name="action" value="fetchurl" title="Get the analysis results based on default configuration.">
           <span class="ui-button-text">Start Analysis!</span>
         </button>
       </form>
     </div>
     <div id="form-pastein">
-      <input type="hidden" name="action" value="pastein">
-      <form method="post" action="#" enctype="multipart/form-data">
+      <form method="post" action="" enctype="multipart/form-data">
         <textarea id="pastein" name="pastein" rows="4"></textarea>
         <p>Email me the results @ <input id="email" name="email" type="email">(optional)</p>
-        <button class="Start ui-button ui-widget ui-state-default ui-corner-all ui-button-text-only" type="submit" name="action" value="pastein" title="Get the analysis results based on default configuration." role="button">
+        <button type="submit" name="action" value="pastein" title="Get the analysis results based on default configuration.">
           <span class="ui-button-text">Start Analysis!</span>
         </button>
       </form>
     </div>
     <div id="form-number">
-      <form method="post" action="#" enctype="multipart/form-data">
+      <form method="post" action="" enctype="multipart/form-data">
         <label>Accession Number:
           <input id="entrez_search_term" name="entrez_search_term" type="search" value="">
         </label>
         <p>Email me the results @ <input id="email" name="email" type="email">(optional)</p>
-        <button class="Start ui-button ui-widget ui-state-default ui-corner-all ui-button-text-only" type="submit" name="action" value="run" title="Get the analysis results based on default configuration." role="button">
+        <button type="submit" name="action" value="search" title="Get the analysis results based on default configuration.">
           <span class="ui-button-text">Start Analysis!</span>
         </button>
       </form>
