@@ -1,18 +1,41 @@
 angular.module('npact')
-  .service('NProfiler', function(Fetcher, Pynpact, $log, GraphConfig, $q, $timeout) {
+  .service('DDNA', function(Fetcher, Pynpact, $log, $q, $timeout) {
     'use strict';
     var self = this;
     var defered = $q.defer();
     this.fetching = defered.promise;
 
     self.start = function(config) {
-      $log.log("Starting nprofiler");
+      $log.log("Starting DDNA fetch");
       self.config = config;
-
       defered.resolve(Fetcher.fetchFile(config[Pynpact.DDNA_FILE]).then(function(ddna) {
         $log.debug('Got back a ddna of length: ', ddna.length);
-        self.ddna = ddna;
+        return (self.ddna = ddna);
       }));
+      return self.fetching;
+    };
+
+    self.sliceForExtract = function(extract) {
+      return self.fetching.then(function(ddna) {
+        // NProfiler.ddna is 0 indexed; the dna by convention (e.g. from the C or NCBI)
+        // C/NCBI, is 1 indexed.
+        var sliceStart = extract.start - 1;
+        // The end index here is inclusive but array.slice isn't so we
+        // don't need to subtract 1
+        var sliceEnd = extract.end;
+        return ddna.slice(sliceStart, sliceEnd);
+      });
+    };
+  })
+
+  .service('NProfiler', function(DDNA, $log, GraphConfig, $q, $timeout) {
+    'use strict';
+    var self = this;
+    var defered = $q.defer();
+    this.fetching = defered.promise;
+    self.start = function(config) {
+      self.config = config;
+      defered.resolve(DDNA.start(config));
       return self.fetching;
     };
 
@@ -58,21 +81,20 @@ angular.module('npact')
         return d.promise;
       }
       // slice asynchronously once we have the data
-      return self.fetching.then(function() {
+      return self.fetching.then(function(ddna) {
         return $timeout(function() {
-          self._slice(opts);
+          self._slice(ddna, opts);
           return opts;
         });
       });
     };
 
-    self._slice = function(opts) {
+    this._slice = function(ddna, opts) {
       //This function assumes all the error checking and prep has been
       //done by the `slice` function
 
       // get local references to avoid dictionary lookups in the loop
-      var ddna = self.ddna,
-          end = Math.min(opts.endBase, ddna.length - 1),
+      var end = Math.min(opts.endBase, ddna.length - 1),
           nucl = opts.nucleotides,
           period = opts.period,
           step = opts.step,
