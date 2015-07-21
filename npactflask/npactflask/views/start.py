@@ -3,7 +3,7 @@ import logging
 import os.path
 import tempfile
 import urllib2
-from flask_wtf import Form, html5
+from flask_wtf import Form
 from wtforms import fields
 from npactflask.views import settings, getrelpath
 from npactflask.views import is_clean_path, library_root
@@ -70,7 +70,7 @@ def fetchurl(self):
 
 
 def pastein():
-    text = request.form['pastein']
+    text = request.form('pastein')
     email = request.args.get['email']
     if not text:
         flash('Text Required in Pastefield')
@@ -79,7 +79,7 @@ def pastein():
     logger.info("Saving paste to %r", relpath)
     with os.fdopen(fd, 'wb') as fh:
         fh.write(text)
-    redirect(url_for('run_frame', path=relpath, email=email))
+    redirect(url_for('run_frame', path=relpath, email=email, active='pastein'))
 
 
 def search(self):
@@ -104,10 +104,14 @@ def search(self):
 
 
 def view():
-    # if request.method == 'POST':
-    #     path = None
+    action = request.form.get('action')
 
-    #     action = request.POST.get('action')
+    if request.method == 'POST':
+
+        logger.info("Handling post action %r", action)
+        if action == 'pastein':
+            pastein()
+
     #     if form.is_valid():
 
     #         logger.info("Form is valid; action is %r", action)
@@ -120,9 +124,6 @@ def view():
     #             flash("Unknown action.")
     # else:
     #     email = startform['email'].data or request.args.get('email')
-    action = request.form('action')
-    if action == 'pastein':
-        pastein()
     return flask.render_template(
         'start.html', **{
             'action': action
