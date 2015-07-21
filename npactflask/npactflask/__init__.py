@@ -9,7 +9,7 @@ from npactflask import views
 from npactflask.views import run, start
 
 
-app.add_url_rule('/', view_func=start.view)
+app.add_url_rule('/', view_func=start.view, methods=['POST', 'GET'], endpoint="start")
 app.add_url_rule('/run/<path:path>', view_func=run.run_frame)
 app.add_url_rule('/about', view_func=views.about)
 app.add_url_rule('/runstatus/<path:path>', view_func=run.run_status)

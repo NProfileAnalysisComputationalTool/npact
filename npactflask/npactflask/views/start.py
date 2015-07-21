@@ -50,9 +50,11 @@ def file_upload(self):
         cleaned_data['path'] = relpath
 
 
-def fetchurl(self):
-    cleaned_data = self.cleaned_data
-    if cleaned_data.get('url'):
+def fetchurl():
+    url = request.form('url')
+    if not url:
+        flash('URL Required in URL Field')
+        redirect(url_for('start', active='url'))
         self.active = 'url'
         url = cleaned_data.get('url')
         logger.debug("Going to pull from %r", url)
@@ -70,16 +72,17 @@ def fetchurl(self):
 
 
 def pastein():
-    text = request.form('pastein')
-    email = request.args.get['email']
+    text = request.form.get('pastein')
+    # email = request.args.get['email']
     if not text:
         flash('Text Required in Pastefield')
-        redirect(url_for('start', active='pastein'))
+        return redirect(url_for('start'))
     (fd, savepath, relpath) = mksavefile("txt")
     logger.info("Saving paste to %r", relpath)
     with os.fdopen(fd, 'wb') as fh:
         fh.write(text)
-    redirect(url_for('run_frame', path=relpath, email=email, active='pastein'))
+    flash('redirecting ' + relpath)
+    return redirect(url_for('run_frame', path=relpath))
 
 
 def search(self):
@@ -110,7 +113,7 @@ def view():
 
         logger.info("Handling post action %r", action)
         if action == 'pastein':
-            pastein()
+            return pastein()
 
     #     if form.is_valid():
 
@@ -128,6 +131,7 @@ def view():
         'start.html', **{
             'action': action
         })
+
 
 
 def re_search():
