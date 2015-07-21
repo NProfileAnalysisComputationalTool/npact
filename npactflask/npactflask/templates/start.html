@@ -26,10 +26,19 @@ function getParameterByName(name) {
 $(document).ready(function() {
     $('#startforms div').hide();
     var selectform = function(index) {
-        jQuery('#startforms div').hide();
-        jQuery('#form-'+index).slideDown();
+        if($('#form-'+index).css('display') == 'none') {
+          jQuery('#startforms div').hide();
+          jQuery('#form-'+index).slideDown();
+        }
         jQuery('#selectors button').removeClass('force-active');
         jQuery('#btn-'+index).addClass('force-active');
+
+        if(!getParameterByName('active')) {
+          window.history.pushState('active', index, '?active=' + index);
+        }
+         else {
+           window.history.replaceState('active', index, '?active=' + index);
+         }
     }
     $('#selectors button').on('click', function(evt) {
         var index = jQuery(evt.target).parent().data('target');
