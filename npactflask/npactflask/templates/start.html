@@ -51,7 +51,19 @@ $(document).ready(function() {
   <p>After seleting a sequence file, "Start Analysis!" will result in a graphical output showing sequence compositional contrasts for frame analysis, coding region (CDS) annotation from the input file, and, by default, regions of non-random 3-base compositional periodicity (hits), newly-identified or modified ORFs, and corresponding output text files.  </p>
 
   <p class="orange-text">The NPACT server can process uploaded files, files fetched from a url, or
-    genbank data pasted directly in. <strong>Only one of the  following is neccessary</strong>.</p>
+genbank data pasted directly in. <strong>Only one of the  following is neccessary</strong>.</p>
+    <div id="msgpane" class="ui-corner-all">
+       {% with messages = get_flashed_messages() %}
+       {% if messages %}
+       {% for message in messages %}
+       <div class="message">
+          <p class="ui-state-highlight ui-corner-all ui-state-error">
+                               {{ message }}</p>
+    </div>
+    {% endfor %}
+    {% endif %}
+    {% endwith %}
+</div>
   <input type="hidden" name="selected" value="" id="selected"/>
  
   <div id="selectors" style="margin-bottom: 15px;">
@@ -88,7 +100,7 @@ $(document).ready(function() {
       <form method="post" action="#" enctype="multipart/form-data">
         <textarea id="pastein" name="pastein" rows="4"></textarea>
         <p>Email me the results @ <input id="email" name="email" type="email">(optional)</p>
-        <button class="Start ui-button ui-widget ui-state-default ui-corner-all ui-button-text-only" type="submit" name="action" value="run" title="Get the analysis results based on default configuration." role="button">
+        <button class="Start ui-button ui-widget ui-state-default ui-corner-all ui-button-text-only" type="submit" name="action" value="pastein" title="Get the analysis results based on default configuration." role="button">
           <span class="ui-button-text">Start Analysis!</span>
         </button>
       </form>
