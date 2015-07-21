@@ -21,6 +21,14 @@ a:hover,a:active {
 color:#ff4a00;
 }
 
+.force-active {
+        border: 1px solid #aaa !important;
+        background: #5368C1 url("images/ui-bg_flat_65_5368C1_40x100.png") 50% 50% repeat-x !important;
+        font-weight: bold !important;
+        color: #FFB241 !important;
+}
+
+
 acronym {
 border:0;
 font-style:normal;
@@ -493,3 +501,8 @@ input.ng-invalid {
    border: 2px red dashed !important;
 }
 button.arrowbutton { margin: 0 2px; padding: 0 2px;}
+
+#startforms {
+   margin: 5px 5px;
+   min-height:150px;
+}

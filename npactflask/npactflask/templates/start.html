@@ -24,19 +24,21 @@ function getParameterByName(name) {
 }
 
 $(document).ready(function() {
-  jQuery('#forms div').hide();
-
-  $('#selectors button').on('click', function(evt) {
-    var btn = jQuery(evt.target).parent();
-    var target = jQuery(btn).data('target');
-    jQuery('#forms div').hide();
-    jQuery(target).toggle();
-  });
-  var active = getParameterByName('active');
-  if(active) {
-    var form = '#form-' + active;
-    jQuery(form).show();
-  }
+    $('#startforms div').hide();
+    var selectform = function(index) {
+        jQuery('#startforms div').hide();
+        jQuery('#form-'+index).slideDown();
+        jQuery('#selectors button').removeClass('force-active');
+        jQuery('#btn-'+index).addClass('force-active');
+    }
+    $('#selectors button').on('click', function(evt) {
+        var index = jQuery(evt.target).parent().data('target');
+        selectform(index);
+    });
+    var active = getParameterByName('active');
+    if(active) {
+        selectform(active);
+    }
 });
 </script>
 {% endblock %}
@@ -53,12 +55,12 @@ $(document).ready(function() {
   <input type="hidden" name="selected" value="" id="selected"/>
  
   <div id="selectors" style="margin-bottom: 15px;">
-    <button data-target="#form-upload" class="btn-upload">File Upload</button>
-    <button data-target="#form-url" class="btn-url">From URL</button>
-    <button data-target="#form-pastein" class="btn-pastein">Paste in as text</button>
-    <button data-target="#form-number" class="btn-number">Accession Number</button>
+    <button data-target="upload" id="btn-upload">File Upload</button>
+    <button data-target="url" id="btn-url">From URL</button>
+    <button data-target="pastein" id="btn-pastein">Paste in as text</button>
+    <button data-target="number" id="btn-number">Accession Number</button>
   </div>
-  <div id="forms" style="margin: 5px 5px;">
+  <div id="startforms">
     <div id="form-upload">
       <form method="post" action="#" enctype="multipart/form-data">
         <button class="ui-button btn-file" title="Select a file for upload">Choose File</button><span class="button-message">No file selected</span>
@@ -70,8 +72,12 @@ $(document).ready(function() {
     </div>
     <div id="form-url">
       <form method="post" action="#" enctype="multipart/form-data">
-        <input id="url" name="url" type="url" value="">
-        <p>Email me the results @ <input id="email" name="email" type="email">(optional)</p>
+        <label>Url:
+          <input id="url" name="url" type="url" value="">
+        </label>
+        <br>
+        <label>Email me the results @ <input id="email" name="email" type="email">(optional)</label>
+        <br>
         <button class="Start ui-button ui-widget ui-state-default ui-corner-all ui-button-text-only" type="submit" name="action" value="run" title="Get the analysis results based on default configuration." role="button">
           <span class="ui-button-text">Start Analysis!</span>
         </button>
@@ -80,7 +86,7 @@ $(document).ready(function() {
     <div id="form-pastein">
       <input type="hidden" name="action" value="pastein">
       <form method="post" action="#" enctype="multipart/form-data">
-        <textarea id="pastein" name="pastein"></textarea>
+        <textarea id="pastein" name="pastein" rows="4"></textarea>
         <p>Email me the results @ <input id="email" name="email" type="email">(optional)</p>
         <button class="Start ui-button ui-widget ui-state-default ui-corner-all ui-button-text-only" type="submit" name="action" value="run" title="Get the analysis results based on default configuration." role="button">
           <span class="ui-button-text">Start Analysis!</span>
