@@ -10,7 +10,6 @@ fmt = "%(asctime)s %(levelname)-7s %(name)-20s| %(message)s"
 sh = logging.StreamHandler()
 sh.setFormatter(logging.Formatter(fmt, datefmt='%H:%M:%S'))
 logger.addHandler(sh)
-# logger.addHandler(logging.getLogger('werkzeug').handlers[0])
 
 
 redirectapp = Flask('redirectapp')

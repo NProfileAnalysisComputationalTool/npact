@@ -2,10 +2,9 @@ import flask
 import logging
 import os
 import os.path
-from flask import url_for, send_from_directory, flash, redirect
+from flask import url_for, flash, redirect, safe_join
 from werkzeug.exceptions import NotFound
 from npactflask import app
-from npactflask import settings
 
 logger = logging.getLogger(__name__)
 
@@ -19,7 +18,7 @@ def library_root():
 
 
 def getrelpath(abspath):
-    return os.path.relpath(abspath, settings.MEDIA_ROOT)
+    return os.path.relpath(abspath, app.config['UPLOADS'])
 
 
 def is_clean_path(path):
@@ -41,12 +40,9 @@ class RedirectException(Exception):
 
 
 def getabspath(relpath, raise_on_missing=True):
-    if not is_clean_path(relpath):
-        logger.error("Illegal path submitted", relpath)
-        raise NotFound("Bad characters")
-    abspath = os.path.join(settings.MEDIA_ROOT, relpath)
+    abspath = safe_join(app.config['UPLOADS'], relpath)
     if raise_on_missing and not os.path.exists(abspath):
-        raise NotFound
+        raise NotFound(relpath)
     return abspath
 
 
@@ -68,8 +64,3 @@ def view_none():
         "No genome source selected, please upload one, "
         "or go to the library and select one.")
     return redirect(url_for('index', filename=''))
-
-
-def static_serve_wrapper(path):
-    if app.debug:
-        return send_from_directory(settings.MEDIA_ROOT, path)

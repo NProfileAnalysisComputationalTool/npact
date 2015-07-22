@@ -3,8 +3,8 @@ import logging
 import os.path
 import tempfile
 import urllib2
-from npactflask.views import settings, getrelpath
-from npactflask.views import is_clean_path, library_root
+from npactflask import app
+from npactflask.views import getrelpath, is_clean_path, library_root
 from pynpact import util, entrez, parsing
 from flask import url_for, redirect, request, flash
 
@@ -16,11 +16,10 @@ def mksavefile(prefix):
     """Wrapper around creating the file to save uploaded files in.
 
     Returns the (fd, abspath, relpath)
-"""
+    """
     # we're using tempfile to ensure the file we get is unique and
     # aren't overwriting another.
-    fd, abspath = tempfile.mkstemp(
-        dir=settings.MEDIA_ROOT, prefix=prefix)
+    fd, abspath = tempfile.mkstemp(app.config['UPLOADS'], prefix=prefix)
     relpath = getrelpath(abspath)
     return (fd, abspath, relpath)
 

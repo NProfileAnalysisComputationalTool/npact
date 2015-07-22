@@ -2,12 +2,11 @@ import flask
 import logging
 import os
 import os.path
-import json
 import Bio.Seq
-from flask import url_for, request, flash, redirect
+from flask import url_for, request, flash, redirect, json, jsonify
 from pynpact import main, parsing, util
+from npactflask import app
 from npactflask.views import getabspath, getrelpath, is_clean_path
-from npactflask.views import settings, app
 from taskqueue import client, NoSuchTaskError
 
 
@@ -86,21 +85,27 @@ def run_frame(path):
         })
 
 
+
 def translate():
-    # table 4 is for mycoplasma ala:
-    # http://www.ncbi.nlm.nih.gov/Taxonomy/Utils/wprintgc.cgi
-    table = 1
-    if request.POST.get('mycoplasma'):
-        table = 4
-    seq = Bio.Seq.Seq(request.POST.get('seq'))
-    rc = request.POST.get('complement')
-    if rc:
-        seq = seq.reverse_complement()
-    trans = Bio.Seq.translate(seq, table)
-    return flask.make_response(json.dumps({
-        'seq': str(trans),
-        'complement': rc and str(seq)}
-    ), 200)
+    try:
+        # table 4 is for mycoplasma ala:
+        # http://www.ncbi.nlm.nih.gov/Taxonomy/Utils/wprintgc.cgi
+        table = 1
+        if request.POST.get('mycoplasma'):
+            table = 4
+        seq = Bio.Seq.Seq(request.POST.get('seq'))
+        rc = request.POST.get('complement')
+        if rc:
+            seq = seq.reverse_complement()
+        trans = Bio.Seq.translate(seq, table)
+        return flask.make_response(json.dumps({
+            'seq': str(trans),
+            'complement': rc and str(seq)}
+        ), 200)
+    except Exception as e:
+        response = jsonify(repr(e))
+        response.status = 500
+        return resposne
 
 
 def kickstart(path):
@@ -148,9 +153,10 @@ def build_email(path, config):
 
 def sanitize_config_for_client(config):
     output = {}
+    uploads = app.config['UPLOADS']
     for k, v in config.iteritems():
-        if isinstance(v, basestring) and v.startswith(settings.MEDIA_ROOT):
-            v = v[len(settings.MEDIA_ROOT):]
+        if isinstance(v, basestring) and v.startswith(uploads):
+            v = v[len(uploads):]
             v = v.lstrip("/")
         output[k] = v
     if 'psnames' in output:
@@ -166,7 +172,7 @@ def send_email(email_address, config, run_link, result_link):
         subject = 'NPACT results ready for "{0}"'.format(
             config['first_page_title'])
 
-        d = app.app_context({'keep_days': settings.ATIME_DEFAULT,
+        d = app.app_context({'keep_days': app.config['ATIME_DEFAULT'],
                              'results_link': result_link,
                              'run_link': run_link})
 
