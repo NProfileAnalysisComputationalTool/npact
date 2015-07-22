@@ -14,7 +14,11 @@ function getParameterByName(name) {
 
 $(document).ready(function() {
     console.log("Startup");
-    $('button').button();
+    $('button').each(function() {
+        if(!$(this).hasClass('btn-file')) {
+            $(this).button();
+        }
+    });
     $('#startforms div').hide();
     var selectform = function(index) {
         console.log('Selecting form', index);
@@ -35,6 +39,25 @@ $(document).ready(function() {
     }
 });
 </script>
+
+<style>
+.btn-file {
+    margin-right: 8px;
+    margin-bottom: 3px;
+    padding: 2px 5px 3px 5px;
+    background: linear-gradient(#fcfcfc, #b6b6b6);
+    border-radius: 5px;
+    border: 1px solid #888;
+}
+
+label {
+    display: block;
+    margin-top: 5px;
+    margin-bottom: 10px;
+}
+
+</style>
+
 {% endblock %}
 
 {% block content %}
@@ -59,51 +82,59 @@ genbank data pasted directly in. <strong>Only one of the  following is neccessar
     {% endwith %}
 </div>
   <input type="hidden" name="selected" value="" id="selected"/>
- 
+  <div>
+    <h1>Step 1: Select a method below</h1>
+  </div>
+  <hr style="margin-top: 3px; margin-bottom: 10px;">
   <div id="selectors" style="margin-bottom: 15px;">
-    <button data-target="upload" id="btn-upload">File Upload</button>
-    <button data-target="url" id="btn-url">From URL</button>
+    <button data-target="upload" id="btn-upload">Upload a File</button>
+    <button data-target="fetchurl" id="btn-fetchurl">Fetch from URL</button>
     <button data-target="pastein" id="btn-pastein">Paste in as text</button>
-    <button data-target="number" id="btn-number">Accession Number</button>
+    <button data-target="search" id="btn-search">Accession Number</button>
   </div>
   <div id="startforms">
     <div id="form-upload">
+      <h1>Step 2: Upload a File</h1>
+      <hr style="margin-top: 3px; margin-bottom: 10px;">
       <form method="post" action="" enctype="multipart/form-data">
-        <button class="ui-button btn-file" title="Select a file for upload">Choose File</button><span class="button-message">No file selected</span>
-        <p>Email me the results @ <input id="email" name="email" type="email">(optional)</p>
+        <button class="btn-file" title="Select a file for upload">Choose File</button><span class="button-message">No file selected</span>
+        <label>Email me the results @ <input id="email" name="email" type="email">(optional)</label>
         <button type="submit" name="action" value="upload" title="Get the analysis results based on default configuration.">
           <span class="ui-button-text">Start Analysis!</span>
         </button>
       </form>
     </div>
-    <div id="form-url">
+    <div id="form-fetchurl">
+      <h1>Step 2: Enter a URL</h1>
+      <hr style="margin-top: 3px; margin-bottom: 10px;">
       <form method="post" action="" enctype="multipart/form-data">
         <label>Url:
           <input id="url" name="url" type="url" value="">
         </label>
-        <br>
         <label>Email me the results @ <input id="email" name="email" type="email">(optional)</label>
-        <br>
         <button type="submit" name="action" value="fetchurl" title="Get the analysis results based on default configuration.">
           <span class="ui-button-text">Start Analysis!</span>
         </button>
       </form>
     </div>
     <div id="form-pastein">
+      <h1 style="margin-bottom: 3px;">Step 2: Paste text below</h1>
       <form method="post" action="" enctype="multipart/form-data">
         <textarea id="pastein" name="pastein" rows="4"></textarea>
-        <p>Email me the results @ <input id="email" name="email" type="email">(optional)</p>
+        <label>Email me the results @ <input id="email" name="email" type="email">(optional)</label>
         <button type="submit" name="action" value="pastein" title="Get the analysis results based on default configuration.">
           <span class="ui-button-text">Start Analysis!</span>
         </button>
       </form>
     </div>
-    <div id="form-number">
+    <div id="form-search">
+      <h1>Step 2: Search Accession Number</h1>
+      <hr style="margin-top: 3px; margin-bottom: 10px;">
       <form method="post" action="" enctype="multipart/form-data">
         <label>Accession Number:
           <input id="entrez_search_term" name="entrez_search_term" type="search" value="">
         </label>
-        <p>Email me the results @ <input id="email" name="email" type="email">(optional)</p>
+        <label>Email me the results @ <input id="email" name="email" type="email">(optional)</label>
         <button type="submit" name="action" value="search" title="Get the analysis results based on default configuration.">
           <span class="ui-button-text">Start Analysis!</span>
         </button>
