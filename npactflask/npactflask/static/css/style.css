@@ -506,3 +506,18 @@ button.arrowbutton { margin: 0 2px; padding: 0 2px;}
    margin: 5px 5px;
    min-height:150px;
 }
+
+.btn-file {
+    margin-right: 8px;
+    margin-bottom: 3px;
+    padding: 2px 5px 3px 5px;
+    background: linear-gradient(#fcfcfc, #b6b6b6);
+    border-radius: 5px;
+    border: 1px solid #888;
+}
+
+label {
+    display: block;
+    margin-top: 5px;
+    margin-bottom: 10px;
+}
