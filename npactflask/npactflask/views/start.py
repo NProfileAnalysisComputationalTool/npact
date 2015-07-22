@@ -8,7 +8,7 @@ from wtforms import fields
 from npactflask.views import settings, getrelpath
 from npactflask.views import is_clean_path, library_root
 from pynpact import util, entrez, parsing
-from flask import url_for, redirect, request, flash
+from flask import url_for, redirect, request, flash, send_from_directory
 
 
 logger = logging.getLogger(__name__)
@@ -31,44 +31,41 @@ def get_ti(size):
     return fields.TextField(attrs={'size': size})
 
 
-def file_upload(self):
-    cleaned_data = self.cleaned_data
+def file_upload():
+    fileup = request.files.get('file')
 
-    if cleaned_data.get('file_upload'):
-        self.active = 'file_upload'
-        fu = cleaned_data.get('file_upload')
-        logger.info("Checking Uploaded file %s", fu)
-        if not is_clean_path(fu.name):
-            raise Form.ValidationError("Illegal filename")
-
-        fd, savepath, relpath = mksavefile("up-%s-" % fu.name)
-        logger.info("Saving uploaded file to %r", relpath)
-        with os.fdopen(fd, 'wb') as fh:
-            for chunk in fu.chunks():
-                fh.write(chunk)
-
-        cleaned_data['path'] = relpath
+    if not fileup:
+        flash('Must upload a File')
+        return redirect(url_for('start') + '?active=upload')
+    logger.info("Checking Uploaded file %s", fileup)
+    if not is_clean_path(fileup.name):
+        flash("Illegal filename")
+        return redirect(url_for('start') + '?active=upload')
+    fd, savepath, relpath = mksavefile("up-%s-" % fileup.filename)
+    logger.info("Saving uploaded file to %r", savepath)
+    fileup.save(savepath)
+    return redirect(url_for('run_frame', path=relpath))
 
 
 def fetchurl():
-    url = request.form('url')
+    url = request.form.get('fetchurl')
     if not url:
         flash('URL Required in URL Field')
-        redirect(url_for('start', active='url'))
-        self.active = 'url'
-        url = cleaned_data.get('url')
-        logger.debug("Going to pull from %r", url)
-        pull_req = urllib2.Request(url)
-        if pull_req.get_type == "file":
-            raise Form.ValidationError("Illegal URL")
-        try:
-            fh = urllib2.urlopen(pull_req)
-            fd, savepath, relpath = mksavefile("url")
-            util.stream_to_file(fh, savepath)
-            cleaned_data['path'] = relpath
-        except:
-            logger.exception("Error fetching url %s", url)
-            raise Form.ValidationError("Error fetching url")
+        return redirect(url_for('start', active='url'))
+    logger.debug("Going to pull from %r", url)
+    pull_req = urllib2.Request(url)
+    if pull_req.get_type == "file":
+        flash("Illegal URL")
+        return redirect(url_for('start') + '?active=url')
+    try:
+        fh = urllib2.urlopen(pull_req)
+        fd, savepath, relpath = mksavefile("url")
+        util.stream_to_file(fh, savepath)
+        return redirect(url_for('run_frame', path=relpath))
+    except:
+        logger.exception("Error fetching url %s", url)
+        flash("Error fetching url")
+        return redirect(url_for('start') + '?active=url')
 
 
 def pastein():
@@ -85,25 +82,27 @@ def pastein():
     return redirect(url_for('run_frame', path=relpath))
 
 
-def search(self):
-    cleaned_data = self.cleaned_data
-    if cleaned_data.get('entrez_search_term'):
-        self.active = 'entrez_search_term'
-        self.session = entrez.CachedEntrezSession(library_root())
+def search():
+    search = request.form.get('entrez_search_term')
+    if not search:
+        flash('Accession Number Required')
+        return redirect(url_for('start') + '?active=search')
+    self.active = 'entrez_search_term'
+    self.session = entrez.CachedEntrezSession(library_root())
 
-        self.session.search(cleaned_data['entrez_search_term'])
-        logger.debug(
-            "Search finished, found %d matches",
-            self.session.result_count)
-        if self.session.result_count == 1:
-            cleaned_data['path'] = getrelpath(self.session.fetch())
-        elif self.session.result_count > 1:
-            raise Form.ValidationError(
-                "Too many results (%d) found, need 1."
-                " Try refining the search or searching for a RefSeq id."
-                % (self.session.result_count))
-        else:
-            raise Form.ValidationError("No results found.")
+    self.session.search(cleaned_data['entrez_search_term'])
+    logger.debug(
+        "Search finished, found %d matches",
+        self.session.result_count)
+    if self.session.result_count == 1:
+        cleaned_data['path'] = getrelpath(self.session.fetch())
+    elif self.session.result_count > 1:
+        raise Form.ValidationError(
+            "Too many results (%d) found, need 1."
+            " Try refining the search or searching for a RefSeq id."
+            % (self.session.result_count))
+    else:
+        raise Form.ValidationError("No results found.")
 
 
 def view():
@@ -114,7 +113,10 @@ def view():
         logger.info("Handling post action %r", action)
         if action == 'pastein':
             return pastein()
-
+        elif action == 'fetchurl':
+            return fetchurl()
+        elif action == 'upload':
+            return file_upload()
     #     if form.is_valid():
 
     #         logger.info("Form is valid; action is %r", action)
@@ -133,7 +135,6 @@ def view():
         })
 
 
-
 def re_search():
     if request.REQUEST.get('entrez_search_term'):
         return flask.render_template(
@@ -144,8 +145,8 @@ def re_search():
 
 def efetch(id):
     logger.info("Asked to fetch Id: %s", id)
-    session = entrez.EntrezSession(library_root())
-    abspath = session.fetch_id(id)
+    searchsession = entrez.EntrezSession(library_root())
+    abspath = searchsession.fetch_id(id)
     path = getrelpath(abspath)
     try:
         parsing.initial(abspath)

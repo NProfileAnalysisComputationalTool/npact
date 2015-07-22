@@ -79,7 +79,7 @@ def run_frame(path):
         'processing.html', **{
             'status_base': url_for('.run_status', path=''),
             'kickstart_base': url_for('kickstart', path=path),  # args=[path]
-            'translate_base': url_for('translate', path=''),
+            'translate_base': url_for('translate'),
             'fetch_base': url_for('raw', path=''),
             'acgt_gamma_base': url_for('.acgt_gamma_file_list', path=''),
             'base_href': url_for('run_frame', path=path)
