@@ -1,6 +1,10 @@
 {% extends "base.html" %}
 {% block title %}NPACT - N-Profile Analysis Computational Tool{% endblock %}
 
+{% macro emailinput() %}
+<label>Email me the results @ <input id="email" name="email" type="email" value="{{ email }}">(optional)</label>
+{% endmacro %}
+
 {% block addScript %}
 <script src="{{ url_for('static', filename='css/custom-theme/jquery-ui.min.js')}}"></script>
 <script src="{{ url_for('static', filename='bower_components/qtip2/jquery.qtip.min.js')}}"></script>
@@ -79,8 +83,8 @@ genbank data pasted directly in. <strong>Only one of the  following is neccessar
       <hr style="margin-top: 3px; margin-bottom: 10px;">
       <form method="post" action="" enctype="multipart/form-data">
         <input id="file" name="file" type="file" title="Select a file for upload">
-        <label>Email me the results @ <input id="email" name="email" type="email">(optional)</label>
-        <button type="submit" name="action" value="upload" title="Get the analysis results based on default configuration.">
+        {{emailinput()}}
+        <button type="submit" name="active" value="upload" title="Get the analysis results based on default configuration.">
           <span class="ui-button-text">Start Analysis!</span>
         </button>
       </form>
@@ -90,10 +94,10 @@ genbank data pasted directly in. <strong>Only one of the  following is neccessar
       <hr style="margin-top: 3px; margin-bottom: 10px;">
       <form method="post" action="" enctype="multipart/form-data">
         <label>Url:
-          <input id="fetchurl" name="fetchurl" type="url" value="">
+          <input id="fetchurl" name="fetchurl" type="url" value="{{ url }}">
         </label>
-        <label>Email me the results @ <input id="email" name="email" type="email">(optional)</label>
-        <button type="submit" name="action" value="fetchurl" title="Get the analysis results based on default configuration.">
+        {{emailinput()}}
+        <button type="submit" name="active" value="fetchurl" title="Get the analysis results based on default configuration.">
           <span class="ui-button-text">Start Analysis!</span>
         </button>
       </form>
@@ -102,9 +106,9 @@ genbank data pasted directly in. <strong>Only one of the  following is neccessar
       <h1 style="margin-bottom: 3px;">Step 2: Paste genome text below</h1>
       <p style="margin: 5px 0px 5px 0px;">Text can be in <a href="https://en.wikipedia.org/wiki/FASTA_format">FASTA format</a> or <a href="http://www.ncbi.nlm.nih.gov/Sitemap/samplerecord.html">GenBank format</a>.</p>
       <form method="post" action="" enctype="multipart/form-data">
-        <textarea id="pastein" name="pastein" rows="4"></textarea>
-        <label>Email me the results @ <input id="email" name="email" type="email">(optional)</label>
-        <button type="submit" name="action" value="pastein" title="Get the analysis results based on default configuration.">
+        <textarea id="pastein" name="pastein" rows="4" value="{{ pastein }}"></textarea>
+        {{emailinput()}}
+        <button type="submit" name="active" value="pastein" title="Get the analysis results based on default configuration.">
           <span class="ui-button-text">Start Analysis!</span>
         </button>
       </form>
@@ -114,10 +118,11 @@ genbank data pasted directly in. <strong>Only one of the  following is neccessar
       <hr style="margin-top: 3px; margin-bottom: 10px;">
       <form method="post" action="" enctype="multipart/form-data">
         <label>Accession Number:
-          <input id="entrez_search_term" name="entrez_search_term" type="search" value="">
+          <input id="entrez_search_term" name="search" type="search" value="{{ search }}">
         </label>
-        <label>Email me the results @ <input id="email" name="email" type="email">(optional)</label>
-        <button type="submit" name="action" value="search" title="Get the analysis results based on default configuration.">
+        {{emailinput()}}
+        {% include "start/EntrezSearchForm.html" %}
+        <button type="submit" name="active" value="search" title="Get the analysis results based on default configuration.">
           <span class="ui-button-text">Start Analysis!</span>
         </button>
       </form>
