@@ -17,30 +17,30 @@ function getParameterByName(name) {
 }
 
 $(document).ready(function() {
-    console.log("Startup");
-    $('button').each(function() {
-        if(!$(this).hasClass('btn-file')) {
-            $(this).button();
-        }
-    });
-    $('#startforms div').hide();
-    var selectform = function(index) {
-        console.log('Selecting form', index);
-        if($('#form-'+index).css('display') == 'none') {
-          $('#startforms div').hide();
-          $('#form-'+index).slideDown();
-        }
-        $('#selectors button').removeClass('force-active');
-        $('#btn-'+index).addClass('force-active');
-        window.history.replaceState('active', index, '?active='+index);
+  console.log("Startup");
+  $('button').not('.btn-file').button();
+  $('#startforms div').hide();
+  var selectform = function(index) {
+    console.log('Selecting form', index);
+    if($('#form-'+index).css('display') == 'none') {
+      $('#startforms div').hide();
+      $('#form-'+index).slideDown();
     }
-    $('#selectors button').on('click', function(evt) {
-        selectform($(evt.target).parent().data('target'));
-    });
-    var active = getParameterByName('active');
-    if(active) {
-        selectform(active);
-    }
+    $('#selectors button').removeClass('force-active');
+    $('#btn-'+index).addClass('force-active');
+    window.history.replaceState('active', index, '?active='+index);
+  }
+
+  $('#selectors').on('click', 'button', function() {
+    selectform($(this).data('target'));
+  })
+  $('#selectors button').on('click', function(evt) {
+
+  });
+  var active = getParameterByName('active');
+  if(active) {
+    selectform(active);
+  }
 });
 </script>
 {% endblock %}
