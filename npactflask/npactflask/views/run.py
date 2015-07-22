@@ -4,9 +4,10 @@ import os
 import os.path
 import json
 import Bio.Seq
-from flask import url_for, request
+from flask import url_for, request, flash, redirect
 from pynpact import main, parsing, util
-from npactflask.views import getabspath, getrelpath, settings, app
+from npactflask.views import getabspath, getrelpath, is_clean_path
+from npactflask.views import settings, app
 from taskqueue import client, NoSuchTaskError
 
 
@@ -69,6 +70,11 @@ def run_frame(path):
     for the client to work with.
 
     """
+    if not is_clean_path(path):
+        flash("Path contained illegal characters. Please "
+              "select a new GBK file.")
+        return redirect(url_for('start'))
+
     return flask.render_template(
         'processing.html', **{
             'status_base': url_for('.run_status', path=''),

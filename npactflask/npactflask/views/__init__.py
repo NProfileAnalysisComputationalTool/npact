@@ -26,15 +26,6 @@ def is_clean_path(path):
     return (not path.startswith('/')) and os.path.normpath(path) == path
 
 
-def assert_clean_path(path, request,
-                      message="Path contained illegal characters. Please "
-                      "select a new GBK file.",
-                      destination='start'):
-    if not is_clean_path(path):
-        flash(message)
-        raise RedirectException(url_for(destination))
-
-
 class ImmediateHttpResponseException (Exception):
     httpResponse = None
 
