@@ -78,7 +78,7 @@ genbank data pasted directly in. <strong>Only one of the  following is neccessar
       <h1>Step 2: Upload a File</h1>
       <hr style="margin-top: 3px; margin-bottom: 10px;">
       <form method="post" action="" enctype="multipart/form-data">
-        <button class="btn-file" title="Select a file for upload">Choose File</button><span class="button-message">No file selected</span>
+        <input id="file" name="file" type="file" title="Select a file for upload">
         <label>Email me the results @ <input id="email" name="email" type="email">(optional)</label>
         <button type="submit" name="action" value="upload" title="Get the analysis results based on default configuration.">
           <span class="ui-button-text">Start Analysis!</span>
@@ -90,7 +90,7 @@ genbank data pasted directly in. <strong>Only one of the  following is neccessar
       <hr style="margin-top: 3px; margin-bottom: 10px;">
       <form method="post" action="" enctype="multipart/form-data">
         <label>Url:
-          <input id="url" name="url" type="url" value="">
+          <input id="fetchurl" name="fetchurl" type="url" value="">
         </label>
         <label>Email me the results @ <input id="email" name="email" type="email">(optional)</label>
         <button type="submit" name="action" value="fetchurl" title="Get the analysis results based on default configuration.">
