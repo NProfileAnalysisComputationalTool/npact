@@ -264,7 +264,7 @@ angular.module('npact')
       link: function($scope, $element, $attrs, ctrl) {
         DDNA.sliceForExtract($scope.extract).then(function(ddna) {
           $scope.ddna = ddna;
-          Translater($scope.ddna, GraphConfig.mycoplasma, $scope.extract.complement)
+          Translater(ddna, GraphConfig.mycoplasma, $scope.extract.complement)
             .then(function(res) {
               $scope.ddnaP = res.data && res.data.seq;
               $scope.ddnaRC = res.data && res.data.complement;
