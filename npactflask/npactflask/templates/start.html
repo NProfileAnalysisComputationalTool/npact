@@ -39,25 +39,6 @@ $(document).ready(function() {
     }
 });
 </script>
-
-<style>
-.btn-file {
-    margin-right: 8px;
-    margin-bottom: 3px;
-    padding: 2px 5px 3px 5px;
-    background: linear-gradient(#fcfcfc, #b6b6b6);
-    border-radius: 5px;
-    border: 1px solid #888;
-}
-
-label {
-    display: block;
-    margin-top: 5px;
-    margin-bottom: 10px;
-}
-
-</style>
-
 {% endblock %}
 
 {% block content %}
@@ -118,7 +99,8 @@ genbank data pasted directly in. <strong>Only one of the  following is neccessar
       </form>
     </div>
     <div id="form-pastein">
-      <h1 style="margin-bottom: 3px;">Step 2: Paste text below</h1>
+      <h1 style="margin-bottom: 3px;">Step 2: Paste genome text below</h1>
+      <p style="margin: 5px 0px 5px 0px;">Text can be in <a href="https://en.wikipedia.org/wiki/FASTA_format">FASTA format</a> or <a href="http://www.ncbi.nlm.nih.gov/Sitemap/samplerecord.html">GenBank format</a>.</p>
       <form method="post" action="" enctype="multipart/form-data">
         <textarea id="pastein" name="pastein" rows="4"></textarea>
         <label>Email me the results @ <input id="email" name="email" type="email">(optional)</label>
@@ -128,7 +110,7 @@ genbank data pasted directly in. <strong>Only one of the  following is neccessar
       </form>
     </div>
     <div id="form-search">
-      <h1>Step 2: Search Accession Number</h1>
+      <h1>Step 2: Search by Accession Number</h1>
       <hr style="margin-top: 3px; margin-bottom: 10px;">
       <form method="post" action="" enctype="multipart/form-data">
         <label>Accession Number:
