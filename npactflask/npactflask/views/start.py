@@ -76,7 +76,7 @@ def pastein():
     # email = request.args.get['email']
     if not text:
         flash('Text Required in Pastefield')
-        return redirect(url_for('start'))
+        return redirect(url_for('start') + '?active=pastein')
     (fd, savepath, relpath) = mksavefile("txt")
     logger.info("Saving paste to %r", relpath)
     with os.fdopen(fd, 'wb') as fh:
