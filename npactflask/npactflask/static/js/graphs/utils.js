@@ -187,12 +187,12 @@ angular.module('npact')
     return ParserFactory.create(parseExtract);
   })
 
-  .factory('Translater', function($http, $log, TRANSLATE_BASE_URL, CSRF_TOKEN){
+  .factory('Translater', function($http, $log, TRANSLATE_URL, CSRF_TOKEN){
     'use strict';
     return function (dna, mycoplasma, complement) {
       return $http({
         method: 'POST',
-        url:TRANSLATE_BASE_URL,
+        url:TRANSLATE_URL,
         data:$.param({
           seq:dna,
           complement: complement,
@@ -203,7 +203,7 @@ angular.module('npact')
     };
   })
 
-  .service('Fetcher', function(StatusPoller, $http, FETCH_URL) {
+  .service('Fetcher', function(StatusPoller, $http, FETCH_BASE_URL) {
     'use strict';
     var self = this;
     /**
@@ -222,7 +222,7 @@ angular.module('npact')
       if(!path) {
         throw new Error("Path is undefined");
       }
-      return self.rawFile(FETCH_URL + path);
+      return self.rawFile(FETCH_BASE_URL + path);
     };
 
 
@@ -239,7 +239,7 @@ angular.module('npact')
   })
 
 
-  .service('StatusPoller', function(STATUS_BASE_URL, FETCH_URL,
+  .service('StatusPoller', function(STATUS_BASE_URL, FETCH_BASE_URL,
                                     $q, $http, $timeout, $log) {
     'use strict';
     var initialPollTime = 200;

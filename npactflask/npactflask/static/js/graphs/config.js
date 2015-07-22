@@ -71,13 +71,13 @@ angular.module('npact')
    * Run a VERB (e.g. extract, acgt_gamma) on server.
    * Get back a config dictionary (which automatically updates GraphConfig)
    */
-  .factory('processOnServer', function(GraphConfig, KICKSTART_BASE_URL,
+  .factory('processOnServer', function(GraphConfig, KICKSTART_URL,
                                 PUBLIC_CONFIG_KEYS, Utils,
                                 $http, $log, $location) {
     'use strict';
     //The keys the server is going to accept from our GraphConfig
     return function(verb) {
-      var url = KICKSTART_BASE_URL;
+      var url = KICKSTART_URL;
       var postconfig = angular.extend({verb: verb}, $location.search());
       $log.log('Going to request', verb, url, postconfig);
       _.forEach(PUBLIC_CONFIG_KEYS, function(k) {

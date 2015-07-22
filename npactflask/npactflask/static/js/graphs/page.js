@@ -10,11 +10,11 @@ angular.module('npact')
   })
 
   .controller('npactGraphPageCtrl', function($scope, $q, $log, $window, dialogService,
-                                      Fetcher, FETCH_URL, EmailBuilder, STATIC_BASE_URL,
+                                      Fetcher, FETCH_BASE_URL, EmailBuilder, STATIC_BASE_URL,
                                       GraphConfig,  kickstarter, processOnServer) {
     'use strict';
 
-    $scope.FETCH_URL = FETCH_URL;
+    $scope.FETCH_BASE_URL = FETCH_BASE_URL;
     $scope.config = GraphConfig;
     $scope.email = EmailBuilder.send;
     kickstarter.start();
@@ -118,7 +118,7 @@ angular.module('npact')
   })
   .service('PredictionManager', function(Fetcher, StatusPoller, Pynpact, Track,
                                   GraphConfig, processOnServer, $log, MessageBus,
-                                  ACGT_GAMMA_FILE_LIST_URL) {
+                                  ACGT_GAMMA_FILE_LIST_BASE_URL) {
     'use strict';
     var self = this;
     self.files = null;
@@ -128,7 +128,7 @@ angular.module('npact')
       var path = result.path;
       if(!result.files) {
         $log.log('Fetching the ACGT_GAMMA_FILE_LIST from', path);
-        result.files = Fetcher.rawFile(ACGT_GAMMA_FILE_LIST_URL + path);
+        result.files = Fetcher.rawFile(ACGT_GAMMA_FILE_LIST_BASE_URL + path);
       }
       result.files.then(function(files) { self.files = files; });
     };
