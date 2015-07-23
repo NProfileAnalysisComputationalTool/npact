@@ -6,8 +6,8 @@
 {% endmacro %}
 
 {% block addScript %}
-<script src="{{ url_for('static', filename='css/custom-theme/jquery-ui.min.js')}}"></script>
-<script src="{{ url_for('static', filename='bower_components/qtip2/jquery.qtip.min.js')}}"></script>
+<script src="{{ vSTATIC('css/custom-theme/jquery-ui.min.js')}}"></script>
+<script src="{{ vSTATIC('bower_components/qtip2/jquery.qtip.min.js')}}"></script>
 <script type="text/javascript">
 function getParameterByName(name) {
     name = name.replace(/[\[]/, "\\[").replace(/[\]]/, "\\]");
@@ -48,7 +48,7 @@ $(document).ready(function() {
 {% block content %}
 <div class="contentPadding">
   <h2>NPACT - N-Profile Analysis Computational Tool (Prokaryotes)</h2>
-  <img src="{{ url_for('static', filename='images/dna.jpg') }}" alt="N-Profile Genbank Analysis Computational Tool image" style="margin:0 0 5px 8px; width:98%" />
+  <img src="{{ vSTATIC('images/dna.jpg') }}" alt="N-Profile Genbank Analysis Computational Tool image" style="margin:0 0 5px 8px; width:98%" />
   <p>For quantitative frame-analysis and identification of ORFs with statistically-significant 3-base periodicities in <b> prokaryotic sequences </b> NPACT is currently accepting sequence files in the GenBank format (see a <a href="http://www.ncbi.nlm.nih.gov/Sitemap/samplerecord.html">sample record</a> or the <a href="about">About</a> page).</p>
   <p>After seleting a sequence file, "Start Analysis!" will result in a graphical output showing sequence compositional contrasts for frame analysis, coding region (CDS) annotation from the input file, and, by default, regions of non-random 3-base compositional periodicity (hits), newly-identified or modified ORFs, and corresponding output text files.  </p>
 

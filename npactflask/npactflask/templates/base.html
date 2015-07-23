@@ -2,12 +2,12 @@
 <html>
   <head>
     <title>{% block title %}University of Florida Genetics Institute{% endblock title %}</title>
-    <link rel="stylesheet" type="text/css" href="{{ url_for('static', filename='css/basic.css') }}">
-    <link rel="stylesheet" type="text/css" href="{{ url_for('static', filename='css/style.css') }}">
-    <link rel="stylesheet" type="text/css" href="{{ url_for('static', filename='css/custom-theme/jquery-ui.min.css') }}">
-    <link rel="stylesheet" type="text/css" href="{{ url_for('static', filename='bower_components/qtip2/jquery.qtip.min.css') }}">
+    <link rel="stylesheet" type="text/css" href="{{ vSTATIC('css/basic.css') }}">
+    <link rel="stylesheet" type="text/css" href="{{ vSTATIC('css/style.css') }}">
+    <link rel="stylesheet" type="text/css" href="{{ vSTATIC('css/custom-theme/jquery-ui.min.css') }}">
+    <link rel="stylesheet" type="text/css" href="{{ vSTATIC('bower_components/qtip2/jquery.qtip.min.css') }}">
     
-    <script src="{{ url_for('static', filename='bower_components/jquery/dist/jquery.min.js') }}"></script>
+    <script src="{{ vSTATIC('bower_components/jquery/dist/jquery.min.js') }}"></script>
     {% block addScript %}{% endblock %}
   </head>
   <body ng-app="npact">

@@ -48,7 +48,10 @@ def getabspath(relpath, raise_on_missing=True):
 @app.context_processor
 def vSTATIC():
     def STATICV(filename):
-        vnum = os.path.getmtime(os.path.join(app.static_folder, filename))
+        if app.config['DEBUG']:
+            vnum = os.path.getmtime(os.path.join(app.static_folder, filename))
+        else:
+            vnum = app.config['VERSION']
         return (url_for('static', filename=filename, vnum=vnum))
     return dict(vSTATIC=STATICV)
 
