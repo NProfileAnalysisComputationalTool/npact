@@ -91,7 +91,7 @@ def translate():
         if request.form.get('mycoplasma'):
             table = 4
         seq = Bio.Seq.Seq(request.form.get('seq'))
-        rc = request.form.get('complement')
+        rc = int(request.form.get('complement', 0))
         if rc:
             seq = seq.reverse_complement()
         trans = Bio.Seq.translate(seq, table)
