@@ -60,14 +60,14 @@ angular.module('npact')
         // x2, y2, ...] lists, make a promise for the completed group of
         // points
         var p0 = [], p1 = [], p2 = [];
-        this._onProfilePoints = NProfiler
-          .slice({ startBase: this.startBaseM, endBase: this.endBaseM,
-                   onPoint: function(coord, p0v, p1v, p2v) {
-                     //invert because drawing is from the top so 100% is 0 pix
-                     p0.push(coord); p0.push(100.0 - p0v);
-                     p1.push(coord); p1.push(100.0 - p1v);
-                     p2.push(coord); p2.push(100.0 - p2v);
-                   }})
+        this._onProfilePoints = NProfiler.slice({
+          startBase: this.startBaseM, endBase: this.endBaseM,
+          onPoint: function(coord, p0v, p1v, p2v) {
+            //invert because drawing is from the top so 100% is 0 pix
+            p0.push(coord); p0.push(100.0 - p0v);
+            p1.push(coord); p1.push(100.0 - p1v);
+            p2.push(coord); p2.push(100.0 - p2v);
+          }})
           .then(function(opts) { return [p0, p1, p2]; });
       }
       return this._onProfilePoints;

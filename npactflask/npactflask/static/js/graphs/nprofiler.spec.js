@@ -19,26 +19,37 @@ describe('NProfiler', function(){
   }));
 
 
-
-
-  var NP, Pynpact, $digest, $timeout, sampleDdnaFile,
+  var DDNA, NP, Pynpact, $digest, $timeout, sampleDdnaFile,
       sampleConfig = {
         length: 11141,
         ddna: 'sampleDdnaFile.ddna'
       };
 
-  beforeEach(inject(function(NProfiler, _Pynpact_, $rootScope, _$timeout_, $templateCache) {
+  beforeEach(inject(function(_DDNA_, NProfiler, _Pynpact_, $rootScope, _$timeout_, $templateCache) {
     NP = NProfiler;
+    DDNA = _DDNA_;
     Pynpact = _Pynpact_;
     $digest = $rootScope.$digest;
     $timeout = _$timeout_;
     sampleDdnaFile = $templateCache.get('/js/test-data/' + sampleConfig.ddna);
   }));
 
-  describe('start', function() {
+  describe('DDNA start', function() {
     it('should fetch the ddna file', function(done) {
-      NP.start(sampleConfig).then(function() {
-        expect(NP.ddna).toBe(sampleDdnaFile);
+      DDNA.start(sampleConfig).then(function(ddna) {
+        expect(ddna).toBe(sampleDdnaFile);
+        expect(DDNA.ddna).toBe(sampleDdnaFile);
+        expect(DDNA.fetching).toBeTruthy();
+        done();
+      });
+      $digest();
+    });
+  });
+  describe('NProfiler start', function() {
+    it('should call DDNA.start preserving the old interface', function(done) {
+      NP.start(sampleConfig).then(function(ddna) {
+        expect(ddna).toBe(sampleDdnaFile);
+        expect(NP.fetching).toBeTruthy();
         done();
       });
       $digest();
@@ -58,14 +69,27 @@ describe('NProfiler', function(){
     });
   });
 
-  describe('.slice', function() {
+  describe('DDNA.slice', function() {
     beforeEach(inject(function($q) {
-      NP.ddna = sampleDdnaFile;
-      NP.fetching = $q.when(true);
+      DDNA.fetching = NP.fetching = $q.when(sampleDdnaFile);
+    }));
+    it('should slice length', function(done) {
+      DDNA.sliceForExtract({start:1, end: 9}).then(function(slice) {
+        expect(slice.length).toEqual(9);
+        expect(slice[0]).toEqual(sampleDdnaFile[0]);
+        done();
+      });
+      $digest();
+    });
+  });
+  describe('NP.slice', function() {
+    beforeEach(inject(function($q) {
+      DDNA.fetching = NP.fetching = $q.when(sampleDdnaFile);
     }));
     it('should be defined', function() {
       expect(NP.slice).toBeDefined();
     });
+
     it('should calculate the nprofile of a section', function(done) {
       // This is using the same parameters as the existing nprofile.c
       // and its output to compare
