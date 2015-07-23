@@ -79,6 +79,7 @@ def run_frame(path):
             'translate': url_for('translate'),
             'fetch_base': url_for('raw', path=''),
             'acgt_gamma_base': url_for('.acgt_gamma_file_list', path=''),
+            'STATIC_BASE': url_for('static', filename=''),
             'base_href': url_for('run_frame', path=path)
         })
 

@@ -3,28 +3,28 @@
 
 {% block addScript %}
 <base href="{{base_href}}">
-<script type="text/javascript" src="{{STATIC_URL}}css/custom-theme/jquery-ui.min.js"></script>
-<script type="text/javascript" src="{{STATIC_URL}}bower_components/angular/angular.min.js"></script>
-<script type="text/javascript" src="{{STATIC_URL}}bower_components/angular-cookies/angular-cookies.min.js"></script>
-<script type="text/javascript" src="{{STATIC_URL}}bower_components/konva/konva.min.js" defer></script>
-<script type="text/javascript" src="{{STATIC_URL}}bower_components/angular-messages/angular-messages.min.js" defer></script>
-<script type="text/javascript" src="{{STATIC_URL}}bower_components/angular-sanitize/angular-sanitize.min.js" defer></script>
-<script type="text/javascript" src="{{STATIC_URL}}bower_components/angular-jquery-dialog-service/dialog-service.js" defer></script>
-<script type="text/javascript" src="{{STATIC_URL}}bower_components/lodash/lodash.min.js" defer></script>
-<script type="text/javascript" src="{{STATIC_URL}}bower_components/qtip2/jquery.qtip.min.js" defer></script>
-<script type="text/javascript" src="{{STATIC_URL}}bower_components/rtree/dist/rtree.min.js" defer></script>
-<script type="text/javascript" src="{{STATIC_URL}}bower_components/ngSticky/dist/sticky.min.js" defer></script>
-<script type="text/javascript" src="{{STATIC_URL}}js/app.js"></script>
-<script type="text/javascript" src="{{STATIC_URL}}js/graphs/constants.js" defer></script>
-<script type="text/javascript" src="{{STATIC_URL}}js/graphs/utils.js" defer></script>
-<script type="text/javascript" src="{{STATIC_URL}}js/messages/message.js" defer></script>
-<script type="text/javascript" src="{{STATIC_URL}}js/graphs/nprofiler.js" defer></script>
-<script type="text/javascript" src="{{STATIC_URL}}js/graphs/tracks.js" defer></script>
-<script type="text/javascript" src="{{STATIC_URL}}js/graphs/page.js" defer></script>
-<script type="text/javascript" src="{{STATIC_URL}}js/graphs/calculator.js" defer></script>
-<script type="text/javascript" src="{{STATIC_URL}}js/graphs/grapher.js" defer></script>
-<script type="text/javascript" src="{{STATIC_URL}}js/graphs/graph.js" defer></script>
-<script type="text/javascript" src="{{STATIC_URL}}js/graphs/config.js" defer></script>
+<script type="text/javascript" src="{{vSTATIC('css/custom-theme/jquery-ui.min.js')}}"></script>
+<script type="text/javascript" src="{{vSTATIC('bower_components/angular/angular.min.js')}}"></script>
+<script type="text/javascript" src="{{vSTATIC('bower_components/angular-cookies/angular-cookies.min.js')}}"></script>
+<script type="text/javascript" src="{{vSTATIC('bower_components/konva/konva.min.js')}}" defer></script>
+<script type="text/javascript" src="{{vSTATIC('bower_components/angular-messages/angular-messages.min.js')}}" defer></script>
+<script type="text/javascript" src="{{vSTATIC('bower_components/angular-sanitize/angular-sanitize.min.js')}}" defer></script>
+<script type="text/javascript" src="{{vSTATIC('bower_components/angular-jquery-dialog-service/dialog-service.js')}}" defer></script>
+<script type="text/javascript" src="{{vSTATIC('bower_components/lodash/lodash.min.js')}}" defer></script>
+<script type="text/javascript" src="{{vSTATIC('bower_components/qtip2/jquery.qtip.min.js')}}" defer></script>
+<script type="text/javascript" src="{{vSTATIC('bower_components/rtree/dist/rtree.min.js')}}" defer></script>
+<script type="text/javascript" src="{{vSTATIC('bower_components/ngSticky/dist/sticky.min.js')}}" defer></script>
+<script type="text/javascript" src="{{vSTATIC('js/app.js')}}"></script>
+<script type="text/javascript" src="{{vSTATIC('js/graphs/constants.js')}}" defer></script>
+<script type="text/javascript" src="{{vSTATIC('js/graphs/utils.js')}}" defer></script>
+<script type="text/javascript" src="{{vSTATIC('js/messages/message.js')}}" defer></script>
+<script type="text/javascript" src="{{vSTATIC('js/graphs/nprofiler.js')}}" defer></script>
+<script type="text/javascript" src="{{vSTATIC('js/graphs/tracks.js')}}" defer></script>
+<script type="text/javascript" src="{{vSTATIC('js/graphs/page.js')}}" defer></script>
+<script type="text/javascript" src="{{vSTATIC('js/graphs/calculator.js')}}" defer></script>
+<script type="text/javascript" src="{{vSTATIC('js/graphs/grapher.js')}}" defer></script>
+<script type="text/javascript" src="{{vSTATIC('js/graphs/graph.js')}}" defer></script>
+<script type="text/javascript" src="{{vSTATIC('js/graphs/config.js')}}" defer></script>
 
 
 {% endblock addScript %}
@@ -40,7 +40,7 @@
       .constant('TRANSLATE_URL', '{{translate}}')
       .constant('FETCH_BASE_URL', '{{fetch_base}}')
       .constant('ACGT_GAMMA_FILE_LIST_BASE_URL', '{{acgt_gamma_base}}')
-      .constant('STATIC_BASE_URL', '{{STATIC_URL}}');
+      .constant('STATIC_BASE_URL', '{{STATIC_BASE}}');
   </script>
 </div>
 

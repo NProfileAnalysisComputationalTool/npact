@@ -46,8 +46,11 @@ def getabspath(relpath, raise_on_missing=True):
 
 
 @app.context_processor
-def STATIC():
-    return dict(STATIC_URL=url_for('static', filename=''))
+def vSTATIC():
+    def STATICV(filename):
+        vnum = os.path.getmtime(os.path.join(app.static_folder, filename))
+        return (url_for('static', filename=filename, vnum=vnum))
+    return dict(vSTATIC=STATICV)
 
 
 def index():
