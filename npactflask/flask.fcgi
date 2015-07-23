@@ -39,4 +39,4 @@ application = DispatcherMiddleware(redirectapp, {
 if __name__ == '__main__':
 
     #TODO: this probably needs the DispatcherMiddleware similar to runserver
-    WSGIServer(application, bindAddress=('127.0.0.1', 5001)).run()
+    WSGIServer(application).run()
