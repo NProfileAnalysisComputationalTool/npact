@@ -5,7 +5,7 @@ from flask import Flask, send_from_directory
 app = Flask(__name__)
 app.config['APPLICATION_ROOT'] = '/npact'
 app.config['VERSION'] = pkg_resources.require('npactflask')[0].version
-app.secret_key = 'a secret key'
+app.secret_key = 'cf0cb53d-1ff1-4074-a65d-977831de66af'
 
 
 from npactflask import settings
