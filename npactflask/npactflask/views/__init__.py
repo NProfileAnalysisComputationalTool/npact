@@ -1,12 +1,11 @@
 import flask
-import logging
 import os
 import os.path
 from flask import url_for, flash, redirect, safe_join
 from werkzeug.exceptions import NotFound
 from npactflask import app
 
-logger = logging.getLogger(__name__)
+logger = app.logger
 
 
 def library_root():

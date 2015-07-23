@@ -1,5 +1,4 @@
 import flask
-import logging
 import os.path
 import tempfile
 import urllib2
@@ -9,7 +8,7 @@ from pynpact import util, entrez, parsing
 from flask import url_for, redirect, request, flash
 
 
-logger = logging.getLogger(__name__)
+logger = app.logger
 
 
 def mksavefile(prefix):
@@ -19,7 +18,7 @@ def mksavefile(prefix):
     """
     # we're using tempfile to ensure the file we get is unique and
     # aren't overwriting another.
-    fd, abspath = tempfile.mkstemp(app.config['UPLOADS'], prefix=prefix)
+    fd, abspath = tempfile.mkstemp(dir=app.config['UPLOADS'], prefix=prefix)
     relpath = getrelpath(abspath)
     return (fd, abspath, relpath)
 
@@ -41,7 +40,7 @@ def file_upload():
 
 
 def fetchurl():
-    args = dict(request.args.items())
+    args = dict(request.values.items())
     url = args.pop('fetchurl', None)
     if not url:
         flash('URL Required in URL Field')

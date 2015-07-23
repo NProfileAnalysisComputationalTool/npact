@@ -1,5 +1,4 @@
 import flask
-import logging
 import os
 import os.path
 import Bio.Seq
@@ -10,7 +9,7 @@ from npactflask.views import getabspath, getrelpath, is_clean_path
 from taskqueue import client, NoSuchTaskError
 
 
-logger = logging.getLogger(__name__)
+logger = app.logger
 VALID_KEYS = ('first_page_title', 'following_page_title', 'nucleotides',
               'significance', 'alternate_colors', 'startBase', 'endBase',
               'basesPerGraph', 'x-tics', 'mycoplasma')
@@ -40,7 +39,6 @@ def build_config(path):
 
     # fixup nucleotides list
     if 'nucleotides' in request.args:
-        logger.info("nucleotides: %r", request.args.getlist('nucleotides'))
         config['nucleotides'] = request.args.getlist('nucleotides')
 
     for key in MAGIC_PARAMS:
@@ -85,7 +83,6 @@ def run_frame(path):
         })
 
 
-
 def translate():
     try:
         # table 4 is for mycoplasma ala:
@@ -105,7 +102,7 @@ def translate():
     except Exception as e:
         response = jsonify(repr(e))
         response.status = 500
-        return resposne
+        return response
 
 
 def kickstart(path):

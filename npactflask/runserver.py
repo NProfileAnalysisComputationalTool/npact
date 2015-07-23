@@ -3,13 +3,13 @@ import logging
 from flask import Flask, redirect
 from npactflask import app
 
-logger = logging.getLogger('npactflask')
-logger.setLevel(logging.DEBUG)
-# logger.addHandler(logging.StreamHandler())
-fmt = "%(asctime)s %(levelname)-7s %(name)-20s| %(message)s"
-sh = logging.StreamHandler()
-sh.setFormatter(logging.Formatter(fmt, datefmt='%H:%M:%S'))
-logger.addHandler(sh)
+# logger = logging.getLogger('npactflask')
+# logger.setLevel(logging.DEBUG)
+# # logger.addHandler(logging.StreamHandler())
+# fmt = "%(asctime)s %(levelname)-7s %(name)-20s| %(message)s"
+# sh = logging.StreamHandler()
+# sh.setFormatter(logging.Formatter(fmt, datefmt='%H:%M:%S'))
+# logger.addHandler(sh)
 
 
 redirectapp = Flask('redirectapp')
