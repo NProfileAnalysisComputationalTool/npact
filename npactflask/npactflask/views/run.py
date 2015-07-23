@@ -88,21 +88,19 @@ def translate():
         # table 4 is for mycoplasma ala:
         # http://www.ncbi.nlm.nih.gov/Taxonomy/Utils/wprintgc.cgi
         table = 1
-        if request.POST.get('mycoplasma'):
+        if request.form.get('mycoplasma'):
             table = 4
-        seq = Bio.Seq.Seq(request.POST.get('seq'))
-        rc = request.POST.get('complement')
+        seq = Bio.Seq.Seq(request.form.get('seq'))
+        rc = request.form.get('complement')
         if rc:
             seq = seq.reverse_complement()
         trans = Bio.Seq.translate(seq, table)
-        return flask.make_response(json.dumps({
+        return jsonify({
             'seq': str(trans),
-            'complement': rc and str(seq)}
-        ), 200)
+            'complement': rc and str(seq)})
     except Exception as e:
-        response = jsonify(repr(e))
-        response.status = 500
-        return response
+        logger.exception('Error While Translating')
+        return flask.make_response(repr(e), 500)
 
 
 def kickstart(path):
