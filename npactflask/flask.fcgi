@@ -5,6 +5,8 @@ from npactflask import app
 
 if __name__ == '__main__':
 #TODO: Test and uncomment the following log code.
+#    from taskqueue.tqdaemon import tqdaemonlog
+#    tqdaemonlog()
 # from logging.handlers import WatchedFileHandler
 # from logging import getLogger, Formatter
 

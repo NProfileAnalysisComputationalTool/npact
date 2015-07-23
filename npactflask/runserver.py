@@ -3,6 +3,9 @@ import logging
 from flask import Flask, redirect
 from npactflask import app
 
+from taskqueue.tqdaemon import tqdaemonlog
+tqdaemonlog()
+
 # logger = logging.getLogger('npactflask')
 # logger.setLevel(logging.DEBUG)
 # # logger.addHandler(logging.StreamHandler())

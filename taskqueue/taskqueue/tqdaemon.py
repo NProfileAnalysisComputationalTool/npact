@@ -6,7 +6,6 @@ import subprocess
 import re
 import time
 
-import lockfile
 from lockfile import pidlockfile
 
 import taskqueue
@@ -16,9 +15,6 @@ OPERATION_FAILED = 1
 INSTANCE_ALREADY_RUNNING = 2
 INSTANCE_NOT_RUNNING = 3
 SET_USER_FAILED = 4
-
-logger = logging.getLogger('taskqueue.daemon')
-
 
 def get_pidfile():
     return pidlockfile.PIDLockFile(
@@ -50,7 +46,7 @@ def stop():
 
     pid = status()
     if not pid:
-        logger.warn("Daemon not running.")
+        logging.getLogger('taskqueue.daemon').warn("Daemon not running.")
         return INSTANCE_NOT_RUNNING
 
     # Try killing the daemon process
@@ -63,7 +59,7 @@ def stop():
         if err.find("No such process") > 0:
             get_pidfile().break_lock()
         else:
-            logger.exception("Failed to stop daemon.")
+            logging.getLogger('taskqueue.daemon').exception("Failed to stop daemon.")
             return OPERATION_FAILED
     return OPERATION_SUCCESSFUL
 
@@ -83,79 +79,92 @@ def kill(sig=signal.SIGKILL):
         ['ps', 'x', '-U', str(uid), '-o', 'pid,command'],
         stdout=subprocess.PIPE)
     lines = proc.stdout.readlines()[1:]
-    logger.debug("Searching %d processes for this user.", len(lines))
+    logging.getLogger('taskqueue.daemon').debug(
+        "Searching %d processes for this user.", len(lines))
     killed = 0
     for l in lines:
         l = l.strip()
         m = re.match('(\\d+) (npact-.*)', l)
         if m:
             pid, name = m.groups()
-            logger.warning("Killing proc %s %r", pid, name)
+            logging.getLogger('taskqueue.daemon').warning(
+                "Killing proc %s %r", pid, name)
             try:
                 os.kill(int(pid), sig)
                 killed += 1
             except:
-                logger.exception("Error killing %s %r", pid, name)
+                logging.getLogger('taskqueue.daemon').exception(
+                    "Error killing %s %r", pid, name)
     return killed
 
 
 def daemonize():
-    "Start a daemonized taskqueue"
-    import daemon
+    """Start a daemonized taskqueue
 
+    This the code run after the initial fork to help get us all the
+    way to daemonized.
+
+    """
+    import daemon
+    import taskqueue
+    import logging
+    logger = logging.getLogger('taskqueue.daemon')
     try:
         # make tqdaemon a bit nicer than whatever parent launched us.
         os.nice(4)
     except:
         pass
-
-    # Before daemonizing figure out which handlers we want to keep.
-    # We only want to keep handlers for this library that aren't going
-    # to stderr or stdout
-    other_handlers = set(logging._handlerList)
-    fds = []
-    l = logger
-    while l:
-        for h in l.handlers:
-            if hasattr(h, 'stream') and \
-              hasattr(h.stream, 'fileno') and \
-              h.stream.fileno() not in [1,2]:
-                fds.append(h.stream.fileno())
-                other_handlers.discard(h)
-        l = l.propagate and l.parent
-
-    # Kill of any other loggers
-    logging.raiseExceptions = False
-    logger.debug("Killing other loggers")
-    logging.shutdown(list(other_handlers))
-
+    # Want to completely stop logging in this proc
     pidfile = get_pidfile()
     check_for_process(pidfile.read_pid())
     if pidfile.is_locked():
         logger.error("Daemon already running")
         return INSTANCE_ALREADY_RUNNING
     else:
-        logger.debug("Daemonizing, pidfile: %r", pidfile.path)
-    try:
-        with daemon.DaemonContext(
-                pidfile=pidfile, files_preserve=fds, detach_process=True):
-            logging.raiseExceptions = True
-            try:
-                import setproctitle
-                import taskqueue
-                setproctitle.setproctitle(taskqueue.PROC_TITLE)
-                logger.debug(
-                    "Successfully setproctitle: %r", taskqueue.PROC_TITLE)
-            except:
-                logger.exception("Couldn't setproctitle.")
-                pass
+        logger.info("Daemonizing, pidfile: %r", pidfile.path)
+    logging.shutdown()
+    with daemon.DaemonContext(pidfile=pidfile, detach_process=True,
+                              working_directory=taskqueue.BASE_DIR):
+        tqdaemonlog()
+        _proctitle()
+        log = logging.getLogger('taskqueue.daemon')
+        import taskqueue.server
+        log.info("Daemonized context")
+        sm = taskqueue.get_ServerManager(make_server=True)
+        sm.get_server().serve_forever()
 
-            import taskqueue.server
-            logger.info("Daemonized context")
-            sm = taskqueue.get_ServerManager(make_server=True)
-            sm.get_server().serve_forever()
-    finally:
-        logger.warning("Exiting (hopefully intentionally)")
+
+def _proctitle():
+    import taskqueue
+    import logging
+    log = logging.getLogger('taskqueue.daemon')
+    try:
+        import setproctitle
+        setproctitle.setproctitle(taskqueue.PROC_TITLE)
+        log.debug("Successfully setproctitle: %r", taskqueue.PROC_TITLE)
+    except:
+        log.exception("Couldn't setproctitle.")
+        pass
+
+
+def tqdaemonlog():
+    import logging
+    import multiprocessing
+    from logging.handlers import WatchedFileHandler
+    logging.raiseExceptions = True
+    handler = WatchedFileHandler(
+        os.path.join(taskqueue.BASE_DIR, 'tqdaemon.log'))
+    handler.setFormatter(logging.Formatter(
+        "%(asctime)s %(processName)15s/%(module)-8s %(levelname)-8s %(message)s",
+        datefmt='%H:%M:%S'))
+    tqlog = logging.getLogger('taskqueue')
+    mplog = multiprocessing.get_logger()
+    tqlog.setLevel(logging.DEBUG)
+    tqlog.propagate = False
+    mplog.propagate = False
+    tqlog.handlers = mplog.handlers = [handler]
+    tqlog.info('Finished setting up logging')
+    return tqlog
 
 
 def start():
