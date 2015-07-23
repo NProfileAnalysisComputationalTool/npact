@@ -187,17 +187,16 @@ angular.module('npact')
     return ParserFactory.create(parseExtract);
   })
 
-  .factory('Translater', function($http, $log, TRANSLATE_URL, CSRF_TOKEN){
+  .factory('Translater', function($http, $log, TRANSLATE_URL) {
     'use strict';
     return function (dna, mycoplasma, complement) {
       return $http({
         method: 'POST',
-        url:TRANSLATE_URL,
-        data:$.param({
-          seq:dna,
+        url: TRANSLATE_URL,
+        data: $.param({
+          seq: dna,
           complement: complement,
-          mycoplasma: mycoplasma,
-          csrfmiddlewaretoken:CSRF_TOKEN}),
+          mycoplasma: mycoplasma}),
         headers: {'Content-Type': 'application/x-www-form-urlencoded'}
       });
     };
