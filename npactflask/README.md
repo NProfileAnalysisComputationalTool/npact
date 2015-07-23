@@ -1,12 +1,10 @@
-# NPactweb
+# NPactflask
 
 This is the code for the website.
 
 ## Important files:
 
-* `settings.py` is the configuration for this django
-  website. Tells what modules and applications to load; configures
-  where paths for different content are.
+* `settings.py` is the configuration for the website. Logging information is in this. Configures where paths for different content are.
 
 * `npactflask/static/` holds the static images, CSS, and JS used on the
   website.
@@ -24,9 +22,7 @@ This is the code for the website.
 * `cleanup.py` used to clean out old uploaded files so they
   don't take too much space on the server.
 
-* `django.fcgi` is the entry point for fcgi webservers.
-
-* `npactflask/mediabundles.py` controls loading static assets
+* `flask.fcgi` is the entry point for fcgi webservers.
 
 * `npactflask/static/bower_components` - third party javascript
   libraries installed via [bower][], to be used in the final
