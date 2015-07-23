@@ -138,7 +138,9 @@ def build_email(path, config):
         result_link = request.build_absolute_uri(
             get_result_link(target_file))
         # build path back to run screen.
-        run_link = url_for('run', path=path, **dicforurl(config, exclude=['email']))
+        run_link = url_for(
+            'run', path=path,
+            **dicforurl(config, exclude=['email']))
         run_link = request.build_absolute_uri(run_link)
 
         task = util.Task(send_email, email, config, run_link, result_link)
