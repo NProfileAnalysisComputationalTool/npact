@@ -49,7 +49,7 @@ $(document).ready(function() {
 <div class="contentPadding">
   <h2>NPACT - N-Profile Analysis Computational Tool (Prokaryotes)</h2>
   <img src="{{ url_for('static', filename='images/dna.jpg') }}" alt="N-Profile Genbank Analysis Computational Tool image" style="margin:0 0 5px 8px; width:98%" />
-  <p>For quantitative frame-analysis and identification of ORFs with statistically-significant 3-base periodicities in <b> prokaryotic sequences </b> NPACT is currently accepting sequence files in the GenBank format (see a <a href="http://www.ncbi.nlm.nih.gov/Sitemap/samplerecord.html">sample record</a> or the <a href="/about">About</a> page).</p>
+  <p>For quantitative frame-analysis and identification of ORFs with statistically-significant 3-base periodicities in <b> prokaryotic sequences </b> NPACT is currently accepting sequence files in the GenBank format (see a <a href="http://www.ncbi.nlm.nih.gov/Sitemap/samplerecord.html">sample record</a> or the <a href="about">About</a> page).</p>
   <p>After seleting a sequence file, "Start Analysis!" will result in a graphical output showing sequence compositional contrasts for frame analysis, coding region (CDS) annotation from the input file, and, by default, regions of non-random 3-base compositional periodicity (hits), newly-identified or modified ORFs, and corresponding output text files.  </p>
 
   <p class="orange-text">The NPACT server can process uploaded files, files fetched from a url, or
@@ -104,7 +104,7 @@ genbank data pasted directly in. <strong>Only one of the  following is neccessar
     </div>
     <div id="form-pastein">
       <h1 style="margin-bottom: 3px;">Step 2: Paste genome text below</h1>
-      <p style="margin: 5px 0px 5px 0px;">Text can be in <a href="https://en.wikipedia.org/wiki/FASTA_format">FASTA format</a> or <a href="http://www.ncbi.nlm.nih.gov/Sitemap/samplerecord.html">GenBank format</a>.</p>
+      <p style="margin: 5px 0px 5px 0px;">Text can be in <a href="https://en.wikipedia.org/wiki/FASTA_format" target="_blank">FASTA format</a> or <a href="http://www.ncbi.nlm.nih.gov/Sitemap/samplerecord.html" target="_blank">GenBank format</a>.</p>
       <form method="post" action="" enctype="multipart/form-data">
         <textarea id="pastein" name="pastein" rows="4" value="{{ pastein }}"></textarea>
         {{emailinput()}}
