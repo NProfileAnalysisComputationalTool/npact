@@ -192,12 +192,12 @@ angular.module('npact')
     return function (dna, mycoplasma, complement) {
       return $http({
         method: 'POST',
-        url:TRANSLATE_BASE_URL,
-        data:$.param({
-          seq:dna,
+        url: TRANSLATE_BASE_URL,
+        data: $.param({
+          seq: dna,
           complement: complement,
           mycoplasma: mycoplasma,
-          csrfmiddlewaretoken:CSRF_TOKEN}),
+          csrfmiddlewaretoken: CSRF_TOKEN}),
         headers: {'Content-Type': 'application/x-www-form-urlencoded'}
       });
     };
