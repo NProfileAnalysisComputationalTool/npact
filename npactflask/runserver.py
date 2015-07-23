@@ -1,9 +1,13 @@
 #!/usr/bin/env python
 from flask import Flask, redirect
+from werkzeug.wsgi import DispatcherMiddleware
+
 from npactflask import app
 
 from taskqueue.tqdaemon import tqdaemonlog
 tqdaemonlog()
+
+app.config['DEBUG'] = True
 
 # logger = logging.getLogger('npactflask')
 # logger.setLevel(logging.DEBUG)
@@ -21,18 +25,16 @@ redirectapp = Flask('redirectapp')
 def doredirect():
     return redirect(app.config['APPLICATION_ROOT'])
 
+# Load a redirect app at the root URL to redirect us to the target app.
+# Serve app at APPLICATION_ROOT for localhost development.
+application = DispatcherMiddleware(redirectapp, {
+    app.config['APPLICATION_ROOT']: app,
+})
 
 if __name__ == '__main__':
     # Relevant documents:
     # http://werkzeug.pocoo.org/docs/middlewares/
     # http://flask.pocoo.org/docs/patterns/appdispatch/
     from werkzeug.serving import run_simple
-    from werkzeug.wsgi import DispatcherMiddleware
-    app.config['DEBUG'] = True
-    # Load a redirect app at the root URL to redirect us to the target app.
-    # Serve app at APPLICATION_ROOT for localhost development.
-    application = DispatcherMiddleware(redirectapp, {
-        app.config['APPLICATION_ROOT']: app,
-    })
-    run_simple('localhost', 5000, application,
+    run_simple('127.0.0.1', 5000, application,
                use_reloader=True, use_debugger=True, use_evalex=True)
