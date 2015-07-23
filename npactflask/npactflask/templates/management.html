@@ -1,9 +1,9 @@
 {% extends "base.html" %}
-{% load media %}
 {% block title %}NPACT - Management{% endblock %}
 
 {% block addScript %}
-{% include_media 'jquery.js' %}
+<script src="{{ url_for('static', filename='css/custom-theme/jquery-ui.min.js')}}"></script>
+<script src="{{ url_for('static', filename='bower_components/qtip2/jquery.qtip.min.js')}}"></script>
 <script type="text/javascript">
 </script>
 {% endblock %}
@@ -30,7 +30,7 @@
       <p>This needs to be done from time to time to help prevent disk space usage from going crazy</p>
       <p>
         <label>Cleanup files older than:
-          <input type="text" name="days" size="2" value="{{settings.ATIME_DEFAULT}}"/> days.
+          <input type="text" name="days" size="2" value="{{ app.config['ATIME_DEFAULT']}}"/> days.
         </label>
         <button type="submit" name="action" value="cleanup">Run Cleanup</button>
       </p>

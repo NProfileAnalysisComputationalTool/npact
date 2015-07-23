@@ -1,5 +1,4 @@
 from path import path
-import taskqueue
 
 from npactflask import app
 
@@ -29,7 +28,7 @@ def ppath(rel, create=True):
         raise Exception("Path '%s' doesn't exist." % abspath)
 
 app.config['UPLOADS'] = ppath('uploads')
-taskqueue.BASE_DIR = ppath('taskqueue')
+app.config['TASKQUEUE'] = ppath('taskqueue')
 
 # How many days should we keep upload files and products that haven't
 # been accessed

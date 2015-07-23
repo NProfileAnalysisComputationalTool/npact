@@ -1,5 +1,4 @@
 #!/usr/bin/env python
-import logging
 from flask import Flask, redirect
 from npactflask import app
 
