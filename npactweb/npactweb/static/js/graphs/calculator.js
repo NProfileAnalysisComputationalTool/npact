@@ -67,9 +67,9 @@ angular.module('npact')
       var zoomToBase = opts.startBase + Math.floor(opts.zoomOnPct*opts.basesPerGraph),
           row = Math.floor((opts.startBase - opts.offset)/opts.basesPerGraph),
           zoomFactor = opts.zoomingOut ? 2 : 0.5,
-          newbasesPerGraph = opts.basesPerGraph * zoomFactor,
+          newbasesPerGraph = Math.floor(opts.basesPerGraph * zoomFactor),
           newstartBase = zoomToBase - Math.floor(newbasesPerGraph * opts.zoomOnPct),
-          newoffset = newstartBase - (row*newbasesPerGraph);
+          newoffset = newstartBase - (row * newbasesPerGraph);
 
       return {offset: newoffset, basesPerGraph: newbasesPerGraph};
     };
