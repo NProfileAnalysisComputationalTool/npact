@@ -470,7 +470,7 @@ h2 span.qtip-help-icon { float: right; }
 
 #results h3 {margin: 10px 0px 0px;}
 
-.ui-state-active, 
+.ui-state-active,
 .ui-widget-content 
 .ui-state-active, 
 .ui-widget-header .ui-state-active {
@@ -486,7 +486,6 @@ input.ng-invalid {
 button.arrowbutton { margin: 0 2px; padding: 0 2px;}
 
 #startforms {
-    margin: 5px 5px;
     min-height:150px;
 }
 
@@ -540,9 +539,8 @@ button.arrowbutton { margin: 0 2px; padding: 0 2px;}
 }
 
 .force-active {
-    background: #546ABE;
-    font-weight: 500;
-    color: #FFB241;
+    background: #546ABE !important;
+    color: #FFB241 !important;
 }
 
 #btn-upload {
