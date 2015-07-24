@@ -3,10 +3,12 @@ import os
 import os.path
 import Bio.Seq
 from flask import url_for, request, flash, redirect, json, jsonify
-from pynpact import main, parsing, util
+from pynpact import main, parsing, util, executors
 from npactflask import app
 from npactflask.views import getabspath, getrelpath
-from taskqueue import client, NoSuchTaskError
+# from taskqueue import client, NoSuchTaskError
+
+gexec = executors.GeventExecutor()
 
 
 logger = app.logger
@@ -108,20 +110,17 @@ def kickstart(path):
     config = build_config(path)
     verb = request.args['verb']
     verb = verb.split(',')
-
     email = request.args.get('email')
-    client.ensure_daemon()
-    executor = client.get_server()
     for v in verb:
         if email:
-            config = main.process('allplots', config, executor=executor)
+            config = main.process('allplots', config, executor=gexec)
             build_email(path, config)
         elif v == 'parse':
             # we've already parsed in `build_config` above.
             pass
         else:
             # main.process handles the rest of the verbs, or errors
-            config = main.process(v, config, executor=executor)
+            config = main.process(v, config, executor=gexec)
 
     return flask.make_response(
         json.dumps(sanitize_config_for_client(config)))
@@ -143,7 +142,7 @@ def build_email(path, config):
         run_link = request.build_absolute_uri(run_link)
 
         task = util.Task(send_email, email, config, run_link, result_link)
-        eid = client.enqueue(task, after=[target_file])
+        eid = gexec.enqueue(task, after=[target_file])
         logger.info("Scheduled email to %r with jobid: %s", email, eid)
     except:
         logger.exception("Error scheduling email to send")
@@ -194,14 +193,14 @@ def run_status(path):
         # bother to check with the server
         if os.path.exists(abspath):
             result['ready'] = True
-        elif client.ready(abspath):
+        elif gexec.ready(abspath):
             result['ready'] = True
-            # Ensure the task finished correctly
-            client.result(abspath)
+            # Ensure the task finished correctly, this could except
+            gexec.result(abspath)
         else:
             result['ready'] = False
 
-    except NoSuchTaskError:
+    except KeyError:  # TODO: Use a restored NoSuchTak
         result['message'] = 'Unknown task identifier.'
         status = 404
     except Exception as e:
