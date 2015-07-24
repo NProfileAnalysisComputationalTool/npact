@@ -53,19 +53,19 @@ $(document).ready(function() {
   <p>After seleting a sequence file, "Start Analysis!" will result in a graphical output showing sequence compositional contrasts for frame analysis, coding region (CDS) annotation from the input file, and, by default, regions of non-random 3-base compositional periodicity (hits), newly-identified or modified ORFs, and corresponding output text files.  </p>
 
   <p class="orange-text">The NPACT server can process uploaded files, files fetched from a url, or
-genbank data pasted directly in. <strong>Only one of the  following is neccessary</strong>.</p>
-    <div id="msgpane" class="ui-corner-all">
-       {% with messages = get_flashed_messages() %}
-       {% if messages %}
-       {% for message in messages %}
-       <div class="message">
-          <p class="ui-state-highlight ui-corner-all ui-state-error">
-                               {{ message }}</p>
+    genbank data pasted directly in. <strong>Only one of the  following is neccessary</strong>.</p>
+  <div id="msgpane" class="ui-corner-all">
+    {% with messages = get_flashed_messages() %}
+    {% if messages %}
+    {% for message in messages %}
+    <div class="message">
+      <p class="ui-state-highlight ui-corner-all ui-state-error">
+        {{ message }}</p>
     </div>
     {% endfor %}
     {% endif %}
     {% endwith %}
-</div>
+  </div>
   <input type="hidden" name="selected" value="" id="selected"/>
   <div>
     <h1>Step 1: Select a method below</h1>
