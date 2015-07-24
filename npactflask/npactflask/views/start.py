@@ -3,7 +3,7 @@ import os.path
 import tempfile
 import urllib2
 from npactflask import app
-from npactflask.views import getrelpath, is_clean_path, library_root
+from npactflask.views import getrelpath, library_root
 from pynpact import util, entrez, parsing
 from flask import url_for, redirect, request, flash
 
@@ -21,6 +21,10 @@ def mksavefile(prefix):
     fd, abspath = tempfile.mkstemp(dir=app.config['UPLOADS'], prefix=prefix)
     relpath = getrelpath(abspath)
     return (fd, abspath, relpath)
+
+
+def is_clean_path(path):
+    return os.pathsep not in path and os.path.normpath(path) == path
 
 
 def file_upload():

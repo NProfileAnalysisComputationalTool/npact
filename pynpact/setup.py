@@ -1,10 +1,8 @@
 #!/usr/bin/env python
-import os, os.path, glob
-
-from setuptools import setup, Extension
+from setuptools import setup
 
 setup(name='pynpact',
-      version='0.4',
+      version='0.5',
       description='Python N-Profile Analysis Computation Tool',
       author='Luciano Brocchieri and Nathan Bird',
       author_email='nathan@acceleration.net',

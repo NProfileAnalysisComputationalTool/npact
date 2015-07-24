@@ -5,7 +5,7 @@ import Bio.Seq
 from flask import url_for, request, flash, redirect, json, jsonify
 from pynpact import main, parsing, util
 from npactflask import app
-from npactflask.views import getabspath, getrelpath, is_clean_path
+from npactflask.views import getabspath, getrelpath
 from taskqueue import client, NoSuchTaskError
 
 
@@ -67,9 +67,9 @@ def run_frame(path):
     for the client to work with.
 
     """
-    if not is_clean_path(path):
-        flash("Path contained illegal characters. Please "
-              "select a new GBK file.")
+
+    if not os.path.exists(getabspath(path, False)):
+        flash("Couldn't find genome in: %s" % path)
         return redirect(url_for('start'))
 
     return flask.render_template(
