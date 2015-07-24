@@ -9,7 +9,7 @@ logger = app.logger
 
 
 def view():
-    if (not app.config['DEBUG'] and request.environ.get('REMOTE_USER') is None):
+    if not app.config['DEBUG'] and request.environ.get('REMOTE_USER') is None:
         raise Unauthorized()
     if request.method == 'POST':
         handle_post()
@@ -17,12 +17,13 @@ def view():
         return redirect(url_for('management'))
     daemon_status = 'running' if tqdaemon.status() else 'stopped'
     return render_template('management.html',
-                           **{'app': app,
-                              'daemon_status': daemon_status})
+                           default_atime=app.config['ATIME_DEFAULT'],
+                           daemon_status=daemon_status)
 
 
 def handle_post():
     action = request.form.get('action')
+    logger.info("Handling action %r", action)
     if action == 'start-daemon':
         start_daemon()
     elif action == 'restart-daemon':
@@ -30,13 +31,11 @@ def handle_post():
         start_daemon()
     elif action == 'kill-daemon':
         count = tqdaemon.kill()
-        flash(request, "Killed {0} processes".format(count))
+        flash("Killed {0} processes".format(count))
     elif action == 'cleanup':
         cleanup()
     elif action == 'clear-library':
         clear_library()
-
-    flash(request, "Handled {0}".format(action))
 
 
 def start_daemon():
@@ -66,7 +65,7 @@ def cleanup():
     try:
         stdout, stderr = management.report_file_size()
         if stdout:
-            for l in stdout.split('\n'):
+            for l in stdout.strip().split('\n'):
                 flash(l)
         if stderr:
             flash(stderr)
