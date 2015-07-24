@@ -2,7 +2,7 @@
 {% block title %}NPACT - N-Profile Analysis Computational Tool{% endblock %}
 
 {% macro emailinput() %}
-<label>Email me the results @ <input id="email" name="email" type="email" value="{{ email }}">(optional)</label>
+<label>Email me the results <p style="display: inline; font-weight: 500; margin: 0px;">(optional)</p><input class="form-control" id="email" name="email" type="email" value="{{ email }}" style="width: 50%"></label>
 {% endmacro %}
 
 {% block addScript %}
@@ -18,13 +18,13 @@ function getParameterByName(name) {
 
 $(document).ready(function() {
   console.log("Startup");
-  $('button').not('.btn-file').button();
   $('#startforms div').hide();
   var selectform = function(index) {
     console.log('Selecting form', index);
     if($('#form-'+index).css('display') == 'none') {
       $('#startforms div').hide();
-      $('#form-'+index).slideDown();
+      $('.input-group').show();
+      $('#form-'+index).show();
     }
     $('#selectors button').removeClass('force-active');
     $('#btn-'+index).addClass('force-active');
@@ -41,6 +41,22 @@ $(document).ready(function() {
   if(active) {
     selectform(active);
   }
+
+  $('.btn-file :file').on('fileselect', function(event, label) {
+        var input = $(this).parents('.input-group').find(':text'),
+            log = label;
+        if( input.length ) {
+            input.val(log);
+        } else {
+            if(log) alert(log);
+        }
+    });
+});
+
+$(document).on('change', '.btn-file :file', function() {
+  var input = $(this),
+      label = input.val().replace(/\\/g, '/').replace(/.*\//, '');
+  input.trigger('fileselect', label);
 });
 </script>
 {% endblock %}
@@ -68,61 +84,68 @@ genbank data pasted directly in. <strong>Only one of the  following is neccessar
 </div>
   <input type="hidden" name="selected" value="" id="selected"/>
   <div>
-    <h1>Step 1: Select a method below</h1>
+    <h2>Step 1: Select a method below</h2>
   </div>
   <hr style="margin-top: 3px; margin-bottom: 10px;">
   <div id="selectors" style="margin-bottom: 15px;">
-    <button data-target="upload" id="btn-upload">Upload a File</button>
-    <button data-target="fetchurl" id="btn-fetchurl">Fetch from URL</button>
-    <button data-target="pastein" id="btn-pastein">Paste in as text</button>
-    <button data-target="search" id="btn-search">Accession Number</button>
+    <button class="btn btn-default" data-target="upload" id="btn-upload">Upload a File</button>
+    <button class="btn btn-default" data-target="fetchurl" id="btn-fetchurl">Fetch from URL</button>
+    <button class="btn btn-default" data-target="pastein" id="btn-pastein">Paste in as text</button>
+    <button class="btn btn-default" data-target="search" id="btn-search">Accession Number</button>
   </div>
   <div id="startforms">
     <div id="form-upload">
-      <h1>Step 2: Upload a File</h1>
+      <h2>Step 2: Upload a File</h2>
       <hr style="margin-top: 3px; margin-bottom: 10px;">
       <form method="post" action="" enctype="multipart/form-data">
-        <input id="file" name="file" type="file" title="Select a file for upload">
+        <div class="input-group">
+          <span class="input-group-btn">
+            <span class="btn btn-file">Choose File
+              <input id="file" name="file" type="file" title="Select a file for upload">
+            </span>
+          </span>
+          <input type="text" class="form-control" readonly>
+        </div>
         {{emailinput()}}
-        <button type="submit" name="active" value="upload" title="Get the analysis results based on default configuration.">
+        <button type="submit" class="btn btn-default btn-analysis" name="active" value="upload" title="Get the analysis results based on default configuration.">
           <span class="ui-button-text">Start Analysis!</span>
         </button>
       </form>
     </div>
     <div id="form-fetchurl">
-      <h1>Step 2: Enter a URL</h1>
+      <h2>Step 2: Enter a URL</h2>
       <hr style="margin-top: 3px; margin-bottom: 10px;">
       <form method="post" action="" enctype="multipart/form-data">
-        <label>Url:
-          <input id="fetchurl" name="fetchurl" type="url" value="{{ url }}">
+        <label>URL
+          <input id="fetchurl" class="form-control" name="fetchurl" type="url" value="{{ url }}" style="width: 50%;">
         </label>
         {{emailinput()}}
-        <button type="submit" name="active" value="fetchurl" title="Get the analysis results based on default configuration.">
+        <button type="submit" class="btn btn-default btn-analysis" name="active" value="fetchurl" title="Get the analysis results based on default configuration.">
           <span class="ui-button-text">Start Analysis!</span>
         </button>
       </form>
     </div>
     <div id="form-pastein">
-      <h1 style="margin-bottom: 3px;">Step 2: Paste genome text below</h1>
-      <p style="margin: 5px 0px 5px 0px;">Text can be in <a href="https://en.wikipedia.org/wiki/FASTA_format" target="_blank">FASTA format</a> or <a href="http://www.ncbi.nlm.nih.gov/Sitemap/samplerecord.html" target="_blank">GenBank format</a>.</p>
+      <h2 style="margin-bottom: 3px;">Step 2: Paste genome text below</h2>
+      <p style="margin: 5px 0px 5px 10px;">Text can be in <a href="https://en.wikipedia.org/wiki/FASTA_format" target="_blank">FASTA format</a> or <a href="http://www.ncbi.nlm.nih.gov/Sitemap/samplerecord.html" target="_blank">GenBank format</a>.</p>
       <form method="post" action="" enctype="multipart/form-data">
-        <textarea id="pastein" name="pastein" rows="4" value="{{ pastein }}"></textarea>
+        <textarea id="pastein" class="form-control" name="pastein" rows="4" value="{{ pastein }}"></textarea>
         {{emailinput()}}
-        <button type="submit" name="active" value="pastein" title="Get the analysis results based on default configuration.">
+        <button type="submit" class="btn btn-default btn-analysis" name="active" value="pastein" title="Get the analysis results based on default configuration.">
           <span class="ui-button-text">Start Analysis!</span>
         </button>
       </form>
     </div>
     <div id="form-search">
-      <h1>Step 2: Search by Accession Number</h1>
+      <h2>Step 2: Search by Accession Number</h2>
       <hr style="margin-top: 3px; margin-bottom: 10px;">
       <form method="post" action="" enctype="multipart/form-data">
-        <label>Accession Number:
-          <input id="entrez_search_term" name="search" type="search" value="{{ search }}">
+        <label>Accession Number
+          <input id="entrez_search_term" class="form-control" name="search" type="search" value="{{ search }}" style="width: 50%">
         </label>
         {{emailinput()}}
         {% include "start/EntrezSearchForm.html" %}
-        <button type="submit" name="active" value="search" title="Get the analysis results based on default configuration.">
+        <button type="submit" class="btn btn-default btn-analysis" name="active" value="search" title="Get the analysis results based on default configuration.">
           <span class="ui-button-text">Start Analysis!</span>
         </button>
       </form>

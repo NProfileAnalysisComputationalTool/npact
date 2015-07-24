@@ -1,4 +1,5 @@
 import pkg_resources
+import flask
 from flask import Flask, send_from_directory
 
 

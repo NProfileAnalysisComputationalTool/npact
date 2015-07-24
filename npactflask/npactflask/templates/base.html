@@ -1,19 +1,22 @@
 <!DOCTYPE html >
 <html>
   <head>
+
+    <style>
+    </style>  
+
     <title>{% block title %}University of Florida Genetics Institute{% endblock title %}</title>
-    <link rel="stylesheet" type="text/css" href="{{ vSTATIC('css/basic.css') }}">
+    <link rel="stylesheet" type="text/css" href="//maxcdn.bootstrapcdn.com/bootstrap/3.3.5/css/bootstrap.min.css?ver=3.3.5">
     <link rel="stylesheet" type="text/css" href="{{ vSTATIC('css/style.css') }}">
-    <link rel="stylesheet" type="text/css" href="{{ vSTATIC('css/custom-theme/jquery-ui.min.css') }}">
-    <link rel="stylesheet" type="text/css" href="{{ vSTATIC('bower_components/qtip2/jquery.qtip.min.css') }}">
-    
+
     <script src="{{ vSTATIC('bower_components/jquery/dist/jquery.min.js') }}"></script>
+    <script src="http://maxcdn.bootstrapcdn.com/bootstrap/3.3.5/js/bootstrap.min.js"></script>
     {% block addScript %}{% endblock %}
   </head>
   <body ng-app="npact">
     <div id="header">
-      <h1 id="dept"><a href="/npact">N-Profile Analysis Computational Tool</a></h1>
-      <h2 id="uf"><a href="http://www.ufl.edu/">University of Florida<span></span></a></h2>
+      <p id="dept"><a href="/npact">N-Profile Analysis Computational Tool</a></p>
+      <p id="uf"><a href="http://www.ufl.edu/">University of Florida<span></span></a></p>
     </div>
 
     <div id="mainContainer">
