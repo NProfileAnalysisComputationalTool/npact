@@ -445,7 +445,7 @@ h2 span.qtip-help-icon { float: right; }
     overflow: hidden;
 }
 
-#msgpane p { padding: 8px; }
+#msgpane p { padding: 14px; }
 #msgpane .message button { float:right; }
 .pointer:hover { cursor: pointer; }
 
@@ -464,50 +464,31 @@ h2 span.qtip-help-icon { float: right; }
 .ui-front {box-shadow: 0px 1px 8px #000;}
 .ui-front .ui-button {border:none; background: #7084D3;}
 
-/* Accordion styles */
-
-#results {padding: 5px ;}
-
-#results h3 {margin: 10px 0px 0px;}
-
-.ui-state-active,
-.ui-widget-content 
-.ui-state-active, 
-.ui-widget-header .ui-state-active {
-    border: 1px solid #AAA;
-    background: url("/npact/devassets/css/custom-theme/images/ui-bg_flat_65_5368C1_40x100.png?version=67e7644522b42d47721f44734383a7218a6ffcfe") repeat-x scroll 50% 50% #5368C1;
-    font-weight: bold;
-    color: #fff;
-}
-
-input.ng-invalid {
-    border: 2px red dashed !important;
-}
-button.arrowbutton { margin: 0 2px; padding: 0 2px;}
+/* Form styles */
 
 #startforms {
     min-height:150px;
 }
 
-.btn-default {
+.btn-form {
     color: #fff;
     background: #5965C2;
     padding: 10px 10px;
     font-size: 18px;
 }
 
-.btn-default:hover {
+.btn-form:hover {
     background: #5965C2;
     color: #F9B440;
 }
 
-.btn-default:active,
-.btn-default:active:hover {
+.btn-form:active,
+.btn-form:active:hover {
     background: #5965C2;
     color: #F9B440;
 }
 
-.input-group {
+#input-file {
     width: 50%;
 }
 
@@ -556,3 +537,22 @@ label {
     margin-top: 5px;
     margin-bottom: 10px;
 }
+
+.btn-search {
+    background: #f7f7f7;
+    border-color: #CCCCCC;
+    padding: 3px 8px;
+}
+
+form select.form-control,
+div.input-group input#searchbox,
+.btn-search {
+    font-size: 12px;
+    height: 25px;
+}
+
+/* Error messages */
+ 
+ .alert {
+    font-size: 18px;
+ }
