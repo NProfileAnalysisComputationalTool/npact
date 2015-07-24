@@ -34,7 +34,7 @@ e.g. http://daringfireball.net/projects/markdown/dingus.
 # Using
 
 This project is primarily meant to be used as a website (See the
-npactweb component). The pynpact component can be used directly on the
+npactflask component). The pynpact component can be used directly on the
 command line though this has not been tested recently.
 
 ## Requirements
@@ -83,16 +83,14 @@ These are already included.
 
 The `requirements.txt` contains the exact libraries beyond that. It is
 in a
-[format](http://www.pip-installer.org/en/latest/requirements.html)
+[format](https://pip.pypa.io/en/latest/reference/pip_install.html#requirements-file-format)
 that pip understands.
 
 Notes:
 
 * Biopython (1.60): Used to query entrez and read information out of
   GenBank files. This can probably be upgraded without any hassle.
-* Django (1.3): Used to build the website interface. Upgrading this
-  will be much more involved.
-* flup is used by django to convert fcgi requests to wsgi.
+* Flask (0.10): Used to build the website interface.
 
 
 ## Building
@@ -111,14 +109,14 @@ Primarily this should be run underneath a fcgi webserver. Look at
 
 ### Development mode
 
-Django does have a builtin webserver that will work for local
+Flask does have a builtin webserver that will work for local
 installations, to use it.
 
-1. edit `npactweb/settings.py` to change DEBUG from False to True at
+1. edit `npactflask/runserver.py` to change DEBUG from False to True at
    the top of the file.
 2. `source ve/bin/activate[.csh]`
 3. `python manage.py runserver`
-4. open [http://127.0.0.1:8000/npact/]()
+4. open [http://127.0.0.1:5000/npact/]()
 
 NB: Apache normally runs as a different user and you may encounter
 permissions issues if you run the developmenet server in the same
@@ -180,7 +178,6 @@ In the root of the project are several configuration and build files.
   environment and dependencies setup.
 * `publish.sh` - used for publishing to genome.ufl.edu (or potentially
   another host)
-* `manage.py` - the Django script for managing the website portion.
 * `lib/` - contains the libraries this project depends on.
 * `ve/` - holds the python virtual environment-- won't exist until
   after `bootstrap.py` has been called. Can be deleted and recreated
@@ -223,10 +220,10 @@ daemon was started by the webserver it must be shutdown as the same
 user. e.g. `sudo -u www-data ./manage.py tqdaemon stop`; this can also
 be done on the websites management panel.
 
-## npactweb/
+## npactflask/
 
 This is the code for the website. It is built on top of
-[Django](http://djangoproject.com/). See `README.md` in that folder.
+[Flask](http://flask.pocoo.org). See `README.md` in that folder.
 
 
 # Contributing
@@ -249,8 +246,8 @@ the root of the project simply type.
 ## Editing the website
 
 Website content is mostly in the templates at
-`npactweb/npactweb/templates`. This uses the
-[Django template language](https://docs.djangoproject.com/en/1.3/topics/templates/). To
+`npactflask/npactflask/templates`. This uses the
+[Flask Jinja2 templating ](http://flask.pocoo.org/docs/0.10/templating/). To
 alter the default values or help text given on the run page go look in
 `pynpact/pynpact/prepare.py`.
 
