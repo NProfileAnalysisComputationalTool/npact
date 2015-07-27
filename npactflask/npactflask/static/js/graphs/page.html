@@ -24,17 +24,17 @@
 
   <div id="results" >
     <div jq-accordion active="false">
-      <h3>Downloads</h3>
+      <h3 class="">Downloads</h3>
       <div id="downloads" style="display:none;" ng-controller="DownloadsCtrl as dc">
         <div class="ui-state-highlight ui-corner-all" >
           <p>
-            <a ng-if="pdf" href="{{FETCH_URL}}{{pdf}}" target="_blank">Download PDF</a>
+            <a ng-if="pdf" href="{{FETCH_BASE_URL}}{{pdf}}" target="_blank">Download PDF</a>
           </p>
           <div ng-show="predictionFiles.length > 0">
             <p>Results are now ready:
               <ul id="files">
                 <li ng-repeat="f in predictionFiles">
-                  <a href="{{FETCH_URL}}{{f}}" target="_blank">{{f}}</a>
+                  <a href="{{FETCH_BASE_URL}}{{f}}" target="_blank">{{f}}</a>
                 </li>
               </ul>
           </div>
@@ -46,5 +46,4 @@
       <div npact-graph-container id="graphcontainer"></div>
     </div>
   </div>
-  <div id="qtiptarget" style="display:none;"></div>
 </div>
