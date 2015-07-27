@@ -28,8 +28,6 @@ def ppath(rel, create=True):
         raise Exception("Path '%s' doesn't exist." % abspath)
 
 app.config['UPLOADS'] = ppath('uploads')
-import taskqueue
-app.config['TASKQUEUE'] = taskqueue.BASE_DIR = ppath('taskqueue')
 
 
 # How many days should we keep upload files and products that haven't

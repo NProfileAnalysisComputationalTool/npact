@@ -63,4 +63,3 @@ def _acgt_gamma(config, dtemp):
     except capproc.CallProcError as cpe:
         log.error("acgt_gamma exitted with rc: %r", cpe.returncode)
         raise
-

@@ -9,8 +9,7 @@ from npactflask.views import library_root
 
 logger = app.logger
 
-CLEANUP_PATHS = [path(app.config['UPLOADS']).realpath(),
-                 path(app.config['TASKQUEUE']).realpath()]
+CLEANUP_PATHS = [path(app.config['UPLOADS']).realpath()]
 
 
 def cleanup_old_files(days):
