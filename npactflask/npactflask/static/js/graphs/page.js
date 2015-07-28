@@ -15,22 +15,18 @@ angular.module('npact')
     };
   })
 
-  .controller('npactGraphPageCtrl', function($scope, $modal) {
-    
-    });
 
-  
-
-  .controller('npactGraphPageCtrl', function($scope, $q, $log, $window, dialogService,
-                                      Fetcher, FETCH_BASE_URL, EmailBuilder, STATIC_BASE_URL,
-                                      GraphConfig,  kickstarter, processOnServer) {
+  .controller('npactGraphPageCtrl', function($scope,$q, $window, $log, PrintModal,
+                                      Fetcher,
+                                      FETCH_BASE_URL, EmailBuilder,
+                                      STATIC_BASE_URL, GraphConfig,
+                                      kickstarter, processOnServer) {
     'use strict';
 
     $scope.FETCH_BASE_URL = FETCH_BASE_URL;
     $scope.config = GraphConfig;
     $scope.email = EmailBuilder.send;
     kickstarter.start();
-
 
     var _doPrint = function() {
       var t1 = new Date();
@@ -51,17 +47,8 @@ angular.module('npact')
     };
 
     this.print = function() {
-      var printTemplate = STATIC_BASE_URL + 'js/graphs/printConfirm.html';
-      $scope.animationsEnabled = true;
-
-    $scope.open = function () {
-      var modalInstance = $modal.open({
-        animation: $scope.animationsEnabled,
-        templateUrl: STATIC_BASE_URL + 'js/graphs/printConfirm.html',
-        controller: 'ModalInstanceCtrl'
-      });
+      PrintModal.show().then(_doPrint);
     };
-
     this.requestPDF = function() {
       processOnServer('allplots').catch(function(e) {
         $log.error('Error requesting PDF:', e);
@@ -70,16 +57,28 @@ angular.module('npact')
   })
 
   .controller('ModalInstanceCtrl', function($scope, $modalInstance) {
-    buttons: {
-           "Cancel": function() {
-             $modalInstance.close();
-           },
-           "Proceed": function() {
-             $modalInstance.close();
-             _doPrint();
-           }
-         }
-  });
+    $scope.proceed = function() {
+      $modalInstance.close();
+    };
+
+    $scope.cancel = function() {
+      $modalInstance.dismiss();
+    };
+  })
+
+  .service('PrintModal', function(STATIC_BASE_URL, $modal) {
+    var printTemplate = STATIC_BASE_URL + 'js/graphs/printConfirm.html';
+    this.show = function() {
+      var modalInstance = $modal.open({
+        animation: true,
+        templateUrl: printTemplate,
+        controller: 'ModalInstanceCtrl'
+      });
+      return modalInstance.result;
+    };
+  })
+
+
   .controller('DownloadsCtrl', function($scope, $log, PredictionManager, MessageBus, Pynpact, StatusPoller, GraphConfig, STATIC_BASE_URL, dialogService) {
     'use strict';
     $scope.$watch( function() { return PredictionManager.files; },
@@ -136,7 +135,8 @@ angular.module('npact')
     };
   })
   .service('PredictionManager', function(Fetcher, StatusPoller, Pynpact, Track,
-                                  GraphConfig, processOnServer, $log, MessageBus,
+                                  GraphConfig, processOnServer, $log,
+                                  MessageBus,
                                   ACGT_GAMMA_FILE_LIST_BASE_URL) {
     'use strict';
     var self = this;
@@ -226,5 +226,4 @@ angular.module('npact')
           }));
       }
     };
-  })
-;
+  });

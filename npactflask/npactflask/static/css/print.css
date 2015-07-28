@@ -1,6 +1,14 @@
 body, p, h1, h2, h3, h4, h5, h6, li  {font-family : "Trebuchet MS", verdana, lucida, arial, helvetica, sans-serif; }
 
-#header, #leftCol, #footer, #printControls, #predictionresults, #progressreport, #results h3, #downloads, .ui-dialog {display:none;}
+#header, #leftCol, #footer, #printControls, #predictionresults, #progressreport, #results h3, .ui-dialog, div[is-open="status.open"] {display:none;}
+
+#content{width:100%;}
+
+* {
+   border:none;
+   margin:0px;
+   padding:0px;
+}
 
 .graph {
    border-bottom: 2px solid #AAF;
