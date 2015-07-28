@@ -72,7 +72,6 @@ def pastein():
     logger.info("Saving paste to %r", relpath)
     with os.fdopen(fd, 'wb') as fh:
         fh.write(text)
-    flash('redirecting ' + relpath)
     return redirect(url_for('run_frame', path=relpath, **args))
 
 

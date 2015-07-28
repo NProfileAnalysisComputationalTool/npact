@@ -24,7 +24,7 @@ angular.module('npact')
   .directive('npactMsgPane', function(MessageBus) {
     return {
       retrict: 'E',
-      template: '<div id="msgpane" class="ui-corner-all"><npact-msg ng-repeat="msg in messages" message="msg"></npact-msg></div>',
+      template: '<div><npact-msg ng-repeat="msg in messages" message="msg"></npact-msg></div>',
       controller: function($scope, $log) {
         this.remove = _.bind(MessageBus.remove, MessageBus);
         $scope.$watch(

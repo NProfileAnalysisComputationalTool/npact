@@ -24,7 +24,7 @@ $(document).ready(function() {
     if($('#form-'+index).css('display') == 'none') {
       $('#startforms div').hide();
       $('.input-group').show();
-      $('#form-'+index).show();
+      $('#form-'+index).slideDown();
     }
     $('#selectors button').removeClass('force-active');
     $('#btn-'+index).addClass('force-active');
@@ -68,8 +68,8 @@ $(document).on('change', '.btn-file :file', function() {
   <p>For quantitative frame-analysis and identification of ORFs with statistically-significant 3-base periodicities in <b> prokaryotic sequences </b> NPACT is currently accepting sequence files in the GenBank format (see a <a href="http://www.ncbi.nlm.nih.gov/Sitemap/samplerecord.html">sample record</a> or the <a href="about">About</a> page).</p>
   <p>After seleting a sequence file, "Start Analysis!" will result in a graphical output showing sequence compositional contrasts for frame analysis, coding region (CDS) annotation from the input file, and, by default, regions of non-random 3-base compositional periodicity (hits), newly-identified or modified ORFs, and corresponding output text files.  </p>
 
-  <p class="orange-text">The NPACT server can process uploaded files, files fetched from a url, or
-genbank data pasted directly in. <strong>Only one of the  following is neccessary</strong>.</p>
+  <p class="orange-text">The NPACT server can process uploaded files, files fetched from a URL, or
+GenBank data pasted directly in. <strong>Only one of the  following is neccessary</strong>.</p>
     <div id="msgpane">
        {% with messages = get_flashed_messages() %}
        {% if messages %}
@@ -88,7 +88,7 @@ genbank data pasted directly in. <strong>Only one of the  following is neccessar
     <h2>Step 1: Select a method below</h2>
   </div>
   <hr style="margin-top: 3px; margin-bottom: 10px;">
-  <div id="selectors" style="margin-bottom: 15px;">
+  <div id="selectors">
     <button class="btn btn-form" data-target="upload" id="btn-upload">Upload a File</button>
     <button class="btn btn-form" data-target="fetchurl" id="btn-fetchurl">Fetch from URL</button>
     <button class="btn btn-form" data-target="pastein" id="btn-pastein">Paste in as text</button>

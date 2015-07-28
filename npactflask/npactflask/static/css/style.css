@@ -116,7 +116,6 @@ ul {
     color:#000;
     font-family:Trebuchet MS, Arial, Helvetica, sans-serif;
     font-size:18px;
-    margin: 10px 0 10px 12px;
 }
 
 #content ul {
@@ -339,6 +338,9 @@ textarea { width: 100%; }
 
 ul.messages { border: 1px dotted #444; }
 
+p#error-message {
+    margin: 0px 0px;
+}
 
 button.Start { clear:both; margin: 8px;}
 
@@ -363,7 +365,7 @@ h2 span.qtip-help-icon { float: right; }
 #progress .ui-icon { float:left;  margin-right: .5em;}
 
 #progress h3 + div { padding-left: 16px; }
-#progress h4 { margin-top: 6px; color:#FF4A00; }
+#progress h4 { color:#FF4A00; }
 
 
 .spinner { height: 24px; width=24px; float:left;}
@@ -445,8 +447,6 @@ h2 span.qtip-help-icon { float: right; }
     overflow: hidden;
 }
 
-#msgpane p { padding: 14px; }
-#msgpane .message button { float:right; }
 .pointer:hover { cursor: pointer; }
 
 #printControls { float: right;}

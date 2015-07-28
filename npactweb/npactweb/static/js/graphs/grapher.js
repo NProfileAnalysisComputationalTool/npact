@@ -655,24 +655,24 @@ angular.module('npact')
     return Grapher;
   })
 
-  .service('Tooltip', function($log, $rootScope, $compile) {
-    'use strict';
-    this.show = function (extract, pageX, pageY) {
-      var scope = $rootScope.$new(),
-          tpl = '<div npact-extract="extract"></div>';
-      scope.extract = extract;
-      $('#qtiptarget').qtip({
-        content: {text: $compile(tpl)(scope)},
-        position: { my: 'top center', target: [pageX, pageY] },
-        show: true,
-        hide: 'unfocus',
-        events: {
-          'hide': function(event, api) { api.destroy(); }
-        }
-      });
-    };
-    this.clearAll = function() {
-      jQuery('.qtip').qtip('destroy');
-    };
-  })
+  // .service('Tooltip', function($log, $rootScope, $compile) {
+  //   'use strict';
+  //   this.show = function (extract, pageX, pageY) {
+  //     var scope = $rootScope.$new(),
+  //         tpl = '<div npact-extract="extract"></div>';
+  //     scope.extract = extract;
+  //     $('#qtiptarget').qtip({
+  //       content: {text: $compile(tpl)(scope)},
+  //       position: { my: 'top center', target: [pageX, pageY] },
+  //       show: true,
+  //       hide: 'unfocus',
+  //       events: {
+  //         'hide': function(event, api) { api.destroy(); }
+  //       }
+  //     });
+  //   };
+  //   this.clearAll = function() {
+  //     jQuery('.qtip').qtip('destroy');
+  //   };
+  // })
 ;

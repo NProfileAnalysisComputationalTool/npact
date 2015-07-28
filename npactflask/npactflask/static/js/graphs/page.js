@@ -1,4 +1,10 @@
 angular.module('npact')
+  .controller('Results', function ($scope) {
+    $scope.status = {
+      isFirstOpen: true,
+      isFirstDisabled: false
+    };
+  })
   .directive('npactGraphPage', function(STATIC_BASE_URL) {
     'use strict';
     return {
@@ -8,6 +14,12 @@ angular.module('npact')
       controllerAs: 'pageCtrl'
     };
   })
+
+  .controller('npactGraphPageCtrl', function($scope, $modal) {
+    
+    });
+
+  
 
   .controller('npactGraphPageCtrl', function($scope, $q, $log, $window, dialogService,
                                       Fetcher, FETCH_BASE_URL, EmailBuilder, STATIC_BASE_URL,
@@ -40,20 +52,16 @@ angular.module('npact')
 
     this.print = function() {
       var printTemplate = STATIC_BASE_URL + 'js/graphs/printConfirm.html';
-      dialogService.open('printConfirm', printTemplate, null, {
-         resizable: false,
-         modal: true,
-         buttons: {
-           "Cancel": function() {
-             $( this ).dialog( "close" );
-           },
-           "Proceed": function() {
-             $( this ).dialog( "close" );
-             _doPrint();
-           }
-         }
-       });
+      $scope.animationsEnabled = true;
+
+    $scope.open = function () {
+      var modalInstance = $modal.open({
+        animation: $scope.animationsEnabled,
+        templateUrl: STATIC_BASE_URL + 'js/graphs/printConfirm.html',
+        controller: 'ModalInstanceCtrl'
+      });
     };
+
     this.requestPDF = function() {
       processOnServer('allplots').catch(function(e) {
         $log.error('Error requesting PDF:', e);
@@ -61,6 +69,17 @@ angular.module('npact')
     };
   })
 
+  .controller('ModalInstanceCtrl', function($scope, $modalInstance) {
+    buttons: {
+           "Cancel": function() {
+             $modalInstance.close();
+           },
+           "Proceed": function() {
+             $modalInstance.close();
+             _doPrint();
+           }
+         }
+  });
   .controller('DownloadsCtrl', function($scope, $log, PredictionManager, MessageBus, Pynpact, StatusPoller, GraphConfig, STATIC_BASE_URL, dialogService) {
     'use strict';
     $scope.$watch( function() { return PredictionManager.files; },
@@ -205,28 +224,6 @@ angular.module('npact')
           waitOn.catch(function(e) {
             MessageBus.danger('Failure while identifying significant 3-base periodicities');
           }));
-      }
-    };
-  })
-
-  .directive('jqAccordion', function($log) {
-    'use strict';
-    return {
-      scope: true,
-      restrict: 'A',
-      link: function($scope, $element, $attrs) {
-        var defaults = {
-          heightStyle: "content",
-          collapsible: true,
-          active: 0
-        };
-        var opts = _.transform(defaults, function(acc, v, k, o) {
-          v = $attrs[k];
-          if(v) {
-            acc[k] = $scope.$eval(v);
-          }
-        }, defaults);
-        $($element).accordion(opts);
       }
     };
   })
