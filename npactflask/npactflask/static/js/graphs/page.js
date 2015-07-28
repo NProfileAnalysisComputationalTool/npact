@@ -79,7 +79,7 @@ angular.module('npact')
   })
 
 
-  .controller('DownloadsCtrl', function($scope, $log, PredictionManager, MessageBus, Pynpact, StatusPoller, GraphConfig, STATIC_BASE_URL, dialogService) {
+  .controller('DownloadsCtrl', function($scope, $log, $modal, PredictionManager, MessageBus, Pynpact, StatusPoller, GraphConfig, STATIC_BASE_URL, dialogService) {
     'use strict';
     $scope.$watch( function() { return PredictionManager.files; },
                    function(val) { $scope.predictionFiles = val; });
@@ -91,7 +91,11 @@ angular.module('npact')
           .then(function(pdfFilename) {
             $log.log('PDF ready', pdfFilename);
             var dialogTemplate = STATIC_BASE_URL + 'js/graphs/pdfReady.html';
-            dialogService.open('pdfReady', dialogTemplate, { pdf: pdfFilename });
+            var modalInstance = $modal.open({
+              animation:true,
+              templateUrl: dialogTemplate,
+              controller: 'ModalInstanceCtrl'
+            });
             $scope.pdf = pdfFilename;
           });
         MessageBus.info("Generating PDF", p);
