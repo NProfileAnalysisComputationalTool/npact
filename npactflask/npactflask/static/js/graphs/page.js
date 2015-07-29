@@ -5,6 +5,7 @@ angular.module('npact')
       isFirstDisabled: false
     };
   })
+
   .directive('npactGraphPage', function(STATIC_BASE_URL) {
     'use strict';
     return {
@@ -14,7 +15,6 @@ angular.module('npact')
       controllerAs: 'pageCtrl'
     };
   })
-
 
   .controller('npactGraphPageCtrl', function($scope,$q, $window, $log, PrintModal,
                                       Fetcher,
@@ -56,13 +56,34 @@ angular.module('npact')
     };
   })
 
-  .controller('ModalInstanceCtrl', function($scope, $modalInstance) {
-    $scope.proceed = function() {
-      $modalInstance.close();
-    };
+  .controller('DownloadsCtrl', function($scope, $log, PredictionManager, PDFModal, MessageBus, Pynpact, StatusPoller, GraphConfig, dialogService) {
+    'use strict';
+    $scope.$watch( function() { return PredictionManager.files; },
+                   function(val) { $scope.predictionFiles = val; });
+    $scope.$watch(
+      function() { return GraphConfig[Pynpact.PDF]; },
+      function(pdfFilename) {
+        if(!pdfFilename && $('PDFModal').hasClass('in'))
+          return;
+        var p = StatusPoller.start(pdfFilename)
+          .then(function(pdfFilename) {
+            $log.log('PDF ready', pdfFilename);
+            PDFModal.show();
+            $scope.pdf = pdfFilename;
+          });
+        MessageBus.info("Generating PDF", p);
+      });
+})
 
-    $scope.cancel = function() {
-      $modalInstance.dismiss();
+  .service('PDFModal', function(STATIC_BASE_URL, $modal){
+    var dialogTemplate = STATIC_BASE_URL + 'js/graphs/pdfReady.html';
+    this.show = function(){
+      var modalInstance = $modal.open({
+      animation:true,
+      templateUrl: dialogTemplate,
+      controller: 'ModalInstanceCtrl'
+      });
+      return modalInstance.result;
     };
   })
 
@@ -78,29 +99,17 @@ angular.module('npact')
     };
   })
 
+.controller('ModalInstanceCtrl', function($scope, $modalInstance) {
+    $scope.proceed = function() {
+      $modalInstance.close();
+    };
 
-  .controller('DownloadsCtrl', function($scope, $log, $modal, PredictionManager, MessageBus, Pynpact, StatusPoller, GraphConfig, STATIC_BASE_URL, dialogService) {
-    'use strict';
-    $scope.$watch( function() { return PredictionManager.files; },
-                   function(val) { $scope.predictionFiles = val; });
-    $scope.$watch(
-      function() { return GraphConfig[Pynpact.PDF]; },
-      function(pdfFilename) {
-        if(!pdfFilename) return;
-        var p = StatusPoller.start(pdfFilename)
-          .then(function(pdfFilename) {
-            $log.log('PDF ready', pdfFilename);
-            var dialogTemplate = STATIC_BASE_URL + 'js/graphs/pdfReady.html';
-            var modalInstance = $modal.open({
-              animation:true,
-              templateUrl: dialogTemplate,
-              controller: 'ModalInstanceCtrl'
-            });
-            $scope.pdf = pdfFilename;
-          });
-        MessageBus.info("Generating PDF", p);
-      });
+    $scope.cancel = function() {
+      $modalInstance.dismiss();
+    };
   })
+
+  
 
   .service('kickstarter', function($q, $log, processOnServer, MessageBus,
                             NProfiler, PredictionManager, ExtractManager) {
