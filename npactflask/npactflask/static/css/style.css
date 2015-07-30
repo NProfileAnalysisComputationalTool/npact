@@ -84,7 +84,7 @@ h3,h4 {
 
 p,li,td,dd,dt {
     color:#444;
-    font-size:75%;
+    font-size:85%;
 }
 
 th { color:#222; font-size: .75em; }
@@ -119,6 +119,7 @@ ul {
     color:#000;
     font-family:Trebuchet MS, Arial, Helvetica, sans-serif;
     font-size:18px;
+    margin: 10px 0 10px 12px;
 }
 
 #content ul {
@@ -277,7 +278,7 @@ ul {
     color:#111;
     font-size:75%;
     font-style:italic;
-    padding:4px 0 0 10px;
+    padding-left:10px;
     text-transform:uppercase;
 }
 
@@ -285,7 +286,7 @@ ul {
     background:url(../images/pointer_small.gif) no-repeat 0 13px;
     clear:left;
     letter-spacing:1px;
-    padding:7px 0 3px 10px;
+    padding:5px 0 0px 10px;
 }
 
 #related li {
@@ -477,6 +478,24 @@ h2 span.qtip-help-icon { float: right; }
 
 #progressreport h3 {
     margin-left: 12px;
+}
+
+#results h4.panel-title {
+    margin: 0px 0px;
+}
+
+/* Modals */
+
+.btn-proceed {
+    color: #fff;
+    background: #f8b340;
+    border-color: #dc9f39;
+}
+
+.btn-cancel {
+    color: #FFF;
+    background: #5965C2;
+    border-color: #505BAF;
 }
 
 /* Form styles */
