@@ -1,3 +1,6 @@
+# Version 2.3.1 - 2015-07-30
+* Fix direct strand protein translation
+
 # Version 2.3.0 - 2015-07-30
 * Blast a gene from the gene info window
 * Scroll left and right with arrow keys
