@@ -71,18 +71,18 @@ $(document).on('change', '.btn-file :file', function() {
   <p class="orange-text">The NPACT server can process uploaded files, files fetched from a URL, or
 GenBank data pasted directly in. <strong>Only one of the following is neccessary</strong>.</p>
     <div id="msgpane">
-       {% with messages = get_flashed_messages() %}
-       {% if messages %}
-       {% for message in messages %}
-       <div class="message">
+        {% with messages = get_flashed_messages() %}
+        {% if messages %}
+        {% for message in messages %}
+        <div class="message">
           <p class="alert alert-danger">
             {{ message }}
           </p>
+        </div>
+        {% endfor %}
+        {% endif %}
+        {% endwith %}
     </div>
-    {% endfor %}
-    {% endif %}
-    {% endwith %}
-</div>
   <input type="hidden" name="selected" value="" id="selected"/>
   <div>
     <h2>Step 1: Select a method below</h2>

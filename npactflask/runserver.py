@@ -1,8 +1,6 @@
 #!/usr/bin/env python
-from flask import Flask, redirect
-from werkzeug.wsgi import DispatcherMiddleware
 
-from npactflask import app
+from npactflask import app, app_with_redirect
 
 from taskqueue.tqdaemon import tqdaemonlog
 tqdaemonlog()
@@ -18,18 +16,7 @@ app.config['DEBUG'] = True
 # logger.addHandler(sh)
 
 
-redirectapp = Flask('redirectapp')
-
-
-@redirectapp.route('/')
-def doredirect():
-    return redirect(app.config['APPLICATION_ROOT'])
-
-# Load a redirect app at the root URL to redirect us to the target app.
-# Serve app at APPLICATION_ROOT for localhost development.
-application = DispatcherMiddleware(redirectapp, {
-    app.config['APPLICATION_ROOT']: app,
-})
+application = app_with_redirect
 
 if __name__ == '__main__':
     # Relevant documents:
