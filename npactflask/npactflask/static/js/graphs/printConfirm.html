@@ -1,8 +1,10 @@
-<div id="printConfirm" title="Ready to print?">
-  <p>Printing requires rendering all the graph rows, for large genomes this may take several.</p>
-  <p>This takes time roughly linear to the number of rows. Narrowing the range (start and end base) or zooming out by using a larger bases/graph will both lower the time required.</p>
+<div id="printConfirm">
+	<h1>Ready to print?</h1>
+	<hr>
+  <p>Printing requires rendering all the graph rows – for large genomes this may take a while.</p>
+  <p>The time it will take is roughly linear to the number of rows. Narrowing the range (start and end base) or zooming out by using larger bases/graph will both lower the time required.</p>
 </div>
 <div class="modal-footer">
-  <button class="btn btn-primary" ng-click="proceed()">Proceed</button>
-  <button class="btn btn-warning" ng-click="cancel()">Cancel</button>
+  <button class="btn btn-proceed" ng-click="proceed()">Proceed</button>
+  <button class="btn btn-cancel" ng-click="cancel()">Cancel</button>
 </div>
