@@ -2,7 +2,7 @@
 {% block title %}NPACT - N-Profile Analysis Computational Tool{% endblock %}
 
 {% macro emailinput() %}
-<label>Email results to <p style="display: inline; font-weight: 500; margin: 0px;">(optional)</p><input class="form-control" id="email" name="email" type="email" value="{{ email }}" style="width: 50%"></label>
+<label>Email me the results <p style="display: inline; font-weight: 500; margin: 0px;">(optional)</p><input class="form-control" id="email" name="email" type="email" value="{{ email }}" style="width: 50%"></label>
 {% endmacro %}
 
 {% block addScript %}
@@ -66,10 +66,10 @@ $(document).on('change', '.btn-file :file', function() {
   <h2>NPACT - N-Profile Analysis Computational Tool (Prokaryotes)</h2>
   <img src="{{ vSTATIC('images/dna.jpg') }}" alt="N-Profile Genbank Analysis Computational Tool image" style="margin:0 0 5px 8px; width:98%" />
   <p>For quantitative frame-analysis and identification of ORFs with statistically-significant 3-base periodicities in <b> prokaryotic sequences </b> NPACT is currently accepting sequence files in the GenBank format (see a <a href="http://www.ncbi.nlm.nih.gov/Sitemap/samplerecord.html">sample record</a> or the <a href="about">About</a> page).</p>
-  <p>After seleting a sequence file, "Start Analysis!" will result in a graphical output showing sequence compositional contrasts for frame analysis, coding region (CDS) annotation from the input file, and, by default, regions of non-random 3-base compositional periodicity (hits), newly-identified or modified ORFs, and corresponding output text files.</p>
+  <p>After seleting a sequence file, "Start Analysis!" will result in a graphical output showing sequence compositional contrasts for frame analysis, coding region (CDS) annotation from the input file, and, by default, regions of non-random 3-base compositional periodicity (hits), newly-identified or modified ORFs, and corresponding output text files.  </p>
 
   <p class="orange-text">The NPACT server can process uploaded files, files fetched from a URL, or
-GenBank data pasted directly in. <strong>Only one of the following is neccessary</strong>.</p>
+GenBank data pasted directly in. <strong>Only one of the  following is neccessary</strong>.</p>
     <div id="msgpane">
         {% with messages = get_flashed_messages() %}
         {% if messages %}
