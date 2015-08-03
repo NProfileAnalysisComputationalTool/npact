@@ -371,7 +371,7 @@ h2 span.qtip-help-icon { float: right; }
 #progress h4 { color:#FF4A00; }
 
 
-.spinner { height: 24px; width=24px; float:left;}
+.spinner { height: 24px; width:24px; float:left;}
 
 #content .ui-state-error { font-size: 1.2em; }
 #content .ui-corner-all p { margin: .5em .7em .7em .7em }

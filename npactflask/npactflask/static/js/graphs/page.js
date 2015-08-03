@@ -63,7 +63,7 @@ angular.module('npact')
     $scope.$watch(
       function() { return GraphConfig[Pynpact.PDF]; },
       function(pdfFilename) {
-        if(!pdfFilename && $('PDFModal').hasClass('in'))
+        if(!pdfFilename || $('PDFModal').hasClass('in'))
           return;
         var p = StatusPoller.start(pdfFilename)
           .then(function(pdfFilename) {
