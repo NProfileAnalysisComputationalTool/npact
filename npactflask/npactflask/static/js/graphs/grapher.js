@@ -1,4 +1,4 @@
-angular.module('npact')
+angular.module('npact', ['ui.bootstrap'])
 
   .factory('Grapher', function($log, $q, GraphConfig, GraphingCalculator, $rootScope,
                         Tooltip, NProfiler, Utils, npactConstants) {
