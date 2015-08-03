@@ -479,6 +479,20 @@ h2 span.qtip-help-icon { float: right; }
     margin-left: 12px;
 }
 
+/* DNA Popup */
+
+.dna-popup {
+    text-align: left;
+    padding: 15px 15px;
+}
+
+.dna-text {
+    font-family: Courier New, monospace;
+    font-size: 15px;
+    word-wrap: break-word;
+    text-align: left;
+}
+
 /* Form styles */
 
 #startforms {

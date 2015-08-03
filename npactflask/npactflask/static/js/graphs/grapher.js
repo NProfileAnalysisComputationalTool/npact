@@ -655,24 +655,26 @@ angular.module('npact')
     return Grapher;
   })
 
-  .service('Tooltip', function($log, $rootScope, $compile) {
+  .controller('ExtractTooltipCtrl', function($scope, extract, $log) {
+    $log.log('extract', extract);
+    $scope.extract = extract;
+  })
+
+  .controller('TooltipScopeCtrl', function($scope, extracScopeStuff) {
+    angular.extend($scope, extracScopeStuff);
+  })
+
+  .service('Tooltip', function($modal) {
     'use strict';
     this.show = function (extract, pageX, pageY) {
-      var scope = $rootScope.$new(),
-          tpl = '<div npact-extract="extract"></div>';
-      scope.extract = extract;
-      $('#qtiptarget').qtip({
-        content: {text: $compile(tpl)(scope)},
-        position: { my: 'top center', target: [pageX, pageY] },
-        show: true,
-        hide: 'unfocus',
-        events: {
-          'hide': function(event, api) { api.destroy(); }
+      var modalInstance = $modal.open({
+        template: '<div npact-extract="extract"></div>',
+        controller: 'ExtractTooltipCtrl',
+        size: 'lg',
+        resolve: {
+          extract: function() {return extract;}
         }
       });
-    };
-    this.clearAll = function() {
-      jQuery('.qtip').qtip('destroy');
-    };
-  })
-;
+      return modalInstance.result;
+    }
+  });
