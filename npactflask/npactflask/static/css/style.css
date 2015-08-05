@@ -479,6 +479,25 @@ h2 span.qtip-help-icon { float: right; }
     margin-left: 12px;
 }
 
+.tooltip.customClass>.tooltip-inner {
+    text-align: left;
+    font-size: 16px;
+    color: #880000;
+    background-color: #ffff66;
+    box-shadow: 0 6px 12px rgba(0,0,0,.175);
+    padding: 10px 10px;
+    max-width: 300px;
+}
+
+.tooltip.customClass>.tooltip-arrow {
+    display: block;
+    border-right-color: #ffff66;
+}
+
+.tooltip.ng-isolate-scope.right.customClass {
+    width: 300px;
+}
+
 /* DNA Popup */
 
 .dna-popup {
