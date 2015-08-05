@@ -1,15 +1,15 @@
 <div id="configContainer" ng-controller="TooltipCtrl">
   <form name="configForm">
-    <h2>Graph Controls <span tooltip-template="'helpTool'" tooltip-placement="right" tooltip-class="customClass" tooltip-append-to-body="true">?</span></h2>
-    <div><a href="?" class="btn md-text" target="_self">Reset to defaults</a>
-    </div>
+    <h2 style="font-size: 24px;">Graph Controls <span tooltip-template="'helpTool'" tooltip-placement="right" tooltip-class="customClass" tooltip-append-to-body="true" class="glyphicon glyphicon-question-sign" style="float: right; cursor: pointer"></span></h2>
 
     <script type="text/ng-template" id="helpTool"><p>To pan left or right you can either use the <b>left and right arrow keys</b> or <b>click and drag</b> on graph</p><p><b>Double click</b> on a graph to zoom into that point. Hold <b>shift and double click</b> on a graph to zoom out.</p>
     </script>
 
+    <div><a href="?" class="btn btn-default" target="_self">Reset to defaults</a>
+    </div>
     <div>
       <label>Zoom:
-        <input type="number" name="basesPerGraph"
+        <input class="form-control form-control-graph-controls" type="number" name="basesPerGraph"
                style="width:5em;"
                min="100" required
                ng-model="gc.basesPerGraph"
@@ -23,19 +23,19 @@
     </div>
     <div>
       <label>Range:</label>
-      <input type="number" name="startBase" style="width:6em;"
+      <input class="form-control form-control-graph-controls" type="number" name="startBase" style="width:6em;"
              min="0" max="{{gc.length}}"
              ng-model="gc.startBase"
              ng-model-options="{ updateOn: 'default blur', debounce: { 'default': 600, 'blur': 0 } }">
-      <span class="sm-text">to</span>
-      <input type="number" name="endBase" style="width:6em;"
+      <span>to</span>
+      <input class="form-control form-control-graph-controls" type="number" name="endBase" style="width:6em;"
              min="0" max="{{gc.length}}"
              ng-model="gc.endBase"
              ng-model-options="{ updateOn: 'default blur', debounce: { 'default': 600, 'blur': 0 } }">
     </div>
     <div>
       <label>Goto:
-        <input type="number" name="gotoBase" style="width:6em;"
+        <input class="form-control form-control-graph-controls" type="number" name="gotoBase" style="width:6em;"
                min="0" max="{{gc.length}}"
                ng-model="gc.gotoBase"
                ng-model-options="{ updateOn: 'default blur', debounce: { 'default': 600, 'blur': 0 } }">
@@ -43,7 +43,7 @@
     </div>
     <div>
       <label>Find ORF by name:<br/>
-        <input type="text" name="findORF" style="width:9em;"
+        <input class="form-control form-control-graph-controls" type="text" name="findORF" style="width:9em;"
                ng-model="gc.findORF"
                ng-model-options="{ updateOn: 'default blur', debounce: { 'default': 1200, 'blur': 0 } }"
                npact-orf-finder
@@ -83,7 +83,8 @@
       <h3>Prediction Options</h3>
       <div>
         <label>Prediction significance
-        <select ng-model="gc.significance"
+        <select class="form-control"
+                ng-model="gc.significance"
                 ng-options="x for x in [0.01, 0.001, 0.0001]"
                 title="significance threshold for high scoring segments (hits)"
                 >

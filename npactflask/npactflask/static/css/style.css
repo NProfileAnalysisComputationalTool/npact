@@ -211,7 +211,7 @@ ul {
 #mainContainer {
     background:#fff url(../images/bg_priNav.jpg) repeat-x;
     max-width:1300px;
-    min-width:800px;
+    min-width:1000px;
     margin:0 auto;
     padding-top:10px;
     position:relative;
@@ -378,6 +378,11 @@ h2 span.qtip-help-icon { float: right; }
 
 
 /* ****** For the Results page ****** */
+
+#progress {
+    min-height: 1100px;
+}
+
 #
 .ui-state-highlight { margin-top:10px; padding:10px; width:94%; }
 .ui-state-highlight p {color:#000;}
@@ -386,11 +391,52 @@ h2 span.qtip-help-icon { float: right; }
 #files li {color:#000;}
 #files li:hover {color:#C60;}
 
+.sm-text {font-size: 10px;}
+.md-text {font-size: 14px;}
+
+.graph {
+    border-bottom: 2px solid #AAF;
+    padding: 8px 0px;
+    overflow: hidden;
+}
+
+.pointer:hover { cursor: pointer; }
+
+#printControls { float: right;}
+#printControls .btn {
+    display: inline-block; 
+    padding: 4px 10px 6px;
+}
+#printControls .ui-icon-print {margin-top: 1px;}
+#printConfirm p {
+    font-size: 14px;
+    text-align: left;
+    margin: 10px 10px;
+}
+
+
+.ui-widget-header {
+    color: #fff;
+}
+.ui-front {box-shadow: 0px 1px 8px #000;}
+.ui-front .ui-button {border:none; background: #7084D3;}
+
+#content #progress h2 {
+    margin:12px 0 15px 12px;
+}
+
+#progressreport h3 {
+    margin-left: 12px;
+}
+
+/* Graph Controls */
+
 #configContainer {
     background: #F7F7F7; 
     border-bottom: solid 4px #4059BD;
     font-size: 14px;
     padding: 0px 8px 8px;
+    min-width: 220px;
 }
 
 #configContainer div.ng-scope {margin-bottom: 5px;}
@@ -440,44 +486,6 @@ h2 span.qtip-help-icon { float: right; }
     margin: 0px 4px;
 }
 
-.sm-text {font-size: 10px;}
-.md-text {font-size: 14px;}
-
-.graph {
-    border-bottom: 2px solid #AAF;
-    padding: 8px 0px;
-    overflow: hidden;
-}
-
-.pointer:hover { cursor: pointer; }
-
-#printControls { float: right;}
-#printControls .btn {
-    display: inline-block; 
-    padding: 4px 10px 6px;
-}
-#printControls .ui-icon-print {margin-top: 1px;}
-#printConfirm p {
-    font-size: 14px;
-    text-align: left;
-    margin: 10px 10px;
-}
-
-
-.ui-widget-header {
-    color: #fff;
-}
-.ui-front {box-shadow: 0px 1px 8px #000;}
-.ui-front .ui-button {border:none; background: #7084D3;}
-
-#content #progress h2 {
-    margin:12px 0 15px 12px;
-}
-
-#progressreport h3 {
-    margin-left: 12px;
-}
-
 .tooltip.customClass>.tooltip-inner {
     text-align: left;
     font-size: 16px;
@@ -495,6 +503,12 @@ h2 span.qtip-help-icon { float: right; }
 
 .tooltip.ng-isolate-scope.right.customClass {
     width: 300px;
+}
+
+.form-control-graph-controls {
+    display: inline;
+    height: 27px;
+    padding: 4px 5px;
 }
 
 label.track-label{
