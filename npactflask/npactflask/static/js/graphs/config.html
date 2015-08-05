@@ -1,6 +1,6 @@
 <div id="configContainer" ng-controller="TooltipCtrl">
   <form name="configForm">
-    <h2>Graph Controls <span tooltip-template="'helpTool'" tooltip-placement="right" tooltip-class="customClass">?</span></h2>
+    <h2>Graph Controls <span tooltip-template="'helpTool'" tooltip-placement="right" tooltip-class="customClass" tooltip-append-to-body="true">?</span></h2>
     <div><a href="?" class="btn md-text" target="_self">Reset to defaults</a>
     </div>
 
@@ -69,14 +69,14 @@
       <h3>Tracks</h3>
       <div>
         <div ng-repeat="t in gc.tracks track by t.name">
-          <label><input ng-model="t.active" type="checkbox" /> {{t.name}}</label>
+          <label class="track-label"><input ng-model="t.active" type="checkbox" /> {{t.name}}</label>
         </div>
       </div>
 
       <h3>N-Profile Options</h3>
       <div class="nprofile-options">
         <span>Base types profiled:</span><br>
-        <checkbox-list ng-model="gc.nucleotides"
+        <checkbox-list id="profile-options" ng-model="gc.nucleotides"
                        title="nucleotide type(s) represented in frame analysis"
                        options="['A', 'C', 'G', 'T']">
       </div>
