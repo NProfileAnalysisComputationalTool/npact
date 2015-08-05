@@ -27,7 +27,8 @@
     "jquery": "~2.1.0",
     "rtree": "~1.4.2",
     "jquery-ui": "~1.11.2",
-    "angular-jquery-dialog-service": "~0.8.1"
+    "angular-jquery-dialog-service": "~0.8.1",
+    "ngSticky": "~1.7.9"
   },
   "devDependencies": {
     "angular-mocks": "~1.4.0"
