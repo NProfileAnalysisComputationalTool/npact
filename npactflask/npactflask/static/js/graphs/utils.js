@@ -202,7 +202,7 @@ angular.module('npact')
     };
   })
 
-  .service('Fetcher', function(StatusPoller, $http, FETCH_BASE_URL) {
+  .service('Fetcher', function(StatusPoller, $http, FETCH_BASE_URL, BASE_URL) {
     'use strict';
     var self = this;
     /**
@@ -229,12 +229,12 @@ angular.module('npact')
      * poll the server for when `path` is ready, then fetch it
      */
     self.pollThenFetch = function(path) {
-      if(!path) {
-        throw new Error("Path is undefined");
-      }
-      return StatusPoller.start(path).then(self.fetchFile);
+      if(!path) { throw new Error("Path is undefined"); }
+      var blockonurl = BASE_URL + '/blockon/' + path;
+      return $http.get(blockonurl).then(function(res) {
+        return res.data;
+      });
     };
-
   })
 
 

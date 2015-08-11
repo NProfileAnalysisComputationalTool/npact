@@ -11,9 +11,8 @@
       waiting on {{printCounter}} rows to finish
     </span>
 
-    &nbsp;<a href="#"
+    &nbsp;<a href="#" target="_blank" ng-href="{{BASE_URL + '/getpdf/' + PATH}}"
              title="Have the server generate a PDF for printing (this takes a minute)."
-             ng-click="pageCtrl.requestPDF()"
              class="btn md-text">Request PDF</a>&nbsp;
   </div>
   <h2 ng-model="gc.first_page_title" contenteditable strip-br="true"></h2>
@@ -28,7 +27,9 @@
       <div id="downloads" style="display:none;" ng-controller="DownloadsCtrl as dc">
         <div class="ui-state-highlight ui-corner-all" >
           <p>
-            <a ng-if="pdf" href="{{FETCH_URL}}{{pdf}}" target="_blank">Download PDF</a>
+            <a href="#"
+             title="Have the server generate a PDF for printing (this takes a minute)."
+             ng-href="{{BASE_URL + '/getpdf/' + PATH}}">Request PDF</a>
           </p>
           <div ng-show="predictionFiles.length > 0">
             <p>Results are now ready:

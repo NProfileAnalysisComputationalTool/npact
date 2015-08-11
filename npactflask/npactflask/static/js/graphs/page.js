@@ -10,6 +10,7 @@ angular.module('npact')
   })
 
   .controller('npactGraphPageCtrl', function($scope, $q, $log, $window, dialogService,
+                                      BASE_URL, PATH,
                                       Fetcher, FETCH_BASE_URL, EmailBuilder, STATIC_BASE_URL,
                                       GraphConfig,  kickstarter, processOnServer) {
     'use strict';
@@ -17,6 +18,8 @@ angular.module('npact')
     $scope.FETCH_BASE_URL = FETCH_BASE_URL;
     $scope.config = GraphConfig;
     $scope.email = EmailBuilder.send;
+    $scope.BASE_URL = BASE_URL;
+    $scope.PATH = PATH;
     kickstarter.start();
 
 
@@ -65,19 +68,6 @@ angular.module('npact')
     'use strict';
     $scope.$watch( function() { return PredictionManager.files; },
                    function(val) { $scope.predictionFiles = val; });
-    $scope.$watch(
-      function() { return GraphConfig[Pynpact.PDF]; },
-      function(pdfFilename) {
-        if(!pdfFilename) return;
-        var p = StatusPoller.start(pdfFilename)
-          .then(function(pdfFilename) {
-            $log.log('PDF ready', pdfFilename);
-            var dialogTemplate = STATIC_BASE_URL + 'js/graphs/pdfReady.html';
-            dialogService.open('pdfReady', dialogTemplate, { pdf: pdfFilename });
-            $scope.pdf = pdfFilename;
-          });
-        MessageBus.info("Generating PDF", p);
-      });
   })
 
   .service('kickstarter', function($q, $log, processOnServer, MessageBus,
