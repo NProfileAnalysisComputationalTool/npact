@@ -1,6 +1,6 @@
 from flask import url_for, redirect, request, flash, render_template
 from werkzeug.exceptions import Unauthorized
-from npactflask import management, app
+from npactflask import cleanup, app
 
 
 # Get an instance of a logger
@@ -30,7 +30,7 @@ def handle_post():
 def cleanup():
     try:
         days = int(request.form.get('days', app.config['ATIME_DEFAULT']))
-        if management.cleanup_old_files(days):
+        if cleanup.cleanup_old_files(days):
             flash("Successfully purged files older than %d days." % days)
         else:
             flash("Error removing old files.")
@@ -38,7 +38,7 @@ def cleanup():
         flash("Error removing old files: %s" % e)
 
     try:
-        stdout, stderr = management.report_file_size()
+        stdout, stderr = cleanup.report_file_size()
         if stdout:
             for l in stdout.strip().split('\n'):
                 flash(l)
@@ -50,6 +50,6 @@ def cleanup():
 
 def clear_library():
     try:
-        management.clear_library()
+        cleanup.clear_library()
     except Exception as e:
         flash("Error clearing library: %s" % e)

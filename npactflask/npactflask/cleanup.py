@@ -1,5 +1,5 @@
 import logging
-import subprocess
+from subprocess import PIPE
 from npactflask import app
 
 from path import path
@@ -24,14 +24,13 @@ def clean_path(path, days):
     "This function actually runs the find and delete."
     logger.info("Cleaning older than: %d @ %r", days, path)
     cmd = ["find", path, "-atime", "+" + str(days), "-delete"]
-    return capproc.capturedCall(cmd, logger=logger, stdin=False,
-                                stderr_level=logging.WARNING)
+    return capproc.capturedCall(
+        cmd, logger=logger, stdin=False, stderr_level=logging.WARNING)
 
 
 def report_file_size():
-    proc = capproc.capturedPopen(['du', '-h', '-s'] + CLEANUP_PATHS,
-                                 stdout=subprocess.PIPE,
-                                 stderr=subprocess.PIPE)
+    proc = capproc.capturedPopen(
+        ['du', '-h', '-s'] + CLEANUP_PATHS, stdout=PIPE, stderr=PIPE)
     return proc.communicate()
 
 

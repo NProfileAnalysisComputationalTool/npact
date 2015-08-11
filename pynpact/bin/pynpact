@@ -1,0 +1,27 @@
+#!/usr/bin/env python
+import logging
+import os
+import os.path
+from optparse import OptionParser
+from pynpact.main import run_cmdline
+
+if __name__ == '__main__':
+    parser = OptionParser("""%prog <genebank file>""")
+    parser.add_option('-v', '--verbose', action='store_true', dest='verbose',
+                      help="Show more verbose log messages.")
+    parser.add_option('-e', '--executor', action='store', dest='executor',
+                      default='gevent')
+    (options, args) = parser.parse_args()
+
+    if len(args) != 1:
+        parser.print_help()
+        exit(1)
+
+    original = args[0]
+    gbkfile = os.path.realpath(original)
+    logging.basicConfig(
+        level=(options.verbose and logging.DEBUG or logging.INFO),
+        format="%(asctime)s %(name)-10s %(levelname)-8s %(message)s",
+        datefmt='%H:%M:%S')
+
+    run_cmdline(gbkfile, options.executor)

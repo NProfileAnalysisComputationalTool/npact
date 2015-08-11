@@ -1,6 +1,6 @@
 #!/usr/bin/env python
-from distutils.core import setup
-import os, os.path
+import os
+from setuptools import setup
 
 
 def recursive_files(*roots):
@@ -10,18 +10,16 @@ def recursive_files(*roots):
                 yield os.path.join(root, i)
 
 setup(name='npactflask',
-      version='0.5',
+      version='0.6.1',
       description='Website for PYNPACT, the Python N-Profile Analysis Computation Tool',
       author='Nathan Bird',
       author_email='nathan@acceleration.net',
       url='http://genome.ufl.edu/npact/',
-      py_modules=['settings'],
       packages=['npactflask'],
       package_data={'npactflask': list(recursive_files('static', 'templates'))},
       requires=["biopython(>=1.57)",
                 "flask(==0.10)",
-                "flup(>=1.0)",
-                "taskqueue",
+                "gunicorn",
                 "pytz"],
-      scripts=['cleanup.py', 'flask.fcgi']
-     )
+      scripts=['bin/cleanup.py', 'bin/devserver']
+)
