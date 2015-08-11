@@ -18,8 +18,7 @@ if __name__ == '__main__':
 
     parser = OptionParser("""usage: %prog [options]
 
-    This script scans for apparently unused files in the upload path
-    and the taskqueue path and deletes them.
+    This script scans for apparently unused files in the upload path.
 
     'unused files' are considered to be ones for which the atime is
     older than X days; set in django settings or via the --atime flag.

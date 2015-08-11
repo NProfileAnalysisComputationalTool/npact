@@ -6,7 +6,6 @@ from flask import url_for, request, flash, redirect, json, jsonify
 from pynpact import main, parsing, util, executors
 from npactflask import app
 from npactflask.views import getabspath, getrelpath
-# from taskqueue import client, NoSuchTaskError
 
 gexec = executors.GeventExecutor()
 
