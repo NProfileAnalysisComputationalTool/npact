@@ -618,7 +618,7 @@ div.input-group input#searchbox,
 .btn-search {
     font-size: 12px;
    height: 25px;
-   padding: 0px 0px 0px 6px;
+   padding: 0px 6px 0px 6px;
 }
 
 /* Error messages */
