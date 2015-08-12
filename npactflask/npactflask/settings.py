@@ -1,6 +1,6 @@
 from path import path
 
-from npactflask import app
+DEBUG=False
 
 # TODO: Figure out mail configuration
 EMAIL_USE_TLS = True
@@ -11,11 +11,6 @@ EMAIL_HOST_PASSWORD = 'sictransit2'
 
 
 WEBROOT = (path(__file__).dirname() / "../../webroot").realpath()
-if not WEBROOT.exists():
-    raise Exception("Couldn't find webroot at %s" % WEBROOT)
-else:
-    app.config['WEBROOT'] = WEBROOT
-
 
 def ppath(rel, create=True):
     abspath = (WEBROOT / rel).realpath()
@@ -27,11 +22,8 @@ def ppath(rel, create=True):
     else:
         raise Exception("Path '%s' doesn't exist." % abspath)
 
-app.config['UPLOADS'] = ppath('uploads')
-import taskqueue
-app.config['TASKQUEUE'] = taskqueue.BASE_DIR = ppath('taskqueue')
-
+UPLOADS = ppath('uploads')
 
 # How many days should we keep upload files and products that haven't
 # been accessed
-app.config['ATIME_DEFAULT'] = 30
+ATIME_DEFAULT = 30

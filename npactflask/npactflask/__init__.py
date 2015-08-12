@@ -4,11 +4,12 @@ from werkzeug.wsgi import DispatcherMiddleware
 
 
 app = Flask(__name__)
+app.config.from_object('npactflask.settings')
 app.config['APPLICATION_ROOT'] = '/npact'
 app.config['VERSION'] = pkg_resources.require('npactflask')[0].version
 app.secret_key = 'cf0cb53d-1ff1-4074-a65d-977831de66af'
 
-from npactflask import settings, helpers
+from npactflask import helpers
 from npactflask.views import raw, about
 from npactflask.views import run, start, management
 
@@ -29,7 +30,6 @@ app.add_url_rule('/management', 'management', view_func=management.view,
 app.add_url_rule('/raw/<path:path>', 'raw', raw)
 
 
-
 redirectapp = Flask('redirectapp')
 
 
@@ -42,3 +42,5 @@ def doredirect():
 app_with_redirect = DispatcherMiddleware(redirectapp, {
     app.config['APPLICATION_ROOT']: app,
 })
+
+SILENCE_UNUSED_WARNING = (helpers,)

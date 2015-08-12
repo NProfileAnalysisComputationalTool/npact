@@ -25,19 +25,6 @@
   </div>
 
   <form  method="POST">
-    <h3>Taskqueue daemon</h3>
-    <div>
-      <p>This is the background working daemon in which the heavy lifting takes place.</p>
-      <p>Current status: <span class="orange-text">{{daemon_status}}</span></p>
-      <ul>
-        {% if daemon_status == 'stopped' %}
-        <li><button type="submit" name="action" value="start-daemon">Start Daemon</button></li>
-        {% else %}
-        <li><button type="submit" name="action" value="restart-daemon">Restart Daemon</button></li>
-        {% endif %}
-        <li><button type="submit" name="action" value="kill-daemon">Kill any daemon processes</button></li>
-      </ul>
-    </div>
     <h3>Cleanup</h3>
     <div>
       <p>This needs to be done from time to time to help prevent disk space usage from going crazy</p>

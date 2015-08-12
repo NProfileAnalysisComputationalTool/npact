@@ -1,22 +1,24 @@
 #!/usr/bin/env python
 
-from npactflask import app, app_with_redirect
+from gevent.monkey import patch_all
+patch_all(subprocess=True)
 
-from taskqueue.tqdaemon import tqdaemonlog
-tqdaemonlog()
+import logging
+logger = logging.getLogger('')
+logger.setLevel(logging.DEBUG)
+fmt = "%(asctime)s %(levelname)-7s %(name)-20s| %(message)s"
+sh = logging.StreamHandler()
+sh.setFormatter(logging.Formatter(fmt, datefmt='%H:%M:%S'))
+logger.addHandler(sh)
+
+from npactflask import app, app_with_redirect
 
 app.config['DEBUG'] = True
 
-# logger = logging.getLogger('npactflask')
-# logger.setLevel(logging.DEBUG)
-# # logger.addHandler(logging.StreamHandler())
-# fmt = "%(asctime)s %(levelname)-7s %(name)-20s| %(message)s"
-# sh = logging.StreamHandler()
-# sh.setFormatter(logging.Formatter(fmt, datefmt='%H:%M:%S'))
-# logger.addHandler(sh)
 
 
 application = app_with_redirect
+
 
 if __name__ == '__main__':
     # Relevant documents:

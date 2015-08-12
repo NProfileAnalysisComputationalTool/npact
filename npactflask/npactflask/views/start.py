@@ -148,3 +148,9 @@ def efetch(id):
     args = dict(request.args.items())
 
     return redirect(url_for('run_frame', path=path, **args))
+
+
+@app.route('/log')
+def log():
+    logger.info("Hi there!")
+    return flask.make_response("Hi there!")

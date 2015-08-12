@@ -104,19 +104,18 @@ finished bootstrap.py". If it doesn't the rest won't work.
 
 ## Running
 
-Primarily this should be run underneath a fcgi webserver. Look at
-`apache.conf` for an example of how to do that.
+This should be run using the gunicorn program behind a proxy (apache).
+Look at `apache.conf` for an example of how to do that.
+
+TODO: Better document the live mode
 
 ### Development mode
 
-Flask does have a builtin webserver that will work for local
-installations, to use it.
+There is a development webserver bundled in that will help for local development. To use:
 
-1. edit `npactflask/runserver.py` to change DEBUG from False to True at
-   the top of the file.
-2. `source ve/bin/activate[.csh]`
-3. `python manage.py runserver`
-4. open [http://127.0.0.1:5000/npact/]()
+1. `source ve/bin/activate[.csh]`
+2. `npacflask/devserver.sh`
+3. open [http://127.0.0.1:5000/npact/]()
 
 NB: Apache normally runs as a different user and you may encounter
 permissions issues if you run the developmenet server in the same
@@ -135,7 +134,7 @@ still useful to run the analysis with all the default options.
 
 1. In a shell from the project root activate the virtualenv:
    `. ve/bin/activate`
-2. `python -mpynpact.main <gbkfile>`
+2. `pynpact <gbkfile>`
 3. It will print a message reporting the output.
 
 

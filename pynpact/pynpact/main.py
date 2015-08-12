@@ -1,4 +1,3 @@
-#!/usr/bin/env python
 import logging
 import os
 import os.path
@@ -48,9 +47,13 @@ def getexecutor(name):
             e = sm.Server()
         elif name == 'inline':
             e = executors.InlineExecutor()
+        elif name == 'gevent':
+            e = executors.GeventExecutor()
         elif name == 'daemon':
             from taskqueue import client
             e = client.get_server()
+        else:
+            raise ValueError("Unknown executor: %r" % name)
         yield e
     finally:
         if sm:
@@ -69,25 +72,3 @@ def run_cmdline(gbkfile, executorName):
         else:
             output = jid
         logging.info("See output at %r", output)
-
-
-if __name__ == '__main__':
-    parser = OptionParser("""%prog <genebank file>""")
-    parser.add_option('-v', '--verbose', action='store_true', dest='verbose',
-                      help="Show more verbose log messages.")
-    parser.add_option('-e', '--executor', action='store', dest='executor',
-                      default='Server')
-    (options, args) = parser.parse_args()
-
-    if len(args) != 1:
-        parser.print_help()
-        exit(1)
-
-    original = args[0]
-    gbkfile = os.path.realpath(original)
-    logging.basicConfig(
-        level=(options.verbose and logging.DEBUG or logging.INFO),
-        format="%(asctime)s %(name)-10s %(levelname)-8s %(message)s",
-        datefmt='%H:%M:%S')
-
-    run_cmdline(gbkfile, options.executor)
