@@ -53,7 +53,7 @@ angular.module('npact')
     };
   })
 
-  .controller('DownloadsCtrl', function($scope, $log, PredictionManager, PDFModal, MessageBus, Pynpact, StatusPoller, GraphConfig, dialogService) {
+  .controller('DownloadsCtrl', function($scope, $log, PredictionManager, MessageBus, Pynpact, StatusPoller, GraphConfig, dialogService) {
     'use strict';
     $scope.$watch( function() { return PredictionManager.files; },
                    function(val) { $scope.predictionFiles = val; });
