@@ -14,7 +14,7 @@ a {
 }
 
 a:link,a:visited {
-    color:#0021a5 !important;
+    color:#0021a5;
 }
 
 a:hover,a:active {
@@ -84,7 +84,6 @@ h3,h4 {
 
 p,li,td,dd,dt {
     color:#444;
-    font-size:75%;
 }
 
 th { color:#222; font-size: .75em; }
@@ -135,8 +134,9 @@ ul {
     padding:0 5px 0 20px;
 }
 
-#content p {
-    line-height:17px;
+#content p,
+#content .contentPadding h4 {
+    line-height:20px;
     margin:2px 10px 15px 13px;
 }
 
@@ -184,7 +184,7 @@ ul {
 #footer ul,#footer p {
     clear:both;
     float:left;
-    font-size:60%;
+    font-size:85%;
     line-height:1.4em;
     width:550px;
 }
@@ -285,7 +285,7 @@ ul {
     background:url(../images/pointer_small.gif) no-repeat 0 13px;
     clear:left;
     letter-spacing:1px;
-    padding:7px 0 3px 10px;
+    padding:7px 0 0px 10px;
 }
 
 #related li {
@@ -540,7 +540,7 @@ checkbox-list#profile-options>label {
 }
 
 .btn-form {
-    color: #fff;
+    color: #fff !important;
     background: #5965C2;
     padding: 10px 10px;
     font-size: 18px;
