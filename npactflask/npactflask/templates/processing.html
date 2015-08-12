@@ -34,7 +34,9 @@
   <div npact-graph-page ></div>
 
   <script type="text/javascript">
-    angular.module('npact')
+  angular.module('npact')
+      .constant('BASE_URL', '{{BASE_URL}}')
+      .constant('PATH', '{{PATH}}')
       .constant('STATUS_BASE_URL', '{{status_base}}')
       .constant('KICKSTART_URL', '{{kickstart}}')
       .constant('TRANSLATE_URL', '{{translate}}')

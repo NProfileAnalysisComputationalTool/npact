@@ -11,16 +11,15 @@
       waiting on {{printCounter}} rows to finish
     </span>
 
-    &nbsp;<button class="btn btn-form"
-                title="Have the server generate a PDF for printing (this takes a minute)."
-                ng-click="pageCtrl.requestPDF()">Request PDF</button>&nbsp;
+    &nbsp;<a href="#" target="_blank" ng-href="{{BASE_URL + '/getpdf/' + PATH}}"
+             title="Have the server generate a PDF for printing (this takes a minute)."
+             class="btn md-text">Request PDF</a>&nbsp;
   </div>
   <h2 ng-model="gc.first_page_title" contenteditable strip-br="true"></h2>
   <div id="progressreport">
     <h3> Status <a title="Email a report about this run to Acceleration" ng-click="email()"><span class="glyphicon glyphicon-envelope" style="font-size: 16px;"></span></a></h3>
     <npact-msg-pane></npact-msg-pane>
   </div>
-
   <div id="results" ng-controller="Results">
     <accordion close-others="false">
       <accordion-group is-open="status.open">
@@ -32,9 +31,10 @@
         <div id="downloads" ng-controller="DownloadsCtrl as dc">
           <div class="ui-state-highlight ui-corner-all" >
             <p>
-              <a ng-if="pdf" href="{{FETCH_BASE_URL}}{{pdf}}" target="_blank">Download PDF</a>
+               <a href="#"
+             title="Have the server generate a PDF for printing (this takes a minute)."
+             ng-href="{{BASE_URL + '/getpdf/' + PATH}}">Request PDF</a>
             </p>
-            
             <div ng-show="predictionFiles.length > 0">
               <p>Results are now ready:
                 <ul id="files">

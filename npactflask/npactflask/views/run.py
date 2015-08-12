@@ -2,11 +2,14 @@ import flask
 import os
 import os.path
 import Bio.Seq
-from flask import url_for, request, flash, redirect, json, jsonify
+from flask import (
+    url_for, request, flash, redirect, json, jsonify,
+    send_from_directory, send_file
+)
+from werkzeug.exceptions import NotFound
 from pynpact import main, parsing, util, executors
 from npactflask import app
 from npactflask.views import getabspath, getrelpath
-# from taskqueue import client, NoSuchTaskError
 
 gexec = executors.GeventExecutor()
 
@@ -76,6 +79,8 @@ def run_frame(path):
 
     return flask.render_template(
         'processing.html', **{
+            'BASE_URL': app.config['APPLICATION_ROOT'],
+            'PATH': path,
             'status_base': url_for('.run_status', path=''),
             'kickstart': url_for('kickstart', path=path),  # args=[path]
             'translate': url_for('translate'),
@@ -210,6 +215,36 @@ def run_status(path):
         logger.exception("Error getting job status. %r", path)
 
     return flask.make_response(json.dumps(result), status)
+
+
+@app.route('/blockon/<path:path>')
+def blockon(path):
+    # Task IDs == filenames on disk
+    abspath = getabspath(path, raise_on_missing=False)
+    try:
+        abspath = getabspath(path, raise_on_missing=False)
+        # Task IDs == filenames on disk, if the file exists don't even
+        # bother to check with the server
+        if os.path.exists(abspath) or gexec.result(abspath, timeout=None):
+            return send_file(abspath)
+        else:
+            raise NotFound()
+    except KeyError:
+        raise NotFound()
+    except Exception as e:
+        logger.exception("Error getting job status. %r", path)
+        r = jsonify(message='Fatal error.', exception=str(e))
+        r.status_code = 500
+        return r
+
+
+@app.route('/getpdf/<path:path>')
+def getpdf(path):
+    config = build_config(path)
+    config = main.process('allplots', config, executor=gexec)
+    pdf = config['pdf_filename']
+    gexec.result(pdf, timeout=None)
+    return send_file(pdf)
 
 
 def acgt_gamma_file_list(path):

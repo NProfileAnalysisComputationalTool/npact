@@ -1,10 +1,4 @@
-from gevent.monkey import patch_all
-patch_all(subprocess=True)
-
-from npactflask import app, app_with_redirect
-application = app_with_redirect
-
-
+from npactflask import app
 import os
 import logging
 from logging.handlers import WatchedFileHandler
@@ -18,7 +12,7 @@ logger.addHandler(fh)
 
 if os.environ.get('ENV', 'dev').lower() in ('dev', 'development'):
     # Causes duplicate logging
-    #app.config['DEBUG'] = True
+    # app.config['DEBUG'] = True
     sh = logging.StreamHandler()
     sh.setFormatter(logging.Formatter(fmt, datefmt='%H:%M:%S'))
     logger.addHandler(sh)

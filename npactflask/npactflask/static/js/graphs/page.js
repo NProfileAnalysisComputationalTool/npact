@@ -17,7 +17,7 @@ angular.module('npact')
   })
 
   .controller('npactGraphPageCtrl', function($scope,$q, $window, $log, PrintModal,
-                                      Fetcher,
+                                      Fetcher, BASE_URL, PATH,
                                       FETCH_BASE_URL, EmailBuilder,
                                       STATIC_BASE_URL, GraphConfig,
                                       kickstarter, processOnServer) {
@@ -26,6 +26,8 @@ angular.module('npact')
     $scope.FETCH_BASE_URL = FETCH_BASE_URL;
     $scope.config = GraphConfig;
     $scope.email = EmailBuilder.send;
+    $scope.BASE_URL = BASE_URL;
+    $scope.PATH = PATH;
     kickstarter.start();
 
     var _doPrint = function() {
@@ -49,42 +51,12 @@ angular.module('npact')
     this.print = function() {
       PrintModal.show().then(_doPrint);
     };
-    this.requestPDF = function() {
-      processOnServer('allplots').catch(function(e) {
-        $log.error('Error requesting PDF:', e);
-      });
-    };
   })
 
   .controller('DownloadsCtrl', function($scope, $log, PredictionManager, PDFModal, MessageBus, Pynpact, StatusPoller, GraphConfig, dialogService) {
     'use strict';
     $scope.$watch( function() { return PredictionManager.files; },
                    function(val) { $scope.predictionFiles = val; });
-    $scope.$watch(
-      function() { return GraphConfig[Pynpact.PDF]; },
-      function(pdfFilename) {
-        if(!pdfFilename || $('PDFModal').hasClass('in'))
-          return;
-        var p = StatusPoller.start(pdfFilename)
-          .then(function(pdfFilename) {
-            $log.log('PDF ready', pdfFilename);
-            PDFModal.show();
-            $scope.pdf = pdfFilename;
-          });
-        MessageBus.info("Generating PDF", p);
-      });
-})
-
-  .service('PDFModal', function(STATIC_BASE_URL, $modal){
-    var dialogTemplate = STATIC_BASE_URL + 'js/graphs/pdfReady.html';
-    this.show = function(){
-      var modalInstance = $modal.open({
-      animation:true,
-      templateUrl: dialogTemplate,
-      controller: 'ModalInstanceCtrl'
-      });
-      return modalInstance.result;
-    };
   })
 
   .service('PrintModal', function(STATIC_BASE_URL, $modal) {

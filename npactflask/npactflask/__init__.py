@@ -1,20 +1,23 @@
+from gevent.monkey import patch_all
+patch_all(subprocess=True)
+
 import pkg_resources
 from flask import Flask, redirect
 from werkzeug.wsgi import DispatcherMiddleware
-
 
 app = Flask(__name__)
 app.config.from_object('npactflask.settings')
 app.config['APPLICATION_ROOT'] = '/npact'
 app.config['VERSION'] = pkg_resources.require('npactflask')[0].version
-app.secret_key = 'cf0cb53d-1ff1-4074-a65d-977831de66af'
 
-from npactflask import helpers
+
+from npactflask import helpers, setuplogging
 from npactflask.views import raw, about
 from npactflask.views import run, start, management
 
-app.add_url_rule('/', 'start', view_func=start.view, methods=['POST', 'GET'])
+SILENCE_UNUSED_WARNING = (helpers, setuplogging)
 
+app.add_url_rule('/', 'start', view_func=start.view, methods=['POST', 'GET'])
 app.add_url_rule('/run/<path:path>', 'run_frame', view_func=run.run_frame)
 app.add_url_rule('/about', view_func=about)
 app.add_url_rule('/runstatus/<path:path>', view_func=run.run_status)
@@ -30,6 +33,7 @@ app.add_url_rule('/management', 'management', view_func=management.view,
 app.add_url_rule('/raw/<path:path>', 'raw', raw)
 
 
+# ***  Handle running at /npact/  ***
 redirectapp = Flask('redirectapp')
 
 
@@ -42,5 +46,3 @@ def doredirect():
 app_with_redirect = DispatcherMiddleware(redirectapp, {
     app.config['APPLICATION_ROOT']: app,
 })
-
-SILENCE_UNUSED_WARNING = (helpers,)
