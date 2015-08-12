@@ -20,7 +20,7 @@ angular.module('npact')
                                       Fetcher, BASE_URL, PATH,
                                       FETCH_BASE_URL, EmailBuilder,
                                       STATIC_BASE_URL, GraphConfig,
-                                      kickstarter, processOnServer) {
+                                      kickstarter, processOnServer, $location) {
     'use strict';
 
     $scope.FETCH_BASE_URL = FETCH_BASE_URL;
@@ -28,6 +28,7 @@ angular.module('npact')
     $scope.email = EmailBuilder.send;
     $scope.BASE_URL = BASE_URL;
     $scope.PATH = PATH;
+    
     kickstarter.start();
 
     var _doPrint = function() {
@@ -50,6 +51,10 @@ angular.module('npact')
 
     this.print = function() {
       PrintModal.show().then(_doPrint);
+    };
+    this.requestPDF = function(){
+      $scope.PARAMS = $.param($location.search());
+      $window.open(BASE_URL + '/getpdf/' + PATH + '?' + $.param($location.search()), '_blank');
     };
   })
 

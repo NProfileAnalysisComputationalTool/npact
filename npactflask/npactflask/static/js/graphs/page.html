@@ -11,7 +11,7 @@
       waiting on {{printCounter}} rows to finish
     </span>
 
-    &nbsp;<a href="#" target="_blank" ng-href="{{BASE_URL + '/getpdf/' + PATH}}"
+    &nbsp;<a href="#" ng-click="pageCtrl.requestPDF()"
              title="Have the server generate a PDF for printing (this takes a minute)."
              class="btn md-text">Request PDF</a>&nbsp;
   </div>
