@@ -81,8 +81,6 @@ angular.module('npact')
     };
   })
 
-  
-
   .service('kickstarter', function($q, $log, processOnServer, MessageBus,
                             NProfiler, PredictionManager, ExtractManager) {
     'use strict';
