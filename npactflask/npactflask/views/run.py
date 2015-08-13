@@ -2,6 +2,8 @@ import flask
 import os
 import os.path
 import Bio.Seq
+
+from path import path as Path
 from flask import (
     url_for, request, flash, redirect, json, jsonify,
     send_from_directory, send_file
@@ -251,3 +253,13 @@ def acgt_gamma_file_list(path):
     acgt_gamma_output = getabspath(path)
     files = map(getrelpath, acgt_gamma_output.listdir())
     return flask.make_response(json.dumps(files), 200)
+
+
+@app.route('/acgt_gamma/<path:path>')
+def acgt_gamma(path):
+    config = build_config(path)
+    config = main.process('acgt_gamma', config, executor=gexec)
+    tid_output_directory = config['acgt_gamma_output']
+    gexec.result(tid_output_directory, timeout=None)
+    files = map(getrelpath, Path(tid_output_directory).listdir())
+    return jsonify(config=config, files=files)

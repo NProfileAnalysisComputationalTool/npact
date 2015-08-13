@@ -131,13 +131,40 @@ angular.module('npact')
     self.files = null;
     var results = {}; //hash keyed on significance of already requested results.
 
+    self.start = function(_config) {
+      var url = '/acgt_gamma/' +PATH + querystring;
+      var acgt_gamma_promise = Fetcher.rawFile(url)
+          .then(function(response) {
+            self.files = response.files;
+            config = response.config;
+            angular.extend(GraphConfig, config);
+            return GraphConfig;
+          });
+      acgt_gamma_promise.then(self.fetchHits);
+      acgt_gamma_promise.then(self.fetchModifiedOrfs);
+      acgt_gamma_promise.then(self.fetchNewOrfs);
+
+    };
+
+    self.fetchHits = function(config) {
+      result.hits = Fetcher.fetchFile(config[Pynpact.HITS])
+          .then(function(data) {
+            var name = 'Hits',
+                track = new Track(name, data, 'hits', 100);
+            GraphConfig.loadTrack(track);
+            return track;
+          });
+    };
+
+/* ************************************************ */
+
     self.updateFiles = function(result) {
       var path = result.path;
       if(!result.files) {
         $log.log('Fetching the ACGT_GAMMA_FILE_LIST from', path);
         result.files = Fetcher.rawFile(ACGT_GAMMA_FILE_LIST_BASE_URL + path);
       }
-      result.files.then(function(files) { self.files = files; });
+      result.files.then(function() { self.files = files; });
     };
     self.toggleTrack = function(ptrack, active) {
       if(ptrack) { ptrack.then(function(track) { track.active = active; }); }
