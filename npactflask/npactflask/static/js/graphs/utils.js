@@ -202,9 +202,14 @@ angular.module('npact')
     };
   })
 
-  .service('Fetcher', function(StatusPoller, $http, FETCH_BASE_URL, BASE_URL) {
+  .service('Fetcher', function(StatusPoller, $http, FETCH_BASE_URL, BASE_URL, PATH, $location) {
     'use strict';
     var self = this;
+    self.buildUrl = function(verb) {
+      return BASE_URL + '/' + verb + '/'
+        + PATH + '?' + $.param($location.search());
+    };
+
     /**
      * download contents from any url
      */

@@ -262,4 +262,4 @@ def acgt_gamma(path):
     tid_output_directory = config['acgt_gamma_output']
     gexec.result(tid_output_directory, timeout=None)
     files = map(getrelpath, Path(tid_output_directory).listdir())
-    return jsonify(config=config, files=files)
+    return jsonify(config=sanitize_config_for_client(config), files=files)

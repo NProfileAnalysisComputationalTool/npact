@@ -52,9 +52,10 @@ angular.module('npact')
     this.print = function() {
       PrintModal.show().then(_doPrint);
     };
+
     this.requestPDF = function(){
       $scope.PARAMS = $.param($location.search());
-      $window.open(BASE_URL + '/getpdf/' + PATH + '?' + $.param($location.search()), '_blank');
+      $window.open(Fetcher.buildUrl('getpdf'), '_blank');
     };
   })
 
@@ -124,7 +125,7 @@ angular.module('npact')
   })
   .service('PredictionManager', function(Fetcher, StatusPoller, Pynpact, Track,
                                   GraphConfig, processOnServer, $log,
-                                  MessageBus,
+                                  MessageBus, PATH, $location,
                                   ACGT_GAMMA_FILE_LIST_BASE_URL) {
     'use strict';
     var self = this;
@@ -132,11 +133,11 @@ angular.module('npact')
     var results = {}; //hash keyed on significance of already requested results.
 
     self.start = function(_config) {
-      var url = '/acgt_gamma/' +PATH + querystring;
+      var url = Fetcher.buildUrl('acgt_gamma');
       var acgt_gamma_promise = Fetcher.rawFile(url)
           .then(function(response) {
             self.files = response.files;
-            config = response.config;
+            var config = response.config;
             angular.extend(GraphConfig, config);
             return GraphConfig;
           });
@@ -144,10 +145,15 @@ angular.module('npact')
       acgt_gamma_promise.then(self.fetchModifiedOrfs);
       acgt_gamma_promise.then(self.fetchNewOrfs);
 
+      MessageBus.info(
+        'Identifying significant 3-base periodicities',
+        acgt_gamma_promise.catch(function(e) {
+          MessageBus.danger('Failure while identifying significant 3-base periodicities');
+        }));
     };
 
     self.fetchHits = function(config) {
-      result.hits = Fetcher.fetchFile(config[Pynpact.HITS])
+      config.hits = Fetcher.fetchFile(config[Pynpact.HITS])
           .then(function(data) {
             var name = 'Hits',
                 track = new Track(name, data, 'hits', 100);
@@ -156,89 +162,23 @@ angular.module('npact')
           });
     };
 
-/* ************************************************ */
-
-    self.updateFiles = function(result) {
-      var path = result.path;
-      if(!result.files) {
-        $log.log('Fetching the ACGT_GAMMA_FILE_LIST from', path);
-        result.files = Fetcher.rawFile(ACGT_GAMMA_FILE_LIST_BASE_URL + path);
-      }
-      result.files.then(function() { self.files = files; });
-    };
-    self.toggleTrack = function(ptrack, active) {
-      if(ptrack) { ptrack.then(function(track) { track.active = active; }); }
-    };
-    self.disableOld = function(oldSig) {
-      if(oldSig && results[oldSig]) {
-        results[oldSig].then(function(result) {
-          self.toggleTrack(result.hits, false);
-          self.toggleTrack(result.newORFs, false);
-          self.toggleTrack(result.modified, false);
-          self.files = null;
+    self.fetchNewOrfs = function(config) {
+      config.newORFs = Fetcher.fetchFile(config[Pynpact.NEW_ORFS])
+        .then(function(data) {
+          var name = 'New ORFs',
+              track = new Track(name, data, 'neworfs', 15);
+          GraphConfig.loadTrack(track);
+          return track;
         });
-      }
-    };
-    self.newHits = function(result) {
-      if(!result.hits) {
-        result.hits = Fetcher.fetchFile(result.config[Pynpact.HITS])
-          .then(function(data) {
-            var name = 'Hits @' + result.config.significance,
-                track = new Track(name, data, 'hits', 100 - result.config.significance);
-            GraphConfig.loadTrack(track);
-            return track;
-          });
-      }
-      self.toggleTrack(result.hits, true);
     };
 
-    self.newORFs = function(result) {
-      if(!result.newORFs) {
-        result.newORFs = Fetcher.fetchFile(result.config[Pynpact.NEW_ORFS])
-          .then(function(data) {
-            var name = 'New ORFs @' + result.config.significance,
-                track = new Track(name, data, 'neworfs', 15 - result.config.significance);
-            GraphConfig.loadTrack(track);
-            return track;
-          });
-      }
-      self.toggleTrack(result.newORFs, true);
-    };
-    self.newModified = function(result) {
-      var config = result.config;
-      if(!result.modified) {
-        result.modified = Fetcher.fetchFile(config[Pynpact.MODIFIED])
-          .then(function(data) {
-            var name = 'Modified ORFs @' + config.significance,
-                track = new Track(name, data, 'modified', 10 - config.significance);
-            GraphConfig.loadTrack(track);
-            return track;
-          });
-      }
-      self.toggleTrack(result.modified, true);
-    };
-
-    self.onSignificanceChange = function(significance, oldSig) {
-      self.disableOld(oldSig);
-      if(significance) {
-        $log.log("New prediction significance: ", significance);
-        if(!results[significance]) {
-          results[significance] = processOnServer('acgt_gamma')
-            .then(function(config) {
-              return StatusPoller.start(config[Pynpact.ACGT_GAMMA_FILES])
-                .then(function(path) { return ({ path: path, config: config }); });
-          });
-        }
-        var waitOn = results[significance];
-        waitOn.then(self.newHits);
-        waitOn.then(self.newORFs);
-        waitOn.then(self.newModified);
-        waitOn.then(self.updateFiles);
-        MessageBus.info(
-          'Identifying significant 3-base periodicities @ ' + significance,
-          waitOn.catch(function(e) {
-            MessageBus.danger('Failure while identifying significant 3-base periodicities');
-          }));
-      }
+    self.fetchModifiedOrfs = function(config) {
+      config.newORFs = Fetcher.fetchFile(config[Pynpact.MODIFIED])
+        .then(function(data) {
+          var name = 'Modified ORFs',
+              track = new Track(name, data, 'modified', 10);
+          GraphConfig.loadTrack(track);
+          return track;
+        });
     };
   });
