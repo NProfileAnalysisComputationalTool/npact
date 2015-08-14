@@ -193,11 +193,11 @@ angular.module('npact')
       return $http({
         method: 'POST',
         url: TRANSLATE_URL,
-        data: $.param({
+        data:{
           seq: dna,
           complement: complement,
-          mycoplasma: mycoplasma}),
-        headers: {'Content-Type': 'application/x-www-form-urlencoded'}
+          mycoplasma: mycoplasma},
+        headers: {'Content-Type': 'application/json'}
       });
     };
   })

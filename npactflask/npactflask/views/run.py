@@ -43,6 +43,7 @@ def build_config(path):
             nv = parsing.number(v)
             config[k] = v if nv is None else nv
     parsing.endBase(config)
+    parsing.mycoplasma(config)
 
     # fixup nucleotides list
     if 'nucleotides' in request.args:
@@ -98,10 +99,12 @@ def translate():
         # table 4 is for mycoplasma ala:
         # http://www.ncbi.nlm.nih.gov/Taxonomy/Utils/wprintgc.cgi
         table = 1
-        if request.form.get('mycoplasma'):
+        config = request.get_json()
+        if parsing.mycoplasma(config):
+            app.logger.debug('using mycoplasma table=4')
             table = 4
-        seq = Bio.Seq.Seq(request.form.get('seq'))
-        rc = int(request.form.get('complement', 0))
+        seq = Bio.Seq.Seq(config.get('seq'))
+        rc = config.get('complement')
         if rc:
             seq = seq.reverse_complement()
         trans = Bio.Seq.translate(seq, table)

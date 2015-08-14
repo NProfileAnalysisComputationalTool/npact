@@ -14,8 +14,8 @@ angular.module('npact')
     self.cookieInit = function() {
       _.each(self.cookieBools, function(v){
         var cv = $cookies.get(v);
-        if( cv == "true" ) self[v] = true;
-        else if(cv == "false") self[v] = false;
+        if( cv === "true" ) self[v] = true;
+        else if(cv === "false") self[v] = false;
       });
     };
     self.cookiePersist  = function(){
@@ -35,7 +35,16 @@ angular.module('npact')
     _.forEach(PUBLIC_CONFIG_KEYS, function(k) {
       var v = $location.search()[k];
       if(v) {
-        self[k] = !isNaN(Number(v)) ? Number(v) : v ;
+        $log.log(k, v);
+        if(v === true || v === false) {
+          self[k] = v;
+        }
+        else if(!isNaN(v)) {
+          self[k] = Number(v);
+        }
+        else {
+          self[k] = v;
+        }
       }
     });
 
@@ -105,16 +114,18 @@ angular.module('npact')
     };
   })
   .controller('npactGraphConfigCtrl', function($scope, $window, $location, $log,
+                                        $timeout,
                                         GraphConfig, PredictionManager,
                                         PUBLIC_CONFIG_KEYS) {
     'use strict';
     $scope.gc = GraphConfig;
-    $scope.$watch('gc.significance', PredictionManager.onSignificanceChange);
-
     //  If any of the GraphConfig values change update the querystring
     var gcpubkeys = _.map(PUBLIC_CONFIG_KEYS, function(k) { return 'gc.' + k; });
     $scope.$watchGroup(gcpubkeys, function(newVals) {
       $location.search(_.object(PUBLIC_CONFIG_KEYS, newVals));
+    });
+    $scope.$watch('gc.mycoplasma', function() {
+      $timeout(PredictionManager.start, 50);
     });
   })
 

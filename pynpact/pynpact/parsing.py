@@ -143,6 +143,22 @@ def significance(config):
         config['significance'] = float(config['significance'])
     else:
         config['significance'] = 0.01
+    return config['significance']
+
+
+def mycoplasma(config):
+    if 'mycoplasma' in config:
+        if config['mycoplasma'] in ('false', 0, '0', False):
+            config['mycoplasma'] = False
+        elif config['mycoplasma'] in ('true', 1, '1', True):
+            config['mycoplasma'] = True
+        else:
+            raise ValueError(
+                "Don't know what to do with mycoplasma: {0|r}".format(
+                    config['mycoplasma']))
+    else:
+        config['mycoplasma'] = False
+    return config['mycoplasma']
 
 
 def first_page_title(config):

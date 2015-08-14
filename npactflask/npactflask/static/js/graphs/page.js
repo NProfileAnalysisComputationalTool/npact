@@ -130,8 +130,6 @@ angular.module('npact')
     'use strict';
     var self = this;
     self.files = null;
-    var results = {}; //hash keyed on significance of already requested results.
-
     self.start = function(_config) {
       var url = Fetcher.buildUrl('acgt_gamma');
       var acgt_gamma_promise = Fetcher.rawFile(url)
