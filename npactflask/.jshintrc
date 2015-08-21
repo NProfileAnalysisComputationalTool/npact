@@ -5,6 +5,7 @@
   "unused": "vars",
   "eqeqeq": true,
   "jasmine": true,
+  "newCap": false,
   "globals": {
     "angular": false,
     "jQuery": false,

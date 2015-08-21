@@ -1,8 +1,10 @@
 from __future__ import absolute_import
+import mmap
+import os
 import os.path
 import logging
 import re
-from Bio import SeqIO
+from Bio import SeqIO, Seq
 from path import path
 
 from pynpact import genbank
@@ -111,6 +113,12 @@ def length(config):
     return config['length']
 
 
+def ddna(config):
+    if 'ddna' not in config:
+        detect_format(config)
+    return config['ddna']
+
+
 def startBase(config):
     if 'startBase' not in config:
         config['startBase'] = 0
@@ -138,6 +146,15 @@ def number(val):
     return None
 
 
+def tobool(val):
+    if val in (u'false', 0, u'0', False, None):
+        return False
+    elif val in (u'true', 1, u'1', True):
+        return True
+    else:
+        raise ValueError("Can't convert %r to boolean" % (val,))
+
+
 def significance(config):
     if 'significance' in config:
         config['significance'] = float(config['significance'])
@@ -148,14 +165,7 @@ def significance(config):
 
 def mycoplasma(config):
     if 'mycoplasma' in config:
-        if config['mycoplasma'] in ('false', 0, '0', False):
-            config['mycoplasma'] = False
-        elif config['mycoplasma'] in ('true', 1, '1', True):
-            config['mycoplasma'] = True
-        else:
-            raise ValueError(
-                "Don't know what to do with mycoplasma: {0|r}".format(
-                    config['mycoplasma']))
+        config['mycoplasma'] = tobool(config['mycoplasma'])
     else:
         config['mycoplasma'] = False
     return config['mycoplasma']
@@ -222,3 +232,35 @@ CONFIG_HELP_TEXT = {
 #         return key in self.__dict__
 #     first_page_title = first_page_title
 #     endBase = endBase
+
+
+def translate(config, rc=False):
+    table = 1
+    if mycoplasma(config):
+        # table 4 is for mycoplasma ala:
+        # http://www.ncbi.nlm.nih.gov/Taxonomy/Utils/wprintgc.cgi
+        table = 4
+    fd, fmap = None, None
+    try:
+        log.debug("Doing translation with table %d, rc: %s", table, rc)
+        fd = os.open(ddna(config), os.O_RDONLY)
+        fmap = mmap.mmap(fd, 0, mmap.MAP_SHARED, mmap.PROT_READ)
+        # NProfiler.ddna is 0 indexed; the dna by convention
+        # (e.g. from the C or NCBI) is 1 indexed.
+        startIdx = config['startBase'] - 1
+        # The end index here is inclusive but array.slice isn't so we
+        # don't need to subtract 1
+        endIdx = config['endBase']
+        seq = Seq.Seq(fmap[startIdx:endIdx])
+
+        if rc:
+            seq = seq.reverse_complement()
+        return {
+            'seq': str(seq),
+            'trans': str(Seq.translate(seq, table))
+        }
+    finally:
+        if fmap:
+            fmap.close
+        if fd:
+            os.close(fd)

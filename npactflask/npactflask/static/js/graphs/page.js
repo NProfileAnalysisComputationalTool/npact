@@ -132,6 +132,7 @@ angular.module('npact')
     self.files = null;
     self.start = function(_config) {
       var url = Fetcher.buildUrl('acgt_gamma');
+      $log.log("Querying acgt_gamma at", url);
       var acgt_gamma_promise = Fetcher.rawFile(url)
           .then(function(response) {
             self.files = response.files;

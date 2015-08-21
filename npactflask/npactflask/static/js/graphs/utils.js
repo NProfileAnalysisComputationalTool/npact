@@ -193,21 +193,37 @@ angular.module('npact')
       return $http({
         method: 'POST',
         url: TRANSLATE_URL,
-        data:{
+        data: {
           seq: dna,
           complement: complement,
           mycoplasma: mycoplasma},
         headers: {'Content-Type': 'application/json'}
-      });
+      })
+        .then(function (res) {
+          return res.data;
+        });
+    };
+  })
+
+  .factory('TranslatePath', function ($http, $log, Fetcher) {
+    'use strict';
+    return function (start, end, complement) {
+      var url = Fetcher.buildUrl('translate', {
+        startBase: start, endBase: end, rc: complement});
+      $log.log("Translating @ ", url);
+      return $http.get(url, {responseType: 'json'})
+        .then(function (res) {
+          return res.data;
+        });
     };
   })
 
   .service('Fetcher', function(StatusPoller, $http, FETCH_BASE_URL, BASE_URL, PATH, $location) {
     'use strict';
     var self = this;
-    self.buildUrl = function(verb) {
-      return BASE_URL + '/' + verb + '/'
-        + PATH + '?' + $.param($location.search());
+    self.buildUrl = function(verb, params) {
+      params = _.assign({}, $location.search(), params);
+      return BASE_URL + '/' + verb + '/' + PATH + '?' + $.param(params);
     };
 
     /**

@@ -96,6 +96,7 @@ def run_frame(path):
 
 @app.route('/translate', methods=['POST'])
 def translate():
+    "Translate arbitrary sequence"
     try:
         # table 4 is for mycoplasma ala:
         # http://www.ncbi.nlm.nih.gov/Taxonomy/Utils/wprintgc.cgi
@@ -105,13 +106,26 @@ def translate():
             app.logger.debug('using mycoplasma table=4')
             table = 4
         seq = Bio.Seq.Seq(config.get('seq'))
-        rc = config.get('complement')
+        rc = parsing.tobool(config.get('complement'))
         if rc:
             seq = seq.reverse_complement()
         trans = Bio.Seq.translate(seq, table)
         return jsonify({
-            'seq': str(trans),
-            'complement': rc and str(seq)})
+            'seq': str(seq),
+            'trans': str(trans)})
+    except Exception as e:
+        logger.exception('Error While Translating')
+        return flask.make_response(repr(e), 500)
+
+
+@app.route('/translate/<path:path>', methods=['GET'])
+def translate2(path):
+    "Translate the known file with params"
+    config = build_config(path)
+    try:
+        return jsonify(
+            parsing.translate(config, parsing.tobool(request.args.get('rc')))
+        )
     except Exception as e:
         logger.exception('Error While Translating')
         return flask.make_response(repr(e), 500)

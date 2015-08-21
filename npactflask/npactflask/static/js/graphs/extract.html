@@ -10,12 +10,9 @@
     <a ng-if="ddnaP" href="http://blast.ncbi.nlm.nih.gov/Blast.cgi?PROGRAM=blastp&PAGE_TYPE=BlastSearch&BLAST_SPEC=&LINK_LOC=blasttab&QUERY={{ddnaP}}&JOB_TITLE={{extract.name}}" target="_blank">pBLAST this Sequence</a>
   </div>
   <hr>
-  DNA:<br>
+  <div>
+  DNA <span ng-if="extract.complement">(reverse complement)</span>:<br >
   <p class="dna-text">{{ddna}}</p>
-  <hr>
-  <div ng-if="extract.complement && ddnaRC">
-  DNA (reverse complement):<br >
-  <p class="dna-text">{{ddnaRC}}</p>
   <hr>
   </div>
   <div ng-if="ddnaP">

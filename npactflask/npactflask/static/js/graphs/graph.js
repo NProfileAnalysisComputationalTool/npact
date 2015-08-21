@@ -256,20 +256,17 @@ angular.module('npact')
     };
   })
   .directive('npactExtract', function(STATIC_BASE_URL, GraphConfig, DDNA,
-                               $log, Translater) {
+                               $log, TranslatePath) {
+    'use strict';
     return {
       restrict: 'A',
       scope: { extract: '=npactExtract'},
       templateUrl: STATIC_BASE_URL + 'js/graphs/extract.html',
       link: function($scope, $element, $attrs, ctrl) {
-        DDNA.sliceForExtract($scope.extract).then(function(ddna) {
-          $scope.ddna = ddna;
-          Translater(ddna, GraphConfig.mycoplasma, $scope.extract.complement)
-            .then(function(res) {
-              $scope.ddnaP = res.data && res.data.seq;
-              $scope.ddnaRC = res.data && res.data.complement;
-              $scope.query = $scope.extract.complement ? $scope.ddnaRC : $scope.ddna;
-            });
+        var e = $scope.extract;
+        TranslatePath(e.start, e.end, e.complement).then(function (data) {
+          $scope.ddnaP = data.trans;
+          $scope.ddna = data.seq;
         });
       }
     };
