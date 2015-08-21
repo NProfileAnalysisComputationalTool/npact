@@ -22,12 +22,12 @@ def handle_post():
     action = request.form.get('action')
     logger.info("Handling action %r", action)
     if action == 'cleanup':
-        cleanup()
+        docleanup()
     elif action == 'clear-library':
         clear_library()
 
 
-def cleanup():
+def docleanup():
     try:
         days = int(request.form.get('days', app.config['ATIME_DEFAULT']))
         if cleanup.cleanup_old_files(days):
@@ -45,7 +45,7 @@ def cleanup():
         if stderr:
             flash(stderr)
     except Exception as e:
-        flash('Error finding file size' % e)
+        flash('Error finding file size: ' + str(e))
 
 
 def clear_library():
