@@ -5,8 +5,7 @@ import Bio.Seq
 
 from path import path as Path
 from flask import (
-    url_for, request, flash, redirect, json, jsonify,
-    send_from_directory, send_file
+    url_for, request, flash, redirect, json, jsonify, send_file
 )
 from werkzeug.exceptions import NotFound
 from pynpact import main, parsing, util, executors
@@ -65,6 +64,7 @@ def dicforurl(config, exclude=None):
     return util.reducedict(config, keys)
 
 
+@app.route('/run/<path:path>')
 def run_frame(path):
     """This is the main processing page.
 
@@ -94,6 +94,7 @@ def run_frame(path):
         })
 
 
+@app.route('/translate', methods=['POST'])
 def translate():
     try:
         # table 4 is for mycoplasma ala:
@@ -116,6 +117,7 @@ def translate():
         return flask.make_response(repr(e), 500)
 
 
+@app.route('/kickstart/<path:path>')
 def kickstart(path):
     config = build_config(path)
     verb = request.args['verb']
@@ -193,6 +195,7 @@ def send_email(email_address, config, run_link, result_link):
         logger.exception("Failed sending email to %r", email_address)
 
 
+@app.route('/runstatus/<path:path>')
 def run_status(path):
     "This checks on the status of jobid=path"
     result = {'tid': path}
@@ -252,6 +255,7 @@ def getpdf(path):
     return send_file(pdf)
 
 
+@app.route('/acgt_gamma_file_list/<path:path>')
 def acgt_gamma_file_list(path):
     acgt_gamma_output = getabspath(path)
     files = map(getrelpath, acgt_gamma_output.listdir())

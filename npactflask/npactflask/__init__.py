@@ -17,24 +17,10 @@ from npactflask.views import run, start, management
 
 SILENCE_UNUSED_WARNING = (helpers, setuplogging)
 
-app.add_url_rule('/', 'start', view_func=start.view, methods=['POST', 'GET'])
-app.add_url_rule('/run/<path:path>', 'run_frame', view_func=run.run_frame)
-app.add_url_rule('/about', view_func=about)
-app.add_url_rule('/runstatus/<path:path>', view_func=run.run_status)
-app.add_url_rule('/kickstart/<path:path>', view_func=run.kickstart)
-app.add_url_rule('/translate', view_func=run.translate, methods=['POST'])
-app.add_url_rule('/acgt_gamma_file_list/<path:path>',
-                 view_func=run.acgt_gamma_file_list)
-
-app.add_url_rule('/efetch/<int:id>', view_func=start.efetch)
-app.add_url_rule('/management', 'management', view_func=management.view,
-                 methods=['POST', 'GET'])
-
-app.add_url_rule('/raw/<path:path>', 'raw', raw)
-
 
 # ***  Handle running at /npact/  ***
 redirectapp = Flask('redirectapp')
+
 
 
 @redirectapp.route('/')

@@ -105,6 +105,7 @@ def search():
         return redirect(url_for('start', **args))
 
 
+@app.route('/', endpoint='start', methods=['POST', 'GET'])
 def view():
     active = request.form.get('active')
     if request.method == 'POST':
@@ -132,6 +133,7 @@ def re_search():
         return view(request)
 
 
+@app.route('/efetch/<int:id>')
 def efetch(id):
     logger.info("Asked to fetch Id: %s", id)
     searchsession = entrez.EntrezSession(library_root())

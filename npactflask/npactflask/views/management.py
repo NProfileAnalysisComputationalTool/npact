@@ -7,6 +7,7 @@ from npactflask import cleanup, app
 logger = app.logger
 
 
+@app.route('/management', endpoint='management', methods=['POST', 'GET'])
 def view():
     if not app.config['DEBUG'] and request.environ.get('REMOTE_USER') is None:
         raise Unauthorized()

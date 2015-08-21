@@ -8,14 +8,12 @@ from npactflask import app
 logger = app.logger
 
 
+@app.route('/raw/<path:path>')
 def raw(path):
     return send_from_directory(app.config['UPLOADS'], path)
 
 
-def index():
-    return flask.render_template('start.html')
-
-
+@app.route('/about')
 def about():
     return flask.render_template('about.html')
 
