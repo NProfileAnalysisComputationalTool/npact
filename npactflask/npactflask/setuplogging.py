@@ -16,3 +16,4 @@ if os.environ.get('ENV', 'dev').lower() in ('dev', 'development'):
     sh = logging.StreamHandler()
     sh.setFormatter(logging.Formatter(fmt, datefmt='%H:%M:%S'))
     logger.addHandler(sh)
+    app.logger.handlers = []

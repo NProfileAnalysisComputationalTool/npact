@@ -2,6 +2,5 @@
 
 export ENV=dev
 gunicorn --bind=127.0.0.1:5000 --worker-class=gevent \
-         --reload \
-         --access-logfile=- \
-         npactflask:app_with_redirect
+         --reload --access-logfile=- \
+         npactflask:application

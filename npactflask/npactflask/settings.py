@@ -1,6 +1,7 @@
-from path import path
+from path import Path
+import os
 
-DEBUG = False
+DEBUG = os.environ.get('ENV').lower() not in ('prod', 'production')
 
 # TODO: Figure out mail configuration
 EMAIL_USE_TLS = True
@@ -11,7 +12,7 @@ EMAIL_HOST_PASSWORD = 'sictransit2'
 
 SECRET_KEY = 'cf0cb53d-1ff1-4074-a65d-977831de66af'
 
-WEBROOT = (path(__file__).dirname() / "../../webroot").realpath()
+WEBROOT = (Path(__file__).dirname() / "../../webroot").realpath()
 
 
 def ppath(rel, create=True):

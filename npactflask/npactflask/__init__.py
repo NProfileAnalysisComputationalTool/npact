@@ -18,17 +18,18 @@ from npactflask.views import run, start, management
 SILENCE_UNUSED_WARNING = (helpers, setuplogging)
 
 
-# ***  Handle running at /npact/  ***
-redirectapp = Flask('redirectapp')
+if app.config.get('APPLICATION_ROOT', '/') != '/':
+    # ***  Handle running at /npact/  ***
+    application = Flask('redirectapp')
 
+    @application.route('/')
+    def doredirect():
+        return redirect(app.config['APPLICATION_ROOT'])
 
-
-@redirectapp.route('/')
-def doredirect():
-    return redirect(app.config['APPLICATION_ROOT'])
-
-# Load a redirect app at the root URL to redirect us to the target app.
-# Serve app at APPLICATION_ROOT for localhost development.
-app_with_redirect = DispatcherMiddleware(redirectapp, {
-    app.config['APPLICATION_ROOT']: app,
-})
+    # Load a redirect app at the root URL to redirect us to the target app.
+    # Serve app at APPLICATION_ROOT for localhost development.
+    application = DispatcherMiddleware(application, {
+        app.config['APPLICATION_ROOT']: app,
+    })
+else:
+    application = app
