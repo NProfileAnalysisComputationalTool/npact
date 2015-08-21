@@ -413,11 +413,10 @@ angular.module('npact')
     };
 
     GP.oneTrack = function(track) {
-      var trackSlice = this._trackSliceCache[track.name] ||
-            (this._trackSliceCache[track.name] = track.slice({
+      var trackSlice = track.slice({
               startBase: this.startBaseM,
               endBase: this.endBaseM
-            }));
+            });
 
       return trackSlice
         .then(_.bind(function(data) {
