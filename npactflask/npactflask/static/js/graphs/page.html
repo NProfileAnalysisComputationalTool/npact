@@ -1,10 +1,8 @@
 <div id="resultsPage" class="contentPadding">
   <div id="printControls" >
-
     <button class="btn btn-form" action="#" ng-click="pageCtrl.print()"
-          title="Render all graph rows on this page for printing (this takes a minute).">
-      Print
-      <span class="glyphicon glyphicon-print"></span>
+            title="Render all graph rows on this page for printing (this takes a minute).">
+      Print <span class="glyphicon glyphicon-print"></span>
     </button>
     <span ng-if="printCounter">
       <img ng-src="{{STATIC_BASE_URL}}images/spinner.gif" class="spinner"/>
@@ -19,9 +17,9 @@
   <div id="status">
     <h3> Status
       <!-- This isn't working right now
-      <a title="Email a report about this run to Acceleration" ng-click="email()">
-        <span class="glyphicon glyphicon-envelope" style="font-size: 16px;"></span></a>
-      -->
+           <a title="Email a report about this run to Acceleration" ng-click="email()">
+             <span class="glyphicon glyphicon-envelope" style="font-size: 16px;"></span></a>
+           -->
     </h3>
     <npact-msg-pane></npact-msg-pane>
   </div>
@@ -36,9 +34,9 @@
         <div id="downloads" ng-controller="DownloadsCtrl as dc">
           <div class="ui-state-highlight ui-corner-all" >
             <p>
-               <a href="#"
-             title="Have the server generate a PDF for printing (this takes a minute)."
-             ng-href="{{BASE_URL + '/getpdf/' + PATH}}">Request PDF</a>
+              <a href="#"
+                 title="Have the server generate a PDF for printing (this takes a minute)."
+                 ng-href="{{BASE_URL + '/getpdf/' + PATH}}">Request PDF</a>
             </p>
             <div ng-show="predictionFiles.length > 0">
               <p>Results are now ready:
