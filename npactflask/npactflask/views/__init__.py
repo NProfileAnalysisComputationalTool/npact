@@ -13,7 +13,7 @@ def raw(path):
     return send_from_directory(app.config['UPLOADS'], path)
 
 
-@app.route('/about')
+@app.route('/about/')
 def about():
     return flask.render_template('about.html')
 

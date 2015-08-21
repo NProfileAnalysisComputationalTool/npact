@@ -26,13 +26,6 @@
 <script type="text/javascript" src="{{vSTATIC('js/graphs/graph.js')}}" defer></script>
 <script type="text/javascript" src="{{vSTATIC('js/graphs/config.js')}}" defer></script>
 
-
-{% endblock addScript %}
-{% block content %}
-
-<div id="progress" class="contentPadding">
-  <div npact-graph-page ></div>
-
   <script type="text/javascript">
   angular.module('npact')
       .constant('BASE_URL', '{{BASE_URL}}')
@@ -44,7 +37,10 @@
       .constant('ACGT_GAMMA_FILE_LIST_BASE_URL', '{{acgt_gamma_base}}')
       .constant('STATIC_BASE_URL', '{{STATIC_BASE}}');
   </script>
-</div>
+{% endblock addScript %}
+{% block content %}
+
+  <div npact-graph-page ></div>
 
 {%endblock content %}
 

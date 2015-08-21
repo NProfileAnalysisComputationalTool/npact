@@ -2,7 +2,11 @@
 {% block title %}NPACT - N-Profile Analysis Computational Tool{% endblock %}
 
 {% macro emailinput() %}
-<label>Email me the results <p style="display: inline; font-weight: 500; margin: 0px;">(optional)</p><input class="form-control" id="email" name="email" type="email" value="{{ email }}" style="width: 50%"></label>
+<div class="emailme">
+  <label>Email me the results <span>(optional)</span>
+    <input class="form-control" id="email" name="email" type="email" value="{{ email }}">
+  </label>
+</div>
 {% endmacro %}
 
 {% block addScript %}
@@ -16,11 +20,11 @@ function getParameterByName(name) {
 
 $(document).ready(function() {
   console.log("Startup");
-  $('#startforms div').hide();
+  $('#startforms > div').hide();
   var selectform = function(index) {
     console.log('Selecting form', index);
     if($('#form-'+index).css('display') == 'none') {
-      $('#startforms div').hide();
+      $('#startforms > div').hide();
       $('.input-group').show();
       $('#form-'+index).slideDown();
     }
@@ -66,8 +70,6 @@ $(document).on('change', '.btn-file :file', function() {
   <p>For quantitative frame-analysis and identification of ORFs with statistically-significant 3-base periodicities in <b> prokaryotic sequences </b> NPACT is currently accepting sequence files in the GenBank format (see a <a href="http://www.ncbi.nlm.nih.gov/Sitemap/samplerecord.html">sample record</a> or the <a href="about">About</a> page).</p>
   <p>After seleting a sequence file, "Start Analysis!" will result in a graphical output showing sequence compositional contrasts for frame analysis, coding region (CDS) annotation from the input file, and, by default, regions of non-random 3-base compositional periodicity (hits), newly-identified or modified ORFs, and corresponding output text files.  </p>
 
-  <p class="orange-text">The NPACT server can process uploaded files, files fetched from a URL, or
-GenBank data pasted directly in. <strong>Only one of the  following is neccessary</strong>.</p>
     <div id="msgpane">
         {% with messages = get_flashed_messages() %}
         {% if messages %}
@@ -150,10 +152,5 @@ GenBank data pasted directly in. <strong>Only one of the  following is neccessar
       </form>
     </div>
   </div>
-
-  <br/>
-  <p id="start-over">
-    <a href="">&laquo; Start Over</a>
-  </p>
 </div>
 {% endblock content %}

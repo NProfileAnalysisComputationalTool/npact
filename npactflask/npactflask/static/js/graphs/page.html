@@ -1,11 +1,11 @@
-<div>
+<div id="resultsPage" class="contentPadding">
   <div id="printControls" >
 
     <button class="btn btn-form" action="#" ng-click="pageCtrl.print()"
           title="Render all graph rows on this page for printing (this takes a minute).">
       Print
       <span class="glyphicon glyphicon-print"></span>
-    </button> 
+    </button>
     <span ng-if="printCounter">
       <img ng-src="{{STATIC_BASE_URL}}images/spinner.gif" class="spinner"/>
       waiting on {{printCounter}} rows to finish
@@ -16,17 +16,22 @@
              class="btn md-text btn-form">Request PDF</a>&nbsp;
   </div>
   <h2 ng-model="gc.first_page_title" contenteditable strip-br="true"></h2>
-  <div id="progressreport">
-    <h3> Status <a title="Email a report about this run to Acceleration" ng-click="email()"><span class="glyphicon glyphicon-envelope" style="font-size: 16px;"></span></a></h3>
+  <div id="status">
+    <h3> Status
+      <!-- This isn't working right now
+      <a title="Email a report about this run to Acceleration" ng-click="email()">
+        <span class="glyphicon glyphicon-envelope" style="font-size: 16px;"></span></a>
+      -->
+    </h3>
     <npact-msg-pane></npact-msg-pane>
   </div>
   <div id="results" ng-controller="Results">
     <accordion close-others="false">
       <accordion-group is-open="status.open">
         <accordion-heading>
-          <div>
+          <span>
             Downloads<i class="pull-right glyphicon" ng-class="{'glyphicon-chevron-down': status.open, 'glyphicon-chevron-right': !status.open}"></i>
-          </div>
+          </span>
         </accordion-heading>
         <div id="downloads" ng-controller="DownloadsCtrl as dc">
           <div class="ui-state-highlight ui-corner-all" >
@@ -49,9 +54,9 @@
       </accordion-group>
       <accordion-group is-open="status.isFirstOpen">
         <accordion-heading>
-          <div>
+          <span>
             Graphs<i class="pull-right glyphicon" ng-class="{'glyphicon-chevron-down': status.isFirstOpen, 'glyphicon-chevron-right': !status.isFirstOpen}"></i>
-          </div>
+          </span>
         </accordion-heading>
         <div npact-graph-container id="graphcontainer"></div>
       </accordion-group>

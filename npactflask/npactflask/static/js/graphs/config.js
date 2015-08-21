@@ -157,7 +157,7 @@ angular.module('npact')
                   return true;
                 }
                 else {
-                  MessageBus.warning("No matches found", 1000);
+                  MessageBus.warning("No matches found");
                   return $q.reject("No matches found for: '" + val + "'");
                 }
               });

@@ -1,4 +1,4 @@
-<div id="configContainer" ng-controller="TooltipCtrl">
+<div id="config" ng-controller="TooltipCtrl">
   <form name="configForm">
     <h2 style="font-size: 24px;">Graph Controls <span tooltip-template="'helpTool'" tooltip-placement="right" tooltip-class="customClass" tooltip-append-to-body="true" class="glyphicon glyphicon-question-sign" style="float: right; cursor: pointer"></span></h2>
 
@@ -9,7 +9,7 @@
     </div>
     <div>
       <label>Zoom:
-        <input class="form-control form-control-graph-controls" type="number" name="basesPerGraph"
+        <input class="form-control" type="number" name="basesPerGraph"
                style="width:5em;"
                min="100" required
                ng-model="gc.basesPerGraph"
@@ -23,19 +23,19 @@
     </div>
     <div>
       <label>Range:</label>
-      <input class="form-control form-control-graph-controls" type="number" name="startBase" style="width:6em;"
+      <input class="form-control" type="number" name="startBase" style="width:6em;"
              min="0" max="{{gc.length}}"
              ng-model="gc.startBase"
              ng-model-options="{ updateOn: 'default blur', debounce: { 'default': 600, 'blur': 0 } }">
       <span>to</span>
-      <input class="form-control form-control-graph-controls" type="number" name="endBase" style="width:6em;"
+      <input class="form-control" type="number" name="endBase" style="width:6em;"
              min="0" max="{{gc.length}}"
              ng-model="gc.endBase"
              ng-model-options="{ updateOn: 'default blur', debounce: { 'default': 600, 'blur': 0 } }">
     </div>
     <div>
       <label>Goto:
-        <input class="form-control form-control-graph-controls" type="number" name="gotoBase" style="width:6em;"
+        <input class="form-control" type="number" name="gotoBase" style="width:6em;"
                min="0" max="{{gc.length}}"
                ng-model="gc.gotoBase"
                ng-model-options="{ updateOn: 'default blur', debounce: { 'default': 600, 'blur': 0 } }">
@@ -43,7 +43,7 @@
     </div>
     <div>
       <label>Find ORF by name:<br/>
-        <input class="form-control form-control-graph-controls" type="text" name="findORF" style="width:9em;"
+        <input class="form-control" type="text" name="findORF" style="width:9em;"
                ng-model="gc.findORF"
                ng-model-options="{ updateOn: 'default blur', debounce: { 'default': 1200, 'blur': 0 } }"
                npact-orf-finder
@@ -64,6 +64,7 @@
                ng-change="gc.cookiePersist()">
         Color-blind friendly
       </label>
+      <br>
       <label>
         <input type="checkbox" ng-model="gc.mycoplasma">
         Mycoplasma
@@ -79,7 +80,7 @@
 
       <h3>N-Profile Options</h3>
       <div class="nprofile-options">
-        <span>Base types profiled:</span><br>
+        <label>Base types profiled:</label><br>
         <checkbox-list id="profile-options" ng-model="gc.nucleotides"
                        title="nucleotide type(s) represented in frame analysis"
                        options="['A', 'C', 'G', 'T']">

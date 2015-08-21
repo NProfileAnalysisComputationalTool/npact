@@ -1,6 +1,5 @@
-<div class="message alert" ng-class="{'alert-danger': message.level == 'danger', 
-		'alert-info': message.level == 'info'}">
-	<a ng-click="dismiss()" class="close" aria-label="close" title="close">&times;</a>
-  <p id="error-message" class="ui-state-highlight ui-corner-all" ng-bind="message.text">
+<div class="message alert alert-{{message.level}}" >
+  <a ng-click="dismiss()" class="close" aria-label="close" title="close">&times;</a>
+  <p id="error-message" class="" ng-bind="message.text">
   </p>
 </div>

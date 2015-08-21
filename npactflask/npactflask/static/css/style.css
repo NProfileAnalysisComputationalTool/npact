@@ -134,8 +134,7 @@ ul {
     padding:0 5px 0 20px;
 }
 
-#content p,
-#content .contentPadding h4 {
+#content p {
     line-height:20px;
     margin:2px 10px 15px 13px;
 }
@@ -230,7 +229,7 @@ ul {
     top:0;
     width:23%;
 }
-#leftCol #search {margin-bottom: 25px;}
+#leftCol #search {margin: 10px auto;}
 
 #priNav h2,#footer h3 {
     display:none;
@@ -269,38 +268,29 @@ ul {
 }
 
 #related {
-    padding:32px 8px 0;
-    width:90%;
+    padding: 0 10px 0 10px;
+}
+#related > * {
+    padding-left: 10px;
 }
 
 #related h3 {
-    color:#111;
-    font-size:75%;
-    font-style:italic;
-    padding:4px 0 0 10px;
-    text-transform:uppercase;
+   color:#111;
+   font-size: smaller;
+   font-style: italic;
+   text-transform: uppercase;
+   margin-bottom: 0;
 }
 
 #related h4 {
-    background:url(../images/pointer_small.gif) no-repeat 0 13px;
-    clear:left;
-    letter-spacing:1px;
-    padding:7px 0 0px 10px;
+   background: url(../images/pointer_small.gif) no-repeat 0 13px;
+   padding-top: 7px;  /* needed for background image to line up */
+   letter-spacing: 1px;
+   margin-top: 0;
+   margin-bottom: 2px;
 }
 
-#related li {
-    padding-right:2px;
-}
-
-* html #related li {
-    float:none;
-}
-
-#related ul {
-    float:left;
-    padding:0 0 5px 10px;
-}
-
+#related ul { margin-bottom: 10px; }
 
 /* ### section header image ### */
 
@@ -326,20 +316,11 @@ dt { font-weight: bold; margin-left: 10px; margin-top:4px;}
 dd { margin-left: 18px; margin-bottom:10px;}
 
 
-textarea { width: 100%; }
-#content .ui-accordion-content p { margin: 0; }
 
 .helptext {font-size: 1em; float:right; }
 
-#accordion {margin-left:9px;width:95%;}
-
-#accordion div {margin-top:5px;}
-#accordion div div {margin-top:0px;}
-#id_url {width:98%;}
 
 .error, ul.errorlist li { color:red; }
-
-ul.messages { border: 1px dotted #444; }
 
 p#error-message {
     margin: 0px 0px;
@@ -365,29 +346,15 @@ h2 span.qtip-help-icon { float: right; }
 #start-over a, #start-over a:visited {color:#FF4A00;}
 
 /* ****** For the processing page ****** */
-#progress .ui-icon { float:left;  margin-right: .5em;}
-
-#progress h3 + div { padding-left: 16px; }
-#progress h4 { color:#FF4A00; }
-
 
 .spinner { height: 24px; width:24px; float:left;}
 
-#content .ui-state-error { font-size: 1.2em; }
-#content .ui-corner-all p { margin: .5em .7em .7em .7em }
 
 
 /* ****** For the Results page ****** */
 
-#progress {
-    min-height: 1100px;
-}
+#resultsPage { min-height: 1100px; }
 
-#
-.ui-state-highlight { margin-top:10px; padding:10px; width:94%; }
-.ui-state-highlight p {color:#000;}
-
-.ui-state-highlight li a {font-weight:bold;}
 #files li {color:#000;}
 #files li:hover {color:#C60;}
 
@@ -421,17 +388,10 @@ h2 span.qtip-help-icon { float: right; }
 .ui-front {box-shadow: 0px 1px 8px #000;}
 .ui-front .ui-button {border:none; background: #7084D3;}
 
-#content #progress h2 {
-    margin:12px 0 15px 12px;
-}
-
-#progressreport h3 {
-    margin-left: 12px;
-}
 
 /* Graph Controls */
 
-#configContainer {
+#config {
     background: #F7F7F7; 
     border-bottom: solid 4px #4059BD;
     font-size: 14px;
@@ -439,9 +399,9 @@ h2 span.qtip-help-icon { float: right; }
     min-width: 220px;
 }
 
-#configContainer div.ng-scope {margin-bottom: 5px;}
+#config div.ng-scope {margin-bottom: 5px;}
 
-#configContainer h2 {
+#config h2 {
     background: #4059BD;
     border-bottom: solid 2px #FF4A00;
     position: relative;
@@ -451,7 +411,7 @@ h2 span.qtip-help-icon { float: right; }
     margin-right: -8px;
     padding: 3px 5px;
 }
-#configContainer h2:after { 
+#config h2:after { 
     left: 100%; 
     top: 50%; 
     border: solid transparent; 
@@ -466,7 +426,7 @@ h2 span.qtip-help-icon { float: right; }
     margin-top: -16px; 
     z-index: 500;
 }
-#configContainer h3 { 
+#config h3 { 
     color: #4059BD;
     font-size: 100%;
     font-style: normal;
@@ -476,13 +436,13 @@ h2 span.qtip-help-icon { float: right; }
     margin-top: 10px; 
 }
 
-#configContainer ul {padding-left: 5px;}
-#configContainer li {
+#config ul {padding-left: 5px;}
+#config li {
     border-bottom: solid 1px #E5E5E5;
     margin-bottom: 5px;
     padding-bottom: 3px;
 }
-#configContainer input[type=checkbox] {
+#config input[type=checkbox] {
     margin: 0px 4px;
 }
 
@@ -505,7 +465,8 @@ h2 span.qtip-help-icon { float: right; }
     width: 300px;
 }
 
-.form-control-graph-controls {
+#config label { font-weight: normal; }
+#config .form-control {
     display: inline;
     height: 27px;
     padding: 4px 5px;
@@ -535,9 +496,13 @@ checkbox-list#profile-options>label {
 
 /* Form styles */
 
-#startforms {
-    min-height:150px;
-}
+#startforms { min-height:275px; }
+#startforms label { display: block; }
+
+.emailme .form-control { width: 50%; }
+.emailme label span {font-weight: 500; margin: 0px;}
+
+textarea { width: 100%; }
 
 .btn-form {
     color: #fff !important;
@@ -601,11 +566,6 @@ checkbox-list#profile-options>label {
     margin-left: 10px;
 }
 
-label {
-    display: block;
-    margin-top: 5px;
-    margin-bottom: 10px;
-}
 
 .btn-search {
     background: #f7f7f7;
@@ -622,7 +582,5 @@ div.input-group input#searchbox,
 }
 
 /* Error messages */
- 
- .alert {
-    font-size: 18px;
- }
+.message { border: 1px dotted #DDD;}
+.alert { font-size: 18px; margin-bottom: 5px;}
