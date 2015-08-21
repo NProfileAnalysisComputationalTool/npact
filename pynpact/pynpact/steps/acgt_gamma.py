@@ -23,8 +23,8 @@ def plan(config, executor):
         "Missing pynpact/data for acgt_gamma prediction. " \
         "Expected at " + DATAPATH
 
-    rconfig = reducedict(config,
-                         ['filename', 'significance', 'GeneDescriptorSkip1'])
+    rconfig = reducedict(config, [
+        'filename', 'significance', 'GeneDescriptorSkip1', 'mycoplasma'])
     h = Hasher().hashdict(rconfig)
     h.hashfiletime(config['filename'])
     h.hashfiletime(BIN)
@@ -45,7 +45,10 @@ def plan(config, executor):
 
 @producer(tmpmanager=mkdtemp_rename)
 def _acgt_gamma(config, dtemp):
-    cmd = [BIN, "-q", config['filename']]
+    cmd = [BIN, "-q"]
+    if config.get('mycoplasma'):
+        cmd.append('-m')
+    cmd.append(config['filename'])
     if 'significance' in config:
         cmd.append(str(config['significance']))
 

@@ -167,7 +167,16 @@ def mycoplasma(config):
     if 'mycoplasma' in config:
         config['mycoplasma'] = tobool(config['mycoplasma'])
     else:
-        config['mycoplasma'] = False
+        detect_format(config)
+        if 'description' in config:
+            # does the description of the file contain the name of a mycoplasma?
+            desc = config['description']
+            config['mycoplasma'] = 'Mycoplasma' in desc or \
+                                   'Mesoplasma' in desc or \
+                                   'Ureaplasma' in desc or \
+                                   'Candidatus_Hodgkinia' in desc
+        else:
+            config['mycoplasma'] = False
     return config['mycoplasma']
 
 
