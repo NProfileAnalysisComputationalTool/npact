@@ -114,7 +114,7 @@ TODO: Better document the live mode
 There is a development webserver bundled in that will help for local development. To use:
 
 1. `source ve/bin/activate[.csh]`
-2. `npacflask/devserver.sh`
+2. `npactflask/bin/devserver`
 3. open [http://127.0.0.1:5000/npact/]()
 
 NB: Apache normally runs as a different user and you may encounter
@@ -122,8 +122,10 @@ permissions issues if you run the developmenet server in the same
 directory that has been served under Apache.
 
 To log in to the npact management page use:
-username: npactmanager
-password: "LBmgm2018"   -> no quotes
+user: npactmanager
+
+The password should be located in .htpasswd file in the webroot
+apache.conf:    authuserfile /var/www/html/genome.ufl.edu/npact/.htpasswd
 
 ### command line interface
 
