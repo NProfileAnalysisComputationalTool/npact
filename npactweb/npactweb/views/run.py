@@ -119,7 +119,7 @@ def translate(request):
     if request.POST.get('mycoplasma'):
         table = 4
     seq = Bio.Seq.Seq(request.POST.get('seq'))
-    rc = request.POST.get('complement')
+    rc = int(request.POST.get('complement'))
     if rc:
         seq = seq.reverse_complement()
     trans = Bio.Seq.translate(seq, table)

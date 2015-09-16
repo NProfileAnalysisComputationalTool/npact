@@ -1,3 +1,17 @@
+# Version 2.3.1 - 2015-07-30
+* Fix direct strand protein translation
+
+# Version 2.3.0 - 2015-07-30
+* Blast a gene from the gene info window
+* Scroll left and right with arrow keys
+* Improve hit track rendering, show significance
+* color blind friendly persists as a cookie
+* Add modified ORFs track
+* Draw ORF type tracks with varying styles to indicate type
+* Goto base
+* Search gene name
+* Keep visible graph row at the top when the row height changes (adding/removing tracks)
+
 # Version 2.2.1 - 2015-03-09
 * polyfill for missing getChild in python2.6
 * better logging of acgt_gamma exit
