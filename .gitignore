@@ -26,3 +26,4 @@ webroot
 /pytest.xml
 /.projectile
 /TAGS
+/npactweb/email_settings.py

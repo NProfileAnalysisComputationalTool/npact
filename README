@@ -125,8 +125,10 @@ permissions issues if you run the developmenet server in the same
 directory that has been served under Apache.
 
 To log in to the npact management page use:
-username: npactmanager
-password: "LBmgm2018"   -> no quotes
+user: npactmanager
+
+The password should be located in .htpasswd file in the webroot
+apache.conf:    authuserfile /var/www/html/genome.ufl.edu/npact/.htpasswd
 
 ### command line interface
 
