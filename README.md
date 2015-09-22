@@ -166,7 +166,8 @@ process.
 ## npactflask/
 
 This is the code for the website. It is built on top of
-[Flask](http://flask.pocoo.org). See `README.md` in that folder.
+[Flask](http://flask.pocoo.org). See [npactflask/README.md]() in that
+folder.
 
 
 # Contributing
