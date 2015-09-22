@@ -1,4 +1,3 @@
-
 # About
 
 NPACT (N-Profile Analysis and Computation Tool) implements methods to
@@ -20,16 +19,6 @@ contract from Luciano Brocchieri at the [University of Florida
 Genetics Institute](http://www.ufgi.ufl.edu/) based on sequence-analysis
 methods and computational tools developed by Luciano Brocchieri at the
 [University of Florida Genetics Institute](http://www.ufgi.ufl.edu/).
-
-## About this file
-
-This file is written using
-[Markdown](http://daringfireball.net/projects/markdown/). It should be
-fairly legible as plain text but there are tools that will produce a
-nice HTML output,
-e.g. http://daringfireball.net/projects/markdown/dingus.
-
-
 
 # Using
 
@@ -55,15 +44,11 @@ These will need to be setup on your system before getting started.
   python. It works on CentOS and Ubuntu; it should work on any posix
   environment build of python. Mac OS X is expected to work.
 * A C compiler: the actual analysis code is written in C. Tested with
-  gcc 4.6.1. Others should work, I don't think there is anything too
+  gcc 4.8.4. Others should work, I don't think there is anything too
   crazy being used.
 * [Make](http://www.gnu.org/s/make/): A makefile is used to build all
   the C.
 * Some sort of PostScript viewer to view the output files.
-* An fcgi server to run the website. The included apache.conf works
-  with Apache 2.2 running mod_fcgid but other fcgi servers should work
-  as well. If you intend to only run it locally there is a builtin
-  webserver that will do well enough.
 * [Git](http://git-scm.com/) (OPTIONAL): The version control system
   this project is maintained in. Will be necessary to record changes
   but not for running the project.
@@ -82,15 +67,15 @@ The system uses several python packages for deployment:
 These are already included.
 
 The `requirements.txt` contains the exact libraries beyond that. It is
-in a
-[format](https://pip.pypa.io/en/latest/reference/pip_install.html#requirements-file-format)
-that pip understands.
+in a [format][req-file-format] that pip understands.
 
 Notes:
 
 * Biopython (1.60): Used to query entrez and read information out of
   GenBank files. This can probably be upgraded without any hassle.
 * Flask (0.10): Used to build the website interface.
+
+[req-file-format]: https://pip.pypa.io/en/latest/reference/pip_install.html#requirements-file-format
 
 
 ## Building
@@ -102,12 +87,7 @@ Notes:
 If that completes successfuly then you should see "Successfully
 finished bootstrap.py". If it doesn't the rest won't work.
 
-## Running
-
-This should be run using the gunicorn program behind a proxy (apache).
-Look at `apache.conf` for an example of how to do that.
-
-TODO: Better document the live mode
+## Running in Development
 
 ### Development mode
 
@@ -118,7 +98,7 @@ There is a development webserver bundled in that will help for local development
 3. open [http://127.0.0.1:5000/npact/]()
 
 NB: Apache normally runs as a different user and you may encounter
-permissions issues if you run the developmenet server in the same
+permissions issues if you run the development server in the same
 directory that has been served under Apache.
 
 To log in to the npact management page use:
@@ -139,31 +119,6 @@ still useful to run the analysis with all the default options.
 2. `pynpact <gbkfile>`
 3. It will print a message reporting the output.
 
-
-# Publishing
-
-Most of the publishing is accomplished by `publish.sh`. It wraps a
-`git pull` and does a few extra build steps.
-
-
-## First time
-The first time NPACT is published to a new server a few more steps are
-going to be needed.
-
-* Ensure `ReleaseNotes.md` is updated and the version at the top has todays date of publish
-* `git tag v${VERSION}`
-* `git push --tags`
-* git clone the repository to the desired publish destination
-    * `git config core.sharedRepository group`
-* Include the `apache.conf` under the desired domain config.
-* From development host check variables at the top of `publish.sh` and run `publish.sh`
-
-## Republish
-* Ensure `ReleaseNotes.md` is updated and the version at the top has todays date of publish
-* `git tag v${VERSION}`
-* `git push --tags`
-* From development host check variables at the top of `publish.sh` and run `publish.sh`
-* Go to http://$HOST/npact/management and make sure the tqdaemon gets restarted
 
 # Project Components
 
@@ -198,7 +153,7 @@ The C code at `pynpact/src` does most of the analysis and the python
 code in `pynpact/pynpact` helps glue it together into an easy-to-run
 process.
 
-* `pynpact/pynpact/prepare.py` this is used to investigate a GBK file
+* `pynpact/pynpact/parsing.py` this is used to investigate a GBK file
   and come up with the default options that will be used on a run. To
   change the default analysis options.on the websites run page, go
   here. To change the help text about one of the options, go here.
@@ -207,19 +162,6 @@ process.
 * `pynpact/pynpact/main.py` actually coordinates the running of the C
   programs and produces the PS output.
 
-## taskqueue/
-
-This is a small daemon that will host long running computation
-external to the web process. Clients can enqueue a task getting back
-an ID. This ID can then be used to check the status, obtain log
-output, or get the result of the original task when it is finished.
-
-The website will automatically create a daemon process (named
-`npact-taskqueue-daemon`) as neccessary. This can be managed manually
-with `manage.py tqdaemon {start,stop,status,restart}`. NB. if the
-daemon was started by the webserver it must be shutdown as the same
-user. e.g. `sudo -u www-data ./manage.py tqdaemon stop`; this can also
-be done on the websites management panel.
 
 ## npactflask/
 
