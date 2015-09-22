@@ -13,16 +13,11 @@ This is the code for the website.
   website. Go here to change text on the site, rearrange blocks, or
   add new content.
 
-* `npactflask/urls.py` controls the web sites url space; django uses
-  this to dispatch incoming requests to views.
-
 * `npactflask/views/` holds the code that gets run on an
   incoming request.
 
-* `cleanup.py` used to clean out old uploaded files so they
+* `bin/cleanup.py` used to clean out old uploaded files so they
   don't take too much space on the server.
-
-* `flask.fcgi` is the entry point for fcgi webservers.
 
 * `npactflask/static/bower_components` - third party javascript
   libraries installed via [bower][], to be used in the final
@@ -42,11 +37,6 @@ that is more like vector drawing and a scene graph to make this easier
 while still rendering to the fast browser `<canvas>` element.
 
 
-
-### Popups
-
-Rendered using `qtip2` as the `npactExtract` directive, based on
-konvajs mouse click events.
 
 ### Development
 
