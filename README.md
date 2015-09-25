@@ -32,11 +32,8 @@ The required libraries are packaged with this
 project as much as possible to make it easier to get started and more resistant to
 external changes.
 
-### External requirements
-
 You will need [Python](http://python.org/) and [Make](http://www.gnu.org/s/make/)
 on your system before getting started.
-
 See [requirements.md](/requirements.md) for more information.
 
 
