@@ -193,7 +193,7 @@ Website content is mostly in the templates at
 `npactflask/npactflask/templates`. This uses the
 [Flask Jinja2 templating ](http://flask.pocoo.org/docs/0.10/templating/). To
 alter the default values or help text given on the run page go look in
-`pynpact/pynpact/prepare.py`.
+`pynpact/pynpact/parsing.py`.
 
 This can be tested out by running the development server. See "Using >
 Running > Development mode" section above.
