@@ -26,7 +26,7 @@ To get the latest stable released version of the code (i.e. what's
 running on http://genome.ufl.edu/npact/) go to
 "https://github.com/NProfileAnalysisComputationalTool/npact/releases".
 
-to get the latest development version of the code click the "Download
+To get the latest development version of the code click the "Download
 ZIP" button on the right.
 
 # Using
