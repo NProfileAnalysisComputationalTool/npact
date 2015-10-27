@@ -28,64 +28,23 @@ command line though this has not been tested recently.
 
 ## Requirements
 
-As much as possible the required libraries are packaged with this
-project to make it easier to get started and more resistant to
+The required libraries are packaged with this
+project as much as possible to make it easier to get started and more resistant to
 external changes.
 
-### External requirements
-
-These will need to be setup on your system before getting started.
-
-* [Python](http://python.org/): The bulk of the glue code is written
-  in Python. It is targeting python 2.6 though 2.7 should work just as
-  well. Python 3 compatibility has not been tested--and probably won't
-  work due to biopython.
-* A [posix](http://en.wikipedia.org/wiki/POSIX) environment for
-  python. It works on CentOS and Ubuntu; it should work on any posix
-  environment build of python. Mac OS X is expected to work.
-* A C compiler: the actual analysis code is written in C. Tested with
-  gcc 4.8.4. Others should work, I don't think there is anything too
-  crazy being used.
-* [Make](http://www.gnu.org/s/make/): A makefile is used to build all
-  the C.
-* Some sort of PostScript viewer to view the output files.
-* [Git](http://git-scm.com/) (OPTIONAL): The version control system
-  this project is maintained in. Will be necessary to record changes
-  but not for running the project.
-* [ps2pdf](http://ghostscript.com/doc/current/Ps2pdf.htm) (OPTIONAL):
-  If present NPACT will convert the rendered Postscript to a PDF file
-  using this program.
-
-### Packaged requirements
-
-The system uses several python packages for deployment:
-
-* [virtualenv](http://pypi.python.org/pypi/virtualenv)
-* [distribute](http://pypi.python.org/pypi/distribute)
-* [pip](http://www.pip-installer.org/en/latest/index.html)
-
-These are already included.
-
-The `requirements.txt` contains the exact libraries beyond that. It is
-in a [format][req-file-format] that pip understands.
-
-Notes:
-
-* Biopython (1.60): Used to query entrez and read information out of
-  GenBank files. This can probably be upgraded without any hassle.
-* Flask (0.10): Used to build the website interface.
-
-[req-file-format]: https://pip.pypa.io/en/latest/reference/pip_install.html#requirements-file-format
+You will need [Python](http://python.org/) and [Make](http://www.gnu.org/s/make/)
+on your system before getting started.
+See [requirements.md](/requirements.md) for more information.
 
 
 ## Building
 
-1. run bootstrap.py to get everything going.
+1. run `bootstrap.py` to get everything going.
 
         python bootstrap.py
 
 If that completes successfuly then you should see "Successfully
-finished bootstrap.py". If it doesn't the rest won't work.
+finished bootstrap.py". If it doesn't, the rest won't work.
 
 ## Running in Development
 
@@ -95,17 +54,18 @@ There is a development webserver bundled in that will help for local development
 
 1. `source ve/bin/activate[.csh]`
 2. `npactflask/bin/devserver`
-3. open [http://127.0.0.1:5000/npact/]()
+3. open http://127.0.0.1:5000/npact/
 
 NB: Apache normally runs as a different user and you may encounter
 permissions issues if you run the development server in the same
 directory that has been served under Apache.
 
-To log in to the npact management page use:
-user: npactmanager
+To log in to the npact management page, the user is `npactmanager`
 
-The password should be located in .htpasswd file in the webroot
-apache.conf:    authuserfile /var/www/html/genome.ufl.edu/npact/.htpasswd
+The password should be located in `.htpasswd` file in the webroot e.g. from the 
+apache.conf:
+
+    authuserfile /var/www/html/genome.ufl.edu/npact/.htpasswd
 
 ### command line interface
 
@@ -166,82 +126,4 @@ process.
 ## npactflask/
 
 This is the code for the website. It is built on top of
-[Flask](http://flask.pocoo.org). See [npactflask/README.md]() in that
-folder.
-
-
-# Contributing
-
-This project uses Git for source control. Git is an excellent system
-with lots of good documentation. One of its advantages is that it can
-be run disconnected from others and then used to bring disparate
-parties back into sync at some later point. See the section "Recording
-changes" below for a super quick introduction and links to tutorials.
-
-## Virtualenv
-
-In order for any editing to work well you should activate the python
-virtual environment. This will alter the paths that the system looks
-for the python and executable code in. From a command line shell in
-the root of the project simply type.
-
-    source ve/bin/activate
-
-## Editing the website
-
-Website content is mostly in the templates at
-`npactflask/npactflask/templates`. This uses the
-[Flask Jinja2 templating ](http://flask.pocoo.org/docs/0.10/templating/). To
-alter the default values or help text given on the run page go look in
-`pynpact/pynpact/parsing.py`.
-
-This can be tested out by running the development server. See "Using >
-Running > Development mode" section above.
-
-## Editing the C code
-
-All of the C lives in `pynpact/src`.
-
-### Building with make
-
-Make is required to build the C code associated with this
-project. Make will automatically detect which files have changed since
-it was last invoked and only build those pieces.
-
-    cd pynpact
-    make
-
-
-## Recording changes
-
-Frequently recording your changes makes it easier to merge with other
-developers later or to track down when a bug or confusing line of code
-was introduced.
-
-The simplest form is:
-
-    git commit -m "<A brief descriptive message>"  <the file or files to commit>
-
-How frequently should you do this? Any time you are at a good little
-stopping point: e.g.
-
-    git commit -m "Got most of the way through first draft of the README file." README
-
-Later on you can see the entire history of a file:
-
-    git log README
-
-If you are in the middle of editing a file and want to see what all
-you've changed?
-
-    git diff <file>
-
-Want to get rid of those changes and go back to the recorded version
-that you know worked?
-
-    git checkout <file>
-
-There are many very good tutorials out there;
-[Pro Git](http://progit.org/book/) is fantastic and all on
-[this list](http://sixrevisions.com/resources/git-tutorials-beginners/)
-look good.
+[Flask](http://flask.pocoo.org). See [npactflask/README.md](/npactflask/README.md).
