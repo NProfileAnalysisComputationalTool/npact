@@ -20,6 +20,15 @@ Genetics Institute](http://www.ufgi.ufl.edu/) based on sequence-analysis
 methods and computational tools developed by Luciano Brocchieri at the
 [University of Florida Genetics Institute](http://www.ufgi.ufl.edu/).
 
+# Download
+
+To get the latest stable released version of the code (i.e. what's
+running on http://genome.ufl.edu/npact/) go to
+"https://github.com/NProfileAnalysisComputationalTool/npact/releases".
+
+to get the latest development version of the code click the "Download
+ZIP" button on the right.
+
 # Using
 
 This project is primarily meant to be used as a website (See the
@@ -62,7 +71,7 @@ directory that has been served under Apache.
 
 To log in to the npact management page, the user is `npactmanager`
 
-The password should be located in `.htpasswd` file in the webroot e.g. from the 
+The password should be located in `.htpasswd` file in the webroot e.g. from the
 apache.conf:
 
     authuserfile /var/www/html/genome.ufl.edu/npact/.htpasswd
