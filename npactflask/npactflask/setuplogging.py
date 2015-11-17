@@ -6,7 +6,9 @@ from logging.handlers import WatchedFileHandler
 logger = logging.getLogger('')
 logger.setLevel(logging.DEBUG)
 fmt = "%(asctime)s %(levelname)-7s %(name)-20s| %(message)s"
-fh = WatchedFileHandler(app.config['WEBROOT'] / 'logs/main.log')
+logdir = app.config['WEBROOT'] / 'logs'
+logdir.makedirs_p()
+fh = WatchedFileHandler(logdir / 'main.log')
 fh.setFormatter(logging.Formatter(fmt))
 logger.addHandler(fh)
 
