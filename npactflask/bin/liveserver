@@ -1,7 +1,7 @@
 #!/usr/bin/env sh
 
-export ENV=dev
+export ENV=prod
 gunicorn --bind=127.0.0.1:5000 \
          --worker-class=gevent \
-         --reload --access-logfile=- \
+         --reload \
          npactflask:application
