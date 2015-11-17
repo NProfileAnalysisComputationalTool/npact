@@ -174,6 +174,7 @@ def mkstemp_rename(destination, **kwargs):
             f.write('stuff\n')
 
     """
+    log = kwargs.pop('log', None)
     kwargs.setdefault('dir', os.path.dirname(destination))
 
     (fd, path) = tempfile.mkstemp(**kwargs)
@@ -192,6 +193,7 @@ def mkdtemp_rename(destination, **kwargs):
     """A wrapper for tempfile.mkdtemp that always cleans up.
 
     This wrapper sets defaults based on the class values."""
+    log = kwargs.pop('log', None)
     dest = Path(destination).normpath()
     kwargs.setdefault('dir', dest.parent)
     tmppath = Path(tempfile.mkdtemp(**kwargs))
@@ -200,10 +202,12 @@ def mkdtemp_rename(destination, **kwargs):
         try:
             tmppath.rename(dest)
         except OSError as e:
-            if e.errno == errno.EEXIST:
-                # I don't think we'll ever get here.
-                dest.rmtree_p()
-                tmppath.rename(dest)
+            if e.errno == errno.ENOENT:
+                # the tmppath didn't exist?!
+                log.exception("Shouldn't be here %r", tmppath)
+                raise
+            elif e.errno == errno.ENOTEMPTY:
+                log.debug("Target already existed")
             else:
                 raise
     finally:
