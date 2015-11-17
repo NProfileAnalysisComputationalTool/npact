@@ -1,5 +1,4 @@
 import logging
-import os
 from contextlib import contextmanager
 from path import Path
 from pynpact import parsing, executors
