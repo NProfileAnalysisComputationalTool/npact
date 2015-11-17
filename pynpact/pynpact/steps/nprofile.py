@@ -20,7 +20,7 @@ statuslog = logging.getLogger('pynpact.statuslog')
 
 BIN = binfile('nprofile')
 
-KEYS = ['nucleotides', 'length', 'window_size', 'step', 'period', 'ddna']
+KEYS = ['nucleotides', 'length', 'window_size', 'step', 'period', 'ddna', 'stderr']
 OUTPUTKEY = 'File_list_of_nucleotides_in_200bp windows'
 JSONOUTPUTKEY = 'nprofileData'
 
@@ -52,7 +52,7 @@ def _nprofile(config, out):
            config['ddna'], 1, config['length'],
            config['window_size'], config['step'], config['period']]
     capproc.capturedCall(
-        cmd, stdout=out, stderr=sys.stderr,
+        cmd, stdout=out, stderr=config['stderr'],
         logger=logger, check=True)
 
 

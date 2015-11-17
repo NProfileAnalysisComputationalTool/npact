@@ -20,7 +20,7 @@ BIN = binfile("extract")
 
 KEYS = ['GeneDescriptorKey1', 'GeneDescriptorKey2',
         'GeneDescriptorSkip1', 'GeneDescriptorSkip2',
-        'filename']
+        'filename', 'stderr']
 
 OUTPUTKEY = 'File_of_published_accepted_CDSs'
 
@@ -53,4 +53,5 @@ def _extract(config, out):
            config['GeneDescriptorSkip1'], config['GeneDescriptorKey1'],
            config['GeneDescriptorSkip2'], config['GeneDescriptorKey2']]
     capproc.capturedCall(
-        cmd, check=True, logger=logger, stdout=out, stderr=sys.stderr)
+        cmd, check=True, logger=logger, stdout=out, stderr=config['stderr'])
+    logger.debug("Finished extract")

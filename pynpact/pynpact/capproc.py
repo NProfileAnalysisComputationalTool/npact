@@ -175,16 +175,18 @@ def capturedPopen(cmd, stdin=None, stdout=None, stderr=None,
 
     def out(arg):
         # figure out what to pass to the stdout stream
-        if arg:
-            return arg  # specified: use that
-        elif arg is False:
+        if arg == 'log':
+            if not logger:
+                raise ValueError("Requested logging but no logger")
+            return PIPE
+        elif arg is False or arg is 'devnull':
             fd = os.open(os.devnull, os.O_WRONLY)
             close_in_parent.append(fd)
             return fd
-        elif logger:
+        elif arg is None and logger:
             return PIPE
         else:
-            return None
+            return arg
 
     p = subprocess.Popen(cmd, stdin=stdin,
                          stdout=out(stdout),
@@ -216,8 +218,9 @@ def capturedPopen(cmd, stdin=None, stdout=None, stderr=None,
             p.__setattr__("std%s_monitor_thread" % name, th)
             th.start()
 
-        if stdout is None: monitor(stdout_level, p.stdout, "out")
-        if stderr is None: monitor(stderr_level, p.stderr, "err")
+        logvals = (None, 'log')
+        if stdout in logvals: monitor(stdout_level, p.stdout, "out")
+        if stderr in logvals: monitor(stderr_level, p.stderr, "err")
     return p
 
 

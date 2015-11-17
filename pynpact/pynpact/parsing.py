@@ -13,31 +13,33 @@ from pynpact.util import mkstemp_rename
 log = logging.getLogger(__name__)
 
 defaults = {
-        'nucleotides': ['C', 'G'],
+    'nucleotides': ['C', 'G'],
 
-        # keys for extract.c
-        'GeneDescriptorKey1': 'gene',
-        'GeneDescriptorKey2': 'locus_tag',
-        'GeneDescriptorSkip1': 0,
-        'GeneDescriptorSkip2': 0,
+    # keys for extract.c
+    'GeneDescriptorKey1': 'gene',
+    'GeneDescriptorKey2': 'locus_tag',
+    'GeneDescriptorSkip1': 0,
+    'GeneDescriptorSkip2': 0,
 
-        # keys for CG:
-        'window_size': 201,
-        'step': 51,
-        'period': 3,
+    # keys for CG:
+    'window_size': 201,
+    'step': 51,
+    'period': 3,
 
-        # acgt_gamma:
-        'skip_prediction': False,
-        'significance': 0.01,
+    # acgt_gamma:
+    'skip_prediction': False,
+    'significance': 0.01,
 
-        # allplots
-        'first_page_title': None,
+    # allplots
+    'first_page_title': None,
 
-        'startBase': 0,
-        'basesPerGraph': 10000,
-        'graphsPerPage': 5,
-        'x-tics': 1000
-        }
+    'startBase': 0,
+    'basesPerGraph': 10000,
+    'graphsPerPage': 5,
+    'x-tics': 1000,
+
+    'stderr': 'log'
+}
 
 
 def initial(filename, outputdir=None):

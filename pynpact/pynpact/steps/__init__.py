@@ -1,6 +1,10 @@
+import logging
 from functools import wraps
 from pynpact.util import mkstemp_rename, delay
 from path import Path
+
+
+log = logging.getLogger('pynpact.steps')
 
 
 def enqueue(func, executor, config, target, after=None):
@@ -31,7 +35,7 @@ def producer(tmpmanager=mkstemp_rename):
         @wraps(func)
         def wrapper(config, target):
             if not Path(target).exists():
-                with tmpmanager(target) as tmp:
+                with tmpmanager(target, log=log) as tmp:
                     func(config, tmp)
                     return target
         return wrapper

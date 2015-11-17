@@ -19,7 +19,7 @@ BIN = binfile('Allplots')
 KEYS = ['first_page_title', 'following_page_title',
         'length', 'startBase', 'endBase', 'period',
         'basesPerGraph', 'graphsPerPage', 'x-tics',
-        'nucleotides', 'alternate_colors', 'basename']
+        'nucleotides', 'alternate_colors', 'basename', 'stderr']
 FILE_KEYS = ['File_of_unbiased_CDSs',
              'File_of_conserved_CDSs',
              'File_of_new_CDSs',
@@ -208,5 +208,5 @@ def _ps2pdf(config, out):
     statuslog.info("Converting to PDF")
     cmd = ['ps2pdf', ps_filename, '-']
     capproc.capturedCall(
-        cmd, stdout=out, logger=log, check=True)
+        cmd, stdout=out, stderr=config['stderr'], logger=log, check=True)
     statuslog.info("Finished PDF conversion")

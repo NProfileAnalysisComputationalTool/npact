@@ -38,7 +38,11 @@ class InlineExecutor(object):
 
 
 class GeventExecutor(object):
-    "Does everything in line"
+    """Executor that assumes gevent is present
+
+    Execution is done inline but it is assumed things are done asynchronously.
+
+    """
     pool = None
     tasks = None
 
