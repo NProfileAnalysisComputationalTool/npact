@@ -1,17 +1,8 @@
 import logging
 import os
-import os.path
-import tempfile
-import shutil
-import sys
-from optparse import OptionParser
 from contextlib import contextmanager
 from path import Path
-from subprocess import PIPE
 from pynpact import parsing, executors
-from __init__ import binfile, DATAPATH
-import capproc
-import util
 
 logger = logging.getLogger('pynpact')
 
