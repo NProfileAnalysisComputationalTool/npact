@@ -22,6 +22,7 @@ setup(name='npactweb',
       requires=["biopython(>=1.57)",
                 "django(==1.3)",
                 "flup(>=1.0)",
+                "pynpact",
                 "taskqueue"],
       scripts=['cleanup.py', 'django.fcgi']
      )

@@ -18,8 +18,10 @@ setup(name='npactflask',
       packages=['npactflask'],
       package_data={'npactflask': list(recursive_files('static', 'templates'))},
       requires=["biopython(>=1.57)",
+                "path.py(==7.4)",
                 "flask(==0.10)",
-                "gunicorn",
+                "gunicorn(==19.3.0)",
+                "gevent(==1.0.2)",
                 "pytz"],
       scripts=['bin/cleanup.py', 'bin/devserver']
 )

@@ -1,15 +1,10 @@
-lib/flup-1.0.2.tar.gz
-lib/setproctitle-1.1.8.tar.gz
 #We've amended this gzip with extra DTDs
 lib/biopython-1.63-extradtds.tar.gz
+
 path.py==7.4
-lockfile==0.10.2
-python-daemon==2.0.5
 flask==0.10
 gevent==1.0.2
 gunicorn==19.3.0
-Flask-Mail
 pytz
 -e pynpact/
--e taskqueue/
 -e npactflask/

@@ -33,7 +33,7 @@ setup(name='taskqueue',
       author_email='nathan@acceleration.net',
       url='http://genome.ufl.edu/npact/',
       packages=['taskqueue'],
-      requires=["lockfile"],
+      requires=["lockfile>=0.10.2", "setproctitle>=1.1.8", "python-daemon==2.0.5"],
       tests_require=["pytest>=2.4", "mock>=1", "pytest-mock"],
       scripts=['tqdaemon.py'],
       cmdclass={'test': PyTest})
