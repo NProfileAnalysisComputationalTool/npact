@@ -160,7 +160,7 @@ def stream_to_file(stream, path, bufsize=8192):
 
 
 @contextmanager
-def mkstemp_rename(destination, **kwargs):
+def mkstemp_rename(destination,  **kwargs):
     """For writing to a temporary file and then move it ontop of a
     (possibly) existing file only when finished.  This enables us to
     perform long running operations on a file that other people might
@@ -183,13 +183,14 @@ def mkstemp_rename(destination, **kwargs):
         filelike = os.fdopen(fd, 'wb')
         yield filelike
         filelike.close()
+        path.chmod(0o0644)
         path.rename(destination)
     finally:
         path.remove_p()
 
 
 @contextmanager
-def mkdtemp_rename(destination, **kwargs):
+def mkdtemp_rename(destination, chmod=None, **kwargs):
     """A wrapper for tempfile.mkdtemp that always cleans up.
 
     This wrapper sets defaults based on the class values."""
@@ -200,7 +201,9 @@ def mkdtemp_rename(destination, **kwargs):
     try:
         yield tmppath
         try:
+            tmppath.chmod(0o0755)
             tmppath.rename(dest)
+
         except OSError as e:
             if e.errno == errno.ENOENT:
                 # the tmppath didn't exist?!
