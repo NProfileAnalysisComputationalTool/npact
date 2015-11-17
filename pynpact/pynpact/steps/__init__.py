@@ -1,6 +1,6 @@
 from functools import wraps
 from pynpact.util import mkstemp_rename, delay
-from path import path as pathlib
+from path import Path
 
 
 def enqueue(func, executor, config, target, after=None):
@@ -30,7 +30,7 @@ def producer(tmpmanager=mkstemp_rename):
     def getfn(func):
         @wraps(func)
         def wrapper(config, target):
-            if not pathlib(target).exists():
+            if not Path(target).exists():
                 with tmpmanager(target) as tmp:
                     func(config, tmp)
                     return target

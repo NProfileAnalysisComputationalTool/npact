@@ -5,7 +5,7 @@ import os.path
 import logging
 import re
 from Bio import SeqIO, Seq
-from path import path
+from path import Path
 
 from pynpact import genbank
 from pynpact.util import mkstemp_rename
@@ -54,7 +54,7 @@ def initial(filename, outputdir=None):
 def detect_format(config):
     if 'format' not in config:
         try:
-            filename = path(config['filename'])
+            filename = Path(config['filename'])
             with filename.open('r') as f:
                 header = f.read(5)
             if filename.ext in ('.gb', '.gbk') or header.startswith('LOCUS'):
@@ -197,9 +197,9 @@ def derive_filename(config, hash, newext):
     "Build target filename based on identifying pieces"
     if newext[0] == '.':
         newext = newext[1:]
-    filename = path(config['filename'])
+    filename = Path(config['filename'])
     if 'outputdir' in config:
-        outputdir = path(config['outputdir'])
+        outputdir = Path(config['outputdir'])
     else:
         outputdir = filename.dirname()
     newfilename = '%s-%s.%s' % (filename.namebase, hash, newext)

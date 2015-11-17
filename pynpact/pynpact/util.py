@@ -7,7 +7,7 @@ import hashlib
 import tempfile
 from contextlib import contextmanager
 from functools import wraps
-from path import path as pathlib
+from path import Path
 
 
 def reducehashdict(dict, keys):
@@ -177,7 +177,7 @@ def mkstemp_rename(destination, **kwargs):
     kwargs.setdefault('dir', os.path.dirname(destination))
 
     (fd, path) = tempfile.mkstemp(**kwargs)
-    path = pathlib(path)
+    path = Path(path)
     try:
         filelike = os.fdopen(fd, 'wb')
         yield filelike
@@ -192,9 +192,9 @@ def mkdtemp_rename(destination, **kwargs):
     """A wrapper for tempfile.mkdtemp that always cleans up.
 
     This wrapper sets defaults based on the class values."""
-    dest = pathlib(destination).normpath()
+    dest = Path(destination).normpath()
     kwargs.setdefault('dir', dest.parent)
-    tmppath = pathlib(tempfile.mkdtemp(**kwargs))
+    tmppath = Path(tempfile.mkdtemp(**kwargs))
     try:
         yield tmppath
         try:
@@ -211,7 +211,7 @@ def mkdtemp_rename(destination, **kwargs):
 
 
 def replace_ext(base, newext):
-    base = pathlib(base)
+    base = Path(base)
     if newext[0] == '.':
         newext = newext[1:]
     return base.stripext() + '.' + newext

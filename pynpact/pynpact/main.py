@@ -6,7 +6,7 @@ import shutil
 import sys
 from optparse import OptionParser
 from contextlib import contextmanager
-from path import path as pathlib
+from path import Path
 from subprocess import PIPE
 from pynpact import parsing, executors
 from __init__ import binfile, DATAPATH
@@ -65,7 +65,7 @@ def run_cmdline(gbkfile, executorName):
     with getexecutor(executorName) as executor:
         config = process('allplots', config, executor=executor)
         jid = config.get('pdf_filename') or config.get('combined_ps_name')
-        if not pathlib(jid).exists():
+        if not Path(jid).exists():
             logging.info("Work scheduled, waiting")
             output = executor.result(jid, timeout=None)
             logging.info("Finished processing %r", gbkfile)
