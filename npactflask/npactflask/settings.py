@@ -1,7 +1,7 @@
 from path import Path
 import os
 
-DEBUG = os.environ.get('ENV').lower() not in ('prod', 'production')
+DEBUG = os.environ.get('ENV', 'dev').lower() not in ('prod', 'production')
 
 # TODO: Figure out mail configuration
 EMAIL_USE_TLS = True
