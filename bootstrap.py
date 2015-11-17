@@ -95,7 +95,7 @@ if __name__ == '__main__':
         init_virtualenv()
         create_aux_directories()
         build_pynpact()
-        print "Successfully finished bootstrap.py"
+        print "\nSuccessfully finished bootstrap.py!"
     else:
         for arg in args:
             globals()[arg.replace('-','_')]()
