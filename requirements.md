@@ -39,6 +39,7 @@ Notes:
 
 * Biopython (1.60): Used to query entrez and read information out of
   GenBank files. This can probably be upgraded without any hassle.
-* Flask (0.10): Used to build the website interface.
+* Flask: Used to build the website interface.
+* GEvent: Provides WSGI container and asynchronous multitasking.
 
 [req-file-format]: https://pip.pypa.io/en/latest/reference/pip_install.html#requirements-file-format
