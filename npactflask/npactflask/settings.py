@@ -10,7 +10,6 @@ EMAIL_PORT = 587
 EMAIL_HOST_USER = 'npact1.0@gmail.com'
 EMAIL_HOST_PASSWORD = 'sictransit2'
 
-SECRET_KEY = 'cf0cb53d-1ff1-4074-a65d-977831de66af'
 
 WEBROOT = (Path(__file__).dirname() / "../../webroot").realpath()
 
@@ -24,6 +23,18 @@ def ppath(rel, create=True):
         return abspath
     else:
         raise Exception("Path '%s' doesn't exist." % abspath)
+
+
+def get_secret():
+    "Get the secret key for session signing"
+    keyfile = WEBROOT / 'secret-key'
+    if keyfile.exists():
+        return keyfile.bytes()
+    b = os.urandom(24)
+    keyfile.write_bytes(b)
+    return b
+
+SECRET_KEY = get_secret()
 
 UPLOADS = ppath('uploads')
 
