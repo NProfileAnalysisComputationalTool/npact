@@ -10,7 +10,7 @@ def recursive_files(*roots):
                 yield os.path.join(root, i)
 
 setup(name='npactflask',
-      version='0.6.2',
+      version='0.6.3',
       description='Website for PYNPACT, the Python N-Profile Analysis Computation Tool',
       author='Nathan Bird',
       author_email='nathan@acceleration.net',
@@ -18,6 +18,8 @@ setup(name='npactflask',
       packages=['npactflask'],
       package_data={'npactflask': list(recursive_files('static', 'templates'))},
       requires=["biopython(>=1.57)",
+                'Flask-Mail(==0.9.1)',
+                'blinker(==1.4)',
                 "path.py(==7.4)",
                 "flask(==0.10)",
                 "gunicorn(==19.3.0)",

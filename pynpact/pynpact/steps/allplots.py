@@ -123,7 +123,7 @@ def _ap(pconfig, out):
             logger=log) as ap:
         # write the allplots.def file information through stdin.
         apdef = build_allplots_def(pconfig, page_num)
-        log.debug("Writing Allplots.def:\n%s", apdef)
+        log.debug("Writing Allplots.def for page: %d", page_num)
         ap.stdin.write(apdef)
         ap.stdin.close()
         ap.wait()

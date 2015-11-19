@@ -4,9 +4,12 @@ patch_all(subprocess=True)
 import pkg_resources
 from flask import Flask, redirect
 from werkzeug.wsgi import DispatcherMiddleware
+from flask_mail import Mail
 
 app = Flask(__name__)
 app.config.from_object('npactflask.settings')
+mail = Mail(app)
+
 app.config['APPLICATION_ROOT'] = '/npact'
 app.config['VERSION'] = pkg_resources.require('npactflask')[0].version
 

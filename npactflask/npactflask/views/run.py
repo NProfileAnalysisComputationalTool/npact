@@ -5,11 +5,13 @@ import Bio.Seq
 
 from path import path as Path
 from flask import (
-    url_for, request, flash, redirect, json, jsonify, send_file
+    url_for, request, flash, redirect, json, jsonify, send_file,
+    render_template
 )
+from flask_mail import Message, email_dispatched
 from werkzeug.exceptions import NotFound
 from pynpact import main, parsing, util, executors
-from npactflask import app
+from npactflask import app, mail
 from npactflask.views import getabspath, getrelpath
 
 gexec = executors.GeventExecutor()
@@ -20,10 +22,6 @@ VALID_KEYS = ('first_page_title', 'following_page_title', 'nucleotides',
               'significance', 'alternate_colors', 'startBase', 'endBase',
               'basesPerGraph', 'x-tics', 'mycoplasma')
 MAGIC_PARAMS = ('raiseerror', 'force')
-
-
-def get_result_link(path):
-    return url_for('raw', path=path)
 
 
 def build_config(path):
@@ -55,7 +53,7 @@ def build_config(path):
     return config
 
 
-def dicforurl(config, exclude=None):
+def dictforurl(config, exclude=None):
     """Reduce a config dictionary suitable for passing in the url
     """
     keys = VALID_KEYS + MAGIC_PARAMS
@@ -80,7 +78,7 @@ def run_frame(path):
         flash("Couldn't find genome in: %s" % path)
         return redirect(url_for('start'))
 
-    return flask.render_template(
+    return render_template(
         'processing.html', **{
             'BASE_URL': app.config['APPLICATION_ROOT'],
             'PATH': path,
@@ -139,8 +137,8 @@ def kickstart(path):
     email = request.args.get('email')
     for v in verb:
         if email:
-            config = main.process('allplots', config, executor=gexec)
-            build_email(path, config)
+            schedule_email(email, path, config)
+
         elif v == 'parse':
             # we've already parsed in `build_config` above.
             pass
@@ -150,28 +148,6 @@ def kickstart(path):
 
     return flask.make_response(
         json.dumps(sanitize_config_for_client(config)))
-
-
-def build_email(path, config):
-    try:
-        email = request.args.get('email')
-        target_file = config['pdf_filename'] or config['combined_ps_name']
-        assert target_file, \
-            "Configured for email but didn't get emailable file."
-        # The direct download link for the PS or PDF file.
-        result_link = request.build_absolute_uri(
-            get_result_link(target_file))
-        # build path back to run screen.
-        run_link = url_for(
-            'run', path=path,
-            **dicforurl(config, exclude=['email']))
-        run_link = request.build_absolute_uri(run_link)
-
-        task = util.Task(send_email, email, config, run_link, result_link)
-        eid = gexec.enqueue(task, after=[target_file])
-        logger.info("Scheduled email to %r with jobid: %s", email, eid)
-    except:
-        logger.exception("Error scheduling email to send")
 
 
 def sanitize_config_for_client(config):
@@ -185,28 +161,6 @@ def sanitize_config_for_client(config):
     if 'psnames' in output:
         del output['psnames']
     return output
-
-
-def send_email(email_address, config, run_link, result_link):
-    try:
-        logger.debug("Task completed; sending email %r, %r, %r",
-                     email_address, run_link, result_link)
-        from django.core.mail import EmailMultiAlternatives
-        subject = 'NPACT results ready for "{0}"'.format(
-            config['first_page_title'])
-
-        d = app.app_context({'keep_days': app.config['ATIME_DEFAULT'],
-                             'results_link': result_link,
-                             'run_link': run_link})
-
-        text_content = flask.render_template('email-results.text', d)
-        html_content = flask.render_template('email-results.html', d)
-        msg = EmailMultiAlternatives(subject, text_content, to=[email_address])
-        msg.attach_alternative(html_content, "text/html")
-        msg.send(fail_silently=False)
-        logger.debug("Finished sending email.")
-    except:
-        logger.exception("Failed sending email to %r", email_address)
 
 
 @app.route('/runstatus/<path:path>')
@@ -284,3 +238,49 @@ def acgt_gamma(path):
     gexec.result(tid_output_directory, timeout=None)
     files = map(getrelpath, Path(tid_output_directory).listdir())
     return jsonify(config=sanitize_config_for_client(config), files=files)
+
+
+def schedule_email(to, path, config):
+    config = main.process('allplots', config, executor=gexec)
+    try:
+        target_file = config.get('pdf_filename') or \
+                      config.get('combined_ps_name')
+        assert target_file, \
+            "Configured for email but didn't get emailable file."
+        # The direct download link for the PS or PDF file.
+        result_link = url_for('raw',
+                              path=getrelpath(target_file), _external=True)
+        # build path back to run screen.
+        run_link = url_for('run_frame', path=path, _external=True,
+                           **dictforurl(config, exclude=['email']))
+        task = util.Task(send_email, to, path, config, result_link, run_link)
+        eid = gexec.enqueue(task, after=[target_file])
+        logger.info("Scheduled email to %r with jobid: %s", to, eid)
+    except:
+        logger.exception("Error scheduling email to send")
+
+
+def send_email(to, path, config, result_link, run_link):
+    try:
+        logger.debug("Task completed; sending email %r, %r, %r",
+                     to, run_link, result_link)
+        subject = 'NPACT results ready for "{0}"'.format(
+            config['first_page_title'])
+
+        with app.app_context():
+            ctx = {'keep_days': app.config['ATIME_DEFAULT'],
+                                 'results_link': result_link,
+                                 'run_link': run_link}
+            text_content = render_template('email-results.txt', **ctx)
+            html_content = render_template('email-results.html', **ctx)
+            msg = Message(subject, recipients=[to])
+            msg.body = text_content
+            msg.html = html_content
+            mail.send(msg)
+    except:
+        logger.exception("Failed sending email to %r", to)
+
+
+@email_dispatched.connect_via(app)
+def log_mail_finished(message, app):
+    logger.debug("Finished sending email to %r", message.recipients)
