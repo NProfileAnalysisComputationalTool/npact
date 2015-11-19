@@ -149,9 +149,9 @@ def number(val):
 
 
 def tobool(val):
-    if val in (u'false', 0, u'0', False, None):
+    if val in (u'False', u'false', 0, u'0', False, None):
         return False
-    elif val in (u'true', 1, u'1', True):
+    elif val in (u'True', u'true', 1, u'1', True):
         return True
     else:
         raise ValueError("Can't convert %r to boolean" % (val,))
