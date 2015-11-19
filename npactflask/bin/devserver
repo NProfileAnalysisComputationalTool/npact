@@ -1,7 +1,0 @@
-#!/usr/bin/env sh
-
-export ENV=dev
-gunicorn --bind=127.0.0.1:5000 \
-         --worker-class=gevent \
-         --reload --access-logfile=- \
-         npactflask:application

@@ -4,20 +4,24 @@ This is the code for the website.
 
 ## Important files:
 
-* `settings.py` is the configuration for the website. Logging information is in this. Configures where paths for different content are.
+* `npactflask/__init__.py`: the toplevel definiton of the Flask app.
+* `npactflask/settings.py`: hold some config for the website,
+  especially paths for different content.
 
-* `npactflask/static/` holds the static images, CSS, and JS used on the
-  website.
+* `npactflask/static/` holds the static images, CSS, and JS used on
+  the website.
 
-* `npactflask/templates/` holds the templates that generate html on the
-  website. Go here to change text on the site, rearrange blocks, or
-  add new content.
+* `npactflask/templates/` holds the templates that generate html on
+  the website. Go here to change text on the site, rearrange blocks,
+  or add new content.
 
 * `npactflask/views/` holds the code that gets run on an
   incoming request.
 
 * `bin/cleanup.py` used to clean out old uploaded files so they
   don't take too much space on the server.
+
+* `bin/npactserver` script used to launch the site
 
 * `npactflask/static/bower_components` - third party javascript
   libraries installed via [bower][], to be used in the final

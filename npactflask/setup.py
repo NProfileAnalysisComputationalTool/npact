@@ -17,13 +17,5 @@ setup(name='npactflask',
       url='http://genome.ufl.edu/npact/',
       packages=['npactflask'],
       package_data={'npactflask': list(recursive_files('static', 'templates'))},
-      requires=["biopython(>=1.57)",
-                'Flask-Mail(==0.9.1)',
-                'blinker(==1.4)',
-                "path.py(==7.4)",
-                "flask(==0.10)",
-                "gunicorn(==19.3.0)",
-                "gevent(==1.0.2)",
-                "pytz"],
-      scripts=['bin/cleanup.py', 'bin/devserver']
+      scripts=['bin/cleanup.py', 'bin/npactserver']
 )

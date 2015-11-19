@@ -6,6 +6,7 @@ DEBUG = os.environ.get('ENV', 'dev').lower() not in ('prod', 'production')
 MAIL_DEFAULT_SENDER = 'npact1.0@gmail.com'
 
 WEBROOT = (Path(__file__).dirname() / "../../webroot").realpath()
+LOGDIR = WEBROOT / 'logs'
 
 
 def ppath(rel, create=True):

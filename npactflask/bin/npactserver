@@ -1,0 +1,51 @@
+#!/usr/bin/env python
+
+import gevent.monkey
+gevent.monkey.patch_all(subprocess=True)
+import gevent.wsgi
+
+import logging
+import sys
+from werkzeug.serving import run_with_reloader
+from werkzeug.wsgi import DispatcherMiddleware
+from flask import Flask
+
+
+from npactflask import application as npactapp
+
+npactapproot = npactapp.config.get('APPLICATION_ROOT', '/')
+if npactapproot != '/':
+    # ***  Handle running at /npact/  ***
+    application = Flask('redirectapp')
+
+    @application.route('/')
+    def doredirect():
+        return redirect(npactapproot)
+
+    # Load a redirect app at the root URL to redirect us to the target app.
+    # Serve app at APPLICATION_ROOT for localhost development.
+    application = DispatcherMiddleware(application, {
+        npactapproot: npactapp,
+    })
+else:
+    application = npactapp
+
+#accesslog = (npactapp.config["LOGDIR"] / "access.log")
+
+@run_with_reloader
+def run_server():
+    ip = '127.0.0.1'
+    port = 5000
+    if len(sys.argv) == 3:
+        name,ip,port = sys.argv
+        port = int(port)
+    elif len(sys.argv) == 2:
+        name,ip = sys.argv
+
+
+    ws = gevent.wsgi.WSGIServer(
+        listener=(ip, port),
+        application=application
+        #,log=accesslog.open('wb')
+    )
+    ws.serve_forever()

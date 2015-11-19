@@ -62,7 +62,7 @@ finished bootstrap.py". If it doesn't, the rest won't work.
 There is a development webserver bundled in that will help for local development. To use:
 
 1. `source ve/bin/activate[.csh]`
-2. `npactflask/bin/devserver`
+2. `npactserver`
 3. open http://127.0.0.1:5000/npact/
 
 NB: Apache normally runs as a different user and you may encounter

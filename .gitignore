@@ -32,3 +32,4 @@ webroot
 /.projectile
 /TAGS
 /npactweb/email_settings.py
+/.htpasswd

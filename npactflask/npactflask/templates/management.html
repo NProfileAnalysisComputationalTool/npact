@@ -2,44 +2,59 @@
 {% block title %}NPACT - Management{% endblock %}
 
 {% block addScript %}
-<script src="{{ url_for('static', filename='css/custom-theme/jquery-ui.min.js')}}"></script>
-<script src="{{ url_for('static', filename='bower_components/qtip2/jquery.qtip.min.js')}}"></script>
-<script type="text/javascript">
-</script>
+<script src="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.5/js/bootstrap.min.js" defer="true"></script>
 {% endblock %}
 
 {%block content %}
 <div class="contentPadding">
-  <h2>NPACT - Management</h2>
-  <div id="msgpane" class="ui-corner-all">
-    {% with messages = get_flashed_messages() %}
-    {% if messages %}
-    {% for message in messages %}
-    <div class="message">
-      <p class="ui-state-highlight ui-corner-all ui-state-error">
-        {{ message }}</p>
-    </div>
+  <div class="page-header">
+    <h2>NPACT - Management</h2>
+  </div>
+  <div id="msgpane">
+    {% with messages = get_flashed_messages(with_categories=true) %}
+    {% for category,message in messages %}
+    <div class="alert alert-{{category}}" role="alert">{{message}}</div>
     {% endfor %}
-    {% endif %}
     {% endwith %}
   </div>
 
-  <form  method="POST">
-    <h3>Cleanup</h3>
-    <div>
-      <p>This needs to be done from time to time to help prevent disk space usage from going crazy</p>
-      <p>
-        <label>Cleanup files older than:
-          <input type="text" name="days" size="2" value="{{ default_atime }}"/> days.
-        </label>
-        <button type="submit" name="action" value="cleanup">Run Cleanup</button>
-      </p>
+  <div class="panel panel-default">
+    <div class="panel-heading">
+      <h3>Cleanup</h3>
     </div>
-    <div>
-      <label>Cleanout library:</label>
-      <button type="submit" name="action" value="clear-library">Clear Library</button>
+    <div class="panel-body">
+    <form  method="POST" class="form-inline">
+      <div>
+        <p>This needs to be done from time to time to help prevent disk space usage from going crazy</p>
+          <label>Cleanup uploads/generated files older than:
+            <input type="text" name="days" size="2" value="{{ default_atime }}" class="form-control"> days.
+          </label>
+          <button type="submit" name="action" value="cleanup" class="btn btn-default">
+            Run Cleanup
+          </button>
+      </div>
+      <div>
+        <label>Cleanout library:</label>
+        <button type="submit" name="action" value="clear-library" class="btn btn-default">
+          Clear Library
+        </button>  (saved copies of gbk from Accession Numbers)
+      </div>
+    </form>
     </div>
-  </form>
+  </div>
+  <h3>WSGI Environment</h3>
+        <pre>
+        {% for k,v in environ.items() -%}
+        {{k}}={{v}}
+        {% endfor %}
+      </pre>
 
+  <div class="panel panel-default">
+    <div class="panel-heading">
+      WSGI environment
+    </div>
+    <div class="panel-body">
+    </div>
+  </div>
 </div>
 {%endblock content %}

@@ -37,7 +37,11 @@ def report_file_size():
 def clear_library():
     logger.debug("Deleting %d from %s",
                  len(path(library_root()).files()), library_root())
+    count = 0
     for f in path(library_root()).files():
         f.unlink()
+        count += 1
     for d in path(library_root()).dirs():
         d.rmtree()
+        count += 1
+    return count
