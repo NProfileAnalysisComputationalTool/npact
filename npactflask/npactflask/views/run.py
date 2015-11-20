@@ -218,9 +218,9 @@ def blockon(path):
 def getpdf(path):
     config = build_config(path)
     config = main.process('allplots', config, executor=gexec)
-    pdf = config['pdf_filename']
+    pdf = config['allplots_result']
     gexec.result(pdf, timeout=None)
-    return send_file(pdf)
+    return send_file(pdf, as_attachment=True)
 
 
 @app.route('/acgt_gamma_file_list/<path:path>')
@@ -243,8 +243,7 @@ def acgt_gamma(path):
 def schedule_email(to, path, config):
     config = main.process('allplots', config, executor=gexec)
     try:
-        target_file = config.get('pdf_filename') or \
-                      config.get('combined_ps_name')
+        target_file = config.get('allplots_result')
         assert target_file, \
             "Configured for email but didn't get emailable file."
         # The direct download link for the PS or PDF file.

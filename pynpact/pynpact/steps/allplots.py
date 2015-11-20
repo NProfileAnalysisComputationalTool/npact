@@ -168,6 +168,7 @@ def combine_ps_files(config, executor):
     combined_ps_name = parsing.derive_filename(
         config, Hasher().hashlist(psnames).hexdigest(), 'ps')
     config['combined_ps_name'] = combined_ps_name
+    config['allplots_result'] = combined_ps_name
     return enqueue(
         _combine_ps_files, executor, config, combined_ps_name, after=after)
 
@@ -199,6 +200,7 @@ def convert_ps_to_pdf(config, executor):
     combined_ps_name = config['combined_ps_name']
     pdf_filename = replace_ext(combined_ps_name, 'pdf')
     config['pdf_filename'] = pdf_filename
+    config['allplots_result'] = pdf_filename
     return enqueue(_ps2pdf, executor, config, pdf_filename, after=after)
 
 

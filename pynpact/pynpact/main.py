@@ -54,7 +54,7 @@ def run_cmdline(gbkfile, executorName):
     config = parsing.initial(gbkfile)
     with getexecutor(executorName) as executor:
         config = process('allplots', config, executor=executor)
-        jid = config.get('pdf_filename') or config.get('combined_ps_name')
+        jid = config.get('allplots_result')
         if not Path(jid).exists():
             logging.info("Work scheduled, waiting")
             output = executor.result(jid, timeout=None)
