@@ -29,19 +29,10 @@ def getexecutor(name):
     sm = None
     name = name.lower()
     try:
-        if name == 'server':
-            from taskqueue import get_ServerManager
-            sm = get_ServerManager(make_server=True, logger=True)
-            logging.info("Opening a socket at %s", sm.address)
-            sm.start()
-            e = sm.Server()
-        elif name == 'inline':
+        if name == 'inline':
             e = executors.InlineExecutor()
         elif name == 'gevent':
             e = executors.GeventExecutor()
-        elif name == 'daemon':
-            from taskqueue import client
-            e = client.get_server()
         else:
             raise ValueError("Unknown executor: %r" % name)
         yield e

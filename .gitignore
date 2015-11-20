@@ -18,11 +18,6 @@ logs
 uploads
 development-bundle
 webroot
-/npactweb/.tmp/templates.js
-/npactweb/node_modules
-/npactweb/npactweb/static/bower_components
-/npactweb/jshint.xml
-/npactweb/test-results.xml
 /npactflask/.tmp/templates.js
 /npactflask/node_modules
 /npactflask/npactflask/static/bower_components
@@ -31,5 +26,4 @@ webroot
 /pytest.xml
 /.projectile
 /TAGS
-/npactweb/email_settings.py
 /.htpasswd
