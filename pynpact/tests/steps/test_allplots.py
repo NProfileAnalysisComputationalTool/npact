@@ -27,6 +27,7 @@ def test_combine_ps(gbkconfig, executor):
     psname = tasks[0]
     assert gbkconfig['combined_ps_name']
     assert gbkconfig['combined_ps_name'] == psname
+    assert gbkconfig['allplots_result'] == gbkconfig['combined_ps_name']
 
 
 def test_ps_to_pdf(gbkconfig, null_executor):
@@ -34,6 +35,7 @@ def test_ps_to_pdf(gbkconfig, null_executor):
     assert len(jobs) == 1
     pdf_filename = jobs[0]
     assert pdf_filename == gbkconfig['pdf_filename']
+    assert gbkconfig['pdf_filename'] == gbkconfig['allplots_result']
 
 
 def test_all_the_way(gbkconfig, executor):

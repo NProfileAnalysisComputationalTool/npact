@@ -7,7 +7,7 @@ import hashlib
 import tempfile
 from contextlib import contextmanager
 from functools import wraps
-from path import path as pathlib
+from path import Path
 
 
 def reducehashdict(dict, keys):
@@ -160,7 +160,7 @@ def stream_to_file(stream, path, bufsize=8192):
 
 
 @contextmanager
-def mkstemp_rename(destination, **kwargs):
+def mkstemp_rename(destination,  **kwargs):
     """For writing to a temporary file and then move it ontop of a
     (possibly) existing file only when finished.  This enables us to
     perform long running operations on a file that other people might
@@ -174,36 +174,43 @@ def mkstemp_rename(destination, **kwargs):
             f.write('stuff\n')
 
     """
+    log = kwargs.pop('log', None)
     kwargs.setdefault('dir', os.path.dirname(destination))
 
     (fd, path) = tempfile.mkstemp(**kwargs)
-    path = pathlib(path)
+    path = Path(path)
     try:
         filelike = os.fdopen(fd, 'wb')
         yield filelike
         filelike.close()
+        path.chmod(0o0644)
         path.rename(destination)
     finally:
         path.remove_p()
 
 
 @contextmanager
-def mkdtemp_rename(destination, **kwargs):
+def mkdtemp_rename(destination, chmod=None, **kwargs):
     """A wrapper for tempfile.mkdtemp that always cleans up.
 
     This wrapper sets defaults based on the class values."""
-    dest = pathlib(destination).normpath()
+    log = kwargs.pop('log', None)
+    dest = Path(destination).normpath()
     kwargs.setdefault('dir', dest.parent)
-    tmppath = pathlib(tempfile.mkdtemp(**kwargs))
+    tmppath = Path(tempfile.mkdtemp(**kwargs))
     try:
         yield tmppath
         try:
+            tmppath.chmod(0o0755)
             tmppath.rename(dest)
+
         except OSError as e:
-            if e.errno == errno.EEXIST:
-                # I don't think we'll ever get here.
-                dest.rmtree_p()
-                tmppath.rename(dest)
+            if e.errno == errno.ENOENT:
+                # the tmppath didn't exist?!
+                log.exception("Shouldn't be here %r", tmppath)
+                raise
+            elif e.errno == errno.ENOTEMPTY:
+                log.debug("Target already existed")
             else:
                 raise
     finally:
@@ -211,7 +218,7 @@ def mkdtemp_rename(destination, **kwargs):
 
 
 def replace_ext(base, newext):
-    base = pathlib(base)
+    base = Path(base)
     if newext[0] == '.':
         newext = newext[1:]
     return base.stripext() + '.' + newext

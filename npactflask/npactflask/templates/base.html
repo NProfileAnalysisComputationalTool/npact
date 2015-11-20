@@ -1,0 +1,82 @@
+<!DOCTYPE html >
+<html>
+  <head>
+    <title>{% block title %}University of Florida Genetics Institute{% endblock title %}</title>
+    <link rel="stylesheet" type="text/css" href="//maxcdn.bootstrapcdn.com/bootstrap/3.3.5/css/bootstrap.min.css?ver=3.3.5">
+    <link rel="stylesheet" type="text/css" href="{{ vSTATIC('css/style.css') }}">
+    <link rel="stylesheet" type="text/css" href="{{ vSTATIC('css/print.css') }}" media="print">
+    <script type="text/javascript" src="{{ vSTATIC('bower_components/jquery/dist/jquery.min.js') }}"></script>
+    {% block addScript %}{% endblock %}
+  </head>
+  <body ng-app="npact">
+    <div id="header">
+      <p id="dept"><a href="/npact">N-Profile Analysis Computational Tool</a></p>
+      <p id="uf"><a href="http://www.ufl.edu/">University of Florida<span></span></a></p>
+    </div>
+
+    <div id="mainContainer">
+      <div id="content">
+        {% block content %}{% endblock %}
+      </div>
+      <div id="leftCol">
+        <div id="priNav">
+          <h2>Primary Navigation</h2>
+          <ul>
+            <li><a href="{{url_for('start')}}">Home</a></li>
+            <li><a href="{{url_for('about')}}">About</a></li>
+            <li><a href="http://compbio.ufl.edu/software/npact/">Downloads</a></li>
+          </ul>
+        </div>
+        <div id="related">
+          <h3>Related Sites:</h3>
+          <h4>Genetics at UF</h4>
+          <ul>
+            <li><a href="http://genome.ufl.edu/pages/index.html">genome.ufl.edu</a></li>
+            <li><a href="http://www.ufgi.ufl.edu/">Genetics Institute at UF</a></li>
+          </ul>
+          <h4>People</h4>
+          <ul>
+            <li><a href="http://brocchieri.mgm.ufl.edu/">Luciano Brocchieri (PI)</a></li>
+            <li><a href="#">Steve M. Oden (Postdoctoral student)</a></li>
+            <li><a href="#">Eric Hernandez (Programmer)</a></li>
+          </ul>
+          {% include "_includes/search.html" %}
+        </div>
+        {% block sidebar %}
+        {% endblock %}
+      </div>
+      <div id="footer">
+        <h3>Frequently Used Sites</h3>
+        <ul>
+          <li><a href="http://news.ufl.edu/">News</a></li>
+          <li><a href="http://calendar.ufl.edu/">Calendar</a></li>
+          <li><a href="http://phonebook.ufl.edu/">Directory</a></li>
+          <li><a href="https://my.ufl.edu/ps/signon.html">MyUFL</a></li>
+          <li><a href="http://www.isis.ufl.edu/">ISIS</a></li>
+          <li><a href="http://www.ufl.edu/websites/">Web Site Listing</a></li>
+          <li><a href="http://campusmap.ufl.edu/">Campus Map</a></li>
+          <li><a href="http://webmail.ufl.edu/">WebMail</a></li>
+          <li><a href="http://www.questions.ufl.edu/">Ask UF</a></li>
+        </ul>
+        <p>&copy; <a href="http://www.ufl.edu/" id="footerHome" title="University of Florida">University of Florida<span></span></a>, Gainesville, FL 32611; (352) 392-3261.</p>
+        <h3>General Site Information</h3>
+        <ul>
+          <li><a href="http://www.ufl.edu/disability/">Disability Services</a></li>
+          <li><a href="http://www.privacy.ufl.edu/privacystatement.html">Privacy Policy</a></li>
+          <li><a href="http://search.ufl.edu">Search</a></li>
+        </ul>
+      </div>
+    </div>
+
+    <script type="text/javascript">
+  var _gaq = _gaq || [];
+_gaq.push(['_setAccount', 'UA-38538218-1']);
+_gaq.push(['_trackPageview']);
+(function() {
+  var ga = document.createElement('script'); ga.type = 'text/javascript'; ga.async = true;
+  ga.src = ('https:' == document.location.protocol ? 'https://ssl' : 'http://www') + '.google-analytics.com/ga.js';
+  var s = document.getElementsByTagName('script')[0]; s.parentNode.insertBefore(ga, s);
+})();
+    </script>
+  </body>
+</html>

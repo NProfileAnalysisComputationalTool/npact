@@ -1,14 +1,10 @@
 import pytest
-import taskqueue
 
 
 @pytest.fixture(scope="session")
 def async_executor(request):
-    taskqueue.LISTEN_ADDRESS = ('127.0.1.1', 57129)
-    sm = taskqueue.get_ServerManager(make_server=True)
-    sm.start()
-    request.addfinalizer(sm.shutdown)
-    return sm.Server()
+    from pynpact.executors import GeventExecutor
+    return GeventExecutor()
 
 
 class NullExecutor(object):

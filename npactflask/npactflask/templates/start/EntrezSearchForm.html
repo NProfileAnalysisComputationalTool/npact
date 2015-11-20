@@ -1,0 +1,28 @@
+{% if sess and sess.result_count > 0 %}
+<table>
+  <thead>
+    <tr>
+      <th>Title</th>
+      <th>Length</th>
+      <th>Date Created/ Updated</th>
+      <th>RefSeqId</th>
+  </thead>
+  <tbody>
+    {% for summary in sess.summarize() %}
+    <tr>
+      <td>
+        <a href="{{ url_for('efetch', id=summary.Id) }}?entrez_search_term={{search|urlencode}}&action={{action}}&email={{email|urlencode}}">
+          {{summary.Title}}
+        </a>
+      </td>
+      <td>{{summary.Length}}</td>
+      <td>{{summary.CreateDate}}<br/>
+          {{summary.UpdateDate}}</td>
+      <td>
+        <a href="http://www.ncbi.nlm.nih.gov/nuccore/{{summary.Caption|urlencode}}">{{summary.Caption}}
+      </td>
+    </tr>
+    {% endfor %}
+  </tbody>
+</table>
+{% endif %}

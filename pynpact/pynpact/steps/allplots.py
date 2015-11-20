@@ -19,7 +19,7 @@ BIN = binfile('Allplots')
 KEYS = ['first_page_title', 'following_page_title',
         'length', 'startBase', 'endBase', 'period',
         'basesPerGraph', 'graphsPerPage', 'x-tics',
-        'nucleotides', 'alternate_colors', 'basename']
+        'nucleotides', 'alternate_colors', 'basename', 'stderr']
 FILE_KEYS = ['File_of_unbiased_CDSs',
              'File_of_conserved_CDSs',
              'File_of_new_CDSs',
@@ -123,7 +123,7 @@ def _ap(pconfig, out):
             logger=log) as ap:
         # write the allplots.def file information through stdin.
         apdef = build_allplots_def(pconfig, page_num)
-        log.debug("Writing Allplots.def:\n%s", apdef)
+        log.debug("Writing Allplots.def for page: %d", page_num)
         ap.stdin.write(apdef)
         ap.stdin.close()
         ap.wait()
@@ -168,6 +168,7 @@ def combine_ps_files(config, executor):
     combined_ps_name = parsing.derive_filename(
         config, Hasher().hashlist(psnames).hexdigest(), 'ps')
     config['combined_ps_name'] = combined_ps_name
+    config['allplots_result'] = combined_ps_name
     return enqueue(
         _combine_ps_files, executor, config, combined_ps_name, after=after)
 
@@ -199,6 +200,7 @@ def convert_ps_to_pdf(config, executor):
     combined_ps_name = config['combined_ps_name']
     pdf_filename = replace_ext(combined_ps_name, 'pdf')
     config['pdf_filename'] = pdf_filename
+    config['allplots_result'] = pdf_filename
     return enqueue(_ps2pdf, executor, config, pdf_filename, after=after)
 
 
@@ -208,5 +210,5 @@ def _ps2pdf(config, out):
     statuslog.info("Converting to PDF")
     cmd = ['ps2pdf', ps_filename, '-']
     capproc.capturedCall(
-        cmd, stdout=out, logger=log, check=True)
+        cmd, stdout=out, stderr=config['stderr'], logger=log, check=True)
     statuslog.info("Finished PDF conversion")

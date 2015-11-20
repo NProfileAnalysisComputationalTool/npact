@@ -7,7 +7,7 @@ import logging
 import sys
 import json
 
-from path import path
+from path import Path
 from pynpact import binfile
 from pynpact import capproc, parsing
 from pynpact.util import Hasher, reducedict
@@ -20,7 +20,7 @@ statuslog = logging.getLogger('pynpact.statuslog')
 
 BIN = binfile('nprofile')
 
-KEYS = ['nucleotides', 'length', 'window_size', 'step', 'period', 'ddna']
+KEYS = ['nucleotides', 'length', 'window_size', 'step', 'period', 'ddna', 'stderr']
 OUTPUTKEY = 'File_list_of_nucleotides_in_200bp windows'
 JSONOUTPUTKEY = 'nprofileData'
 
@@ -52,13 +52,13 @@ def _nprofile(config, out):
            config['ddna'], 1, config['length'],
            config['window_size'], config['step'], config['period']]
     capproc.capturedCall(
-        cmd, stdout=out, stderr=sys.stderr,
+        cmd, stdout=out, stderr=config['stderr'],
         logger=logger, check=True)
 
 
 def parse_nprofile(ifile):
     # Read the file in and split the fields on space
-    nprofile_lines = [l.split() for l in path(ifile).lines(retain=False)]
+    nprofile_lines = [l.split() for l in Path(ifile).lines(retain=False)]
     # convert the strings to numbers
     data = [(int(c), float(x), float(y), float(z))
             for (c, x, y, z) in nprofile_lines]

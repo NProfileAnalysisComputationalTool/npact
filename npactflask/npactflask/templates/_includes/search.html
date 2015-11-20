@@ -1,0 +1,12 @@
+<form action="//search.ufl.edu/search" method="get" name="search" id="search">
+  <select id="source" class="form-control" name="source" onchange="document.getElementById('searchbox').focus()">
+    <option value="web" selected="selected">UF Web with Google</option>
+    <option value="phonebook">UF Phonebook</option>
+  </select>
+  <div class="input-group">
+    <input name="query" class="form-control" id="searchbox" type="text" size="20" placeholder="Search" alt="Search" onfocus="select()">
+    <span class="input-group-btn">
+      <button class="btn btn-default btn-search" type="submit" name="Submit">Go</button>
+    </span>
+  </div>
+</form>

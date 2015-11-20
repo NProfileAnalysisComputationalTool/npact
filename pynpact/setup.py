@@ -1,10 +1,8 @@
 #!/usr/bin/env python
-import os, os.path, glob
-
-from setuptools import setup, Extension
+from setuptools import setup
 
 setup(name='pynpact',
-      version='0.4',
+      version='0.6',
       description='Python N-Profile Analysis Computation Tool',
       author='Luciano Brocchieri and Nathan Bird',
       author_email='nathan@acceleration.net',
@@ -13,6 +11,6 @@ setup(name='pynpact',
       package_data={
           'pynpact': ['data/*', 'bin/*']
       },
-      install_requires=["biopython>=1.57"],
+      scripts=['bin/pynpact'],
       tests_require=["pytest>=2.4", "mock>=1", "pytest-mock"]
-    )
+)

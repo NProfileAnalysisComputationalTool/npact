@@ -1,4 +1,4 @@
-/*  -*- c-file-style:"linux" c-basic-offset:4 tab-width:8 -*-  */
+/*  -*- c-file-style:"linux" c-basic-offset:4 tab-width:4 -*-  */
 #include <stdlib.h>
 #include <math.h>
 #include <stdio.h>
@@ -12,8 +12,8 @@
 
 #include "util.h"
 
-double	SIGNIFICANCE= 0.001;
-int	RANDOMIZE= 0;
+double  SIGNIFICANCE= 0.001;
+int     RANDOMIZE= 0;
 #define MIN_ENTROPY 0.40
 
 // Hits are sorted by length of global significance (the sequence length at which
@@ -76,7 +76,7 @@ int	RANDOMIZE= 0;
 
 # define CODONS 65
 
-int	MYCOPLASMA= 0;
+int     MYCOPLASMA= 0;
 
 /* Boolean RANDOMIZE forces if true a randomization (shuffling) of the
  * sequence to be analyzed (both HHS and G-test analyses) */
@@ -121,7 +121,7 @@ char	aa_letters[]= AA_LETTERS;
 char	RGB[]= "RGB";
 char	strnd[]= "DC";
 char	start_char[]= " AaGgTtCcWw";
-char	ORF[6 * MAX_ORF_SIZE]; 
+char	ORF[6 * MAX_ORF_SIZE];
 char	buff[MAX_LINE];
 char	*organism_name;
 
@@ -143,7 +143,7 @@ int	search_size;
 double sc[6 * CODONS];
 // Old:
 // double sc[6][64]
-// double  sc[384];       
+// double  sc[384];
 
 FILE *output, *fp;
 
@@ -172,7 +172,7 @@ double PChi6[][2]=  {
 struct exons
 {
     char    strand;
-	char	name[50];
+    char	name[50];
     int     num_exons;
     int     from;		// First coding position encountered along the genome
     int     to;		// Last coding position encountered along the genome (excluding stop codon).
@@ -189,41 +189,41 @@ struct exons
 } *gene;
 
 struct HSSs {
-    int	  stop1;
-    int	  stop2;
-    char	  strand;
-    int	  frame;
-    char	  color;
-    int	  orf_num;
-    int	  hit_num;
-    int	  previous_hit;
-    int	  next_hit;
-    int	  fromp;
-    int	  top;
-    int	  len;
-    int	  type;
-    int	  start_pos;
-    int	  start;
-//    int	  seqlen;
-//    char	  *seq;
-    int	  hsuper;
-    int	  gsuper;
-    int	  exten;
-    char	  hit_type;	// 'H' (hss) or 'G' (G-test).
+    int   stop1;
+    int   stop2;
+    char      strand;
+    int   frame;
+    char      color;
+    int   orf_num;
+    int   hit_num;
+    int   previous_hit;
+    int   next_hit;
+    int   fromp;
+    int   top;
+    int   len;
+    int   type;
+    int   start_pos;
+    int   start;
+//    int     seqlen;
+//    char    *seq;
+    int   hsuper;
+    int   gsuper;
+    int   exten;
+    char      hit_type;	// 'H' (hss) or 'G' (G-test).
     char  prob;
     double nuc[24];
     double score;
     double scpp;              // score per position of ORF
     double entropy;
     double sig_len;
-    char	  global_sig;
+    char      global_sig;
     double G;
-    char	  pstring[15];
+    char      pstring[15];
 } *hss;
 
 struct Gstruct
 {
-	char strand;
+    char strand;
     int pos[2];
     float score;
 } *Ghit;
@@ -235,7 +235,6 @@ void	read_tables();
 int	analyze_genome(int n, int tot_hss, int *on);
 int	genome_composition(double *tnuc, long *ffrom, int *o, int k);
 void	get_sequence(int from, int len, char strand, char *ORF);
-int	mycoplasma_code();
 long	annotation(int *ncds, int *nexons);
 void	sort(double * array, int size);
 void	build_scores(char *seg, int n, double *sc);
@@ -278,18 +277,18 @@ int check;
 
 int main (int argc, char *argv[])
 {
-    char	*organism_file, *p, *opt;
-    int	i, j, k, h, genome_size, tot_hss= 0, *o, tot_Ghits= 0, ncds, nexons= 0, on= 1;
-    size_t len;
-    long	*ffrom, bytes_from_origin;
+    char    *organism_file, *p, *opt;
+    int     i, j, k, h, genome_size, tot_hss= 0, *o, tot_Ghits= 0, ncds, nexons= 0, on= 1;
+    size_t  len;
+    long    *ffrom, bytes_from_origin;
     int     minutes, secs;
-    time_t	t0, t1, t2;
-    double	nuc[24], tnuc[5]= {0.0};
+    time_t  t0, t1, t2;
+    double  nuc[24], tnuc[5]= {0.0};
 
     int argi = 1;
-		
+
     define_characterizations();
-	if(!REPETITIONS) read_tables();
+        if(!REPETITIONS) read_tables();
 
     #ifdef WIN32
      srand((long)time(NULL));
@@ -301,10 +300,14 @@ int main (int argc, char *argv[])
     /**** Parse command line options ****/
     while (argi < argc && argv[argi][0] == '-') {
         opt = argv[argi];
-        if(strcmp(opt, "-q") == 0) 
+        if(strcmp(opt, "-q") == 0) {
             quiet += 10;
-        else 
-            logmsg(10, "Unknown option: %s", argv[argi])
+        }
+        else if(strcmp(opt, "-m") == 0) {
+            MYCOPLASMA = 1;
+        }
+        else
+            logmsg(10, "Unknown option: %s", argv[argi]);
         argi++;
     }
 
@@ -316,7 +319,7 @@ int main (int argc, char *argv[])
         argv[argi++]);
 
     /* consume the significance, the 2nd argument. */
-    if(argc > argi) 
+    if(argc > argi)
         SIGNIFICANCE= atof(argv[argi]);
     argi++;
 
@@ -341,17 +344,20 @@ int main (int argc, char *argv[])
     gene= (struct exons *)malloc(sizeof(struct exons));
 
     if((fp = fopen(organism_file, "r")) == NULL) {
-        fprintf(stderr, "Organism file %s not found.\n", organism_file); 
+        fprintf(stderr, "Organism file %s not found.\n", organism_file);
         exit(1);
     }
 
-    // Determines from DEFINITION line of Genbank file if the Mycoplasma genetic code should be used
-     if(MYCOPLASMA= mycoplasma_code());
-     else aa_letters[56]= '*';
+    if(MYCOPLASMA) {
+        logmsg(10, "Treating gene as mycoplasma\n");
+    }
+    else {
+        aa_letters[56]= '*';
+    }
 
     // Reads annotated CDSs and records start-of-sequence position in the file
-    bytes_from_origin= annotation(&ncds, &nexons);		
-    
+    bytes_from_origin= annotation(&ncds, &nexons);
+
     logmsg(10,"Num CDS: %d; Num exons: %d\n", ncds, nexons);
 
     ffrom= (long *)malloc(nexons * sizeof(long));
@@ -372,25 +378,25 @@ int main (int argc, char *argv[])
             tnuc[0]*100.0/tnuc[4],tnuc[1]*100.0/tnuc[4],tnuc[2]*100.0/tnuc[4],tnuc[3]*100.0/tnuc[4]);
     fprintf(stdout,"Significance level: %.4f\n", SIGNIFICANCE);
 
-    
+
 /* Finds and tests orfs in all 6 frames */
 
-	for(k= 0; k < 6; ++k)
-	{
+    for(k= 0; k < 6; ++k)
+    {
         orf_num[k]= (int **)malloc(sizeof(int *));
 //        orf_num[k][0]= (int *)malloc(3 * sizeof(int));
-	}
+    }
 
     tot_hss= analyze_genome(genome_size, tot_hss, &on);
     fseek(fp, bytes_from_origin, SEEK_SET);
 
 /************/
-	fprintf(stderr, "\nTotal H-type hits: %d\n", tot_hss);
-		
+    fprintf(stderr, "\nTotal H-type hits: %d\n", tot_hss);
+
     fprintf(stdout,"Total HSS: %d\n",tot_hss);
     //for(i= 0; i < tot_hss; ++i) logmsg(10,"%5d.\t%d\t%d\t%c%d\n",i+1,hss[i].fromp,hss[i].top,hss[i].strand,hss[i].frame);
 
-//    rescue_hss(tot_hss);                                    // Rescues excluded HSSs 
+//    rescue_hss(tot_hss);                                    // Rescues excluded HSSs
 
 //    renumber_orf_hits();
 
@@ -399,7 +405,7 @@ int main (int argc, char *argv[])
     secs= ((int)(t1 - t0)) % 60;
 
     fprintf(stdout, "Scoring time: %d\' %d\"\n", minutes, secs);
-    
+
 
     tot_Ghits= find_Ghits(genome_size, tot_hss, bytes_from_origin, &on);     // G-tests
     fseek(fp, bytes_from_origin, SEEK_SET);
@@ -1103,27 +1109,6 @@ double score(char *seq,int n,double *sc,int *from,int *to, int flag)
 
 // End of function score()
 
-/************************************/
-/**** Function mycoplasma_code() ****/
-/************************************/
-
-int mycoplasma_code()
-{
-    int     flag= 0;
-    char    longstr[512];
-
-	while(fgets(longstr, 510, fp) && strncmp(longstr, "DEFINITION", 10) && !feof(fp))
-	;
-
-    if(!strncmp(longstr, "DEFINITION", 10) && 
-      (strstr(longstr, "Mycoplasma") || 
-       strstr(longstr, "Mesoplasma") || 
-       strstr(longstr, "Ureaplasma") || 
-       strstr(longstr, "Candidatus_Hodgkinia"))) 
-        flag= 1;
-
-return(flag);
-}
 
 /*******************************/
 /**** Function annotation() ****/
