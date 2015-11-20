@@ -1,4 +1,4 @@
-angular.module('npact', ['ngMessages', 'sticky', 'ngSanitize', 'dialogService', 'ngCookies', 'ui.bootstrap'])
+angular.module('npact', ['ngMessages', 'sticky', 'ngSanitize', 'ngCookies', 'ui.bootstrap'])
   .config(function($locationProvider) {
     'use strict';
     $locationProvider.html5Mode(true);
