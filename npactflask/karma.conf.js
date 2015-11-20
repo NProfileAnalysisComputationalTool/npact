@@ -12,6 +12,8 @@ module.exports = function(config){
       'npactflask/static/bower_components/lodash/lodash.min.js',
       'npactflask/static/bower_components/rtree/dist/rtree.min.js',
       'npactflask/static/bower_components/ngSticky/dist/sticky.min.js',
+      'http://cdnjs.cloudflare.com/ajax/libs/angular-ui-bootstrap/0.13.1/ui-bootstrap.min.js',
+      'http://cdnjs.cloudflare.com/ajax/libs/angular-ui-bootstrap/0.13.1/ui-bootstrap-tpls.min.js',
       'npactflask/static/js/*.js',
       'npactflask/static/js/**/*.js',
       'npactflask/static/js/**/*.html',

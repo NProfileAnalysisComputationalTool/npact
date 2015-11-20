@@ -82,6 +82,6 @@ describe('Grapher', function() {
     $timeout.flush();
     //KineticJs uses window timeouts, so we need to let that happen
     //and then flush angular's fake $timeout again
-    window.setTimeout($timeout.flush, 0);
+    window.setTimeout($timeout.flush, 50);
   });
 });
