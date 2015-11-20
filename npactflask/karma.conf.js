@@ -8,7 +8,6 @@ module.exports = function(config){
       'npactflask/static/bower_components/angular-sanitize/angular-sanitize.min.js',
       'npactflask/static/bower_components/angular-cookies/angular-cookies.min.js',
       'npactflask/static/bower_components/angular-mocks/angular-mocks.js',
-      'npactflask/static/bower_components/angular-jquery-dialog-service/dialog-service.js',
       'npactflask/static/bower_components/konva/konva.min.js',
       'npactflask/static/bower_components/lodash/lodash.min.js',
       'npactflask/static/bower_components/rtree/dist/rtree.min.js',
