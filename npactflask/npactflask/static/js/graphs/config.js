@@ -39,6 +39,12 @@ angular.module('npact')
         if(v === true || v === false) {
           self[k] = v;
         }
+        else if (v === "true") {
+          self[k] = true;
+        }
+        else if (v === "false") {
+          self[k] = false;
+        }
         else if(!isNaN(v)) {
           self[k] = Number(v);
         }
@@ -124,7 +130,9 @@ angular.module('npact')
     $scope.$watchGroup(gcpubkeys, function(newVals) {
       $location.search(_.object(PUBLIC_CONFIG_KEYS, newVals));
     });
-    $scope.$watch('gc.mycoplasma', function() {
+    $scope.$watch('gc.mycoplasma', function(val, old) {
+      $log.debug("mycoplasma changed from", old, "to", val);
+      // Wait so that the above update to $location has a chance to complete
       $timeout(PredictionManager.start, 50);
     });
   })
