@@ -62,7 +62,7 @@ def _acgt_gamma(config, dtemp):
             env={'BASE_DIR_THRESHOLD_TABLES': DATAPATH},
             stderr=config['stderr'],
             logger=log)
-        log.debug("Prediction finished successfully")
+        log.info("Prediction finished successfully")
     except capproc.CallProcError as cpe:
         log.error("acgt_gamma exitted with rc: %r", cpe.returncode)
         raise
