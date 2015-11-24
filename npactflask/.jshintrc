@@ -1,11 +1,9 @@
 {
   "browser": true,
-  "indent": 2,
   "latedef": true,
   "unused": "vars",
   "eqeqeq": true,
   "jasmine": true,
-  "newCap": false,
   "globals": {
     "angular": false,
     "jQuery": false,
