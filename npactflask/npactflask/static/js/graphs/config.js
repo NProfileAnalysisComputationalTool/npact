@@ -6,6 +6,7 @@ angular.module('npact')
 
   .service('GraphConfig', function(Err, npactConstants, Evt, PUBLIC_CONFIG_KEYS, Track,
                             $location, $log, $rootScope, $cookies, $window) {
+    'use strict';
     var self = this;
     $window.GraphConfig = this;
     self.cookieBools = ["colorBlindFriendly"];

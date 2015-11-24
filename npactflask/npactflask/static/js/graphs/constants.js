@@ -50,7 +50,7 @@ angular.module('npact')
     }
   })
   .service('Err',function() {
-
+    'use strict';
     var self = this,
         makeError = function(message, name) {
           self[name] = _.partial(Error, message);

@@ -1,5 +1,6 @@
 angular.module('npact')
   .controller('Results', function ($scope) {
+    'use strict';
     $scope.status = {
       isFirstOpen: true,
       isFirstDisabled: false
@@ -66,6 +67,7 @@ angular.module('npact')
   })
 
   .service('PrintModal', function(STATIC_BASE_URL, $modal) {
+    'use strict';
     var printTemplate = STATIC_BASE_URL + 'js/graphs/printConfirm.html';
     this.show = function() {
       var modalInstance = $modal.open({
@@ -78,13 +80,9 @@ angular.module('npact')
   })
 
   .controller('ModalInstanceCtrl', function($scope, $modalInstance) {
-    $scope.proceed = function() {
-      $modalInstance.close();
-    };
-
-    $scope.cancel = function() {
-      $modalInstance.dismiss();
-    };
+    'use strict';
+    $scope.proceed = $modalInstance.close;
+    $scope.cancel = $modalInstance.dismiss;
   })
 
   .service('kickstarter', function($q, $log, processOnServer, MessageBus,

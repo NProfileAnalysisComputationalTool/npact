@@ -172,6 +172,7 @@ angular.module('npact')
     });
   })
   .directive('npactGraphContainer', function(STATIC_BASE_URL) {
+    'use strict';
     return {
       restrict: 'A',
       scope: {},

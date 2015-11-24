@@ -655,11 +655,13 @@ angular.module('npact')
   })
 
   .controller('ExtractTooltipCtrl', function($scope, extract, $log) {
+    'use strict';
     $log.log('extract', extract);
     $scope.extract = extract;
   })
 
   .controller('TooltipScopeCtrl', function($scope, extracScopeStuff) {
+    'use strict';
     angular.extend($scope, extracScopeStuff);
   })
 
