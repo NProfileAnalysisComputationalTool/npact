@@ -124,9 +124,7 @@ angular.module('npact')
     };
   })
   .service('PredictionManager', function(Fetcher, StatusPoller, Pynpact, Track,
-                                  GraphConfig, processOnServer, $log,
-                                  MessageBus, PATH, $location,
-                                  ACGT_GAMMA_FILE_LIST_BASE_URL) {
+                                  GraphConfig, processOnServer, $log, MessageBus) {
     'use strict';
     var self = this;
     self.files = null;
