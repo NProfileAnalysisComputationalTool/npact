@@ -28,7 +28,7 @@ angular.module('npact')
     $scope.email = EmailBuilder.send;
     $scope.BASE_URL = BASE_URL;
     $scope.PATH = PATH;
-    
+
     kickstarter.start();
 
     var _doPrint = function() {
@@ -77,7 +77,7 @@ angular.module('npact')
     };
   })
 
-.controller('ModalInstanceCtrl', function($scope, $modalInstance) {
+  .controller('ModalInstanceCtrl', function($scope, $modalInstance) {
     $scope.proceed = function() {
       $modalInstance.close();
     };

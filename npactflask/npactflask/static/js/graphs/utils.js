@@ -234,7 +234,6 @@ angular.module('npact')
     };
 
 
-
     /**
      * download contents from a "fetch" path
      */
