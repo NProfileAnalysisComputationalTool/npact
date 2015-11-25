@@ -27,3 +27,4 @@ webroot
 /.projectile
 /TAGS
 /.htpasswd
+/npm-debug.log
