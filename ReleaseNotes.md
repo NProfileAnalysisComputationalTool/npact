@@ -1,3 +1,9 @@
+# Version 3.0pre
+* Change backend to use Flask+GEvent
+* Mycoplasma checkbox affects acgt_gamma and protein translation
+* Use Bootstrap on frontend for styling
+
+
 # Version 2.3.1 - 2015-07-30
 * Fix direct strand protein translation
 
