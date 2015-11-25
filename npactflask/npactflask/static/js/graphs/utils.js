@@ -14,7 +14,7 @@ angular.module('npact')
      * @param {Number} x
      * @param {Number} [exponent] shift the result by this many digits
      */
-    this.orderOfMagnitude = function(x, exponent){
+    this.orderOfMagnitude = function(x, exponent) {
       var k = Math.floor(Math.log(x) / Math.LN10),
           t = Math.floor(0.5 + x / Math.pow(10, k));
       return t * Math.pow(10, k + (exponent || 0));
@@ -27,41 +27,39 @@ angular.module('npact')
      *
      * @returns {Promise} when the iteration is complete
      */
-    this.forEachAsync = function(list, fn){
+    this.forEachAsync = function(list, fn) {
       var d = $q.defer(),
           p = d.promise;
 
-      if(list === null){
+      if(list === null) {
         d.reject();
         return p;
       }
 
       var idx = 0,
-          opts = {batchSize:512, delay: 0},
+          opts = {batchSize: 512, delay: 0},
           batches = 0,
-          len = list.length
-      ;
+          len = list.length;
 
-      function iterate(){
+      function iterate() {
         var t1 = new Date();
-        try{
-          for(var c = opts.batchSize; idx < len && c >= 0; idx++, c--){
+        try {
+          for(var c = opts.batchSize; idx < len && c >= 0; idx++, c--) {
             fn(list[idx], idx);
           }
-        }catch(e){
-          if(e === STOP_ITERATING){
+        }catch(e) {
+          if(e === STOP_ITERATING) {
             idx = len;
-          }else{
+          } else{
             d.reject({error:e, line: list[idx]});
           }
         }
         var elapsed = new Date() - t1;
         batches++;
-        if(idx < len){
-          d.notify({batches:batches, idx:idx, len:len,
-                    elapsed:elapsed,
-                    batchSize:opts.batchSize});
-          // if the loop was very fast, double the batch size, if slow, halve it
+        if(idx < len) {
+          d.notify({batches: batches, idx: idx, len: len,
+                    elapsed: elapsed,
+                    batchSize: opts.batchSize});
           var goalms = 10,
               rowsPerms = opts.batchSize / elapsed;
 
@@ -97,7 +95,7 @@ angular.module('npact')
      * @param {function} parseLine - callback to parse a line
      * @returns {array} extract objects
      */
-    this.parse = function(text, parseLine){
+    this.parse = function(text, parseLine) {
       if (!_.isString(text)) { return text; }
       var lines = text.split('\n');
       return _.map(lines, parseLine);
@@ -109,7 +107,7 @@ angular.module('npact')
      * @param {function} parseLine - callback to parse a line
      * @returns {Promise} for array of parsed objects
      */
-    this.parseAsync = function(text, parseLine){
+    this.parseAsync = function(text, parseLine) {
       if (!_.isString(text)) {
         throw new Error("Can't parse non-text " + typeof text);
       }
@@ -118,16 +116,16 @@ angular.module('npact')
       // async loop, gathering results
       return Utils.forEachAsync(
         text.split('\n'),
-        function(line, idx){
+        function(line, idx) {
           if(line && line.length > 0) {
             results[idx] = parseLine(line);
           }
         })
-        .then(function(){ return results; });
+        .then(function() { return results; });
     };
   })
 // creates parsers, suitable for returning from factory declarations
-  .service('ParserFactory', function(LineParser){
+  .service('ParserFactory', function(LineParser) {
     'use strict';
     this.create = function(parseLineFn) {
       return {
@@ -137,7 +135,7 @@ angular.module('npact')
       };
     };
   })
-  .factory('ExtractParser', function(ParserFactory){
+  .factory('ExtractParser', function(ParserFactory) {
     'use strict';
     /**
      * Extract format
@@ -170,7 +168,7 @@ angular.module('npact')
      * @param {string} line - single extract line
      * @returns {Object} extract
      */
-    function parseExtract(line){
+    function parseExtract(line) {
       var parts = EXTRACT_REGEX.exec(line),
           res = {
             start: parseInt(parts[START]),
@@ -237,7 +235,7 @@ angular.module('npact')
     /**
      * download contents from a "fetch" path
      */
-    self.fetchFile = function(path){
+    self.fetchFile = function(path) {
       if(!path) {
         throw new Error("Path is undefined");
       }
@@ -281,7 +279,7 @@ angular.module('npact')
     }
 
     this.start = function(tid) {
-      if(!tid || tid.length === 0){
+      if(!tid || tid.length === 0) {
         return $q.reject(new Error('Invalid task id'));
       }
       return poller(tid, $q.defer(), initialPollTime);
