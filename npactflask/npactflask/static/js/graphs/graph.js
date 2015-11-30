@@ -4,9 +4,7 @@ angular.module('npact')
                                            GraphingCalculator) {
     'use strict';
 
-    var getWidth = function() {
-      return $element.width(); //from style.css `.graph`
-    };
+    var getWidth =  _.bind($element.width, $element);
 
     //The baseOpts are the graph options that are the same for every graph
     var baseOpts = { width: getWidth() },
