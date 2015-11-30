@@ -1,13 +1,14 @@
 angular.module('npact')
 
-  .factory('Grapher', function($log, $q, GraphConfig, GraphingCalculator, $rootScope,
+  .factory('Grapher', function($log, $q, GraphConfig, GraphingCalculator,
                         Tooltip, NProfiler, Utils, npactConstants) {
     'use strict';
     var K = Konva;
     var style = npactConstants.graphStyle;
 
-    function Grapher(element, opts) {
-      this.$element = jQuery(element);
+    function Grapher($element, $scope, opts) {
+      this.$element = $element;
+      this.$scope = $scope;
       angular.extend(this, opts);
       // invariants: startBase, endBase
       var length = GraphConfig.basesPerGraph;
@@ -204,15 +205,16 @@ angular.module('npact')
         }
       });
       l.add(dg);
-      var moving = false;
+      var moving = false,
+          $scope = this.$scope;
       dg.on('dragmove', function(evt) {
         var delta = evt.target.x() - moving || 0;
-        $rootScope.$broadcast('offset', - delta);
+        $scope.$emit('offset', - delta);
         moving = evt.target.x();
       });
       dg.on('dragend', function(evt) {
         moving = false;
-        $rootScope.$evalAsync(function() {
+        $scope.$evalAsync(function() {
           GraphConfig.offset += -evt.target.x();
         });
       });
@@ -270,7 +272,7 @@ angular.module('npact')
             zoomingOut: evt.evt.shiftKey
           };
       $log.log('Zoom event:', opts);
-      $rootScope.$evalAsync(function() {
+      this.$scope.$evalAsync(function() {
         //updates `offset`, and `basesPerGraph`
         angular.extend(GraphConfig, GraphingCalculator.zoom(opts));
       });
@@ -452,7 +454,7 @@ angular.module('npact')
                    tailWidth, 0 ];
         };
     GP.drawORFsTrack = function(track, orfs) {
-      var xaxis = this.m.xaxis, $el = this.$element,
+      var xaxis = this.m.xaxis,
           colors = this.colors,
           g = new K.Group({ y: track.y }),
           arrowHeadWidth = style.tracks.arrow.width / xaxis.scaleX;
@@ -517,7 +519,6 @@ angular.module('npact')
       var midY = (track.style.height / 2),
           offset = 2,  //how far off midline
           g = new K.Group({ x: 0, y: track.y }),
-          $el = this.$element,
           colors = {
             'H': this.colors,
             //G type hits should be lighter

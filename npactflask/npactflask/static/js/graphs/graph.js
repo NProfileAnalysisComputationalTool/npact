@@ -190,7 +190,6 @@ angular.module('npact')
         var g = null,
             visible = ctrl.visible,
             idx = $attrs.idx, id = '#graph_' + idx,
-            el = $element[0],
             // redraw gets set for all graphs once (e.g. a new track
             // triggers broadcasts redraw), but only gets cleared as
             // the currently visible ones are drawn
@@ -201,7 +200,7 @@ angular.module('npact')
               //However long it actually takes to draw, we have the
               //latest options as of this point
               redraw = false;
-              return (g || (g = new Grapher(el, opts)))
+              return (g || (g = new Grapher($element, $scope, opts)))
                     .redraw(opts)
                     .catch(function() {
                       //something went wrong, we will still need to redraw this
