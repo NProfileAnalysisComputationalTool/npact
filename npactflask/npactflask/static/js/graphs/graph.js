@@ -147,6 +147,7 @@ angular.module('npact')
             break;
           }
         }, 800);
+
     $scope.$on('printresize', function(event, printing) {
       if(printing) {
         $element.css({width: '7in'});
@@ -170,6 +171,7 @@ angular.module('npact')
       $win.off('keyup', onKeyUp);
     });
   })
+
   .directive('npactGraphContainer', function(STATIC_BASE_URL) {
     'use strict';
     return {
