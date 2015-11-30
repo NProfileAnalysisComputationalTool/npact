@@ -1,5 +1,5 @@
 angular.module('npact')
-  .factory('Track', function($log, ExtractParser, TrackBinSearchIndex, npactConstants) {
+  .factory('Track', function($log, ExtractParser, TrackBinSearchIndex, npactConstants, $timeout) {
     'use strict';
     var ITrackIndex = TrackBinSearchIndex;
     function Track(name, data, type, weight) {
@@ -12,32 +12,74 @@ angular.module('npact')
       var trackStyle = npactConstants.trackStyle[type] || {};
       this.style = _.defaults(trackStyle, npactConstants.trackStyle['default']);
       this.weight = weight || 0;
-      this.data = this.loadData(data);
-      this.index = this.indexData(this.data);
+      this.data = null;
+      this.index = null;
+      this.loading = this.loadData(data);
+      this.indexing = this.loading.then(_.bind(this.indexData, this));
     }
+
     Track.prototype.loadData = function(data) {
-      return ExtractParser.parseAsync(data)
-        .catch(function(e) { $log.log('Track.loadData failed', name, e); throw e; });
+      return (
+        this.loading = ExtractParser.parseAsync(data)
+          .then(_.bind(function (data) {
+            $log.log("Finished parsing", this.name, ", found ", data.length);
+            this.data = data;
+            this.loading = false;
+            return data;
+          }, this))
+          .catch(function(e) { $log.log('Track.loadData failed', name, e); throw e; }));
     };
     Track.prototype.indexData = function(data) {
-      return data
-        .then(function(data) { return new ITrackIndex(data); })
-        .catch(function(e) { $log.log('Track.indexData failed', name, e); throw e; });
+      return (
+        this.indexing = $timeout(_.bind(function () {
+          this.indexing = false;
+          return (this.index = ITrackIndex(data));
+        }, this))
+          .catch(function(e) { $log.log('Track.indexData failed', name, e); throw e; }));
     };
+    Track.prototype.reindex = function () {
+      if(this.loading) {
+        //shouldn't be able to get here but if this is true then we
+        //haven't yet started indexing and nothing to do.
+        return;
+      }
+      else if(this.indexing) {
+        this.indexing.then(_.bind(function () {
+          this.indexData(this.data);
+        }, this));
+      }
+      else {
+        this.indexData(this.data);
+      }
+   };
     Track.prototype.slice = function(opts) {
-      return this.index.then(_.bind(function(index) {
-        this.slice = index;
-        return index(opts);
-      }, this));
+      if(this.indexing) {
+        return this.indexing.then(function (index) {
+          return index(opts);
+        });
+      }
+      else {
+        return this.index(opts);
+      }
     };
+
     Track.prototype.findByName = function(substr) {
-      return this.data.then(function(parsedData) {
-        if(!parsedData) return [];
+      var doFind = function () {
+        if(!this.data) return [];
         var searcher = new RegExp(substr.replace(/[.*+?^${}()|[\]\\]/g, "\\$&"), "i");
-        return _.filter(parsedData, function(orf) {
+        return _.filter(this.data, function(orf) {
           return searcher.test(orf.name);
         });
-      });
+      };
+      return (this.loading ? this.loading.then : $timeout)(doFind);
+    };
+
+    Track.prototype.remove = function (entry) {
+      if(this.loading) {
+        throw new Error("Shouldn't be able to remove from a track before the track exists");
+      }
+      this.data = _.without(this.data, entry);
+      this.reindex();
     };
     return Track;
   })

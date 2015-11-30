@@ -1,7 +1,7 @@
 describe('ITrackReader', function() {
   'use strict';
   beforeEach(module('npact', function($provide) {
-  //  $provide.value('$log', console);
+    $provide.value('$log', console);
   }));
   beforeEach(module('assets'));
 
@@ -100,15 +100,17 @@ describe('ITrackReader', function() {
     });
   describe('Track', function() {
     var track;
-    beforeEach(inject(function(Track) {
-      track = new Track('test', extract, 'extracts', 0);
+    beforeEach(inject(function(Track, $rootScope) {
+      track = new Track('slicetest', extract, 'extracts', 0);
+      $timeout.flush();
     }));
     it('should load and parse', function() {
       expect(track).toBeDefined();
-      expect(track.name).toEqual('test');
+      expect(track.name).toEqual('slicetest');
       expect(track.weight).toEqual(0);
       expect(track.type).toEqual('extracts');
       expect(track.style.height).toBeTruthy();
+      expect(track.index).toBeTruthy();
     });
 
     it('should throw on unknown track type', inject(function(Track) {
@@ -121,15 +123,17 @@ describe('ITrackReader', function() {
     });
 
     it('should be sliceable', function(done) {
-      track.slice({name:'test', startBase:72000, endBase:88600}).then(function(results) {
-        expect(results.length).toEqual(6);
-      }).then(function() {
-        // Ensure it works more than once
-        track.slice({name:'test', startBase:72000, endBase:88600}).then(function(results) {
+      track.slice({name:'test', startBase:72000, endBase:88600})
+        .then(function(results) {
           expect(results.length).toEqual(6);
-          done();
+        })
+        .then(function() {
+          // Ensure it works more than once
+          track.slice({name:'test', startBase:72000, endBase:88600}).then(function(results) {
+            expect(results.length).toEqual(6);
+            done();
+          });
         });
-      });
       $timeout.flush();
     });
   });

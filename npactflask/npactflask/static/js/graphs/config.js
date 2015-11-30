@@ -76,7 +76,7 @@ angular.module('npact')
      * register a track to be displayed on the graph
      */
     this.loadTrack = function(track) {
-      $log.log('loading new track', track);
+      $log.log('loading new track', track.name);
       _.remove(self.tracks, {name: track.name});  //mutates
       self.tracks.push(track);
       self.tracks = _.sortBy(self.tracks, 'weight');
