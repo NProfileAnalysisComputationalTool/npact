@@ -80,7 +80,6 @@ angular.module('npact')
           topOffset = $element.offset().top;
           topOffset += _.parseInt($element.css('padding-top'));
           topOffset = Math.floor(topOffset);
-          $log.log('topOffset:', topOffset);
 
           // Keep the topIdx at the top through the height change
           var delta = Math.max(0, topIdx) * (height - $scope.graphHeight);
