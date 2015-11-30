@@ -660,11 +660,6 @@ angular.module('npact')
     $scope.extract = extract;
   })
 
-  .controller('TooltipScopeCtrl', function($scope, extracScopeStuff) {
-    'use strict';
-    angular.extend($scope, extracScopeStuff);
-  })
-
   .service('Tooltip', function($modal) {
     'use strict';
     this.show = function (extract, pageX, pageY) {
