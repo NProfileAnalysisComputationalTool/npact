@@ -3,6 +3,8 @@ import os
 
 DEBUG = os.environ.get('ENV', 'dev').lower() not in ('prod', 'production')
 
+SEND_FILE_MAX_AGE_DEFAULT = 0 if DEBUG else 86400
+
 MAIL_DEFAULT_SENDER = 'npact1.0@gmail.com'
 
 WEBROOT = (Path(__file__).dirname() / "../../webroot").realpath()

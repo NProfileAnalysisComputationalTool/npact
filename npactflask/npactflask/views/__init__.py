@@ -10,7 +10,8 @@ logger = app.logger
 
 @app.route('/raw/<path:path>')
 def raw(path):
-    return send_from_directory(app.config['UPLOADS'], path)
+    return send_from_directory(app.config['UPLOADS'], path,
+                               cache_timeout=60*60*24*365)
 
 
 @app.route('/about/')
