@@ -24,6 +24,9 @@ angular.module('npact')
     };
   })
   .controller('ZoomWindowCtrl', function ($log, focusData, GraphConfig) {
+    var type = focusData.type;
+    var data = focusData[type];
+    this.data = data;
     $log.log("Focusing on", focusData);
 
   })

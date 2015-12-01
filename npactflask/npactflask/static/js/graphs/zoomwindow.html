@@ -1,3 +1,53 @@
-<div>
-  Hi there!
+<div class="container-fluid">
+  <div class="row">
+    <div class="col-sm-6"><h2>{{zw.data.name}}</h2></div>
+    <div class="col-sm-4">
+      <input class="form-control" type="number" name="startBase" style="width:6em;"
+             min="0" max="{{gc.length}}"
+             ng-model="zw.data.start"
+             ng-model-options="{ updateOn: 'default blur', debounce: { 'default': 600, 'blur': 0 } }">
+      <span>to</span>
+      <input class="form-control" type="number" name="endBase" style="width:6em;"
+             min="0" max="{{gc.length}}"
+             ng-model="zw.data.end"
+             ng-model-options="{ updateOn: 'default blur', debounce: { 'default': 600, 'blur': 0 } }">
+
+    </div>
+  </div>
+  <div class="row">
+    <div class="col-sm-1">
+      <label>Phase</label>
+    </div>
+    <div class="col-sm-4">
+      <div class="btn-group btn-group-sm" role="group" aria-label="Phase">
+        <div class="btn-group">
+          <button type="button" class="btn btn-default"
+                  ng-model="zw.data.phase" uib-btn-radio="0">0</button>
+        </div>
+        <div class="btn-group">
+          <button type="button" class="btn btn-default"
+                  ng-model="zw.data.phase" uib-btn-radio="1">1</button>
+        </div>
+        <div class="btn-group">
+          <button type="button" class="btn btn-default"
+                  ng-model="zw.data.phase" uib-btn-radio="2">2</button>
+        </div>
+      </div>
+    </div>
+    <div class="col-sm-1">
+      <label>Strand</label>
+    </div>
+    <div class="col-sm-4">
+      <div class="btn-group btn-group-sm" role="group" aria-label="Phase">
+        <div class="btn-group">
+          <button type="button" class="btn btn-default"
+                  ng-model="zw.data.complement" uib-btn-radio="0">Direct</button>
+        </div>
+        <div class="btn-group">
+          <button type="button" class="btn btn-default"
+                  ng-model="zw.data.complement" uib-btn-radio="1">Complement</button>
+        </div>
+      </div>
+    </div>
+  </div>
 </div>

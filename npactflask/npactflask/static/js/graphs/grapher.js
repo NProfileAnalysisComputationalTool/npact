@@ -510,7 +510,6 @@ angular.module('npact')
       }, this);
 
       g.on('click', _.bind(function(evt) {
-        $log.log("clicked", this.$scope);
         this.$scope.$emit('ORF-selected', {
           type: 'ORF',
           track: track,
@@ -547,7 +546,6 @@ angular.module('npact')
         }));
       });
       g.on('click', _.bind(function(evt) {
-        $log.log("clicked", this.$scope);
         this.$scope.$emit('hit-selected', {
           type: 'hit',
           track: track,
