@@ -174,7 +174,7 @@ angular.module('npact')
     'use strict';
     return {
       restrict: 'A',
-      scope: {},
+      scope: true,
       templateUrl: STATIC_BASE_URL + 'js/graphs/graph-container.html',
       controller: 'npactGraphContainerCtrl as ctrl'
     };

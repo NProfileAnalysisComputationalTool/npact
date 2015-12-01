@@ -17,11 +17,12 @@ angular.module('npact')
     };
   })
 
-  .controller('npactGraphPageCtrl', function($scope,$q, $window, $log, PrintModal,
+  .controller('npactGraphPageCtrl', function($scope,$q, $window, $log, $location,
                                       Fetcher, BASE_URL, PATH,
                                       FETCH_BASE_URL, EmailBuilder,
                                       STATIC_BASE_URL, GraphConfig,
-                                      kickstarter, processOnServer, $location) {
+                                      kickstarter, processOnServer,
+                                      PrintModal, ZoomWindowHandler) {
     'use strict';
 
     $scope.FETCH_BASE_URL = FETCH_BASE_URL;
@@ -50,14 +51,10 @@ angular.module('npact')
       });
     };
 
-    this.print = function() {
-      PrintModal.show().then(_doPrint);
-    };
+    this.print = function() { PrintModal.show().then(_doPrint); };
+    this.requestPDF = function(){ $window.open(Fetcher.buildUrl('getpdf'), '_blank'); };
 
-    this.requestPDF = function(){
-      $scope.PARAMS = $.param($location.search());
-      $window.open(Fetcher.buildUrl('getpdf'), '_blank');
-    };
+    ZoomWindowHandler.register($scope);
   })
 
   .controller('DownloadsCtrl', function($scope, $log, PredictionManager, MessageBus, Pynpact, StatusPoller, GraphConfig) {

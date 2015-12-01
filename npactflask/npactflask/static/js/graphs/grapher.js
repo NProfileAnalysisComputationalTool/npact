@@ -509,9 +509,15 @@ angular.module('npact')
         }
       }, this);
 
-      g.on('click', function(evt) {
-        Tooltip.show(evt.target.getAttrs().extract, evt.evt.pageX, evt.evt.pageY);
-      });
+      g.on('click', _.bind(function(evt) {
+        $log.log("clicked", this.$scope);
+        this.$scope.$emit('ORF-selected', {
+          type: 'ORF',
+          track: track,
+          ORF: evt.target.getAttrs().extract
+        });
+        //evt.evt.pageX, evt.evt.pageY
+      }, this));
       return g;
     };
 
@@ -540,9 +546,15 @@ angular.module('npact')
           strokeWidth: strokeWidth
         }));
       });
-      g.on('click', function(evt) {
-        Tooltip.show(evt.target.getAttrs().hit, evt.evt.pageX, evt.evt.pageY);
-      });
+      g.on('click', _.bind(function(evt) {
+        $log.log("clicked", this.$scope);
+        this.$scope.$emit('hit-selected', {
+          type: 'hit',
+          track: track,
+          hit: evt.target.getAttrs().hit
+        });
+        //evt.evt.pageX, evt.evt.pageY
+      }, this));
 
       return g;
     };
