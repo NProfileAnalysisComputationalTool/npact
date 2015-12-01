@@ -661,10 +661,10 @@ angular.module('npact')
     $scope.extract = extract;
   })
 
-  .service('Tooltip', function($modal) {
+  .service('Tooltip', function($uibModal) {
     'use strict';
     this.show = function (extract, pageX, pageY) {
-      var modalInstance = $modal.open({
+      var modalInstance = $uibModal.open({
         template: '<div npact-extract="extract"></div>',
         controller: 'ExtractTooltipCtrl',
         size: 'lg',
@@ -673,5 +673,5 @@ angular.module('npact')
         }
       });
       return modalInstance.result;
-    }
+    };
   });

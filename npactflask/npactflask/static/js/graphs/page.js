@@ -66,11 +66,11 @@ angular.module('npact')
                    function(val) { $scope.predictionFiles = val; });
   })
 
-  .service('PrintModal', function(STATIC_BASE_URL, $modal) {
+  .service('PrintModal', function(STATIC_BASE_URL, $uibModal) {
     'use strict';
     var printTemplate = STATIC_BASE_URL + 'js/graphs/printConfirm.html';
     this.show = function() {
-      var modalInstance = $modal.open({
+      var modalInstance = $uibModal.open({
         animation: true,
         templateUrl: printTemplate,
         controller: 'ModalInstanceCtrl'
@@ -79,10 +79,10 @@ angular.module('npact')
     };
   })
 
-  .controller('ModalInstanceCtrl', function($scope, $modalInstance) {
+  .controller('ModalInstanceCtrl', function($scope, $uibModalInstance) {
     'use strict';
-    $scope.proceed = $modalInstance.close;
-    $scope.cancel = $modalInstance.dismiss;
+    $scope.proceed = $uibModalInstance.close;
+    $scope.cancel = $uibModalInstance.dismiss;
   })
 
   .service('kickstarter', function($q, $log, processOnServer, MessageBus,
