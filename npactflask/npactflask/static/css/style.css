@@ -308,16 +308,6 @@ p#error-message {
 
 button.Start { clear:both; margin: 8px;}
 
-.qtip-help-text {
-   display: none;
-   font-size: 1.5em;
-}
-.qtip-help-text p { padding: 5px; }
-.qtip {
-   max-width: 400px !important;
-}
-h2 span.qtip-help-icon { float: right; }
-
 
 .blue-text {color:#5368C1;}
 .orange-text {color:#FF4A00;}
