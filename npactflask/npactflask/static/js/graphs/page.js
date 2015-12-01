@@ -72,17 +72,10 @@ angular.module('npact')
     this.show = function() {
       var modalInstance = $uibModal.open({
         animation: true,
-        templateUrl: printTemplate,
-        controller: 'ModalInstanceCtrl'
+        templateUrl: printTemplate
       });
       return modalInstance.result;
     };
-  })
-
-  .controller('ModalInstanceCtrl', function($scope, $uibModalInstance) {
-    'use strict';
-    $scope.proceed = $uibModalInstance.close;
-    $scope.cancel = $uibModalInstance.dismiss;
   })
 
   .service('kickstarter', function($q, $log, processOnServer, MessageBus,
