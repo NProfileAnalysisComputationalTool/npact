@@ -1,7 +1,8 @@
 <!DOCTYPE html >
-<html>
+<html lang="en">
   <head>
     <title>{% block title %}University of Florida Genetics Institute{% endblock title %}</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1">
     <link rel="stylesheet" type="text/css" href="//maxcdn.bootstrapcdn.com/bootstrap/3.3.5/css/bootstrap.min.css?ver=3.3.5">
     <link rel="stylesheet" type="text/css" href="{{ vSTATIC('css/style.css') }}">
     <link rel="stylesheet" type="text/css" href="{{ vSTATIC('css/print.css') }}" media="print">
@@ -14,13 +15,12 @@
       <p id="uf"><a href="http://www.ufl.edu/">University of Florida<span></span></a></p>
     </div>
 
-    <div id="mainContainer">
+    <div id="mainContainer" class="container">
       <div id="content">
         {% block content %}{% endblock %}
       </div>
       <div id="leftCol">
-        <div id="priNav">
-          <h2>Primary Navigation</h2>
+        <div id="priNav" role="navigation">
           <ul>
             <li><a href="{{url_for('start')}}">Home</a></li>
             <li><a href="{{url_for('about')}}">About</a></li>
