@@ -31,28 +31,33 @@ angular.module('npact')
     self.nucleotides = ['C', 'G'];
     self.offset = 0; // how much the graph is panned left/right
 
+    var inputConfig = {};
     //Get values from the querystring during intialization
     _.forEach(PUBLIC_CONFIG_KEYS, function(k) {
       var v = $location.search()[k];
       if(v) {
-        $log.log(k, v);
         if(v === true || v === false) {
-          self[k] = v;
+          inputConfig[k] = v;
         }
         else if (v === "true") {
-          self[k] = true;
+          inputConfig[k] = true;
         }
         else if (v === "false") {
-          self[k] = false;
+          inputConfig[k] = false;
         }
         else if(!isNaN(v)) {
-          self[k] = Number(v);
+          inputConfig[k] = Number(v);
         }
         else {
-          self[k] = v;
+          inputConfig[k] = v;
         }
       }
+      //  Watch for the value changing later
+      $rootScope.$watch(function () { return GraphConfig[k]; },
+                    function (v) { $location.search(k, v); });
     });
+    $log.debug("Finished reading config from querystring:", inputConfig);
+    _.assign(self, inputConfig);
 
     /**
      * what's the right title for the current nucleotides?
@@ -125,16 +130,6 @@ angular.module('npact')
                                         PUBLIC_CONFIG_KEYS) {
     'use strict';
     $scope.gc = GraphConfig;
-    //  If any of the GraphConfig values change update the querystring
-    var gcpubkeys = _.map(PUBLIC_CONFIG_KEYS, function(k) { return 'gc.' + k; });
-    $scope.$watchGroup(gcpubkeys, function(newVals) {
-      $location.search(_.object(PUBLIC_CONFIG_KEYS, newVals));
-    });
-    $scope.$watch('gc.mycoplasma', function(val, old) {
-      $log.debug("mycoplasma changed from", old, "to", val);
-      // Wait so that the above update to $location has a chance to complete
-      $timeout(PredictionManager.start, 50);
-    });
   })
 
   .directive('npactOrfFinder', function(GraphConfig, MessageBus, $q, $log, $timeout) {
@@ -149,10 +144,10 @@ angular.module('npact')
         }
 
         function doSearch(val) {
-          $log.log("Searching for:", val);
           delete $scope.results;
           delete $scope.resultsIndex;
           if(!val) return $q.when(true);
+          $log.log("Searching for:", val);
           return $q
             .all(_.map(GraphConfig.activeTracks(), function(t) { return t.findByName(val); }))
             .then(function(values) {

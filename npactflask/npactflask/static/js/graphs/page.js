@@ -112,7 +112,8 @@ angular.module('npact')
     };
   })
   .service('PredictionManager', function(Fetcher, StatusPoller, Pynpact, Track,
-                                  GraphConfig, processOnServer, $log, MessageBus) {
+                                  $rootScope, $timeout, $log,
+                                  GraphConfig, processOnServer, MessageBus) {
     'use strict';
     var self = this;
     self.files = null;
@@ -163,4 +164,11 @@ angular.module('npact')
           return track;
         });
     };
+
+    $rootScope.$watch(function () { return GraphConfig.mycoplasma; },
+                      function (val, old) {
+                        $log.debug("mycoplasma changed from", old, "to", val);
+                        // Wait so that the above update to $location has a chance to complete
+                        $timeout(self.start, 50);
+    });
   });
