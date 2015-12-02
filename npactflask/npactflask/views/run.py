@@ -86,7 +86,6 @@ def run_frame(path):
             'kickstart': url_for('kickstart', path=path),  # args=[path]
             'translate': url_for('translate'),
             'fetch_base': url_for('raw', path=''),
-            'acgt_gamma_base': url_for('.acgt_gamma_file_list', path=''),
             'STATIC_BASE': url_for('static', filename=''),
             'base_href': url_for('run_frame', path=path)
         })
@@ -223,13 +222,6 @@ def getpdf(path):
     return send_file(pdf, as_attachment=True)
 
 
-@app.route('/acgt_gamma_file_list/<path:path>')
-def acgt_gamma_file_list(path):
-    acgt_gamma_output = getabspath(path)
-    files = map(getrelpath, acgt_gamma_output.listdir())
-    return flask.make_response(json.dumps(files), 200)
-
-
 @app.route('/acgt_gamma/<path:path>')
 def acgt_gamma(path):
     config = build_config(path)
@@ -237,7 +229,11 @@ def acgt_gamma(path):
     tid_output_directory = config['acgt_gamma_output']
     gexec.result(tid_output_directory, timeout=None)
     files = map(getrelpath, Path(tid_output_directory).listdir())
-    return jsonify(config=sanitize_config_for_client(config), files=files)
+    return jsonify(
+        NewOrfsFile=getrelpath(config['NewOrfsFile']),
+        ModifiedOrfsFile=getrelpath(config['ModifiedOrfsFile']),
+        HitsFile=getrelpath(config['HitsFile']),
+        files=files)
 
 
 def schedule_email(to, path, config):
@@ -268,8 +264,8 @@ def send_email(to, path, config, result_link, run_link):
 
         with app.app_context():
             ctx = {'keep_days': app.config['ATIME_DEFAULT'],
-                                 'results_link': result_link,
-                                 'run_link': run_link}
+                   'results_link': result_link,
+                   'run_link': run_link}
             text_content = render_template('email-results.txt', **ctx)
             html_content = render_template('email-results.html', **ctx)
             msg = Message(subject, recipients=[to])

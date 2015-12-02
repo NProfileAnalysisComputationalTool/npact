@@ -35,9 +35,9 @@ def plan(config, executor):
     # it at about lines 262-270
     j = lambda ext: os.path.join(
         outdir, os.path.basename(config['filename'])[:-4] + ext)
-    config['File_of_new_CDSs'] = j(".newcds")
-    config['File_of_published_rejected_CDSs'] = j(".modified")
-    config['File_of_G+C_coding_potential_regions'] = j('.profiles')
+    config['NewOrfsFile'] = config['File_of_new_CDSs'] = j(".newcds")
+    config['ModifiedOrfsFile'] = config['File_of_published_rejected_CDSs'] = j(".modified")
+    config['HitsFile'] = config['File_of_G+C_coding_potential_regions'] = j('.profiles')
     config[OUTPUTKEY] = outdir
 
     return enqueue(_acgt_gamma, executor, rconfig, outdir)

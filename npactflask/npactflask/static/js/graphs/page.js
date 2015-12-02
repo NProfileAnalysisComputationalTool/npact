@@ -122,13 +122,10 @@ angular.module('npact')
       var acgt_gamma_promise = Fetcher.rawFile(url)
           .then(function(response) {
             self.files = response.files;
-            var config = response.config;
-            angular.extend(GraphConfig, config);
-            return GraphConfig;
+            self.fetchHits(response.HitsFile);
+            self.fetchNewOrfs(response.NewOrfsFile);
+            self.fetchModifiedOrfs(response.ModifiedOrfsFile);
           });
-      acgt_gamma_promise.then(self.fetchHits);
-      acgt_gamma_promise.then(self.fetchModifiedOrfs);
-      acgt_gamma_promise.then(self.fetchNewOrfs);
 
       MessageBus.info(
         'Identifying significant 3-base periodicities',
@@ -137,8 +134,8 @@ angular.module('npact')
         }));
     };
 
-    self.fetchHits = function(config) {
-      config.hits = Fetcher.fetchFile(config[Pynpact.HITS])
+    self.fetchHits = function(HitsFile) {
+      config.hits = Fetcher.fetchFile(HitsFile)
           .then(function(data) {
             var name = 'Hits',
                 track = new Track(name, data, 'hits', 100);
@@ -147,8 +144,8 @@ angular.module('npact')
           });
     };
 
-    self.fetchNewOrfs = function(config) {
-      config.newORFs = Fetcher.fetchFile(config[Pynpact.NEW_ORFS])
+    self.fetchNewOrfs = function(NewOrfsFile) {
+      config.newORFs = Fetcher.fetchFile(NewOrfsFile)
         .then(function(data) {
           var name = 'New ORFs',
               track = new Track(name, data, 'neworfs', 15);
@@ -157,8 +154,8 @@ angular.module('npact')
         });
     };
 
-    self.fetchModifiedOrfs = function(config) {
-      config.newORFs = Fetcher.fetchFile(config[Pynpact.MODIFIED])
+    self.fetchModifiedOrfs = function(ModifiedOrfsFile) {
+      config.newORFs = Fetcher.fetchFile(ModifiedOrfsFile)
         .then(function(data) {
           var name = 'Modified ORFs',
               track = new Track(name, data, 'modified', 10);
