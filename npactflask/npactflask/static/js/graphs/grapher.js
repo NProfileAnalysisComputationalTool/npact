@@ -510,10 +510,18 @@ angular.module('npact')
       }, this);
 
       g.on('click', _.bind(function(evt) {
+        var extract  = evt.target.getAttrs().extract;
         this.$scope.$emit('ORF-selected', {
           type: 'ORF',
           track: track,
-          ORF: evt.target.getAttrs().extract
+          item: evt.target.getAttrs().extract,
+          start: extract.start,
+          end: extract.end,
+          complement: extract.complement,
+          phase: extract.phase,
+          name: extract.name
+
+
         });
         //evt.evt.pageX, evt.evt.pageY
       }, this));
@@ -546,10 +554,16 @@ angular.module('npact')
         }));
       });
       g.on('click', _.bind(function(evt) {
-        this.$scope.$emit('hit-selected', {
+        var hit = evt.target.getAttrs().hit;
+        this.$scope.$emit('region-selected', {
           type: 'hit',
           track: track,
-          hit: evt.target.getAttrs().hit
+          item: hit,
+          start: hit.start,
+          end: hit.end,
+          complement: hit.complement,
+          phase: hit.phase,
+          name: hit.name
         });
         //evt.evt.pageX, evt.evt.pageY
       }, this));

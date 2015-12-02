@@ -31,7 +31,7 @@ angular.module('npact')
     $scope.BASE_URL = BASE_URL;
     $scope.PATH = PATH;
 
-    kickstarter.start();
+    var bootp = kickstarter.start();
 
     var _doPrint = function() {
       var t1 = new Date();
@@ -55,6 +55,11 @@ angular.module('npact')
     this.requestPDF = function(){ $window.open(Fetcher.buildUrl('getpdf'), '_blank'); };
 
     ZoomWindowHandler.register($scope);
+    bootp
+      .then(_.bind(ZoomWindowHandler.maybePopup, ZoomWindowHandler))
+      .then(function () {
+        $log.log("Everything finished initial boot");
+      });
   })
 
   .controller('DownloadsCtrl', function($scope, $log, PredictionManager, MessageBus, Pynpact, StatusPoller, GraphConfig) {
@@ -86,10 +91,11 @@ angular.module('npact')
         MessageBus.danger('There\'s been an error starting up; please try starting over.');
       });
       MessageBus.info('kickstarting', safePromise);
-      this.basePromise.then(NProfiler.start);
-      this.basePromise.then(PredictionManager.start);
-      this.basePromise.then(ExtractManager.start);
-      return this.basePromise;
+      return $q.all([
+        this.basePromise.then(NProfiler.start),
+        this.basePromise.then(PredictionManager.start),
+        this.basePromise.then(ExtractManager.start),
+      ]);
     };
   })
 

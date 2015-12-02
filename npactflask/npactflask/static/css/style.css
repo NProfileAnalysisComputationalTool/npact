@@ -428,6 +428,12 @@ checkbox-list#profile-options>label {
    text-align: left;
 }
 
+.zoomwindow ul.nav-stacked a {
+   padding-top: 0;
+   padding-bottom: 0;
+}
+
+
 /* Form styles */
 
 #startforms { min-height:275px; }
