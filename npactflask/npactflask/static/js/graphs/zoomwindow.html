@@ -49,7 +49,14 @@
     <div class="row"></div>
     <div class="row graph-row">
       <div class="col-sm-12" style="padding: 20px; border: 1px dotted #333; height:120px;">
-        The graph will go here
+        <div npact-graph
+             id="zoomgraph"
+             start-base="zw.data.start"
+             end-base="zw.data.end"
+             visible="true"
+             graph-options="baseOpts"
+             style="height:{{graphHeight}}px;">
+        </div>
       </div>
     </div>
     <div class="row protein-row">

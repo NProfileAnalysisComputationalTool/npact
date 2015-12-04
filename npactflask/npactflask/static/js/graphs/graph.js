@@ -7,17 +7,15 @@ angular.module('npact')
     var getWidth =  _.bind($element.width, $element);
 
     //The baseOpts are the graph options that are the same for every graph
-    var baseOpts = { width: getWidth() },
+    var baseOpts = { width: getWidth(),
+                     m: null,
+                     basesPerGraph: GraphConfig.basesPerGraph,
+                     tracks: null },
         updateMetrics = function() {
           baseOpts.m = GraphingCalculator.chart(baseOpts);
         };
-    this.graphOptions = function(idx) {
-      // This function builds the specific options for a graph; as
-      // many graph rows will never be drawn this only generates the
-      // object for a row when needed.
-      var start = $scope.graphSpecs[idx];
-      return angular.extend({ startBase: start }, baseOpts);
-    };
+    $scope.gc = GraphConfig;
+    $scope.baseOpts = baseOpts;
 
     var ready = function() {
           return GraphConfig.nucleotides && GraphConfig.nucleotides.length &&
@@ -91,7 +89,7 @@ angular.module('npact')
             try {
               // Find the height including the padding+border for
               // graphRowHeight visibility calculations
-              graphRowHeight = angular.element('#graph_0', $element).outerHeight();
+              graphRowHeight = angular.element('.graph', $element).outerHeight();
             }
             catch(e) {
               graphRowHeight = 0; // There are no rows
@@ -157,7 +155,7 @@ angular.module('npact')
       }
     });
 
-    this.visible = function(idx) { return idx >= topIdx && idx <= bottomIdx; };
+    $scope.visible = function(idx) { return idx >= topIdx && idx <= bottomIdx; };
     $win.on('resize', onResize);
     $win.on('scroll', onScroll);
     $win.on('keydown', onKeyDown);
@@ -185,18 +183,28 @@ angular.module('npact')
     'use strict';
     return {
       restrict: 'A',
-      require: '^npactGraphContainer',
-      link: function($scope, $element, $attrs, ctrl) {
+      scope: {
+        startBase: '&',
+        endBase: '&',
+        visible: '&',
+        graphOptions: '&'
+      },
+      link: function($scope, $element, $attrs) {
         var g = null,
-            visible = ctrl.visible,
-            idx = $attrs.idx, id = '#graph_' + idx,
+            startBase = $scope.startBase(),
+            endBase = $scope.endBase(),
+            visible = $scope.visible,
+            id = $attrs.id,
             // redraw gets set for all graphs once (e.g. a new track
             // triggers broadcasts redraw), but only gets cleared as
             // the currently visible ones are drawn
             redraw = false,
             draw = function(force) {
-              if(!redraw || (!force && !visible(idx))) { return null; }
-              var opts = ctrl.graphOptions(idx);
+              if(!redraw || (!force && !visible())) { return null; }
+              var opts = _.clone($scope.graphOptions());
+              opts.startBase = startBase;
+              opts.endbase = endBase;
+
               //However long it actually takes to draw, we have the
               //latest options as of this point
               redraw = false;
@@ -208,13 +216,13 @@ angular.module('npact')
                     });
             },
             schedule = function(force) {
-              if(!redraw || (!force && !visible(idx))) { return null; }
+              if(!redraw || (!force && !visible())) { return null; }
               return $timeout(_.partial(draw, force), 0, false);
             },
             discard = function() { if(g) { g.destroy(); g = null; } },
             scrollToHere = function() {
-              $log.log('scrolling to', id);
-              $window.scrollTo(0, $(id).offset().top);
+              $log.log('scrolling to', $element);
+              $window.scrollTo(0, $element.offset().top);
             };
         $scope.$on(Evt.DRAW, _.partial(schedule, false));
         $scope.$on(Evt.REDRAW, function() { redraw = true; schedule();});
@@ -225,7 +233,7 @@ angular.module('npact')
           schedule();
         });
         $scope.$on('offset', function(event, dx) {
-          if(g && g.offset && visible(idx)) {
+          if(g && g.offset && visible()) {
             g.offset(dx);
           }
         });
@@ -239,8 +247,6 @@ angular.module('npact')
           else { callback(g.replaceWithImage()); }
         });
         $scope.$watch(function() { return GraphConfig.gotoBase; }, function(gotoBase, fromBase) {
-          var startBase = Number($attrs.startBase);
-          var endBase = startBase + GraphConfig.basesPerGraph;
           if (_.isFinite(gotoBase) && startBase <= gotoBase && gotoBase <= endBase) {
             $log.log('gotoBase triggered redraw:', startBase, id);
             redraw = true;

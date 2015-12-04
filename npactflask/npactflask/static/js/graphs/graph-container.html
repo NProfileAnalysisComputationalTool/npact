@@ -1,10 +1,12 @@
 <div>
   <div ng-repeat="spec in graphSpecs track by $index"
-       id="graph_{{$index}}"
        class="graph">
     <div npact-graph
-         idx="{{$index}}"
-         start-base="{{spec}}"
+         id="graph_{{$index}}"
+         start-base="spec"
+         end-base="spec + gc.basesPerGraph"
+         visible="visible($index)"
+         graph-options="baseOpts"
          style="height:{{graphHeight}}px;">
     </div>
   </div>
