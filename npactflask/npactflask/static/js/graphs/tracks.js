@@ -71,7 +71,7 @@ angular.module('npact')
           return searcher.test(orf.name);
         });
       };
-      return (this.loading ? this.loading.then : $timeout)(doFind);
+      return (this.loading ? this.loading.then : $timeout)(_.bind(doFind, this));
     };
 
     Track.prototype.remove = function (entry) {
