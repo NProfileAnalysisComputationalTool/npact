@@ -2,7 +2,7 @@ angular.module('npact')
   .constant('npactConstants', {
     graphStyle: {
       paddingUnit: 5,
-      leftPadding: 120,
+      leftPadding: 80,
 
       profile: {
         height: 80,

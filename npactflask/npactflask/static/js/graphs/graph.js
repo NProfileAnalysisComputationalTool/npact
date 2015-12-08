@@ -1,91 +1,123 @@
 angular.module('npact')
+  .directive('npactGraphContainer', function() {
+    'use strict';
+    return {
+      restrict: 'A',
+      scope: true,
+      controller: 'npactGraphContainerCtrl as ctrl'
+    };
+  })
   .controller('npactGraphContainerCtrl', function($scope, $element, $window, $log, $timeout,
                                            npactConstants, Utils, GraphConfig, Evt,
                                            GraphingCalculator) {
     'use strict';
-
-    var getWidth =  _.bind($element.width, $element);
-
-    //The baseOpts are the graph options that are the same for every graph
-    var baseOpts = { width: getWidth(),
-                     m: null,
-                     basesPerGraph: GraphConfig.basesPerGraph,
-                     tracks: null },
-        updateMetrics = function() {
+    var $win = angular.element($window),
+        getWidth =  function() { return $element.width(); },
+        onDragMove = function (dx) {
+          $scope.$broadcast('offset', dx);
+        },
+        onDragEnd = function (dx) {
+          $scope.$evalAsync(function () {
+            GraphConfig.offset += dx;
+            $log.log("Finished dragging, new offset is", GraphConfig.offset);
+          });
+        },
+        baseOpts = {
+          width: null,
+          m: null,
+          tracks: null,
+          onDragMove: onDragMove,
+          onDragEnd: onDragEnd
+        },
+        updateMetrics = function () {
+          baseOpts.width = getWidth();
           baseOpts.m = GraphingCalculator.chart(baseOpts);
-        };
-    $scope.gc = GraphConfig;
+          $scope.graphHeight = baseOpts.m.height;
+        },
+        redraw = function () { $scope.$broadcast(Evt.REDRAW); };
+
     $scope.baseOpts = baseOpts;
+    this.winHeight = $win.height();
 
-    var ready = function() {
-          return GraphConfig.nucleotides && GraphConfig.nucleotides.length &&
-            baseOpts.m;
-        },
-        draw = function() {
-          updateVisibility();
-          $scope.$broadcast(Evt.DRAW);
-        },
-        redraw = function() {
-          if (!ready()) return;  //too early to do anything
-          updateVisibility();
-          $scope.$broadcast(Evt.REDRAW);
-        },
-        rebuild = function() {
-          if (!ready()) return;  //too early to do anything
-          updateVisibility();
-          $scope.$broadcast(Evt.REBUILD);
-        };
-
-
-    /*** Watch the config for changes we care about ***/
-    $scope.$watchCollection(
-      function() { return [GraphConfig.basesPerGraph,
-                    GraphConfig.offset, GraphConfig.startBase, GraphConfig.endBase]; },
-      function() {
-        // basic row geometry changed, repartition and rebuild
-        if(isNaN(GraphConfig.startBase) ||
-           isNaN(GraphConfig.endBase) ||
-           isNaN(GraphConfig.basesPerGraph)) { return; }
-        baseOpts.basesPerGraph = GraphConfig.basesPerGraph;
-        $scope.graphSpecs = GraphingCalculator.partition(GraphConfig);
+    var onResize = _.throttle(_.bind(function () {
+      this.winHeight = $win.height();
+      if(getWidth() !== baseOpts.width) {
         updateMetrics();
-        $log.log('Partitioned into', $scope.graphSpecs.length, 'rows.');
-        $timeout(rebuild);
-      });
+        redraw();
+      }
+      $scope.$applyAsync();
+    }, this), 1000/30);
+    $win.on('resize', onResize);
+    $scope.$on('$destroy', function () { $win.off('resize', onResize); });
+    $timeout(onResize, 100);
 
-    $scope.$watch(function() { return GraphConfig.nucleotides; }, function() {
-      $scope.$broadcast('n-profile');
-    }, true);
-    $scope.$watch(function() { return GraphConfig.colorBlindFriendly; }, redraw);
-
-    $scope.$watchCollection(GraphConfig.activeTracks, function(val, old) {
+    $scope.$watch(function () { return GraphConfig.basesPerGraph; }, updateMetrics);
+    $scope.$watchCollection(GraphConfig.activeTracks, function (val, old) {
       //Find headers and headerY
       baseOpts.tracks = val;
       updateMetrics();
-      updateRowHeight(baseOpts.m.height);
+      $scope.$broadcast('updateRowHeight', baseOpts.m.height);
+      redraw();
     });
 
-    /***  Scrolling and Graph Visibility management ***/
-    var $win = angular.element($window),
-        winHeight = $win.height(),
+    $scope.$on('printresize', function(event, printing) {
+      if(printing) {
+        $element.css({width: '7in'});
+        onResize();
+      }
+      else {
+        $element.css({width: 'auto'});
+        onResize();
+      }
+    });
+
+    $scope.$watch(function() { return GraphConfig.nucleotides; }, function() {
+      $scope.$broadcast(Evt.REDRAW, {nProfiles: true});
+    }, true);
+    $scope.$watch(function() { return GraphConfig.colorBlindFriendly; }, redraw);
+  })
+
+  .directive('npactGraphScroller', function ($log, $window, Evt) {
+    'use strict';
+    return {
+      restrict: 'A',
+      require: 'npactGraphContainer',
+      link: function ($scope, $element, $attrs, npactGraphContainerCtrl) {
+        var $win = angular.element($window),
+        graphHeight = 0, graphRowHeight = null,
         slack = 20, // how many pixels outside of viewport to render
         topOffset = 0,
-        topIdx = 0, bottomIdx = 0,
-        graphRowHeight = 0,
-        updateRowHeight = function(height) {
+        topIdx = 0, bottomIdx = 0;
+
+        var updateVisibility = function () {
+          if(!graphRowHeight) return;
+          slack = graphRowHeight / 4;
+          var scrollDist = $window.scrollY - topOffset - slack;
+          topIdx = Math.floor(scrollDist / graphRowHeight);
+          bottomIdx = topIdx + Math.ceil(
+            (npactGraphContainerCtrl.winHeight + slack) / graphRowHeight);
+        };
+
+        $scope.visible = function(idx) { return idx >= topIdx && idx <= bottomIdx; };
+
+        var draw = _.throttle(function () {
+          updateVisibility();
+          $scope.$broadcast(Evt.DRAW);
+        }, 1000/30);
+
+        $scope.$on('updateRowHeight', function ($evt, height) {
+          $log.debug("Updating graphHeight to", height);
           topOffset = $element.offset().top;
           topOffset += _.parseInt($element.css('padding-top'));
           topOffset = Math.floor(topOffset);
 
           // Keep the topIdx at the top through the height change
-          var delta = Math.max(0, topIdx) * (height - $scope.graphHeight);
-          if (delta) {
-            $window.scrollBy(0, delta);
-          }
-          $scope.graphHeight = height;  //set the inner height of the canvas container
-          $timeout(function() {
+          var delta = Math.max(0, topIdx) * (height - graphHeight);
+          if (delta) { $window.scrollBy(0, delta); }
+          graphHeight = height;
+          $scope.$evalAsync(function () {
             //This code won't work until after the `$scope.graphHeight`
-            //above has a chance to take effect. Hence the $timeout.
+            //above has a chance to take effect. Hence the async.
             try {
               // Find the height including the padding+border for
               // graphRowHeight visibility calculations
@@ -94,29 +126,23 @@ angular.module('npact')
             catch(e) {
               graphRowHeight = 0; // There are no rows
             }
-            redraw();
+            draw();
           });
-        },
-        updateVisibility = function() {
-          if(!graphRowHeight) return;
-          var scrollDist = $window.scrollY - topOffset - slack;
-          topIdx = Math.floor(scrollDist / graphRowHeight);
-          bottomIdx = topIdx + Math.ceil((winHeight + 2* slack) / graphRowHeight);
-        },
-        onScroll = draw,
-        onResize = function() {
-          winHeight = $win.height();
-          if(getWidth() !== baseOpts.width) {
-            topOffset = $element.offset().top;
-            baseOpts.width = getWidth();
-            updateMetrics();
-            redraw();
-          }
-          else {
-            //If the width didn't change then its the same as scrolling
-            onScroll();
-          }
-        },
+        });
+
+        $win.on('scroll', draw);
+        $scope.$on('$destroy', function () { $win.off('scroll', draw); });
+      }
+    };
+  })
+
+
+  .directive('npactKeyHandlers', function($window, $log, GraphConfig) {
+    'use strict';
+    return {
+      restrict: 'A',
+      link: function ($scope, $element, $attrs) {
+        var $win = angular.element($window),
         onKeyDown = _.throttle(function(event) {
           //Ignore keys while the user is typing in input controls
           if(event.target.nodeName == "INPUT") return;
@@ -143,38 +169,13 @@ angular.module('npact')
             break;
           }
         }, 800);
-
-    $scope.$on('printresize', function(event, printing) {
-      if(printing) {
-        $element.css({width: '7in'});
-        onResize();
+        $win.on('keydown', onKeyDown);
+        $win.on('keyup', onKeyUp);
+        $scope.$on('$destroy', function() {
+          $win.off('keydown', onKeyDown);
+          $win.off('keyup', onKeyUp);
+        });
       }
-      else {
-        $element.css({width: 'auto'});
-        onResize();
-      }
-    });
-
-    $scope.visible = function(idx) { return idx >= topIdx && idx <= bottomIdx; };
-    $win.on('resize', onResize);
-    $win.on('scroll', onScroll);
-    $win.on('keydown', onKeyDown);
-    $win.on('keyup', onKeyUp);
-    $scope.$on('$destroy', function() {
-      $win.off('resize', onResize);
-      $win.off('scroll', onScroll);
-      $win.off('keydown', onKeyDown);
-      $win.off('keyup', onKeyUp);
-    });
-  })
-
-  .directive('npactGraphContainer', function(STATIC_BASE_URL) {
-    'use strict';
-    return {
-      restrict: 'A',
-      scope: true,
-      templateUrl: STATIC_BASE_URL + 'js/graphs/graph-container.html',
-      controller: 'npactGraphContainerCtrl as ctrl'
     };
   })
 
@@ -191,51 +192,58 @@ angular.module('npact')
       },
       link: function($scope, $element, $attrs) {
         var g = null,
-            startBase = $scope.startBase(),
-            endBase = $scope.endBase(),
-            visible = $scope.visible,
-            id = $attrs.id,
-            // redraw gets set for all graphs once (e.g. a new track
-            // triggers broadcasts redraw), but only gets cleared as
-            // the currently visible ones are drawn
-            redraw = false,
-            draw = function(force) {
-              if(!redraw || (!force && !visible())) { return null; }
-              var opts = _.clone($scope.graphOptions());
-              opts.startBase = startBase;
-              opts.endbase = endBase;
+        startBase = $scope.startBase(),
+        endBase = $scope.endBase(),
+        visible = $scope.visible,
+        id = $attrs.id,
+        // redraw gets set for all graphs once (e.g. a new track
+        // triggers broadcasts redraw), but only gets cleared as
+        // the currently visible ones are drawn
+        redraw = false,
+        draw = function(force) {
+          if(!redraw || (!force && !visible())) { return null; }
+          var opts = _.clone($scope.graphOptions());
+          opts.startBase = startBase;
+          opts.endBase = endBase;
 
-              //However long it actually takes to draw, we have the
-              //latest options as of this point
-              redraw = false;
-              return (g || (g = new Grapher($element, $scope, opts)))
-                    .redraw(opts)
-                    .catch(function() {
-                      //something went wrong, we will still need to redraw this
-                      redraw = true;
-                    });
-            },
-            schedule = function(force) {
-              if(!redraw || (!force && !visible())) { return null; }
-              return $timeout(_.partial(draw, force), 0, false);
-            },
-            discard = function() { if(g) { g.destroy(); g = null; } },
-            scrollToHere = function() {
-              $log.log('scrolling to', $element);
-              $window.scrollTo(0, $element.offset().top);
-            };
+          //However long it actually takes to draw, we have the
+          //latest options as of this point
+          redraw = false;
+          return (g || (g = new Grapher($element, $scope, opts)))
+            .draw(opts)
+            .catch(function() {
+              //something went wrong, we will still need to redraw this
+              redraw = true;
+            });
+        },
+        scheduled = false, //is a draw call already in the event queue
+        schedule = function(force) {
+          if(!redraw || scheduled || (!force && !visible())) { return null; }
+          scheduled = true;
+          return $timeout(function () { scheduled = false; return draw(force); }, 0, false);
+        },
+        discard = function() { if(g) { g.destroy(); g = null; } },
+        scrollToHere = function() {
+          $log.log('scrolling to', $element);
+          $window.scrollTo(0, $element.offset().top);
+        };
         $scope.$on(Evt.DRAW, _.partial(schedule, false));
-        $scope.$on(Evt.REDRAW, function() { redraw = true; schedule();});
-        $scope.$on(Evt.REBUILD, function() { discard(); redraw = true; schedule(); });
-        $scope.$on('n-profile', function() {
+        $scope.$on(Evt.REDRAW, function(evt, cachesToClear) {
           redraw = true;
-          if(g) { g.clearProfilePoints(); }
+          if(g && cachesToClear) {
+            if(cachesToClear.nProfiles) { g.clearProfilePoints(); }
+          }
+          schedule();
+        });
+        $scope.$on(Evt.REBUILD, function() {
+          discard();
+          startBase = $scope.startBase();
+          endBase = $scope.endBase();
+          redraw = true;
           schedule();
         });
         $scope.$on('offset', function(event, dx) {
-          if(g && g.offset && visible()) {
-            g.offset(dx);
-          }
+          if(g && g.offset && visible()) { g.offset(dx); }
         });
         $scope.$on('$destroy', discard);
 
@@ -256,22 +264,6 @@ angular.module('npact')
           else if(_.isFinite(fromBase) && startBase <= fromBase && fromBase <= endBase) {
             redraw = true;
           }
-        });
-      }
-    };
-  })
-  .directive('npactExtract', function(STATIC_BASE_URL, GraphConfig, DDNA,
-                               $log, TranslatePath) {
-    'use strict';
-    return {
-      restrict: 'A',
-      scope: { extract: '=npactExtract'},
-      templateUrl: STATIC_BASE_URL + 'js/graphs/extract.html',
-      link: function($scope, $element, $attrs, ctrl) {
-        var e = $scope.extract;
-        TranslatePath(e.start, e.end, e.complement).then(function (data) {
-          $scope.ddnaP = data.trans;
-          $scope.ddna = data.seq;
         });
       }
     };

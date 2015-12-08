@@ -56,7 +56,19 @@
             Graphs<i class="pull-right glyphicon" ng-class="{'glyphicon-chevron-down': status.isFirstOpen, 'glyphicon-chevron-right': !status.isFirstOpen}"></i>
           </span>
         </uib-accordion-heading>
-        <div npact-graph-container id="graphcontainer"></div>
+        <div id="graphcontainer" npact-graph-container npact-graph-scroller npact-key-handlers>
+          <div ng-repeat="spec in graphSpecs track by $index"
+               class="graph">
+            <div npact-graph
+                 id="graph_{{$index}}"
+                 start-base="spec"
+                 end-base="spec + config.basesPerGraph"
+                 visible="visible($index)"
+                 graph-options="baseOpts"
+                 style="height:{{graphHeight}}px;">
+            </div>
+          </div>
+        </div>
       </uib-accordion-group>
     </uib-accordion>
   </div>

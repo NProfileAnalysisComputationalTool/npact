@@ -41,6 +41,11 @@ angular.module('npact')
       $log.debug("Finished serializing focusdata, final url", $location.absUrl());
       return $location.absUrl();
     };
+    this.clearQuery = function () {
+      $log.log("Clearing FocusData from querystring");
+      this.serialize({});
+      $location.search('zoom-trackName', undefined);
+    };
   })
   .service('ZoomWindowHandler', function ($log, $uibModal, FocusData, STATIC_BASE_URL) {
 
@@ -69,13 +74,42 @@ angular.module('npact')
         animation: true,
         size: 'lg'
       };
-      $uibModal.open(_.assign(modalDefaults, modalopts));
+      $uibModal.open(_.assign(modalDefaults, modalopts)).result
+        .finally( _.bind(FocusData.clearQuery, FocusData));
     };
   })
-  .controller('ZoomWindowCtrl', function ($log, FocusData, focusData, GraphConfig) {
+  .controller('ZoomWindowCtrl', function ($scope, $log, FocusData, focusData,
+                                   GraphConfig, Utils, TranslatePath) {
     var type = focusData.type;
     this.data = focusData;
+    var length = this.data.end - this.data.start;
+    var margin = Utils.orderOfMagnitude(length, -1);
+    this.startBase = Math.max(this.data.start - margin, 0);
+    this.endBase = Math.min(this.data.end + margin, GraphConfig.endBase);
+
     $log.log("Focusing on", focusData);
+    $scope.$on('offset', _.bind(function ($evt, dx) {
+      $evt.stopPropagation();
+      dx = Math.round(dx);
+      this.startBase += dx;
+      this.endBase += dx;
+      $log.log("Updating offsets", dx);
+      $scope.$apply();
+    }, this));
+
+    TranslatePath(this.data.start, this.data.end, this.data.complement)
+      .then(_.bind(function (data) {
+        this.ddnaP = data.trans;
+        this.ddna = data.seq;
+      }, this));
+    TranslatePath(this.startBase, this.data.start, this.data.complement)
+      .then(_.bind(function (data) {
+        this.leftDdnaP = data.trans;
+      }, this));
+    TranslatePath(this.data.end, this.endBase, this.data.complement)
+      .then(_.bind(function (data) {
+        this.rightDdnaP = data.trans;
+      }, this));
   })
 
   .directive('zwPermalink', function ($log, $location, FocusData) {
@@ -91,4 +125,50 @@ angular.module('npact')
       }
     };
   })
+
+  .directive('npactSingleGraph', function($log, $timeout,
+                                   GraphConfig, GraphingCalculator, Grapher, Evt) {
+    'use strict';
+    return {
+      restrict: 'A',
+      scope: {
+        startBase: '=',
+        endBase: '='
+      },
+      link: function($scope, $element, $attrs) {
+        var g = null;
+        var draw = function() {
+          var opts = {
+            width: $element.width(),
+            m: null,
+            tracks: GraphConfig.activeTracks(),
+            startBase: $scope.startBase,
+            endBase: $scope.endBase,
+            onDragEnd: function (dx) {
+              $scope.$emit('offset', dx);
+            }
+          };
+          opts.m = GraphingCalculator.chart(opts);
+          $scope.graphHeight = opts.m.height;
+          $log.debug("Redrawing with params:", opts);
+          if(g) { g.destroy(); }
+          g = new Grapher($element, $scope, opts);
+          return g.draw();
+        };
+        var scheduled = false,
+            schedule = function () {
+              if(scheduled) return;
+              scheduled = true;
+              $timeout(function () {
+                draw();
+                scheduled=false;
+              });
+              draw();
+            };
+        $scope.$watchGroup(['startBase', 'endBase', 'zw.data.complement'], schedule);
+        $scope.$watch(function() {return $element.width();}, schedule);
+      }
+    };
+  })
+
 ;

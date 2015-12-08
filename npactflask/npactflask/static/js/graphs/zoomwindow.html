@@ -24,12 +24,12 @@
         </div>
         <label>Bases</label>
         <div class="form-group">
-          <input class="form-control" type="number" name="startBase" style="width:6em;"
+          <input class="form-control" type="number" name="startBase" style="width:8em;"
                  min="0" max="{{gc.length}}"
                  ng-model="zw.data.start"
                  ng-model-options="{ updateOn: 'default blur', debounce: { 'default': 600, 'blur': 0 } }">
           <span class="small">to</span>
-          <input class="form-control" type="number" name="endBase" style="width:6em;"
+          <input class="form-control" type="number" name="endBase" style="width:8em;"
                  min="0" max="{{gc.length}}"
                  ng-model="zw.data.end"
                  ng-model-options="{ updateOn: 'default blur', debounce: { 'default': 600, 'blur': 0 } }">
@@ -48,20 +48,23 @@
   <div class="container-fluid">
     <div class="row"></div>
     <div class="row graph-row">
-      <div class="col-sm-12" style="padding: 20px; border: 1px dotted #333; height:120px;">
-        <div npact-graph
+      <div
+          class="col-sm-12 graph" style="padding: 20px 10px; border: 1px dotted #333;">
+        <div npact-single-graph
              id="zoomgraph"
-             start-base="zw.data.start"
-             end-base="zw.data.end"
+             start-base="zw.startBase"
+             end-base="zw.endBase"
              visible="true"
              graph-options="baseOpts"
              style="height:{{graphHeight}}px;">
         </div>
       </div>
     </div>
-    <div class="row protein-row">
-      <div class="col-sm-1" style="color: #ccc;">outside of gene left</div>
-      <div class="col-sm-10" style="padding: 20px;">The Protein translation here</div>
-      <div class="col-sm-1" style="color: #ccc;">outside of gene right</div>  </div>
+    <div class="row dna-text">
+      <div class="col-sm-1" style="color: #ccc;">{{zw.leftDdnaP}}</div>
+      <div class="col-sm-10" style="padding: 10px;">
+        <span class="">{{zw.ddnaP}}</span>
+      </div>
+      <div class="col-sm-1" style="color: #ccc;">{{zw.rightDdnaP}}</div>
   </div>
 </div>

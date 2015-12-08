@@ -9,48 +9,54 @@ angular.module('npact')
     function Grapher($element, $scope, opts) {
       this.$element = $element;
       this.$scope = $scope;
-      angular.extend(this, opts);
+      _.assign(this, opts);
       // invariants: startBase, endBase
-      var length = GraphConfig.basesPerGraph;
-      this.endBase = Math.min(GraphConfig.endBase, this.startBase + GraphConfig.basesPerGraph);
+
+      if(this.endBase === undefined) {
+        throw new Exception("Undefined endBase");
+      }
+      var length = this.endBase - this.startBase;
+
       this.margin = Utils.orderOfMagnitude(length, -1);
       this.startBaseM = Math.max(this.startBase - this.margin, 0);
       this.endBaseM = Math.min(this.endBase + this.margin, GraphConfig.endBase);
       this._trackSliceCache = {};
+
     }
     var GP = Grapher.prototype;
 
-    GP.getStage = function() {
-      if(!this.stage) {
-        this.stage = new K.Stage({
-          container: this.$element[0],
-          height: this.height,
-          width: this.width
-        });
-      }
-      return this.stage;
-    };
     GP.destroy = function() { if(this.stage) { this.stage.destroy(); } };
 
-    GP.redraw = function(newOpts) {
+    GP.draw = function(newOpts) {
       var t1 = new Date();
-      angular.extend(this, newOpts);
+      _.assign(this, newOpts);
+      this.m.xaxis.length = this.endBase - this.startBase;
+      this.m.xaxis.scaleX = this.m.graph.w / this.m.xaxis.length;
+
       this.colors = GraphConfig.colorBlindFriendly ?
         npactConstants.colorBlindLineColors :
         npactConstants.lineColors;
 
-      var stage = this.getStage();
-      stage.destroyChildren();
-      stage.setWidth(this.width);
-      stage.setHeight(this.m.height);
-
-      var llp = this.leftLayer(stage);
-      var flp = this.frameLayer(stage);
-      var glp = this.genomeLayer(stage);
-      return $q.all([llp, flp, glp])
-        .then(function() {
-          $log.log("Finished draw at", newOpts.startBase, "in", new Date() - t1);
+      if(!this.stage) {
+        this.stage = new K.Stage({
+          container: this.$element[0],
+          height: this.m.height,
+          width: this.width
         });
+      }
+      else {
+        this.stage.destroyChildren();
+        this.stage.setWidth(this.width);
+        this.stage.setHeight(this.m.height);
+      }
+
+      var llp = this.leftLayer(this.stage);
+      var flp = this.frameLayer(this.stage);
+      var glp = this.genomeLayer(this.stage);
+      return $q.all([llp, flp, glp])
+        .then(_.bind(function() {
+          $log.log("Finished draw at", this.startBase, "in", new Date() - t1);
+        }, this));
     };
 
     GP._onProfilePoints = null;
@@ -206,18 +212,21 @@ angular.module('npact')
       });
       l.add(dg);
       var moving = false,
-          $scope = this.$scope;
-      dg.on('dragmove', function(evt) {
-        var delta = evt.target.x() - moving || 0;
-        $scope.$emit('offset', - delta);
-        moving = evt.target.x();
-      });
-      dg.on('dragend', function(evt) {
-        moving = false;
-        $scope.$evalAsync(function() {
-          GraphConfig.offset += -evt.target.x();
+          onDragMove = this.onDragMove,
+          onDragEnd = this.onDragEnd;
+      if(onDragMove) {
+        dg.on('dragmove', function(evt) {
+          var delta = evt.target.x() - moving || 0;
+          onDragMove(-delta);
+          moving = evt.target.x();
         });
-      });
+      }
+      if(onDragEnd) {
+        dg.on('dragend', function(evt) {
+          moving = false;
+          onDragEnd(-evt.target.x());
+        });
+      }
       this.offset = function(dx) {
         if(moving === false){
           offsetX += dx;

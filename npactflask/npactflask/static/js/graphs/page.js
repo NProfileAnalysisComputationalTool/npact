@@ -17,10 +17,10 @@ angular.module('npact')
     };
   })
 
-  .controller('npactGraphPageCtrl', function($scope,$q, $window, $log, $location,
-                                      Fetcher, BASE_URL, PATH,
+  .controller('npactGraphPageCtrl', function($scope,$q, $window, $log, $location, $timeout,
+                                      Fetcher, BASE_URL, PATH, Evt,
                                       FETCH_BASE_URL, EmailBuilder,
-                                      STATIC_BASE_URL, GraphConfig,
+                                      STATIC_BASE_URL, GraphConfig, GraphingCalculator,
                                       kickstarter, processOnServer,
                                       PrintModal, ZoomWindowHandler) {
     'use strict';
@@ -59,6 +59,21 @@ angular.module('npact')
       .then(_.bind(ZoomWindowHandler.maybePopup, ZoomWindowHandler))
       .then(function () {
         $log.log("Everything finished initial boot");
+      });
+
+    /*** Watch the config for changes we care about ***/
+    $scope.$watchCollection(
+      function() { return [GraphConfig.basesPerGraph,
+                    GraphConfig.offset, GraphConfig.startBase, GraphConfig.endBase]; },
+      function() {
+        // basic row geometry changed, repartition and rebuild
+        if(isNaN(GraphConfig.startBase) ||
+           isNaN(GraphConfig.endBase) ||
+           isNaN(GraphConfig.basesPerGraph)) { return; }
+
+        $scope.graphSpecs = GraphingCalculator.partition(GraphConfig);
+        $log.log('Partitioned into', $scope.graphSpecs.length, 'rows.');
+        $timeout(function () { $log.debug("Rebuilding"); $scope.$broadcast(Evt.REBUILD); });
       });
   })
 

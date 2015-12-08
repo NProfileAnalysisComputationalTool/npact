@@ -109,10 +109,7 @@ angular.module('npact')
         },
         xaxis: {
           height: xAxisHeight,
-          y: xAxisTop,
-          length: opts.basesPerGraph,
-          scaleX: graphWidth / opts.basesPerGraph
-
+          y: xAxisTop
         },
         yaxis: {
           height: style.profile.height,
