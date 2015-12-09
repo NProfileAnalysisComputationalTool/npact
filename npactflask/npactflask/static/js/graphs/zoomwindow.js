@@ -97,6 +97,9 @@ angular.module('npact')
       $scope.$apply();
     }, this));
 
+    $scope.$watch(function () { return focusData.complement; },
+                  function () { $scope.$broadcast('schedule'); });
+
     TranslatePath(this.data.start, this.data.end, this.data.complement)
       .then(_.bind(function (data) {
         this.ddnaP = data.trans;
@@ -138,6 +141,7 @@ angular.module('npact')
       link: function($scope, $element, $attrs) {
         var g = null;
         var draw = function() {
+          $log.debug("Redrawing single graph");
           var opts = {
             width: $element.width(),
             m: null,
@@ -164,7 +168,8 @@ angular.module('npact')
                 scheduled=false;
               });
             };
-        $scope.$watchGroup(['startBase', 'endBase', 'zw.data.complement'], schedule);
+        $scope.$on('schedule', schedule);
+        $scope.$watchGroup(['startBase', 'endBase'], schedule);
         $scope.$watch(function() {return $element.width();}, schedule);
       }
     };
