@@ -56,8 +56,8 @@ angular.module('npact')
 
     ZoomWindowHandler.register($scope);
     bootp
-      .then(_.bind(ZoomWindowHandler.maybePopup, ZoomWindowHandler))
       .then(function () {
+        ZoomWindowHandler.maybePopup();
         $log.log("Everything finished initial boot");
       });
 
