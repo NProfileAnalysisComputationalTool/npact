@@ -163,7 +163,6 @@ angular.module('npact')
                 draw();
                 scheduled=false;
               });
-              draw();
             };
         $scope.$watchGroup(['startBase', 'endBase', 'zw.data.complement'], schedule);
         $scope.$watch(function() {return $element.width();}, schedule);
