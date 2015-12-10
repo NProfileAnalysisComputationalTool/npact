@@ -10,7 +10,7 @@ def recursive_files(*roots):
                 yield os.path.join(root, i)
 
 setup(name='npactflask',
-      version='0.6.3',
+      version='0.7.0',
       description='Website for PYNPACT, the Python N-Profile Analysis Computation Tool',
       author='Nathan Bird',
       author_email='nathan@acceleration.net',
