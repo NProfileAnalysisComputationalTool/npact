@@ -5,6 +5,7 @@ gevent.monkey.patch_all(subprocess=True)
 import gevent.wsgi
 
 import logging
+import os
 import sys
 from werkzeug.serving import run_with_reloader
 from werkzeug.wsgi import DispatcherMiddleware
@@ -41,11 +42,12 @@ def run_server():
         port = int(port)
     elif len(sys.argv) == 2:
         name,ip = sys.argv
-
-
     ws = gevent.wsgi.WSGIServer(
         listener=(ip, port),
         application=application
         #,log=accesslog.open('wb')
     )
+    if os.isatty(sys.stdin.fileno()):
+        print("Listening at http://{ip}:{port}{npactapproot}".format(
+            ip=ip,port=port,npactapproot=npactapproot))
     ws.serve_forever()
