@@ -2,7 +2,9 @@ angular.module('npact')
   .constant('PUBLIC_CONFIG_KEYS',
             ['first_page_title', 'following_page_title', 'nucleotides',
              'significance', 'startBase', 'endBase', 'basesPerGraph',
-             'offset', 'mycoplasma'])
+             'offset', 'mycoplasma',
+             'hitsTrack', 'neworfsTrack', 'modifiedTrack',
+             'exportedTrack', 'customTrack'])
 
   .service('GraphConfig', function(Err, npactConstants, Evt, PUBLIC_CONFIG_KEYS, Track,
                             $location, $log, $rootScope, $cookies, $window) {

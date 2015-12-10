@@ -1,13 +1,59 @@
 angular.module('npact')
+  .service('TrackSyncer', function(Fetcher, Track, $http, SAVE_TRACK_URL){
+    'use strict';
+    var self = this;
+    self.fetchTrack= function(filename, name, type, fetcher){
+      if(!type) type = "custom";
+      if(!name) name = filename;
+      if(!fetcher) fetcher = 'fetchFile';
+      //console.log('fetchTrack ',name, type , filename);
+      config[type] = Fetcher[fetcher](filename).then(function(data){
+        var track = new Track(name, data, type, 100, filename);
+        GraphConfig.loadTrack(track);
+        track.saveTrack = function(){
+          self.saveTrack(track);
+        };
+        return track;
+      });
+    };
+    self.fetchHits = function(HitsFile) {
+      return self.fetchTrack(HitsFile, 'Hits', 'hits');
+    };
+
+    self.fetchNewOrfs = function(NewOrfsFile) {
+      return self.fetchTrack(NewOrfsFile, 'New ORFs', 'neworfs');
+    };
+
+    self.fetchModifiedOrfs = function(ModifiedOrfsFile) {
+      return self.fetchTrack(ModifiedOrfsFile, 'Modified ORFs', 'modified');
+    };
+
+    self.saveTrack = function(track){
+      return $http({
+        method: 'POST',
+        url: SAVE_TRACK_URL,
+        data: { track: track },
+        headers: {'Content-Type': 'application/json'}
+      })
+        .then(function (res) {
+          return res.data;
+        });
+    };
+
+  })
+
   .factory('Track', function($log, ExtractParser, TrackBinSearchIndex, npactConstants, $timeout) {
     'use strict';
     var ITrackIndex = TrackBinSearchIndex;
-    function Track(name, data, type, weight) {
+    function Track(name, data, type, weight, filename) {
+      // console.log('new Track ',name, data, type ,weight, filename);
       this.active = true;
       this.name = name;
       this.type = type;
-      if(!_.includes(['extracts', 'hits', 'modified', 'neworfs'], type)) {
-        throw new Error("Unknown track type: +", type);
+      this.filename = filename;
+      if(!_.includes(['extracts', 'hits', 'modified', 'neworfs', 'custom'], type)) {
+        throw new Error("Unknown track type: ", type);
+        //console.log("Unknown track type: ", type);
       }
       var trackStyle = npactConstants.trackStyle[type] || {};
       this.style = _.defaults(trackStyle, npactConstants.trackStyle['default']);
@@ -29,6 +75,7 @@ angular.module('npact')
           }, this))
           .catch(function(e) { $log.log('Track.loadData failed', name, e); throw e; }));
     };
+
     Track.prototype.indexData = function(data) {
       return (
         this.indexing = $timeout(_.bind(function () {
@@ -37,6 +84,7 @@ angular.module('npact')
         }, this))
           .catch(function(e) { $log.log('Track.indexData failed', name, e); throw e; }));
     };
+
     Track.prototype.reindex = function () {
       if(this.loading) {
         //shouldn't be able to get here but if this is true then we

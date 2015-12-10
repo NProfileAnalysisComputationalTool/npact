@@ -115,16 +115,14 @@ angular.module('npact')
   })
 
   .service('ExtractManager', function(Fetcher, Pynpact, Track, GraphConfig,
-                               processOnServer, MessageBus, $log) {
+                               processOnServer, MessageBus, $log, TrackSyncer) {
     'use strict';
     this.start = function(config) {
       if(config.format != 'genbank') { return; }
       var p = processOnServer('extract').then(function(config) {
         if(config[Pynpact.CDS]) {
-          Fetcher.pollThenFetch(config[Pynpact.CDS])
-            .then(function(data) {
-              return GraphConfig.loadTrack(new Track('Input file CDS', data, 'extracts'));
-            });
+          TrackSyncer.fetchTrack(config[Pynpact.CDS], 'Input file CDS',
+                          'extracts','pollThenFetch');
         }
       });
       MessageBus.info(
@@ -132,7 +130,8 @@ angular.module('npact')
         p.catch("Failure while extracting known genes."));
     };
   })
-  .service('PredictionManager', function(Fetcher, StatusPoller, Pynpact, Track,
+
+  .service('PredictionManager', function(Fetcher, StatusPoller, Pynpact, TrackSyncer,
                                   $rootScope, $timeout, $log,
                                   GraphConfig, processOnServer, MessageBus) {
     'use strict';
@@ -144,9 +143,9 @@ angular.module('npact')
       var acgt_gamma_promise = Fetcher.rawFile(url)
           .then(function(response) {
             self.files = response.files;
-            self.fetchHits(response.HitsFile);
-            self.fetchNewOrfs(response.NewOrfsFile);
-            self.fetchModifiedOrfs(response.ModifiedOrfsFile);
+            TrackSyncer.fetchHits(response.HitsFile);
+            TrackSyncer.fetchNewOrfs(response.NewOrfsFile);
+            TrackSyncer.fetchModifiedOrfs(response.ModifiedOrfsFile);
           });
 
       MessageBus.info(
@@ -154,36 +153,6 @@ angular.module('npact')
         acgt_gamma_promise.catch(function(e) {
           MessageBus.danger('Failure while identifying significant 3-base periodicities');
         }));
-    };
-
-    self.fetchHits = function(HitsFile) {
-      config.hits = Fetcher.fetchFile(HitsFile)
-          .then(function(data) {
-            var name = 'Hits',
-                track = new Track(name, data, 'hits', 100);
-            GraphConfig.loadTrack(track);
-            return track;
-          });
-    };
-
-    self.fetchNewOrfs = function(NewOrfsFile) {
-      config.newORFs = Fetcher.fetchFile(NewOrfsFile)
-        .then(function(data) {
-          var name = 'New ORFs',
-              track = new Track(name, data, 'neworfs', 15);
-          GraphConfig.loadTrack(track);
-          return track;
-        });
-    };
-
-    self.fetchModifiedOrfs = function(ModifiedOrfsFile) {
-      config.newORFs = Fetcher.fetchFile(ModifiedOrfsFile)
-        .then(function(data) {
-          var name = 'Modified ORFs',
-              track = new Track(name, data, 'modified', 10);
-          GraphConfig.loadTrack(track);
-          return track;
-        });
     };
 
     $rootScope.$watch(function () { return GraphConfig.mycoplasma; },
