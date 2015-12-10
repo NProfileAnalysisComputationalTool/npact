@@ -19,14 +19,6 @@ def about():
     return flask.render_template('about.html')
 
 
-def library_root():
-    abspath = getabspath("library", False)
-    if not os.path.exists(abspath):
-        logger.info("Creating library root at %s", abspath)
-        os.makedirs(abspath)
-    return abspath
-
-
 def getrelpath(abspath):
     return os.path.relpath(abspath, app.config['UPLOADS'])
 

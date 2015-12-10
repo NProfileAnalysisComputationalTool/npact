@@ -3,7 +3,7 @@ import os.path
 import tempfile
 import urllib2
 from npactflask import app
-from npactflask.views import getrelpath, library_root
+from npactflask.views import getrelpath
 from pynpact import util, entrez, parsing
 from flask import url_for, redirect, request, flash
 
@@ -85,7 +85,7 @@ def search():
     if not search:
         flash('Accession Number Required')
         return redirect(url_for('start', **args))
-    sess = entrez.CachedEntrezSession(library_root())
+    sess = entrez.CachedEntrezSession(app.config['UPLOADS'])
 
     sess.search(search)
     logger.debug(
@@ -136,7 +136,7 @@ def re_search():
 @app.route('/efetch/<int:id>')
 def efetch(id):
     logger.info("Asked to fetch Id: %s", id)
-    searchsession = entrez.EntrezSession(library_root())
+    searchsession = entrez.EntrezSession(app.config['UPLOADS'])
     abspath = searchsession.fetch_id(id)
     path = getrelpath(abspath)
     try:

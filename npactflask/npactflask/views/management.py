@@ -27,8 +27,6 @@ def handle_post():
     logger.info("Handling action %r", action)
     if action == 'cleanup':
         docleanup()
-    elif action == 'clear-library':
-        clear_library()
 
 
 def docleanup():
@@ -54,11 +52,3 @@ def docleanup():
     except Exception as e:
         logger.exception("Error finding size")
         flash('Error finding file size: ' + str(e), "danger")
-
-
-def clear_library():
-    try:
-        count = cleanup.clear_library()
-        flash("Removed %d files" % count, "success")
-    except Exception as e:
-        flash("Error clearing library: %s" % e, "danger")
