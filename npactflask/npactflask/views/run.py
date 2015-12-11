@@ -284,11 +284,11 @@ def acgt_gamma(path):
     tid_output_directory = config['acgt_gamma_output']
     gexec.result(tid_output_directory, timeout=None)
     files = map(getrelpath, Path(tid_output_directory).listdir())
-    return jsonify(
-        NewOrfsFile=getrelpath(config['NewOrfsFile']),
-        ModifiedOrfsFile=getrelpath(config['ModifiedOrfsFile']),
-        HitsFile=getrelpath(config['HitsFile']),
-        files=files)
+    trackPaths = map(
+        getrelpath,
+        [config.get('InputCDSFile'), config.get('ModifiedOrfsFile'),
+         config.get('NewOrfsFile'), config.get('HitsFile')])
+    return jsonify(trackPaths=trackPaths, files=files)
 
 
 def schedule_email(to, path, config):

@@ -121,8 +121,9 @@ angular.module('npact')
       MessageBus.info('kickstarting', safePromise);
       return $q.all([
         this.basePromise.then(NProfiler.start),
-        //this.basePromise.then(PredictionManager.start),
-        //this.basePromise.then(ExtractManager.start),
+        // TODO: Remove Prediction Manager?
+        // this.basePromise.then(PredictionManager.start),
+
       ]);
     };
   })
@@ -139,11 +140,21 @@ angular.module('npact')
       var acgt_gamma_promise = Fetcher.rawFile(url)
           .then(function(response) {
             self.files = response.files;
-            // TODO: Launch all of these at once whenever we have the url
-            // since it can come from the query string or the response
-            // TrackSyncer.fetchHits(GraphConfig.hitsTrack || response.HitsFile);
-            // TrackSyncer.fetchNewOrfs(GraphConfig.neworfsTrack || response.NewOrfsFile);
-            // TrackSyncer.fetchModifiedOrfs(GraphConfig.modifiedTrack || response.ModifiedOrfsFile);
+            TrackSyncer.fetchAllTracks(response.trackPaths).then(function(tracks) {
+              _.each(GraphConfig.tracks, function(v, k) {
+                v.active=false;
+              });
+              _.each(tracks, function(track) {
+                if((tr=_.find(GraphConfig.tracks, {filename: track.filename}))){
+                  tr.active=true;
+                }
+                else{
+                  GraphConfig.tracks.push(track);
+                }
+              });
+            });
+            // TODO: reload the tracks?  This probably should return them
+            // in the same format as default_tracks
           });
 
       MessageBus.info(
