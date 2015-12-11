@@ -96,11 +96,24 @@ angular.module('npact')
   })
 
   .service('kickstarter', function($q, $log, processOnServer, MessageBus,
-                            NProfiler, PredictionManager, ExtractManager) {
+                            NProfiler, PredictionManager, Fetcher, TrackSyncer, GraphConfig) {
     'use strict';
     //Kickstart the whole process, start all the main managers
     this.start = function() {
       this.basePromise = processOnServer('parse');
+      this.basePromise.then(function() {
+        if(!GraphConfig.trackPaths) {
+          TrackSyncer.fetchDefaultTracks();
+        }else{
+          var pths = GraphConfig.trackPaths;
+          if(typeof(pths) == 'string') pths=pths.split(',');
+          TrackSyncer.fetchAllTracks(pths).then(function(tracks) {
+              GraphConfig.tracks = tracks;
+            });
+        }
+
+        return null;
+      });
       var safePromise = this.basePromise.catch(function(e) {
         $log.error(e);
         MessageBus.danger('There\'s been an error starting up; please try starting over.');
@@ -108,30 +121,9 @@ angular.module('npact')
       MessageBus.info('kickstarting', safePromise);
       return $q.all([
         this.basePromise.then(NProfiler.start),
-        this.basePromise.then(PredictionManager.start),
-        this.basePromise.then(ExtractManager.start),
+        //this.basePromise.then(PredictionManager.start),
+        //this.basePromise.then(ExtractManager.start),
       ]);
-    };
-  })
-
-  .service('ExtractManager', function(Fetcher, Pynpact, Track, GraphConfig,
-                               processOnServer, MessageBus, $log, TrackSyncer) {
-    'use strict';
-    this.start = function(config) {
-      if(config.format != 'genbank') { return; }
-      var p = processOnServer('extract').then(function(config) {
-        if(config[Pynpact.CDS]) {
-          // TODO: if we have an extractsTrack, we probably dont need to
-          // process on server
-          TrackSyncer.fetchTrack(
-            GraphConfig.extractsTrack || config[Pynpact.CDS],
-            'Input file CDS',
-            'extracts', 1, 'pollThenFetch');
-        }
-      });
-      MessageBus.info(
-        "Fetching extract data from server",
-        p.catch("Failure while extracting known genes."));
     };
   })
 
@@ -149,9 +141,9 @@ angular.module('npact')
             self.files = response.files;
             // TODO: Launch all of these at once whenever we have the url
             // since it can come from the query string or the response
-            TrackSyncer.fetchHits(GraphConfig.hitsTrack || response.HitsFile);
-            TrackSyncer.fetchNewOrfs(GraphConfig.neworfsTrack || response.NewOrfsFile);
-            TrackSyncer.fetchModifiedOrfs(GraphConfig.modifiedTrack || response.ModifiedOrfsFile);
+            // TrackSyncer.fetchHits(GraphConfig.hitsTrack || response.HitsFile);
+            // TrackSyncer.fetchNewOrfs(GraphConfig.neworfsTrack || response.NewOrfsFile);
+            // TrackSyncer.fetchModifiedOrfs(GraphConfig.modifiedTrack || response.ModifiedOrfsFile);
           });
 
       MessageBus.info(

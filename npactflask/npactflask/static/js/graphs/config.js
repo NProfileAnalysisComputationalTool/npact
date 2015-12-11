@@ -2,9 +2,7 @@ angular.module('npact')
   .constant('PUBLIC_CONFIG_KEYS',
             ['first_page_title', 'following_page_title', 'nucleotides',
              'significance', 'startBase', 'endBase', 'basesPerGraph',
-             'offset', 'mycoplasma',
-             'hitsTrack', 'neworfsTrack', 'modifiedTrack',
-             'extractsTrack', 'customTrack'])
+             'offset', 'mycoplasma'])
 
   .service('GraphConfig', function(Err, npactConstants, Evt, PUBLIC_CONFIG_KEYS, Track,
                             $location, $log, $rootScope, $cookies, $window) {
@@ -56,8 +54,21 @@ angular.module('npact')
       }
       //  Watch for the value changing later
       $rootScope.$watch(function () { return GraphConfig[k]; },
-                    function (v) { $location.search(k, v); });
+                        function (v) { $location.search(k, v); });
     });
+    inputConfig.trackPaths = $location.search().trackPaths;
+    //  Watch for the track paths changing changing later
+    $rootScope.$watch(
+      function () {
+        if( GraphConfig.tracks && GraphConfig.tracks.length >0 )
+          return _.map(GraphConfig.tracks, "filename").join(",");
+        return GraphConfig.trackPaths;
+      },
+      function (v) {
+
+        $location.search('trackPaths', v);
+        GraphConfig.trackPaths = v;
+      });
     $log.debug("Finished reading config from querystring:", inputConfig);
     _.assign(self, inputConfig);
 
@@ -86,7 +97,6 @@ angular.module('npact')
       $log.log('loading new track', track.name);
       _.remove(self.tracks, {name: track.name});  //mutates
       self.tracks.push(track);
-      self.tracks = _.sortBy(self.tracks, 'weight');
     };
   })
 

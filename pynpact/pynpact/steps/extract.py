@@ -31,7 +31,7 @@ def plan(config, executor):
             "GBK file, extracting known gene names %s", config['filename'])
         rconfig, hash = get_hash(config)
         target_file = parsing.derive_filename(config, hash, 'genes')
-        config[OUTPUTKEY] = target_file
+        config['InputCDSFile'] = config[OUTPUTKEY] = target_file
         return enqueue(_extract, executor, rconfig, target_file)
 
 

@@ -185,12 +185,12 @@ angular.module('npact')
     return ParserFactory.create(parseExtract);
   })
 
-  .factory('Translater', function($http, $log, TRANSLATE_URL) {
+  .factory('Translater', function($http, $log, Fetcher) {
     'use strict';
     return function (dna, mycoplasma, complement) {
       return $http({
         method: 'POST',
-        url: TRANSLATE_URL,
+        url: Fetcher.buildUrl('translate'),
         data: {
           seq: dna,
           complement: complement,

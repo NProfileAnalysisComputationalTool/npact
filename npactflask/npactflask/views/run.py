@@ -86,8 +86,6 @@ def run_frame(path):
             'PATH': path,
             'status_base': url_for('.run_status', path=''),
             'kickstart': url_for('kickstart', path=path),  # args=[path]
-            'translate': url_for('translate'),
-            'save_track': url_for('save_track'),
             'fetch_base': url_for('raw', path=''),
             'STATIC_BASE': url_for('static', filename=''),
             'base_href': url_for('run_frame', path=path)
@@ -130,30 +128,45 @@ def _upload_root():
     return os.path.join(os.path.abspath(os.curdir), 'webroot/uploads')
 
 
-def _new_track_file_name(track):
+def _new_track_file_name(pathconfig, track):
     fn = track.get('filename')
+    ext = Path(fn).ext
     dt = datetime.datetime.now()
-    # strip previous timestamp
-    fn = re.sub(r'\.(\d|_)*$', '', fn)
-    path = fn + '.' + re.sub(r':|\.|-', '_', dt.isoformat("_"))
-    return (os.path.join(_upload_root(), path), path)
+    ds = re.sub(r':|\.|-', '_', dt.isoformat("_"))
+    fn = parsing.derive_filename(pathconfig, ds, ext)
+    return fn
 
 
-@app.route('/save-track', methods=['POST'])
-def save_track():
+@app.route('/save_track/<path:path>', methods=['POST'])
+def save_track(path):
     try:
+        pathconfig = build_config(path)
         config = request.get_json()
         track = config.get('track')
         orfs = track.get('data')
         if not track or not orfs:
             raise ValueError('Must have a track and orfs to save a track')
-        (path, rtn) = _new_track_file_name(track)
+        path = _new_track_file_name(pathconfig, track)
         with open(path, "w") as f:
             for orf in orfs:
                 f.write(_track_line_from_orf(orf))
-        return jsonify({'filename': rtn})
+        return jsonify({'filename': getrelpath(path)})
     except Exception as e:
         logger.exception('Error While Saving Track')
+        return flask.make_response(repr(e), 500)
+
+
+@app.route('/default_tracks/<path:path>', methods=['GET'])
+def default_tracks(path):
+    try:
+        config = build_config(path)
+        config = main.process('extract', config, executor=gexec)
+        config = main.process('acgt_gamma', config, executor=gexec)
+        lst = [config.get('InputCDSFile'), config.get('ModifiedOrfsFile'),
+               config.get('NewOrfsFile'), config.get('HitsFile')]
+        return jsonify(filenames=map(getrelpath, lst))
+    except Exception as e:
+        logger.exception('Error While finding default tracks')
         return flask.make_response(repr(e), 500)
 
 

@@ -1,42 +1,47 @@
 angular.module('npact')
-  .service('TrackSyncer', function(Fetcher, Track, $http, SAVE_TRACK_URL, GraphConfig){
+  .service('TrackSyncer', function(Fetcher, Track, $http, BASE_URL, GraphConfig, $q){
     'use strict';
     var self = this;
-    self.fetchTrack= function(filename, name, type, weight, fetcher){
-      if(!type) type = "custom";
-      if(!name) name = filename;
-      if(!fetcher) fetcher = 'fetchFile';
-      //console.log('fetchTrack ',name, type , filename);
-      config[type] = Fetcher[fetcher](filename).then(function(data){
-        var track = new Track(name, data, type, weight || 100, filename);
-        GraphConfig.loadTrack(track);
+
+    self.loadedTracks = {};
+
+    self.fetchDefaultTracks = function(){
+      return Fetcher.rawFile(Fetcher.buildUrl('default_tracks')).then(function(resp){
+        var paths = resp.filenames;
+        return self.fetchAllTracks(paths).then(function(tracks) {
+          GraphConfig.tracks = tracks;
+        });
+      });
+    };
+
+    self.fetchAllTracks = function(paths){
+      var p = _.map(paths, self.fetchTrack);
+      return $q.all(p);
+    };
+
+    self.fetchTrack= function(filename){
+      console.log('fetchTrack ', filename);
+      if(self.loadedTracks[filename]) return $q.when(self.loadedTracks[filename]);
+      return Fetcher.fetchFile(filename).then(function(data){
+        var track = new Track(filename, data);
+        self.loadedTracks[filename] = track;
+        //TODO:GraphConfig.loadTrack(track);
         track.save = function(){
           self.saveTrack(track);
         };
         return track;
       });
     };
-    self.fetchHits = function(HitsFile) {
-      return self.fetchTrack(HitsFile, 'Hits', 'hits', 30);
-    };
-
-    self.fetchNewOrfs = function(NewOrfsFile) {
-      return self.fetchTrack(NewOrfsFile, 'New ORFs', 'neworfs', 10);
-    };
-
-    self.fetchModifiedOrfs = function(ModifiedOrfsFile) {
-      return self.fetchTrack(ModifiedOrfsFile, 'Modified ORFs', 'modified', 20);
-    };
 
     self.saveTrack = function(track){
       return $http({
         method: 'POST',
-        url: SAVE_TRACK_URL,
+        url: Fetcher.buildUrl('save_track'),
         data: { track: track },
         headers: {'Content-Type': 'application/json'}
       })
         .then(function (res) {
-          GraphConfig[track.type+'Track']= res.data.filename;
+          track.filename = res.data.filename;
           return res.data;
         });
     };
@@ -46,19 +51,40 @@ angular.module('npact')
   .factory('Track', function($log, ExtractParser, TrackBinSearchIndex, npactConstants, $timeout) {
     'use strict';
     var ITrackIndex = TrackBinSearchIndex;
-    function Track(name, data, type, weight, filename) {
-      // console.log('new Track ',name, data, type ,weight, filename);
+    function Track(filename, data, type, name) {
+      // console.log('new Track ',name, data, type ,filename);
+      if(!name && !type){
+        if(filename.search('profiles')>=0){
+          name="Hits";
+          type='hits';
+        }
+        else if(filename.search('modified')>=0){
+          name="Modified ORFs";
+          type='extracts';
+        }
+        else if(filename.search('newcds')>=0){
+          name="New ORFs";
+          type='extracts';
+        }
+        else if(filename.search('genes')>=0){
+          name="Input CDFs";
+          type='extracts';
+        }
+        else{
+          name = filename;
+          type = 'extracts';
+        }
+      }
       this.active = true;
+      this.filename = filename;
       this.name = name;
       this.type = type;
-      this.filename = filename;
-      if(!_.includes(['extracts', 'hits', 'modified', 'neworfs', 'custom'], type)) {
+      if(!_.includes(['extracts', 'hits'], type)) {
         throw new Error("Unknown track type: ", type);
         //console.log("Unknown track type: ", type);
       }
       var trackStyle = npactConstants.trackStyle[type] || {};
       this.style = _.defaults(trackStyle, npactConstants.trackStyle['default']);
-      this.weight = weight || 0;
       this.data = null;
       this.index = null;
       this.loading = this.loadData(data);
