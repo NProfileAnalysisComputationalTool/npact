@@ -1,5 +1,5 @@
 angular.module('npact')
-  .service('TrackSyncer', function(Fetcher, Track, $http, SAVE_TRACK_URL){
+  .service('TrackSyncer', function(Fetcher, Track, $http, SAVE_TRACK_URL, GraphConfig){
     'use strict';
     var self = this;
     self.fetchTrack= function(filename, name, type, fetcher){
@@ -36,6 +36,7 @@ angular.module('npact')
         headers: {'Content-Type': 'application/json'}
       })
         .then(function (res) {
+          GraphConfig[track.type+'Track']= res.data.filename;
           return res.data;
         });
     };

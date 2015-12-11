@@ -4,7 +4,7 @@ angular.module('npact')
              'significance', 'startBase', 'endBase', 'basesPerGraph',
              'offset', 'mycoplasma',
              'hitsTrack', 'neworfsTrack', 'modifiedTrack',
-             'exportedTrack', 'customTrack'])
+             'extractsTrack', 'customTrack'])
 
   .service('GraphConfig', function(Err, npactConstants, Evt, PUBLIC_CONFIG_KEYS, Track,
                             $location, $log, $rootScope, $cookies, $window) {

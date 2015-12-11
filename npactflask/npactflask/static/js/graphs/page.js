@@ -121,8 +121,12 @@ angular.module('npact')
       if(config.format != 'genbank') { return; }
       var p = processOnServer('extract').then(function(config) {
         if(config[Pynpact.CDS]) {
-          TrackSyncer.fetchTrack(config[Pynpact.CDS], 'Input file CDS',
-                          'extracts','pollThenFetch');
+          // TODO: if we have an extractsTrack, we probably dont need to
+          // process on server
+          TrackSyncer.fetchTrack(
+            GraphConfig.extractsTrack || config[Pynpact.CDS],
+            'Input file CDS',
+            'extracts','pollThenFetch');
         }
       });
       MessageBus.info(
@@ -143,9 +147,11 @@ angular.module('npact')
       var acgt_gamma_promise = Fetcher.rawFile(url)
           .then(function(response) {
             self.files = response.files;
-            TrackSyncer.fetchHits(response.HitsFile);
-            TrackSyncer.fetchNewOrfs(response.NewOrfsFile);
-            TrackSyncer.fetchModifiedOrfs(response.ModifiedOrfsFile);
+            // TODO: Launch all of these at once whenever we have the url
+            // since it can come from the query string or the response
+            TrackSyncer.fetchHits(GraphConfig.hitsTrack || response.HitsFile);
+            TrackSyncer.fetchNewOrfs(GraphConfig.neworfsTrack || response.NewOrfsFile);
+            TrackSyncer.fetchModifiedOrfs(GraphConfig.modifiedTrack || response.ModifiedOrfsFile);
           });
 
       MessageBus.info(
