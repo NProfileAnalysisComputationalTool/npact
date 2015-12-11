@@ -24,7 +24,7 @@ angular.module('npact')
         else $cookies.put(v, "false");
       });
     };
-    self.tracks = [];
+    self.tracks = null;
     self.cookieInit();
 
     self.basesPerGraph = 10000;
@@ -60,12 +60,10 @@ angular.module('npact')
     //  Watch for the track paths changing changing later
     $rootScope.$watch(
       function () {
-        if( GraphConfig.tracks && GraphConfig.tracks.length >0 )
-          return _.map(GraphConfig.tracks, "filename").join(",");
-        return GraphConfig.trackPaths;
+        return GraphConfig.tracks ? _.map(GraphConfig.tracks, "filename").join(",")
+          : GraphConfig.trackPaths;
       },
       function (v) {
-
         $location.search('trackPaths', v);
         GraphConfig.trackPaths = v;
       });

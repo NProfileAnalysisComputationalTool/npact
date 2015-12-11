@@ -73,7 +73,7 @@
 
       <h3>Tracks</h3>
       <div>
-        <div ng-repeat="t in gc.tracks track by t.name">
+        <div ng-repeat="t in gc.tracks track by t.filename">
           <label class="track-label"><input ng-model="t.active" type="checkbox" /> {{t.name}}</label>
         </div>
       </div>

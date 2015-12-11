@@ -104,12 +104,12 @@ angular.module('npact')
       this.basePromise.then(function() {
         if(!GraphConfig.trackPaths) {
           TrackSyncer.fetchDefaultTracks();
-        }else{
+        }
+        else{
           var pths = GraphConfig.trackPaths;
-          if(typeof(pths) == 'string') pths=pths.split(',');
-          TrackSyncer.fetchAllTracks(pths).then(function(tracks) {
-              GraphConfig.tracks = tracks;
-            });
+          if(typeof(pths) === 'string') pths=pths.split(',');
+          TrackSyncer.fetchAllTracks(pths)
+            .then(function(tracks) { GraphConfig.tracks = tracks; });
         }
 
         return null;
@@ -140,21 +140,15 @@ angular.module('npact')
       var acgt_gamma_promise = Fetcher.rawFile(url)
           .then(function(response) {
             self.files = response.files;
+            _.each(GraphConfig.tracks, function(v, k) { v.active=false; });
             TrackSyncer.fetchAllTracks(response.trackPaths).then(function(tracks) {
-              _.each(GraphConfig.tracks, function(v, k) {
-                v.active=false;
-              });
               _.each(tracks, function(track) {
-                if((tr=_.find(GraphConfig.tracks, {filename: track.filename}))){
-                  tr.active=true;
-                }
-                else{
+                track.active = true;
+                if(!_.find(GraphConfig.tracks, 'filename', track.filename)) {
                   GraphConfig.tracks.push(track);
                 }
               });
             });
-            // TODO: reload the tracks?  This probably should return them
-            // in the same format as default_tracks
           });
 
       MessageBus.info(

@@ -8,9 +8,8 @@ angular.module('npact')
     self.fetchDefaultTracks = function(){
       return Fetcher.rawFile(Fetcher.buildUrl('default_tracks')).then(function(resp){
         var paths = resp.filenames;
-        return self.fetchAllTracks(paths).then(function(tracks) {
-          GraphConfig.tracks = tracks;
-        });
+        return self.fetchAllTracks(paths)
+          .then(function(tracks) { GraphConfig.tracks = tracks; });
       });
     };
 
@@ -21,16 +20,15 @@ angular.module('npact')
 
     self.fetchTrack= function(filename){
       console.log('fetchTrack ', filename);
-      if(self.loadedTracks[filename]) return $q.when(self.loadedTracks[filename]);
-      return Fetcher.fetchFile(filename).then(function(data){
-        var track = new Track(filename, data);
-        self.loadedTracks[filename] = track;
-        //TODO:GraphConfig.loadTrack(track);
-        track.save = function(){
-          self.saveTrack(track);
-        };
-        return track;
-      });
+      var tr = self.loadedTracks[filename];
+      if(tr) return $q.when(tr);
+      return Fetcher.pollThenFetch(filename)
+        .then(function(data){
+          var track = new Track(filename, data);
+          self.loadedTracks[filename] = track;
+          track.save = function() { self.saveTrack(track); };
+          return track;
+        });
     };
 
     self.saveTrack = function(track){

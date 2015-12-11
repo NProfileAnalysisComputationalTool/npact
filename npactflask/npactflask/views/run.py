@@ -250,7 +250,6 @@ def run_status(path):
 @app.route('/blockon/<path:path>')
 def blockon(path):
     # Task IDs == filenames on disk
-    abspath = getabspath(path, raise_on_missing=False)
     try:
         abspath = getabspath(path, raise_on_missing=False)
         # Task IDs == filenames on disk, if the file exists don't even
@@ -284,10 +283,8 @@ def acgt_gamma(path):
     tid_output_directory = config['acgt_gamma_output']
     gexec.result(tid_output_directory, timeout=None)
     files = map(getrelpath, Path(tid_output_directory).listdir())
-    trackPaths = map(
-        getrelpath,
-        [config.get('InputCDSFile'), config.get('ModifiedOrfsFile'),
-         config.get('NewOrfsFile'), config.get('HitsFile')])
+    trackPaths = map(getrelpath, [
+        config['ModifiedOrfsFile'], config['NewOrfsFile'], config['HitsFile']])
     return jsonify(trackPaths=trackPaths, files=files)
 
 
