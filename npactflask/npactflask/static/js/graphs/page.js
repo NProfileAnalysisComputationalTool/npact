@@ -126,7 +126,7 @@ angular.module('npact')
           TrackSyncer.fetchTrack(
             GraphConfig.extractsTrack || config[Pynpact.CDS],
             'Input file CDS',
-            'extracts','pollThenFetch');
+            'extracts', 1, 'pollThenFetch');
         }
       });
       MessageBus.info(

@@ -131,9 +131,11 @@ def _upload_root():
 
 
 def _new_track_file_name(track):
+    fn = track.get('filename')
     dt = datetime.datetime.now()
-    path = track.get('filename') + '.' + \
-        re.sub(r':|\.|-', '_', dt.isoformat("_"))
+    # strip previous timestamp
+    fn = re.sub(r'\.(\d|_)*$', '', fn)
+    path = fn + '.' + re.sub(r':|\.|-', '_', dt.isoformat("_"))
     return (os.path.join(_upload_root(), path), path)
 
 

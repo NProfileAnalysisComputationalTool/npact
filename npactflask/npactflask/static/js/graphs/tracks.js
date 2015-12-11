@@ -2,30 +2,30 @@ angular.module('npact')
   .service('TrackSyncer', function(Fetcher, Track, $http, SAVE_TRACK_URL, GraphConfig){
     'use strict';
     var self = this;
-    self.fetchTrack= function(filename, name, type, fetcher){
+    self.fetchTrack= function(filename, name, type, weight, fetcher){
       if(!type) type = "custom";
       if(!name) name = filename;
       if(!fetcher) fetcher = 'fetchFile';
       //console.log('fetchTrack ',name, type , filename);
       config[type] = Fetcher[fetcher](filename).then(function(data){
-        var track = new Track(name, data, type, 100, filename);
+        var track = new Track(name, data, type, weight || 100, filename);
         GraphConfig.loadTrack(track);
-        track.saveTrack = function(){
+        track.save = function(){
           self.saveTrack(track);
         };
         return track;
       });
     };
     self.fetchHits = function(HitsFile) {
-      return self.fetchTrack(HitsFile, 'Hits', 'hits');
+      return self.fetchTrack(HitsFile, 'Hits', 'hits', 30);
     };
 
     self.fetchNewOrfs = function(NewOrfsFile) {
-      return self.fetchTrack(NewOrfsFile, 'New ORFs', 'neworfs');
+      return self.fetchTrack(NewOrfsFile, 'New ORFs', 'neworfs', 10);
     };
 
     self.fetchModifiedOrfs = function(ModifiedOrfsFile) {
-      return self.fetchTrack(ModifiedOrfsFile, 'Modified ORFs', 'modified');
+      return self.fetchTrack(ModifiedOrfsFile, 'Modified ORFs', 'modified', 20);
     };
 
     self.saveTrack = function(track){
