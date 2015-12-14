@@ -23,12 +23,12 @@
     </h3>
     <npact-msg-pane></npact-msg-pane>
   </div>
-  <div id="results" ng-controller="Results">
+  <div id="results" ng-controller="ResultsCtrl as rc">
     <uib-accordion close-others="false">
-      <uib-accordion-group is-open="status.open">
+      <uib-accordion-group is-open="rc.downloadsopen">
         <uib-accordion-heading>
           <span>
-            Downloads<i class="pull-right glyphicon" ng-class="{'glyphicon-chevron-down': status.open, 'glyphicon-chevron-right': !status.open}"></i>
+            Downloads<i class="pull-right glyphicon" ng-class="{'glyphicon-chevron-down': rc.downloadsopen, 'glyphicon-chevron-right': !rc.downloadsopen}"></i>
           </span>
         </uib-accordion-heading>
         <div id="downloads" ng-controller="DownloadsCtrl as dc">
@@ -41,8 +41,8 @@
             </p>
             <p><a href="{{FETCH_BASE_URL}}{{GraphConfig.filename}}">
               Original GBK: {{GraphConfig.filename}}</a></p>
-            <h4 id="download-tracks">Tracks</h4>
-            <ul id="track-files">
+            <h4 id="downloads-tracks">Tracks</h4>
+            <ul >
               <li ng-repeat="tr in GraphConfig.tracks">
                 <a href="{{FETCH_BASE_URL}}{{tr.filename}}">{{tr.name}}</a>
               </li>
@@ -51,21 +51,21 @@
                   title="Save all currently active track ORFs as features in a GBK file"
                >All tracks in a GBK</a></p>
             <div ng-show="predictionFiles.length > 0">
-              <h4>Prediction output files: </h4>
-                <ul id="prediction-files">
-                  <li ng-repeat="f in predictionFiles">
-                    <a href="{{FETCH_BASE_URL}}{{f}}" target="_blank">{{f}}</a>
-                  </li>
-                </ul>
-
+              <h4 id="downloads-predictions">Prediction output files: </h4>
+              <ul id="prediction-files">
+                <li ng-repeat="f in predictionFiles">
+                  <a href="{{FETCH_BASE_URL}}{{f}}" target="_blank">{{f}}</a>
+                </li>
+              </ul>
             </div>
           </div>
         </div>
       </uib-accordion-group>
-      <uib-accordion-group is-open="status.isFirstOpen">
+
+      <uib-accordion-group is-open="rc.graphsopen">
         <uib-accordion-heading>
           <span>
-            Graphs<i class="pull-right glyphicon" ng-class="{'glyphicon-chevron-down': status.isFirstOpen, 'glyphicon-chevron-right': !status.isFirstOpen}"></i>
+            Graphs<i class="pull-right glyphicon" ng-class="{'glyphicon-chevron-down': rc.graphsopen, 'glyphicon-chevron-right': !rc.graphsopen}"></i>
           </span>
         </uib-accordion-heading>
         <div id="graphcontainer" npact-graph-container npact-graph-scroller npact-key-handlers>
