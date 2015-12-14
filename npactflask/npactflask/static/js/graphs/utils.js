@@ -216,11 +216,15 @@ angular.module('npact')
     };
   })
 
-  .service('Fetcher', function(StatusPoller, $http, FETCH_BASE_URL, BASE_URL, PATH, $location) {
+  .service('Fetcher', function($location, $http,
+                        StatusPoller, FETCH_BASE_URL, BASE_URL, PATH, PUBLIC_CONFIG_KEYS) {
     'use strict';
     var self = this;
     self.buildUrl = function(verb, params) {
-      params = _.assign({}, $location.search(), params);
+      params = _.assign({},
+                        $location.search(),
+                        _.pick(GraphConfig, PUBLIC_CONFIG_KEYS),
+                        params);
       return BASE_URL + '/' + verb + '/' + PATH + '?' + $.param(params);
     };
 
