@@ -151,6 +151,7 @@ angular.module('npact')
         // some indexes for where our regex groups will show
         NAME = 1, COMP = 2, START_APPROX = 3, START = 4, END_APPROX = 5, END = 6;
 
+
     /**
      * parses one line as an extract
      *
@@ -169,20 +170,29 @@ angular.module('npact')
      * @returns {Object} extract
      */
     function parseExtract(line) {
+      if(line && line[0] === '#'){
+        pair = line.split(':');
+        return {
+          key: pair[0],
+          value: pair[1],
+          type: 'META'
+        };
+      }
       var parts = EXTRACT_REGEX.exec(line),
           res = {
             start: parseInt(parts[START]),
             end: parseInt(parts[END]),
             complement: parts[COMP] ? 1 : 0,
             name: parts[NAME],
-            approximate: (parts[START_APPROX] || parts[END_APPROX]) ? true : false
+            approximate: (parts[START_APPROX] || parts[END_APPROX]) ? true : false,
+            type:'CDS'
           },
           phaseCoordinate = res.complement ? res.start : res.end;
       res.phase = (phaseCoordinate - 1) % 3;
       return res;
     }
-
-    return ParserFactory.create(parseExtract);
+    var parser = ParserFactory.create(parseExtract);
+    return parser;
   })
 
   .factory('Translater', function($http, $log, Fetcher) {

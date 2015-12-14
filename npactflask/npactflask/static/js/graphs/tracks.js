@@ -49,14 +49,20 @@ angular.module('npact')
     };
 
     Track.prototype.loadData = function(data) {
+      var self = this;
       return (
-        this.loading = ExtractParser.parseAsync(data)
-          .then(_.bind(function (data) {
-            $log.log("Finished parsing", this.name, ", found ", data.length);
-            this.data = data;
-            this.loading = false;
+        self.loading = ExtractParser.parseAsync(data)
+          .then(function (data) {
+            $log.log("Finished parsing", self.name, ", found ", data.length);
+            self.data = [];
+            self.metadata = {};
+            _.each(data, function(v, k) {
+              if(v.type === 'CDS') self.data.push(v);
+              else if(v.type === 'META') self.metadata[k]=v;
+            });
+            self.loading = false;
             return data;
-          }, this))
+          })
           .catch(function(e) { $log.log('Track.loadData failed', name, e); throw e; }));
     };
 

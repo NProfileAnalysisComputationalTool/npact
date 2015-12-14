@@ -1,0 +1,9 @@
+#name:Input CDSs
+#mycoplasma:True
+#jim:bob
+ADEH_RS00015 22..1395
+ADEH_RS00020 1811..2938
+ADEH_RS00055 complement(9256..11391)
+ileS 14776..17616
+ADEH_RS00430 complement(95876..>97657)
+ADEH_RS01115 complement(<240102..240860)

@@ -13,6 +13,7 @@ from flask import (
 from flask_mail import Message, email_dispatched
 from werkzeug.exceptions import NotFound
 from pynpact import main, parsing, util, executors
+from pynpact import track as pyntrack
 from npactflask import app, mail
 from npactflask.views import getabspath, getrelpath
 
@@ -115,21 +116,12 @@ def translate():
         logger.exception('Error While Translating')
         return flask.make_response(repr(e), 500)
 
-
-def _track_line_from_orf(orf):
-    if orf.get('complement'):
-        return "{name} complement({start}..{end})\n".format(**orf)
-    else:
-        return "{name} {start}..{end}\n".format(**orf)
-
-
 def _upload_root():
     # TODO: whats the actual application root?
     return os.path.join(os.path.abspath(os.curdir), 'webroot/uploads')
 
-
 def _new_track_file_name(pathconfig, track):
-    fn = track.get('filename')
+    fn = track.filename
     ext = Path(fn).ext
     dt = datetime.datetime.now()
     ds = re.sub(r':|\.|-', '_', dt.isoformat("_"))
@@ -143,13 +135,11 @@ def save_track(path):
         pathconfig = build_config(path)
         config = request.get_json()
         track = config.get('track')
-        orfs = track.get('data')
-        if not track or not orfs:
-            raise ValueError('Must have a track and orfs to save a track')
+        if not track:
+            raise ValueError('Must have a track to save')
+        track = pyntrack.Track(**track)
         path = _new_track_file_name(pathconfig, track)
-        with open(path, "w") as f:
-            for orf in orfs:
-                f.write(_track_line_from_orf(orf))
+        track.write(path)
         return jsonify({'filename': getrelpath(path)})
     except Exception as e:
         logger.exception('Error While Saving Track')
@@ -274,6 +264,14 @@ def getpdf(path):
     pdf = config['allplots_result']
     gexec.result(pdf, timeout=None)
     return send_file(pdf, as_attachment=True)
+
+
+
+
+@app.route('/build_gbk/<path:path>')
+def build_gbk(path):
+    config = build_config(path)
+    pass
 
 
 @app.route('/acgt_gamma/<path:path>')
