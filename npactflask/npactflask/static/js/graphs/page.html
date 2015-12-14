@@ -32,20 +32,32 @@
           </span>
         </uib-accordion-heading>
         <div id="downloads" ng-controller="DownloadsCtrl as dc">
-          <div class="" >
+          <div class="">
             <p>
               <a href="#"
+                 target="_blank"
                  title="Have the server generate a PDF for printing (this takes a minute)."
                  ng-href="{{BASE_URL + '/getpdf/' + PATH}}">Request PDF</a>
             </p>
+            <p><a href="{{FETCH_BASE_URL}}{{GraphConfig.filename}}">
+              Original GBK: {{GraphConfig.filename}}</a></p>
+            <h4 id="download-tracks">Tracks</h4>
+            <ul id="track-files">
+              <li ng-repeat="tr in GraphConfig.tracks">
+                <a href="{{FETCH_BASE_URL}}{{tr.filename}}">{{tr.name}}</a>
+              </li>
+            </ul>
+            <p><a lazy-href="dc.buildGBKDownload()"
+                  title="Save all currently active track ORFs as features in a GBK file"
+               >All tracks in a GBK</a></p>
             <div ng-show="predictionFiles.length > 0">
-              <p>Results are now ready:
-                <ul id="files">
+              <h4>Prediction output files: </h4>
+                <ul id="prediction-files">
                   <li ng-repeat="f in predictionFiles">
                     <a href="{{FETCH_BASE_URL}}{{f}}" target="_blank">{{f}}</a>
                   </li>
                 </ul>
-              </p>
+
             </div>
           </div>
         </div>

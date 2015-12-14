@@ -5,7 +5,7 @@
     <script type="text/ng-template" id="helpTool"><p>To pan left or right you can either use the <b>left and right arrow keys</b> or <b>click and drag</b> on graph</p><p><b>Double click</b> on a graph to zoom into that point. Hold <b>shift and double click</b> on a graph to zoom out.</p>
     </script>
 
-    <div><a href="?" class="btn btn-default" target="_self">Reset to defaults</a>
+    <div><a href="?" class="btn btn-default btn-sm" target="_self">Reset to defaults</a>
     </div>
     <div>
       <label>Zoom:
@@ -47,12 +47,12 @@
                ng-model="gc.findORF"
                ng-model-options="{ updateOn: 'default blur', debounce: { 'default': 1200, 'blur': 0 } }"
                npact-orf-finder
-               >
+        >
       </label>
       <span ng-show="results && results.length > 0">
-      <button ng-click="resultsIndex = resultsIndex - 1" class="arrowbutton">&lt;</button>
-      <button ng-click="resultsIndex = resultsIndex + 1" class="arrowbutton">&gt;</button>
-      {{resultsIndex + 1}} of {{results.length}}
+        <button ng-click="resultsIndex = resultsIndex - 1" class="arrowbutton">&lt;</button>
+        <button ng-click="resultsIndex = resultsIndex + 1" class="arrowbutton">&gt;</button>
+        {{resultsIndex + 1}} of {{results.length}}
       </span>
       <span ng-show="results && results.length == 0">
         No results found
@@ -71,19 +71,21 @@
       </label>
     </div>
 
-      <h3>Tracks</h3>
-      <div>
-        <div ng-repeat="t in gc.tracks track by t.filename">
-          <label class="track-label" title="{{t.filename}}"><input ng-model="t.active" type="checkbox" /> {{t.name}}</label>&nbsp;<small>{{t.id()}}</small>
-        </div>
+    <h3>Tracks <a class="small" href="#download-tracks" ng-click="">Download tracks</a></h3>
+    <div>
+      <div ng-repeat="t in gc.tracks track by t.filename">
+        <label class="track-label" title="{{t.filename}}"><input ng-model="t.active" type="checkbox" /> {{t.name}}</label>&nbsp;<small>{{t.id()}}</small>
       </div>
+      <div><button class="btn btn-default btn-xs" target="_self">Upload a track</button></div>
 
-      <h3>N-Profile Options</h3>
-      <div class="nprofile-options">
-        <label>Base types profiled:</label><br>
-        <checkbox-list id="profile-options" ng-model="gc.nucleotides"
-                       title="nucleotide type(s) represented in frame analysis"
-                       options="['A', 'C', 'G', 'T']">
-      </div>
+    </div>
+
+    <h3>N-Profile Options</h3>
+    <div class="nprofile-options">
+      <label>Base types profiled:</label><br>
+      <checkbox-list id="profile-options" ng-model="gc.nucleotides"
+                     title="nucleotide type(s) represented in frame analysis"
+                     options="['A', 'C', 'G', 'T']">
+    </div>
   </form>
 </div>

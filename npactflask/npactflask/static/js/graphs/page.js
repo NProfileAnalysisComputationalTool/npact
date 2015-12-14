@@ -77,10 +77,29 @@ angular.module('npact')
       });
   })
 
-  .controller('DownloadsCtrl', function($scope, $log, PredictionManager, MessageBus, Pynpact, StatusPoller, GraphConfig) {
+  .controller('DownloadsCtrl', function($scope, $log, PredictionManager, MessageBus, Pynpact, StatusPoller, GraphConfig, FETCH_BASE_URL, Fetcher) {
     'use strict';
+    $scope.FETCH_BASE_URL = FETCH_BASE_URL;
     $scope.$watch( function() { return PredictionManager.files; },
                    function(val) { $scope.predictionFiles = val; });
+    $scope.GraphConfig = GraphConfig;
+    this.buildGBKDownload = function () {
+      return Fetcher.buildUrl('BuildGBK', {trackPaths: _.map(GraphConfig.activeTracks(), 'filename').join(',')});
+    };
+  })
+  .directive('lazyHref', function ($log) {
+    return {
+      scope: {
+        lazyHref: '&'
+      },
+      link: function($scope, $element, attrs) {
+        $element.on('mouseenter focus', function () {
+          var newUrl = $scope.lazyHref();
+          $log.debug("Updated lazyHref to", newUrl);
+          $element.attr('href', newUrl);
+        });
+      }
+    };
   })
 
   .service('PrintModal', function(STATIC_BASE_URL, $uibModal) {
