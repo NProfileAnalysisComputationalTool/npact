@@ -43,7 +43,7 @@ class Track(object):
             i = 0
             for o in self.data:
                 if(o is not CDS):
-                    data[i] = CDS(**o)
+                    self.data[i] = CDS(**o)
                 i += 1
         if filename and len(data) == 0:
             self._read()
