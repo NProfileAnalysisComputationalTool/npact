@@ -96,7 +96,7 @@ angular.module('npact')
   })
 
   .service('kickstarter', function($q, $log, processOnServer, MessageBus,
-                            NProfiler, PredictionManager, Fetcher, TrackSyncer, GraphConfig) {
+                            NProfiler, PredictionManager, Fetcher, Track, GraphConfig) {
     'use strict';
     //Kickstart the whole process, start all the main managers
     this.start = function() {
@@ -115,7 +115,7 @@ angular.module('npact')
           else{
             var pths = GraphConfig.trackPaths;
             if(typeof(pths) === 'string') pths=pths.split(',');
-            TrackSyncer.fetchAllTracks(pths)
+            Track.fetchAllTracks(pths)
               .then(function(tracks) { GraphConfig.tracks = tracks; });
           }
           return null;
@@ -124,7 +124,7 @@ angular.module('npact')
     };
   })
 
-  .service('PredictionManager', function(Fetcher, StatusPoller, Pynpact, TrackSyncer,
+  .service('PredictionManager', function(Fetcher, StatusPoller, Pynpact, Track,
                                   $rootScope, $timeout, $log,
                                   GraphConfig, processOnServer, MessageBus) {
     'use strict';
@@ -138,7 +138,7 @@ angular.module('npact')
       var acgt_gamma_promise = Fetcher.rawFile(url)
           .then(function(response) {
             self.files = response.files;
-            TrackSyncer.fetchAllTracks(response.trackPaths)
+            Track.fetchAllTracks(response.trackPaths)
               .then(function(tracks) {
                 var tracksToAdd = _.difference(tracks, self.predictionTracks);
                 var tracksToRem = _.difference(self.predictionTracks, tracks);

@@ -1,59 +1,7 @@
 angular.module('npact')
-  .service('TrackSyncer', function(Fetcher, Track, $http, BASE_URL, GraphConfig, $q){
+  .factory('Track', function($log,  $q, $timeout, $http, Fetcher, ExtractParser, TrackBinSearchIndex, npactConstants) {
     'use strict';
-    var self = this;
 
-    self.loadedTracks = {};
-
-    self.fetchDefaultTracks = function(){
-      return Fetcher.rawFile(Fetcher.buildUrl('default_tracks')).then(function(resp){
-        var paths = resp.filenames;
-        return self.fetchAllTracks(paths)
-          .then(function(tracks) { GraphConfig.tracks = tracks; });
-      });
-    };
-
-    self.fetchAllTracks = function(paths){
-      var p = _.map(paths, self.fetchTrack);
-      return $q.all(p);
-    };
-
-    self.fetchTrack = function(filename){
-      console.log('fetchTrack ', filename);
-      var tr = self.loadedTracks[filename];
-      if(!tr) {
-        tr = self.loadedTracks[filename] = Fetcher.pollThenFetch(filename)
-          .then(function(data) { return self.loadTrack(filename, data); });
-      }
-      return tr;
-    };
-
-    self.loadTrack = function (filename, data) {
-      var track = new Track(filename, data);
-      track.save = function() { return self.saveTrack(track); };
-      self.loadedTracks[filename] = $q.when(track);
-      return track;
-    };
-
-    self.saveTrack = function(track){
-      return $http({
-        method: 'POST',
-        url: Fetcher.buildUrl('save_track'),
-        data: { track: track },
-        headers: {'Content-Type': 'application/json'}
-      })
-        .then(function (res) {
-          var tr = _.create(Track.prototype, track);
-          tr.filename = res.data.filename;
-          self.loadedTracks[tr.filename] = $q.when(tr);
-          tr.save = function () { return self.saveTrack(track); };
-          return tr;
-        });
-    };
-  })
-
-  .factory('Track', function($log, ExtractParser, TrackBinSearchIndex, npactConstants, $timeout) {
-    'use strict';
     var ITrackIndex = TrackBinSearchIndex;
     function Track(filename, data, type, name) {
       // console.log('new Track ',name, data, type ,filename);
@@ -164,6 +112,41 @@ angular.module('npact')
       }
       this.data = _.without(this.data, entry);
       this.reindex();
+    };
+
+    Track.prototype.save = function () {
+      var track = this;
+      delete Track.loadedTracks[track.filename];  //this is no longer a valid repr of the url.
+
+      return $http({
+        method: 'POST',
+        url: Fetcher.buildUrl('save_track'),
+        data: { track: _.pick(this, ['active', 'data', 'filename', 'name', 'type']) },
+        headers: {'Content-Type': 'application/json'}
+      })
+        .then(function (res) {
+          var tr = _.create(Track.prototype, track);
+          tr.filename = res.data.filename;
+          Track.loadedTracks[tr.filename] = $q.when(tr);
+          return tr;
+        });
+    };
+
+    /// Static methods on Track.
+    Track.loadedTracks = {};
+
+    Track.fetchAllTracks = function(paths){
+      return $q.all(_.map(paths, Track.fetchTrack));
+    };
+
+    Track.fetchTrack = function(filename){
+      console.log('fetchTrack ', filename);
+      var tr = Track.loadedTracks[filename];
+      if(!tr) {
+        tr = Track.loadedTracks[filename] = Fetcher.pollThenFetch(filename)
+          .then(function(data) { return new Track(filename, data); });
+      }
+      return tr;
     };
     return Track;
   })
