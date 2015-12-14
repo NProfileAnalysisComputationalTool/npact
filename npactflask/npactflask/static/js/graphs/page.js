@@ -101,19 +101,6 @@ angular.module('npact')
     //Kickstart the whole process, start all the main managers
     this.start = function() {
       this.basePromise = processOnServer('parse');
-      this.basePromise.then(function() {
-        if(!GraphConfig.trackPaths) {
-          TrackSyncer.fetchDefaultTracks();
-        }
-        else{
-          var pths = GraphConfig.trackPaths;
-          if(typeof(pths) === 'string') pths=pths.split(',');
-          TrackSyncer.fetchAllTracks(pths)
-            .then(function(tracks) { GraphConfig.tracks = tracks; });
-        }
-
-        return null;
-      });
       var safePromise = this.basePromise.catch(function(e) {
         $log.error(e);
         MessageBus.danger('There\'s been an error starting up; please try starting over.');
@@ -121,9 +108,18 @@ angular.module('npact')
       MessageBus.info('kickstarting', safePromise);
       return $q.all([
         this.basePromise.then(NProfiler.start),
-        // TODO: Remove Prediction Manager?
-        // this.basePromise.then(PredictionManager.start),
-
+        this.basePromise.then(function() {
+          if(!GraphConfig.trackPaths) {
+            PredictionManager.start();
+          }
+          else{
+            var pths = GraphConfig.trackPaths;
+            if(typeof(pths) === 'string') pths=pths.split(',');
+            TrackSyncer.fetchAllTracks(pths)
+              .then(function(tracks) { GraphConfig.tracks = tracks; });
+          }
+          return null;
+        })
       ]);
     };
   })
@@ -134,21 +130,33 @@ angular.module('npact')
     'use strict';
     var self = this;
     self.files = null;
+    self.predictionTracks = null;
+
     self.start = function(_config) {
       var url = Fetcher.buildUrl('acgt_gamma');
       $log.log("Querying acgt_gamma at", url);
       var acgt_gamma_promise = Fetcher.rawFile(url)
           .then(function(response) {
             self.files = response.files;
-            _.each(GraphConfig.tracks, function(v, k) { v.active=false; });
-            TrackSyncer.fetchAllTracks(response.trackPaths).then(function(tracks) {
-              _.each(tracks, function(track) {
-                track.active = true;
-                if(!_.find(GraphConfig.tracks, 'filename', track.filename)) {
-                  GraphConfig.tracks.push(track);
-                }
+            TrackSyncer.fetchAllTracks(response.trackPaths)
+              .then(function(tracks) {
+                var tracksToAdd = _.difference(tracks, self.predictionTracks);
+                var tracksToRem = _.difference(self.predictionTracks, tracks);
+                GraphConfig.tracks = _(GraphConfig.tracks)
+                  .difference(tracksToRem)
+                  .union(tracksToAdd).value();
+
+                self.predictionTracks = tracks;
+
+                return;
+                //////////
+                _.each(tracks, function(track) {
+                  track.active = true;
+                  if(!_.find(GraphConfig.tracks, 'filename', track.filename)) {
+                    GraphConfig.tracks.push(track);
+                  }
+                });
               });
-            });
           });
 
       MessageBus.info(
@@ -158,10 +166,13 @@ angular.module('npact')
         }));
     };
 
-    $rootScope.$watch(function () { return GraphConfig.mycoplasma; },
-                      function (val, old) {
-                        $log.debug("mycoplasma changed from", old, "to", val);
-                        // Wait so that the above update to $location has a chance to complete
-                        $timeout(self.start, 50);
-    });
+    $rootScope.$watch(
+      function () { return GraphConfig.mycoplasma; },
+      function (val, old) {
+        if(old !== undefined) {
+          $log.debug("mycoplasma changed from", old, "to", val);
+          // Wait so that the above update to $location has a chance to complete
+          $timeout(self.start, 50);
+        }
+      });
   });

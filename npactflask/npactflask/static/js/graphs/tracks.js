@@ -18,17 +18,21 @@ angular.module('npact')
       return $q.all(p);
     };
 
-    self.fetchTrack= function(filename){
+    self.fetchTrack = function(filename){
       console.log('fetchTrack ', filename);
       var tr = self.loadedTracks[filename];
-      if(tr) return $q.when(tr);
-      return Fetcher.pollThenFetch(filename)
-        .then(function(data){
-          var track = new Track(filename, data);
-          self.loadedTracks[filename] = track;
-          track.save = function() { self.saveTrack(track); };
-          return track;
-        });
+      if(!tr) {
+        tr = self.loadedTracks[filename] = Fetcher.pollThenFetch(filename)
+          .then(function(data) { return self.loadTrack(filename, data); });
+      }
+      return tr;
+    };
+
+    self.loadTrack = function (filename, data) {
+      var track = new Track(filename, data);
+      track.save = function() { return self.saveTrack(track); };
+      self.loadedTracks[filename] = $q.when(track);
+      return track;
     };
 
     self.saveTrack = function(track){
@@ -39,11 +43,13 @@ angular.module('npact')
         headers: {'Content-Type': 'application/json'}
       })
         .then(function (res) {
-          track.filename = res.data.filename;
-          return res.data;
+          var tr = _.create(Track.prototype, track);
+          tr.filename = res.data.filename;
+          self.loadedTracks[tr.filename] = $q.when(tr);
+          tr.save = function () { return self.saveTrack(track); };
+          return tr;
         });
     };
-
   })
 
   .factory('Track', function($log, ExtractParser, TrackBinSearchIndex, npactConstants, $timeout) {
@@ -88,6 +94,11 @@ angular.module('npact')
       this.loading = this.loadData(data);
       this.indexing = this.loading.then(_.bind(this.indexData, this));
     }
+
+    Track.prototype.id = function () {
+      var fn = _.last(this.filename.split('/'));
+      return _.takeRight(fn.split('.'),2)[0];
+    };
 
     Track.prototype.loadData = function(data) {
       return (

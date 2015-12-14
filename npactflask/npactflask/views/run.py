@@ -279,11 +279,13 @@ def getpdf(path):
 @app.route('/acgt_gamma/<path:path>')
 def acgt_gamma(path):
     config = build_config(path)
+    config = main.process('extract', config, executor=gexec)
     config = main.process('acgt_gamma', config, executor=gexec)
     tid_output_directory = config['acgt_gamma_output']
     gexec.result(tid_output_directory, timeout=None)
     files = map(getrelpath, Path(tid_output_directory).listdir())
     trackPaths = map(getrelpath, [
+        config.get('InputCDSFile'),
         config['ModifiedOrfsFile'], config['NewOrfsFile'], config['HitsFile']])
     return jsonify(trackPaths=trackPaths, files=files)
 

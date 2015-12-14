@@ -135,9 +135,7 @@ angular.module('npact')
     };
   })
   .controller('npactGraphConfigCtrl', function($scope, $window, $location, $log,
-                                        $timeout,
-                                        GraphConfig, PredictionManager,
-                                        PUBLIC_CONFIG_KEYS) {
+                                        $timeout, GraphConfig, PUBLIC_CONFIG_KEYS) {
     'use strict';
     $scope.gc = GraphConfig;
   })
