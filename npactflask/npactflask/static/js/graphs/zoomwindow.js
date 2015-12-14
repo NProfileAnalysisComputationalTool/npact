@@ -54,7 +54,8 @@ angular.module('npact')
                  _.bind(function (evt, data) { this.popup(data); }, this));
       $scope.$on('hit-selected',
                  _.bind(function (evt, data) { this.popup(data); }, this));
-      $scope.$on('region-selected');
+      $scope.$on('region-selected',
+                 _.bind(function (evt, data) { this.popup(data); }, this));
     };
 
     this.maybePopup = function () {
@@ -148,9 +149,10 @@ angular.module('npact')
             tracks: GraphConfig.activeTracks(),
             startBase: $scope.startBase,
             endBase: $scope.endBase,
-            onDragEnd: function (dx) {
-              $scope.$emit('offset', dx);
-            }
+            onDragEnd: function (dx) { $scope.$emit('offset', dx); },
+            onRegionSelected: function (data) { $scope.$emit('region-selected', data); },
+            onOrfSelected: function (data) { $scope.$emit('ORF-selected', data); },
+            onHitSelected: function (data) { $scope.$emit('ORF-selected', data); }
           };
           opts.m = GraphingCalculator.chart(opts);
           $scope.graphHeight = opts.m.height;
