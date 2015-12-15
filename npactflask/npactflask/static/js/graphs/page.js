@@ -99,21 +99,6 @@ angular.module('npact')
       return Fetcher.buildUrl('build_gbk', {trackPaths: _.map(GraphConfig.activeTracks(), 'filename').join(',')});
     };
   })
-  .directive('lazyHref', function ($log) {
-    return {
-      scope: {
-        lazyHref: '&'
-      },
-      link: function($scope, $element, attrs) {
-        $element.on('mouseenter focus', function () {
-          var newUrl = $scope.lazyHref();
-          $log.debug("Updated lazyHref to", newUrl);
-          $element.attr('href', newUrl);
-        });
-      }
-    };
-  })
-
   .service('PrintModal', function(STATIC_BASE_URL, $uibModal) {
     'use strict';
     var printTemplate = STATIC_BASE_URL + 'js/graphs/printConfirm.html';
