@@ -152,7 +152,7 @@ angular.module('npact')
             onDragEnd: function (dx) { $scope.$emit('offset', dx); },
             onRegionSelected: function (data) { $scope.$emit('region-selected', data); },
             onOrfSelected: function (data) { $scope.$emit('ORF-selected', data); },
-            onHitSelected: function (data) { $scope.$emit('ORF-selected', data); }
+            onHitSelected: function (data) { $scope.$emit('hit-selected', data); }
           };
           opts.m = GraphingCalculator.chart(opts);
           $scope.graphHeight = opts.m.height;
