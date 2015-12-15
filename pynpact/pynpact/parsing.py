@@ -256,8 +256,8 @@ def translate(config, rc=False):
         log.debug("Doing translation with table %d, rc: %s", table, rc)
         fd = os.open(ddna(config), os.O_RDONLY)
         fmap = mmap.mmap(fd, 0, mmap.MAP_SHARED, mmap.PROT_READ)
-        # NProfiler.ddna is 0 indexed; the dna by convention
-        # (e.g. from the C or NCBI) is 1 indexed.
+        # By convention (e.g. from the C or NCBI) the DNA is is 1
+        # indexed; our DDNA is a c style array that is 0 indexed
         startIdx = config['startBase'] - 1
         # The end index here is inclusive but array.slice isn't so we
         # don't need to subtract 1
