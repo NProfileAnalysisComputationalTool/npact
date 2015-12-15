@@ -225,7 +225,6 @@ angular.module('npact')
                               GraphConfig.gotoBase, 0, GraphConfig.gotoBase, metrics.height]}));
         }
 
-        l.draw();
         return l;
       }, this);
 
