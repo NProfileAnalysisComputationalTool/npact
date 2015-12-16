@@ -191,19 +191,19 @@ angular.module('npact')
       //the scale to the first group inside the layer so that the
       //clipping on the layer itself (which makes the viewport) isn't
       //scaled
-      var scaleX = this.m.xaxis.scaleX,
+      var metrics = this.m,
+          scaleX = metrics.xaxis.scaleX,
           l = new K.Layer({
-            x: this.m.graph.x,
+            x: metrics.graph.x,
             scaleX: scaleX,
             clip: {
-              x: 0, width: this.m.graph.w / scaleX,
-              y: 0, height: this.m.height
+              x: 0, width: metrics.graph.w / scaleX,
+              y: 0, height: metrics.height
             }
           });
       stage.add(l);
-      var offsetX = this.startBase;
       var dg = new K.Group({
-        offsetX: offsetX,
+        offsetX: this.startBase,
         draggable: true,
         dragBoundFunc: function(pos) {
           pos.y = 0; //Disallow vertical movement
@@ -211,41 +211,8 @@ angular.module('npact')
         }
       });
       l.add(dg);
-      var moving = false,
-          onDragMove = this.onDragMove,
-          onDragEnd = this.onDragEnd;
-      if(onDragMove) {
-        dg.on('dragmove', function(evt) {
-          var delta = evt.target.x() - moving || 0;
-          onDragMove(-delta);
-          moving = evt.target.x();
-        });
-      }
-      if(onDragEnd) {
-        dg.on('dragend', function(evt) {
-          moving = false;
-          onDragEnd(-evt.target.x());
-        });
-      }
-      this.offset = function(dx) {
-        if(moving === false){
-          offsetX += dx;
-          dg.offsetX(offsetX);
-          l.batchDraw();
-        }
-      };
-
-      dg.on('mouseover', function() { document.body.style.cursor = 'pointer'; });
-      dg.on('mouseout', function() { document.body.style.cursor = 'default'; });
-      dg.on('dblclick', _.bind(this.onZoom, this));
-
+      this.dragEventsHandlers(dg, metrics);
       var dgAdd = _.bind(dg.add, dg);
-      // need a shape that can be clicked on to allow dragging the
-      // entire layer
-      dgAdd(new K.Rect({x: this.startBaseM, y: 0, //fill: '#BDD',
-                        width: this.m.xaxis.length * 2,
-                        height: this.m.height}));
-
       var p3 = this.xAxisGroup().then(dgAdd);
       var p2 = this.tracksGroup().then(dgAdd);
       var p1 = this.profileGroup().then(dgAdd);
@@ -255,10 +222,9 @@ angular.module('npact')
           dgAdd(new K.Line({stroke: style.profile.axis.text.fill, strokeWidth: 1,
                             strokeScaleEnabled: false,
                             points: [
-                              GraphConfig.gotoBase, 0, GraphConfig.gotoBase, this.m.height]}));
+                              GraphConfig.gotoBase, 0, GraphConfig.gotoBase, metrics.height]}));
         }
 
-        l.draw();
         return l;
       }, this);
 
@@ -267,6 +233,84 @@ angular.module('npact')
         l.draw();
         return l;
       });
+    };
+
+    GP.dragEventsHandlers = function (dg, metrics, $scope) {
+      var dragging = false,    //indicates whether *this* row is being dragged
+          selectionRect = null,
+          onDragMove = this.onDragMove,
+          onDragEnd = this.onDragEnd,
+          onRegionSelected = this.onRegionSelected,
+          scaleX = metrics.xaxis.scaleX,
+          toScaledDgX = function (layerX) {
+            return dg.offsetX() + (layerX - metrics.graph.x) / scaleX;
+          };
+
+      this.offset = function(dx) {
+        if(dragging === false) {  //don't double move the one the mouse is on.
+          dg.offsetX(dg.offsetX() + dx);
+          dg.getLayer().batchDraw();
+        }
+      };
+
+      // need a shape that can be clicked on to allow dragging the
+      // entire layer
+      dg.add(new K.Rect({x: this.startBaseM, y: 0, //fill: '#BDD',
+                        width: metrics.xaxis.length * 2,
+                        height: metrics.height}));
+
+      if(onDragMove) {
+        dg.on('dragstart', function (evt) { dragging = 0; });
+        dg.on('dragmove', function(evt) {
+          var delta = evt.target.x() - dragging;
+          onDragMove(-delta);
+          dragging = evt.target.x();
+        });
+      }
+      if(onDragEnd) {
+        dg.on('dragend', function(evt) {
+          dragging = false;
+          onDragEnd(-evt.target.x());
+        });
+      }
+
+      if(onRegionSelected) {
+        var expandSelection = function (evt) {
+          var w = toScaledDgX(evt.evt.layerX) - selectionRect.x();
+          selectionRect.setWidth(w);
+          dg.getLayer().batchDraw();
+        };
+        var finishSelection = function (evt) {
+          dg.setDraggable(true);
+          dg.off('mousemove', expandSelection);
+          dg.off('mouseup', finishSelection);
+          if(!selectionRect) return; //shouldn't happen
+          var start = Math.floor(selectionRect.x()),
+              end = Math.ceil(selectionRect.x() + selectionRect.width());
+          onRegionSelected({
+            type: 'region',
+            start: Math.min(start, end),
+            end: Math.max(start, end)
+          });
+          selectionRect.remove();
+          selectionRect = null;
+        };
+        dg.on('mousedown', function (evt) {
+          if(evt.evt.shiftKey){
+            dg.setDraggable(false);
+            dg.add(selectionRect = new K.Rect({
+              x: toScaledDgX(evt.evt.layerX), y: 0,
+              width:1, height: metrics.height,
+              fill: '#bbb', stroke: '#999', opacity: 0.2
+            }));
+            dg.on('mousemove', expandSelection);
+            dg.on('mouseup', finishSelection);
+          }
+        });
+      }
+      dg.on('mouseover', function() { document.body.style.cursor = 'pointer'; });
+      dg.on('mouseout', function() { document.body.style.cursor = 'default'; });
+      dg.on('dblclick', _.bind(this.onZoom, this));
     };
 
     GP.onZoom = function(evt) {
@@ -520,7 +564,7 @@ angular.module('npact')
 
       g.on('click', _.bind(function(evt) {
         var extract  = evt.target.getAttrs().extract;
-        this.$scope.$emit('ORF-selected', {
+        this.onOrfSelected({
           type: 'ORF',
           track: track,
           item: evt.target.getAttrs().extract,
@@ -529,8 +573,6 @@ angular.module('npact')
           complement: extract.complement,
           phase: extract.phase,
           name: extract.name
-
-
         });
         //evt.evt.pageX, evt.evt.pageY
       }, this));
@@ -564,7 +606,7 @@ angular.module('npact')
       });
       g.on('click', _.bind(function(evt) {
         var hit = evt.target.getAttrs().hit;
-        this.$scope.$emit('region-selected', {
+        this.onHitSelected({
           type: 'hit',
           track: track,
           item: hit,

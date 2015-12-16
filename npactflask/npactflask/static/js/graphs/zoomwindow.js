@@ -1,11 +1,15 @@
 angular.module('npact')
+
+// {type: 'region', start: 0, end: 10}
+// {type: 'hit}
+
   .service('FocusData', function ($log, $location, GraphConfig) {
     /**
      * focusData interface:
      *
      *  type       : "(hit|orf|region)"
      *  track      : Reference to a Track object
-     *  item       : Data Object  inside a track
+     *  item       : Data Object inside a track
      *  start      : start base of zoom region
      *  end        : end base of zoom region
      *  complement : (0|1), indicates strand
@@ -54,7 +58,8 @@ angular.module('npact')
                  _.bind(function (evt, data) { this.popup(data); }, this));
       $scope.$on('hit-selected',
                  _.bind(function (evt, data) { this.popup(data); }, this));
-      $scope.$on('region-selected');
+      $scope.$on('region-selected',
+                 _.bind(function (evt, data) { this.popup(data); }, this));
     };
 
     this.maybePopup = function () {
@@ -78,41 +83,47 @@ angular.module('npact')
         .finally( _.bind(FocusData.clearQuery, FocusData));
     };
   })
-  .controller('ZoomWindowCtrl', function ($scope, $log, FocusData, focusData,
-                                   GraphConfig, Utils, TranslatePath) {
+  .controller('ZoomWindowCtrl', function ($scope, $log, FocusData, focusData, getPhase,
+                                   GraphConfig, Utils) {
     var type = focusData.type;
     this.data = focusData;
-    var length = this.data.end - this.data.start;
-    var margin = Utils.orderOfMagnitude(length, -1);
-    this.startBase = Math.max(this.data.start - margin, 0);
-    this.endBase = Math.min(this.data.end + margin, GraphConfig.endBase);
+    if(type === 'region') {
+      this.item = {
+        name: "New",
+        start: Utils.floor3(focusData.start),
+        end: Utils.ceil3(focusData.end),
+        complement: 0
+      };
+      this.item.phase = getPhase(this.item);
+    }
+    else {
+      this.item = focusData.item;
+    }
+    this.track = focusData.track || _.first(GraphConfig.activeTracks);
+
+    var margin = Utils.orderOfMagnitude(this.item.end - this.item.start, -1);
+    this.startBase = Utils.floor3(Math.max(this.item.start - margin, 0));
+    this.endBase = Utils.ceil3(Math.min(this.item.end + margin, GraphConfig.endBase));
+
 
     $log.log("Focusing on", focusData);
     $scope.$on('offset', _.bind(function ($evt, dx) {
       $evt.stopPropagation();
-      dx = Math.round(dx);
-      this.startBase += dx;
-      this.endBase += dx;
       $log.log("Updating offsets", dx);
+      dx = Math.round(dx);
+      this.startBase = Utils.floor3(this.startBase + dx);
+      this.endBase = Utils.ceil3(this.endBase + dx);
       $scope.$apply();
     }, this));
+    var redraw = function () { $scope.$broadcast('redraw'); };
+    $scope.$watchCollection("zw.item", redraw);
+    $scope.$watch('zw.track', redraw);
 
-    $scope.$watch(function () { return focusData.complement; },
-                  function () { $scope.$broadcast('schedule'); });
 
-    TranslatePath(this.data.start, this.data.end, this.data.complement)
-      .then(_.bind(function (data) {
-        this.ddnaP = data.trans;
-        this.ddna = data.seq;
-      }, this));
-    TranslatePath(this.startBase, this.data.start, this.data.complement)
-      .then(_.bind(function (data) {
-        this.leftDdnaP = data.trans;
-      }, this));
-    TranslatePath(this.data.end, this.endBase, this.data.complement)
-      .then(_.bind(function (data) {
-        this.rightDdnaP = data.trans;
-      }, this));
+    this.buildPermalink = function () {
+      //TODO: Params to this function
+      return FocusData.serialize();
+    };
   })
 
   .directive('zwPermalink', function ($log, $location, FocusData) {
@@ -148,9 +159,10 @@ angular.module('npact')
             tracks: GraphConfig.activeTracks(),
             startBase: $scope.startBase,
             endBase: $scope.endBase,
-            onDragEnd: function (dx) {
-              $scope.$emit('offset', dx);
-            }
+            onDragEnd: function (dx) { $scope.$emit('offset', dx); },
+            onRegionSelected: function (data) { $scope.$emit('region-selected', data); },
+            onOrfSelected: function (data) { $scope.$emit('ORF-selected', data); },
+            onHitSelected: function (data) { $scope.$emit('hit-selected', data); }
           };
           opts.m = GraphingCalculator.chart(opts);
           $scope.graphHeight = opts.m.height;
@@ -168,11 +180,35 @@ angular.module('npact')
                 scheduled=false;
               });
             };
-        $scope.$on('schedule', schedule);
+        $scope.$on('redraw', schedule);
         $scope.$watchGroup(['startBase', 'endBase'], schedule);
         $scope.$watch(function() {return $element.width();}, schedule);
       }
     };
   })
 
+  .directive('npactProteinTranslation', function ($log, TranslatePath) {
+    return {
+      restrict: 'E',
+      scope: {
+        start: '=',
+        end: '=',
+        complement: '='
+      },
+      link: function ($scope, $element) {
+        $scope.$watchGroup(
+          ['start', 'end', 'complement'],
+          function () {
+            $element.text('');
+            TranslatePath($scope.start, $scope.end, $scope.complement)
+              .then(function (data) {
+                ddnaP = data.trans;
+                ddna = data.seq;
+                $element.text(ddnaP);
+              });
+          }
+        );
+      }
+    };
+  })
 ;

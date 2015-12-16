@@ -3,42 +3,46 @@
     <div class="container-fluid">
 
       <div class="navbar-header">
-        <span class="navbar-brand" contenteditable>{{zw.data.name}}</span> <br>
-        on <span contenteditable> {{zw.data.track.name}}
+        <span class="navbar-brand" contenteditable ng-model="zw.item.name"></span> <br>
+        on <span contenteditable ng-model="zw.track.name">
       </div>
       <div class="navbar-form navbar-left">
         <label>Phase</label>
         <div class="btn-group btn-group-sm" role="group" aria-label="Phase">
           <button type="button" class="btn btn-default"
-                  ng-model="zw.data.phase" uib-btn-radio="0">0</button>
+                  ng-model="zw.item.phase" uib-btn-radio="0">0</button>
           <button type="button" class="btn btn-default"
-                  ng-model="zw.data.phase" uib-btn-radio="1">1</button>
+                  ng-model="zw.item.phase" uib-btn-radio="1">1</button>
           <button type="button" class="btn btn-default"
-                  ng-model="zw.data.phase" uib-btn-radio="2">2</button>
+                  ng-model="zw.item.phase" uib-btn-radio="2">2</button>
+          <button type="buttn"  class="btn btn-default"
+                  ng-model="zw.phaseLock" uib-btn-checkbox
+                  title="When locked the start and end will adjust in increments of three">
+            lock</button>
         </div>
         <label>Strand</label>
         <div class="btn-group btn-group-sm" role="group" aria-label="Phase">
           <button type="button" class="btn btn-default"
-                  ng-model="zw.data.complement" uib-btn-radio="0">Direct</button>
+                  ng-model="zw.item.complement" uib-btn-radio="0">Direct</button>
           <button type="button" class="btn btn-default"
-                  ng-model="zw.data.complement" uib-btn-radio="1">Complement</button>
+                  ng-model="zw.item.complement" uib-btn-radio="1">Complement</button>
         </div>
         <label>Bases</label>
         <div class="form-group">
           <input class="form-control" type="number" name="startBase" style="width:8em;"
                  min="0" max="{{gc.length}}"
-                 ng-model="zw.data.start"
+                 ng-model="zw.item.start"
                  ng-model-options="{ updateOn: 'default blur', debounce: { 'default': 600, 'blur': 0 } }">
           <span class="small">to</span>
           <input class="form-control" type="number" name="endBase" style="width:8em;"
                  min="0" max="{{gc.length}}"
-                 ng-model="zw.data.end"
+                 ng-model="zw.item.end"
                  ng-model-options="{ updateOn: 'default blur', debounce: { 'default': 600, 'blur': 0 } }">
         </div>
       </div>
       <div class="navbar-right">
         <ul class="nav nav-stacked">
-          <li><a href="#" zw-permalink="zw.data">
+          <li><a href="#" lazy-href="zw.buildPermalink()">
             <span class="glyphicon glyphicon-link"></span>Share</a></li>
           <li><a href="#"><span class="glyphicon glyphicon-new-window"></span>nBLAST</a></li>
           <li><a href="#"><span class="glyphicon glyphicon-new-window"></span>pBLAST</a></li>
@@ -62,10 +66,20 @@
       </div>
     </div>
     <div class="row dna-text">
-      <div class="col-sm-1" style="color: #ccc;">{{zw.leftDdnaP}}</div>
-      <div class="col-sm-10" style="padding: 10px;">
-        <span class="">{{zw.ddnaP}}</span>
+      <div class="col-sm-1" style="color: #ccc;">
+        <npact-protein-translation
+            start="zw.startBase" end="zw.item.start - 1" complement="zw.item.complement">
+        </npact-protein-translation>
       </div>
-      <div class="col-sm-1" style="color: #ccc;">{{zw.rightDdnaP}}</div>
+      <div class="col-sm-10" style="padding: 10px;">
+        <npact-protein-translation
+            start="zw.item.start" end="zw.item.end" complement="zw.item.complement">
+        </npact-protein-translation>
+      </div>
+      <div class="col-sm-1" style="color: #ccc;">
+        <npact-protein-translation
+            start="zw.item.end + 1" end="zw.endBase" complement="zw.item.complement">
+        </npact-protein-translation>
+      </div>
   </div>
 </div>

@@ -71,7 +71,7 @@
       </label>
     </div>
 
-    <h3>Tracks <a class="small" href="#download-tracks" ng-click="">Download tracks</a></h3>
+    <h3>Tracks <a class="small" href="#downloads-tracks" >Download tracks</a></h3>
     <div>
       <div ng-repeat="t in gc.tracks track by t.filename">
         <label class="track-label" title="{{t.filename}}"><input ng-model="t.active" type="checkbox" /> {{t.name}}</label>&nbsp;<small>{{t.id()}}</small>

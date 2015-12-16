@@ -85,6 +85,14 @@ angular.module('npact')
       args.unshift(dst.length);
       dst.splice.apply(dst, args);
     };
+
+
+    // a lot of our math is based on codons which are three in length
+    // so we need to find the nearest multiple of 3 based on some
+    // start
+    this.round3 = function(x) { return x + 1.5 - (x + 1.5) % 3; };
+    this.ceil3 = function(x) { var r = x%3; return r ? x + 3 - r : x; };
+    this.floor3 = function (x) { return x - x%3; };
   })
   .service('LineParser', function(Utils, $q) {
     'use strict';
@@ -124,6 +132,26 @@ angular.module('npact')
         .then(function() { return results; });
     };
   })
+
+   /**
+    * COLORING INDICATES THE COLOR OF THE GENOME PHASE (0,1, OR 2) OF
+    * THE THIRD CODON POSITIONS OF GENES, IN INTERNAL COORDINATES. IF A
+    * GENE IS ENCODED IN THE DIRECT STRAND, ITS THIRD CODON POSITIONS
+    * ARE IN THE SAME PHASE AS THE SECOND COORDINATE. E.G., dnaN
+    * 1460..2668, WILL HAVE COLOR CORRESPONDING TO (2668 – 1) % 3 = 0
+    * (RED)). INSTEAD, IF IT IS ENCODED ON THE COMPLEMENTARY STRAND, IT
+    * WILL HAVE COLOR CORRESPONDING TO THE POSITION INDICATED BY THE
+    * FIRST COORDINATE. E.G., radA complement(23561..24766) HAS COLOR
+    * (23561 – 1) % 3 = 1 (GREEN). ONE IS SUBTRACTED FROM POSITION TO
+    * TRANSLATE OUTPUT/INPUT COORDINATES INTO INTERNAL COORDINATES.
+    */
+  .factory('getPhase', function () {
+    return function (orf) {
+      var phaseCoord = orf.complement ? orf.start : orf.end;
+      return (phaseCoord - 1) % 3;
+    };
+  })
+
 // creates parsers, suitable for returning from factory declarations
   .service('ParserFactory', function(LineParser) {
     'use strict';
@@ -135,7 +163,7 @@ angular.module('npact')
       };
     };
   })
-  .factory('ExtractParser', function(ParserFactory) {
+  .factory('ExtractParser', function(ParserFactory, getPhase) {
     'use strict';
     /**
      * Extract format
@@ -155,16 +183,6 @@ angular.module('npact')
     /**
      * parses one line as an extract
      *
-     * COLORING INDICATES THE COLOR OF THE GENOME PHASE (0,1, OR 2) OF
-     * THE THIRD CODON POSITIONS OF GENES, IN INTERNAL COORDINATES. IF A
-     * GENE IS ENCODED IN THE DIRECT STRAND, ITS THIRD CODON POSITIONS
-     * ARE IN THE SAME PHASE AS THE SECOND COORDINATE. E.G., dnaN
-     * 1460..2668, WILL HAVE COLOR CORRESPONDING TO (2668 – 1) % 3 = 0
-     * (RED)). INSTEAD, IF IT IS ENCODED ON THE COMPLEMENTARY STRAND, IT
-     * WILL HAVE COLOR CORRESPONDING TO THE POSITION INDICATED BY THE
-     * FIRST COORDINATE. E.G., radA complement(23561..24766) HAS COLOR
-     * (23561 – 1) % 3 = 1 (GREEN). ONE IS SUBTRACTED FROM POSITION TO
-     * TRANSLATE OUTPUT/INPUT COORDINATES INTO INTERNAL COORDINATES.
      *
      * @param {string} line - single extract line
      * @returns {Object} extract
@@ -186,9 +204,8 @@ angular.module('npact')
             name: parts[NAME],
             approximate: (parts[START_APPROX] || parts[END_APPROX]) ? true : false,
             type:'CDS'
-          },
-          phaseCoordinate = res.complement ? res.start : res.end;
-      res.phase = (phaseCoordinate - 1) % 3;
+          };
+      res.phase = getPhase(res);
       return res;
     }
     var parser = ParserFactory.create(parseExtract);

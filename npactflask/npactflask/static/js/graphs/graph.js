@@ -13,21 +13,22 @@ angular.module('npact')
     'use strict';
     var $win = angular.element($window),
         getWidth =  function() { return $element.width(); },
-        onDragMove = function (dx) {
-          $scope.$broadcast('offset', dx);
-        },
-        onDragEnd = function (dx) {
-          $scope.$evalAsync(function () {
-            GraphConfig.offset += dx;
-            $log.log("Finished dragging, new offset is", GraphConfig.offset);
-          });
-        },
         baseOpts = {
           width: null,
           m: null,
           tracks: null,
-          onDragMove: onDragMove,
-          onDragEnd: onDragEnd
+          onDragMove: function (dx) {
+          $scope.$broadcast('offset', dx);
+          },
+          onDragEnd: function (dx) {
+          $scope.$evalAsync(function () {
+            GraphConfig.offset += dx;
+            $log.log("Finished dragging, new offset is", GraphConfig.offset);
+          });
+          },
+          onRegionSelected: function (data) { $scope.$emit('region-selected', data); },
+          onOrfSelected: function (data) {  $scope.$emit('ORF-selected', data); },
+          onHitSelected: function (data) {  $scope.$emit('hit-selected', data); }
         },
         updateMetrics = function () {
           baseOpts.width = getWidth();

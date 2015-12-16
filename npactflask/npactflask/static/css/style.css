@@ -529,3 +529,5 @@ form select.form-control,
 /* Error messages */
 .message { border: 1px dotted #DDD;}
 .alert { font-size: 18px; margin-bottom: 5px;}
+
+span[contenteditable] { cursor: text; }

@@ -28,7 +28,7 @@ angular.module('npact')
     };
   })
 
-  .service('NProfiler', function(DDNA, $log, GraphConfig, $q, $timeout) {
+  .service('NProfiler', function(DDNA, GraphConfig, Utils, $log, $q, $timeout) {
     'use strict';
     var self = this;
     var defered = $q.defer();
@@ -39,14 +39,11 @@ angular.module('npact')
       return self.fetching;
     };
 
-    var round3 = function(num) {
-      //round to multiple of 3
-      return num + 1.5 - (num + 1.5) % 3;
-    };
+
 
     self.defaultStepSize = function(len) {
       //Targetting about 200 datapoints for one graph line
-      return round3(len / 200);
+      return Utils.floor3(len / 200);
     };
 
     self.defaultWindowSize = function(step) {
@@ -55,7 +52,7 @@ angular.module('npact')
       // At  2000 it is 111,
       // At 10000 it is 198
       // At 50000 it is 276
-      return round3(50 * Math.log(step));
+      return Utils.floor3(50 * Math.log(step));
     };
 
     self.slice = function(opts) {

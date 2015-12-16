@@ -1,10 +1,22 @@
 angular.module('npact')
-  .controller('Results', function ($scope) {
+  .controller('ResultsCtrl', function ($scope, $location, $anchorScroll, $log) {
     'use strict';
-    $scope.status = {
-      isFirstOpen: true,
-      isFirstDisabled: false
-    };
+    var self = this;
+    self.downloadsopen = false;
+    self.graphsopen = true;
+    $scope.$watch(
+      function () {return $location.hash();     },
+      function (hash) {
+        $log.log("Hash changed to", hash);
+        if(_.startsWith(hash, "downloads")) {
+          self.downloadsopen = true;
+          $anchorScroll(hash);
+        }
+        else if(_.startsWith(hash, "graphs")) {
+          self.graphsopen = true;
+          $anchorScroll(hash);
+        }
+      });
   })
 
   .directive('npactGraphPage', function(STATIC_BASE_URL) {
@@ -84,24 +96,9 @@ angular.module('npact')
                    function(val) { $scope.predictionFiles = val; });
     $scope.GraphConfig = GraphConfig;
     this.buildGBKDownload = function () {
-      return Fetcher.buildUrl('BuildGBK', {trackPaths: _.map(GraphConfig.activeTracks(), 'filename').join(',')});
+      return Fetcher.buildUrl('build_gbk', {trackPaths: _.map(GraphConfig.activeTracks(), 'filename').join(',')});
     };
   })
-  .directive('lazyHref', function ($log) {
-    return {
-      scope: {
-        lazyHref: '&'
-      },
-      link: function($scope, $element, attrs) {
-        $element.on('mouseenter focus', function () {
-          var newUrl = $scope.lazyHref();
-          $log.debug("Updated lazyHref to", newUrl);
-          $element.attr('href', newUrl);
-        });
-      }
-    };
-  })
-
   .service('PrintModal', function(STATIC_BASE_URL, $uibModal) {
     'use strict';
     var printTemplate = STATIC_BASE_URL + 'js/graphs/printConfirm.html';

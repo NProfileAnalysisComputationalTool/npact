@@ -79,4 +79,22 @@ angular.module('npact', ['ngMessages', 'sticky', 'ngSanitize', 'ngCookies', 'ui.
     };
   })
 
+  /**
+   * A directive to be used on anchors. updates the href only when it
+   * would be used (e.g. mouseover, focus)
+   */
+  .directive('lazyHref', function ($log) {
+    return {
+      scope: {
+        lazyHref: '&'
+      },
+      link: function($scope, $element, attrs) {
+        $element.on('mouseenter focus', function () {
+          var newUrl = $scope.lazyHref();
+          $log.debug("Updated lazyHref to", newUrl);
+          $element.attr('href', newUrl);
+        });
+      }
+    };
+  })
 ;
