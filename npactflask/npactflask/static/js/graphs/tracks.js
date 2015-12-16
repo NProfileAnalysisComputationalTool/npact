@@ -19,7 +19,7 @@ angular.module('npact')
           type='extracts';
         }
         else if(filename.search('genes')>=0){
-          name="Input CDFs";
+          name="Input CDSs";
           type='extracts';
         }
         else{
@@ -50,20 +50,29 @@ angular.module('npact')
 
     Track.prototype.loadData = function(data) {
       var self = this;
-      return (
-        self.loading = ExtractParser.parseAsync(data)
-          .then(function (data) {
-            $log.log("Finished parsing", self.name, ", found ", data.length);
-            self.data = [];
-            self.metadata = {};
-            _.each(data, function(v, k) {
-              if(v.type === 'CDS') self.data.push(v);
-              else if(v.type === 'META') self.metadata[k]=v;
-            });
-            self.loading = false;
-            return data;
-          })
-          .catch(function(e) { $log.log('Track.loadData failed', name, e); throw e; }));
+      // console.log(data);
+      if(typeof(data) === 'string'){ // trackfile to parse
+        return (
+          self.loading = ExtractParser.parseAsync(data)
+            .then(function (data) {
+              $log.log("Finished parsing", self.name, ", found ", data.length);
+              self.data = [];
+              self.metadata = {};
+              _.each(data, function(v, k) {
+                if(v.type === 'CDS') self.data.push(v);
+                else if(v.type === 'META') self.metadata[k]=v;
+              });
+              self.loading = false;
+              return data;
+            })
+            .catch(function(e) { $log.log('Track.loadData failed', name, e); throw e; }));
+      }else{ // data must be parsed (probably json version of this object)
+        if(Array.isArray(data))
+          self.data = data;
+        else if(data.cds || data.data)
+          self.data = data.cds || data.data;
+        return $q.when(self.data);
+      }
     };
 
     Track.prototype.indexData = function(data) {
@@ -127,7 +136,7 @@ angular.module('npact')
       return $http({
         method: 'POST',
         url: Fetcher.buildUrl('save_track'),
-        data: { track: _.pick(this, ['active', 'data', 'filename', 'name', 'type']) },
+        data: { track: _.pick(this, ['filename', 'name', 'type', 'active', 'data', 'metadata']) },
         headers: {'Content-Type': 'application/json'}
       })
         .then(function (res) {

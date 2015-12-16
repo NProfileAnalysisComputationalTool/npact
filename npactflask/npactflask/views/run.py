@@ -4,6 +4,7 @@ import re
 import datetime
 import os.path
 import Bio.Seq
+from StringIO import StringIO
 
 from path import path as Path
 from flask import (
@@ -116,17 +117,31 @@ def translate():
         logger.exception('Error While Translating')
         return flask.make_response(repr(e), 500)
 
+
 def _upload_root():
     # TODO: whats the actual application root?
     return os.path.join(os.path.abspath(os.curdir), 'webroot/uploads')
 
-def _new_track_file_name(pathconfig, track):
-    fn = track.filename
-    ext = Path(fn).ext
+
+def _new_track_file_name(pathconfig, gbkfilename):
+    fn = gbkfilename
+    ext = None
+    m = re.search(r'\.([^/\\]*)$', fn)
+    if m:
+        ext = m.groups()[0]
+    if not ext.endswith('json'):
+        ext = "track.%s.json" % ext
     dt = datetime.datetime.now()
     ds = re.sub(r':|\.|-', '_', dt.isoformat("_"))
     fn = parsing.derive_filename(pathconfig, ds, ext)
     return fn
+
+
+def _pretty_save_track_json(track, path):
+    o = StringIO()
+    json.dump(track, o)
+    with open(path, 'w') as f:
+        f.write(o.getvalue().replace("},", "},\n"))
 
 
 @app.route('/save_track/<path:path>', methods=['POST'])
@@ -135,11 +150,12 @@ def save_track(path):
         pathconfig = build_config(path)
         config = request.get_json()
         track = config.get('track')
+        fn = track.get('filename')
+        path = _new_track_file_name(pathconfig, fn)
         if not track:
             raise ValueError('Must have a track to save')
-        track = pyntrack.Track(**track)
-        path = _new_track_file_name(pathconfig, track)
-        track.write(path)
+        # track = pyntrack.Track(**track)
+        _pretty_save_track_json(track, path)
         return jsonify({'filename': getrelpath(path)})
     except Exception as e:
         logger.exception('Error While Saving Track')
@@ -150,9 +166,10 @@ def save_track(path):
 def default_tracks(path):
     try:
         config = build_config(path)
+        config = main.process('extract_json', config, executor=gexec)
         config = main.process('extract', config, executor=gexec)
         config = main.process('acgt_gamma', config, executor=gexec)
-        lst = [config.get('InputCDSFile'), config.get('ModifiedOrfsFile'),
+        lst = [config.get('InputCDSFileJson'), config.get('ModifiedOrfsFile'),
                config.get('NewOrfsFile'), config.get('HitsFile')]
         return jsonify(filenames=map(getrelpath, lst))
     except Exception as e:
@@ -277,13 +294,14 @@ def build_gbk(path):
 @app.route('/acgt_gamma/<path:path>')
 def acgt_gamma(path):
     config = build_config(path)
+    config = main.process('extract_json', config, executor=gexec)
     config = main.process('extract', config, executor=gexec)
     config = main.process('acgt_gamma', config, executor=gexec)
     tid_output_directory = config['acgt_gamma_output']
     gexec.result(tid_output_directory, timeout=None)
     files = map(getrelpath, Path(tid_output_directory).listdir())
     trackPaths = map(getrelpath, [
-        config.get('InputCDSFile'),
+        config.get('InputCDSFileJson'),
         config['ModifiedOrfsFile'], config['NewOrfsFile'], config['HitsFile']])
     return jsonify(trackPaths=trackPaths, files=files)
 

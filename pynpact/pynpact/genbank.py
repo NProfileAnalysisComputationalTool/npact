@@ -3,6 +3,7 @@ import logging
 import Bio
 import Bio.GenBank
 from Bio.GenBank.Scanner import GenBankScanner
+from Bio.SeqFeature import ExactPosition
 
 
 logger = logging.getLogger(__name__)
@@ -110,6 +111,16 @@ def open_parse_seq_rec(gbkfile, reduce_first=False, do_features=False):
         return rp._consumer.data
 
 
+def _write_gbk_track_json(fh, dicts):
+    fh.write('{"name":"Input CDSs", "type":"extracts", "active":true,\n')
+    fh.write('"data":[\n')
+    for r in dicts[:-1]:
+        json.dump(r, fh)
+        fh.write(',\n')
+    json.dump(dicts[-1], fh)
+    fh.write(']}')
+
+
 def gbk_to_track_json(gbkfile, outfilename):
     rec = open_parse_seq_rec(gbkfile, do_features=True)
     rtn = []
@@ -119,15 +130,19 @@ def gbk_to_track_json(gbkfile, outfilename):
         d = feat.qualifiers.copy()
         d['start'] = feat.location.start.real
         d['end'] = feat.location.end.real
+        d['approximate'] = not(isinstance(feat.location.start, ExactPosition)
+                               and isinstance(feat.location.end, ExactPosition))
         d['complement'] = feat.location.strand == -1
+        d['type'] = 'CDS'
+        if not d.get('name'):
+            d['name'] = d.get('locus_tag')
         for (k, v) in d.items():
             if isinstance(v, list) and len(v) == 1:
-                d[k]=v[0]
+                d[k] = v[0]
         rtn.append(d)
-    with open(outfilename, 'w') as fh:
-        fh.write('[')
-        for r in rtn[:-1]:
-            json.dump(r, fh)
-            fh.write(',\n')
-        json.dump(r, fh)
-        fh.write(']')
+
+    if isinstance(outfilename, file):
+        _write_gbk_track_json(outfilename, rtn)
+    else:
+        with open(outfilename, 'w') as fh:
+            _write_gbk_track_json(outfilename, rtn)

@@ -5,12 +5,13 @@ from pynpact import parsing, executors
 
 logger = logging.getLogger('pynpact')
 
-from pynpact.steps import extract, allplots, acgt_gamma, nprofile
+from pynpact.steps import extract, extract_json, allplots, acgt_gamma, nprofile
 
 
 def resolve_verb(verb):
     "Convert the verb into something that has the plan function"
     mod = {'extract': extract,
+           'extract_json': extract_json,
            'nprofile': nprofile,
            'allplots': allplots,
            'acgt_gamma': acgt_gamma}[verb]
