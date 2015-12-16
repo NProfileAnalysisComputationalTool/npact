@@ -145,4 +145,4 @@ def gbk_to_track_json(gbkfile, outfilename):
         _write_gbk_track_json(outfilename, rtn)
     else:
         with open(outfilename, 'w') as fh:
-            _write_gbk_track_json(outfilename, rtn)
+            _write_gbk_track_json(fh, rtn)
