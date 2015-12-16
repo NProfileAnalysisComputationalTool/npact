@@ -37,6 +37,6 @@ def producer(tmpmanager=mkstemp_rename):
             if not Path(target).exists():
                 with tmpmanager(target, log=log) as tmp:
                     func(config, tmp)
-                    return target
+            return target
         return wrapper
     return getfn
