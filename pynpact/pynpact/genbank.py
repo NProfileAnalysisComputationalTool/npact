@@ -1,6 +1,7 @@
-
+import json
 import logging
-
+import Bio
+import Bio.GenBank
 from Bio.GenBank.Scanner import GenBankScanner
 
 
@@ -86,25 +87,47 @@ def parse_seq_rec(gbkfile, do_features=False):
 #         return rp._consumer.data
 
 
-# def open_parse_seq_rec(gbkfile, reduce_first=False, do_features=False):
-#     """Open the GenBank file using the underlying biopython libraries
-#     so we can get at the do_features keyword (False is generally quite
-#     a bit faster)
+def open_parse_seq_rec(gbkfile, reduce_first=False, do_features=False):
+    """Open the GenBank file using the underlying biopython libraries
+    so we can get at the do_features keyword (False is generally quite
+    a bit faster)
 
-#     Returns a SeqRecord object--the same as Bio.SeqIO.read(<file>,'genbank')
-# """
-#     if reduce_first:
-#         raise NotImplementedError("reduce_first option must be False for now")
+    Returns a SeqRecord object--the same as Bio.SeqIO.read(<file>,'genbank')"""
+    if reduce_first:
+        raise NotImplementedError("reduce_first option must be False for now")
 
-#     logger.info("Parsing genbank file (features:%s): %r",
-#                 do_features, gbkfile)
+    logger.info("Parsing genbank file (features:%s): %r",
+                do_features, gbkfile)
 
-#     #rec = GenBankScanner().parse(open('NC_007912.gbk','r'), do_features=False)
-#     #SeqIO.read(gbkfile,"genbank")
+    #rec = GenBankScanner().parse(open('NC_007912.gbk','r'), do_features=False)
+    #SeqIO.read(gbkfile,"genbank")
 
-#     with open(gbkfile, 'r') as handle:
-#         rp = Bio.GenBank.FeatureParser()
-#         rp._consumer = Bio.GenBank._FeatureConsumer(
-#             rp.use_fuzziness, rp._cleaner)
-#         rp._scanner.feed(handle, rp._consumer, do_features=do_features)
-#         return rp._consumer.data
+    with open(gbkfile, 'r') as handle:
+        rp = Bio.GenBank.FeatureParser()
+        rp._consumer = Bio.GenBank._FeatureConsumer(
+            rp.use_fuzziness, rp._cleaner)
+        rp._scanner.feed(handle, rp._consumer, do_features=do_features)
+        return rp._consumer.data
+
+
+def gbk_to_track_json(gbkfile, outfilename):
+    rec = open_parse_seq_rec(gbkfile, do_features=True)
+    rtn = []
+    for feat in rec.features:
+        if feat.type != 'CDS':
+            continue
+        d = feat.qualifiers.copy()
+        d['start'] = feat.location.start.real
+        d['end'] = feat.location.end.real
+        d['complement'] = feat.location.strand == -1
+        for (k, v) in d.items():
+            if isinstance(v, list) and len(v) == 1:
+                d[k]=v[0]
+        rtn.append(d)
+    with open(outfilename, 'w') as fh:
+        fh.write('[')
+        for r in rtn[:-1]:
+            json.dump(r, fh)
+            fh.write(',\n')
+        json.dump(r, fh)
+        fh.write(']')
