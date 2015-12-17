@@ -111,6 +111,14 @@ def open_parse_seq_rec(gbkfile, reduce_first=False, do_features=False):
         return rp._consumer.data
 
 
+def read_gbk(fn):
+    if isinstance(fn, str):
+        with open(fn) as fh:
+            return Bio.GenBank.read(fh)
+    elif isinstance(fn, file):
+        return Bio.GenBank.read(fn)
+
+
 def _write_gbk_track_json(fh, dicts):
     fh.write('{"name":"Input CDSs", "type":"extracts", "active":true,\n')
     fh.write('"data":[\n')
@@ -124,12 +132,17 @@ def _write_gbk_track_json(fh, dicts):
 def gbk_to_track_json(gbkfile, outfilename):
     rec = open_parse_seq_rec(gbkfile, do_features=True)
     rtn = []
+    cdsidx = 0
     for feat in rec.features:
         if feat.type != 'CDS':
             continue
         d = feat.qualifiers.copy()
-        d['start'] = feat.location.start.real
+        d['cdsidx'] = cdsidx
+        cdsidx += 1
+        d['start'] = feat.location.start.real + 1 # account for python off by one
         d['end'] = feat.location.end.real
+        d['start_approximate'] = not(isinstance(feat.location.start, ExactPosition))
+        d['end_approximate'] = not(isinstance(feat.location.end, ExactPosition))
         d['approximate'] = not(isinstance(feat.location.start, ExactPosition)
                                and isinstance(feat.location.end, ExactPosition))
         d['complement'] = feat.location.strand == -1
@@ -146,3 +159,22 @@ def gbk_to_track_json(gbkfile, outfilename):
     else:
         with open(outfilename, 'w') as fh:
             _write_gbk_track_json(fh, rtn)
+
+
+def _cds_to_feature(cdsdict):
+    # TODO: get this right
+    f = Bio.GenBank.Record.Feature()
+    f.key = 'CDS'
+    l = "%s..%s" % (cdsdict.get('start'), cdsdict.get('end'))
+    f.location = l
+    return f
+
+def track_json_to_gbk(gbkfile, outpath, track_json=None):
+    # TODO: INCOMPLETE
+    rec = read_gbk(gbkfile)
+    for (i, f) in enumerate(rec.features):
+        if f.key == 'CDS':
+            rec.features[i] = _cds_to_feature(f)
+    with open(outpath,'w') as fh:
+        fh.write(str(rec))
+    return rec
