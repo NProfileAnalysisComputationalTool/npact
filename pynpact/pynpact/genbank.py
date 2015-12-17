@@ -147,6 +147,7 @@ def gbk_to_track_json(gbkfile, outfilename):
                                and isinstance(feat.location.end, ExactPosition))
         d['complement'] = feat.location.strand == -1
         d['type'] = 'CDS'
+        d['phase'] = getPhase(d)
         if not d.get('name'):
             d['name'] = d.get('locus_tag')
         for (k, v) in d.items():
@@ -178,3 +179,8 @@ def track_json_to_gbk(gbkfile, outpath, track_json=None):
     with open(outpath,'w') as fh:
         fh.write(str(rec))
     return rec
+
+
+def getPhase(orf):
+    pc = orf['start'] if orf['complement'] else orf['end']
+    return (pc - 1) % 3
