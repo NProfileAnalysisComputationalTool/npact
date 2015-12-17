@@ -3,24 +3,12 @@
     <div class="container-fluid">
 
       <div class="navbar-header">
-        <span class="navbar-brand" contenteditable ng-model="zw.item.name"></span> <br>
-        on <span contenteditable ng-model="zw.track.name">
+        <span class="navbar-brand" contenteditable ng-model="zw.item.name" strip-brs="true"></span> <br>
+        on <span contenteditable ng-model="zw.track.name" strip-brs="true"></span>
       </div>
       <div class="navbar-form navbar-left">
-        <label>Phase</label>
-        <div class="btn-group btn-group-sm" role="group" aria-label="Phase">
-          <button type="button" class="btn btn-default"
-                  ng-model="zw.item.phase" uib-btn-radio="0">0</button>
-          <button type="button" class="btn btn-default"
-                  ng-model="zw.item.phase" uib-btn-radio="1">1</button>
-          <button type="button" class="btn btn-default"
-                  ng-model="zw.item.phase" uib-btn-radio="2">2</button>
-          <button type="buttn"  class="btn btn-default"
-                  ng-model="zw.phaseLock" uib-btn-checkbox
-                  title="When locked the start and end will adjust in increments of three">
-            lock</button>
-        </div>
-        <label>Strand</label>
+        <label>Phase:</label> <span>{{zw.item.phase}}</span>
+        <label>Strand:</label>
         <div class="btn-group btn-group-sm" role="group" aria-label="Phase">
           <button type="button" class="btn btn-default"
                   ng-model="zw.item.complement" uib-btn-radio="0">Direct</button>

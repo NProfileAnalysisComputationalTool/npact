@@ -1,6 +1,6 @@
 angular.module('npact')
 
-  .factory('Grapher', function($log, $q, GraphConfig, GraphingCalculator,
+  .factory('Grapher', function($log, $q, $timeout, GraphConfig, GraphingCalculator,
                         Tooltip, NProfiler, Utils, npactConstants) {
     'use strict';
     var K = Konva;
@@ -509,15 +509,33 @@ angular.module('npact')
     GP.drawORFsTrack = function(track, orfs) {
       var xaxis = this.m.xaxis,
           colors = this.colors,
-          g = new K.Group({ y: track.y }),
+          trackGroup = new K.Group({
+            y: track.y,
+            track: track,
+            name: 'orf-track'
+          }),
           arrowHeadWidth = style.tracks.arrow.width / xaxis.scaleX;
 
+      trackGroup.add(new K.Rect({
+        name: 'orf-track-hit-rectangle',
+        x: 0, width: this.endBaseM,
+        y: 0, height: track.style.height
+      }));
+
+      if(orfs && orfs.length > 0) {
+        this.orfTrackEvents(trackGroup, track);
+      }
       // Go through the list of genes in the track.
       _.forEach(orfs, function(x) {
         var width = x.end - x.start,
             baseY = 0, shape,
             headWidth = Math.min(width, arrowHeadWidth),
-            tailWidth = Math.max(width - headWidth, 0);
+            tailWidth = Math.max(width - headWidth, 0),
+            g = new K.Group({
+              draggable: true,
+              orf: x,
+              name: 'orf'
+            });
         if(x.complement === 1) {
           shape = leftArrow(width, headWidth, tailWidth);
           baseY = arrowHalfHeight;       // complement gets drawn lower
@@ -527,7 +545,6 @@ angular.module('npact')
         }
         g.add(new K.Line({
           x: x.start, y: baseY,
-          extract: x,
           points: shape, closed: true,
           stroke: track.style.light ? shadeBlend(0.7, colors[x.phase]) : colors[x.phase],
           strokeWidth: track.style.strokeWidth,
@@ -538,10 +555,10 @@ angular.module('npact')
           // need a dummy group for clipping, `Text` doesn't
           // support clip directly
           var textBounds =
-                {
-                  x: x.complement === 1 ? headWidth : 0, y:0,
-                  width: tailWidth, height: arrowHeight
-                },
+              {
+                x: x.complement === 1 ? headWidth : 0, y:0,
+                width: tailWidth, height: arrowHeight
+              },
               lblGroup = new K.Group({
                 x: x.start, y: baseY,
                 clip: textBounds,
@@ -550,7 +567,6 @@ angular.module('npact')
               lbl = new K.Text(_.assign({
                 x: textBounds.x + 1,
                 text: x.name,
-                extract: x,
                 listening: false,
                 scaleX: 1/xaxis.scaleX //undo parent scaling for readable txt
               }, style.tracks.text)),
@@ -560,29 +576,54 @@ angular.module('npact')
           g.add(lblGroup);
           lbl.setOffset({ x: Math.min(lblOffsetX, 0), y: lblOffsetY });
         }
+        trackGroup.add(g);
       }, this);
 
-      g.on('click', _.bind(function(evt) {
-        var extract  = evt.target.getAttrs().extract;
+      return trackGroup;
+    };
+
+    GP.orfTrackEvents = function (trackGroup, track) {
+      trackGroup.on('click', _.bind(function(evt) {
         this.onOrfSelected({
           type: 'ORF',
           track: track,
-          item: evt.target.getAttrs().extract,
-          start: extract.start,
-          end: extract.end,
-          complement: extract.complement,
-          phase: extract.phase,
-          name: extract.name
+          item: getScopedAttr(evt.target, 'orf')
         });
-        //evt.evt.pageX, evt.evt.pageY
       }, this));
-      return g;
+      var trackLayer = null, dragLayer = null;
+      var dragend = function (e) {
+        var pos = this.stage.getPointerPosition(),
+            dropshape = trackLayer.getIntersection(pos),
+            targetTrack = getScopedAttr(dropshape, 'track'),
+            orf = getScopedAttr(e.target, 'orf');
+        if(targetTrack && track !== targetTrack && track.type === targetTrack.type) {
+          track.remove(orf);
+          targetTrack.add(orf);
+        }
+        $timeout(_.bind(this.draw, this));
+      };
+      var dragstart = function (e) {
+        trackLayer = e.target.getLayer();
+        dragLayer = new Konva.Layer({
+          name: 'dragLayer',
+          scaleX: trackLayer.scaleX()
+        });
+        dragLayer.on('dragend', _.bind(dragend, this));
+        e.target.getStage().add(dragLayer);
+        e.target.moveTo(dragLayer);
+        trackLayer.batchDraw();
+        dragLayer.batchDraw();
+      };
+      trackGroup.on('dragstart', _.bind(dragstart, this));
     };
 
     GP.drawHitsTrack = function(track, hits) {
       var midY = (track.style.height / 2),
           offset = 2,  //how far off midline
-          g = new K.Group({ x: 0, y: track.y }),
+          g = new K.Group({
+            name: 'hits-track',
+            x: 0, y: track.y,
+            track: track}),
           colors = {
             'H': this.colors,
             //G type hits should be lighter
@@ -605,18 +646,11 @@ angular.module('npact')
         }));
       });
       g.on('click', _.bind(function(evt) {
-        var hit = evt.target.getAttrs().hit;
         this.onHitSelected({
           type: 'hit',
-          track: track,
-          item: hit,
-          start: hit.start,
-          end: hit.end,
-          complement: hit.complement,
-          phase: hit.phase,
-          name: hit.name
+          track: evt.target.getAttrs().track,
+          item: evt.target.getAttrs().hit
         });
-        //evt.evt.pageX, evt.evt.pageY
       }, this));
 
       return g;
@@ -664,6 +698,15 @@ angular.module('npact')
       if(children && children.length) {
         container.add.apply(container, children);
       }
+    }
+    function getScopedAttr(node, attr) {
+      if(!node) return null;
+      var val = node.getAttr(attr);
+      return val !== undefined ? val : getScopedAttr(node.getParent(), attr);
+    }
+
+    function getContainingGroup(node) {
+      return node.nodeType === "Group" ? node : containingGroup(node.getParent());
     }
 
     function boundingBox(container) {

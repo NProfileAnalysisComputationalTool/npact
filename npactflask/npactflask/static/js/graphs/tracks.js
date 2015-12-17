@@ -121,6 +121,14 @@ angular.module('npact')
       return (this.loading ? this.loading.then : $timeout)(_.bind(doFind, this));
     };
 
+    Track.prototype.add = function (entry) {
+      if(this.loading) {
+        throw new Error("Shouldn't be able to add to a track that doesn't exist");
+      }
+      this.data.push(entry);
+      this.reindex();
+    };
+
     Track.prototype.remove = function (entry) {
       if(this.loading) {
         throw new Error("Shouldn't be able to remove from a track before the track exists");

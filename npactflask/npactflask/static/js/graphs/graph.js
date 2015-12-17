@@ -21,9 +21,9 @@ angular.module('npact')
           $scope.$broadcast('offset', dx);
           },
           onDragEnd: function (dx) {
-          $scope.$evalAsync(function () {
-            GraphConfig.offset += dx;
-            $log.log("Finished dragging, new offset is", GraphConfig.offset);
+            $scope.$evalAsync(function () {
+              GraphConfig.offset += Math.round(dx);
+              $log.log("Finished dragging, new offset is", GraphConfig.offset);
           });
           },
           onRegionSelected: function (data) { $scope.$emit('region-selected', data); },

@@ -91,34 +91,35 @@ angular.module('npact')
       this.item = {
         name: "New",
         start: Utils.floor3(focusData.start),
-        end: Utils.ceil3(focusData.end),
+        end: Utils.ceil3(focusData.end) -1, //the end is an inclusive range
         complement: 0
       };
-      this.item.phase = getPhase(this.item);
     }
     else {
       this.item = focusData.item;
     }
     this.track = focusData.track || _.first(GraphConfig.activeTracks);
 
-    var margin = Utils.orderOfMagnitude(this.item.end - this.item.start, -1);
-    this.startBase = Utils.floor3(Math.max(this.item.start - margin, 0));
-    this.endBase = Utils.ceil3(Math.min(this.item.end + margin, GraphConfig.endBase));
+    var margin = Utils.ceil3(Utils.orderOfMagnitude(this.item.end - this.item.start, -1));
+    this.startBase = Math.max(this.item.start - margin, 0);
+    this.endBase = Math.min(this.item.end + margin, GraphConfig.endBase);
 
+    $scope.$watch(_.partial(getPhase, this.item),
+                  _.bind(function (phase) { this.item.phase = phase; }, this));
 
     $log.log("Focusing on", focusData);
     $scope.$on('offset', _.bind(function ($evt, dx) {
       $evt.stopPropagation();
       $log.log("Updating offsets", dx);
-      dx = Math.round(dx);
-      this.startBase = Utils.floor3(this.startBase + dx);
-      this.endBase = Utils.ceil3(this.endBase + dx);
+      dx = Utils.round3(dx);
+      this.startBase = this.startBase + dx;
+      this.endBase = this.endBase + dx;
       $scope.$apply();
     }, this));
     var redraw = function () { $scope.$broadcast('redraw'); };
     $scope.$watchCollection("zw.item", redraw);
     $scope.$watch('zw.track', redraw);
-
+    //Keep phase up to date with the end
 
     this.buildPermalink = function () {
       //TODO: Params to this function

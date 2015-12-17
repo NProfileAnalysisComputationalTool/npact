@@ -22,11 +22,7 @@ angular.module('npact', ['ngMessages', 'sticky', 'ngSanitize', 'ngCookies', 'ui.
         };
 
         // Listen for change events to enable binding
-        element.on('blur keyup change', function() {
-          scope.$evalAsync(read);
-        });
-        read(); // initialize
-
+        element.on('blur keyup change', function() { scope.$evalAsync(read); });
         // Write data to the model
         function read() {
           var html = element.html();

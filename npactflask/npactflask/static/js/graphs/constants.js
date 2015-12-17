@@ -25,7 +25,7 @@ angular.module('npact')
           fill: '#444'
         },
         arrow: {
-          height: 12,
+          height: 13,
           width: 6
         },
         guidelines: { stroke: '#bbb'}
