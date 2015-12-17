@@ -100,6 +100,11 @@ angular.module('npact')
       }
    };
     Track.prototype.slice = function(opts) {
+      if(this.loading) {
+        return this.loading.then(_.bind(function () {
+          return this.slice(opts);
+        }, this));
+      }
       if(this.indexing) {
         return this.indexing.then(function (index) {
           return index(opts);
