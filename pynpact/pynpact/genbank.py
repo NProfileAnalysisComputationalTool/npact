@@ -2,8 +2,9 @@ import json
 import logging
 import Bio
 import Bio.GenBank
+
 from Bio.GenBank.Scanner import GenBankScanner
-from Bio.SeqFeature import ExactPosition
+from Bio.SeqFeature import ExactPosition, BeforePosition, AfterPosition
 
 
 logger = logging.getLogger(__name__)
@@ -111,14 +112,6 @@ def open_parse_seq_rec(gbkfile, reduce_first=False, do_features=False):
         return rp._consumer.data
 
 
-def read_gbk(fn):
-    if isinstance(fn, str):
-        with open(fn) as fh:
-            return Bio.GenBank.read(fh)
-    elif isinstance(fn, file):
-        return Bio.GenBank.read(fn)
-
-
 def _write_gbk_track_json(fh, dicts):
     fh.write('{"name":"Input CDSs", "type":"extracts", "active":true,\n')
     fh.write('"data":[\n')
@@ -130,13 +123,17 @@ def _write_gbk_track_json(fh, dicts):
 
 
 def gbk_to_track_json(gbkfile, outfilename):
-    rec = open_parse_seq_rec(gbkfile, do_features=True)
+    rec = Bio.SeqIO.read(gbkfile, 'genbank')
     rtn = []
     cdsidx = 0
     for feat in rec.features:
         if feat.type != 'CDS':
             continue
-        d = feat.qualifiers.copy()
+        q = feat.qualifiers.copy()
+        for (k, v) in q.items():
+            if isinstance(v, list) and len(v) == 1:
+                q[k] = v[0]
+        d = {'qualifiers': q}
         d['cdsidx'] = cdsidx
         cdsidx += 1
         d['start'] = feat.location.start.real + 1 # account for python off by one
@@ -148,10 +145,7 @@ def gbk_to_track_json(gbkfile, outfilename):
         d['complement'] = feat.location.strand == -1
         d['type'] = 'CDS'
         if not d.get('name'):
-            d['name'] = d.get('locus_tag')
-        for (k, v) in d.items():
-            if isinstance(v, list) and len(v) == 1:
-                d[k] = v[0]
+            d['name'] = d.get('qualifiers').get('locus_tag')
         rtn.append(d)
 
     if isinstance(outfilename, file):
@@ -162,19 +156,35 @@ def gbk_to_track_json(gbkfile, outfilename):
 
 
 def _cds_to_feature(cdsdict):
-    # TODO: get this right
-    f = Bio.GenBank.Record.Feature()
-    f.key = 'CDS'
-    l = "%s..%s" % (cdsdict.get('start'), cdsdict.get('end'))
-    f.location = l
+    start_pos = cdsdict.get('start')-1
+    start = ExactPosition(start_pos)
+    if cdsdict.get('start_approximate'):
+        start = BeforePosition(start_pos)
+    end = ExactPosition(cdsdict.get('end'))
+    if cdsdict.get('end_approximate'):
+        end = AfterPosition(cdsdict.get('end'))
+
+    # these are lists in the original object
+    q = cdsdict.get('qualifiers')
+    for (k, v) in q.items():
+        if not isinstance(v, list):
+            q[k] = [v]
+    strand = -1 if cdsdict.get('complement') else 1
+    f = Bio.SeqFeature.SeqFeature(
+        type='CDS', qualifiers=q,
+        location=Bio.SeqFeature.FeatureLocation(
+            start=start, end=end, strand=strand))
     return f
 
+
 def track_json_to_gbk(gbkfile, outpath, track_json=None):
-    # TODO: INCOMPLETE
-    rec = read_gbk(gbkfile)
+    rec = Bio.SeqIO.read(gbkfile, 'genbank')
+    jsonfeats = track_json.get('data')
+    cdsidx = 0
     for (i, f) in enumerate(rec.features):
-        if f.key == 'CDS':
-            rec.features[i] = _cds_to_feature(f)
-    with open(outpath,'w') as fh:
-        fh.write(str(rec))
+        if f.type == 'CDS':
+            rec.features[i] = _cds_to_feature(jsonfeats[cdsidx])
+            cdsidx += 1
+    with open(outpath, 'w') as fh:
+        Bio.SeqIO.write(rec, fh, 'genbank')
     return rec
