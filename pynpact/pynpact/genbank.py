@@ -144,6 +144,7 @@ def gbk_to_track_json(gbkfile, outfilename):
                                and isinstance(feat.location.end, ExactPosition))
         d['complement'] = feat.location.strand == -1
         d['type'] = 'CDS'
+        d['phase'] = getPhase(d)
         if not d.get('name'):
             d['name'] = d.get('qualifiers').get('locus_tag')
         rtn.append(d)
@@ -188,3 +189,8 @@ def track_json_to_gbk(gbkfile, outpath, track_json=None):
     with open(outpath, 'w') as fh:
         Bio.SeqIO.write(rec, fh, 'genbank')
     return rec
+
+
+def getPhase(orf):
+    pc = orf['start'] if orf['complement'] else orf['end']
+    return (pc - 1) % 3

@@ -1,5 +1,6 @@
 angular.module('npact')
-  .factory('Track', function($log,  $q, $timeout, $http, Fetcher, ExtractParser, TrackBinSearchIndex, npactConstants) {
+  .factory('Track', function($log,  $q, $timeout, $http,
+                      Fetcher, ExtractParser, TrackBinSearchIndex, npactConstants) {
     'use strict';
 
     var ITrackIndex = TrackBinSearchIndex;
@@ -40,7 +41,7 @@ angular.module('npact')
       this.data = null;
       this.index = null;
       this.loading = this.loadData(data);
-      this.indexing = this.loading.then(_.bind(this.indexData, this));
+      this.reindex();
     }
 
     Track.prototype.id = function () {
@@ -51,7 +52,7 @@ angular.module('npact')
     Track.prototype.loadData = function(data) {
       var self = this;
       // console.log(data);
-      if(typeof(data) === 'string'){ // trackfile to parse
+      if(typeof(data) === 'string') { // trackfile to parse
         return (
           self.loading = ExtractParser.parseAsync(data)
             .then(function (data) {
@@ -66,12 +67,15 @@ angular.module('npact')
               return data;
             })
             .catch(function(e) { $log.log('Track.loadData failed', name, e); throw e; }));
-      }else{ // data must be parsed (probably json version of this object)
+      }
+      else { // data must be parsed (probably json version of this object)
         if(Array.isArray(data))
           self.data = data;
-        else if(data.cds || data.data)
-          self.data = data.cds || data.data;
-        return $q.when(self.data);
+        else if(data.cds)
+          self.data = data.cds;
+        else if(data.data)
+          self.data = data.data;
+        return null;
       }
     };
 
@@ -86,20 +90,21 @@ angular.module('npact')
 
     Track.prototype.reindex = function () {
       if(this.loading) {
-        //shouldn't be able to get here but if this is true then we
-        //haven't yet started indexing and nothing to do.
-        return;
+        this.loading.then(_.bind(this.indexData, this));
       }
       else if(this.indexing) {
-        this.indexing.then(_.bind(function () {
-          this.indexData(this.data);
-        }, this));
+        this.indexing.then(_.bind(this.indexData, this, this.data));
       }
       else {
         this.indexData(this.data);
       }
    };
     Track.prototype.slice = function(opts) {
+      if(this.loading) {
+        return this.loading.then(_.bind(function () {
+          return this.slice(opts);
+        }, this));
+      }
       if(this.indexing) {
         return this.indexing.then(function (index) {
           return index(opts);

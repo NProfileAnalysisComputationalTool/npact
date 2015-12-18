@@ -536,7 +536,7 @@ angular.module('npact')
               orf: x,
               name: 'orf'
             });
-        if(x.complement === 1) {
+        if(x.complement) {
           shape = leftArrow(width, headWidth, tailWidth);
           baseY = arrowHalfHeight;       // complement gets drawn lower
         }
