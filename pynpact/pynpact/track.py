@@ -9,9 +9,12 @@ class CDS (object):
         r'(?P<end_approx>>)?(?P<end>\d+)')
 
     def __init__(self, name=None, start=None, end=None,
-                 complement=False, approximate=False, line=None, **keys):
+                 complement=False, approximate=False, line=None,
+                 start_approximate=False, end_approximate=False, **keys):
         (self.name, self.start, self.end, self.complement, self.approximate,
-         self.line) = (name, start, end, complement, approximate, line)
+         self.line, self.start_approximate, self.end_approximate) = (
+             name, start, end, complement, approximate, line,
+             start_approximate, end_approximate)
         if line:
             self._loadline(line)
 
@@ -23,6 +26,8 @@ class CDS (object):
             self.start = int(d.get('start'))
             self.end = int(d.get('end'))
             self.complement = d.get('complement') is not None
+            self.start_approximate = d.get('start_approx')
+            self.end_approximate = d.get('end_approx')
             self.approximate = (d.get('start_approx') is not None
                                 or d.get('end_approx') is not None)
 
@@ -42,7 +47,7 @@ class Track(object):
         if len(self.data) > 0:
             i = 0
             for o in self.data:
-                if(o is not CDS):
+                if not isinstance(o, CDS):
                     self.data[i] = CDS(**o)
                 i += 1
         if filename and len(data) == 0:
@@ -58,6 +63,8 @@ class Track(object):
             self.metadata[k] = v
 
     def _read(self):
+        #print "Track._read %s" % len(self.data)
+        self.data = []
         with open(self.filename) as f:
             for line in f.readlines():
                 if(line.startswith('#')):
@@ -76,6 +83,12 @@ class Track(object):
                 f.write("#%s:%s\n" % (k, v))
             for o in self.data:
                 f.write(str(o))
+
+    def todict(self):
+        d = self.__dict__.copy()
+        for (i, o) in enumerate(self.data):
+            d['data'][i] = o.__dict__.copy()
+        return d
 
     def read(filename):
         return Track(filename=filename)

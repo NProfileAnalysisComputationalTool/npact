@@ -5,6 +5,7 @@ import Bio.GenBank
 
 from Bio.GenBank.Scanner import GenBankScanner
 from Bio.SeqFeature import ExactPosition, BeforePosition, AfterPosition
+import pynpact.track
 
 
 logger = logging.getLogger(__name__)
@@ -216,6 +217,37 @@ def track_json_to_gbk(gbkfile, outpath, track_json=None):
     with open(outpath, 'w') as fh:
         Bio.SeqIO.write(rec, fh, 'genbank')
     return rec
+
+
+def get_track_dicts(paths):
+    dicts=[]
+    for p in paths:
+        if p.endswith('json'):
+            with open(p) as f:
+                dicts.append(json.load(f))
+        else:
+            dicts.append(pynpact.track.Track(filename=p).todict())
+    return dicts
+
+
+def combine_track_files(paths):
+    return combine_track_jsons(get_track_dicts(paths))
+
+
+def combine_track_jsons(track_json_dicts):
+    c = {}
+
+    c.update(track_json_dicts[0])
+    c['data'] = list(c.get('data'))
+    for tr in track_json_dicts:
+        for f in tr.get('data'):
+            if 'qualifiers' not in f:
+                f['qualifiers'] = {}
+            f['qualifiers']['trackfile']=tr.get('filename')
+    print len(track_json_dicts), track_json_dicts[0].get('filename'), track_json_dicts[1].get('filename')
+    for tr in track_json_dicts[1:]:
+        c.get('data').extend(list(tr.get('data')))
+    return (c, track_json_dicts)
 
 
 def getPhase(orf):
