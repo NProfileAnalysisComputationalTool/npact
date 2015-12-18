@@ -468,12 +468,14 @@ angular.module('npact')
     };
 
     GP.oneTrack = function(track) {
-      var trackSlice = track.slice({
-              startBase: this.startBaseM,
-              endBase: this.endBaseM
-            });
-
-      return trackSlice
+      var ts;
+      if((ts = this._trackSliceCache[track.filename]) === undefined) {
+        ts = this._trackSliceCache[track.filename] = track.slice({
+          startBase: this.startBaseM,
+          endBase: this.endBaseM
+        });
+      }
+      return ts
         .then(_.bind(function(data) {
           switch(track.type) {
           case 'neworfs':
