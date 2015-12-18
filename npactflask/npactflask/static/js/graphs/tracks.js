@@ -71,10 +71,10 @@ angular.module('npact')
       else { // data must be parsed (probably json version of this object)
         if(Array.isArray(data))
           self.data = data;
-        else if(data.cds)
-          self.data = data.cds;
-        else if(data.data)
+        else if(data.data){
           self.data = data.data;
+          if(data.name) self.name = data.name;
+        }
         return null;
       }
     };

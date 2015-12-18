@@ -178,14 +178,41 @@ def _cds_to_feature(cdsdict):
     return f
 
 
+def _sort_feats(f, g):
+    s0 = f.location.start.real
+    s1 = g.location.start.real
+    if s0 == s1:
+        return 1 if f.type < g.type else -1
+    else:
+        return s0 - s1
+
+
 def track_json_to_gbk(gbkfile, outpath, track_json=None):
     rec = Bio.SeqIO.read(gbkfile, 'genbank')
     jsonfeats = track_json.get('data')
+    cdsToReplace = {}
+    cdsToAdd = []
+    cdsidxToRemove = []
+    for v in jsonfeats:
+        if v.get('cdsidx'):
+            cdsToReplace[v.get('cdsidx')] = v
+        else:
+            cdsToAdd.append(v)
     cdsidx = 0
+    feats = []
     for (i, f) in enumerate(rec.features):
         if f.type == 'CDS':
-            rec.features[i] = _cds_to_feature(jsonfeats[cdsidx])
+            if cdsidx in cdsToReplace:
+                feats.append(_cds_to_feature(cdsToReplace[cdsidx]))
             cdsidx += 1
+        else:
+            feats.append(f)
+    for cdict in cdsToAdd:
+        feats.append(_cds_to_feature(cdict))
+
+    feats.sort(cmp=_sort_feats)
+    rec.features = feats
+
     with open(outpath, 'w') as fh:
         Bio.SeqIO.write(rec, fh, 'genbank')
     return rec
