@@ -20,8 +20,6 @@ angular.module('npact')
       this.margin = Utils.orderOfMagnitude(length, -1);
       this.startBaseM = Math.max(this.startBase - this.margin, 0);
       this.endBaseM = Math.min(this.endBase + this.margin, GraphConfig.endBase);
-      this._trackSliceCache = {};
-
     }
     var GP = Grapher.prototype;
 
@@ -468,14 +466,10 @@ angular.module('npact')
     };
 
     GP.oneTrack = function(track) {
-      var ts;
-      if((ts = this._trackSliceCache[track.filename]) === undefined) {
-        ts = this._trackSliceCache[track.filename] = track.slice({
+      return track.slice({
           startBase: this.startBaseM,
           endBase: this.endBaseM
-        });
-      }
-      return ts
+        })
         .then(_.bind(function(data) {
           switch(track.type) {
           case 'neworfs':
@@ -601,8 +595,6 @@ angular.module('npact')
         if(targetTrack && track !== targetTrack && track.type === targetTrack.type) {
           track.remove(orf);
           targetTrack.add(orf);
-          delete this._trackSliceCache[track.filename];
-          delete this._trackSliceCache[targetTrack.filename];
         }
         $timeout(_.bind(this.draw, this));
       };
