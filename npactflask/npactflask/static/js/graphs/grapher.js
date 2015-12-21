@@ -601,6 +601,8 @@ angular.module('npact')
         if(targetTrack && track !== targetTrack && track.type === targetTrack.type) {
           track.remove(orf);
           targetTrack.add(orf);
+          delete this._trackSliceCache[track.filename];
+          delete this._trackSliceCache[targetTrack.filename];
         }
         $timeout(_.bind(this.draw, this));
       };
