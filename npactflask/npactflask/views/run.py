@@ -284,13 +284,12 @@ def getpdf(path):
     return send_file(pdf, as_attachment=True)
 
 
-
-
 def _new_gbk_file_name(pathconfig):
     dt = datetime.datetime.now()
     ds = re.sub(r':|\.|-', '_', dt.isoformat("_"))
     fn = parsing.derive_filename(pathconfig, ds, "gbk")
     return fn
+
 
 @app.route('/build_gbk/<path:path>')
 def build_gbk(path):
