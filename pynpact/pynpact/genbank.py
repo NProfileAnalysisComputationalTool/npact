@@ -235,11 +235,10 @@ def combine_track_files(paths, root=None):
     if root:
         paths = [os.path.join(root, p) for p in paths]
     res = combine_track_jsons(get_track_dicts(paths))
-    print res
     if root and res.get('data'):
         for d in res.get('data'):
             q = d.get('qualifiers')
-            if q:
+            if q and q.get('trackfile'):
                 q['trackfile'] = q['trackfile'].replace(root, '')
     return res
 
