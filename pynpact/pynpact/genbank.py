@@ -1,5 +1,6 @@
 import json
 import logging
+import os.path
 import Bio
 import Bio.GenBank
 
@@ -230,8 +231,17 @@ def get_track_dicts(paths):
     return dicts
 
 
-def combine_track_files(paths):
-    return combine_track_jsons(get_track_dicts(paths))
+def combine_track_files(paths, root=None):
+    if root:
+        paths = [os.path.join(root, p) for p in paths]
+    res = combine_track_jsons(get_track_dicts(paths))
+    print res
+    if root and res.get('data'):
+        for d in res.get('data'):
+            q = d.get('qualifiers')
+            if q:
+                q['trackfile'] = q['trackfile'].replace(root, '')
+    return res
 
 
 def combine_track_jsons(track_json_dicts):
@@ -239,15 +249,20 @@ def combine_track_jsons(track_json_dicts):
 
     c.update(track_json_dicts[0])
     c['data'] = list(c.get('data'))
+    if not track_json_dicts:
+        return None
     for tr in track_json_dicts:
+        if not tr.get('data'):
+            continue
         for f in tr.get('data'):
             if 'qualifiers' not in f:
                 f['qualifiers'] = {}
             f['qualifiers']['trackfile']=tr.get('filename')
-    print len(track_json_dicts), track_json_dicts[0].get('filename'), track_json_dicts[1].get('filename')
+    # print len(track_json_dicts), track_json_dicts[0].get('filename'), track_json_dicts[1].get('filename')
     for tr in track_json_dicts[1:]:
         c.get('data').extend(list(tr.get('data')))
-    return (c, track_json_dicts)
+    return c
+    #return (c, track_json_dicts)
 
 
 def getPhase(orf):

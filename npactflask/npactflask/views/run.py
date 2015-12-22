@@ -15,6 +15,7 @@ from flask_mail import Message, email_dispatched
 from werkzeug.exceptions import NotFound
 from pynpact import main, parsing, util, executors
 from pynpact import track as pyntrack
+from pynpact import genbank
 from npactflask import app, mail
 from npactflask.views import getabspath, getrelpath
 
@@ -24,7 +25,7 @@ gexec = executors.GeventExecutor()
 logger = app.logger
 VALID_KEYS = ('first_page_title', 'following_page_title', 'nucleotides',
               'significance', 'alternate_colors', 'startBase', 'endBase',
-              'basesPerGraph', 'x-tics', 'mycoplasma')
+              'basesPerGraph', 'x-tics', 'mycoplasma', 'trackPaths')
 MAGIC_PARAMS = ('raiseerror', 'force')
 
 
@@ -118,9 +119,9 @@ def translate():
         return flask.make_response(repr(e), 500)
 
 
-def _upload_root():
+def _upload_root(*rest):
     # TODO: whats the actual application root?
-    return os.path.join(os.path.abspath(os.curdir), 'webroot/uploads')
+    return os.path.join(os.path.abspath(os.curdir), 'webroot/uploads', *rest)
 
 
 def _new_track_file_name(pathconfig, gbkfilename):
@@ -285,10 +286,25 @@ def getpdf(path):
 
 
 
+def _new_gbk_file_name(pathconfig):
+    dt = datetime.datetime.now()
+    ds = re.sub(r':|\.|-', '_', dt.isoformat("_"))
+    fn = parsing.derive_filename(pathconfig, ds, "gbk")
+    return fn
+
 @app.route('/build_gbk/<path:path>')
 def build_gbk(path):
-    config = build_config(path)
-    pass
+    pathconfig = build_config(path)
+    path = _new_gbk_file_name(pathconfig)
+    tracks = pathconfig.get('trackPaths')
+
+    if not tracks:
+        s = StringIO()
+        json.dump(pathconfig, s)
+        raise ValueError("No tracks provided for building GBK: "+s.getvalue())
+    tracks = genbank.combine_track_files(tracks.split(','), root=_upload_root())
+    genbank.track_json_to_gbk(pathconfig['filename'], path, tracks)
+    return send_file(path, as_attachment=True)
 
 
 @app.route('/acgt_gamma/<path:path>')
