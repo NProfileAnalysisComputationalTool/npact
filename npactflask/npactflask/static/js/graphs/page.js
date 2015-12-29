@@ -180,6 +180,7 @@ angular.module('npact')
         acgt_gamma_promise.catch(function(e) {
           MessageBus.danger('Failure while identifying significant 3-base periodicities');
         }));
+      return acgt_gamma_promise;
     };
 
     $rootScope.$watch(

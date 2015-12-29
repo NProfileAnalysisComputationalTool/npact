@@ -18,6 +18,8 @@ th,td { padding: 3px; }
 ul { list-style: none; margin: 0; padding: 0; }
 .panel-body ul { margin: 0 20px; }
 
+.clearer, .killfloat, .kill-float {clear:both; color:transparent; background-color:transparent;}
+
 p#dept {
    position: relative;
    height: 40px;
@@ -436,7 +438,8 @@ checkbox-list#profile-options>label {
 .zoomwindow .navbar { margin-bottom:6px;}
 .zoomwindow .navbar .navbar-header {max-width:200px;}
 .zoomwindow .navbar .navbar-form {  padding: 0; }
-.zoomwindow .navbar label { margin-left: 6px; }
+   .zoomwindow .navbar label { margin-left: 6px; }
+   .zoomwindow .persist.buttons{float:left;}
 
 
 /* Form styles */

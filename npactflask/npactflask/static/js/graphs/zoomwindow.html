@@ -36,6 +36,16 @@
           <li><a href="#"><span class="glyphicon glyphicon-new-window"></span>pBLAST</a></li>
         </ul>
       </div>
+      <div class="persist buttons">
+        <button ng-click="zw.save(zw.track)"> Save </button>
+        <button confirmed-click="zw.cancel()"
+                np-confirm-click="Are you sure you want to discard your changes?">
+          Cancel </button>
+        <button confirmed-click="zw.delete(zw.item, zw.track)"
+                np-confirm-click="Are you sure you wish to remove this ORF/CDS">
+          Delete </button>
+      </div>
+      <div class="clearer"></div>
     </div>
   </nav>
   <div class="container-fluid">

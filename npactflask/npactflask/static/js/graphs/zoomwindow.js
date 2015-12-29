@@ -18,37 +18,37 @@ angular.module('npact')
      *
      */
     this.deserialize = function () {
-      var search = $location.search();
-      if(search['zoom-start'] === undefined) return null;
+      if(!(GraphConfig.zoomTrack && GraphConfig.zoomIdx >= 0))
+        return null;
+
+      var track = GraphConfig.findTrack(GraphConfig.zoomTrack);
+      var cds = track.data[GraphConfig.zoomIdx];
+      //$log.log('loading', GraphConfig.zoomTrack, GraphConfig.zoomIdx,track, cds);
       var focusData = {
-        type: search['zoom-type'],
-        track: GraphConfig.findTrack(search['zoom-trackName']),
-        start: Number(search['zoom-start']),
-        end: Number(search['zoom-end']),
-        complement: Number(search['zoom-complement']),
-        phase: Number(search['zoom-phase']),
-        name: search['zoom-name']
+        type: 'orf',
+        track: track,
+        start: cds.start,
+        end: cds.end,
+        complement: cds.complement,
+        phase: cds.phase,
+        name: cds.name,
+        item: cds
       };
-      if(focusData.track && focusData.type === 'orf') {
-        focusData.track.findByName(focusData.name);
-      }
       return focusData;
     };
     this.serialize = function (focusData) {
-      $location.search('zoom-type', focusData.type);
-      if(focusData.track) $location.search('zoom-trackName', focusData.track.name);
-      $location.search('zoom-start', focusData.start);
-      $location.search('zoom-end', focusData.end);
-      $location.search('zoom-complement', focusData.complement);
-      $location.search('zoom-phase', focusData.phase);
-      $location.search('zoom-name', focusData.name);
-      $log.debug("Finished serializing focusdata, final url", $location.absUrl());
+      $log.log('Serializing: ', focusData, focusData.track.filename, focusData.item.cdsidx);
+      if(!focusData) return $location.absUrl();
+      if(focusData.track)
+        GraphConfig.zoomTrack = focusData.track.filename;
+      if(focusData.item && focusData.item.cdsidx>=0)
+        GraphConfig.zoomIdx = focusData.item.cdsidx;
       return $location.absUrl();
     };
     this.clearQuery = function () {
-      $log.log("Clearing FocusData from querystring");
-      this.serialize({});
-      $location.search('zoom-trackName', undefined);
+      //$log.log("Clearing FocusData from querystring");
+      GraphConfig.zoomTrack=null;
+      GraphConfig.zoomIdx = null;
     };
   })
   .service('ZoomWindowHandler', function ($log, $uibModal, FocusData, STATIC_BASE_URL) {
@@ -64,10 +64,12 @@ angular.module('npact')
 
     this.maybePopup = function () {
       var fd = FocusData.deserialize();
+      //console.log('maybe popup', fd);
       if(fd) this.popup(fd);
     };
     this.popup = function (focusData, modalopts) {
       $log.log("popping!", focusData, modalopts);
+      FocusData.serialize(focusData);
       var modalDefaults = {
         templateUrl: STATIC_BASE_URL + 'js/graphs/zoomwindow.html',
         controller: 'ZoomWindowCtrl',
@@ -84,9 +86,41 @@ angular.module('npact')
     };
   })
   .controller('ZoomWindowCtrl', function ($scope, $log, FocusData, focusData, getPhase,
-                                   GraphConfig, Utils) {
+                                   GraphConfig, Utils, $location, $uibModalInstance,
+                                   $window
+                                  ) {
+    //$log.log('ZoomWindowCtrl', focusData);
     var type = focusData.type;
+    var self = this;
     this.data = focusData;
+    this.cancel = function() {
+      console.log('Cancelling track edit');
+      $window.location.reload();
+    };
+    this.save = function(track) {
+      console.log('saving track', track);
+      track.save().then(function(newtr){
+        self.data.track = newtr;
+        FocusData.serialize(self.data);
+        var idx = null;
+        _.each(GraphConfig.tracks,function(t, i) {
+          if(t.filename==track.filename) idx=i;
+        });
+        if(!idx) idx=GraphConfig.tracks.length;
+        GraphConfig.tracks.splice(idx, 1, newtr);
+      });
+    };
+    this.delete = function(orf, track) {
+      console.log('deleting orf', orf, track);
+      var idx = orf.cdsidx;
+      var tr = track;
+      tr.data.splice(idx,1);
+      _.each(tr.data, function(orf, k) {
+        if(idx < orf.cdsidx) orf.cdsidx--;
+      });
+      self.save(self.track);
+      $uibModalInstance.dismiss();
+    };
     if(type === 'region') {
       this.item = {
         name: "New",
@@ -107,7 +141,7 @@ angular.module('npact')
     $scope.$watch(_.partial(getPhase, this.item),
                   _.bind(function (phase) { this.item.phase = phase; }, this));
 
-    $log.log("Focusing on", focusData);
+    //$log.log("Focusing on", focusData);
     $scope.$on('offset', _.bind(function ($evt, dx) {
       $evt.stopPropagation();
       $log.log("Updating offsets", dx);
@@ -123,22 +157,10 @@ angular.module('npact')
 
     this.buildPermalink = function () {
       //TODO: Params to this function
-      return FocusData.serialize();
+      window.focusData = focusData;
+      return FocusData.serialize(focusData);
     };
-  })
 
-  .directive('zwPermalink', function ($log, $location, FocusData) {
-    return {
-      restrict: 'A',
-      scope: {
-        data: '&zwPermalink'
-      },
-      link: function ($scope, $element, attrs) {
-        $element.on('mouseenter focus', function () {
-          $element.attr('href', FocusData.serialize($scope.data()));
-        });
-      }
-    };
   })
 
   .directive('npactSingleGraph', function($log, $timeout,

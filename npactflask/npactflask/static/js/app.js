@@ -90,6 +90,9 @@ angular.module('npact', ['ngMessages', 'sticky', 'ngSanitize', 'ngCookies', 'ui.
           $log.debug("Updated lazyHref to", newUrl);
           $element.attr('href', newUrl);
         });
+        $scope.$on('$destroy', function() {
+          $element.off('mouseenter focus');
+        });
       }
     };
   })

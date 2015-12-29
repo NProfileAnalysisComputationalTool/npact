@@ -1,4 +1,20 @@
 angular.module('npact')
+
+  .directive('npConfirmClick', function(){
+    //http://stackoverflow.com/questions/18313576/confirmation-dialog-on-ng-click-angularjs
+    return {
+      link: function (scope, element, attr) {
+        var msg = attr.npConfirmClick || "Are you sure?";
+        var clickAction = attr.confirmedClick;
+        element.bind('click',function (event) {
+          if ( window.confirm(msg) ) {
+            console.log('applying confirmedclick', clickAction);
+            scope.$eval(clickAction);
+          }
+        });
+      }
+    };
+  })
   .service('Utils', function($q, $timeout, $log) {
     'use strict';
     // sigil value for quitting forEachAsync

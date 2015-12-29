@@ -59,8 +59,12 @@ angular.module('npact')
               $log.log("Finished parsing", self.name, ", found ", data.length);
               self.data = [];
               self.metadata = {};
+              var cdsidx = 0;
               _.each(data, function(v, k) {
-                if(v.type === 'CDS') self.data.push(v);
+                if(v.type === 'CDS'){
+                  self.data.push(v);
+                  v.cdsidx = cdsidx++;
+                }
                 else if(v.type === 'META') self.metadata[k]=v;
               });
               self.loading = false;

@@ -2,7 +2,7 @@ angular.module('npact')
   .constant('PUBLIC_CONFIG_KEYS',
             ['first_page_title', 'following_page_title', 'nucleotides',
              'significance', 'startBase', 'endBase', 'basesPerGraph',
-             'offset', 'mycoplasma'])
+             'offset', 'mycoplasma', 'zoomTrack', 'zoomIdx'])
 
   .service('GraphConfig', function(Err, npactConstants, Evt, PUBLIC_CONFIG_KEYS, Track,
                             $location, $log, $rootScope, $cookies, $window) {
@@ -85,7 +85,9 @@ angular.module('npact')
      * do we have a track with a given name?
      */
     this.findTrack = function(name){
-      return _.find(self.tracks, {name: name});
+      return _.find(self.tracks,function(tr) {
+        return tr.name == name || tr.filename == name;
+      });
     };
 
     /**
