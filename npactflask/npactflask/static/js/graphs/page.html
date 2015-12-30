@@ -43,7 +43,7 @@
               Original GBK: {{GraphConfig.filename}}</a></p>
             <h4 id="downloads-tracks">Tracks</h4>
             <ul >
-              <li ng-repeat="tr in GraphConfig.tracks">
+              <li ng-repeat="tr in GraphConfig.tracks track by tr.filename">
                 <a href="{{FETCH_BASE_URL}}{{tr.filename}}">{{tr.name}}</a>
               </li>
             </ul>

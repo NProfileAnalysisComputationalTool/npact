@@ -81,13 +81,16 @@ angular.module('npact')
         animation: true,
         size: 'lg'
       };
-      $uibModal.open(_.assign(modalDefaults, modalopts)).result
-        .finally( _.bind(FocusData.clearQuery, FocusData));
+      GraphConfig.zoomwindow = $uibModal.open(_.assign(modalDefaults, modalopts));
+      GraphConfig.zoomwindow.result.finally( function() {
+        FocusData.clearQuery();
+        GraphConfig.zoomwindow = null;
+      });
     };
   })
   .controller('ZoomWindowCtrl', function ($scope, $log, FocusData, focusData, getPhase,
                                    GraphConfig, Utils, $location, $uibModalInstance,
-                                   $window
+                                   $window, Evt
                                   ) {
     //$log.log('ZoomWindowCtrl', focusData);
     var type = focusData.type;
@@ -99,7 +102,7 @@ angular.module('npact')
     };
     this.save = function(track) {
       console.log('saving track', track);
-      track.save().then(function(newtr){
+      return track.save().then(function(newtr){
         self.data.track = newtr;
         FocusData.serialize(self.data);
         var idx = null;
@@ -108,18 +111,14 @@ angular.module('npact')
         });
         if(!idx) idx=GraphConfig.tracks.length;
         GraphConfig.tracks.splice(idx, 1, newtr);
+        $scope.$broadcast(Evt.REDRAW);
+        $uibModalInstance.dismiss();
       });
     };
     this.delete = function(orf, track) {
       console.log('deleting orf', orf, track);
-      var idx = orf.cdsidx;
-      var tr = track;
-      tr.data.splice(idx,1);
-      _.each(tr.data, function(orf, k) {
-        if(idx < orf.cdsidx) orf.cdsidx--;
-      });
-      self.save(self.track);
-      $uibModalInstance.dismiss();
+      self.track.remove(orf);
+      return self.save(self.track);
     };
     if(type === 'region') {
       this.item = {

@@ -86,6 +86,9 @@ angular.module('npact')
     Track.prototype.indexData = function(data) {
       return (
         this.indexing = $timeout(_.bind(function () {
+          _.each(this.data, function(orf, k) {
+            orf.cdsidx = k;
+          });
           this.indexing = false;
           return (this.index = ITrackIndex(data));
         }, this))
@@ -139,6 +142,7 @@ angular.module('npact')
     };
 
     Track.prototype.remove = function (entry) {
+      if(!entry) return;
       if(this.loading) {
         throw new Error("Shouldn't be able to remove from a track before the track exists");
       }
