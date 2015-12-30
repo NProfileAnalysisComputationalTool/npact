@@ -51,10 +51,10 @@ angular.module('npact')
       var llp = this.leftLayer(this.stage);
       var flp = this.frameLayer(this.stage);
       var glp = this.genomeLayer(this.stage);
-      return $q.all([llp, flp, glp])
-        .then(_.bind(function() {
+      return $q.all([llp, flp, glp]);
+        /*.then(_.bind(function() {
           $log.log("Finished draw at", this.startBase, "in", new Date() - t1);
-        }, this));
+        }, this));*/
     };
 
     GP._onProfilePoints = null;

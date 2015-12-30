@@ -22,14 +22,16 @@ angular.module('npact', ['ngMessages', 'sticky', 'ngSanitize', 'ngCookies', 'ui.
         };
 
         // Listen for change events to enable binding
-        element.on('blur keyup change', function() { scope.$evalAsync(read); });
+        element.on('blur keyup change',
+                   _.debounce(function() { scope.$evalAsync(read); }, 400));
         // Write data to the model
         function read() {
           var html = element.html();
           // When we clear the content editable the browser leaves a <br> behind
           // If strip-br attribute is provided then we strip this out
-          if (attrs.stripBr) {
-            html = html.replace(/<br>$/, '');
+          var before = html;
+          if (attrs.stripTags) {
+            html = html.replace(/<[^>]*>|&[^;]*;/gi, '');
           }
           ngModel.$setViewValue(html);
         }

@@ -51,23 +51,24 @@ angular.module('npact')
       GraphConfig.zoomIdx = null;
     };
   })
-  .service('ZoomWindowHandler', function ($log, $uibModal, FocusData, STATIC_BASE_URL) {
+  .service('ZoomWindowHandler', function ($log, $uibModal, FocusData, STATIC_BASE_URL, Evt) {
 
     this.register = function ($scope) {
       $scope.$on('ORF-selected',
-                 _.bind(function (evt, data) { this.popup(data); }, this));
+                 _.bind(function (evt, data) { this.popup(data,null, $scope); }, this));
       $scope.$on('hit-selected',
-                 _.bind(function (evt, data) { this.popup(data); }, this));
+                 _.bind(function (evt, data) { this.popup(data,null, $scope); }, this));
       $scope.$on('region-selected',
-                 _.bind(function (evt, data) { this.popup(data); }, this));
+                 _.bind(function (evt, data) { this.popup(data,null, $scope); }, this));
     };
 
-    this.maybePopup = function () {
+    this.maybePopup = function ($scope) {
       var fd = FocusData.deserialize();
       //console.log('maybe popup', fd);
-      if(fd) this.popup(fd);
+      if(fd) return this.popup(fd,null, $scope);
+      return null;
     };
-    this.popup = function (focusData, modalopts) {
+    this.popup = function (focusData, modalopts, $scope) {
       $log.log("popping!", focusData, modalopts);
       FocusData.serialize(focusData);
       var modalDefaults = {
@@ -82,16 +83,19 @@ angular.module('npact')
         size: 'lg'
       };
       GraphConfig.zoomwindow = $uibModal.open(_.assign(modalDefaults, modalopts));
-      GraphConfig.zoomwindow.result.finally( function() {
+      GraphConfig.zoomwindow.result.catch(function() {
+        // when exiting the window, data may have changed that requires a redraw
+        $scope.$broadcast(Evt.REDRAW);
+      }).finally( function() {
         FocusData.clearQuery();
         GraphConfig.zoomwindow = null;
       });
+      return GraphConfig.zoomwindow.result;
     };
   })
   .controller('ZoomWindowCtrl', function ($scope, $log, FocusData, focusData, getPhase,
                                    GraphConfig, Utils, $location, $uibModalInstance,
-                                   $window, Evt
-                                  ) {
+                                   $window ) {
     //$log.log('ZoomWindowCtrl', focusData);
     var type = focusData.type;
     var self = this;
@@ -102,18 +106,8 @@ angular.module('npact')
     };
     this.save = function(track) {
       console.log('saving track', track);
-      return track.save().then(function(newtr){
-        self.data.track = newtr;
-        FocusData.serialize(self.data);
-        var idx = null;
-        _.each(GraphConfig.tracks,function(t, i) {
-          if(t.filename==track.filename) idx=i;
-        });
-        if(!idx) idx=GraphConfig.tracks.length;
-        GraphConfig.tracks.splice(idx, 1, newtr);
-        $scope.$broadcast(Evt.REDRAW);
-        $uibModalInstance.dismiss();
-      });
+      $uibModalInstance.dismiss();
+      return track.save();
     };
     this.delete = function(orf, track) {
       console.log('deleting orf', orf, track);
@@ -193,15 +187,7 @@ angular.module('npact')
           g = new Grapher($element, $scope, opts);
           return g.draw();
         };
-        var scheduled = false,
-            schedule = function () {
-              if(scheduled) return;
-              scheduled = true;
-              $timeout(function () {
-                draw();
-                scheduled=false;
-              });
-            };
+        var schedule = _.debounce(function () {$timeout(draw);},400);
         $scope.$on('redraw', schedule);
         $scope.$watchGroup(['startBase', 'endBase'], schedule);
         $scope.$watch(function() {return $element.width();}, schedule);

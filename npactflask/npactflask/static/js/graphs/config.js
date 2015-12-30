@@ -4,7 +4,7 @@ angular.module('npact')
              'significance', 'startBase', 'endBase', 'basesPerGraph',
              'offset', 'mycoplasma', 'zoomTrack', 'zoomIdx'])
 
-  .service('GraphConfig', function(Err, npactConstants, Evt, PUBLIC_CONFIG_KEYS, Track,
+  .service('GraphConfig', function(Err, npactConstants, Evt, PUBLIC_CONFIG_KEYS,
                             $location, $log, $rootScope, $cookies, $window) {
     'use strict';
     var self = this;
@@ -88,15 +88,6 @@ angular.module('npact')
       return _.find(self.tracks,function(tr) {
         return tr.name == name || tr.filename == name;
       });
-    };
-
-    /**
-     * register a track to be displayed on the graph
-     */
-    this.loadTrack = function(track) {
-      $log.log('loading new track', track.name);
-      _.remove(self.tracks, {name: track.name});  //mutates
-      self.tracks.push(track);
     };
   })
 

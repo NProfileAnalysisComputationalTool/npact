@@ -1,6 +1,7 @@
 angular.module('npact')
   .factory('Track', function($log,  $q, $timeout, $http,
-                      Fetcher, ExtractParser, TrackBinSearchIndex, npactConstants) {
+                      Fetcher, ExtractParser, TrackBinSearchIndex, npactConstants,
+                      GraphConfig) {
     'use strict';
 
     var ITrackIndex = TrackBinSearchIndex;
@@ -164,6 +165,11 @@ angular.module('npact')
           var tr = _.create(Track.prototype, track);
           tr.filename = res.data.filename;
           Track.loadedTracks[tr.filename] = $q.when(tr);
+          var idx = null;
+          GraphConfig.tracks = _.map(GraphConfig.tracks,function(t, i) {
+            if(t.filename==track.filename) return tr;
+            return t;
+          });
           return tr;
         });
     };
@@ -176,11 +182,13 @@ angular.module('npact')
     };
 
     Track.fetchTrack = function(filename){
-      console.log('fetchTrack ', filename);
       var tr = Track.loadedTracks[filename];
       if(!tr) {
+        console.log('fetchTrack ', filename);
         tr = Track.loadedTracks[filename] = Fetcher.pollThenFetch(filename)
           .then(function(data) { return new Track(filename, data); });
+      }else{
+        console.log('already fetched ', filename);
       }
       return tr;
     };

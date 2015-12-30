@@ -4,7 +4,7 @@
 
       <div class="navbar-header">
         <span class="navbar-brand" contenteditable ng-model="zw.item.name" strip-brs="true"></span> <br>
-        on <span contenteditable ng-model="zw.track.name" strip-brs="true"></span>
+        on <span contenteditable ng-model="zw.track.name" strip-tags="true"></span>
       </div>
       <div class="navbar-form navbar-left">
         <label>Phase:</label> <span>{{zw.item.phase}}</span>
@@ -40,7 +40,7 @@
         <button ng-click="zw.save(zw.track)"> Save </button>
         <button confirmed-click="zw.cancel()"
                 np-confirm-click="Are you sure you want to discard your changes?">
-          Cancel </button>
+          Reset </button>
         <button confirmed-click="zw.delete(zw.item, zw.track)"
                 np-confirm-click="Are you sure you wish to remove this ORF/CDS">
           Delete </button>
