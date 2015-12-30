@@ -579,38 +579,52 @@ angular.module('npact')
     };
 
     GP.orfTrackEvents = function (trackGroup, track) {
-      trackGroup.on('click', _.bind(function(evt) {
-        this.onOrfSelected({
+      var self = this;
+      var orfClick = function(evt) {
+        self.onOrfSelected({
           type: 'ORF',
           track: track,
           item: getScopedAttr(evt.target, 'orf')
         });
-      }, this));
+      };
+      trackGroup.on('click', orfClick);
+      var startPos =null;
       var trackLayer = null, dragLayer = null;
+      var isShortDrag = function(start, end){
+        var dy = end.y-start.y, dx = end.x-start.x;
+        return dy<8 && dx < 25;
+      };
       var dragend = function (e) {
-        var pos = this.stage.getPointerPosition(),
+        var pos = self.stage.getPointerPosition(),
             dropshape = trackLayer.getIntersection(pos),
             targetTrack = getScopedAttr(dropshape, 'track'),
             orf = getScopedAttr(e.target, 'orf');
-        if(targetTrack && track !== targetTrack && track.type === targetTrack.type) {
-          track.remove(orf);
-          targetTrack.add(orf);
+        if(isShortDrag(startPos, pos)){
+          console.log('short drag, click instead');
+          orfClick(e);
         }
-        $timeout(_.bind(this.draw, this));
+        else if(targetTrack && track !== targetTrack
+                && track.type === targetTrack.type) {
+          targetTrack.add(_.clone(orf));
+          targetTrack.save();
+        }
+        $timeout(_.bind(self.draw, self));
+        return true;
       };
       var dragstart = function (e) {
+        startPos = self.stage.getPointerPosition();
         trackLayer = e.target.getLayer();
         dragLayer = new Konva.Layer({
           name: 'dragLayer',
           scaleX: trackLayer.scaleX()
         });
-        dragLayer.on('dragend', _.bind(dragend, this));
+        dragLayer.on('dragend', dragend);
         e.target.getStage().add(dragLayer);
         e.target.moveTo(dragLayer);
         trackLayer.batchDraw();
         dragLayer.batchDraw();
       };
-      trackGroup.on('dragstart', _.bind(dragstart, this));
+      trackGroup.on('dragstart', dragstart);
     };
 
     GP.drawHitsTrack = function(track, hits) {
