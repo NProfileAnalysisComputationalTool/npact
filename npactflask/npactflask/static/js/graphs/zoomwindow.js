@@ -1,8 +1,4 @@
 angular.module('npact')
-
-// {type: 'region', start: 0, end: 10}
-// {type: 'hit}
-
   .service('FocusData', function ($log, $location, GraphConfig) {
     /**
      * focusData interface:
@@ -41,7 +37,7 @@ angular.module('npact')
       if(!focusData) return $location.absUrl();
       if(focusData.track)
         GraphConfig.zoomTrack = focusData.track.filename;
-      if(focusData.item && focusData.item.cdsidx>=0)
+      if(focusData.item && focusData.item.cdsidx >= 0)
         GraphConfig.zoomIdx = focusData.item.cdsidx;
       return $location.absUrl();
     };
@@ -64,8 +60,7 @@ angular.module('npact')
 
     self.maybePopup = function ($scope) {
       var fd = FocusData.deserialize();
-      //console.log('maybe popup', fd);
-      if(fd) return self.popup(fd,null, $scope);
+      if(fd) return self.popup(fd, null, $scope);
       return null;
     };
     self.popup = function (focusData, modalopts, $scope) {
@@ -126,8 +121,8 @@ angular.module('npact')
       this.item = focusData.item;
     }
     this.track = focusData.track || _.first(GraphConfig.activeTracks);
-
-    var margin = Utils.ceil3(Utils.orderOfMagnitude(this.item.end - this.item.start, -1));
+    var length = this.item.end - this.item.start;
+    var margin = Utils.ceil3(Utils.orderOfMagnitude(length, -1));
     this.startBase = Math.max(this.item.start - margin, 0);
     this.endBase = Math.min(this.item.end + margin, GraphConfig.endBase);
 
@@ -187,7 +182,7 @@ angular.module('npact')
           g = new Grapher($element, $scope, opts);
           return g.draw();
         };
-        var schedule = _.debounce(function () {$timeout(draw);},400);
+        var schedule = _.debounce(function () {$timeout(draw);}, 400);
         $scope.$on('redraw', schedule);
         $scope.$watchGroup(['startBase', 'endBase'], schedule);
         $scope.$watch(function() {return $element.width();}, schedule);

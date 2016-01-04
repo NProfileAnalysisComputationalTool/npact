@@ -87,10 +87,8 @@ angular.module('npact')
     Track.prototype.indexData = function(data) {
       return (
         this.indexing = $timeout(_.bind(function () {
-          _.each(this.data, function(orf, k) {
-            orf.cdsidx = k;
-          });
           this.indexing = false;
+          _.each(this.data, function(orf, k) { orf.cdsidx = k; });
           return (this.index = ITrackIndex(data));
         }, this))
           .catch(function(e) { $log.log('Track.indexData failed', name, e); throw e; }));
