@@ -614,7 +614,7 @@ angular.module('npact')
           targetTrack.add(_.clone(orf));
           targetTrack.save();
         }
-        $timeout(_.bind(self.draw, self));
+        $timeout(_.bind(self.draw, self), 0, false);
         return true;
       };
       var dragstart = function (e) {

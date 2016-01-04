@@ -90,7 +90,7 @@ angular.module('npact')
           this.indexing = false;
           _.each(this.data, function(orf, k) { orf.cdsidx = k; });
           return (this.index = ITrackIndex(data));
-        }, this))
+        }, this), false)
           .catch(function(e) { $log.log('Track.indexData failed', name, e); throw e; }));
     };
 
@@ -266,7 +266,7 @@ angular.module('npact')
             leftPointerIdx++;
           }
           return _.slice(byStart, leftIdx, rightIdx);
-        });
+        }, false);
       };
     };
   })

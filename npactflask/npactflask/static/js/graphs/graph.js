@@ -50,7 +50,7 @@ angular.module('npact')
     }, this), 1000/30);
     $win.on('resize', onResize);
     $scope.$on('$destroy', function () { $win.off('resize', onResize); });
-    $timeout(onResize, 100);
+    $timeout(onResize, 100, false);
 
     $scope.$watch(function () { return GraphConfig.basesPerGraph; }, updateMetrics);
     $scope.$watchCollection(GraphConfig.activeTracks, function (val, old) {
@@ -261,7 +261,7 @@ angular.module('npact')
             $log.log('gotoBase triggered redraw:', startBase, id);
             redraw = true;
             schedule();
-            $timeout(scrollToHere());
+            $timeout(scrollToHere, 0, false);
           }
           else if(_.isFinite(fromBase) && startBase <= fromBase && fromBase <= endBase) {
             redraw = true;
