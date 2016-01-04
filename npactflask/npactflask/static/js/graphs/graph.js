@@ -104,7 +104,7 @@ angular.module('npact')
         var draw = _.throttle(function () {
           updateVisibility();
           $scope.$broadcast(Evt.DRAW);
-        }, 1000/30);
+        }, 1000/20);
 
         $scope.$on('updateRowHeight', function ($evt, height) {
           $log.debug("Updating graphHeight to", height);
