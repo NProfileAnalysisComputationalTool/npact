@@ -91,45 +91,60 @@ angular.module('npact')
       //done by the `slice` function
 
       // get local references to avoid dictionary lookups in the loop
-      var end = Math.min(opts.endBase, ddna.length - 1),
+      var start = Math.max(opts.startBase, 0),
+          end = Math.min(opts.endBase, ddna.length - 1),
           nucl = opts.nucleotides,
           period = opts.period,
           step = opts.step,
           onPoint = opts.onPoint,
           window = opts.window;
 
-      var n = 0, // number of bases examined
-          idx = opts.startBase, // current genome idx (0 based)
-          box = new Array(window),
+      var box = new Array(window),
           profile = [0, 0, 0], // the current profile values
           normfactor = 100.0 / (window / period),
           win2 = Math.floor(window / 2);
+      var nuclFn = (function(nucl) {
+        switch(nucl.length) {
+        case 0: return function () { return false; };
+        case 1:
+          return function(b) {return nucl[0] === b; };
+        case 2:
+          return function(b) {return nucl[0] === b || nucl[1] === b; };
+        case 3:
+          return function(b) {return nucl[0] === b || nucl[1] === b || nucl[2] === b; };
+        case 4:
+          return function(b) {return nucl[0] === b || nucl[1] === b || nucl[2] === b || nucl[3] === b; };
+        }
+        return function() {return nucl.indexOf(b) >= 0;};
+      })(nucl);
 
-      for(idx=opts.startBase; idx < end; idx++) {
-        //is this base one we're searching for?
-        if(nucl.indexOf(ddna[idx]) >= 0) {
-          if(! box[n % window]) {
-            //the flag wasn't set but we have a hit
-            ++profile[idx % period];
-            box[n % window] = true;
+      _(ddna).slice(start, end).forEach(
+        function (base, n) {
+          var idx = start + n;
+          if(n >= window && n % step === 0) {
+            //idx+1: we 1 index our bases traditionally
+            //win2: we want report the coordinate at the center of the window
+            onPoint((idx+1) - win2,
+                    normfactor * profile[0],
+                    normfactor * profile[1],
+                    normfactor * profile[2]);
+          }
+          //is this base one we're searching for?
+          if(nuclFn(base)) {
+            if(! box[n % window]) {
+              //the flag wasn't set but we have a hit
+              ++profile[idx % period];
+              box[n % window] = true;
+            }
+          }
+          else {
+            if(box[n % window]) {
+              --profile[idx % period];
+              box[n % window] = false;
+            }
           }
         }
-        else {
-          if(box[n % window]) {
-            --profile[idx % period];
-            box[n % window] = false;
-          }
-        }
-        n++;
-        if(n >= window && ((n-window) % step) === 0) {
-          //idx+1: we 1 index our bases traditionally
-          //win2: we want report the coordinate at the center of the window
-          onPoint((idx+1) - win2,
-                  normfactor * profile[0],
-                  normfactor * profile[1],
-                  normfactor * profile[2]);
-        }
-      }
+      ).value();
     };
   })
 ;
