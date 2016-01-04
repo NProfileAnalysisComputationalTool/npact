@@ -137,6 +137,7 @@ angular.module('npact')
         throw new Error("Shouldn't be able to add to a track that doesn't exist");
       }
       this.data.push(entry);
+      entry.cdsidx = this.data.length - 1;
       this.reindex();
     };
 

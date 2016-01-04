@@ -18,16 +18,10 @@ angular.module('npact')
         return null;
 
       var track = GraphConfig.findTrack(GraphConfig.zoomTrack);
-      var cds = track.data[GraphConfig.zoomIdx];
+      var cds = track && track.data[GraphConfig.zoomIdx];
       //$log.log('loading', GraphConfig.zoomTrack, GraphConfig.zoomIdx,track, cds);
-      var focusData = {
-        type: 'orf',
+      var focusData = track && cds && {
         track: track,
-        start: cds.start,
-        end: cds.end,
-        complement: cds.complement,
-        phase: cds.phase,
-        name: cds.name,
         item: cds
       };
       return focusData;
@@ -42,20 +36,33 @@ angular.module('npact')
       return $location.absUrl();
     };
     this.clearQuery = function () {
-      //$log.log("Clearing FocusData from querystring");
+      $log.debug("Clearing FocusData from querystring");
       GraphConfig.zoomTrack=null;
       GraphConfig.zoomIdx = null;
     };
   })
-  .service('ZoomWindowHandler', function ($log, $uibModal, FocusData, STATIC_BASE_URL, Evt) {
+  .service('ZoomWindowHandler', function ($log, $uibModal, FocusData, STATIC_BASE_URL, Evt, Utils) {
     var self = this;
     self.register = function ($scope) {
       $scope.$on('ORF-selected',
                  function (evt, data) { self.popup(data, null, $scope); });
       $scope.$on('hit-selected',
                  function (evt, data) { self.popup(data, null, $scope); });
-      $scope.$on('region-selected',
-                 function (evt, data) { self.popup(data, null, $scope); });
+      $scope.$on('region-selected', function (evt, data) {
+        var start = Utils.floor3(data.start),
+            //end is inclusive so need to subtract one for the length to be mod3
+            end = Utils.ceil3(data.end) -1,
+            item = {
+                name: "ORF from region",
+                start: start,
+                end: end,
+                complement: 0
+            },
+            track = _.find(GraphConfig.activeTracks(), {name: 'New ORFs'}) ||
+                _.first(GraphConfig.activeTracks());
+        track.add(item);
+        self.popup({ item: item, track: track }, null, $scope);
+      });
     };
 
     self.maybePopup = function ($scope) {
@@ -92,9 +99,9 @@ angular.module('npact')
                                    GraphConfig, Utils, $location, $uibModalInstance,
                                    $window ) {
     //$log.log('ZoomWindowCtrl', focusData);
-    var type = focusData.type;
     var self = this;
-    this.data = focusData;
+    this.item = focusData.item;
+    this.track = focusData.track;
     this.cancel = function() {
       console.log('Cancelling track edit');
       $window.location.reload();
@@ -109,18 +116,7 @@ angular.module('npact')
       self.track.remove(orf);
       return self.save(self.track);
     };
-    if(type === 'region') {
-      this.item = {
-        name: "New",
-        start: Utils.floor3(focusData.start),
-        end: Utils.ceil3(focusData.end) -1, //the end is an inclusive range
-        complement: 0
-      };
-    }
-    else {
-      this.item = focusData.item;
-    }
-    this.track = focusData.track || _.first(GraphConfig.activeTracks);
+
     var length = this.item.end - this.item.start;
     var margin = Utils.ceil3(Utils.orderOfMagnitude(length, -1));
     this.startBase = Math.max(this.item.start - margin, 0);
