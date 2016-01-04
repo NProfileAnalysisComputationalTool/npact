@@ -52,23 +52,23 @@ angular.module('npact')
     };
   })
   .service('ZoomWindowHandler', function ($log, $uibModal, FocusData, STATIC_BASE_URL, Evt) {
-
-    this.register = function ($scope) {
+    var self = this;
+    self.register = function ($scope) {
       $scope.$on('ORF-selected',
-                 _.bind(function (evt, data) { this.popup(data,null, $scope); }, this));
+                 function (evt, data) { self.popup(data, null, $scope); });
       $scope.$on('hit-selected',
-                 _.bind(function (evt, data) { this.popup(data,null, $scope); }, this));
+                 function (evt, data) { self.popup(data, null, $scope); });
       $scope.$on('region-selected',
-                 _.bind(function (evt, data) { this.popup(data,null, $scope); }, this));
+                 function (evt, data) { self.popup(data, null, $scope); });
     };
 
-    this.maybePopup = function ($scope) {
+    self.maybePopup = function ($scope) {
       var fd = FocusData.deserialize();
       //console.log('maybe popup', fd);
-      if(fd) return this.popup(fd,null, $scope);
+      if(fd) return self.popup(fd,null, $scope);
       return null;
     };
-    this.popup = function (focusData, modalopts, $scope) {
+    self.popup = function (focusData, modalopts, $scope) {
       $log.log("popping!", focusData, modalopts);
       FocusData.serialize(focusData);
       var modalDefaults = {
