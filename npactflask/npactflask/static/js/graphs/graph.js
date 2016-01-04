@@ -192,7 +192,7 @@ angular.module('npact')
         graphOptions: '&'
       },
       link: function($scope, $element, $attrs) {
-        var g = null,
+        var g = null, scheduledOn = null,
         startBase = $scope.startBase(),
         endBase = $scope.endBase(),
         visible = $scope.visible,
@@ -202,6 +202,8 @@ angular.module('npact')
         // the currently visible ones are drawn
         redraw = false,
         draw = function(force) {
+          var t1 = scheduledOn;
+          scheduledOn = null;
           if(!redraw || (!force && !visible())) { return null; }
           var opts = _.clone($scope.graphOptions());
           opts.startBase = startBase;
@@ -212,16 +214,20 @@ angular.module('npact')
           redraw = false;
           return (g || (g = new Grapher($element, $scope, opts)))
             .draw(opts)
+            .then(function () {
+              $log.log("Finished draw at", opts.startBase, "in", new Date() - t1);
+            })
             .catch(function() {
               //something went wrong, we will still need to redraw this
               redraw = true;
             });
         },
-        scheduled = false, //is a draw call already in the event queue
         schedule = function(force) {
-          if(!redraw || scheduled || (!force && !visible())) { return null; }
-          scheduled = true;
-          return $timeout(function () { scheduled = false; return draw(force); }, 0, false);
+          if(redraw && (force || (visible() && scheduledOn !== null))) {
+            scheduledOn = new Date();
+            return $timeout(_.partial(draw, force), 0, false);
+          }
+          return null;
         },
         discard = function() { if(g) { g.destroy(); g = null; } },
         scrollToHere = function() {
