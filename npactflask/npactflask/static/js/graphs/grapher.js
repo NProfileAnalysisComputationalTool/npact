@@ -157,6 +157,8 @@ angular.module('npact')
     };
 
     GP._leftLayerImage = function() {
+      $log.debug("Building leftLayer image");
+      var t1 = new Date();
       return  $q(_.bind(function(resolve) {
         var opts = {
           x: 0, y: 0,
@@ -168,20 +170,24 @@ angular.module('npact')
         layer.add(this.yAxisGroup());
         this.headerGroup(layer);
         layer.toImage(angular.extend(opts, {callback: resolve}));
-      }, this));
+      }, this))
+        .then(function (image) {
+          $log.log("Finished Building leftLayer image", new Date() - t1);
+          return image;
+        });
     };
 
-    var leftLayerCache = {};  // Shared amongst all Graphers
+    var leftLayerCache = null;  // Shared amongst all Graphers
     GP.leftLayer = function(stage) {
-      var key = angular.toJson(this.tracks) + GraphConfig.profileTitle();
       var layer = new K.FastLayer();
       stage.add(layer);
-      return (leftLayerCache[key] || (leftLayerCache[key] = this._leftLayerImage()))
+      return (leftLayerCache || (leftLayerCache = this._leftLayerImage()))
         .then(function(image) {
           layer.add(new K.Image( {image: image}));
           layer.draw();
         });
     };
+    GP.clearLeftLayerCache = function () { leftLayerCache = null; };
 
     GP.genomeLayer = function(stage) {
       //Everything in this layer is in the coordinate system of the

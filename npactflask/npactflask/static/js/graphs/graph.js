@@ -35,7 +35,7 @@ angular.module('npact')
           baseOpts.m = GraphingCalculator.chart(baseOpts);
           $scope.graphHeight = baseOpts.m.height;
         },
-        redraw = function () { $scope.$broadcast(Evt.REDRAW); };
+        redraw = function (clearing) { $scope.$broadcast(Evt.REDRAW, clearing); };
 
     $scope.baseOpts = baseOpts;
     this.winHeight = $win.height();
@@ -58,7 +58,7 @@ angular.module('npact')
       baseOpts.tracks = val;
       updateMetrics();
       $scope.$broadcast('updateRowHeight', baseOpts.m.height);
-      redraw();
+      redraw({headers: true});
     });
 
     $scope.$on('printresize', function(event, printing) {
@@ -72,9 +72,9 @@ angular.module('npact')
       }
     });
 
-    $scope.$watch(function() { return GraphConfig.nucleotides; }, function() {
-      $scope.$broadcast(Evt.REDRAW, {nProfiles: true});
-    }, true);
+    $scope.$watch(function() { return GraphConfig.nucleotides; },
+                  function() { redraw({nProfiles: true, headers: true}); },
+                  true);
     $scope.$watch(function() { return GraphConfig.colorBlindFriendly; }, redraw);
   })
 
@@ -233,6 +233,7 @@ angular.module('npact')
           redraw = true;
           if(g && cachesToClear) {
             if(cachesToClear.nProfiles) { g.clearProfilePoints(); }
+            if(cachesToClear.headers) { g.clearLeftLayerCache(); }
           }
           schedule();
         });
