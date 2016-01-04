@@ -166,13 +166,6 @@ angular.module('npact')
                 self.predictionTracks = tracks;
 
                 return;
-                //////////
-                _.each(tracks, function(track) {
-                  track.active = true;
-                  if(!_.find(GraphConfig.tracks, 'filename', track.filename)) {
-                    GraphConfig.tracks.push(track);
-                  }
-                });
               });
           });
 
