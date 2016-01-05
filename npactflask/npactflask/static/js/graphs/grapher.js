@@ -553,7 +553,7 @@ angular.module('npact')
           strokeScaleEnabled: false
         }));
         // Only put a label in it if there is any room
-        if(tailWidth) {
+        if(tailWidth && x.name) {
           // need a dummy group for clipping, `Text` doesn't
           // support clip directly
           var textBounds =
