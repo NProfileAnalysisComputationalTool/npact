@@ -223,7 +223,7 @@ angular.module('npact')
             });
         },
         schedule = function(force) {
-          if(redraw && (force || (visible() && scheduledOn !== null))) {
+          if(redraw && (force || (visible() && scheduledOn === null))) {
             scheduledOn = new Date();
             return $timeout(_.partial(draw, force), 0, false);
           }
