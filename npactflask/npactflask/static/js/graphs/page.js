@@ -97,7 +97,10 @@ angular.module('npact')
                    function(val) { $scope.predictionFiles = val; });
     $scope.GraphConfig = GraphConfig;
     this.buildGBKDownload = function () {
-      return Fetcher.buildUrl('build_gbk', {trackPaths: _.map(GraphConfig.activeTracks(), 'filename').join(',')});
+      var trackPaths = _(GraphConfig.tracks)
+          .filter({active: true, type: 'extracts'})
+          .pluck('filename').join(',');
+      return Fetcher.buildUrl('build_gbk', { trackPaths: trackPaths });
     };
   })
   .service('PrintModal', function(STATIC_BASE_URL, $uibModal) {
