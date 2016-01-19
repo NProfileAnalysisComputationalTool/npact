@@ -3,28 +3,28 @@
     <div class="container-fluid">
 
       <div class="navbar-header">
-        <span class="navbar-brand" contenteditable ng-model="zw.item.name" strip-brs="true"></span> <br>
+        <span class="navbar-brand" contenteditable ng-model="data.item.name" strip-brs="true"></span> <br>
         on <span contenteditable ng-model="zw.track.name" strip-tags="true"></span>
       </div>
       <div class="navbar-form navbar-left">
-        <label>Phase:</label> <span>{{zw.item.phase}}</span>
+        <label>Phase:</label> <span>{{data.item.phase}}</span>
         <label>Strand:</label>
         <div class="btn-group btn-group-sm" role="group" aria-label="Phase">
           <button type="button" class="btn btn-default"
-                  ng-model="zw.item.complement" uib-btn-radio="0">Direct</button>
+                  ng-model="data.item.complement" uib-btn-radio="0">Direct</button>
           <button type="button" class="btn btn-default"
-                  ng-model="zw.item.complement" uib-btn-radio="1">Complement</button>
+                  ng-model="data.item.complement" uib-btn-radio="1">Complement</button>
         </div>
         <label>Bases</label>
         <div class="form-group">
           <input class="form-control" type="number" name="startBase" style="width:8em;"
                  min="0" max="{{gc.length}}"
-                 ng-model="zw.item.start"
+                 ng-model="data.item.start"
                  ng-model-options="{ updateOn: 'default blur', debounce: { 'default': 600, 'blur': 0 } }">
           <span class="small">to</span>
           <input class="form-control" type="number" name="endBase" style="width:8em;"
                  min="0" max="{{gc.length}}"
-                 ng-model="zw.item.end"
+                 ng-model="data.item.end"
                  ng-model-options="{ updateOn: 'default blur', debounce: { 'default': 600, 'blur': 0 } }">
         </div>
       </div>
@@ -41,7 +41,7 @@
         <button confirmed-click="zw.cancel()"
                 np-confirm-click="Are you sure you want to discard your changes?">
           Reset </button>
-        <button confirmed-click="zw.delete(zw.item, zw.track)"
+        <button confirmed-click="zw.delete(data.item, zw.track)"
                 np-confirm-click="Are you sure you wish to remove this ORF/CDS">
           Delete </button>
       </div>
@@ -55,8 +55,8 @@
           class="col-sm-12 graph" style="padding: 20px 10px; border: 1px dotted #333;">
         <div npact-single-graph
              id="zoomgraph"
-             start-base="zw.startBase"
-             end-base="zw.endBase"
+             start-base="startBase"
+             end-base="endBase"
              visible="true"
              graph-options="baseOpts"
              style="height:{{graphHeight}}px;">
@@ -66,17 +66,18 @@
     <div class="row dna-text">
       <div class="col-sm-1" style="color: #ccc;">
         <npact-protein-translation
-            start="zw.startBase" end="zw.item.start - 1" complement="zw.item.complement">
+            start="startBase" end="data.item.start - 1" complement="data.item.complement">
         </npact-protein-translation>
       </div>
       <div class="col-sm-10" style="padding: 10px;">
         <npact-protein-translation
-            start="zw.item.start" end="zw.item.end" complement="zw.item.complement">
+            item="data.item"
+            start="data.item.start" end="data.item.end" complement="data.item.complement">
         </npact-protein-translation>
       </div>
       <div class="col-sm-1" style="color: #ccc;">
         <npact-protein-translation
-            start="zw.item.end + 1" end="zw.endBase" complement="zw.item.complement">
+            start="data.item.end + 1" end="zw.endBase" complement="data.item.complement">
         </npact-protein-translation>
       </div>
   </div>

@@ -71,14 +71,20 @@ angular.module('npact')
     this.popup = function (focusData, modalopts, $scope) {
       $log.log("popping!", focusData, modalopts);
       FocusData.serialize(focusData);
+      if(GraphConfig.zoomwindow){
+        GraphConfig.zoomwindow.$scope.data = focusData;
+        $scope.$broadcast(Evt.REDRAW);
+        return GraphConfig.zoomwindow.result;
+      }
+
+      var child = $scope.$new();
+      child.data = focusData;
       var modalDefaults = {
         templateUrl: STATIC_BASE_URL + 'js/graphs/zoomwindow.html',
         controller: 'ZoomWindowCtrl',
         controllerAs: 'zw',
         bindToController: true,
-        resolve: {
-          focusData: function () { return focusData; }
-        },
+        scope: child,
         animation: true,
         size: 'lg'
       };
@@ -93,13 +99,13 @@ angular.module('npact')
       return GraphConfig.zoomwindow.result;
     };
   })
-  .controller('ZoomWindowCtrl', function ($scope, $log, FocusData, focusData, getPhase,
+  .controller('ZoomWindowCtrl', function ($scope, $log, FocusData, getPhase,
                                    GraphConfig, Utils, $location, $uibModalInstance,
                                    $window ) {
     //$log.log('ZoomWindowCtrl', focusData);
-    var type = focusData.type;
+    GraphConfig.zoomwindow.$scope = $scope;
+    var type = $scope.data.type;
     var self = this;
-    this.data = focusData;
     this.cancel = function() {
       console.log('Cancelling track edit');
       $window.location.reload();
@@ -115,42 +121,48 @@ angular.module('npact')
       return self.save(self.track);
     };
     if(type === 'region') {
-      this.item = {
+      $scope.data = {
         name: "New",
-        start: Utils.floor3(focusData.start),
-        end: Utils.ceil3(focusData.end) -1, //the end is an inclusive range
+        start: Utils.floor3($scope.data.start),
+        end: Utils.ceil3($scope.data.end) -1, //the end is an inclusive range
         complement: 0
       };
     }
     else {
-      this.item = focusData.item;
+      this.item = $scope.data.item;
     }
-    this.track = focusData.track || _.first(GraphConfig.activeTracks);
+    this.track = $scope.data.track || _.first(GraphConfig.activeTracks);
 
-    var margin = Utils.ceil3(Utils.orderOfMagnitude(this.item.end - this.item.start, -1));
-    this.startBase = Math.max(this.item.start - margin, 0);
-    this.endBase = Math.min(this.item.end + margin, GraphConfig.endBase);
+    $scope._setGraphBounds = function() {
+      var margin = Utils.ceil3(Utils.orderOfMagnitude(
+        $scope.data.item.end - $scope.data.item.start, -1));
+      $scope.startBase = Math.max($scope.data.item.start - margin, 0);
+      $scope.endBase = Math.min($scope.data.item.end + margin, GraphConfig.endBase);
+    };
+    $scope._setGraphBounds();
 
-    $scope.$watch(_.partial(getPhase, this.item),
-                  _.bind(function (phase) { this.item.phase = phase; }, this));
+    $scope.$watch(_.partial(getPhase, $scope.data.item),
+                  _.bind(function (phase) { $scope.data.item.phase = phase; }, this));
 
     //$log.log("Focusing on", focusData);
     $scope.$on('offset', _.bind(function ($evt, dx) {
       $evt.stopPropagation();
       $log.log("Updating offsets", dx);
       dx = Utils.round3(dx);
-      this.startBase = this.startBase + dx;
-      this.endBase = this.endBase + dx;
+      $scope.startBase = $scope.startBase + dx;
+      $scope.endBase = $scope.endBase + dx;
       $scope.$apply();
     }, this));
-    var redraw = function () { $scope.$broadcast('redraw'); };
-    $scope.$watchCollection("zw.item", redraw);
+    var redraw = function () {
+      $scope._setGraphBounds();
+      $scope.$broadcast('redraw');
+    };
+    $scope.$watchCollection("data.item", redraw);
     $scope.$watch('zw.track', redraw);
     //Keep phase up to date with the end
 
     this.buildPermalink = function () {
       //TODO: Params to this function
-      window.focusData = focusData;
       return FocusData.serialize(focusData);
     };
 
@@ -196,9 +208,11 @@ angular.module('npact')
   })
 
   .directive('npactProteinTranslation', function ($log, TranslatePath) {
+    'use strict';
     return {
       restrict: 'E',
       scope: {
+        item: '=',
         start: '=',
         end: '=',
         complement: '='
@@ -210,9 +224,11 @@ angular.module('npact')
             $element.text('');
             TranslatePath($scope.start, $scope.end, $scope.complement)
               .then(function (data) {
-                ddnaP = data.trans;
-                ddna = data.seq;
-                $element.text(ddnaP);
+                if($scope.item){
+                  $scope.item.ddnaP = data.trans;
+                  $scope.item.ddna = data.seq;
+                }
+                $element.text(data.trans);
               });
           }
         );
