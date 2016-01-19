@@ -87,12 +87,10 @@ angular.module('npact')
     Track.prototype.indexData = function(data) {
       return (
         this.indexing = $timeout(_.bind(function () {
-          _.each(this.data, function(orf, k) {
-            orf.cdsidx = k;
-          });
           this.indexing = false;
+          _.each(this.data, function(orf, k) { orf.cdsidx = k; });
           return (this.index = ITrackIndex(data));
-        }, this))
+        }, this), false)
           .catch(function(e) { $log.log('Track.indexData failed', name, e); throw e; }));
     };
 
@@ -139,6 +137,7 @@ angular.module('npact')
         throw new Error("Shouldn't be able to add to a track that doesn't exist");
       }
       this.data.push(entry);
+      entry.cdsidx = this.data.length - 1;
       this.reindex();
     };
 
@@ -267,7 +266,7 @@ angular.module('npact')
             leftPointerIdx++;
           }
           return _.slice(byStart, leftIdx, rightIdx);
-        });
+        }, false);
       };
     };
   })

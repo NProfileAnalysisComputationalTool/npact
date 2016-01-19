@@ -1,8 +1,4 @@
 angular.module('npact')
-
-// {type: 'region', start: 0, end: 10}
-// {type: 'hit}
-
   .service('FocusData', function ($log, $location, GraphConfig) {
     /**
      * focusData interface:
@@ -22,16 +18,10 @@ angular.module('npact')
         return null;
 
       var track = GraphConfig.findTrack(GraphConfig.zoomTrack);
-      var cds = track.data[GraphConfig.zoomIdx];
+      var cds = track && track.data[GraphConfig.zoomIdx];
       //$log.log('loading', GraphConfig.zoomTrack, GraphConfig.zoomIdx,track, cds);
-      var focusData = {
-        type: 'orf',
+      var focusData = track && cds && {
         track: track,
-        start: cds.start,
-        end: cds.end,
-        complement: cds.complement,
-        phase: cds.phase,
-        name: cds.name,
         item: cds
       };
       return focusData;
@@ -41,34 +31,46 @@ angular.module('npact')
       if(!focusData) return $location.absUrl();
       if(focusData.track)
         GraphConfig.zoomTrack = focusData.track.filename;
-      if(focusData.item && focusData.item.cdsidx>=0)
+      if(focusData.item && focusData.item.cdsidx >= 0)
         GraphConfig.zoomIdx = focusData.item.cdsidx;
       return $location.absUrl();
     };
     this.clearQuery = function () {
-      //$log.log("Clearing FocusData from querystring");
+      $log.debug("Clearing FocusData from querystring");
       GraphConfig.zoomTrack=null;
       GraphConfig.zoomIdx = null;
     };
   })
-  .service('ZoomWindowHandler', function ($log, $uibModal, FocusData, STATIC_BASE_URL, Evt) {
-
-    this.register = function ($scope) {
+  .service('ZoomWindowHandler', function ($log, $uibModal, FocusData, STATIC_BASE_URL, Evt, Utils) {
+    var self = this;
+    self.register = function ($scope) {
       $scope.$on('ORF-selected',
-                 _.bind(function (evt, data) { this.popup(data,null, $scope); }, this));
+                 function (evt, data) { self.popup(data, null, $scope); });
       $scope.$on('hit-selected',
-                 _.bind(function (evt, data) { this.popup(data,null, $scope); }, this));
-      $scope.$on('region-selected',
-                 _.bind(function (evt, data) { this.popup(data,null, $scope); }, this));
+                 function (evt, data) { self.popup(data, null, $scope); });
+      $scope.$on('region-selected', function (evt, data) {
+        var start = Utils.floor3(data.start),
+            //end is inclusive so need to subtract one for the length to be mod3
+            end = Utils.ceil3(data.end) -1,
+            item = {
+                name: "ORF from region",
+                start: start,
+                end: end,
+                complement: 0
+            },
+            track = _.find(GraphConfig.activeTracks(), {name: 'New ORFs'}) ||
+                _.first(GraphConfig.activeTracks());
+        track.add(item);
+        self.popup({ item: item, track: track }, null, $scope);
+      });
     };
 
-    this.maybePopup = function ($scope) {
+    self.maybePopup = function ($scope) {
       var fd = FocusData.deserialize();
-      //console.log('maybe popup', fd);
-      if(fd) return this.popup(fd,null, $scope);
+      if(fd) return self.popup(fd, null, $scope);
       return null;
     };
-    this.popup = function (focusData, modalopts, $scope) {
+    self.popup = function (focusData, modalopts, $scope) {
       $log.log("popping!", focusData, modalopts);
       FocusData.serialize(focusData);
       if(GraphConfig.zoomwindow){
@@ -103,6 +105,7 @@ angular.module('npact')
                                    GraphConfig, Utils, $location, $uibModalInstance,
                                    $window ) {
     //$log.log('ZoomWindowCtrl', focusData);
+
     GraphConfig.zoomwindow.$scope = $scope;
     var type = $scope.data.type;
     var self = this;
@@ -120,6 +123,8 @@ angular.module('npact')
       self.track.remove(orf);
       return self.save(self.track);
     };
+
+    // TODO: I think this can be removed
     if(type === 'region') {
       $scope.data = {
         name: "New",
@@ -134,8 +139,8 @@ angular.module('npact')
     this.track = $scope.data.track || _.first(GraphConfig.activeTracks);
 
     $scope._setGraphBounds = function() {
-      var margin = Utils.ceil3(Utils.orderOfMagnitude(
-        $scope.data.item.end - $scope.data.item.start, -1));
+      var len = $scope.data.item.end - $scope.data.item.start;
+      var margin = Utils.ceil3(Utils.orderOfMagnitude(len, -1));
       $scope.startBase = Math.max($scope.data.item.start - margin, 0);
       $scope.endBase = Math.min($scope.data.item.end + margin, GraphConfig.endBase);
     };
@@ -199,7 +204,7 @@ angular.module('npact')
           g = new Grapher($element, $scope, opts);
           return g.draw();
         };
-        var schedule = _.debounce(function () {$timeout(draw);},400);
+        var schedule = _.debounce(function () {$timeout(draw);}, 400);
         $scope.$on('redraw', schedule);
         $scope.$watchGroup(['startBase', 'endBase'], schedule);
         $scope.$watch(function() {return $element.width();}, schedule);

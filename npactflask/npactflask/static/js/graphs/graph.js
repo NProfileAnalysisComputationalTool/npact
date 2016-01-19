@@ -35,7 +35,7 @@ angular.module('npact')
           baseOpts.m = GraphingCalculator.chart(baseOpts);
           $scope.graphHeight = baseOpts.m.height;
         },
-        redraw = function () { $scope.$broadcast(Evt.REDRAW); };
+        redraw = function (clearing) { $scope.$broadcast(Evt.REDRAW, clearing); };
 
     $scope.baseOpts = baseOpts;
     this.winHeight = $win.height();
@@ -50,7 +50,7 @@ angular.module('npact')
     }, this), 1000/30);
     $win.on('resize', onResize);
     $scope.$on('$destroy', function () { $win.off('resize', onResize); });
-    $timeout(onResize, 100);
+    $timeout(onResize, 100, false);
 
     $scope.$watch(function () { return GraphConfig.basesPerGraph; }, updateMetrics);
     $scope.$watchCollection(GraphConfig.activeTracks, function (val, old) {
@@ -58,7 +58,7 @@ angular.module('npact')
       baseOpts.tracks = val;
       updateMetrics();
       $scope.$broadcast('updateRowHeight', baseOpts.m.height);
-      redraw();
+      redraw({headers: true});
     });
 
     $scope.$on('printresize', function(event, printing) {
@@ -72,9 +72,9 @@ angular.module('npact')
       }
     });
 
-    $scope.$watch(function() { return GraphConfig.nucleotides; }, function() {
-      $scope.$broadcast(Evt.REDRAW, {nProfiles: true});
-    }, true);
+    $scope.$watch(function() { return GraphConfig.nucleotides; },
+                  function() { redraw({nProfiles: true, headers: true}); },
+                  true);
     $scope.$watch(function() { return GraphConfig.colorBlindFriendly; }, redraw);
   })
 
@@ -104,7 +104,7 @@ angular.module('npact')
         var draw = _.throttle(function () {
           updateVisibility();
           $scope.$broadcast(Evt.DRAW);
-        }, 1000/30);
+        }, 1000/20);
 
         $scope.$on('updateRowHeight', function ($evt, height) {
           $log.debug("Updating graphHeight to", height);
@@ -192,7 +192,7 @@ angular.module('npact')
         graphOptions: '&'
       },
       link: function($scope, $element, $attrs) {
-        var g = null,
+        var g = null, scheduledOn = null,
         startBase = $scope.startBase(),
         endBase = $scope.endBase(),
         visible = $scope.visible,
@@ -202,6 +202,8 @@ angular.module('npact')
         // the currently visible ones are drawn
         redraw = false,
         draw = function(force) {
+          var t1 = scheduledOn;
+          scheduledOn = null;
           if(!redraw || (!force && !visible())) { return null; }
           var opts = _.clone($scope.graphOptions());
           opts.startBase = startBase;
@@ -212,16 +214,20 @@ angular.module('npact')
           redraw = false;
           return (g || (g = new Grapher($element, $scope, opts)))
             .draw(opts)
+            .then(function () {
+              $log.log("Finished draw at", opts.startBase, "in", new Date() - t1);
+            })
             .catch(function() {
               //something went wrong, we will still need to redraw this
               redraw = true;
             });
         },
-        scheduled = false, //is a draw call already in the event queue
         schedule = function(force) {
-          if(!redraw || scheduled || (!force && !visible())) { return null; }
-          scheduled = true;
-          return $timeout(function () { scheduled = false; return draw(force); }, 0, false);
+          if(redraw && (force || (visible() && scheduledOn === null))) {
+            scheduledOn = new Date();
+            return $timeout(_.partial(draw, force), 0, false);
+          }
+          return null;
         },
         discard = function() { if(g) { g.destroy(); g = null; } },
         scrollToHere = function() {
@@ -233,6 +239,7 @@ angular.module('npact')
           redraw = true;
           if(g && cachesToClear) {
             if(cachesToClear.nProfiles) { g.clearProfilePoints(); }
+            if(cachesToClear.headers) { g.clearLeftLayerCache(); }
           }
           schedule();
         });
@@ -260,7 +267,7 @@ angular.module('npact')
             $log.log('gotoBase triggered redraw:', startBase, id);
             redraw = true;
             schedule();
-            $timeout(scrollToHere());
+            $timeout(scrollToHere, 0, false);
           }
           else if(_.isFinite(fromBase) && startBase <= fromBase && fromBase <= endBase) {
             redraw = true;
