@@ -429,7 +429,12 @@ checkbox-list#profile-options>label {
    word-wrap: break-word;
    text-align: left;
 }
-
+.zoom-nav-btn{
+   height:100%; background-color: #CCE; color:#66C;
+   font-weight:bold; font-size:2em; float:left; cursor:pointer;
+   min-height:100px; display:table-cell; vertical-align:middle; padding-top:25px;
+}
+.zoomwindow .dna-holder{width:98%; float:left; position:relative; padding: 0 20px;}
 .zoomwindow ul.nav-stacked > li {margin: 0;}
 .zoomwindow ul.nav-stacked a {
    padding-top: 0;
@@ -534,3 +539,7 @@ form select.form-control,
 .alert { font-size: 18px; margin-bottom: 5px;}
 
 span[contenteditable] { cursor: text; }
+.npact-protein-translation .codon {cursor:pointer;}
+.npact-protein-translation .stop { color:#600; background-color:#FAA; }
+.npact-protein-translation .start { color:#060; background-color:#AFA; }
+.npact-protein-translation .start.rare { color:#006; background-color:#AAF; }

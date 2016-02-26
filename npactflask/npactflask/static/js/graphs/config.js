@@ -5,10 +5,12 @@ angular.module('npact')
              'offset', 'mycoplasma', 'zoomTrack', 'zoomIdx'])
 
   .service('GraphConfig', function(Err, npactConstants, Evt, PUBLIC_CONFIG_KEYS,
-                            $location, $log, $rootScope, $cookies, $window) {
+                            $location, $log, $rootScope, $cookies, $window,
+                            STATIC_BASE_URL, CodonFinder) {
     'use strict';
     var self = this;
     $window.GraphConfig = this;
+    self.baseUrl = STATIC_BASE_URL;
     self.cookieBools = ["colorBlindFriendly"];
     self.colorBlindFriendly = false;
     self.cookieInit = function() {
@@ -89,6 +91,9 @@ angular.module('npact')
         return tr.name == name || tr.filename == name;
       });
     };
+    self.CodonFinder = CodonFinder;
+
+
   })
 
   /*

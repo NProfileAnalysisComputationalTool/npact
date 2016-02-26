@@ -16,7 +16,7 @@
                   ng-model="data.item.complement" uib-btn-radio="1">Complement</button>
         </div>
         <label>Bases</label>
-        <div class="form-group">
+        <div class="form-group">{{startBase}} - {{endBase}}
           <input class="form-control" type="number" name="startBase" style="width:8em;"
                  min="0" max="{{gc.length}}"
                  ng-model="data.item.start"
@@ -31,7 +31,7 @@
       <div class="navbar-right">
         <ul class="nav nav-stacked">
           <li><a href="#" lazy-href="zw.buildPermalink()">
-            <span class="glyphicon glyphicon-link"></span>Share</a></li>
+              <span class="glyphicon glyphicon-link"></span>Share</a></li>
           <li><a href="#"><span class="glyphicon glyphicon-new-window"></span>nBLAST</a></li>
           <li><a href="#"><span class="glyphicon glyphicon-new-window"></span>pBLAST</a></li>
         </ul>
@@ -52,33 +52,48 @@
     <div class="row"></div>
     <div class="row graph-row">
       <div
-          class="col-sm-12 graph" style="padding: 20px 10px; border: 1px dotted #333;">
+        class="col-sm-12 graph" style="padding: 20px 10px; border: 1px dotted #333;">
         <div npact-single-graph
              id="zoomgraph"
              start-base="startBase"
              end-base="endBase"
+             extended-window="extendedWindow"
              visible="true"
              graph-options="baseOpts"
              style="height:{{graphHeight}}px;">
         </div>
       </div>
     </div>
-    <div class="row dna-text">
-      <div class="col-sm-1" style="color: #ccc;">
+    <div class="dna-holder row">
+      <div class="zoom-nav-btn left" title="extend window left">
+        &lt;
+      </div>
+      <div class="dna-text" style="color: #ccc; float:left; width:10%;">
         <npact-protein-translation
-            start="startBase" end="data.item.start - 1" complement="data.item.complement">
+          item ="data.item"
+          start="startBase" end="data.item.start - 1"
+          extended-window="extendedWindow"
+          complement="data.item.complement">
         </npact-protein-translation>
       </div>
-      <div class="col-sm-10" style="padding: 10px;">
+      <div class="dna-text" style="padding: 10px; float:left; width:75%">
         <npact-protein-translation
-            item="data.item"
-            start="data.item.start" end="data.item.end" complement="data.item.complement">
+          item="data.item"
+          start="data.item.start" end="data.item.end" complement="data.item.complement">
+          extended-window="extendedWindow"
         </npact-protein-translation>
       </div>
-      <div class="col-sm-1" style="color: #ccc;">
+      <div class="dna-text" style="color: #ccc; float:left; width:10%">
         <npact-protein-translation
-            start="data.item.end + 1" end="zw.endBase" complement="data.item.complement">
+          item ="data.item"
+          start="data.item.end + 1" end="endBase" complement="data.item.complement"
+          extended-window="extendedWindow">
         </npact-protein-translation>
       </div>
+      <div class="zoom-nav-btn right" title="extend window right">
+        &gt;
+      </div>
+      <div class="clearer"></div>
+    </div>
   </div>
 </div>

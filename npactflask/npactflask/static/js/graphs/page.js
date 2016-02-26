@@ -115,7 +115,7 @@ angular.module('npact')
     };
   })
 
-  .service('kickstarter', function($q, $log, processOnServer, MessageBus,
+  .service('kickstarter', function($q, $log, processOnServer, MessageBus, $http,
                             NProfiler, PredictionManager, Fetcher, Track, GraphConfig) {
     'use strict';
     //Kickstart the whole process, start all the main managers
@@ -139,6 +139,12 @@ angular.module('npact')
               .then(function(tracks) { GraphConfig.tracks = tracks; });
           }
           return null;
+        }),
+        this.basePromise.then(function() {
+          console.log('Getting DDNA string');
+          Fetcher.fetchFile(GraphConfig.ddna).then(function(res){
+            GraphConfig.ddnaString = res;
+          });
         })
       ]);
     };

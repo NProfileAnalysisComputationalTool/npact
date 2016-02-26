@@ -251,15 +251,42 @@ angular.module('npact')
     return function (start, end, complement) {
       var url = Fetcher.buildUrl('translate', {
         startBase: start, endBase: end, rc: complement});
-      $log.log("Translating @ ", url);
+      // $log.log("Translating @ ", url);
       return $http.get(url, {responseType: 'json'})
         .then(function (res) {
           return res.data;
         });
     };
   })
-
-  .service('Fetcher', function($location, $http,
+  .service('CodonFinder', function() {
+    var self = this;
+    self.codonRegexes = {
+      start: /ATG|GTG/gim,
+      altStart: /TTG|CTG|ATT/gim,
+      end: /TAG|TAA/gim,
+      nonMycoEnd: /TGA/gim
+    };
+    self.searchAllDNA = function(r, ddna){
+      var res =[], m;
+      while((m = r.exec(ddna))){
+        res.push(m.index);
+      }
+      return res;
+    };
+    self.startCodons = function(ddna) {
+      return self.searchAllDNA(self.codonRegexes.start, ddna);
+    };
+    self.altStartCodons = function(ddna) {
+      return self.searchAllDNA(self.codonRegexes.altStart, ddna);
+    };
+    self.endCodons = function(ddna) {
+      return self.searchAllDNA(self.codonRegexes.end, ddna);
+    };
+    self.noMycoEndCodons =function(ddna) {
+      return self.searchAllDNA(self.codonRegexes.nonMycoEnd, ddna);
+    };
+  })
+  .service('Fetcher', function($location, $http, GraphConfig,
                         StatusPoller, FETCH_BASE_URL, BASE_URL, PATH, PUBLIC_CONFIG_KEYS) {
     'use strict';
     var self = this;
