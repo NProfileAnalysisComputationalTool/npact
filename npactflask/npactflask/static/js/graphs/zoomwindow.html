@@ -16,7 +16,7 @@
                   ng-model="data.item.complement" uib-btn-radio="1">Complement</button>
         </div>
         <label>Bases</label>
-        <div class="form-group">{{startBase}} - {{endBase}}
+        <div class="form-group">
           <input class="form-control" type="number" name="startBase" style="width:8em;"
                  min="0" max="{{gc.length}}"
                  ng-model="data.item.start"
@@ -68,7 +68,7 @@
       <div class="zoom-nav-btn left" title="extend window left">
         &lt;
       </div>
-      <div class="dna-text" style="color: #ccc; float:left; width:10%;">
+      <div class="dna-text" style="color: #ccc; float:left; width:12%;">
         <npact-protein-translation
           item ="data.item"
           start="startBase" end="data.item.start - 1"
@@ -76,14 +76,14 @@
           complement="data.item.complement">
         </npact-protein-translation>
       </div>
-      <div class="dna-text" style="padding: 10px; float:left; width:72%">
+      <div class="dna-text" style="padding: 10px; float:left; width:68%">
         <npact-protein-translation
           item="data.item"
           start="data.item.start" end="data.item.end" complement="data.item.complement">
           extended-window="extendedWindow"
         </npact-protein-translation>
       </div>
-      <div class="dna-text" style="color: #ccc; float:left; width:10%">
+      <div class="dna-text" style="color: #ccc; float:left; width:12%">
         <npact-protein-translation
           item ="data.item"
           start="data.item.end + 1" end="endBase" complement="data.item.complement"

@@ -407,7 +407,7 @@ angular.module('npact')
                       '" data-index="'+idx+'">'+ddnaP[i/3]+'</span>';
                 }
                 GraphConfig.ddnaP = ddnaP;
-                var html = ['<div>start:'+$scope.start+" <wbr>end:"+$scope.end+"</div>"]
+                var html = ['<div>('+$scope.start+"-<wbr>"+$scope.end+")</div>"]
                   .concat(ddnaP);
                 $element.html(html);
                 $element.bind('click', function(e){
