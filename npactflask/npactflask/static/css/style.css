@@ -97,6 +97,7 @@ p#uf a span{
    font-size:18px;
 }
 
+
 #content li {
    line-height: 110%;
    list-style:disc;
@@ -428,13 +429,18 @@ checkbox-list#profile-options>label {
    font-size: 13px;
    word-wrap: break-word;
    text-align: left;
+   margin:1px;
+   min-height:130px;
+   border:1px solid #339;
 }
 .zoom-nav-btn{
    height:100%; background-color: #CCE; color:#66C;
    font-weight:bold; font-size:2em; float:left; cursor:pointer;
-   min-height:100px; display:table-cell; vertical-align:middle; padding-top:25px;
+   min-height:130px; display:table-cell; vertical-align:middle; 
+   padding:45px 3px  3px  3px; margin:1px 0;
+   border:1px solid #339;
 }
-.zoomwindow .dna-holder{width:98%; float:left; position:relative; padding: 0 20px;}
+.zoomwindow .dna-holder{width:100%; position:relative; padding: 0; margin:0;}
 .zoomwindow ul.nav-stacked > li {margin: 0;}
 .zoomwindow ul.nav-stacked a {
    padding-top: 0;

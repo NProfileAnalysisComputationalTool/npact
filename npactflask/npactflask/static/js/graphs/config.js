@@ -9,6 +9,7 @@ angular.module('npact')
                             STATIC_BASE_URL, CodonFinder) {
     'use strict';
     var self = this;
+    self.graphMargin = 198;// multiple of 3 ;)
     $window.GraphConfig = this;
     self.baseUrl = STATIC_BASE_URL;
     self.cookieBools = ["colorBlindFriendly"];

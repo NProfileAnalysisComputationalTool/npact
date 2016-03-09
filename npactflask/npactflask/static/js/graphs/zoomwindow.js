@@ -19,6 +19,7 @@ angular.module('npact')
 
       var track = GraphConfig.findTrack(GraphConfig.zoomTrack);
       var cds = track && track.data[GraphConfig.zoomIdx];
+      cds.end++; // end is inclusive?  Its not mod 3 till I do this
       //$log.log('loading', GraphConfig.zoomTrack, GraphConfig.zoomIdx,track, cds);
       var focusData = track && cds && {
         track: track,
@@ -27,7 +28,9 @@ angular.module('npact')
       return focusData;
     };
     this.serialize = function (focusData) {
-      $log.log('Serializing: ', focusData, focusData.track.filename, focusData.item.cdsidx);
+      $log.log('Serializing: ', focusData,
+               focusData && focusData.track.filename,
+               focusData && focusData.item.cdsidx);
       if(!focusData) return $location.absUrl();
       if(focusData.track)
         GraphConfig.zoomTrack = focusData.track.filename;
@@ -108,6 +111,7 @@ angular.module('npact')
     //$log.log('ZoomWindowCtrl', focusData);
     GraphConfig.stack=[];
     GraphConfig.zoomwindow.$scope = $scope;
+    GraphConfig.Utils = Utils;
     var type = $scope.data.type;
     var self = this;
     this.cancel = function() {
@@ -138,15 +142,17 @@ angular.module('npact')
       this.item = $scope.data.item;
     }
     this.track = $scope.data.track || _.first(GraphConfig.activeTracks);
-
     $scope.setGraphBounds = function() {
       var len = $scope.data.item.end - $scope.data.item.start;
-      var margin = Utils.ceil3(Math.max(Utils.orderOfMagnitude(len, -1), 198));
       if(!$scope.extendedWindow){
-        $scope.startBase = Math.max($scope.data.item.start - margin, 0);
-        $scope.endBase = Math.min($scope.data.item.end + margin, GraphConfig.endBase);
+        $scope.startBase = Math.max(
+          0, // from 1 behind the start back 1 margin
+          (($scope.data.item.start) - GraphConfig.graphMargin ));
+        $scope.endBase = Math.min(
+          GraphConfig.endBase,// from 1 past the end + a margin
+          $scope.data.item.end + 1 + GraphConfig.graphMargin);
       }
-      console.log('setGraphBounds', $scope.data.item, len, margin, $scope.startBase, $scope.endBase, $scope.extendedWindow);
+      //$log.log('setGraphBounds', $scope.data.item, len, GraphConfig.graphMargin, $scope.startBase, $scope.endBase, $scope.extendedWindow);
     };
     $scope.setGraphBounds();
 
@@ -156,7 +162,7 @@ angular.module('npact')
     //$log.log("Focusing on", focusData);
     $scope.$on('offset', _.bind(function ($evt, dx) {
       $evt.stopPropagation();
-      $log.log("Updating offsets", dx);
+      //$log.log("Updating offsets", dx);
       dx = Utils.round3(dx);
       $scope.startBase = $scope.startBase + dx;
       $scope.endBase = $scope.endBase + dx;
@@ -169,30 +175,35 @@ angular.module('npact')
     },50);
 
     $scope.startChange = function(newStart, oldStart) {
-      console.log('startChange', arguments);
+      //$log.log('startChange', arguments);
+      $scope.extendedWindow = false;
+      return $scope.redraw();
+      /*
+      if(!newStart || !oldStart){
+        $log.log('cant change start, null args', newStart, oldStart);
+        return;
+      }
       var dir = Math.sign(newStart - oldStart);
       var start = $scope.data.item.start, end = $scope.data.item.end;
       if(dir==0) return;
-      while( ((end-start) % 3) != 0){
-        end += dir*1;
-      }
+      while(!Utils.isValidRange(start, end)) end += dir * 1;
       $scope.data.item.end = end;
-
-      $scope.extendedWindow = false;
       $scope.redraw();
+      */
     };
     $scope.endChange = function(newEnd, oldEnd) {
-      console.log('endChange', arguments);
+      //$log.log('endChange', arguments);
+      $scope.extendedWindow = false;
+      return $scope.redraw();
+      /*
       var dir = Math.sign(newEnd - oldEnd);
       var start = $scope.data.item.start, end = $scope.data.item.end;
       if(dir==0) return;
-      while( ((end-start) % 3) != 0){
-        start += dir*1;
-      }
+      while(!Utils.isValidRange(start, end))
+        start += dir * 1;
       $scope.data.item.start = start;
-
-      $scope.extendedWindow = false;
       $scope.redraw();
+      */
     };
     $scope.$watch('data.item.start', $scope.startChange);
     $scope.$watch('data.item.end', $scope.endChange);
@@ -202,7 +213,7 @@ angular.module('npact')
 
     this.buildPermalink = function () {
       //TODO: Params to this function
-      return FocusData.serialize(focusData);
+      return FocusData.serialize();
     };
 
   })
@@ -242,28 +253,28 @@ angular.module('npact')
           g = new Grapher($element, $scope, opts);
           return g.draw();
         };
-        var schedule = _.debounce(function () {$timeout(draw);}, 400);
+        var schedule = _.debounce(function () {$timeout(draw);}, 750);
         $scope.$on('redraw', schedule);
         $scope.$watchGroup(['startBase', 'endBase'], schedule);
         $scope.$watch(function() {return $element.width();}, schedule);
         angular.element(".zoom-nav-btn").bind('click',function(e) {
           var $el = angular.element(e.target);
           var dir = $el.is('.left')?'start':'end';
-          console.log('zoom-btn clicked', dir, $el);
+          //console.log('zoom-btn clicked', dir, $el);
           $scope.extendedWindow = true;
           $scope.$apply(function() {
             if(dir === 'start')
-              $scope.startBase = Math.max(0, $scope.startBase-198);
+              $scope.startBase = Math.max(0, $scope.startBase-GraphConfig.graphMargin);
             else
               $scope.endBase = Math.min(
-                GraphConfig.ddnaString.length, $scope.endBase+198);
+                GraphConfig.endBase, $scope.endBase+GraphConfig.graphMargin);
           });
         });
       }
     };
   })
 
-  .directive('npactProteinTranslation', function ($log, TranslatePath, GraphConfig, Evt) {
+  .directive('npactProteinTranslation', function ($log, TranslatePath, GraphConfig, Evt, Utils) {
     'use strict';
     return {
       restrict: 'E',
@@ -297,9 +308,8 @@ angular.module('npact')
           });
           return found && angular.element(found);
         };
-        $scope.findPrevStartCodon = function($codon, $prevStop){
+        $scope.findPrevStartCodon = function($codon, prevstopidx){
           var prev = null, found=null, cidx = $codon && Number($codon.data('index'));
-          var prevstopidx = $prevStop && Number($prevStop.data('index'));
           angular.forEach(angular.element('.start.standard.codon'),function(v, k) {
             var vidx = Number(angular.element(v).data('index'));
             if(vidx >= cidx){
@@ -307,14 +317,15 @@ angular.module('npact')
               return false;
             }
             if((!prevstopidx || (prevstopidx < vidx)) && vidx < cidx){
-              $log.log('setting prev to', vidx,'prevstop', prevstopidx, 'el', cidx);
+              //$log.log('setting prev to', vidx,'prevstop', prevstopidx, 'el', cidx);
               prev = v;
             }
           });
           found = found || prev;
           if( !found ) return null;
           found = angular.element(found);
-          if( Number(found.data('index')) >= cidx ) return null;
+          fidx = Number(found.data('index'));
+          if( fidx >= cidx || (prevstopidx && fidx >= prevstopidx)) return null;
           return found;
         };
         $scope._debounced_applied = function(fn) {
@@ -326,35 +337,39 @@ angular.module('npact')
             return rtn;
           },25);
         };
+
+        $scope._stopClickedTest_doOne = function(start, stop, newstart, newstop) {
+
+        }
         $scope._stopClicked = $scope._debounced_applied(function($el){
-          var $prevStop = $scope.findPrevStopCodon($el);
-          var $currentStart = angular.element('.codon.start[data-index="'+$scope.item.start+'"]');
-          var $prevStart = $scope.findPrevStartCodon($el, $prevStop);
-          var stop = Number($el.data('index')),
-              start = $currentStart.length>0 && Number($currentStart.data('index'));
-          if(!start) start = $prevStart && Number($prevStart.data('index'));
-          if(!start) start = $prevStop && Number($prevStop.data('index'))+3;
-          if(!start) start = Math.max(stop - 99, 0);
-          /*
-          $log.log('stop clicked',
-                   'prevstop',$prevStop && $prevStop.data('index'),
-                   'prevstart', $prevStart && $prevStart.data('index'),
-                   'cur: ',$el.data('index'),
-                   'start', start, 'stop', stop);
-          */
-          // Include the full stop codon
-          $scope.item.end = stop+2;
+          var $prevStop = $scope.findPrevStopCodon($el),
+              prevStop = $prevStop && Utils.startOfNextCodon(Number($prevStop.data('index'))),
+              $prevStart = $scope.findPrevStartCodon($el, $prevStop),
+              prevStart = $prevStart && Number($prevStart.data('index')),
+              stop = Utils.endOfThisCodon(Number($el.data('index'))),
+              cur = $scope.item.start,
+              start = cur;
+
+          // our start should never be after our stop
+          if(!start || start > stop)
+            start = prevStart;
+          if(!start || start > stop || (prevStop && prevStop > start))
+            start = prevStop;
+          if(!start || start > stop)
+            start = Math.max(stop - 99, 0);
+
+          //$log.log('stop clicked', 'prevstop',prevStop, 'prevstart', prevStart, 'cur: ',cur, 'start', start, 'stop', stop);
+
+          $scope.item.end = stop;
           if(start) $scope.item.start = start;
-          if($scope.item.start >= $scope.item.end){
-            $scope.item.start = $scope.startBase;
-          }
         });
         $scope._startClicked = $scope._debounced_applied(function($el){
           var start = $el.data('index'),
               eidx = $scope.item.end,
               nextStop = $scope.findNextStopCodon($el),
-              stop = (nextStop && Number(nextStop.data('index'))+2) ||
-                Math.min(start + 198, GraphConfig.ddnaString.length);
+              stop = (nextStop && Utils.endOfThisCodon(Number(nextStop.data('index')))) ||
+                Math.min(start + GraphConfig.graphMargin,
+                         GraphConfig.endBase);
           $scope.item.start = start;
           if(stop) $scope.item.end = stop;
           //$log.log('start clicked', 'cur: ',$el.data('index'), 'start', start, 'stop', stop);
@@ -362,6 +377,7 @@ angular.module('npact')
         $scope.$watchGroup(
           ['start', 'end', 'complement'],
           function () {
+
             $element.text('');
             TranslatePath($scope.start, $scope.end, $scope.complement)
               .then(function (data) {
@@ -391,7 +407,9 @@ angular.module('npact')
                       '" data-index="'+idx+'">'+ddnaP[i/3]+'</span>';
                 }
                 GraphConfig.ddnaP = ddnaP;
-                $element.html(ddnaP);
+                var html = ['<div>start:'+$scope.start+" <wbr>end:"+$scope.end+"</div>"]
+                  .concat(ddnaP);
+                $element.html(html);
                 $element.bind('click', function(e){
                   var $el = angular.element(e.target);
                   // $log.log('translation clicked', e, e.target, $scope.item, $el.is('.codon'));
@@ -399,7 +417,7 @@ angular.module('npact')
                   GraphConfig.zoomwindow.$evtscope = $scope;
                   if($el.is('.codon') && $scope.item){
                     // $log.log('codon clicked', $el, $el.data('index'), $scope.item);
-                    //GraphConfig.stack.push('codon clicked'); $log.log('stack', GraphConfig.stack);
+                    // GraphConfig.stack.push('codon clicked'); $log.log('stack', GraphConfig.stack);
                     if ($el.is('.stop'))
                       $scope._stopClicked($el);
                     else if ($el.is('.start'))

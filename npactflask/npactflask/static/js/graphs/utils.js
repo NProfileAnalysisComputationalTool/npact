@@ -109,6 +109,23 @@ angular.module('npact')
     this.round3 = function(x) { return x + 1.5 - (x + 1.5) % 3; };
     this.ceil3 = function(x) { var r = x%3; return r ? x + 3 - r : x; };
     this.floor3 = function (x) { return x - x%3; };
+    this.startOfNextCodon = function(idx){
+      return idx+3;
+    };
+    this.endOfThisCodon = function(idx){
+      return idx+2;
+    };
+    /*
+    this.rangeModulo3 = function(startIdx, stopIdx) {
+      // start is 161
+      // stop codon index is 236 for indices 236,237,238
+      // 238 is part of the codon, so we need to include it
+      return (((stopIdx+1) - startIdx) % 3);
+    };
+    */
+    this.isValidRange = function(start, stop) {
+      return 0 === this.rangeModulo3(start, stop);
+    };
   })
   .service('LineParser', function(Utils, $q) {
     'use strict';
