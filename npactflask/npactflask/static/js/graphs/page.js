@@ -86,7 +86,7 @@ angular.module('npact')
 
         $scope.graphSpecs = GraphingCalculator.partition(GraphConfig);
         $log.log('Partitioned into', $scope.graphSpecs.length, 'rows.');
-        $timeout(function () { $log.debug("Rebuilding"); $scope.$broadcast(Evt.REBUILD); });
+        //$timeout(function () { $log.debug("Rebuilding"); $scope.$broadcast(Evt.REBUILD); });
       });
   })
 
@@ -130,6 +130,7 @@ angular.module('npact')
         this.basePromise.then(NProfiler.start),
         this.basePromise.then(function() {
           if(!GraphConfig.trackPaths) {
+            console.log('Starting PredictionManager, because: ', GraphConfig.trackPaths)
             PredictionManager.start();
           }
           else{
@@ -151,14 +152,13 @@ angular.module('npact')
   })
 
   .service('PredictionManager', function(Fetcher, StatusPoller, Pynpact, Track,
-                                  $rootScope, $timeout, $log,
+                                  $rootScope, $timeout, $log, $q,
                                   GraphConfig, processOnServer, MessageBus) {
     'use strict';
     var self = this;
     self.files = null;
     self.predictionTracks = null;
-
-    self.start = function(_config) {
+    self.doPrediction = function() {
       var url = Fetcher.buildUrl('acgt_gamma');
       $log.log("Querying acgt_gamma at", url);
       var acgt_gamma_promise = Fetcher.rawFile(url)
@@ -166,6 +166,7 @@ angular.module('npact')
             self.files = response.files;
             Track.fetchAllTracks(response.trackPaths)
               .then(function(tracks) {
+                $log.log('Fetched tracks', tracks);
                 var tracksToAdd = _.difference(tracks, self.predictionTracks);
                 var tracksToRem = _.difference(self.predictionTracks, tracks);
                 GraphConfig.tracks = _(GraphConfig.tracks)
@@ -178,21 +179,34 @@ angular.module('npact')
               });
           });
 
-      MessageBus.info(
-        'Identifying significant 3-base periodicities',
-        acgt_gamma_promise.catch(function(e) {
-          MessageBus.danger('Failure while identifying significant 3-base periodicities');
-        }));
+        MessageBus.info(
+          'Identifying significant 3-base periodicities',
+          acgt_gamma_promise.catch(function(e) {
+            MessageBus.danger('Failure while identifying significant 3-base periodicities');
+          }));
       return acgt_gamma_promise;
+    };
+    self.start = function(_config) {
+      $log.log("PredictionManager.start");
+      if(GraphConfig.trackPaths){
+        $log.log('skipping because we have explicit graphs, how are we even getting here');
+        return $q.when(true);
+      }
+      else{
+        var acgt_gamma_promise = self.doPrediction();
+        return acgt_gamma_promise;
+      }
     };
 
     $rootScope.$watch(
       function () { return GraphConfig.mycoplasma; },
       function (val, old) {
-        if(old !== undefined) {
-          $log.debug("mycoplasma changed from", old, "to", val);
+        if(old !== undefined && old != val) {
           // Wait so that the above update to $location has a chance to complete
-          $timeout(self.start, 50);
+          $timeout(function() {
+            $log.debug("mycoplasma changed from", old, "to", val);
+            self.doPrediction();
+          }, 50);
         }
       });
   });

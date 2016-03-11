@@ -529,6 +529,8 @@ angular.module('npact')
       }
       // Go through the list of genes in the track.
       _.forEach(orfs, function(x) {
+        x = _.clone(x);
+        x.track = track.filename;
         var width = x.end - x.start,
             baseY = 0, shape,
             headWidth = Math.min(width, arrowHeadWidth),
@@ -604,14 +606,18 @@ angular.module('npact')
         var pos = self.stage.getPointerPosition(),
             dropshape = trackLayer.getIntersection(pos),
             targetTrack = getScopedAttr(dropshape, 'track'),
-            orf = getScopedAttr(e.target, 'orf');
+            orf = getScopedAttr(e.target, 'orf'),
+            parentTrack = _.find(GraphConfig.tracks, {filename: orf.track});
         if(isShortDrag(startPos, pos)){
           console.log('short drag, click instead');
           orfClick(e);
         }
         else if(targetTrack && track !== targetTrack
                 && track.type === targetTrack.type) {
-          targetTrack.add(_.clone(orf));
+          console.log('copying', orf, e, parentTrack);
+          parentTrack.remove(orf);
+          parentTrack.save();
+          targetTrack.add(orf);
           targetTrack.save();
         }
         $timeout(_.bind(self.draw, self), 0, false);

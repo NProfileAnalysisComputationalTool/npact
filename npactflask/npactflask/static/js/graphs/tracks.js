@@ -136,6 +136,7 @@ angular.module('npact')
       if(this.loading) {
         throw new Error("Shouldn't be able to add to a track that doesn't exist");
       }
+      entry.track = this.filename;
       this.data.push(entry);
       entry.cdsidx = this.data.length - 1;
       this.reindex();
@@ -146,7 +147,10 @@ angular.module('npact')
       if(this.loading) {
         throw new Error("Shouldn't be able to remove from a track before the track exists");
       }
-      this.data = _.without(this.data, entry);
+      _.remove(this.data, function(v,k,a) {
+        return (entry.start == v.start && entry.end == v.end);
+      });
+      entry.track = null;
       this.reindex();
     };
 
@@ -162,13 +166,16 @@ angular.module('npact')
       })
         .then(function (res) {
           var tr = _.create(Track.prototype, track);
-          tr.filename = res.data.filename;
-          Track.loadedTracks[tr.filename] = $q.when(tr);
           var idx = null;
           GraphConfig.tracks = _.map(GraphConfig.tracks,function(t, i) {
             if(t.filename==track.filename) return tr;
             return t;
           });
+          tr.filename = res.data.filename;
+          _.each(tr.data,function(orf) { orf.track=tr.filename;});
+          Track.loadedTracks[tr.filename] = $q.when(tr);
+          if(GraphConfig.tracks.length != 4)
+            console.log('ERROR: why do we have bonus tracks', GraphConfig.tracks, tr, track);
           return tr;
         });
     };
