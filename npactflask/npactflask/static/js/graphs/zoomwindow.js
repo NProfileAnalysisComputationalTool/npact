@@ -44,7 +44,7 @@ angular.module('npact')
       GraphConfig.zoomIdx = null;
     };
   })
-  .service('ZoomWindowHandler', function ($log, $uibModal, FocusData, STATIC_BASE_URL, Evt, Utils) {
+  .service('ZoomWindowHandler', function ($log, $uibModal, FocusData, STATIC_BASE_URL, Evt, Utils, $timeout) {
     var self = this;
     self.register = function ($scope) {
       $scope.$on('ORF-selected',
@@ -95,8 +95,14 @@ angular.module('npact')
         size: 'lg'
       };
       GraphConfig.zoomwindow = $uibModal.open(_.assign(modalDefaults, modalopts));
+      $timeout(function() {
+        $('.modal-content').resizable({
+          alsoResize: ".modal-header, .modal-body, .modal-footer"
+        });
+      }, 100);
       GraphConfig.zoomwindow.result.catch(function() {
         // when exiting the window, data may have changed that requires a redraw
+
         $scope.$broadcast(Evt.REDRAW);
       }).finally( function() {
         FocusData.clearQuery();

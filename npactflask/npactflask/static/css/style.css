@@ -549,3 +549,7 @@ span[contenteditable] { cursor: text; }
 .npact-protein-translation .stop { color:#600; background-color:#FAA; }
 .npact-protein-translation .start { color:#060; background-color:#AFA; }
 .npact-protein-translation .start.rare { color:#006; background-color:#AAF; }
+.modal-content.ui-resizable { overflow: auto; position:relative;}
+.zoomwindow{width:98%; height:98%; position:relative;}
+.ui-resizable-handle.ui-resizable-e,
+.ui-resizable-handle.ui-resizable-s {bottom:5px; right:5px;}
