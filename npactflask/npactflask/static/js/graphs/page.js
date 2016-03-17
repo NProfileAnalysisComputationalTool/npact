@@ -137,7 +137,10 @@ angular.module('npact')
             var pths = GraphConfig.trackPaths;
             if(typeof(pths) === 'string') pths=pths.split(',');
             Track.fetchAllTracks(pths)
-              .then(function(tracks) { GraphConfig.tracks = tracks; });
+              .then(function(tracks) {
+                GraphConfig.tracks = tracks;
+                GraphConfig.clearORFSelection();
+              });
           }
           return null;
         }),

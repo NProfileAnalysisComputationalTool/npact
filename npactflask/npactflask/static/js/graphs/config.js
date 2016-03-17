@@ -14,6 +14,11 @@ angular.module('npact')
     self.baseUrl = STATIC_BASE_URL;
     self.cookieBools = ["colorBlindFriendly"];
     self.colorBlindFriendly = false;
+    self.clearORFSelection =function() {
+      _.each(GraphConfig.tracks,function(t) {
+        _.each(t.data,function(orf,k) { orf.selected = false; });
+      });
+    };
     self.cookieInit = function() {
       _.each(self.cookieBools, function(v){
         var cv = $cookies.get(v);
@@ -156,9 +161,21 @@ angular.module('npact')
           if(!val) return $q.when(true);
           $log.log("Searching for:", val);
           return $q
-            .all(_.map(GraphConfig.activeTracks(), function(t) { return t.findByName(val); }))
+            .all(_.map(GraphConfig.activeTracks(), function(t) {
+              var orf = t.findByName(val);
+
+              return orf;
+            }))
             .then(function(values) {
               return $timeout(function() {  // let other code run
+                $log.log('Found orfs', values);
+                GraphConfig.clearORFSelection();
+                _.each(values, function(orfarr) {
+                  _.each(orfarr,function(orf) {
+                   orf.selected = true;
+                  });
+                });
+
                 $scope.results = _(values).flatten().filter(resultInRange).sortBy('start').value();
                 $log.log("Total results", $scope.results.length);
                 if($scope.results.length > 0) {

@@ -76,9 +76,7 @@ angular.module('npact')
     };
     self.popup = function (focusData, modalopts, $scope) {
       $log.log("popping!", focusData, modalopts);
-      _.each(GraphConfig.tracks,function(t) {
-        _.each(t.data,function(orf,k) { orf.selected = false; });
-      });
+      GraphConfig.clearORFSelection();
       focusData.item.selected = true;
       FocusData.serialize(focusData);
       if(GraphConfig.zoomwindow){
