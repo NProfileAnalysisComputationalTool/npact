@@ -145,7 +145,7 @@ angular.module('npact')
           return null;
         }),
         this.basePromise.then(function() {
-          console.log('Getting DDNA string');
+          //console.log('Getting DDNA string');
           Fetcher.fetchFile(GraphConfig.ddna).then(function(res){
             GraphConfig.ddnaString = res;
           });

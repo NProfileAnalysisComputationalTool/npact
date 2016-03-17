@@ -22,9 +22,14 @@ angular.module('npact')
           },
           onDragEnd: function (dx) {
             $scope.$evalAsync(function () {
-              GraphConfig.offset += Math.round(dx);
-              $log.log("Finished dragging, new offset is", GraphConfig.offset);
-          });
+
+              //$log.log("Finished dragging, new offset is", GraphConfig.offset, 'upper',(GraphConfig.endbase|| 1e15), 'dx',Math.round(dx), 'new', GraphConfig.offset+Math.round(dx));
+              GraphConfig.offset =
+                Math.min(
+                  (GraphConfig.endbase|| 1e15),
+                  Math.max(0,GraphConfig.offset+Math.round(dx)));
+              redraw();
+            });
           },
           onRegionSelected: function (data) { $scope.$emit('region-selected', data); },
           onOrfSelected: function (data) {  $scope.$emit('ORF-selected', data); },
@@ -193,32 +198,35 @@ angular.module('npact')
       },
       link: function($scope, $element, $attrs) {
         var g = null, scheduledOn = null,
-        startBase = $scope.startBase(),
-        endBase = $scope.endBase(),
-        visible = $scope.visible,
-        id = $attrs.id,
-        // redraw gets set for all graphs once (e.g. a new track
-        // triggers broadcasts redraw), but only gets cleared as
-        // the currently visible ones are drawn
-        redraw = false,
-        draw = function(force) {
+            visible = $scope.visible,
+            id = $attrs.id,
+            // redraw gets set for all graphs once (e.g. a new track
+            // triggers broadcasts redraw), but only gets cleared as
+            // the currently visible ones are drawn
+            redraw = false;
+
+
+
+        var draw = function(force) {
           var t1 = scheduledOn;
           scheduledOn = null;
           if(!redraw || (!force && !visible())) { return null; }
+          var it;
           var opts = _.clone($scope.graphOptions());
-          opts.startBase = startBase;
-          opts.endBase = endBase;
+          opts.startBase = $scope.startBase();
+          opts.endBase = $scope.endBase();
 
           //However long it actually takes to draw, we have the
           //latest options as of this point
           redraw = false;
-          return (g || (g = new Grapher($element, $scope, opts)))
+          return ((g = new Grapher($element, $scope, opts)))
             .draw(opts)
             .then(function () {
               $log.log("Finished draw at", opts.startBase, "in", new Date() - t1);
             })
             .catch(function() {
               //something went wrong, we will still need to redraw this
+              $log.log('Need to redraw');
               redraw = true;
             });
         },

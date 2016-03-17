@@ -167,16 +167,15 @@ angular.module('npact')
               return orf;
             }))
             .then(function(values) {
+              values = _(values).flatten();
               return $timeout(function() {  // let other code run
-                $log.log('Found orfs', values);
+                //$log.log('Found orfs', values);
                 GraphConfig.clearORFSelection();
-                _.each(values, function(orfarr) {
-                  _.each(orfarr,function(orf) {
-                   orf.selected = true;
-                  });
+                _.each(values, function(orf) {
+                  orf.selected = true;
                 });
 
-                $scope.results = _(values).flatten().filter(resultInRange).sortBy('start').value();
+                $scope.results = _(values).filter(resultInRange).sortBy('start').value();
                 $log.log("Total results", $scope.results.length);
                 if($scope.results.length > 0) {
                   $scope.resultsIndex = 0;

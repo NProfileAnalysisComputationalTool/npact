@@ -10,6 +10,7 @@ angular.module('npact')
       this.$element = $element;
       this.$scope = $scope;
       _.assign(this, opts);
+      //$element.find('.coords').detach(); $element.prepend("<div class='coords'> start:"+opts.startBase+" end"+opts.endBase+"</div>");
       // invariants: startBase, endBase
 
       if(this.endBase === undefined) {
@@ -547,7 +548,6 @@ angular.module('npact')
         else {
           shape = rightArrow(width, headWidth, tailWidth);
         }
-        if(x.name == "H-6*g")$log.log(x.name, x.selected, x);
         g.add(new K.Line({
           x: x.start, y: baseY,
           points: shape, closed: true,
