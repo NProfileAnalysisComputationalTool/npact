@@ -147,6 +147,8 @@ angular.module('npact')
     else {
       this.item = $scope.data.item;
     }
+    $scope.startBaseInp = $scope.data.item.start;
+    $scope.endBaseInp = $scope.data.item.end;
     this.track = $scope.data.track || _.first(GraphConfig.activeTracks);
     $scope.setGraphBounds = function() {
       var len = $scope.data.item.end - $scope.data.item.start;
@@ -180,39 +182,77 @@ angular.module('npact')
       $scope.$broadcast('redraw');
     },50);
 
+    $scope.inbounds = function(inp) {
+      if(!inp || isNaN(inp)) return false;
+      inp = Number(inp);
+      if(inp < 0 || inp > GraphConfig.endBase) return false;
+      return true;
+    };
+    $scope._lastGoodStart=null;
     $scope.startChange = function(newStart, oldStart) {
-      //$log.log('startChange', arguments);
-      $scope.extendedWindow = false;
-      return $scope.redraw();
-      /*
-      if(!newStart || !oldStart){
-        $log.log('cant change start, null args', newStart, oldStart);
+      $log.log('startChange', arguments);
+      // start validation
+      if(!$scope.inbounds(newStart) || newStart == $scope.data.item.end){
+        $log.log('resetting invalid start input');
+        $scope.startBaseInp = oldStart || $scope._lastGoodStart;
         return;
       }
-      var dir = Math.sign(newStart - oldStart);
-      var start = $scope.data.item.start, end = $scope.data.item.end;
-      if(dir==0) return;
-      while(!Utils.isValidRange(start, end)) end += dir * 1;
-      $scope.data.item.end = end;
-      $scope.redraw();
-      */
-    };
-    $scope.endChange = function(newEnd, oldEnd) {
-      //$log.log('endChange', arguments);
+      else if(newStart > $scope.data.item.end){
+        $scope.startBaseInp = $scope.endBaseInp;
+        $scope.endBaseInp = newStart;
+        return;
+      }
+      else if(newStart == $scope.data.item.start){
+        // nothing to do
+        return;
+      }
+      // End Validation
+      $scope._lastGoodStart = newStart;
+      var diff = newStart-oldStart,
+          m = (diff)%3;
+      //$log.log('Mod',newStart, ' newend', $scope.data.item.end+m, diff, m);
+      $scope.data.item.start = newStart;
+      // keep triplets in sync
+      $scope.endBaseInp = $scope.data.item.end = $scope.data.item.end+m;
       $scope.extendedWindow = false;
-      return $scope.redraw();
-      /*
-      var dir = Math.sign(newEnd - oldEnd);
-      var start = $scope.data.item.start, end = $scope.data.item.end;
-      if(dir==0) return;
-      while(!Utils.isValidRange(start, end))
-        start += dir * 1;
-      $scope.data.item.start = start;
       $scope.redraw();
-      */
+      return;
     };
-    $scope.$watch('data.item.start', $scope.startChange);
-    $scope.$watch('data.item.end', $scope.endChange);
+    $scope._lastGoodEnd=null;
+    $scope.endChange = function(newEnd, oldEnd) {
+      $log.log('endChange', arguments);
+      if(!$scope.inbounds(newEnd) || $scope.data.item.start == newEnd){
+        $log.log('resetting invalid end input');
+        $scope.endBaseInp = oldEnd || $scope._lastGoodEnd;
+        return;
+      }else if(newEnd < $scope.data.item.start){
+        $scope.endBaseInp = $scope.startBaseInp;
+        $scope.startBaseInp = newEnd;
+        return;
+      }
+      else if(newEnd == $scope.data.item.end){
+        // nothing to do
+        return;
+      }
+      // End Validation
+      var diff = newEnd-oldEnd,
+          m = (diff)%3;
+      $scope.extendedWindow = false;
+      $scope.startBaseInp = $scope.data.item.start = $scope.data.item.start+m;
+      $scope.data.item.end = newEnd;
+      $scope.redraw();
+      return;
+    };
+    $scope.orfChange = function() {
+      //$log.log("orfChange");
+      $scope.startBaseInp = $scope.data.item.start;
+      $scope.endBaseInp = $scope.data.item.end;
+      $scope.redraw();
+    };
+    $scope.$watch('data.item.start', $scope.orfChange);
+    $scope.$watch('data.item.end', $scope.orfChange);
+    $scope.$watch('startBaseInp', $scope.startChange);
+    $scope.$watch('endBaseInp', $scope.endChange);
     $scope.$watch('data.item.complement', $scope.redraw);
     $scope.$watch('zw.track', $scope.redraw);
     //Keep phase up to date with the end
@@ -364,9 +404,7 @@ angular.module('npact')
               start = Math.max(end - 99, 0);
           }else{
             // shift the window for complements
-            $log.log('!!!=',$scope.item.start,'+ (',$scope.item.end,' - ',
-                     clicked,'= ',($scope.item.end - clicked),') = ',
-                     ($scope.item.start + ($scope.item.end - clicked))-2);
+            //$log.log('!!!=',$scope.item.start,'+ (',$scope.item.end,' - ', clicked,'= ',($scope.item.end - clicked),') = ', ($scope.item.start + ($scope.item.end - clicked))-2);
             start = ($scope.item.start + ($scope.item.end - clicked))-2;
             end =  $scope.item.end;
 
