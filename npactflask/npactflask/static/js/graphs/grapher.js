@@ -655,27 +655,38 @@ angular.module('npact')
             //G type hits should be lighter
             'G': _.map(this.colors, function(c) { return shadeBlend(0.5, c); })}
       ;
-
       // draw each hit
       _.forEach(hits, function(hit) {
+        hit.track = track.filename;
         var type = hit.name[0],  // {G,H}
             confidence = _.parseInt(hit.name[1]), // {0,1,2,3}
-            strokeWidth = (confidence + 1) * 2;
-        var y = midY + (hit.complement ? offset : -offset);
-        g.add(new K.Line({
+            confidenceWeight = (confidence + 1) * 2;
+        var y =  midY * (confidenceWeight/6);
+
+        if(hit.selected) y = y*1.25;
+        var c =colors[type][hit.phase];
+        g.add(new K.Rect({
           hit: hit,
-          points: [hit.start, y, hit.end, y],
+          x: hit.start,
+          y:  midY,
+          width:hit.end-hit.start,
+          height: y,
           // set it outside the guidelines instead of ontop:
-          offsetY: (hit.complement ? -strokeWidth : strokeWidth)/2,
-          stroke: colors[type][hit.phase],
-          strokeWidth: strokeWidth
+          offsetY: (hit.complement ? 0 : +y),
+          fill: hit.selected ?  shadeBlend(0.3, c) :
+            shadeBlend(1-(8-confidenceWeight)/8, c),
+          stroke: hit.selected ? "#000000" : shadeBlend(0.9, c),
+          strokeWidth: hit.selected ? 2 : 1
         }));
       });
       g.on('click', _.bind(function(evt) {
+        var hit = evt.target.getAttrs().hit;
+        GraphConfig.clearORFSelection();
+        hit.selected = true;
         this.onHitSelected({
           type: 'hit',
-          track: evt.target.getAttrs().track,
-          item: evt.target.getAttrs().hit
+          track: _.find(GraphConfig.tracks, {filename: hit.track}),
+          item: hit
         });
       }, this));
 

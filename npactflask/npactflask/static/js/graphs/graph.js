@@ -31,9 +31,15 @@ angular.module('npact')
               redraw();
             });
           },
-          onRegionSelected: function (data) { $scope.$emit('region-selected', data); },
-          onOrfSelected: function (data) {  $scope.$emit('ORF-selected', data); },
-          onHitSelected: function (data) {  $scope.$emit('hit-selected', data); }
+          onRegionSelected: function (data) {
+            $log.log('region-selected', data);
+            $scope.$emit('region-selected', data); },
+          onOrfSelected: function (data) {
+            $log.log('ORF-selected', data);
+            $scope.$emit('ORF-selected', data); },
+          onHitSelected: function (data) {
+            $log.log('hit-selected', data);
+            $scope.$emit('hit-selected', data); }
         },
         updateMetrics = function () {
           baseOpts.width = getWidth();
