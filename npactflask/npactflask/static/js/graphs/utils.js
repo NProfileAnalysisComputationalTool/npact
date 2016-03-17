@@ -106,13 +106,21 @@ angular.module('npact')
     // a lot of our math is based on codons which are three in length
     // so we need to find the nearest multiple of 3 based on some
     // start
-    this.round3 = function(x) { return x + 1.5 - (x + 1.5) % 3; };
-    this.ceil3 = function(x) { var r = x%3; return r ? x + 3 - r : x; };
-    this.floor3 = function (x) { return x - x%3; };
+    this.round3 = function(x) {
+      x = Number(x);
+      return x + 1.5 - (x + 1.5) % 3; };
+    this.ceil3 = function(x) {
+      x = Number(x);
+      var r = x%3; return r ? x + 3 - r : x; };
+    this.floor3 = function (x) {
+      x = Number(x);
+      return x - x%3; };
     this.startOfNextCodon = function(idx){
+      idx = Number(idx);
       return idx+3;
     };
     this.endOfThisCodon = function(idx){
+      idx = Number(idx);
       return idx+2;
     };
     /*

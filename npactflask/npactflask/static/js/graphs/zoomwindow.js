@@ -344,41 +344,58 @@ angular.module('npact')
           },25);
         };
 
-        $scope._stopClickedTest_doOne = function(start, stop, newstart, newstop) {
 
-        }
         $scope._stopClicked = $scope._debounced_applied(function($el){
           var $prevStop = $scope.findPrevStopCodon($el),
               prevStop = $prevStop && Utils.startOfNextCodon(Number($prevStop.data('index'))),
               $prevStart = $scope.findPrevStartCodon($el, $prevStop),
               prevStart = $prevStart && Number($prevStart.data('index')),
-              stop = Utils.endOfThisCodon(Number($el.data('index'))),
-              cur = $scope.item.start,
-              start = cur;
+              end, cur, start, clicked = Number($el.data('index'));
+          cur = $scope.item.start;
+          if(!$scope.item.complement){
+            start = cur;
+            end = Utils.endOfThisCodon(Number($el.data('index')));
+            // our start should never be after our end
+            if(!start || start > end)
+              start = prevStart;
+            if(!start || start > end || (prevStop && prevStop > start))
+              start = prevStop;
+            if(!start || start > end)
+              start = Math.max(end - 99, 0);
+          }else{
+            // shift the window for complements
+            $log.log('!!!=',$scope.item.start,'+ (',$scope.item.end,' - ',
+                     clicked,'= ',($scope.item.end - clicked),') = ',
+                     ($scope.item.start + ($scope.item.end - clicked))-2);
+            start = ($scope.item.start + ($scope.item.end - clicked))-2;
+            end =  $scope.item.end;
 
-          // our start should never be after our stop
-          if(!start || start > stop)
-            start = prevStart;
-          if(!start || start > stop || (prevStop && prevStop > start))
-            start = prevStop;
-          if(!start || start > stop)
-            start = Math.max(stop - 99, 0);
+          }
 
-          //$log.log('stop clicked', 'prevstop',prevStop, 'prevstart', prevStart, 'cur: ',cur, 'start', start, 'stop', stop);
+          //$log.log('stop clicked', 'prevstop',prevStop, 'prevstart', prevStart, 'cur: ',cur, 'start', start, 'end', end);
 
-          $scope.item.end = stop;
+          $scope.item.end = end;
           if(start) $scope.item.start = start;
         });
         $scope._startClicked = $scope._debounced_applied(function($el){
-          var start = $el.data('index'),
+          var start=null, end=null,
+              clicked = $el.data('index'),
               eidx = $scope.item.end,
-              nextStop = $scope.findNextStopCodon($el),
-              stop = (nextStop && Utils.endOfThisCodon(Number(nextStop.data('index')))) ||
+              $nextStop = $scope.findNextStopCodon($el),
+              nextStop =$nextStop && Number($nextStop.data('index'));
+          if(!$scope.item.complement){
+            start = clicked;
+            end = (nextStop && Utils.endOfThisCodon(nextStop)) ||
                 Math.min(start + GraphConfig.graphMargin,
                          GraphConfig.endBase);
-          $scope.item.start = start;
-          if(stop) $scope.item.end = stop;
-          //$log.log('start clicked', 'cur: ',$el.data('index'), 'start', start, 'stop', stop);
+          }else{
+            var d = ($scope.item.end - clicked);
+            end = ($scope.item.start+d);
+            //$log.log('start:',$scope.item.start, 'clicked:', clicked, 'd:',d, 'end:', end);
+          }
+          if(start) $scope.item.start = start;
+          if(end) $scope.item.end = end;
+          //$log.log('start clicked', 'cur: ',$el.data('index'), 'start', start, 'end', end);
         });
         $scope.$watchGroup(
           ['start', 'end', 'complement'],
