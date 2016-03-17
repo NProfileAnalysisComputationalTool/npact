@@ -56,10 +56,11 @@ angular.module('npact')
             //end is inclusive so need to subtract one for the length to be mod3
             end = Utils.ceil3(data.end) -1,
             item = {
-                name: "ORF from region",
-                start: start,
-                end: end,
-                complement: 0
+              name: "ORF from region",
+              start: start,
+              end: end,
+              complement: 0,
+              selected: true
             },
             track = _.find(GraphConfig.activeTracks(), {name: 'New ORFs'}) ||
                 _.first(GraphConfig.activeTracks());
@@ -75,6 +76,10 @@ angular.module('npact')
     };
     self.popup = function (focusData, modalopts, $scope) {
       $log.log("popping!", focusData, modalopts);
+      _.each(GraphConfig.tracks,function(t) {
+        _.each(t.data,function(orf,k) { orf.selected = false; });
+      });
+      focusData.item.selected = true;
       FocusData.serialize(focusData);
       if(GraphConfig.zoomwindow){
         GraphConfig.zoomwindow.$scope.data = focusData;

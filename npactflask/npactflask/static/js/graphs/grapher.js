@@ -529,7 +529,7 @@ angular.module('npact')
       }
       // Go through the list of genes in the track.
       _.forEach(orfs, function(x) {
-        x = _.clone(x);
+        //x = _.clone(x);
         x.track = track.filename;
         var width = x.end - x.start,
             baseY = 0, shape,
@@ -547,10 +547,12 @@ angular.module('npact')
         else {
           shape = rightArrow(width, headWidth, tailWidth);
         }
+        if(x.name == "H-6*g")$log.log(x.name, x.selected, x);
         g.add(new K.Line({
           x: x.start, y: baseY,
           points: shape, closed: true,
           stroke: track.style.light ? shadeBlend(0.7, colors[x.phase]) : colors[x.phase],
+          fill: x.selected ? shadeBlend(0.9, colors[x.phase]) : null,
           strokeWidth: track.style.strokeWidth,
           strokeScaleEnabled: false
         }));
@@ -589,10 +591,12 @@ angular.module('npact')
     GP.orfTrackEvents = function (trackGroup, track) {
       var self = this;
       var orfClick = function(evt) {
+        var orf = getScopedAttr(evt.target, 'orf');
+        //$log.log(orf);
         self.onOrfSelected({
           type: 'ORF',
           track: track,
-          item: getScopedAttr(evt.target, 'orf')
+          item: orf
         });
       };
       trackGroup.on('click', orfClick);
