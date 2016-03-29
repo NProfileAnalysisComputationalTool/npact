@@ -552,7 +552,7 @@ angular.module('npact')
           x: x.start, y: baseY,
           points: shape, closed: true,
           stroke: track.style.light ? shadeBlend(0.7, colors[x.phase]) : colors[x.phase],
-          fill: x.selected ? shadeBlend(0.9, colors[x.phase]) : null,
+          fill: x.selected ? shadeBlend(0.75, colors[x.phase]) : null,
           strokeWidth: track.style.strokeWidth,
           strokeScaleEnabled: false
         }));

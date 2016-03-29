@@ -6,38 +6,40 @@ angular.module('npact')
 
   .service('GraphConfig', function(Err, npactConstants, Evt, PUBLIC_CONFIG_KEYS,
                             $location, $log, $rootScope, $cookies, $window,
-                            STATIC_BASE_URL, CodonFinder) {
+                            STATIC_BASE_URL) {
     'use strict';
     var self = this;
-    self.graphMargin = 198;// multiple of 3 ;)
+    var GraphConfig = this;
+
+    GraphConfig.graphMargin = 198;// multiple of 3 ;)
     $window.GraphConfig = this;
-    self.baseUrl = STATIC_BASE_URL;
-    self.cookieBools = ["colorBlindFriendly"];
-    self.colorBlindFriendly = false;
-    self.clearORFSelection =function() {
+    GraphConfig.baseUrl = STATIC_BASE_URL;
+    GraphConfig.cookieBools = ["colorBlindFriendly"];
+    GraphConfig.colorBlindFriendly = false;
+    GraphConfig.clearORFSelection =function() {
       _.each(GraphConfig.tracks,function(t) {
         _.each(t.data,function(orf,k) { orf.selected = false; });
       });
     };
-    self.cookieInit = function() {
-      _.each(self.cookieBools, function(v){
+    GraphConfig.cookieInit = function() {
+      _.each(GraphConfig.cookieBools, function(v){
         var cv = $cookies.get(v);
-        if( cv === "true" ) self[v] = true;
-        else if(cv === "false") self[v] = false;
+        if( cv === "true" ) GraphConfig[v] = true;
+        else if(cv === "false") GraphConfig[v] = false;
       });
     };
-    self.cookiePersist  = function(){
-      _.each(self.cookieBools, function(v){
-        if(self[v]) $cookies.put(v, "true");
+    GraphConfig.cookiePersist  = function(){
+      _.each(GraphConfig.cookieBools, function(v){
+        if(GraphConfig[v]) $cookies.put(v, "true");
         else $cookies.put(v, "false");
       });
     };
-    self.tracks = null;
-    self.cookieInit();
+    GraphConfig.tracks = null;
+    GraphConfig.cookieInit();
 
-    self.basesPerGraph = 10000;
-    self.nucleotides = ['C', 'G'];
-    self.offset = 0; // how much the graph is panned left/right
+    GraphConfig.basesPerGraph = 10000;
+    GraphConfig.nucleotides = ['C', 'G'];
+    GraphConfig.offset = 0; // how much the graph is panned left/right
 
     var inputConfig = {};
     //Get values from the querystring during intialization
@@ -76,28 +78,27 @@ angular.module('npact')
         GraphConfig.trackPaths = v;
       });
     $log.debug("Finished reading config from querystring:", inputConfig);
-    _.assign(self, inputConfig);
+    _.assign(GraphConfig, inputConfig);
 
     /**
      * what's the right title for the current nucleotides?
      */
-    self.profileTitle = function() {
-      return self.nucleotides ? '% ' + self.nucleotides.join('') : null;
+    GraphConfig.profileTitle = function() {
+      return GraphConfig.nucleotides ? '% ' + GraphConfig.nucleotides.join('') : null;
     };
 
-    self.activeTracks = function() {
-      return _.filter(self.tracks, 'active');
+    GraphConfig.activeTracks = function() {
+      return _.filter(GraphConfig.tracks, 'active');
     };
 
     /**
      * do we have a track with a given name?
      */
-    this.findTrack = function(name){
-      return _.find(self.tracks,function(tr) {
+    GraphConfig.findTrack = function(name){
+      return _.find(GraphConfig.tracks,function(tr) {
         return tr.name == name || tr.filename == name;
       });
     };
-    self.CodonFinder = CodonFinder;
 
 
   })

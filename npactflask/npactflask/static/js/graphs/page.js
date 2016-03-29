@@ -116,7 +116,8 @@ angular.module('npact')
   })
 
   .service('kickstarter', function($q, $log, processOnServer, MessageBus, $http,
-                            NProfiler, PredictionManager, Fetcher, Track, GraphConfig) {
+                            NProfiler, PredictionManager, Fetcher, Track,
+                            GraphConfig, CodonFinder) {
     'use strict';
     //Kickstart the whole process, start all the main managers
     this.start = function() {
@@ -148,6 +149,7 @@ angular.module('npact')
           //console.log('Getting DDNA string');
           Fetcher.fetchFile(GraphConfig.ddna).then(function(res){
             GraphConfig.ddnaString = res;
+            CodonFinder.reindex();
           });
         })
       ]);

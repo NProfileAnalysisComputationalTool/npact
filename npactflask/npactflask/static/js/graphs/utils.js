@@ -113,13 +113,16 @@ angular.module('npact')
       x = Number(x);
       var r = x%3; return r ? x + 3 - r : x; };
     this.floor3 = function (x) {
+      if(!x || isNaN(x)) return null;
       x = Number(x);
       return x - x%3; };
     this.startOfNextCodon = function(idx){
+      if(!idx || isNaN(idx)) return null;
       idx = Number(idx);
       return idx+3;
     };
     this.endOfThisCodon = function(idx){
+      if(!idx || isNaN(idx)) return null;
       idx = Number(idx);
       return idx+2;
     };
@@ -275,7 +278,7 @@ angular.module('npact')
     'use strict';
     return function (start, end, complement) {
       var url = Fetcher.buildUrl('translate', {
-        startBase: start, endBase: end, rc: complement});
+        startBase: start, endBase: end, rc: complement ? 'true' : 'false'});
       // $log.log("Translating @ ", url);
       return $http.get(url, {responseType: 'json'})
         .then(function (res) {
@@ -283,32 +286,105 @@ angular.module('npact')
         });
     };
   })
-  .service('CodonFinder', function() {
+  .service('CodonFinder', function(GraphConfig) {
     var self = this;
+    GraphConfig.CodonFinder = self;
+    self.indexes={start:[], alt:[], stop:[]};
+    self.comIndexes={start:[], alt:[], stop:[]};
+
     self.codonRegexes = {
       start: /ATG|GTG/gim,
       altStart: /TTG|CTG|ATT/gim,
       end: /TAG|TAA/gim,
-      nonMycoEnd: /TGA/gim
+      nonMycoEnd: /TAG|TAA|TGA/gim
     };
-    self.searchAllDNA = function(r, ddna){
-      var res =[], m;
-      while((m = r.exec(ddna))){
-        res.push(m.index);
+    var classifyIdx = function(i, codon, complement) {
+      var stopRe = GraphConfig.mycoplasma ? self.codonRegexes.end : self.codonRegexes.nonMycoEnd,
+          startRe = self.codonRegexes.start,
+          altstartRe = self.codonRegexes.altStart;
+      var idxs = complement ? self.comIndexes : self.indexes ;
+      //stops
+      if(codon.search(stopRe)===0) idxs.stop[i]=codon;
+      // start
+      else if(codon.search(startRe)===0) idxs.start[i]=codon;
+      // nonstandard start
+      else if(codon.search(altstartRe)===0) idxs.alt[i]=codon;
+    };
+    var strRevCom = function(s) {
+      for (var i = s.length - 1, o = ''; i >= 0; i--) {
+        var c = s[i];
+        switch(c){
+          case "A": o+= 'T'; break;
+          case "T": o+= 'A'; break;
+          case "G": o+= 'C'; break;
+          case "C": o+= 'G'; break;
+        }
       }
-      return res;
+      return o;
     };
-    self.startCodons = function(ddna) {
-      return self.searchAllDNA(self.codonRegexes.start, ddna);
+    self.reindex = _.debounce(function() {
+      self._indexing = true;
+      self.indexes={start:[], alt:[], stop:[]};
+      self.comIndexes={start:[], alt:[], stop:[]};
+
+      // I tried different methods including a hand coded matcher
+      // and reversing the DNA string to match complements
+      // this was the best I could come up with at about 1.2sec
+      // to index
+      var indexByRe = function() {
+        var match,
+        re      = /TAG|TAA|ATG|GTG|TTG|CTG|ATT|TGA/img,
+        //rev   = /GAT|AAT|GTA|GTG|GTT|GTC|TTA|AGT/img;
+        // reverse and complment the codes
+        comre   = /CTG|TTA|CAT|CAC|CAA|CAG|AAT|TCA/img;
+        while((match = re.exec(GraphConfig.ddnaString))){
+          re.lastIndex = match.index+1;
+          classifyIdx(match.index, match[0], false);
+        }
+        while((match = comre.exec(GraphConfig.ddnaString))){
+          comre.lastIndex = match.index+1;
+          classifyIdx(match.index+2, strRevCom(match[0]), true);
+        }
+      };
+      console.time('reindex re');
+      indexByRe();
+      console.timeEnd('reindex re');
+      self._indexing = false;
+    }, 50);
+    self.isStart = function(cidx, complement){
+      var idxs = complement ? self.comIndexes : self.indexes ;
+      return idxs.start[cidx];
     };
-    self.altStartCodons = function(ddna) {
-      return self.searchAllDNA(self.codonRegexes.altStart, ddna);
+    self.isAltStart = function(cidx, complement){
+      var idxs = complement ? self.comIndexes : self.indexes ;
+      return idxs.alt[cidx];
     };
-    self.endCodons = function(ddna) {
-      return self.searchAllDNA(self.codonRegexes.end, ddna);
+    self.isStop = function(cidx, complement){
+      var idxs = complement ? self.comIndexes : self.indexes ;
+      return idxs.stop[cidx];
     };
-    self.noMycoEndCodons =function(ddna) {
-      return self.searchAllDNA(self.codonRegexes.nonMycoEnd, ddna);
+    self.findNextStopCodon = function(cidx, complement){
+      var idxs = complement ? self.comIndexes : self.indexes ;
+      for(var i = cidx, rightbound=GraphConfig.ddnaString.length;
+          i < rightbound ; i+=3){
+        if(idxs.stop[i]) return i;
+      }
+      return null;
+    };
+    self.findPrevStopCodon = function(cidx, complement){
+      var idxs = complement ? self.comIndexes : self.indexes ;
+      for(var i = cidx; i >= 0 ; i-=3){
+        if(idxs.stop[i]) return i;
+      }
+      return null;
+    };
+    self.findPrevStartCodon = function(cidx, complement){
+      var idxs = complement ? self.comIndexes : self.indexes ;
+      var leftbound = prevstopidx||0;
+      for(var i = cidx; i >= leftbound ; i-=3){
+        if(idxs.start[i]) return i;
+      }
+      return null;
     };
   })
   .service('Fetcher', function($location, $http, GraphConfig,
