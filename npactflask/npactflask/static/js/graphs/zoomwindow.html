@@ -18,12 +18,12 @@
         <label>Bases</label>
         <div class="form-group">
           <input class="form-control" type="number" name="startBaseInp" style="width:8em;"
-                 min="0" max="{{gc.length}}"
+                 min="0" max="{{GraphConfig.length}}"
                  ng-model="startBaseInp"
                  ng-model-options="{ updateOn: 'default blur', debounce: { 'default': 600, 'blur': 0 } }">
           <span class="small">to</span>
           <input class="form-control" type="number" name="endBaseInp" style="width:8em;"
-                 min="0" max="{{gc.length}}"
+                 min="0" max="{{GraphConfig.length}}"
                  ng-model="endBaseInp"
                  ng-model-options="{ updateOn: 'default blur', debounce: { 'default': 600, 'blur': 0 } }">
         </div>

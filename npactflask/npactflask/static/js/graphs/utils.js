@@ -8,7 +8,7 @@ angular.module('npact')
         var clickAction = attr.confirmedClick;
         element.bind('click',function (event) {
           if ( window.confirm(msg) ) {
-            console.log('applying confirmedclick', clickAction);
+            //console.log('applying confirmedclick', clickAction);
             scope.$eval(clickAction);
           }
         });
@@ -116,16 +116,7 @@ angular.module('npact')
       if(!x || isNaN(x)) return null;
       x = Number(x);
       return x - x%3; };
-    this.startOfNextCodon = function(idx){
-      if(!idx || isNaN(idx)) return null;
-      idx = Number(idx);
-      return idx+3;
-    };
-    this.endOfThisCodon = function(idx){
-      if(!idx || isNaN(idx)) return null;
-      idx = Number(idx);
-      return idx+2;
-    };
+
     /*
     this.rangeModulo3 = function(startIdx, stopIdx) {
       // start is 161
@@ -287,8 +278,15 @@ angular.module('npact')
     };
   })
   .service('CodonFinder', function(GraphConfig) {
+    /* The DNA string is 0 indexed, the dna positions are 1 indexed)
+     * CodonFinder deals in string indexes (0 based)
+     */
     var self = this;
     GraphConfig.CodonFinder = self;
+    self.STOP="STOP";
+    self.START="START";
+    self.ALTSTART="ALTSTART";
+    self.index = [];
     self.indexes={start:[], alt:[], stop:[]};
     self.comIndexes={start:[], alt:[], stop:[]};
 
@@ -298,19 +296,37 @@ angular.module('npact')
       end: /TAG|TAA/gim,
       nonMycoEnd: /TAG|TAA|TGA/gim
     };
-    var classifyIdx = function(i, codon, complement) {
+
+    self.classifyIdx = function(i, codon, complement) {
+      if(arguments[2] === undefined){
+        complment = GraphConfig.complement;
+      }
+      if(arguments[1] === undefined){
+        codon = GraphConfig.ddnaString.substr(i, 3);
+        if(complement) codon = self.strRevCom( codon );
+      }
       var stopRe = GraphConfig.mycoplasma ? self.codonRegexes.end : self.codonRegexes.nonMycoEnd,
           startRe = self.codonRegexes.start,
           altstartRe = self.codonRegexes.altStart;
       var idxs = complement ? self.comIndexes : self.indexes ;
       //stops
-      if(codon.search(stopRe)===0) idxs.stop[i]=codon;
+      if(codon.search(stopRe)===0){
+        idxs.stop[i]=codon;
+        return self.STOP;
+      }
       // start
-      else if(codon.search(startRe)===0) idxs.start[i]=codon;
+      else if(codon.search(startRe)===0){
+        idxs.start[i]=codon;
+        return self.START;
+      }
       // nonstandard start
-      else if(codon.search(altstartRe)===0) idxs.alt[i]=codon;
+      else if(codon.search(altstartRe)===0){
+        idxs.alt[i]=codon;
+        return self.ALTSTART;
+      }
+      return false;
     };
-    var strRevCom = function(s) {
+    self.strRevCom = function(s) {
       for (var i = s.length - 1, o = ''; i >= 0; i--) {
         var c = s[i];
         switch(c){
@@ -318,6 +334,7 @@ angular.module('npact')
           case "T": o+= 'A'; break;
           case "G": o+= 'C'; break;
           case "C": o+= 'G'; break;
+          default: o+= c;    break;
         }
       }
       return o;
@@ -339,16 +356,16 @@ angular.module('npact')
         comre   = /CTG|TTA|CAT|CAC|CAA|CAG|AAT|TCA/img;
         while((match = re.exec(GraphConfig.ddnaString))){
           re.lastIndex = match.index+1;
-          classifyIdx(match.index, match[0], false);
+          self.classifyIdx(match.index, match[0], false);
         }
         while((match = comre.exec(GraphConfig.ddnaString))){
           comre.lastIndex = match.index+1;
-          classifyIdx(match.index+2, strRevCom(match[0]), true);
+          self.classifyIdx(match.index+2, self.strRevCom(match[0]), true);
         }
       };
-      console.time('reindex re');
+      //console.time('reindex re');
       indexByRe();
-      console.timeEnd('reindex re');
+      //console.timeEnd('reindex re');
       self._indexing = false;
     }, 50);
     self.isStart = function(cidx, complement){
@@ -373,18 +390,28 @@ angular.module('npact')
     };
     self.findPrevStopCodon = function(cidx, complement){
       var idxs = complement ? self.comIndexes : self.indexes ;
-      for(var i = cidx; i >= 0 ; i-=3){
+      for(var i = cidx-3; i >= 0 ; i-=3){
         if(idxs.stop[i]) return i;
       }
       return null;
     };
-    self.findPrevStartCodon = function(cidx, complement){
+    self.findPrevStartCodon = function(cidx, complement, prevstopidx){
       var idxs = complement ? self.comIndexes : self.indexes ;
       var leftbound = prevstopidx||0;
-      for(var i = cidx; i >= leftbound ; i-=3){
+      for(var i = cidx-3; i >= leftbound ; i-=3){
         if(idxs.start[i]) return i;
       }
       return null;
+    };
+    self.startOfNextCodon = function(idx){
+      if(!idx || isNaN(idx)) return null;
+      idx = Number(idx);
+      return idx+3;
+    };
+    self.endOfThisCodon = function(idx){
+      if(!idx || isNaN(idx)) return null;
+      idx = Number(idx);
+      return idx+2;
     };
   })
   .service('Fetcher', function($location, $http, GraphConfig,
