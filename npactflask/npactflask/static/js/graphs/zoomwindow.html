@@ -66,7 +66,8 @@
       </div>
     </div>
     <div class="dna-holder row">
-      <div class="zoom-nav-btn left" title="extend window left">
+      <div class="zoom-nav-btn left" title="extend window left"
+           ng-click="zw.extendWindowClick($event)">
         &lt;
       </div>
       <div class="dna-text" style="color: #ccc; float:left; width:12%;">
@@ -93,7 +94,8 @@
           extended-window="extendedWindow">
         </npact-protein-translation>
       </div>
-      <div class="zoom-nav-btn right" title="extend window right">
+      <div class="zoom-nav-btn right" title="extend window right"
+           ng-click="zw.extendWindowClick($event)">
         &gt;
       </div>
       <div class="clearer"></div>

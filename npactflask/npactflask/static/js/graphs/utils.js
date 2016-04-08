@@ -277,15 +277,16 @@ angular.module('npact')
         });
     };
   })
-  .service('CodonFinder', function(GraphConfig) {
+  .service('CodonFinder', function(GraphConfig,
+                           $log) {
     /* The DNA string is 0 indexed, the dna positions are 1 indexed)
      * CodonFinder deals in string indexes (0 based)
      */
     var self = this;
     GraphConfig.CodonFinder = self;
-    self.STOP="STOP";
-    self.START="START";
-    self.ALTSTART="ALTSTART";
+    self.STOP="stop";
+    self.START="start";
+    self.ALTSTART="alt";
     self.index = [];
     self.indexes={start:[], alt:[], stop:[]};
     self.comIndexes={start:[], alt:[], stop:[]};
@@ -296,35 +297,45 @@ angular.module('npact')
       end: /TAG|TAA/gim,
       nonMycoEnd: /TAG|TAA|TGA/gim
     };
-
-    self.classifyIdx = function(i, codon, complement) {
-      if(arguments[2] === undefined){
-        complment = GraphConfig.complement;
-      }
-      if(arguments[1] === undefined){
-        codon = GraphConfig.ddnaString.substr(i, 3);
-        if(complement) codon = self.strRevCom( codon );
-      }
-      var stopRe = GraphConfig.mycoplasma ? self.codonRegexes.end : self.codonRegexes.nonMycoEnd,
-          startRe = self.codonRegexes.start,
-          altstartRe = self.codonRegexes.altStart;
-      var idxs = complement ? self.comIndexes : self.indexes ;
+    self.logging=false;
+    self.classifyCodon = function(codon){
+      var stopRe = GraphConfig.mycoplasma ?
+          self.codonRegexes.end : self.codonRegexes.nonMycoEnd,
+        startRe = self.codonRegexes.start,
+        altstartRe = self.codonRegexes.altStart;
       //stops
       if(codon.search(stopRe)===0){
-        idxs.stop[i]=codon;
         return self.STOP;
       }
       // start
       else if(codon.search(startRe)===0){
-        idxs.start[i]=codon;
         return self.START;
       }
       // nonstandard start
       else if(codon.search(altstartRe)===0){
-        idxs.alt[i]=codon;
         return self.ALTSTART;
       }
       return false;
+    };
+    self.classifyIdx = function(i, complement, codon) {
+      if(i >= 9250 && i <= 9260) console.log('Classifying', arguments);
+      if(arguments[2] === undefined){
+        complment = GraphConfig.complement;
+      }
+      if(!codon){
+        if(complement){
+          codon = self.strRevCom( GraphConfig.ddnaString.substr(i-2, 3) );
+        }else {
+          codon = GraphConfig.ddnaString.substr(i, 3);
+        }
+      }
+      var idxs = complement ? self.comIndexes : self.indexes ;
+      var classification = self.classifyCodon(codon);
+      if(classification){
+        idxs[classification][i] = codon;
+        if(GraphConfig.logging)$log.log('Classified Codon', codon, classification);
+      }
+      return classification;
     };
     self.strRevCom = function(s) {
       for (var i = s.length - 1, o = ''; i >= 0; i--) {
@@ -350,22 +361,23 @@ angular.module('npact')
       // to index
       var indexByRe = function() {
         var match,
-        re      = /TAG|TAA|ATG|GTG|TTG|CTG|ATT|TGA/img,
-        //rev   = /GAT|AAT|GTA|GTG|GTT|GTC|TTA|AGT/img;
-        // reverse and complment the codes
-        comre   = /CTG|TTA|CAT|CAC|CAA|CAG|AAT|TCA/img;
+            res = 'TAG|TAA|ATG|GTG|TTG|CTG|ATT|TGA',
+            re      = new RegExp(res, 'img'),
+            //rev   = /GAT|AAT|GTA|GTG|GTT|GTC|TTA|AGT/img;
+            // reverse and complment the codes
+            comre   = new RegExp(self.strRevCom(res),'img');
         while((match = re.exec(GraphConfig.ddnaString))){
           re.lastIndex = match.index+1;
-          self.classifyIdx(match.index, match[0], false);
+          self.classifyIdx(match.index, false, match[0]);
         }
         while((match = comre.exec(GraphConfig.ddnaString))){
           comre.lastIndex = match.index+1;
-          self.classifyIdx(match.index+2, self.strRevCom(match[0]), true);
+          self.classifyIdx(match.index+2, true, self.strRevCom(match[0]));
         }
       };
-      //console.time('reindex re');
+      if(GraphConfig.logging) console.time('reindex re');
       indexByRe();
-      //console.timeEnd('reindex re');
+      if(GraphConfig.logging) console.timeEnd('reindex re');
       self._indexing = false;
     }, 50);
     self.isStart = function(cidx, complement){
@@ -378,7 +390,10 @@ angular.module('npact')
     };
     self.isStop = function(cidx, complement){
       var idxs = complement ? self.comIndexes : self.indexes ;
-      return idxs.stop[cidx];
+      var r = idxs.stop[cidx];
+      if(GraphConfig.logging)
+        $log.log('isStop Codon', cidx, complement, r);
+      return r;
     };
     self.findNextStopCodon = function(cidx, complement){
       var idxs = complement ? self.comIndexes : self.indexes ;

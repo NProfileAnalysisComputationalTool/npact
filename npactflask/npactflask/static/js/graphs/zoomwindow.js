@@ -127,6 +127,20 @@ angular.module('npact')
       $log.log('Cancelling track edit');
       $window.location.reload();
     };
+    this.extendWindowClick = function(e) {
+      var $el = angular.element(e.target);
+      var dir = $el.is('.left')?'start':'end',
+          comp = $scope.data.item.complement;
+      $log.log('zoom-btn clicked:', dir, comp, $el);
+      $scope.extendedWindow = true;
+      if((dir === 'start' && !comp)
+         || (dir === 'end' && comp))
+        $scope.startBase = Math.max(0, $scope.startBase-GraphConfig.graphMargin);
+      else
+        $scope.endBase = Math.min(
+          GraphConfig.endBase, $scope.endBase+GraphConfig.graphMargin);
+    };
+
     this.save = function(track) {
       $log.log('saving track', track);
       $uibModalInstance.dismiss();
@@ -253,6 +267,7 @@ angular.module('npact')
       $scope.endBaseInp = $scope.data.item.end;
       $scope.redraw();
     };
+
     $scope.$watch('data.item.start', $scope.orfChange);
     $scope.$watch('data.item.end', $scope.orfChange);
     $scope.$watch('startBaseInp', $scope.startChange);
@@ -307,19 +322,6 @@ angular.module('npact')
         $scope.$on('redraw', schedule);
         $scope.$watchGroup(['startBase', 'endBase'], schedule);
         $scope.$watch(function() {return $element.width();}, schedule);
-        angular.element(".zoom-nav-btn").bind('click',function(e) {
-          var $el = angular.element(e.target);
-          var dir = $el.is('.left')?'start':'end';
-          //console.log('zoom-btn clicked', dir, $el);
-          $scope.extendedWindow = true;
-          $scope.$apply(function() {
-            if(dir === 'start')
-              $scope.startBase = Math.max(0, $scope.startBase-GraphConfig.graphMargin);
-            else
-              $scope.endBase = Math.min(
-                GraphConfig.endBase, $scope.endBase+GraphConfig.graphMargin);
-          });
-        });
       }
     };
   })
@@ -382,7 +384,8 @@ angular.module('npact')
           if(start) $scope.item.start = start;
         });
         $scope._startClicked = $scope._debounced_applied(function($el){
-          var start=null, end=null,
+          var end=$scope.item.end, cur = $scope.item.start,
+              start=cur,
               clicked = $el.data('index'),
               eidx = $scope.item.end,
               nextStop = CodonFinder.findNextStopCodon(clicked-1, $scope.complement)+1;
@@ -392,39 +395,41 @@ angular.module('npact')
                 Math.min(start + GraphConfig.graphMargin,
                          GraphConfig.endBase);
           }else{
-            var d = ($scope.item.end - clicked);
-            end = ($scope.item.start+d);
+            end = clicked;
             //$log.log('start:',$scope.item.start, 'clicked:', clicked, 'd:',d, 'end:', end);
           }
           if(((end - start) % 3) !== 2){
             $log.log('out of phase shift!  start clicked',
-                     clicked, 'nextstop',nextStop, 'prevstart', prevStart,
-                     'cur: ',cur, 'start', start, 'end', end, 'mod',((end - start) % 3));
+                     clicked, 'start', start, 'end', end, 'curstart', cur);
             return;
           }
           if(start) $scope.item.start = start;
           if(end) $scope.item.end = end;
-          $log.log('start clicked', 'cur: ',$el.data('index'), 'start', start, 'end', end);
+          $log.log('start clicked', clicked, 'cur: ',cur, 'start', start, 'end', end);
         });
         $scope._highlightDnaP= function(ddnaP) {
           if(!_.isArray(ddnaP)) ddnaP = ddnaP.split('');
+          var comp = $scope.item.complement;
           return _.map(ddnaP, function(v, k){
             // the DNA indexes run from 1 but our DNA string is indexed from 0
             // to make the display line up, just add one when displaying the inde
             var idx = ((k*3) + $scope.start), c;
-            if($scope.complement) idx = ($scope.end - k*3);
+            if(idx >= 9250 && idx <= 9260)
+              $log.log(idx, comp?($scope.end - k*3):idx);
+            if(comp) idx = ($scope.end - k*3);
             // CodonFinder deals in string indexes (0 based)
-            if((c = CodonFinder.isStop(idx-1, $scope.complement))){
+
+            if((c = CodonFinder.isStop(idx-1, comp))){
               return '<span class="codon stop"  title="stop: '+c+
                 ' ('+idx+')'+ '" data-index="'+idx+'">'+v+'</span>';
-            }else if((c = CodonFinder.isStart(idx-1, $scope.complement))){
+            }else if((c = CodonFinder.isStart(idx-1, comp))){
               return '<span class="codon standard start" title="start: '+ c +
                 ' ('+idx+')'+ '" data-index="'+idx+'">'+v+'</span>';
-            }else if((c = CodonFinder.isAltStart(idx-1, $scope.complement))){
+            }else if((c = CodonFinder.isAltStart(idx-1, comp))){
               return '<span class="codon rare start" title="alt start:'+c+
                 ' ('+idx+')'+ '" data-index="'+idx+'">'+v+'</span>';
             }
-            else return v;
+            else return '<span title="'+idx+'">'+v+'</span>';
           });
         };
 
