@@ -73,25 +73,28 @@
       <div class="dna-text" style="color: #ccc; float:left; width:12%;">
         <npact-protein-translation
           item ="data.item"
-            start="data.item.complement ? data.item.end  : startBase+1"
-            end="data.item.complement ? endBase-1 : data.item.start "
+            start="data.item.complement ? data.item.end+1  : startBase"
+            end="data.item.complement ? endBase : data.item.start-1 "
           extended-window="extendedWindow"
           complement="data.item.complement">
         </npact-protein-translation>
       </div>
       <div class="dna-text" style="padding: 10px; float:left; width:65%">
         <npact-protein-translation
-          item="data.item"
-          start="data.item.start" end="data.item.end" complement="data.item.complement">
+            item="data.item"
+            start="data.item.start"
+            end="data.item.end"
+            complement="data.item.complement">
           extended-window="extendedWindow"
         </npact-protein-translation>
       </div>
       <div class="dna-text" style="color: #ccc; float:left; width:12%">
         <npact-protein-translation
-          item ="data.item"
-            start="data.item.complement ? startBase : data.item.end + 1 "
+            item ="data.item"
+            start="data.item.complement ? startBase : data.item.end+1 "
             end="data.item.complement ? data.item.start-1 : endBase "
-          extended-window="extendedWindow">
+            complement="data.item.complement"
+            extended-window="extendedWindow">
         </npact-protein-translation>
       </div>
       <div class="zoom-nav-btn right" title="extend window right"

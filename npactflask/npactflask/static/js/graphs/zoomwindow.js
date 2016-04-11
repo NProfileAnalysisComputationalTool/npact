@@ -172,10 +172,10 @@ angular.module('npact')
       if(!$scope.extendedWindow){
         $scope.startBase = Math.max(
           0, // from 1 behind the start back 1 margin
-          (($scope.data.item.start-1) - GraphConfig.graphMargin ));
+          (($scope.data.item.start-1) - (GraphConfig.graphMargin+2) ));
         $scope.endBase = Math.min(
           GraphConfig.endBase,// from 1 past the end + a margin
-          $scope.data.item.end + 1 + GraphConfig.graphMargin);
+          $scope.data.item.end + 1 + GraphConfig.graphMargin+2);
       }
       //$log.log('setGraphBounds', $scope.data.item, len, GraphConfig.graphMargin, $scope.startBase, $scope.endBase, $scope.extendedWindow);
     };
