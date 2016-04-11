@@ -10,7 +10,7 @@ angular.module('npact')
     'use strict';
     var self = this;
     var GraphConfig = this;
-
+    GraphConfig.logging = false;
     GraphConfig.graphMargin = 198;// multiple of 3 ;)
     $window.GraphConfig = this;
     GraphConfig.baseUrl = STATIC_BASE_URL;

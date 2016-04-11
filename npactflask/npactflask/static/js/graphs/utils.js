@@ -363,8 +363,6 @@ angular.module('npact')
         var match,
             res = 'TAG|TAA|ATG|GTG|TTG|CTG|ATT|TGA',
             re      = new RegExp(res, 'img'),
-            //rev   = /GAT|AAT|GTA|GTG|GTT|GTC|TTA|AGT/img;
-            // reverse and complment the codes
             comre   = new RegExp(self.strRevCom(res),'img');
         while((match = re.exec(GraphConfig.ddnaString))){
           re.lastIndex = match.index+1;
