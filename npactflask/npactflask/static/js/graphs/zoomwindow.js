@@ -169,6 +169,8 @@ angular.module('npact')
     this.track = $scope.data.track || _.first(GraphConfig.activeTracks);
     $scope.setGraphBounds = function() {
       var len = $scope.data.item.end - $scope.data.item.start;
+      if($scope.endBase<=$scope.data.item.end ||
+         $scope.startBase>=$scope.data.item.start) $scope.extendedWindow=false;
       if(!$scope.extendedWindow){
         $scope.startBase = Math.max(
           0, // from 1 behind the start back 1 margin
