@@ -421,7 +421,7 @@ angular.module('npact')
     };
     self.findPrevStartCodon = function(cidx, complement, prevstopidx){
       var rtn, idxs = complement ? self.comIndexes : self.indexes ;
-      if(complement) rtn=self._lookUpFor(idxs.stop, cidx, prevstopidx);
+      if(complement) rtn=self._lookUpFor(idxs.start, cidx, prevstopidx);
       else rtn=self._lookDownFor(idxs.start, cidx, prevstopidx);
       return rtn;
     };

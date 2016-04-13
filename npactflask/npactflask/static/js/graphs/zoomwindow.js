@@ -361,18 +361,25 @@ angular.module('npact')
           if(!c){
             end = CodonFinder.endOfThisCodon(clicked);
             // our start should never be after our end
-            if(!start || start > end ||
-               (prevStop && prevStart && prevStart>prevStop))
+            if(prevStart &&
+               (start > end || (prevStop && prevStart > prevStop)))
               start = prevStart;
-            if(!start || start > end ||
-               (prevStop && prevStop > start))
+            if(prevStop &&
+               (start > end || (prevStop > start)))
               start = CodonFinder.startOfNextCodon(prevStop);
-            if(!start || start > end) start = Math.max(end - 99, 0);
+            if(start > end) start = Math.max(end - 99, 0);
           }else{
-            // shift the window for complements
-            //$log.log('!!!=',$scope.item.start,'+ (',$scope.item.end,' - ', clicked,'= ',($scope.item.end - clicked),') = ', ($scope.item.start + ($scope.item.end - clicked))-2);
-            start = CodonFinder.startOfNextCodon((clicked+1), true);//
-
+            // shift the window for complements - mostly just reversed
+            // from the standard case
+            start = CodonFinder.endOfThisCodon(clicked, true);
+            if(prevStart &&
+               (start > end || (prevStop && prevStart < prevStop)))
+              end = prevStart;
+            if(prevStop &&
+               (start > end || (prevStop < start)))
+              end = CodonFinder.startOfNextCodon(prevStop, true);
+            if(start > end)
+              end = Math.min(start + 99, GraphConfig.ddnaString.length);
           }
 
           $log.log('stop clicked', clicked, 'prevstop',prevStop, 'prevstart', prevStart, 'cur: ',cur, 'start', start, 'end', end);
@@ -398,9 +405,9 @@ angular.module('npact')
                 Math.min(start + GraphConfig.graphMargin,
                          GraphConfig.endBase);
           }else{
-            // shift idx to other end for complment
-            end = clicked+2;
-            //$log.log('start:',$scope.item.start, 'clicked:', clicked, 'd:',d, 'end:', end);
+            end = clicked;
+            start = (nextStop && CodonFinder.endOfThisCodon(nextStop, true)) ||
+              Math.max(0,start - GraphConfig.graphMargin);
           }
           if(((end - start) % 3) !== 2){
             $log.log('out of phase shift!  start clicked',
