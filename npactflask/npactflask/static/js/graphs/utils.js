@@ -318,7 +318,6 @@ angular.module('npact')
       return false;
     };
     self.classifyIdx = function(i, complement, codon) {
-      if(i >= 9250 && i <= 9260) console.log('Classifying', arguments);
       if(arguments[2] === undefined){
         complment = GraphConfig.complement;
       }
@@ -330,6 +329,7 @@ angular.module('npact')
         }
       }
       var idxs = complement ? self.comIndexes : self.indexes ;
+      // use the start of the codon in revCom
       var classification = self.classifyCodon(codon);
       if(classification){
         idxs[classification][i] = codon;
@@ -393,38 +393,48 @@ angular.module('npact')
         $log.log('isStop Codon', cidx, complement, r);
       return r;
     };
-    self.findNextStopCodon = function(cidx, complement){
-      var idxs = complement ? self.comIndexes : self.indexes ;
-      for(var i = cidx, rightbound=GraphConfig.ddnaString.length;
-          i < rightbound ; i+=3){
-        if(idxs.stop[i]) return i;
+    self._lookUpFor = function(idx , cidx, rbound){
+      if(!rbound)rbound = GraphConfig.ddnaString.length;
+      for(var i = cidx+3; i < rbound ; i+=3){
+        if(idx[i]) return i;
       }
       return null;
+    };
+    self._lookDownFor = function(idx, cidx, lbound){
+      if(!lbound)lbound=0;
+      for(var i = cidx-3; i >= lbound ; i-=3){
+        if(idx[i]) return i;
+      }
+      return null;
+    };
+    self.findNextStopCodon = function(cidx, complement){
+      var rtn=null, idxs = complement ? self.comIndexes : self.indexes ;
+      if(complement) rtn=self._lookDownFor(idxs.stop, cidx);
+      else rtn=self._lookUpFor(idxs.stop, cidx);
+      return rtn;
     };
     self.findPrevStopCodon = function(cidx, complement){
       var idxs = complement ? self.comIndexes : self.indexes ;
-      for(var i = cidx-3; i >= 0 ; i-=3){
-        if(idxs.stop[i]) return i;
-      }
-      return null;
+      if(complement) rtn=self._lookUpFor(idxs.stop, cidx);
+      else rtn=self._lookDownFor(idxs.stop, cidx);
+      return rtn;
     };
     self.findPrevStartCodon = function(cidx, complement, prevstopidx){
-      var idxs = complement ? self.comIndexes : self.indexes ;
-      var leftbound = prevstopidx||0;
-      for(var i = cidx-3; i >= leftbound ; i-=3){
-        if(idxs.start[i]) return i;
-      }
-      return null;
+      var rtn, idxs = complement ? self.comIndexes : self.indexes ;
+      if(complement) rtn=self._lookUpFor(idxs.stop, cidx, prevstopidx);
+      else rtn=self._lookDownFor(idxs.start, cidx, prevstopidx);
+      return rtn;
     };
-    self.startOfNextCodon = function(idx){
+    self.startOfNextCodon = function(idx, c){
+      $log.log('startOfNextCodon', arguments);
       if(!idx || isNaN(idx)) return null;
       idx = Number(idx);
-      return idx+3;
+      return idx+ (c?-3:3);
     };
-    self.endOfThisCodon = function(idx){
+    self.endOfThisCodon = function(idx, c){
       if(!idx || isNaN(idx)) return null;
       idx = Number(idx);
-      return idx+2;
+      return idx+(c?-2:2);
     };
   })
   .service('Fetcher', function($location, $http, GraphConfig,

@@ -351,25 +351,27 @@ angular.module('npact')
         };
 
         $scope._stopClicked = $scope._debounced_applied(function($el){
-          var clicked = $el && Number($el.data('index')),
-              prevStop = CodonFinder.startOfNextCodon(
-                CodonFinder.findPrevStopCodon(clicked-1, $scope.complement)+1),
-              prevStart = CodonFinder.findPrevStartCodon(clicked-1, $scope.complement, prevStop)+1,
-              end, cur, start;
-          cur = $scope.item.start;
-          if(!$scope.item.complement){
-            start = cur;
+          var c = $scope.item.complement,
+              clicked = $el && Number($el.data('index')),
+              // +1 for translating from ddnaidx to dna locations
+              prevStop = CodonFinder.findPrevStopCodon(clicked-1, c)+1,
+              prevStart = CodonFinder.findPrevStartCodon(clicked-1, c, prevStop)+1,
+              cur = $scope.item.end,
+              end = $scope.item.end, start = $scope.item.start;
+          if(!c){
             end = CodonFinder.endOfThisCodon(clicked);
             // our start should never be after our end
-            if(!start || start > end) start = prevStart;
-            if(!start || start > end || (prevStop && prevStop > start))
-              start = prevStop;
+            if(!start || start > end ||
+               (prevStop && prevStart && prevStart>prevStop))
+              start = prevStart;
+            if(!start || start > end ||
+               (prevStop && prevStop > start))
+              start = CodonFinder.startOfNextCodon(prevStop);
             if(!start || start > end) start = Math.max(end - 99, 0);
           }else{
             // shift the window for complements
             //$log.log('!!!=',$scope.item.start,'+ (',$scope.item.end,' - ', clicked,'= ',($scope.item.end - clicked),') = ', ($scope.item.start + ($scope.item.end - clicked))-2);
-            start = ($scope.item.start + ($scope.item.end - clicked))-2;
-            end =  $scope.item.end;
+            start = CodonFinder.startOfNextCodon((clicked+1), true);//
 
           }
 
@@ -385,17 +387,19 @@ angular.module('npact')
         });
         $scope._startClicked = $scope._debounced_applied(function($el){
           var end=$scope.item.end, cur = $scope.item.start,
+              c=$scope.item.complement,
               start=cur,
               clicked = $el.data('index'),
               eidx = $scope.item.end,
-              nextStop = CodonFinder.findNextStopCodon(clicked-1, $scope.complement)+1;
-          if(!$scope.item.complement){
+              nextStop = CodonFinder.findNextStopCodon(clicked-1, c)+1;
+          if(!c){
             start = clicked;
             end = (nextStop && CodonFinder.endOfThisCodon(nextStop)) ||
                 Math.min(start + GraphConfig.graphMargin,
                          GraphConfig.endBase);
           }else{
-            end = clicked;
+            // shift idx to other end for complment
+            end = clicked+2;
             //$log.log('start:',$scope.item.start, 'clicked:', clicked, 'd:',d, 'end:', end);
           }
           if(((end - start) % 3) !== 2){
@@ -410,27 +414,28 @@ angular.module('npact')
         $scope._highlightDnaP= function(ddnaP) {
           if(!_.isArray(ddnaP)) ddnaP = ddnaP.split('');
           var comp = $scope.item.complement;
-          return _.map(ddnaP, function(v, k){
+          var highlight = _.map(ddnaP, function(v, k){
             // the DNA indexes run from 1 but our DNA string is indexed from 0
             // to make the display line up, just add one when displaying the inde
             var idx = ((k*3) + $scope.start), c;
-            if(idx >= 9250 && idx <= 9260)
-              $log.log(idx, comp?($scope.end - k*3):idx);
             if(comp) idx = ($scope.end - k*3);
+            var disp=idx;
             // CodonFinder deals in string indexes (0 based)
 
             if((c = CodonFinder.isStop(idx-1, comp))){
               return '<span class="codon stop"  title="stop: '+c+
-                ' ('+idx+')'+ '" data-index="'+idx+'">'+v+'</span>';
+                ' ('+disp+')'+ '" data-index="'+idx+'">'+v+'</span>';
             }else if((c = CodonFinder.isStart(idx-1, comp))){
               return '<span class="codon standard start" title="start: '+ c +
-                ' ('+idx+')'+ '" data-index="'+idx+'">'+v+'</span>';
+                ' ('+disp+')'+ '" data-index="'+idx+'">'+v+'</span>';
             }else if((c = CodonFinder.isAltStart(idx-1, comp))){
               return '<span class="codon rare start" title="alt start:'+c+
-                ' ('+idx+')'+ '" data-index="'+idx+'">'+v+'</span>';
+                ' ('+disp+')'+ '" data-index="'+idx+'">'+v+'</span>';
             }
-            else return '<span title="'+idx+'">'+v+'</span>';
+            else return '<span title="'+disp+'">'+v+'</span>';
           });
+
+          return highlight;
         };
 
         $scope.$watchGroup(
@@ -444,6 +449,11 @@ angular.module('npact')
                   $scope.item.ddnaP = data.trans;
                   $scope.item.ddna = data.seq;
                 }
+
+                if(!GraphConfig.translatedDNA)GraphConfig.translatedDNA=[];
+                var r = _.assign({start:$scope.start, end:$scope.end, $scope:$scope},data);
+                GraphConfig.translatedDNA[$scope.start]=r;
+
                 var ddnaP = $scope._highlightDnaP(data.trans);
 
                 var html = ['<div>('+$scope.start+"-<wbr>"+$scope.end+")</div>"]
