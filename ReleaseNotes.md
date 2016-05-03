@@ -1,3 +1,12 @@
+# Version 3.0-beta (zoomwindow) 2016-05
+* Improved zoom window
+ * improved gene display with codon highlighting
+ * Gene navigation and editing
+ * complementary strand bug fixes
+ * saves work in progress via the url and historic track files
+* Improved trac manipulation (drag and drop)
+* UI polish and bug fixes
+
 # Version 3.0pre
 * Change backend to use Flask+GEvent
 * Mycoplasma checkbox affects acgt_gamma and protein translation
