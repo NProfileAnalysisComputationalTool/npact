@@ -603,7 +603,7 @@ angular.module('npact')
       var startPos =null;
       var trackLayer = null, dragLayer = null;
       var isShortDrag = function(start, end){
-        var dy = end.y-start.y, dx = end.x-start.x;
+        var dy = Math.abs(end.y-start.y), dx = Math.abs(end.x-start.x);
         return dy<8 && dx < 25;
       };
       var dragend = function (e) {
