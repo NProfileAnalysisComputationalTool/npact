@@ -465,8 +465,11 @@ angular.module('npact')
 
                 var ddnaP = $scope._highlightDnaP(data.trans);
 
-                var html = ['<div>('+$scope.start+"-<wbr>"+$scope.end+")</div>"]
-                  .concat(ddnaP);
+                var html = $scope.item.complement ?
+                    ['<div>('+$scope.end+"-<wbr>"+$scope.start+")</div>"]:
+                    ['<div>('+$scope.start+"-<wbr>"+$scope.end+")</div>"];
+
+                html = html.concat(ddnaP);
                 $element.html(html);
                 $element.bind('click', function(e){
                   var $el = angular.element(e.target);
