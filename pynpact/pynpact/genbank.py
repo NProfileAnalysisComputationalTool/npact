@@ -148,6 +148,8 @@ def gbk_to_track_json(gbkfile, outfilename):
         d['type'] = 'CDS'
         d['phase'] = getPhase(d)
         if not d.get('name'):
+            d['name'] = d.get('qualifiers').get('gene')
+        if not d.get('name'):
             d['name'] = d.get('qualifiers').get('locus_tag')
         rtn.append(d)
 
