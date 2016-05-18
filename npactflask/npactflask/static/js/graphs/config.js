@@ -172,10 +172,6 @@ angular.module('npact')
               return $timeout(function() {  // let other code run
                 //$log.log('Found orfs', values);
                 GraphConfig.clearORFSelection();
-                _.each(values, function(orf) {
-                  orf.selected = true;
-                });
-
                 $scope.results = _(values).filter(resultInRange).sortBy('start').value();
                 $log.log("Total results", $scope.results.length);
                 if($scope.results.length > 0) {

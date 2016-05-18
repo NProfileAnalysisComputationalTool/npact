@@ -197,8 +197,8 @@ angular.module('npact')
     return {
       restrict: 'A',
       scope: {
-        startBase: '&',
-        endBase: '&',
+        startBase: '=',
+        endBase: '=',
         visible: '&',
         graphOptions: '&'
       },
@@ -219,8 +219,8 @@ angular.module('npact')
           if(!redraw || (!force && !visible())) { return null; }
           var it;
           var opts = _.clone($scope.graphOptions());
-          opts.startBase = $scope.startBase();
-          opts.endBase = $scope.endBase();
+          opts.startBase = $scope.startBase;
+          opts.endBase = $scope.endBase;
 
           //However long it actually takes to draw, we have the
           //latest options as of this point
@@ -259,8 +259,8 @@ angular.module('npact')
         });
         $scope.$on(Evt.REBUILD, function() {
           discard();
-          startBase = $scope.startBase();
-          endBase = $scope.endBase();
+          startBase = $scope.startBase;
+          endBase = $scope.endBase;
           redraw = true;
           schedule();
         });
@@ -277,13 +277,13 @@ angular.module('npact')
           else { callback(g.replaceWithImage()); }
         });
         $scope.$watch(function() { return GraphConfig.gotoBase; }, function(gotoBase, fromBase) {
-          if (_.isFinite(gotoBase) && startBase <= gotoBase && gotoBase <= endBase) {
-            $log.log('gotoBase triggered redraw:', startBase, id);
+          if (_.isFinite(gotoBase) && $scope.startBase <= gotoBase && gotoBase <= $scope.endBase) {
+            $log.log('gotoBase triggered redraw:', $scope.startBase, id);
             redraw = true;
             schedule();
             $timeout(scrollToHere, 0, false);
           }
-          else if(_.isFinite(fromBase) && startBase <= fromBase && fromBase <= endBase) {
+          else if(_.isFinite(fromBase) && $scope.startBase <= fromBase && fromBase <= $scope.endBase) {
             redraw = true;
           }
         });
