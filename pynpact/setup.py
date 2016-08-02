@@ -2,10 +2,10 @@
 from setuptools import setup
 
 setup(name='pynpact',
-      version='0.6',
+      version='3.0.0rc1',
       description='Python N-Profile Analysis Computation Tool',
-      author='Luciano Brocchieri and Nathan Bird',
-      author_email='nathan@acceleration.net',
+      author='Luciano Brocchieri, Nathan Bird, Russ Tyndall',
+      author_email='russ@acceleration.net',
       url='http://genome.ufl.edu/npact/',
       packages=['pynpact'],
       package_data={

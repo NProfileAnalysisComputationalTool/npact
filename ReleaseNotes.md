@@ -1,4 +1,4 @@
-# Version 3.0-beta (zoomwindow) 2016-05
+# Version 3.0.0rc1 (zoomwindow) 2016-08-02
 * Improved zoom window
  * improved gene display with codon highlighting
  * Gene navigation and editing
