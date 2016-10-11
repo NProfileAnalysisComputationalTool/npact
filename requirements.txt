@@ -1,5 +1,6 @@
 #We've amended this gzip with extra DTDs
-lib/biopython-1.63-extradtds.tar.gz
+#lib/biopython-1.63-extradtds.tar.gz
+biopython==1.68
 
 path.py==7.4
 flask==0.10.1
