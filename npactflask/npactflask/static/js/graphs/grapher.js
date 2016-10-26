@@ -663,7 +663,7 @@ angular.module('npact')
         var height =  16,
             c =colors[type][hit.phase],
             cfill = c,
-            cstroke = hit.selected ? "#000000" : shadeBlend(0.9, c);
+            cstroke = hit.selected ? "#000000" : shadeBlend(0.1, c);
 
         if(confidence == 1){
           height = 12;
