@@ -656,26 +656,35 @@ angular.module('npact')
             'G': _.map(this.colors, function(c) { return shadeBlend(0.5, c); })}
       ;
       // draw each hit
-      _.forEach(hits, function(hit) {
+      _.forEach(hits, function(hit, i) {
         hit.track = track.filename;
         var type = hit.name[0],  // {G,H}
-            confidence = _.parseInt(hit.name[1]), // {0,1,2,3}
-            confidenceWeight = (confidence + 1) * 2;
-        var y =  midY * (confidenceWeight/6);
+            confidence = _.parseInt(hit.name[1]); // {0,1,2,3}
+        var height =  16,
+            c =colors[type][hit.phase],
+            cfill = c,
+            cstroke = hit.selected ? "#000000" : shadeBlend(0.9, c);
 
-        if(hit.selected) y = y*1.25;
-        var c =colors[type][hit.phase];
+        if(confidence == 1){
+          height = 12;
+          cfill = shadeBlend(0.1, c);
+        }
+        if(confidence == 0){
+          height = 8;
+          cfill = shadeBlend(0.5, c);
+        }
+
+        //if( i<20 ) console.log("c:", c, "cfill:", cfill, 'stroke:', cstroke, 'height', height, 'c',  confidence);
         g.add(new K.Rect({
           hit: hit,
           x: hit.start,
           y:  midY,
           width:hit.end-hit.start,
-          height: y,
+          height: height,
           // set it outside the guidelines instead of ontop:
-          offsetY: (hit.complement ? 0 : +y),
-          fill: hit.selected ?  shadeBlend(0.3, c) :
-            shadeBlend(1-(8-confidenceWeight)/8, c),
-          stroke: hit.selected ? "#000000" : shadeBlend(0.9, c),
+          offsetY: (hit.complement ? 0 : +height),
+          fill: cfill,
+          stroke: cstroke,
           strokeWidth: hit.selected ? 2 : 1
         }));
       });
