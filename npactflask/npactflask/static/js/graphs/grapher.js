@@ -667,11 +667,11 @@ angular.module('npact')
 
         if(confidence == 1){
           height = 12;
-          cfill = shadeBlend(0.1, c);
+          //cfill = shadeBlend(0.1, c);
         }
         if(confidence == 0){
           height = 8;
-          cfill = shadeBlend(0.5, c);
+          //cfill = shadeBlend(0.5, c);
         }
 
         //if( i<20 ) console.log("c:", c, "cfill:", cfill, 'stroke:', cstroke, 'height', height, 'c',  confidence);
