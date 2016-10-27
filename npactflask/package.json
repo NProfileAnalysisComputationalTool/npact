@@ -1,6 +1,6 @@
 {
   "name": "npactflask",
-  "version": "0.7.0",
+  "version": "3.0.0rc1",
   "devDependencies": {
     "grunt": "~0.4.5",
     "grunt-cli": "~0.1.13",

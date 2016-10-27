@@ -1,9 +1,10 @@
 {
   "name": "npactflask",
-  "version": "0.7.0",
+  "version": "3.0.0rc1",
   "authors": [
-    "Nathan Bird <nathan@acceleration.net>",
-    "Ryan Davis <ryan@acceleration.net>"
+      "Nathan Bird <nathan@acceleration.net>",
+      "Ryan Davis <ryan@acceleration.net>",
+      "Russ Tyndall <russ@acceleration.net>"
   ],
   "description": "analyzes and renders genomes",
   "license": "private",
