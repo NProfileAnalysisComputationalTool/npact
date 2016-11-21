@@ -36,7 +36,7 @@ try:
 except ImportError:
     import configparser as ConfigParser
 
-__version__ = "15.0.2"
+__version__ = "15.0.4"
 virtualenv_version = __version__  # legacy
 
 if sys.version_info < (2, 6):
@@ -1036,7 +1036,43 @@ def change_prefix(filename, dst_prefix):
 
 def copy_required_modules(dst_prefix, symlink):
     import imp
+    for modname in REQUIRED_MODULES:
+        if modname in sys.builtin_module_names:
+            logger.info("Ignoring built-in bootstrap module: %s" % modname)
+            continue
+        try:
+            f, filename, _ = imp.find_module(modname)
+        except ImportError:
+            logger.info("Cannot import bootstrap module: %s" % modname)
+        else:
+            if f is not None:
+                f.close()
+            # special-case custom readline.so on OS X, but not for pypy:
+            if modname == 'readline' and sys.platform == 'darwin' and not (
+                    is_pypy or filename.endswith(join('lib-dynload', 'readline.so'))):
+                dst_filename = join(dst_prefix, 'lib', 'python%s' % sys.version[:3], 'readline.so')
+            elif modname == 'readline' and sys.platform == 'win32':
+                # special-case for Windows, where readline is not a
+                # standard module, though it may have been installed in
+                # site-packages by a third-party package
+                pass
+            else:
+                dst_filename = change_prefix(filename, dst_prefix)
+            copyfile(filename, dst_filename, symlink)
+            if filename.endswith('.pyc'):
+                pyfile = filename[:-1]
+                if os.path.exists(pyfile):
+                    copyfile(pyfile, dst_filename[:-1], symlink)
 
+def copy_tcltk(src, dest, symlink):
+    """ copy tcl/tk libraries on Windows (issue #93) """
+    for libversion in '8.5', '8.6':
+        for libname in 'tcl', 'tk':
+            srcdir = join(src, 'tcl', libname + libversion)
+            destdir = join(dest, 'tcl', libname + libversion)
+            # Only copy the dirs from the above combinations that exist
+            if os.path.exists(srcdir) and not os.path.exists(destdir):
+                copyfileordir(srcdir, destdir, symlink)
     for modname in REQUIRED_MODULES:
         if modname in sys.builtin_module_names:
             logger.info("Ignoring built-in bootstrap module: %s" % modname)
@@ -1370,12 +1406,6 @@ def install_python(home_dir, lib_dir, inc_dir, bin_dir, site_packages, clear, sy
             else:
                 copyfile(py_executable, full_pth, symlink)
 
-    if is_win and ' ' in py_executable:
-        # There's a bug with subprocess on Windows when using a first
-        # argument that has a space in it.  Instead we have to quote
-        # the value:
-        py_executable = '"%s"' % py_executable
-    # NOTE: keep this check as one line, cmd.exe doesn't cope with line breaks
     cmd = [py_executable, '-c', 'import sys;out=sys.stdout;'
         'getattr(out, "buffer", out).write(sys.prefix.encode("utf-8"))']
     logger.info('Testing executable with %s %s "%s"' % tuple(cmd))
@@ -1553,6 +1583,7 @@ def resolve_interpreter(exe):
     """
     # If the "executable" is a version number, get the installed executable for
     # that version
+    orig_exe = exe
     python_versions = get_installed_pythons()
     if exe in python_versions:
         exe = python_versions[exe]
@@ -1564,16 +1595,16 @@ def resolve_interpreter(exe):
                 exe = join(path, exe)
                 break
     if not os.path.exists(exe):
-        logger.fatal('The executable %s (from --python=%s) does not exist' % (exe, exe))
+        logger.fatal('The path %s (from --python=%s) does not exist' % (exe, orig_exe))
         raise SystemExit(3)
     if not is_executable(exe):
-        logger.fatal('The executable %s (from --python=%s) is not executable' % (exe, exe))
+        logger.fatal('The path %s (from --python=%s) is not an executable file' % (exe, orig_exe))
         raise SystemExit(3)
     return exe
 
 def is_executable(exe):
     """Checks a file is executable"""
-    return os.access(exe, os.X_OK)
+    return os.path.isfile(exe) and os.access(exe, os.X_OK)
 
 ############################################################
 ## Relocating the environment:
